@@ -45,125 +45,93 @@ class vtkRGBAColorTransferFunction;
 class SurfaceOverlay;
 class SurfaceLabel;
 
-class SurfaceOverlayProperty  : public QObject
-{
+class SurfaceOverlayProperty : public QObject {
   Q_OBJECT
 public:
-  SurfaceOverlayProperty ( SurfaceOverlay* overlay );
-  ~SurfaceOverlayProperty ();
+  SurfaceOverlayProperty(SurfaceOverlay *overlay);
+  ~SurfaceOverlayProperty();
 
-  enum COLOR_SCALE  { CS_Heat = 0, CS_GreenRed, CS_BlueRed, CS_ColorWheel, CS_Custom };
+  enum COLOR_SCALE {
+    CS_Heat = 0,
+    CS_GreenRed,
+    CS_BlueRed,
+    CS_ColorWheel,
+    CS_Custom
+  };
   enum COLOR_METHOD { CM_Linear = 0, CM_LinearOpaque, CM_Piecewise };
 
-  void Copy(SurfaceOverlayProperty* p);
+  void Copy(SurfaceOverlayProperty *p);
 
   double GetOpacity() const;
-  void SetOpacity( double opacity );
+  void SetOpacity(double opacity);
 
   int GetColorScale() const;
-  void SetColorScale( int nScale );
+  void SetColorScale(int nScale);
 
-  void SetSurfaceOverlay( SurfaceOverlay* overlay );
+  void SetSurfaceOverlay(SurfaceOverlay *overlay);
 
-  void SetMinPoint( double dValue );
+  void SetMinPoint(double dValue);
   double GetMinPoint();
 
-  void SetMidPoint( double dValue );
+  void SetMidPoint(double dValue);
   double GetMidPoint();
 
-  void SetMaxPoint( double dValue );
+  void SetMaxPoint(double dValue);
   double GetMaxPoint();
 
   void SetOffset(double dOffset);
   double GetOffset();
 
   int GetColorMethod();
-  void SetColorMethod( int n );
+  void SetColorMethod(int n);
 
   bool GetColorInverse();
-  void SetColorInverse( bool bInverse );
+  void SetColorInverse(bool bInverse);
 
   bool GetColorTruncate();
-  void SetColorTruncate( bool bTruncate );
+  void SetColorTruncate(bool bTruncate);
 
-  bool GetClearLower()
-  {
-    return m_bClearLower;
-  }
-  void SetClearLower( bool bClear );
+  bool GetClearLower() { return m_bClearLower; }
+  void SetClearLower(bool bClear);
 
-  bool GetClearHigher()
-  {
-    return m_bClearHigher;
-  }
+  bool GetClearHigher() { return m_bClearHigher; }
   void SetClearHigher(bool bClear);
 
-  QGradientStops GetCustomColorScale()
-  {
-    return m_customScale;
-  }
+  QGradientStops GetCustomColorScale() { return m_customScale; }
   void SetCustomColorScale(QGradientStops stops);
 
-  bool GetSmooth()
-  {
-    return m_bSmooth;
-  }
+  bool GetSmooth() { return m_bSmooth; }
   void SetSmooth(bool bSmooth);
 
-  int GetSmoothSteps()
-  {
-    return m_nSmoothSteps;
-  }
+  int GetSmoothSteps() { return m_nSmoothSteps; }
   void SetSmoothSteps(int n);
 
-  bool GetUsePercentile()
-  {
-    return m_bUsePercentile;
-  }
+  bool GetUsePercentile() { return m_bUsePercentile; }
 
-  void SetUsePercentile(bool bPercentile)
-  {
-    m_bUsePercentile = bPercentile;
-  }
+  void SetUsePercentile(bool bPercentile) { m_bUsePercentile = bPercentile; }
 
-  bool GetIgnoreZeros()
-  {
-    return m_bIgnoreZeros;
-  }
+  bool GetIgnoreZeros() { return m_bIgnoreZeros; }
 
-  void SetIgnoreZeros(bool b)
-  {
-    m_bIgnoreZeros = b;
-  }
+  void SetIgnoreZeros(bool b) { m_bIgnoreZeros = b; }
 
-//  void MapOverlayColor( unsigned char* colordata, int nPoints );
-  void MapOverlayColor( float* data, unsigned char* colordata, int nPoints );
-  void MapOverlayColorSymmetric( float* data, unsigned char* colordata, int nPoints );
-  void MapOverlayColorFullScale( float* data, unsigned char* colordata, int nPoints );
+  //  void MapOverlayColor( unsigned char* colordata, int nPoints );
+  void MapOverlayColor(float *data, unsigned char *colordata, int nPoints);
+  void MapOverlayColorSymmetric(float *data, unsigned char *colordata,
+                                int nPoints);
+  void MapOverlayColorFullScale(float *data, unsigned char *colordata,
+                                int nPoints);
 
-  vtkRGBAColorTransferFunction* GetLookupTable()
-  {
-    return m_lut;
-  }
+  vtkRGBAColorTransferFunction *GetLookupTable() { return m_lut; }
 
   void Reset();
 
-  void EmitColorMapChanged()
-  {
-    emit ColorMapChanged();
-  }
+  void EmitColorMapChanged() { emit ColorMapChanged(); }
 
-  void SetMask(SurfaceLabel* label);
+  void SetMask(SurfaceLabel *label);
 
-  SurfaceLabel* GetMask()
-  {
-    return m_mask;
-  }
+  SurfaceLabel *GetMask() { return m_mask; }
 
-  bool GetMaskInverse()
-  {
-    return m_bInverseMask;
-  }
+  bool GetMaskInverse() { return m_bInverseMask; }
 
   void SetMaskInverse(bool b);
 
@@ -174,39 +142,38 @@ signals:
   void ComputeCorrelationChanged();
 
 public slots:
-  void OnLabelMaskDestroyed(QObject* label);
+  void OnLabelMaskDestroyed(QObject *label);
 
 private:
-
-  double      m_dOpacity;
-  int         m_nColorScale;
-  int         m_nColorMethod;
-  double      m_dMinPoint;
-  double      m_dMidPoint;
-  double      m_dMaxPoint;
-  double      m_dOffset;
-  int         m_colorMin[3];
-  int         m_colorMid[3];
-  int         m_colorMax[3];
-  bool        m_bColorInverse;
-  bool        m_bColorTruncate;
+  double m_dOpacity;
+  int m_nColorScale;
+  int m_nColorMethod;
+  double m_dMinPoint;
+  double m_dMidPoint;
+  double m_dMaxPoint;
+  double m_dOffset;
+  int m_colorMin[3];
+  int m_colorMid[3];
+  int m_colorMax[3];
+  bool m_bColorInverse;
+  bool m_bColorTruncate;
   QGradientStops m_customScale;
-  double      m_dMinStop;
-  double      m_dMaxStop;
-  bool        m_bClearLower;
-  bool        m_bClearHigher;
-  bool        m_bSmooth;
-  int         m_nSmoothSteps;
-  bool        m_bUsePercentile;
-  bool        m_bIgnoreZeros;
+  double m_dMinStop;
+  double m_dMaxStop;
+  bool m_bClearLower;
+  bool m_bClearHigher;
+  bool m_bSmooth;
+  int m_nSmoothSteps;
+  bool m_bUsePercentile;
+  bool m_bIgnoreZeros;
 
-  SurfaceLabel* m_mask;
-  unsigned char* m_maskData;
-  bool        m_bInverseMask;
+  SurfaceLabel *m_mask;
+  unsigned char *m_maskData;
+  bool m_bInverseMask;
 
-  vtkRGBAColorTransferFunction* m_lut;
+  vtkRGBAColorTransferFunction *m_lut;
 
-  SurfaceOverlay* m_overlay;
+  SurfaceOverlay *m_overlay;
 };
 
 #endif

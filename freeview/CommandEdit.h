@@ -27,20 +27,16 @@
 #include <QPlainTextEdit>
 #include <QStringList>
 
-class CommandEdit : public QTextEdit
-{
+class CommandEdit : public QTextEdit {
   Q_OBJECT
 public:
   explicit CommandEdit(QWidget *parent = 0);
   ~CommandEdit();
 
-  QString GetPrompt()
-  {
-    return m_strPrompt;
-  }
+  QString GetPrompt() { return m_strPrompt; }
 
 signals:
-  void CommandTriggered(const QString& cmd);
+  void CommandTriggered(const QString &cmd);
 
 protected slots:
   void OnSelectionChanged();
@@ -53,9 +49,9 @@ protected:
 private:
   void ProcessCommandInput();
   QStringList m_listHistory;
-  int         m_nPosInHistory;
-  QString     m_strPrompt;
-  QString     m_strTempCommand;
+  int m_nPosInHistory;
+  QString m_strPrompt;
+  QString m_strTempCommand;
 };
 
 #endif // COMMANDEDIT_H

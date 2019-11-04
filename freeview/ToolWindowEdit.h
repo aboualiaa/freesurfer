@@ -28,13 +28,11 @@
 #include <QWidget>
 #include <QList>
 
-namespace Ui
-{
+namespace Ui {
 class ToolWindowEdit;
 }
 
-class ToolWindowEdit : public QWidget, public UIUpdateHelper
-{
+class ToolWindowEdit : public QWidget, public UIUpdateHelper {
   Q_OBJECT
 
 public:
@@ -47,26 +45,26 @@ public slots:
 
 protected slots:
   void OnIdle();
-  void OnEditMode( QAction* act );
+  void OnEditMode(QAction *act);
   void OnComboReference(int sel);
-  void OnLineEditContourValue(const QString& strg);
-  void OnLineEditSmoothSD(const QString& strg);
-  void OnDrawRangeChanged(const QString& strg);
-  void OnExcludeRangeChanged(const QString& strg);
+  void OnLineEditContourValue(const QString &strg);
+  void OnLineEditSmoothSD(const QString &strg);
+  void OnDrawRangeChanged(const QString &strg);
+  void OnExcludeRangeChanged(const QString &strg);
   void OnReplaceLabel();
   void OnCheckReconEditing(bool bRecon);
-  void OnLineEditFillValue(const QString& strg);
-  void OnLineEditEraseValue(const QString& strg);
+  void OnLineEditFillValue(const QString &strg);
+  void OnLineEditEraseValue(const QString &strg);
 
-  void OnEraseRangeChanged(const QString& strg);
-  void OnEraseExcludeRangeChanged(const QString& strg);
+  void OnEraseRangeChanged(const QString &strg);
+  void OnEraseExcludeRangeChanged(const QString &strg);
 
   void OnButtonGeoSegClear();
   void OnButtonGeoSegGo();
   void OnButtonGeoSegClearFilling();
   void OnButtonGeoSegApply();
   void OnButtonGeoSegUndo();
-  void OnColorPickerGeoSeg(const QColor& color);
+  void OnColorPickerGeoSeg(const QColor &color);
   void OnSliderGeoOpacity(int nVal);
   void OnButtonGeoSegAbort();
   void OnGeoSegFinished(double time);
@@ -79,13 +77,13 @@ private:
   Ui::ToolWindowEdit *ui;
 
   bool m_bToUpdateWidgets;
-  QList<QWidget*>  m_widgetsBrushSize;
-  QList<QWidget*>  m_widgetsReference;
-  QList<QWidget*>  m_widgetsTolerance;
-  QList<QWidget*>  m_widgetsConstrain;
-  QList<QWidget*>  m_widgetsSmooth;
-  QList<QWidget*>  m_widgetsContour;
-  QList<QWidget*>  m_widgetsGeoSeg;
+  QList<QWidget *> m_widgetsBrushSize;
+  QList<QWidget *> m_widgetsReference;
+  QList<QWidget *> m_widgetsTolerance;
+  QList<QWidget *> m_widgetsConstrain;
+  QList<QWidget *> m_widgetsSmooth;
+  QList<QWidget *> m_widgetsContour;
+  QList<QWidget *> m_widgetsGeoSeg;
 };
 
 #endif // TOOLWINDOWEDIT_H

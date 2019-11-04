@@ -6,27 +6,29 @@
 #include "MainWindow.h"
 #include <QSettings>
 
-DialogLoadSurface::DialogLoadSurface(QWidget *parent) :
-  QDialog(parent),
-  ui(new Ui::DialogLoadSurface)
-{
+DialogLoadSurface::DialogLoadSurface(QWidget *parent)
+    : QDialog(parent), ui(new Ui::DialogLoadSurface) {
   ui->setupUi(this);
 
   QSettings s;
-  ui->lineEditFilename->setText(s.value("DialogLoadSurface/Filename").toString());
+  ui->lineEditFilename->setText(
+      s.value("DialogLoadSurface/Filename").toString());
   ui->lineEditFilename->setCursorPosition(ui->lineEditFilename->text().size());
-  ui->checkBoxInflated->setChecked(s.value("DialogLoadSurface/LoadInflated").toBool());
+  ui->checkBoxInflated->setChecked(
+      s.value("DialogLoadSurface/LoadInflated").toBool());
   ui->checkBoxOrig->setChecked(s.value("DialogLoadSurface/LoadOrig").toBool());
   ui->checkBoxPial->setChecked(s.value("DialogLoadSurface/LoadPial").toBool());
-  ui->checkBoxWhite->setChecked(s.value("DialogLoadSurface/LoadWhite").toBool());
+  ui->checkBoxWhite->setChecked(
+      s.value("DialogLoadSurface/LoadWhite").toBool());
   UpdateStatus();
 }
 
-DialogLoadSurface::~DialogLoadSurface()
-{
+DialogLoadSurface::~DialogLoadSurface() {
   QSettings s;
-  s.setValue("DialogLoadSurface/Filename", ui->lineEditFilename->text().trimmed());
-  s.setValue("DialogLoadSurface/LoadInflated", ui->checkBoxInflated->isChecked());
+  s.setValue("DialogLoadSurface/Filename",
+             ui->lineEditFilename->text().trimmed());
+  s.setValue("DialogLoadSurface/LoadInflated",
+             ui->checkBoxInflated->isChecked());
   s.setValue("DialogLoadSurface/LoadOrig", ui->checkBoxOrig->isChecked());
   s.setValue("DialogLoadSurface/LoadPial", ui->checkBoxPial->isChecked());
   s.setValue("DialogLoadSurface/LoadWhite", ui->checkBoxWhite->isChecked());
@@ -34,24 +36,21 @@ DialogLoadSurface::~DialogLoadSurface()
   delete ui;
 }
 
-void DialogLoadSurface::accept()
-{
-  if (ui->lineEditFilename->text().trimmed().isEmpty())
-  {
-    QMessageBox::warning(this, "Error", "Please enter the filename of the surface file to load");
-  }
-  else
+void DialogLoadSurface::accept() {
+  if (ui->lineEditFilename->text().trimmed().isEmpty()) {
+    QMessageBox::warning(
+        this, "Error", "Please enter the filename of the surface file to load");
+  } else
     QDialog::accept();
 }
 
-void DialogLoadSurface::OnOpen()
-{
-  QString lastdir = QFileInfo(ui->lineEditFilename->text().trimmed()).absoluteFilePath();
-  QString filename = QFileDialog::getOpenFileName( this, "Select surface file",
-                                                   MainWindow::AutoSelectLastDir(lastdir, "surf" ),
-                                                   "Surface files (*)");
-  if (!filename.isEmpty())
-  {
+void DialogLoadSurface::OnOpen() {
+  QString lastdir =
+      QFileInfo(ui->lineEditFilename->text().trimmed()).absoluteFilePath();
+  QString filename = QFileDialog::getOpenFileName(
+      this, "Select surface file",
+      MainWindow::AutoSelectLastDir(lastdir, "surf"), "Surface files (*)");
+  if (!filename.isEmpty()) {
     ui->lineEditFilename->setText(filename);
     ui->lineEditFilename->setCursorPosition(filename.size());
   }
@@ -59,8 +58,7 @@ void DialogLoadSurface::OnOpen()
   UpdateStatus();
 }
 
-void DialogLoadSurface::UpdateStatus()
-{
+void DialogLoadSurface::UpdateStatus() {
   /*
   QString fn = GetFilename();
   if (fn.contains(".inflated"))
@@ -97,13 +95,11 @@ void DialogLoadSurface::UpdateStatus()
   */
 }
 
-QString DialogLoadSurface::GetFilename()
-{
+QString DialogLoadSurface::GetFilename() {
   return ui->lineEditFilename->text().trimmed();
 }
 
-QStringList DialogLoadSurface::GetSupFiles()
-{
+QStringList DialogLoadSurface::GetSupFiles() {
   QStringList list;
   if (ui->checkBoxInflated->isChecked())
     list << "inflated";

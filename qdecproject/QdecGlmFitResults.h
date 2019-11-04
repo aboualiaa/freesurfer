@@ -34,22 +34,19 @@
 
 using namespace std;
 
-class QdecGlmFitResults
-{
+class QdecGlmFitResults {
 public:
-
   // Constructors/Destructors
   //
 
-  QdecGlmFitResults
-    ( QdecGlmDesign* iGlmDesign,
-      vector< string > iContrastSigFiles,  /* /<contrast>/sig.mgh */
-      string iConcatContrastSigFile,       /* contrast.sig.mgh */
-      string ifnResidualErrorStdDevFile,   /* rstd.mgh */
-      string ifnRegressionCoefficientsFile,/* beta.mgh */
-      string ifnFsgdFile                   /* y.fsgd */ );
+  QdecGlmFitResults(QdecGlmDesign *iGlmDesign,
+                    vector<string> iContrastSigFiles,  /* /<contrast>/sig.mgh */
+                    string iConcatContrastSigFile,     /* contrast.sig.mgh */
+                    string ifnResidualErrorStdDevFile, /* rstd.mgh */
+                    string ifnRegressionCoefficientsFile, /* beta.mgh */
+                    string ifnFsgdFile /* y.fsgd */);
 
-  virtual ~QdecGlmFitResults ( );
+  virtual ~QdecGlmFitResults();
 
   // public attribute accessor methods
   //
@@ -58,15 +55,14 @@ public:
    * Returns the design object used as input to the GLM fitter
    * @return QdecGlmDesign*
    */
-  QdecGlmDesign* GetGlmDesign ( );
+  QdecGlmDesign *GetGlmDesign();
 
   /**
    * Returns the names given to the contrast results produced by glmfit.
    * Example of one of the possible names: "Avg-thickness-Age-Cor"
    * @return vector< string >
    */
-  vector< string > GetContrastNames ( );
-
+  vector<string> GetContrastNames();
 
   /**
    * Returns the human-readable questions associated with each contrast.
@@ -74,84 +70,74 @@ public:
    * "Does the correlation between thickness and Age differ from zero?".
    * @return vector< string >
    */
-  vector< string > GetContrastQuestions ( );
-
+  vector<string> GetContrastQuestions();
 
   /**
-   * Returns pathname to the concatenated contrast significance file, 
+   * Returns pathname to the concatenated contrast significance file,
    * ie sig.mgh for all contrasts.
    * @return string
    */
-  string GetConcatContrastSigFile ( );
-
+  string GetConcatContrastSigFile();
 
   /**
    * Returns pathnames to the contrast significance file, ie sig.mgh for that
    * contrast.
    * @return vector< string >
    */
-  vector< string > GetContrastSigFiles ( );
-
+  vector<string> GetContrastSigFiles();
 
   /**
    * Returns pathnames to the contrast gamma file, ie gamma.mgh for that
    * contrast.
    * @return vector< string >
    */
-  vector< string > GetContrastGammaFiles ( );
-
+  vector<string> GetContrastGammaFiles();
 
   /**
    * Returns pathnames to the contrast F-test file, ie F.mgh for that contrast.
    * @return vector< string >
    */
-  vector< string > GetContrast_F_Files ( );
-
+  vector<string> GetContrast_F_Files();
 
   /**
    * Returns pathname to the beta.mgh file.
    * @return string
    */
-  string GetRegressionCoefficientsFile ( );
-
+  string GetRegressionCoefficientsFile();
 
   /**
    * Returns pathname to eres.mgh
    * @return string
    */
-  string GetResidualErrorFile ( );
-
+  string GetResidualErrorFile();
 
   /**
    * Returns pathname to rstd.mgh
    * @return string
    */
-  string GetResidualErrorStdDevFile ( );
+  string GetResidualErrorStdDevFile();
 
   /**
    * Returns pathname to y.fsgd
    * @return string
    */
-  string GetFsgdFile ( );
-
+  string GetFsgdFile();
 
 private:
-
   // private attributes
   //
 
-  QdecGlmDesign* mGlmDesign;
-  vector< string > mContrastNames;
-  vector< string > mContrastQuestions;
-  string mfnConcatContrastSigFile;      /* contrast.sig.mgh */
-  vector< string > mfnContrastSigFiles; /* /<contrast>/sig.mgh */
-  vector< string > mfnContrastGammaFiles;
-  vector< string > mfnContrast_F_Files;
+  QdecGlmDesign *mGlmDesign;
+  vector<string> mContrastNames;
+  vector<string> mContrastQuestions;
+  string mfnConcatContrastSigFile;    /* contrast.sig.mgh */
+  vector<string> mfnContrastSigFiles; /* /<contrast>/sig.mgh */
+  vector<string> mfnContrastGammaFiles;
+  vector<string> mfnContrast_F_Files;
   string mfnRegressionCoefficientsFile; /* beta.mgh */
   string mfnResidualErrorFile;          /* eres.mgh */
   string mfnResidualErrorStdDevFile;    /* rstd.mgh */
   string mfnFsgdFile;                   /* y.fsgd */
-
 };
 
 #endif // QDECGLMFITRESULTS_H

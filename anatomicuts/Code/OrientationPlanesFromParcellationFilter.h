@@ -14,50 +14,37 @@
 #include <vnl/vnl_vector.h>
 #include <vnl/vnl_cross.h>
 
-template< class TInputImage , class TOutputImage>
-class OrientationPlanesFromParcellationFilter: public itk::ImageToImageFilter<TInputImage,TOutputImage>
-{
+template <class TInputImage, class TOutputImage>
+class OrientationPlanesFromParcellationFilter
+    : public itk::ImageToImageFilter<TInputImage, TOutputImage> {
 public:
-	using Self= OrientationPlanesFromParcellationFilter;
-	using Superclass = itk::ImageToImageFilter<TInputImage, TOutputImage>;
+  using Self = OrientationPlanesFromParcellationFilter;
+  using Superclass = itk::ImageToImageFilter<TInputImage, TOutputImage>;
 
-	using Pointer =  itk::SmartPointer<Self>;
-	using ConstPointer = itk::SmartPointer  <const Self>;
+  using Pointer = itk::SmartPointer<Self>;
+  using ConstPointer = itk::SmartPointer<const Self>;
 
-	using InputImageType = TInputImage;
-	using OutputImageType = TOutputImage;
- 	
-	itkNewMacro(Self);
-	using VectorType = itk::Vector<float,3>;
-	VectorType GetLeftRight()
-	{
-		return m_LeftRight;
-	}
+  using InputImageType = TInputImage;
+  using OutputImageType = TOutputImage;
 
-	VectorType GetUpDown()
-	{
-		return m_UpDown;
-	}
+  itkNewMacro(Self);
+  using VectorType = itk::Vector<float, 3>;
+  VectorType GetLeftRight() { return m_LeftRight; }
 
-	VectorType GetFrontBack()
-	{
-		return m_FrontBack;
-	}
+  VectorType GetUpDown() { return m_UpDown; }
 
-	void SetBabyMode(bool bb)
-	{
-		this->m_baby = bb;
-	}
-	
+  VectorType GetFrontBack() { return m_FrontBack; }
+
+  void SetBabyMode(bool bb) { this->m_baby = bb; }
+
 protected:
-	void GenerateData() override;
+  void GenerateData() override;
 
 private:
-	bool m_baby=false;
-	itk::Vector<float, 3> m_LeftRight;
-	itk::Vector<float, 3> m_UpDown;
-	itk::Vector<float, 3> m_FrontBack;
+  bool m_baby = false;
+  itk::Vector<float, 3> m_LeftRight;
+  itk::Vector<float, 3> m_UpDown;
+  itk::Vector<float, 3> m_FrontBack;
 };
 #include "OrientationPlanesFromParcellationFilter.txx"
 #endif
-

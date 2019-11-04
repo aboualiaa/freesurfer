@@ -23,9 +23,9 @@
  *
  */
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
 #include <sys/time.h>
 
 #include "proto.h"
@@ -40,11 +40,10 @@ double round(double x);
   The seed will be different from microsecond-to-microsecond. This
   can be used as input to srand48().
   -------------------------------------------------------------------*/
-unsigned long PDFtodSeed(void)
-{
+unsigned long PDFtodSeed() {
   struct timeval tv;
   unsigned long seed;
-  gettimeofday(&tv, NULL);
+  gettimeofday(&tv, nullptr);
   // seed = ((unsigned long) 1000000)*tv.tv_sec + tv.tv_usec;
   seed = (unsigned long)(tv.tv_sec + tv.tv_usec);
   // printf("%ld %ld\n",tv.tv_sec,tv.tv_usec);
@@ -57,8 +56,7 @@ unsigned long PDFtodSeed(void)
  *          distribution with zero mean and std dev of 1:
  *              pdf(x) = e^(x^2/2)/sqrt(2pi)
  ************************************************************/
-double PDFgaussian(void)
-{
+double PDFgaussian() {
   double v1, v2, r2;
 
   do {
@@ -76,12 +74,12 @@ double PDFgaussian(void)
  *   pdf(x) = r*((r*(x-avg+1))^(r-1)) * exp(-r*(x-avg+1)) / (r-1)!
  * when order=1, an exponential distribution is generated.
  ************************************************************/
-double PDFerlang(int order)
-{
+double PDFerlang(int order) {
   double v, n;
 
   v = 0;
-  for (n = 0; n < order; n++) v = v + -log(drand48());
+  for (n = 0; n < order; n++)
+    v = v + -log(drand48());
   v /= order;
   return (v);
 }
@@ -92,8 +90,7 @@ double PDFerlang(int order)
   is the probability that the random number will be <= xcdf[n].  See
   also PDFloadCDF().
   -------------------------------------------------------------------*/
-double PDFsampleCDF(double *xcdf, double *cdf, int ncdf)
-{
+double PDFsampleCDF(double *xcdf, double *cdf, int ncdf) {
   double u;
   int n;
 
@@ -123,8 +120,7 @@ double PDFsampleCDF(double *xcdf, double *cdf, int ncdf)
   PDFsearchOrderedTable() - returns the index in y such that y(index)
   is closest to u. Assumes that y is sorted from lowest to highest.
   ----------------------------------------------------------------*/
-int PDFsearchOrderedTable(double u, double *y, int ny)
-{
+int PDFsearchOrderedTable(double u, double *y, int ny) {
   int n1, n2, n3;
 
   n1 = 0;
@@ -135,14 +131,14 @@ int PDFsearchOrderedTable(double u, double *y, int ny)
     if (y[n2] <= u) {
       n1 = n2;
       n2 = (int)round((n2 + n3) / 2);
-    }
-    else {
+    } else {
       n3 = n2;
       n2 = (int)round((n1 + n2) / 2);
     }
   }
   // printf("n2 = %d, cdf[n2] = %g\n",n2,y[n2]);
-  if (n2 + 1 < ny && fabs(y[n2] - u) > fabs(y[n2 + 1] - u)) n2 = n2 + 1;
+  if (n2 + 1 < ny && fabs(y[n2] - u) > fabs(y[n2 + 1] - u))
+    n2 = n2 + 1;
   // printf("n2 = %d, cdf[n2] = %g\n",n2,y[n2]);
   return (n2);
 }
@@ -152,21 +148,21 @@ int PDFsearchOrderedTable(double u, double *y, int ny)
   two columns. The first column is the x at which the cdf is sampled,
   the second column is the value of the cdf. See also PDFsampleCDF().
   ----------------------------------------------------------------*/
-int PDFloadCDF(char *fname, double **xcdf, double **cdf, int *ncdf)
-{
+int PDFloadCDF(char *fname, double **xcdf, double **cdf, int *ncdf) {
   FILE *fp;
   int n;
   char tmpstring[1000];
 
   fp = fopen(fname, "r");
-  if (fp == NULL) {
+  if (fp == nullptr) {
     printf("ERROR: cannot open %s\n", fname);
     return (1);
   }
 
   // Count the number of rows
   *ncdf = 0;
-  while (fgets(tmpstring, 1000, fp) != NULL) (*ncdf)++;
+  while (fgets(tmpstring, 1000, fp) != nullptr)
+    (*ncdf)++;
   fclose(fp);
   fp = fopen(fname, "r");
   // printf("ncdf = %d\n",*ncdf);

@@ -28,27 +28,22 @@
 #include <limits>
 #include <iostream>
 
-namespace Freesurfer
-{
+namespace Freesurfer {
 
-template<typename T>
-class MinMax
-{
+template <typename T> class MinMax {
 public:
   //! Default constructor
-  MinMax( void ) : minVal(std::numeric_limits<T>::max()),
-    maxVal(std::numeric_limits<T>::min()),
-    nAcc(0), intTotal(0), doubleTotal(0) {};
+  MinMax()
+      : minVal(std::numeric_limits<T>::max()),
+        maxVal(std::numeric_limits<T>::min()), nAcc(0), intTotal(0),
+        doubleTotal(0){};
 
   //! Accumulator
-  void Accumulate( const T val )
-  {
-    if( val > this->maxVal )
-    {
+  void Accumulate(const T val) {
+    if (val > this->maxVal) {
       this->maxVal = val;
     }
-    if( val < this->minVal )
-    {
+    if (val < this->minVal) {
       this->minVal = val;
     }
 
@@ -58,35 +53,19 @@ public:
   }
 
   //! Accessor for maximum
-  T GetMax( void ) const
-  {
-    return( this->maxVal );
-  }
+  T GetMax() const { return (this->maxVal); }
 
   //! Accessor for minimum
-  T GetMin( void ) const
-  {
-    return( this->minVal );
-  }
+  T GetMin() const { return (this->minVal); }
 
   //! Accessor for number accumulated
-  size_t GetN( void ) const
-  {
-    return( this->nAcc );
-  }
+  size_t GetN() const { return (this->nAcc); }
 
   //! Accessor for integer running total
-  long long GetIntTotal( void ) const
-  {
-    return( this->intTotal );
-  }
+  long long GetIntTotal() const { return (this->intTotal); }
 
   //! Accessor for double running total
-  double GetDoubleTotal( void ) const
-  {
-    return( this->doubleTotal );
-  }
-
+  double GetDoubleTotal() const { return (this->doubleTotal); }
 
 private:
   T minVal;
@@ -97,20 +76,14 @@ private:
   double doubleTotal;
 };
 
+} // namespace Freesurfer
+
+template <typename T>
+std::ostream &operator<<(std::ostream &os, const Freesurfer::MinMax<T> &me) {
+
+  os << "[ " << me.GetMin() << ", " << me.GetMax() << " ]";
+
+  return (os);
 }
-
-template<typename T>
-std::ostream& operator<<( std::ostream& os, const Freesurfer::MinMax<T>& me )
-{
-
-  os << "[ "
-     << me.GetMin()
-     << ", "
-     << me.GetMax()
-     << " ]";
-
-  return( os );
-}
-
 
 #endif

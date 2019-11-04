@@ -34,29 +34,26 @@
 class vtkActor;
 class vtkProp;
 
-class LayerVolumeTrack : public LayerMRI
-{
+class LayerVolumeTrack : public LayerMRI {
   Q_OBJECT
 public:
-  LayerVolumeTrack( LayerMRI* ref, QObject* parent = NULL );
+  LayerVolumeTrack(LayerMRI *ref, QObject *parent = NULL);
   virtual ~LayerVolumeTrack();
 
   bool LoadFromFile();
 
   void SetVisible(bool bVisible);
 
-  virtual void Append3DProps( vtkRenderer* renderer, bool* bPlaneVisibility = NULL );
+  virtual void Append3DProps(vtkRenderer *renderer,
+                             bool *bPlaneVisibility = NULL);
 
-  virtual COLOR_TABLE* GetEmbeddedColorTable()
-  {
-    return m_ctabStripped;
-  }
+  virtual COLOR_TABLE *GetEmbeddedColorTable() { return m_ctabStripped; }
 
   virtual void UpdateOpacity();
 
   virtual bool HasProp(vtkProp *prop);
 
-  QVariantMap GetLabelByProp(vtkProp* prop);
+  QVariantMap GetLabelByProp(vtkProp *prop);
 
   double GetThreshold(int nLabel);
 
@@ -76,8 +73,8 @@ protected slots:
   void RebuildActors();
 
 protected:
-  QList< vtkSmartPointer<vtkActor> >  m_actors;
-  COLOR_TABLE* m_ctabStripped;
+  QList<vtkSmartPointer<vtkActor>> m_actors;
+  COLOR_TABLE *m_ctabStripped;
 };
 
 #endif // LAYERVOLUMETRACK_H

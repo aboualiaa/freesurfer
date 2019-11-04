@@ -35,30 +35,32 @@
 class vtkInflatePolyData : public vtkPolyDataAlgorithm {
 
 public:
-
   static vtkInflatePolyData *New();
-  void PrintSelf(ostream& os, vtkIndent indent);
-  vtkTypeMacro(vtkInflatePolyData,vtkPolyDataAlgorithm);
+  void PrintSelf(ostream &os, vtkIndent indent);
+  vtkTypeMacro(vtkInflatePolyData, vtkPolyDataAlgorithm);
 
   // Description:
   // The factor to use. >0 will inflate, and <0 will deflate.
-  vtkSetClampMacro(InflateFactor,double,0.0,VTK_DOUBLE_MAX);
-  vtkGetMacro(InflateFactor,double);
+  vtkSetClampMacro(InflateFactor, double, 0.0, VTK_DOUBLE_MAX);
+  vtkGetMacro(InflateFactor, double);
 
 protected:
   vtkInflatePolyData();
- ~vtkInflatePolyData();
+  ~vtkInflatePolyData();
 
   // Usual data generation method
-  virtual int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
-  virtual int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
-  virtual int RequestUpdateExtent(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  virtual int RequestData(vtkInformation *, vtkInformationVector **,
+                          vtkInformationVector *);
+  virtual int RequestInformation(vtkInformation *, vtkInformationVector **,
+                                 vtkInformationVector *);
+  virtual int RequestUpdateExtent(vtkInformation *, vtkInformationVector **,
+                                  vtkInformationVector *);
 
   double InflateFactor;
 
 private:
-  vtkInflatePolyData(const vtkInflatePolyData&);  // Not implemented.
-  void operator=(const vtkInflatePolyData&);  // Not implemented.
+  vtkInflatePolyData(const vtkInflatePolyData &); // Not implemented.
+  void operator=(const vtkInflatePolyData &);     // Not implemented.
 };
 
 #endif

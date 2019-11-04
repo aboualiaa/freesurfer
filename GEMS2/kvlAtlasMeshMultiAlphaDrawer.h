@@ -4,66 +4,56 @@
 #include "kvlAtlasMeshRasterizor.h"
 #include "itkImage.h"
 
-
-namespace kvl
-{
-
+namespace kvl {
 
 /**
  *
  */
-class AtlasMeshMultiAlphaDrawer: public AtlasMeshRasterizor
-{
-public :
-  
+class AtlasMeshMultiAlphaDrawer : public AtlasMeshRasterizor {
+public:
   /** Standard class typedefs */
-  typedef AtlasMeshMultiAlphaDrawer  Self;
-  typedef AtlasMeshRasterizor Superclass;
-  typedef itk::SmartPointer< Self >  Pointer;
-  typedef itk::SmartPointer< const Self >  ConstPointer;
+  using Self = AtlasMeshMultiAlphaDrawer;
+  using Superclass = AtlasMeshRasterizor;
+  using Pointer = itk::SmartPointer<Self>;
+  using ConstPointer = itk::SmartPointer<const Self>;
 
   /** Method for creation through the object factory. */
-  itkNewMacro( Self );
+  itkNewMacro(Self);
 
   /** Run-time type information (and related methods). */
-  itkTypeMacro( AtlasMeshMultiAlphaDrawer, itk::Object );
+  itkTypeMacro(AtlasMeshMultiAlphaDrawer, itk::Object);
 
   /** Some typedefs */
-  typedef itk::Image< AtlasAlphasType, 3 >  ImageType;
+  using ImageType = itk::Image<AtlasAlphasType, 3>;
 
   /** */
-  void SetRegions( const ImageType::RegionType&  region )
-    {
+  void SetRegions(const ImageType::RegionType &region) {
     m_Image = ImageType::New();
-    m_Image->SetRegions( region );
+    m_Image->SetRegions(region);
     m_Image->Allocate();
-    }
-  
-  /** */
-  const ImageType*  GetImage() const
-    { return m_Image; }
-  
-  //
-  void Rasterize( const AtlasMesh* mesh );
+  }
 
-  
+  /** */
+  const ImageType *GetImage() const { return m_Image; }
+
+  //
+  void Rasterize(const AtlasMesh *mesh);
+
 protected:
   AtlasMeshMultiAlphaDrawer();
   virtual ~AtlasMeshMultiAlphaDrawer();
-  
+
   //
-  bool RasterizeTetrahedron( const AtlasMesh* mesh, 
-                             AtlasMesh::CellIdentifier tetrahedronId,
-                             int threadNumber );
+  bool RasterizeTetrahedron(const AtlasMesh *mesh,
+                            AtlasMesh::CellIdentifier tetrahedronId,
+                            int threadNumber);
 
 private:
-  AtlasMeshMultiAlphaDrawer(const Self&); //purposely not implemented
-  void operator=(const Self&); //purposely not implemented
-  
-  ImageType::Pointer  m_Image;
-  
-};
+  AtlasMeshMultiAlphaDrawer(const Self &); // purposely not implemented
+  void operator=(const Self &);            // purposely not implemented
 
+  ImageType::Pointer m_Image;
+};
 
 } // end namespace kvl
 

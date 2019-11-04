@@ -28,13 +28,13 @@
 
 class FSVolume;
 
-class FSTrack : public TrackData
-{
+class FSTrack : public TrackData {
   Q_OBJECT
 public:
-  FSTrack(FSVolume* ref = 0, QObject *parent = 0);
-  bool LoadFromFile(const QString &filename, const QString& ref_fn = QString());
-  bool LoadFromFiles(const QStringList &filenames, const QString& ref_fn = QString());
+  FSTrack(FSVolume *ref = 0, QObject *parent = 0);
+  bool LoadFromFile(const QString &filename, const QString &ref_fn = QString());
+  bool LoadFromFiles(const QStringList &filenames,
+                     const QString &ref_fn = QString());
 
   void GetRASBounds(double bounds[]);
 
@@ -43,8 +43,8 @@ signals:
 public slots:
 
 protected:
-  FSVolume* m_volumeRef;
-  double    m_dRASBounds[6];
+  FSVolume *m_volumeRef;
+  double m_dRASBounds[6];
 };
 
 #endif // FSTRACK_H

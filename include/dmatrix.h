@@ -22,7 +22,6 @@
  *
  */
 
-
 #ifndef DMATRIX_H
 #define DMATRIX_H
 
@@ -35,18 +34,17 @@
 #define DMATRIX_TYPE double
 
 // Same as in matrix.h but using double instead of float
-typedef struct
-{
-  short   type ;
-  int     rows ;
-  int     cols ;
-  DMATRIX_TYPE **rptr;    /* pointer to an array of rows */
-  DMATRIX_TYPE *data;     /* pointer to base of data */
-}
-DMATRIX, DVECTOR ;
+typedef struct {
+  short type;
+  int rows;
+  int cols;
+  DMATRIX_TYPE **rptr; /* pointer to an array of rows */
+  DMATRIX_TYPE *data;  /* pointer to base of data */
+} DMATRIX, DVECTOR;
 
-int DMatrixTest(void);
-int DMatrixCheckDims(const DMATRIX *m1, const DMATRIX *m2, const int checktype, FILE *fp, const char *str);
+int DMatrixTest();
+int DMatrixCheckDims(const DMATRIX *m1, const DMATRIX *m2, const int checktype,
+                     FILE *fp, const char *str);
 DMATRIX *DMatrixAlloc(const int rows, const int cols, const int type);
 int DMatrixFree(DMATRIX **pmat);
 int DMatrixPrintFmt(FILE *fp, const char *fmt, DMATRIX *mat);
@@ -56,15 +54,18 @@ DMATRIX *DMatrixCopyFMatrix(MATRIX *mf, DMATRIX *md);
 DMATRIX *DMatrixMultiply(const DMATRIX *m1, const DMATRIX *m2, DMATRIX *m3);
 DMATRIX *DMatrixCopy(DMATRIX *msrc, DMATRIX *mcopy);
 DMATRIX *DMatrixTranspose(DMATRIX *mIn, DMATRIX *mOut);
-DMATRIX *DMatrixAddMul(DMATRIX *m1, DMATRIX *m2, double v1, double v2, DMATRIX *mOut);
+DMATRIX *DMatrixAddMul(DMATRIX *m1, DMATRIX *m2, double v1, double v2,
+                       DMATRIX *mOut);
 DMATRIX *DMatrixAdd(DMATRIX *m1, DMATRIX *m2, DMATRIX *mout);
 DMATRIX *DMatrixSubtract(DMATRIX *m1, DMATRIX *m2, DMATRIX *mout);
 DMATRIX *DMatrixScalarMul(DMATRIX *m, double v, DMATRIX *mout);
 double DVectorDot(const DVECTOR *v1, const DVECTOR *v2);
-DMATRIX *DMatrixConstVal(const double val, const int rows, const int cols, DMATRIX *X);
+DMATRIX *DMatrixConstVal(const double val, const int rows, const int cols,
+                         DMATRIX *X);
 DMATRIX *DMatrixZero(const int rows, const int cols, DMATRIX *X);
 double DVectorLen(const DVECTOR *v);
-DVECTOR *DVectorCrossProduct(const DVECTOR *v1, const DVECTOR *v2, DVECTOR *vdst);
+DVECTOR *DVectorCrossProduct(const DVECTOR *v1, const DVECTOR *v2,
+                             DVECTOR *vdst);
 DMATRIX_TYPE DMatrixMaxAbs(DMATRIX *M);
 DMATRIX *DMatrixDRand48(int rows, int cols, DMATRIX *m);
 

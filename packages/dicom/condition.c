@@ -91,16 +91,14 @@
 typedef struct {
   CONDITION statusCode;
   char statusText[256];
-}
-EDB;
+} EDB;
 
-#define MAXEDB  100
+#define MAXEDB 100
 
 static int stackPtr = -1;
 static EDB EDBStack[MAXEDB];
-static void (*ErrorCallback) (CONDITION, const char*) = NULL;
-static void dumpstack(FILE * fp);
-
+static void (*ErrorCallback)(CONDITION, const char *) = NULL;
+static void dumpstack(FILE *fp);
 
 /*
 **++
@@ -136,17 +134,15 @@ static void dumpstack(FILE * fp);
 **
 */
 CONDITION
-COND_PushCondition(CONDITION cond, const char *controlString,...) {
-  va_list
-  args;
-  char
-  buffer[1024];
+COND_PushCondition(CONDITION cond, const char *controlString, ...) {
+  va_list args;
+  char buffer[1024];
 
   /*lint -e40 -e50 */
   va_start(args, controlString);
   if (controlString == NULL)
     controlString = "NULL Control string passedto PushCondition";
-  (void) vsprintf(buffer, controlString, args);
+  (void)vsprintf(buffer, controlString, args);
   va_end(args);
   /*lint +e40 +e50 */
 
@@ -161,10 +157,9 @@ COND_PushCondition(CONDITION cond, const char *controlString,...) {
   EDBStack[stackPtr].statusCode = cond;
   buffer[256] = '\0';
 
-  (void) strcpy(EDBStack[stackPtr].statusText, buffer);
+  (void)strcpy(EDBStack[stackPtr].statusText, buffer);
   if (ErrorCallback != NULL)
-    ErrorCallback(EDBStack[stackPtr].statusCode,
-                  EDBStack[stackPtr].statusText);
+    ErrorCallback(EDBStack[stackPtr].statusCode, EDBStack[stackPtr].statusText);
 
   if (stackPtr >= MAXEDB - 2) {
     dumpstack(stderr);
@@ -179,9 +174,7 @@ COND_PushCondition(CONDITION cond, const char *controlString,...) {
 #endif
 
   return cond;
-
 }
-
 
 /*
 **++
@@ -214,10 +207,8 @@ COND_PushCondition(CONDITION cond, const char *controlString,...) {
 */
 
 CONDITION
-COND_ExtractConditions(CTNBOOLEAN(*callback) (CONDITION, const char*)) {
-  int
-  index,
-  returnflag;
+COND_ExtractConditions(CTNBOOLEAN (*callback)(CONDITION, const char *)) {
+  int index, returnflag;
 
 #ifdef CTN_USE_THREADS
   if (THR_ObtainMutex(FAC_COND) != THR_NORMAL) {
@@ -228,13 +219,14 @@ COND_ExtractConditions(CTNBOOLEAN(*callback) (CONDITION, const char*)) {
 
   for (index = stackPtr, returnflag = 1; index >= 0 && returnflag != 0;
        index--) {
-    returnflag = callback(EDBStack[index].statusCode,
-                          EDBStack[index].statusText);
+    returnflag =
+        callback(EDBStack[index].statusCode, EDBStack[index].statusText);
   }
 
 #ifdef CTN_USE_THREADS
   if (THR_ReleaseMutex(FAC_COND) != THR_NORMAL) {
-    fprintf(stderr, "COND_ExtractConditions unable to release mutex, exiting\n");
+    fprintf(stderr,
+            "COND_ExtractConditions unable to release mutex, exiting\n");
     exit(1);
   }
 #endif
@@ -273,7 +265,7 @@ COND_ExtractConditions(CTNBOOLEAN(*callback) (CONDITION, const char*)) {
 */
 
 CONDITION
-COND_TopCondition(CONDITION * code, char *text, unsigned long maxlength) {
+COND_TopCondition(CONDITION *code, char *text, unsigned long maxlength) {
   CONDITION rtnValue;
 #ifdef CTN_USE_THREADS
   if (THR_ObtainMutex(FAC_COND) != THR_NORMAL) {
@@ -284,7 +276,7 @@ COND_TopCondition(CONDITION * code, char *text, unsigned long maxlength) {
 
   if (stackPtr >= 0) {
     *code = EDBStack[stackPtr].statusCode;
-    (void) strncpy(text, EDBStack[stackPtr].statusText, maxlength - 1);
+    (void)strncpy(text, EDBStack[stackPtr].statusText, maxlength - 1);
     text[maxlength - 1] = '\0';
     rtnValue = EDBStack[stackPtr].statusCode;
   } else {
@@ -390,7 +382,7 @@ COND_PopCondition(CTNBOOLEAN clearstack) {
 */
 
 CONDITION
-COND_EstablishCallback(void (*callback) (CONDITION, const char*)) {
+COND_EstablishCallback(void (*callback)(CONDITION, const char *)) {
 #ifdef CTN_USE_THREADS
   if (THR_ObtainMutex(FAC_COND) != THR_NORMAL) {
     fprintf(stderr, "COND_EstablishCallback unable to obtain mutex, exiting\n");
@@ -402,13 +394,13 @@ COND_EstablishCallback(void (*callback) (CONDITION, const char*)) {
 
 #ifdef CTN_USE_THREADS
   if (THR_ReleaseMutex(FAC_COND) != THR_NORMAL) {
-    fprintf(stderr, "COND_EstablishCallback unable to release mutex, exiting\n");
+    fprintf(stderr,
+            "COND_EstablishCallback unable to release mutex, exiting\n");
     exit(1);
   }
 #endif
   return COND_NORMAL;
 }
-
 
 /* function name
 **
@@ -424,8 +416,7 @@ COND_EstablishCallback(void (*callback) (CONDITION, const char*)) {
 ** Description of the algorithm (optional) and any other notes.
 */
 
-void
-COND_DumpConditions(void) {
+void COND_DumpConditions(void) {
 #ifdef CTN_USE_THREADS
   if (THR_ObtainMutex(FAC_COND) != THR_NORMAL) {
     fprintf(stderr, "COND_DumpConditions unable to obtain mutex\n");
@@ -444,13 +435,11 @@ COND_DumpConditions(void) {
 #endif
 }
 
-static void
-dumpstack(FILE * lfp) {
-  int
-  index;
+static void dumpstack(FILE *lfp) {
+  int index;
 
   for (index = 0; index <= stackPtr; index++)
-    fprintf(lfp, "%8x %s\n", (unsigned int) EDBStack[index].statusCode,
+    fprintf(lfp, "%8x %s\n", (unsigned int)EDBStack[index].statusCode,
             EDBStack[index].statusText);
 }
 
@@ -478,8 +467,7 @@ dumpstack(FILE * lfp) {
 **
 */
 
-void
-COND_CopyText(char *txt, size_t length) {
+void COND_CopyText(char *txt, size_t length) {
   size_t i;
   int j;
 
@@ -527,8 +515,7 @@ COND_CopyText(char *txt, size_t length) {
 ** A reiteration of the COND_DumpConditions except this takes an argument.
 */
 
-void
-COND_WriteConditions(FILE * lfp) {
+void COND_WriteConditions(FILE *lfp) {
 #ifdef CTN_USE_THREADS
   if (THR_ObtainMutex(FAC_COND) != THR_NORMAL) {
     fprintf(stderr, "COND_WriteConditions unable to obtain mutex\n");
@@ -545,4 +532,3 @@ COND_WriteConditions(FILE * lfp) {
   }
 #endif
 }
-

@@ -5,15 +5,14 @@
 
 class QTreeWidgetItem;
 
-class LabelTreeWidget : public QTreeWidget
-{
+class LabelTreeWidget : public QTreeWidget {
   Q_OBJECT
 public:
   explicit LabelTreeWidget(QWidget *parent = 0);
 
   void contextMenuEvent(QContextMenuEvent *e);
 
-  virtual void dropEvent(QDropEvent * event);
+  virtual void dropEvent(QDropEvent *event);
   virtual void dragEnterEvent(QDragEnterEvent *event);
 
 signals:
@@ -26,7 +25,7 @@ signals:
 public slots:
 
 private:
-  QTreeWidgetItem* draggedItem;
+  QTreeWidgetItem *draggedItem;
 };
 
 #endif // LABELTREEWIDGET_H

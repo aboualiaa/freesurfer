@@ -15,12 +15,12 @@ if(NOT ZBLIB_FOUND)
   find_package(ZLIB REQUIRED)
 endif()
 
-option(GEMS_BUILD_SHARED_LIBS "Build GEMS with shared libraries" OFF)
-option(GEMS_BUILD_EXECUTABLES "Build command line executables" OFF)
-option(GEMS_BUILD_TESTING "Build tests" OFF)
-option(GEMS_BUILD_GUI "Build GUI components (requires FLTK and VTK)" OFF)
-option(GEMS_BUILD_MATLAB "Build Matlab wrappers" OFF)
-option(GEMS_BUILD_PYTHON "Build Python wrappers" OFF)
+option(GEMS_BUILD_SHARED_LIBS "Build GEMS with shared libraries" ON) # doesn't do anything
+option(GEMS_BUILD_EXECUTABLES "Build command line executables" ON)
+option(GEMS_BUILD_TESTING "Build tests" ON)
+option(GEMS_BUILD_GUI "Build GUI components (requires FLTK and VTK)" ON)
+option(GEMS_BUILD_MATLAB "Build Matlab wrappers" ON)
+option(GEMS_BUILD_PYTHON "Build Python wrappers" OFF) # if you're building the whole freesurfer project, this gets turned on below
 option(GEMS_BUILD_CUDA "Build CUDA stuff" OFF)
 
 set(GEMS_RUNTIME_PATH ${CMAKE_CURRENT_BINARY_DIR}/bin)
@@ -42,16 +42,16 @@ else()
   endif()
 endif()
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "-fPIC -fpermissive -msse2 -mfpmath=sse")
 
 if(GEMS_BUILD_EXECUTABLES OR GEMS_BUILD_GUI)
   add_definitions(-DUSE_DYNAMIC_MESH)
-  message(WARNING "Since you're building executables to compute meshes, ITK dynamic meshes will"
-    "be used (internally using std::map instead of std::vector to store lists of points, cells, etc)."
-    "Everything will still work, but anything that only uses existing meshes will be"
-    "slower than it could be (up to 100% slower)"
-  )    
+  message(STATUS "Since you're building executables to compute meshes, ITK dynamic meshes will "
+    "be used (internally using std::map instead of std::vector to store lists of points, cells, etc). "
+    "Everything will still work, but anything that only uses existing meshes will be "
+    "slower. (up to 100% slower)"
+    )
 endif()
 
 if(GEMS_BUILD_CUDA)
@@ -97,7 +97,7 @@ set(SOURCES
   kvlHistogrammer.cxx
   kvlMutualInformationCostAndGradientCalculator.cxx
   kvlAtlasMeshJacobianDeterminantDrawer.cxx
-)
+  )
 
 # gems libary
 add_library(kvlGEMSCommon ${SOURCES})

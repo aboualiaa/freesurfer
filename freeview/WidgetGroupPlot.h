@@ -31,16 +31,15 @@
 
 class FSGroupDescriptor;
 
-class WidgetGroupPlot : public QWidget
-{
+class WidgetGroupPlot : public QWidget {
   Q_OBJECT
 public:
-  explicit WidgetGroupPlot(QWidget* parent = 0);
+  explicit WidgetGroupPlot(QWidget *parent = 0);
   ~WidgetGroupPlot();
 
-  void paintEvent(QPaintEvent * e);
+  void paintEvent(QPaintEvent *e);
 
-  void SetFsgdData(FSGroupDescriptor* fsgd);
+  void SetFsgdData(FSGroupDescriptor *fsgd);
 
   void mousePressEvent(QMouseEvent *e);
   void mouseMoveEvent(QMouseEvent *e);
@@ -54,10 +53,9 @@ public slots:
   void SetCurrentVariableIndex(int n);
   void SetPlotType(int n);
   void SetCurrentVertex(int nVertex);
-  void SetCurrentDataIndex(int n)
-  {
-      m_nCurrentDataIndex = n;
-      update();
+  void SetCurrentDataIndex(int n) {
+    m_nCurrentDataIndex = n;
+    update();
   }
 
 signals:
@@ -65,20 +63,21 @@ signals:
   void CurrentDataIndexChanged(int nIndex);
 
 public:
-  static void DrawMarker(QPainter* p, const QPointF& pt, const QString& marker, const QColor& c,
-                         double r, bool bHighlight = false);
-  void DrawMarker(QPainter* p, const QPointF& pt, const QString& marker, const QColor& c, bool bHighlight);
+  static void DrawMarker(QPainter *p, const QPointF &pt, const QString &marker,
+                         const QColor &c, double r, bool bHighlight = false);
+  void DrawMarker(QPainter *p, const QPointF &pt, const QString &marker,
+                  const QColor &c, bool bHighlight);
 
-  double          m_dTR;
-  double          m_dMin;
-  double          m_dMax;
-  bool            m_bAutoScale;
-  QRectF          m_rectPlot;
-  FSGroupDescriptor*  m_fsgd;
-  int       m_nCurrentDataIndex;
+  double m_dTR;
+  double m_dMin;
+  double m_dMax;
+  bool m_bAutoScale;
+  QRectF m_rectPlot;
+  FSGroupDescriptor *m_fsgd;
+  int m_nCurrentDataIndex;
 
-  int       m_nCurrentVariableIndex;
-  int       m_nPlotType;
+  int m_nCurrentVariableIndex;
+  int m_nPlotType;
 };
 
 #endif // WidgetGroupPlot_H

@@ -7,7 +7,7 @@
   2007-03-30  GW original
   ----------------------------------------------*/
 
-#define TestRepetitions  100
+#define TestRepetitions 100
 
 // Probably don't need all these includes...
 #include <stdio.h>
@@ -29,73 +29,74 @@
 #include "icosahedron.h"
 #include "gw_utils.h"
 
-const char * Progname;
+const char *Progname;
 char progver[] = "V1.11";
 char logfilepath[1000];
 char surffilepath[1000];
 char mrifilepath[1000];
 
 //------------------------------
-void init_various(char * AProgname) {
-//------------------------------
+void init_various(char *AProgname) {
+  //------------------------------
   int rslt;
-  sprintf( logfilepath, "%s_log.txt", Progname);
+  sprintf(logfilepath, "%s_log.txt", Progname);
   sprintf(surffilepath, "lh.%s_.tri", Progname);
-  sprintf( mrifilepath, "%s_mri.mgz", Progname);
+  sprintf(mrifilepath, "%s_mri.mgz", Progname);
 
   rslt = gw_log_init(Progname, progver, logfilepath, 1); // empty file
   if (rslt) {
     printf("Couldn't open log file %s", logfilepath);
     exit(-1);
   }
-
 }
 
 //---------------------------------------------
 int TestIntersectionDistance(int repnum) {
-//---------------------------------------------
+  //---------------------------------------------
   int rslt = 0; // default OK
   char msg[1000];
-  double radius1, radius2, rtot=0.0, maxradius, mhtres, pctspheredev;
+  double radius1, radius2, rtot = 0.0, maxradius, mhtres, pctspheredev;
   double offset;
-  double vecx, vecy, vecz, veclen, osx=0.0, osy=0.0, osz=0.0;
+  double vecx, vecy, vecz, veclen, osx = 0.0, osy = 0.0, osz = 0.0;
   double jump = 70;
   int intersect;
-  MRI_SURFACE * mris = NULL;
-  msg[0]=0;
+  MRI_SURFACE *mris = NULL;
+  msg[0] = 0;
 
 #define pctspheredevMAX 0.125
 
   //---------------------------------------------
   // Random radii
   //---------------------------------------------
-  radius1 = (0.95 * ((double) rand() / RAND_MAX) + 0.5) * 40;//3*radius < 127
-  radius2 = (0.95 * ((double) rand() / RAND_MAX) + 0.5) * 40;//3*radius < 127
+  radius1 = (0.95 * ((double)rand() / RAND_MAX) + 0.5) * 40; // 3*radius < 127
+  radius2 = (0.95 * ((double)rand() / RAND_MAX) + 0.5) * 40; // 3*radius < 127
   maxradius = radius1;
-  if (maxradius < radius2) maxradius = radius2;
+  if (maxradius < radius2)
+    maxradius = radius2;
 
   offset = radius1 + radius2 + 5;
-  jump   = offset - maxradius; // don't want one to end up inside the other
+  jump = offset - maxradius; // don't want one to end up inside the other
 
   //---------------------------------------------
   // Random mht resolution
   //---------------------------------------------
-  mhtres = 1.0 + 3.9 * ((double) rand() / RAND_MAX);
-  mhtres = floor(mhtres);// only really interested in integer values from 1..4
+  mhtres = 1.0 + 3.9 * ((double)rand() / RAND_MAX);
+  mhtres = floor(mhtres); // only really interested in integer values from 1..4
 
   //----------------------------------------
   // Random direction of offset
   //----------------------------------------
   // unit random vector
-  vecx = ((double) rand() / RAND_MAX);
-  vecy = ((double) rand() / RAND_MAX);
-  vecz = ((double) rand() / RAND_MAX);
-  veclen = sqrt(vecx*vecx + vecy*vecy + vecz*vecz);
+  vecx = ((double)rand() / RAND_MAX);
+  vecy = ((double)rand() / RAND_MAX);
+  vecz = ((double)rand() / RAND_MAX);
+  veclen = sqrt(vecx * vecx + vecy * vecy + vecz * vecz);
   vecx /= veclen;
   vecy /= veclen;
   vecz /= veclen;
 
-  sprintf(msg, "[%d] Intersect test... Rs: %8.4f %8.4f = %8.4f offset: "
+  sprintf(msg,
+          "[%d] Intersect test... Rs: %8.4f %8.4f = %8.4f offset: "
           "%8.4f  (%8.4f  %8.4f  %8.4f) res: %8.4f",
           repnum, radius1, radius2, rtot, offset, vecx, vecy, vecz, mhtres);
   printf("%s\n", msg);
@@ -105,9 +106,10 @@ int TestIntersectionDistance(int repnum) {
     osy = vecy * offset;
     osz = vecz * offset;
 
-    if (mris) MRISfree(&mris);
+    if (mris)
+      MRISfree(&mris);
 
-    mris = ic2562_make_two_icos(0,0,0,radius1, osx,osy,osz,radius2 );
+    mris = ic2562_make_two_icos(0, 0, 0, radius1, osx, osy, osz, radius2);
 
     intersect = MHTtestIsMRISselfIntersecting(mris, mhtres);
 
@@ -126,14 +128,14 @@ int TestIntersectionDistance(int repnum) {
   // collision may be closer than that because of the flat faces
   // that are inside boundary of sphere.
   //------------------------------------------------------------
-  pctspheredev = 100 * (rtot - offset)/rtot;
-  if ( (-0.02 > pctspheredev) || (pctspheredev > pctspheredevMAX) ) {
+  pctspheredev = 100 * (rtot - offset) / rtot;
+  if ((-0.02 > pctspheredev) || (pctspheredev > pctspheredevMAX)) {
     rslt = 1;
   }
 
   sprintf(msg, "%d %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %8.4f %d",
-          repnum, radius1, radius2, rtot, offset,
-          osx, osy, osz, mhtres, pctspheredev, rslt);
+          repnum, radius1, radius2, rtot, offset, osx, osy, osz, mhtres,
+          pctspheredev, rslt);
   printf("%s\n", msg);
   gw_log_message(msg);
 
@@ -142,16 +144,17 @@ int TestIntersectionDistance(int repnum) {
 
 //-----------------------------------
 int main(int argc, char *argv[]) {
-//-----------------------------------
+  //-----------------------------------
   char msg[1000];
   int n;
-  char * cp;
+  char *cp;
   int rslt = 0; // default to OK
 
-  if (getenv("SKIP_MRISHASH_TEST")) exit(77); // bypass
+  if (getenv("SKIP_MRISHASH_TEST"))
+    exit(77); // bypass
 
   Progname = argv[0];
-  init_various(Progname);  // and gw_log_init
+  init_various(Progname); // and gw_log_init
 
   gw_log_begin();
 
@@ -172,20 +175,20 @@ int main(int argc, char *argv[]) {
   //------------------------------------------
   // Randomize -- may want this or not
   //------------------------------------------
-  srand((unsigned int) time((time_t *) NULL) );
+  srand((unsigned int)time((time_t *)NULL));
 
   //------------------------------------------
   // Call collision exercise routine.
   //------------------------------------------
   for (n = 0; n < TestRepetitions; n++) {
     rslt = TestIntersectionDistance(n);
-    if (rslt) goto done;
+    if (rslt)
+      goto done;
   }
 
- done:
+done:
 
   gw_log_end();
 
   return rslt;
 }
-

@@ -1,8 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <unistd.h>
-#include <string.h>
-#include <errno.h>
+#include <cstring>
+#include <cerrno>
 #include "diag.h"
 #include "error.h"
 #include "mri.h"
@@ -24,41 +24,41 @@ void usage_message(FILE *stream);
 
 int main(int argc, char *argv[]) {
 
-  char in_name[STRLEN];  
+  char in_name[STRLEN];
   in_name[0] = '\0';
   int i;
-  FILE* fp;
+  FILE *fp;
 
   if (argc <= 1)
-    printf("Input filename is required! Use -i or --input_volume and the name of the file.\n");
+    printf("Input filename is required! Use -i or --input_volume and the name "
+           "of the file.\n");
 
-  for(i = 1;i < argc;i++) {
-    if(strcmp(argv[i], "-i") == 0 ||
-       strcmp(argv[i], "--input_volume") == 0)
+  for (i = 1; i < argc; i++) {
+    if (strcmp(argv[i], "-i") == 0 || strcmp(argv[i], "--input_volume") == 0)
       get_string(argc, argv, &i, in_name);
     else
-      printf("Input filename is required! Use -i or --input_volume and the name of the file.\n");
+      printf("Input filename is required! Use -i or --input_volume and the "
+             "name of the file.\n");
   }
-  if ((fp = fopen(in_name, "r")) != NULL)
-    {
-      list_labels_in_otl_file(fp);
-    }
+  if ((fp = fopen(in_name, "r")) != nullptr) {
+    list_labels_in_otl_file(fp);
+  }
 
   return 0;
-
 }
-
 
 void get_string(int argc, char *argv[], int *pos, char *val) {
 
   if (*pos + 1 >= argc) {
-    fprintf(stderr, "\n%s: argument %s expects an extra argument; "
-            "none found\n", Progname, argv[*pos]);
+    fprintf(stderr,
+            "\n%s: argument %s expects an extra argument; "
+            "none found\n",
+            Progname, argv[*pos]);
     usage_message(stdout);
     exit(1);
   }
 
-  strcpy(val, argv[*pos+1]);
+  strcpy(val, argv[*pos + 1]);
 
   (*pos)++;
 

@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:09 $
@@ -23,7 +23,6 @@
  *
  */
 
-
 //
 // Bruker.h
 //
@@ -38,8 +37,7 @@
 #ifndef c_bruker_h
 #define c_bruker_h
 
-typedef struct
-{
+typedef struct {
   int transposition; // 0 no , 1 x-y flipped
   double fov[3];
   int size[3];
@@ -50,24 +48,26 @@ typedef struct
   double phase1_offset;
   double slice_offset;
   double grad_matrix[9];
-  int type;           // MRI data type
-  int dim;            // record the dimension (for 2d case)
-}
-BrukerTransform;
+  int type; // MRI data type
+  int dim;  // record the dimension (for 2d case)
+} BrukerTransform;
 
 // specify directory name
 MRI *brukerRead(char *fname, int read_volume);
 
 // utility routines
 // check and create filenames for Bruker volume from directory name
-int checkBrukerFiles(char *fname, char *methodFile, char *acqpFile, char *dataFile, char *d3procFile,
-                     char *recoFile, int flag); // whether to say something(1) or not
+int checkBrukerFiles(char *fname, char *methodFile, char *acqpFile,
+                     char *dataFile, char *d3procFile, char *recoFile,
+                     int flag); // whether to say something(1) or not
 // reconstructed image info
-int readBrukerD3proc(char *d3procFile, int *pwidth, int *pheight, int *pdepth, int *ptype, int *pnframes);
+int readBrukerD3proc(char *d3procFile, int *pwidth, int *pheight, int *pdepth,
+                     int *ptype, int *pnframes);
 int readBrukerReco(char *recoFile, BrukerTransform *bTran);
 int readBrukerVolume(MRI *mri, char *dataFile);
 // acquisition information
-int readBrukerAcqp(char *acqpFile, double *TR, double *TE, double *TI, double *flip_angle, BrukerTransform *bTran);
+int readBrukerAcqp(char *acqpFile, double *TR, double *TE, double *TI,
+                   double *flip_angle, BrukerTransform *bTran);
 // check whether fname is a bruker directory
 int is_bruker(char *fname);
 

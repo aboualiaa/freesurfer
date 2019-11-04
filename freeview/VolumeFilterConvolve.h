@@ -30,25 +30,16 @@
 
 class LayerMRI;
 
-class VolumeFilterConvolve : public VolumeFilter
-{
+class VolumeFilterConvolve : public VolumeFilter {
 public:
-  VolumeFilterConvolve( LayerMRI* input = 0, LayerMRI* output = 0, QObject* parent = 0 );
+  VolumeFilterConvolve(LayerMRI *input = 0, LayerMRI *output = 0,
+                       QObject *parent = 0);
 
-  void SetSigma( double dvalue )
-  {
-    m_dSigma = dvalue;
-  }
+  void SetSigma(double dvalue) { m_dSigma = dvalue; }
 
-  double GetSigma()
-  {
-    return m_dSigma;
-  }
+  double GetSigma() { return m_dSigma; }
 
-  QString GetName()
-  {
-    return "Convolve";
-  }
+  QString GetName() { return "Convolve"; }
 
 protected:
   bool Execute();
@@ -57,5 +48,3 @@ protected:
 };
 
 #endif
-
-

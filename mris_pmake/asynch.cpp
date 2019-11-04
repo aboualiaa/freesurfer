@@ -35,32 +35,28 @@
 #include "c_label.h"
 #include "c_surface.h"
 
-extern  bool    	Gb_stdout;
-extern  stringstream 	Gsout;
+extern bool Gb_stdout;
+extern stringstream Gsout;
 
 #if 1
-bool
-asynchEvent_processWGHT(
-  s_env&    ast_env,
-  string    astr_comms
-) {
+bool asynchEvent_processWGHT(s_env &ast_env, string astr_comms) {
 
-  int lw     = ast_env.lw;
-  int rw     = ast_env.rw;
+  int lw = ast_env.lw;
+  int rw = ast_env.rw;
 
   string str_errorAct = "checking <WGHT>";
 
   string str_object = "";
   string str_verb = "";
   string str_modifier = "";
-  string str_sep  = " ";
-  float f_val  = 0.0;
+  string str_sep = " ";
+  float f_val = 0.0;
 
-  //std::_Ios_Fmtflags origFlags;
-  //origFlags  = cout.flags();
+  // std::_Ios_Fmtflags origFlags;
+  // origFlags  = cout.flags();
   cout.setf(ios::left);
 
-  if (!str_3parse( astr_comms, str_object, str_verb, str_modifier))
+  if (!str_3parse(astr_comms, str_object, str_verb, str_modifier))
     warn(str_errorAct, "Some error occurred in the 3parse.", 1);
 
   if (str_object == "all") {
@@ -81,7 +77,7 @@ asynchEvent_processWGHT(
       if (!str_modifier.length())
         return false;
       f_val = atof(str_modifier.c_str());
-      ast_env.pSTw->wd =  f_val;
+      ast_env.pSTw->wd = f_val;
     }
   }
   if (str_object == "wc") {
@@ -92,7 +88,7 @@ asynchEvent_processWGHT(
       if (!str_modifier.length())
         return false;
       f_val = atof(str_modifier.c_str());
-      ast_env.pSTw->wc =  f_val;
+      ast_env.pSTw->wc = f_val;
     }
   }
   if (str_object == "wh") {
@@ -103,7 +99,7 @@ asynchEvent_processWGHT(
       if (!str_modifier.length())
         return false;
       f_val = atof(str_modifier.c_str());
-      ast_env.pSTw->wh =  f_val;
+      ast_env.pSTw->wh = f_val;
     }
   }
   if (str_object == "wdc") {
@@ -114,7 +110,7 @@ asynchEvent_processWGHT(
       if (!str_modifier.length())
         return false;
       f_val = atof(str_modifier.c_str());
-      ast_env.pSTw->wdc =  f_val;
+      ast_env.pSTw->wdc = f_val;
     }
   }
   if (str_object == "wdh") {
@@ -125,7 +121,7 @@ asynchEvent_processWGHT(
       if (!str_modifier.length())
         return false;
       f_val = atof(str_modifier.c_str());
-      ast_env.pSTw->wdh =  f_val;
+      ast_env.pSTw->wdh = f_val;
     }
   }
   if (str_object == "wch") {
@@ -136,7 +132,7 @@ asynchEvent_processWGHT(
       if (!str_modifier.length())
         return false;
       f_val = atof(str_modifier.c_str());
-      ast_env.pSTw->wch =  f_val;
+      ast_env.pSTw->wch = f_val;
     }
   }
   if (str_object == "wdch") {
@@ -147,7 +143,7 @@ asynchEvent_processWGHT(
       if (!str_modifier.length())
         return false;
       f_val = atof(str_modifier.c_str());
-      ast_env.pSTw->wdch =  f_val;
+      ast_env.pSTw->wdch = f_val;
     }
   }
   if (str_object == "wdir") {
@@ -158,38 +154,34 @@ asynchEvent_processWGHT(
       if (!str_modifier.length())
         return false;
       f_val = atof(str_modifier.c_str());
-      ast_env.pSTw->wdir =  f_val;
+      ast_env.pSTw->wdir = f_val;
     }
   }
 
-  //cout.flags(origFlags);
+  // cout.flags(origFlags);
   return true;
 }
 #endif
 
 #if 1
-bool
-asynchEvent_processDWGHT(
-  s_env&    ast_env,
-  string    astr_comms
-) {
+bool asynchEvent_processDWGHT(s_env &ast_env, string astr_comms) {
 
-  int lw     = ast_env.lw;
-  int rw     = ast_env.rw;
+  int lw = ast_env.lw;
+  int rw = ast_env.rw;
 
   string str_errorAct = "checking <DWGHT>";
 
   string str_object = "";
   string str_verb = "";
   string str_modifier = "";
-  string str_sep  = " ";
-  float f_val  = 0.0;
+  string str_sep = " ";
+  float f_val = 0.0;
 
   //  std::_Ios_Fmtflags origFlags;
-  //origFlags  = cout.flags();
+  // origFlags  = cout.flags();
   cout.setf(ios::left);
 
-  if (!str_3parse( astr_comms, str_object, str_verb, str_modifier))
+  if (!str_3parse(astr_comms, str_object, str_verb, str_modifier))
     warn(str_errorAct, "Some error occurred in the 3parse.", 1);
 
   if (str_object == "all") {
@@ -210,7 +202,7 @@ asynchEvent_processDWGHT(
       if (!str_modifier.length())
         return false;
       f_val = atof(str_modifier.c_str());
-      ast_env.pSTDw->Dwd =  f_val;
+      ast_env.pSTDw->Dwd = f_val;
     }
   }
   if (str_object == "Dwc") {
@@ -221,7 +213,7 @@ asynchEvent_processDWGHT(
       if (!str_modifier.length())
         return false;
       f_val = atof(str_modifier.c_str());
-      ast_env.pSTDw->Dwc =  f_val;
+      ast_env.pSTDw->Dwc = f_val;
     }
   }
   if (str_object == "Dwh") {
@@ -232,7 +224,7 @@ asynchEvent_processDWGHT(
       if (!str_modifier.length())
         return false;
       f_val = atof(str_modifier.c_str());
-      ast_env.pSTDw->Dwh =  f_val;
+      ast_env.pSTDw->Dwh = f_val;
     }
   }
   if (str_object == "Dwdc") {
@@ -243,7 +235,7 @@ asynchEvent_processDWGHT(
       if (!str_modifier.length())
         return false;
       f_val = atof(str_modifier.c_str());
-      ast_env.pSTDw->Dwdc =  f_val;
+      ast_env.pSTDw->Dwdc = f_val;
     }
   }
   if (str_object == "Dwdh") {
@@ -254,7 +246,7 @@ asynchEvent_processDWGHT(
       if (!str_modifier.length())
         return false;
       f_val = atof(str_modifier.c_str());
-      ast_env.pSTDw->Dwdh =  f_val;
+      ast_env.pSTDw->Dwdh = f_val;
     }
   }
   if (str_object == "Dwch") {
@@ -265,7 +257,7 @@ asynchEvent_processDWGHT(
       if (!str_modifier.length())
         return false;
       f_val = atof(str_modifier.c_str());
-      ast_env.pSTDw->Dwch =  f_val;
+      ast_env.pSTDw->Dwch = f_val;
     }
   }
   if (str_object == "Dwdch") {
@@ -276,7 +268,7 @@ asynchEvent_processDWGHT(
       if (!str_modifier.length())
         return false;
       f_val = atof(str_modifier.c_str());
-      ast_env.pSTDw->Dwdch =  f_val;
+      ast_env.pSTDw->Dwdch = f_val;
     }
   }
   if (str_object == "Dwdir") {
@@ -287,39 +279,35 @@ asynchEvent_processDWGHT(
       if (!str_modifier.length())
         return false;
       f_val = atof(str_modifier.c_str());
-      ast_env.pSTDw->Dwdir =  f_val;
+      ast_env.pSTDw->Dwdir = f_val;
     }
   }
 
-  //cout.flags(origFlags);
+  // cout.flags(origFlags);
   return true;
 }
 #endif
 
 #if 1
-bool
-asynchEvent_processVERTEX(
-  s_env&    st_env,
-  string    astr_comms
-) {
+bool asynchEvent_processVERTEX(s_env &st_env, string astr_comms) {
 
-  int lw     = st_env.lw;
-  int rw     = st_env.rw;
+  int lw = st_env.lw;
+  int rw = st_env.rw;
 
   string str_errorAct = "checking <VERTEX>";
 
-  string  str_object = "";
-  string  str_verb = "";
-  string  str_modifier = "";
-  string  str_sep  = " ";
-  int   val  = 0;
+  string str_object = "";
+  string str_verb = "";
+  string str_modifier = "";
+  string str_sep = " ";
+  int val = 0;
   stringstream Gsout("");
 
   //  std::_Ios_Fmtflags origFlags;
-  //origFlags  = cout.flags();
+  // origFlags  = cout.flags();
   cout.setf(ios::left);
 
-  if (!str_3parse( astr_comms, str_object, str_verb, str_modifier))
+  if (!str_3parse(astr_comms, str_object, str_verb, str_modifier))
     warn(str_errorAct, "Some error occurred in the 3parse.", 1);
 
   if (str_object == "start") {
@@ -332,7 +320,7 @@ asynchEvent_processVERTEX(
       val = atoi(str_modifier.c_str());
       Gsout.str("");
       Gsout << "Setting VERTEX start to \t\t\t\t\t[ " << val << " ]" << endl;
-      st_env.startVertex =  val;
+      st_env.startVertex = val;
       ULOUT(Gsout.str());
     }
   }
@@ -346,7 +334,7 @@ asynchEvent_processVERTEX(
       val = atoi(str_modifier.c_str());
       Gsout.str("");
       Gsout << "Setting VERTEX end to \t\t\t\t\t\t[ " << val << " ]" << endl;
-      st_env.endVertex =  val;
+      st_env.endVertex = val;
       ULOUT(Gsout.str());
     }
   }
@@ -354,29 +342,25 @@ asynchEvent_processVERTEX(
   return true;
 }
 
-bool
-asynchEvent_processENV(
-  s_env&    st_env,
-  string    astr_comms
-) {
+bool asynchEvent_processENV(s_env &st_env, string astr_comms) {
 
-  int lw     = st_env.lw;
-  int rw     = st_env.rw;
+  int lw = st_env.lw;
+  int rw = st_env.rw;
 
   string str_errorAct = "checking <ENV>";
 
-  string  str_object    = "";
-  string  str_verb      = "";
-  string  str_modifier  = "";
-  string  str_sep       = " ";
-  int     val           = 0;
+  string str_object = "";
+  string str_verb = "";
+  string str_modifier = "";
+  string str_sep = " ";
+  int val = 0;
   stringstream Gsout("");
 
   //  std::_Ios_Fmtflags origFlags;
-  //origFlags  = cout.flags();
+  // origFlags  = cout.flags();
   cout.setf(ios::left);
 
-  if (!str_3parse( astr_comms, str_object, str_verb, str_modifier))
+  if (!str_3parse(astr_comms, str_object, str_verb, str_modifier))
     warn(str_errorAct, "Some error occurred in the 3parse.", 1);
 
   if (str_object == "costPathSave") {
@@ -384,7 +368,7 @@ asynchEvent_processENV(
       if (!str_modifier.length())
         return false;
       val = atoi(str_modifier.c_str());
-      st_env.b_costPathSave     = (bool) val;
+      st_env.b_costPathSave = (bool)val;
       colprintf(lw, rw, "costPathSave flag", "[ %d ]\n", (int)val);
     }
   }
@@ -400,23 +384,23 @@ asynchEvent_processENV(
 
   if (str_object == "mpmProg") {
     if (str_verb == "list")
-        s_env_mpmPrint(st_env, "", e_mpmProg);
+      s_env_mpmPrint(st_env, "", e_mpmProg);
     if (str_verb == "use") {
-        st_env.b_mpmProgUse     = true;
-        colprintf(lw, rw, "mpmProg use set", "[ ok ]\n");
+      st_env.b_mpmProgUse = true;
+      colprintf(lw, rw, "mpmProg use set", "[ ok ]\n");
     }
     if (str_verb == "get")
-        s_env_mpmPrint(st_env, "", e_mpmProg);
+      s_env_mpmPrint(st_env, "", e_mpmProg);
     else if (str_verb == "set") {
-      if (!str_modifier.length()) return false;
-      val       = atoi(str_modifier.c_str());
+      if (!str_modifier.length())
+        return false;
+      val = atoi(str_modifier.c_str());
       if (s_env_mpmProgSetIndex(&st_env, val) == -1) {
         fprintf(stderr, "\nThere is no valid mpmProg at index %d.\n", val);
         fprintf(stderr, "Use 'ENV mpmProg list' ");
         fprintf(stderr, "for a list of valid indices.\n");
       } else {
-        lprintf(lw, "'%s' built",
-                st_env.vstr_mpmProgName[val].c_str());
+        lprintf(lw, "'%s' built", st_env.vstr_mpmProgName[val].c_str());
         lprintf(rw, "[ ok ]\n");
         Gsout.str("");
         Gsout << "Setting mpmProgIndex to \t\t\t\t\t[ ";
@@ -431,7 +415,8 @@ asynchEvent_processENV(
       if (!str_modifier.length())
         return false;
       Gsout.str("");
-      Gsout << "Setting surfaceFile to \t\t\t\t\t\t[ " << str_modifier << " ]" << endl;
+      Gsout << "Setting surfaceFile to \t\t\t\t\t\t[ " << str_modifier << " ]"
+            << endl;
       if (!s_env_surfaceFile_set(st_env, str_modifier))
         error_exit("Setting surfaceFile", "Some error occurred", 1);
       ULOUT(Gsout.str());
@@ -442,7 +427,8 @@ asynchEvent_processENV(
       if (!str_modifier.length())
         return false;
       Gsout.str("");
-      Gsout << "Setting surfaceCurvature to \t\t\t\t\t[ " << str_modifier << " ]" << endl;
+      Gsout << "Setting surfaceCurvature to \t\t\t\t\t[ " << str_modifier
+            << " ]" << endl;
       if (!s_env_surfaceCurvature_set(st_env, str_modifier))
         error_exit("Setting surfaceCurvature", "Some error occurred", 1);
       ULOUT(Gsout.str());
@@ -453,7 +439,8 @@ asynchEvent_processENV(
       if (!str_modifier.length())
         return false;
       Gsout.str("");
-      Gsout << "Setting surfaceSulcal to \t\t\t\t\t[ " << str_modifier << " ]" << endl;
+      Gsout << "Setting surfaceSulcal to \t\t\t\t\t[ " << str_modifier << " ]"
+            << endl;
       if (!s_env_secondarySurface_setCurvature(st_env, str_modifier))
         error_exit("Setting surfaceSulcal", "Some error occurred", 1);
       ULOUT(Gsout.str());
@@ -465,7 +452,8 @@ asynchEvent_processENV(
       if (!str_modifier.length())
         return false;
       Gsout.str("");
-      Gsout << "Setting auxSurfaceFile to \t\t\t\t\t[ " << str_modifier << " ]" << endl;
+      Gsout << "Setting auxSurfaceFile to \t\t\t\t\t[ " << str_modifier << " ]"
+            << endl;
       if (!s_env_auxSurfaceFile_set(st_env, str_modifier))
         error_exit("Setting auxSurfaceFile", "Some error occurred", 1);
       ULOUT(Gsout.str());
@@ -476,7 +464,8 @@ asynchEvent_processENV(
       if (!str_modifier.length())
         return false;
       Gsout.str("");
-      Gsout << "Setting auxSurfaceCurvature to \t\t\t\t\t[ " << str_modifier << " ]" << endl;
+      Gsout << "Setting auxSurfaceCurvature to \t\t\t\t\t[ " << str_modifier
+            << " ]" << endl;
       if (!s_env_auxSurfaceCurvature_set(st_env, str_modifier))
         error_exit("Setting auxSurfaceCurvature", "Some error occurred", 1);
       ULOUT(Gsout.str());
@@ -485,12 +474,13 @@ asynchEvent_processENV(
 
   if (str_object == "costFunctionIndex") {
     if (str_verb == "get")
-        s_env_costFctList(st_env);
+      s_env_costFctList(st_env);
     else if (str_verb == "set") {
       if (!str_modifier.length())
         return false;
       Gsout.str("");
-      Gsout << "Setting costFunctionIndex to \t\t\t\t\t[ " << str_modifier << " ]" << endl;
+      Gsout << "Setting costFunctionIndex to \t\t\t\t\t[ " << str_modifier
+            << " ]" << endl;
       if (s_env_costFctSetIndex(&st_env, atoi(str_modifier.c_str())) == -1)
         error_exit("setting costFunctionIndex", "Some error occurred", 1);
       ULOUT(Gsout.str());
@@ -505,7 +495,8 @@ asynchEvent_processENV(
       if (!str_modifier.length())
         return false;
       Gsout.str("");
-      Gsout << "Setting syslog to \t\t\t\t\t\t[ " << str_modifier << " ]" << endl;
+      Gsout << "Setting syslog to \t\t\t\t\t\t[ " << str_modifier << " ]"
+            << endl;
       s_env_log_file_changeTo(st_env, e_sys, str_modifier);
       ULOUT(Gsout.str());
     }
@@ -518,7 +509,8 @@ asynchEvent_processENV(
       if (!str_modifier.length())
         return false;
       Gsout.str("");
-      Gsout << "Setting userlog to \t\t\t\t\t\t[ " << str_modifier << " ]" << endl;
+      Gsout << "Setting userlog to \t\t\t\t\t\t[ " << str_modifier << " ]"
+            << endl;
       s_env_log_file_changeTo(st_env, e_user, str_modifier);
       ULOUT(Gsout.str());
     }
@@ -531,7 +523,8 @@ asynchEvent_processENV(
       if (!str_modifier.length())
         return false;
       Gsout.str("");
-      Gsout << "Setting resultlog to \t\t\t\t\t\t[ " << str_modifier << " ]" << endl;
+      Gsout << "Setting resultlog to \t\t\t\t\t\t[ " << str_modifier << " ]"
+            << endl;
       s_env_log_file_changeTo(st_env, e_result, str_modifier);
       ULOUT(Gsout.str());
     }
@@ -559,7 +552,8 @@ asynchEvent_processENV(
         return false;
       val = atoi(str_modifier.c_str());
       Gsout.str("");
-      Gsout << "Setting surfacesClearFlag to \t\t\t\t\t[ " << val << " ]" << endl;
+      Gsout << "Setting surfacesClearFlag to \t\t\t\t\t[ " << val << " ]"
+            << endl;
       st_env.b_surfacesClear = val;
       ULOUT(Gsout.str());
     }
@@ -581,308 +575,285 @@ asynchEvent_processENV(
 }
 #endif
 
-C_mpmProg_NOP*
-pC_NOP_cast(
-    C_mpmProg*                  pmpm,
-    C_mpmProg_NOP*&             pC_mpmProg_NOP
-) {
-    pC_mpmProg_NOP              = dynamic_cast<C_mpmProg_NOP*>(pmpm);
-    if(!pC_mpmProg_NOP) {
-        cout << "The embedded mpmProg is not of type 'NOP'" << endl;
-    }
-    return pC_mpmProg_NOP;
+C_mpmProg_NOP *pC_NOP_cast(C_mpmProg *pmpm, C_mpmProg_NOP *&pC_mpmProg_NOP) {
+  pC_mpmProg_NOP = dynamic_cast<C_mpmProg_NOP *>(pmpm);
+  if (!pC_mpmProg_NOP) {
+    cout << "The embedded mpmProg is not of type 'NOP'" << endl;
+  }
+  return pC_mpmProg_NOP;
 }
 
-C_mpmProg_autodijk*
-pC_autodijk_cast(
-    C_mpmProg*                  pmpm,
-    C_mpmProg_autodijk*&        pC_mpmProg_autodijk
-) {
-    pC_mpmProg_autodijk         = dynamic_cast<C_mpmProg_autodijk*>(pmpm);
-    if(!pC_mpmProg_autodijk) {
-        cout << "The embedded mpmProg is not of type 'autodijk'" << endl;
-    }
-    return pC_mpmProg_autodijk;
+C_mpmProg_autodijk *pC_autodijk_cast(C_mpmProg *pmpm,
+                                     C_mpmProg_autodijk *&pC_mpmProg_autodijk) {
+  pC_mpmProg_autodijk = dynamic_cast<C_mpmProg_autodijk *>(pmpm);
+  if (!pC_mpmProg_autodijk) {
+    cout << "The embedded mpmProg is not of type 'autodijk'" << endl;
+  }
+  return pC_mpmProg_autodijk;
 }
 
-C_mpmProg_pathFind*
-pC_pathFind_cast(
-    C_mpmProg*                  pmpm,
-    C_mpmProg_pathFind*&        pC_mpmProg_pathFind
-) {
-    pC_mpmProg_pathFind         = dynamic_cast<C_mpmProg_pathFind*>(pmpm);
-    if(!pC_mpmProg_pathFind) {
-        cout << "The embedded mpmProg is not of type 'pathFind'" << endl;
-    }
-    return pC_mpmProg_pathFind;
+C_mpmProg_pathFind *pC_pathFind_cast(C_mpmProg *pmpm,
+                                     C_mpmProg_pathFind *&pC_mpmProg_pathFind) {
+  pC_mpmProg_pathFind = dynamic_cast<C_mpmProg_pathFind *>(pmpm);
+  if (!pC_mpmProg_pathFind) {
+    cout << "The embedded mpmProg is not of type 'pathFind'" << endl;
+  }
+  return pC_mpmProg_pathFind;
 }
 
-C_mpmProg_ROI*
-pC_ROI_cast(
-    C_mpmProg*                  pmpm,
-    C_mpmProg_ROI*&             pC_mpmProg_ROI
-) {
-    pC_mpmProg_ROI              = dynamic_cast<C_mpmProg_ROI*>(pmpm);
-    if(!pC_mpmProg_ROI) {
-        cout << "The embedded mpmProg is not of type 'ROI'" << endl;
-    }
-    return pC_mpmProg_ROI;
+C_mpmProg_ROI *pC_ROI_cast(C_mpmProg *pmpm, C_mpmProg_ROI *&pC_mpmProg_ROI) {
+  pC_mpmProg_ROI = dynamic_cast<C_mpmProg_ROI *>(pmpm);
+  if (!pC_mpmProg_ROI) {
+    cout << "The embedded mpmProg is not of type 'ROI'" << endl;
+  }
+  return pC_mpmProg_ROI;
 }
 
-C_mpmProg_externalMesh*
-pC_externalMesh_cast(
-    C_mpmProg*                  pmpm,
-    C_mpmProg_externalMesh*&    pC_mpmProg_externalMesh
-) {
-    pC_mpmProg_externalMesh     = dynamic_cast<C_mpmProg_externalMesh*>(pmpm);
-    if(!pC_mpmProg_externalMesh) {
-        cout << "The embedded mpmProg is not of type 'externalMesh'" << endl;
-    }
-    return pC_mpmProg_externalMesh;
+C_mpmProg_externalMesh *
+pC_externalMesh_cast(C_mpmProg *pmpm,
+                     C_mpmProg_externalMesh *&pC_mpmProg_externalMesh) {
+  pC_mpmProg_externalMesh = dynamic_cast<C_mpmProg_externalMesh *>(pmpm);
+  if (!pC_mpmProg_externalMesh) {
+    cout << "The embedded mpmProg is not of type 'externalMesh'" << endl;
+  }
+  return pC_mpmProg_externalMesh;
 }
 
-bool
-asynchEvent_processMPMPROG(
-    s_env&      st_env,
-    string      astr_comms
-) {
+bool asynchEvent_processMPMPROG(s_env &st_env, string astr_comms) {
 
-  int lw     = st_env.lw;
-  int rw     = st_env.rw;
+  int lw = st_env.lw;
+  int rw = st_env.rw;
 
   string str_errorAct = "checking <MPMPROG>";
 
-  string  str_object    = "";
-  string  str_verb      = "";
-  string  str_modifier  = "";
-  string  str_sep       = " ";
+  string str_object = "";
+  string str_verb = "";
+  string str_modifier = "";
+  string str_sep = " ";
 
-  char 	  pch_buffer[65536];
+  char pch_buffer[65536];
 
-  if (!str_3parse( astr_comms, str_object, str_verb, str_modifier))
+  if (!str_3parse(astr_comms, str_object, str_verb, str_modifier))
     warn(str_errorAct, "Some error occurred in the 3parse.", 1);
 
   if (str_object == "info") {
-    C_mpmProg_NOP*              pC_NOP          = NULL;
-    C_mpmProg_pathFind*		pC_pathFind 	= NULL;
-    C_mpmProg_autodijk*         pC_autodijk     = NULL;
-    C_mpmProg_ROI*              pC_ROI          = NULL;
-    C_mpmProg_externalMesh*	pC_externalMesh = NULL;
-    switch(st_env.empmProg_current) {
-    	case emp_externalMesh:
-                if( (pC_externalMesh_cast(st_env.pCmpmProg, pC_externalMesh))==NULL)
-                    return false;
-        break;
-    	case emp_NULL: break;
-        case emp_NOP:
-            if( (pC_NOP_cast(st_env.pCmpmProg, pC_NOP))==NULL) 
-		return false;
-            if (str_verb == "get" || str_verb == "list") {
-                colprintf(lw, rw, "Sleep seconds:", "[ %d ]\n",
-                        pC_NOP->sleepSeconds_get());
-            }
-        break;
-	case emp_pathFind: 
-            if( (pC_pathFind_cast(st_env.pCmpmProg, pC_pathFind))==NULL) 
-		return false;
-            if (str_verb == "get" || str_verb == "list") {
-                colprintf(lw, rw, "Start vertex:", "[ %d ]\n",
-                        pC_pathFind->vertexStart_get());
-                colprintf(lw, rw, "End vertex:",   "[ %d ]\n",
-                        pC_pathFind->vertexEnd_get());
-	    }
-	break;
-        case emp_autodijk:
-        case emp_autodijk_fast:  
-            if( (pC_autodijk_cast(st_env.pCmpmProg, pC_autodijk))==NULL) 
-		return false;
-            if (str_verb == "get" || str_verb == "list") {
-                colprintf(lw, rw, "Polar vertex:", "[ %d ]\n",
-                        pC_autodijk->vertexPolar_get());
-                colprintf(lw, rw, "Start vertex:", "[ %d ]\n",
-                        pC_autodijk->vertexStart_get());
-                colprintf(lw, rw, "Step vertex:",  "[ %d ]\n",
-                        pC_autodijk->vertexStep_get());
-                colprintf(lw, rw, "End vertex:",   "[ %d ]\n",
-                        pC_autodijk->vertexEnd_get());
-                colprintf(lw, rw, "Progress Iter:","[ %d ]\n",
-                        pC_autodijk->progressIter_get());
-                colprintf(lw, rw, "Surface ripClear:","[ %d ]\n",
-                        pC_autodijk->surfaceRipClear_get());
-            }
-	 break;
-        case emp_ROI:
-            if( (pC_ROI_cast(st_env.pCmpmProg, pC_ROI))==NULL)
-                return false;
-            if (str_verb == "get" || str_verb == "list") {
-                colprintf(lw, rw, "Radius", "[ %f ]\n",
-                        pC_ROI->radius_get());
-                colprintf(lw, rw, "Number of ROI vertex seeds:",
-                        "[ %d ]\n",
-                        pC_ROI->v_vertex_get().size());
-            }
-        break;
-	case empmprog: break;
+    C_mpmProg_NOP *pC_NOP = nullptr;
+    C_mpmProg_pathFind *pC_pathFind = nullptr;
+    C_mpmProg_autodijk *pC_autodijk = nullptr;
+    C_mpmProg_ROI *pC_ROI = nullptr;
+    C_mpmProg_externalMesh *pC_externalMesh = nullptr;
+    switch (st_env.empmProg_current) {
+    case emp_externalMesh:
+      if ((pC_externalMesh_cast(st_env.pCmpmProg, pC_externalMesh)) == nullptr)
+        return false;
+      break;
+    case emp_NULL:
+      break;
+    case emp_NOP:
+      if ((pC_NOP_cast(st_env.pCmpmProg, pC_NOP)) == nullptr)
+        return false;
+      if (str_verb == "get" || str_verb == "list") {
+        colprintf(lw, rw, "Sleep seconds:", "[ %d ]\n",
+                  pC_NOP->sleepSeconds_get());
       }
+      break;
+    case emp_pathFind:
+      if ((pC_pathFind_cast(st_env.pCmpmProg, pC_pathFind)) == nullptr)
+        return false;
+      if (str_verb == "get" || str_verb == "list") {
+        colprintf(lw, rw, "Start vertex:", "[ %d ]\n",
+                  pC_pathFind->vertexStart_get());
+        colprintf(lw, rw, "End vertex:", "[ %d ]\n",
+                  pC_pathFind->vertexEnd_get());
+      }
+      break;
+    case emp_autodijk:
+    case emp_autodijk_fast:
+      if ((pC_autodijk_cast(st_env.pCmpmProg, pC_autodijk)) == nullptr)
+        return false;
+      if (str_verb == "get" || str_verb == "list") {
+        colprintf(lw, rw, "Polar vertex:", "[ %d ]\n",
+                  pC_autodijk->vertexPolar_get());
+        colprintf(lw, rw, "Start vertex:", "[ %d ]\n",
+                  pC_autodijk->vertexStart_get());
+        colprintf(lw, rw, "Step vertex:", "[ %d ]\n",
+                  pC_autodijk->vertexStep_get());
+        colprintf(lw, rw, "End vertex:", "[ %d ]\n",
+                  pC_autodijk->vertexEnd_get());
+        colprintf(lw, rw, "Progress Iter:", "[ %d ]\n",
+                  pC_autodijk->progressIter_get());
+        colprintf(lw, rw, "Surface ripClear:", "[ %d ]\n",
+                  pC_autodijk->surfaceRipClear_get());
+      }
+      break;
+    case emp_ROI:
+      if ((pC_ROI_cast(st_env.pCmpmProg, pC_ROI)) == nullptr)
+        return false;
+      if (str_verb == "get" || str_verb == "list") {
+        colprintf(lw, rw, "Radius", "[ %f ]\n", pC_ROI->radius_get());
+        colprintf(lw, rw, "Number of ROI vertex seeds:", "[ %d ]\n",
+                  pC_ROI->v_vertex_get().size());
+      }
+      break;
+    case empmprog:
+      break;
+    }
+  }
+
+  if (st_env.empmProg_current == emp_pathFind) {
+    C_mpmProg_pathFind *pC_pathFind = nullptr;
+    if ((pC_pathFind_cast(st_env.pCmpmProg, pC_pathFind)) == nullptr)
+      return false;
+    if (str_object == "vertexEnd") {
+      if (str_verb == "get") {
+        colsprintf(lw, rw, pch_buffer, "End vertex:", "[ %d ]\n",
+                   pC_pathFind->vertexEnd_get());
+      } else if (str_verb == "set") {
+        if (!str_modifier.length())
+          return false;
+        pC_pathFind->vertexEnd_set(atoi(str_modifier.c_str()));
+        colsprintf(lw, rw, pch_buffer, "mpmProg vertexEnd set to", "[ %s ]\n",
+                   str_modifier.c_str());
+      }
+      if (Gb_stdout)
+        printf("%s", pch_buffer);
+      ULOUT(pch_buffer);
+    }
+    if (str_object == "vertexStart") {
+      if (str_verb == "get") {
+        colsprintf(lw, rw, pch_buffer, "Start vertex:", "[ %d ]\n",
+                   pC_pathFind->vertexStart_get());
+      } else if (str_verb == "set") {
+        if (!str_modifier.length())
+          return false;
+        pC_pathFind->vertexStart_set(atoi(str_modifier.c_str()));
+        colsprintf(lw, rw, pch_buffer, "mpmProg vertexStart set to", "[ %s ]\n",
+                   str_modifier.c_str());
+      }
+      if (Gb_stdout)
+        printf("%s", pch_buffer);
+      ULOUT(pch_buffer);
+    }
+  }
+
+  if (st_env.empmProg_current == emp_autodijk ||
+      st_env.empmProg_current == emp_autodijk_fast) {
+    C_mpmProg_autodijk *pC_autodijk = nullptr;
+    if ((pC_autodijk_cast(st_env.pCmpmProg, pC_autodijk)) == nullptr)
+      return false;
+    if (str_object == "progressIter") {
+      if (str_verb == "get") {
+        colsprintf(lw, rw, pch_buffer,
+                   "Show progress at each iter:", "[ %d ]\n",
+                   pC_autodijk->progressIter_get());
+      } else if (str_verb == "set") {
+        if (!str_modifier.length())
+          return false;
+        pC_autodijk->progressIter_set(atoi(str_modifier.c_str()));
+        colsprintf(lw, rw, pch_buffer, "autodijk progressIter set to",
+                   "[ %s ]\n", str_modifier.c_str());
+      }
+      if (Gb_stdout)
+        printf("%s", pch_buffer);
+      ULOUT(pch_buffer);
     }
 
-    if(	st_env.empmProg_current == emp_pathFind ) {
-	C_mpmProg_pathFind*         pC_pathFind     = NULL;
-    	if( (pC_pathFind_cast(st_env.pCmpmProg, pC_pathFind))==NULL) 
-	    return false;
-        if (str_object == "vertexEnd") {
-    	    if (str_verb == "get") {
-        	colsprintf(lw, rw, pch_buffer,
-		    	   "End vertex:", "[ %d ]\n",
-                  	   pC_pathFind->vertexEnd_get());
-    	    } else if (str_verb == "set") {
-      		if (!str_modifier.length()) return false;
-      		pC_pathFind->vertexEnd_set(atoi(str_modifier.c_str()));
-      		colsprintf(lw, rw, pch_buffer,
-		           "mpmProg vertexEnd set to", "[ %s ]\n",
-                	   str_modifier.c_str());
-    	    }
-	    if(Gb_stdout) printf("%s", pch_buffer); 
-	    ULOUT(pch_buffer);
-  	}
-        if (str_object == "vertexStart") {
-    	    if (str_verb == "get") {
-        	colsprintf(lw, rw, pch_buffer,
-		    	   "Start vertex:", "[ %d ]\n",
-                  	   pC_pathFind->vertexStart_get());
-    	    } else if (str_verb == "set") {
-      		if (!str_modifier.length()) return false;
-      		pC_pathFind->vertexStart_set(atoi(str_modifier.c_str()));
-      		colsprintf(lw, rw, pch_buffer,
-		           "mpmProg vertexStart set to", "[ %s ]\n",
-                	   str_modifier.c_str());
-    	    }
-	    if(Gb_stdout) printf("%s", pch_buffer); 
-	    ULOUT(pch_buffer);
-  	}
+    if (str_object == "vertexEnd") {
+      if (str_verb == "get") {
+        colsprintf(lw, rw, pch_buffer, "End vertex:", "[ %d ]\n",
+                   pC_autodijk->vertexEnd_get());
+      } else if (str_verb == "set") {
+        if (!str_modifier.length())
+          return false;
+        pC_autodijk->vertexEnd_set(atoi(str_modifier.c_str()));
+        colsprintf(lw, rw, pch_buffer, "mpmProg vertexEnd set to", "[ %s ]\n",
+                   str_modifier.c_str());
+      }
+      if (Gb_stdout)
+        printf("%s", pch_buffer);
+      ULOUT(pch_buffer);
     }
-    
-    if(	st_env.empmProg_current == emp_autodijk ||
-      	st_env.empmProg_current == emp_autodijk_fast ) {
-	C_mpmProg_autodijk*         pC_autodijk     = NULL;
-    	if( (pC_autodijk_cast(st_env.pCmpmProg, pC_autodijk))==NULL) 
-	    return false;
-        if (str_object == "progressIter") {
-    	    if (str_verb == "get") {
-        	colsprintf(lw, rw, pch_buffer,
-		    	   "Show progress at each iter:", "[ %d ]\n",
-                  	   pC_autodijk->progressIter_get());
-    	    } else if (str_verb == "set") {
-      	        if (!str_modifier.length()) return false;
-      	        pC_autodijk->progressIter_set(atoi(str_modifier.c_str()));
-      	        colsprintf(lw, rw, pch_buffer,
-		      	   "autodijk progressIter set to", "[ %s ]\n",
-                	   str_modifier.c_str());
-            }
-	    if(Gb_stdout) printf("%s", pch_buffer); 
-	    ULOUT(pch_buffer);
-        }
 
-        if (str_object == "vertexEnd") {
-    	    if (str_verb == "get") {
-        	colsprintf(lw, rw, pch_buffer,
-		    	   "End vertex:", "[ %d ]\n",
-                  	   pC_autodijk->vertexEnd_get());
-    	    } else if (str_verb == "set") {
-      		if (!str_modifier.length()) return false;
-      		pC_autodijk->vertexEnd_set(atoi(str_modifier.c_str()));
-      		colsprintf(lw, rw, pch_buffer,
-		           "mpmProg vertexEnd set to", "[ %s ]\n",
-                	   str_modifier.c_str());
-    	    }
-	    if(Gb_stdout) printf("%s", pch_buffer); 
-	    ULOUT(pch_buffer);
-  	}
-
-        if (str_object == "vertexPolar") {
-    	    if (str_verb == "get") {
-        	colsprintf(lw, rw, pch_buffer, 
-		    	   "Polar vertex:", "[ %d ]\n",
-                  	   pC_autodijk->vertexPolar_get());
-    	    } else if (str_verb == "set") {
-      		if (!str_modifier.length()) return false;
-      		pC_autodijk->vertexPolar_set(atoi(str_modifier.c_str()));
-      		colsprintf(lw, rw, pch_buffer, 
-		          "autodijk polar vertex set to", "[ %s ]\n",
-                	  str_modifier.c_str());
-            }
-	    if(Gb_stdout) printf("%s", pch_buffer); 
-	    ULOUT(pch_buffer);
-        }
+    if (str_object == "vertexPolar") {
+      if (str_verb == "get") {
+        colsprintf(lw, rw, pch_buffer, "Polar vertex:", "[ %d ]\n",
+                   pC_autodijk->vertexPolar_get());
+      } else if (str_verb == "set") {
+        if (!str_modifier.length())
+          return false;
+        pC_autodijk->vertexPolar_set(atoi(str_modifier.c_str()));
+        colsprintf(lw, rw, pch_buffer, "autodijk polar vertex set to",
+                   "[ %s ]\n", str_modifier.c_str());
+      }
+      if (Gb_stdout)
+        printf("%s", pch_buffer);
+      ULOUT(pch_buffer);
     }
-    return true;
+  }
+  return true;
 }
 
 #if 1
-bool
-asynchEvent_processLABEL(
-  s_env&    st_env,
-  string    astr_comms
-) {
+bool asynchEvent_processLABEL(s_env &st_env, string astr_comms) {
 
-  int lw     = st_env.lw;
-  int rw     = st_env.rw;
+  int lw = st_env.lw;
+  int rw = st_env.rw;
 
-  string str_errorAct  = "checking <LABEL>";
+  string str_errorAct = "checking <LABEL>";
 
-  string  str_object = "";
-  string  str_verb = "";
-  string  str_modifier = "";
-  string  str_sep  = " ";
-  int   val  = 0;
-  void*  pv_void = NULL;
+  string str_object = "";
+  string str_verb = "";
+  string str_modifier = "";
+  string str_sep = " ";
+  int val = 0;
+  void *pv_void = nullptr;
   stringstream Gsout("");
 
   //  std::_Ios_Fmtflags origFlags;
-  //origFlags  = cout.flags();
+  // origFlags  = cout.flags();
   cout.setf(ios::left);
 
-  if (!str_3parse( astr_comms, str_object, str_verb, str_modifier))
+  if (!str_3parse(astr_comms, str_object, str_verb, str_modifier))
     warn(str_errorAct, "Some error occurred in the 3parse.", 1);
 
   if (str_verb == "singleVertexSet") {
-    char    ch_mark  = TRUE;
-    char*   pch_mark = &ch_mark;
-    void*   pv_mark  = (void*) pch_mark;
+    char ch_mark = TRUE;
+    char *pch_mark = &ch_mark;
+    void *pv_mark = (void *)pch_mark;
     if (!str_modifier.length())
       return false;
-    int vertex  = atoi(str_modifier.c_str());
-    if (str_object          == "workingSurface") {
-      label_singleVertexSet(st_env.pMS_primary, vertex,
-                            vertex_ripFlagMark, pv_mark);
-    } else if (str_object   == "secondarySurface") {
-      label_singleVertexSet(st_env.pMS_secondary, vertex,
-                            vertex_ripFlagMark, pv_mark);
-    } else if (str_object   == "activeSurface") {
-      label_singleVertexSet(st_env.pMS_active, vertex,
-                            vertex_ripFlagMark, pv_mark);
+    int vertex = atoi(str_modifier.c_str());
+    if (str_object == "workingSurface") {
+      label_singleVertexSet(st_env.pMS_primary, vertex, vertex_ripFlagMark,
+                            pv_mark);
+    } else if (str_object == "secondarySurface") {
+      label_singleVertexSet(st_env.pMS_secondary, vertex, vertex_ripFlagMark,
+                            pv_mark);
+    } else if (str_object == "activeSurface") {
+      label_singleVertexSet(st_env.pMS_active, vertex, vertex_ripFlagMark,
+                            pv_mark);
     } else
       return false;
   }
 
   if (str_verb == "loadFrom") {
-    char ch_mark   = TRUE;
-    char* pch_mark  = &ch_mark;
-    void* pv_mark   = (void*) pch_mark;
+    char ch_mark = TRUE;
+    char *pch_mark = &ch_mark;
+    void *pv_mark = (void *)pch_mark;
     string str_fileSpec = str_modifier;
     if (!str_modifier.length())
       return false;
     if (relDirSpec_test(str_modifier))
       str_fileSpec = st_env.str_workingDir + str_modifier;
-    if (str_object          == "workingSurface") {
-      label_coreLoad(st_env.pMS_primary, str_fileSpec,
-                     vertex_ripFlagMark, pv_mark);
-    } else if (str_object   == "secondarySurface") {
-      label_coreLoad(st_env.pMS_secondary, str_fileSpec,
-                     vertex_ripFlagMark, pv_mark);
-    } else if (str_object   == "activeSurface") {
-      label_coreLoad(st_env.pMS_active, str_fileSpec,
-                     vertex_ripFlagMark, pv_mark);
+    if (str_object == "workingSurface") {
+      label_coreLoad(st_env.pMS_primary, str_fileSpec, vertex_ripFlagMark,
+                     pv_mark);
+    } else if (str_object == "secondarySurface") {
+      label_coreLoad(st_env.pMS_secondary, str_fileSpec, vertex_ripFlagMark,
+                     pv_mark);
+    } else if (str_object == "activeSurface") {
+      label_coreLoad(st_env.pMS_active, str_fileSpec, vertex_ripFlagMark,
+                     pv_mark);
     } else
       return false;
   }
@@ -893,15 +864,15 @@ asynchEvent_processLABEL(
       return false;
     if (relDirSpec_test(str_modifier))
       str_fileSpec = st_env.str_workingDir + str_modifier;
-    if (str_object          == "workingSurface") {
-      label_coreSave(st_env.pMS_primary, str_fileSpec,
-                     vertex_ripFlagIsTrue, pv_void);
-    } else if (str_object   == "secondarySurface") {
-      label_coreSave(st_env.pMS_secondary, str_fileSpec,
-                     vertex_ripFlagIsTrue, pv_void);
-    } else if (str_object   == "activeSurface") {
-      label_coreSave(st_env.pMS_active, str_fileSpec,
-                     vertex_ripFlagIsTrue, pv_void);
+    if (str_object == "workingSurface") {
+      label_coreSave(st_env.pMS_primary, str_fileSpec, vertex_ripFlagIsTrue,
+                     pv_void);
+    } else if (str_object == "secondarySurface") {
+      label_coreSave(st_env.pMS_secondary, str_fileSpec, vertex_ripFlagIsTrue,
+                     pv_void);
+    } else if (str_object == "activeSurface") {
+      label_coreSave(st_env.pMS_active, str_fileSpec, vertex_ripFlagIsTrue,
+                     pv_void);
     } else
       return false;
   }
@@ -911,21 +882,21 @@ asynchEvent_processLABEL(
       if (!str_modifier.length())
         return false;
       ULOUT("Searching for terminal vertices");
-      string  str_fileName   = str_modifier;
+      string str_fileName = str_modifier;
       bool b_terminalsFound = false;
       deque<int> que_terminal;
-      b_terminalsFound = label_terminalsFind(st_env.pMS_primary,
-                                             str_fileName, que_terminal);
+      b_terminalsFound =
+          label_terminalsFind(st_env.pMS_primary, str_fileName, que_terminal);
       if (!b_terminalsFound) {
         nULOUT("\t\t\t\t\t[ none found ]\n");
       } else {
         nULOUT("\t\t\t\t\t[ done ]\n");
-        for (unsigned i=0; i<que_terminal.size(); i++) {
+        for (unsigned i = 0; i < que_terminal.size(); i++) {
           Gsout.str("");
           Gsout << "Terminal " << i << "\t\t\t\t\t\t\t[ ";
           Gsout << que_terminal[i] << " ]" << endl;
           ULOUT(Gsout.str());
-          if (i>2) {
+          if (i > 2) {
             ULOUT("Warning! High terminal number detected!\n");
           }
         }
@@ -979,28 +950,23 @@ asynchEvent_processLABEL(
 #endif
 
 #if 1
-bool
-asynchEvent_processSURFACE(
-  s_env&    st_env,
-  string    astr_comms
-) {
+bool asynchEvent_processSURFACE(s_env &st_env, string astr_comms) {
 
-  string  str_errorAct = "checking <SURFACE>";
+  string str_errorAct = "checking <SURFACE>";
 
-  string  str_object = "";
-  string  str_verb = "";
-  string  str_modifier = "";
-  string  str_sep  = " ";
-  int   val  = 0;
+  string str_object = "";
+  string str_verb = "";
+  string str_modifier = "";
+  string str_sep = " ";
+  int val = 0;
 
   stringstream Gsout("");
 
-
   //  std::_Ios_Fmtflags origFlags;
-  //origFlags  = cout.flags();
+  // origFlags  = cout.flags();
   cout.setf(ios::left);
 
-  if (!str_3parse( astr_comms, str_object, str_verb, str_modifier))
+  if (!str_3parse(astr_comms, str_object, str_verb, str_modifier))
     warn(str_errorAct, "Some error occurred in the 3parse.", 1);
 
   if (str_object == "active") {
@@ -1072,12 +1038,12 @@ asynchEvent_processSURFACE(
 
   if (str_object == "averageIntegratedCurveArea") {
     if (str_verb == "do") {
-      e_CURVATURE  e_curvature;
+      e_CURVATURE e_curvature;
       if (!str_modifier.length())
         e_curvature = e_gaussian;
       Gsout.str("");
       val = atoi(str_modifier.c_str());
-      e_curvature  = (e_CURVATURE) val;
+      e_curvature = (e_CURVATURE)val;
       Gsout << "Setting curvature type to \t\t\t\t\t[ " << val << " ]" << endl;
       ULOUT(Gsout.str());
       Gsout.str("");
@@ -1093,11 +1059,7 @@ asynchEvent_processSURFACE(
 }
 #endif
 
-void
-asynchEvent_process(
-  s_env&    st_env,
-  string    str_event
-) {
+void asynchEvent_process(s_env &st_env, string str_event) {
   //
   // ARGS
   // st_env    		in  		process environment
@@ -1128,27 +1090,26 @@ asynchEvent_process(
   // o Added {USER,SYS}ECHO
   //
 
-  //debug_push("asynchEvent_process");
-  unsigned      pos             = 0;
-  string        str_path        = "";
-  string        str_optionsFile = "";
-  string        str_optionsArg  = "";
-  string        str_text        = "";
+  // debug_push("asynchEvent_process");
+  unsigned pos = 0;
+  string str_path = "";
+  string str_optionsFile = "";
+  string str_optionsArg = "";
+  string str_text = "";
 
   stringstream Gsout("");
-
 
   // Check for SYSECHO
   pos = str_event.find("SYSECHO");
   if (pos != (unsigned)string::npos) {
     if (str_event.length() < 8)
-        warn("checking <SYSECHO>", "no argument was found.", 2);
+      warn("checking <SYSECHO>", "no argument was found.", 2);
     else {
-        str_text  = str_event.substr(pos+8);
-        Gsout.str("");
-        Gsout << "ECHO: " << str_text << endl;
-        SLOUT(Gsout.str());
-    }    
+      str_text = str_event.substr(pos + 8);
+      Gsout.str("");
+      Gsout << "ECHO: " << str_text << endl;
+      SLOUT(Gsout.str());
+    }
   }
 
   // Check for USERECHO
@@ -1157,10 +1118,10 @@ asynchEvent_process(
     if (str_event.length() < 9)
       warn("checking <USERECHO>", "no argument was found.", 2);
     else {
-        str_text  = str_event.substr(pos+9);
-        Gsout.str("");
-        Gsout << "ECHO: " << str_text << endl;
-        ULOUT(Gsout.str());
+      str_text = str_event.substr(pos + 9);
+      Gsout.str("");
+      Gsout << "ECHO: " << str_text << endl;
+      ULOUT(Gsout.str());
     }
   }
 
@@ -1170,10 +1131,10 @@ asynchEvent_process(
     if (str_event.length() < 11)
       warn("checking <RESULTECHO>", "no argument was found.", 2);
     else {
-        str_text  = str_event.substr(pos+11);
-        Gsout.str("");
-        Gsout << "ECHO: " << str_text << endl;
-        RLOUT(Gsout.str());
+      str_text = str_event.substr(pos + 11);
+      Gsout.str("");
+      Gsout << "ECHO: " << str_text << endl;
+      RLOUT(Gsout.str());
     }
   }
 
@@ -1184,26 +1145,26 @@ asynchEvent_process(
     if (str_event.length() < 4)
       warn("checking <OPT>", "no argument was found.", 2);
     else {
-        str_optionsArg = str_event.substr(pos+4);
+      str_optionsArg = str_event.substr(pos + 4);
 
-        pos = str_optionsArg.rfind("/");
-        str_path  = (pos == (unsigned)string::npos) ?
-                    "./" :
-                    str_optionsArg.substr(0, pos);
-        str_optionsFile = (pos == (unsigned)string::npos) ?
-                        str_optionsArg :
-                        str_optionsArg.substr(pos+1);
+      pos = str_optionsArg.rfind("/");
+      str_path = (pos == (unsigned)string::npos)
+                     ? "./"
+                     : str_optionsArg.substr(0, pos);
+      str_optionsFile = (pos == (unsigned)string::npos)
+                            ? str_optionsArg
+                            : str_optionsArg.substr(pos + 1);
 
-        str_pathAbs  = str_path;
-        str_rel2absDirSpec_change(str_path, str_pathAbs);
-        st_env.str_workingDir  = str_pathAbs + "/";
-        st_env.str_optionsFileName = str_optionsFile;
-        Gsout.str("");
-        Gsout << "PATH: " << st_env.str_workingDir << endl;
-        SLOUT(Gsout.str());
-        Gsout.str("");
-        Gsout << "OptionsFile: " << st_env.str_optionsFileName << endl;
-        SLOUT(Gsout.str());
+      str_pathAbs = str_path;
+      str_rel2absDirSpec_change(str_path, str_pathAbs);
+      st_env.str_workingDir = str_pathAbs + "/";
+      st_env.str_optionsFileName = str_optionsFile;
+      Gsout.str("");
+      Gsout << "PATH: " << st_env.str_workingDir << endl;
+      SLOUT(Gsout.str());
+      Gsout.str("");
+      Gsout << "OptionsFile: " << st_env.str_optionsFileName << endl;
+      SLOUT(Gsout.str());
     }
   }
 
@@ -1214,13 +1175,13 @@ asynchEvent_process(
     if (str_event.length() < 4)
       warn("checking <CWD>", "no argument was found.", 2);
     else {
-        str_path  = str_event.substr(pos+4);
-        str_pathAbs  = str_path;
-        str_rel2absDirSpec_change(str_path, str_pathAbs);
-        st_env.str_workingDir = str_pathAbs + "/";
-        Gsout.str("");
-        Gsout << "PATH: " << st_env.str_workingDir << endl;
-        SLOUT(Gsout.str());
+      str_path = str_event.substr(pos + 4);
+      str_pathAbs = str_path;
+      str_rel2absDirSpec_change(str_path, str_pathAbs);
+      st_env.str_workingDir = str_pathAbs + "/";
+      Gsout.str("");
+      Gsout << "PATH: " << st_env.str_workingDir << endl;
+      SLOUT(Gsout.str());
     }
   }
 
@@ -1236,11 +1197,11 @@ asynchEvent_process(
   pos = str_event.find("ENV");
   if (pos != (unsigned)string::npos) {
     if (str_event.length() < 4)
-        warn("checking <ENV>", "no argument was found.", 2);
+      warn("checking <ENV>", "no argument was found.", 2);
     else {
-        // Now remove the ENV<sp> string
-        str_event.erase(0, 4);
-        asynchEvent_processENV(st_env, str_event);
+      // Now remove the ENV<sp> string
+      str_event.erase(0, 4);
+      asynchEvent_processENV(st_env, str_event);
     }
   }
 
@@ -1248,11 +1209,11 @@ asynchEvent_process(
   pos = str_event.find("MPMPROG");
   if (pos != (unsigned)string::npos) {
     if (str_event.length() < 4)
-        warn("checking <MPMPROG>", "no argument was found.", 2);
+      warn("checking <MPMPROG>", "no argument was found.", 2);
     else {
-        // Now remove the MPMPROG<sp> string
-        str_event.erase(0, 8);
-        asynchEvent_processMPMPROG(st_env, str_event);
+      // Now remove the MPMPROG<sp> string
+      str_event.erase(0, 8);
+      asynchEvent_processMPMPROG(st_env, str_event);
     }
   }
 
@@ -1262,9 +1223,9 @@ asynchEvent_process(
     if (str_event.length() < 6)
       warn("checking <DWGHT>", "no argument was found.", 2);
     else {
-        // Now remove the DWGHT<sp> string
-        str_event.erase(0, 6);
-        asynchEvent_processDWGHT(st_env, str_event);
+      // Now remove the DWGHT<sp> string
+      str_event.erase(0, 6);
+      asynchEvent_processDWGHT(st_env, str_event);
     }
   }
 
@@ -1274,9 +1235,9 @@ asynchEvent_process(
     if (str_event.length() < 5)
       warn("checking <WGHT>", "no argument was found.", 2);
     else {
-        // Now remove the WGHT<sp> string
-        str_event.erase(0, 5);
-        asynchEvent_processWGHT(st_env, str_event);
+      // Now remove the WGHT<sp> string
+      str_event.erase(0, 5);
+      asynchEvent_processWGHT(st_env, str_event);
     }
   }
 
@@ -1286,9 +1247,9 @@ asynchEvent_process(
     if (str_event.length() < 7)
       warn("checking <VERTEX>", "no argument was found.", 2);
     else {
-        // Now remove the VERTEX<sp> string
-        str_event.erase(0, 7);
-        asynchEvent_processVERTEX(st_env, str_event);
+      // Now remove the VERTEX<sp> string
+      str_event.erase(0, 7);
+      asynchEvent_processVERTEX(st_env, str_event);
     }
   }
 
@@ -1298,9 +1259,9 @@ asynchEvent_process(
     if (str_event.length() < 6)
       warn("checking <LABEL>", "no argument was found.", 2);
     else {
-        // Now remove the VERTEX<sp> string
-        str_event.erase(0, 6);
-        asynchEvent_processLABEL(st_env, str_event);
+      // Now remove the VERTEX<sp> string
+      str_event.erase(0, 6);
+      asynchEvent_processLABEL(st_env, str_event);
     }
   }
 
@@ -1310,55 +1271,50 @@ asynchEvent_process(
     if (str_event.length() < 7)
       warn("checking <SURFACE>", "no argument was found.", 2);
     else {
-        // Now remove the VERTEX<sp> string
-        str_event.erase(0, 8);
-        asynchEvent_processSURFACE(st_env, str_event);
+      // Now remove the VERTEX<sp> string
+      str_event.erase(0, 8);
+      asynchEvent_processSURFACE(st_env, str_event);
     }
   }
 
-
-  //debug_pop();
+  // debug_pop();
 }
 
-string
-asynchEvent_poll(
-    c_SSocket_UDP_receive*      pCSocketUDPR,
-    int                         maxPolls
-) {
-    //
-    // ARGS
-    // pcSocketUDPR   		in  	socket on which to
-    //        				+ listen
-    // maxPolls   		in  	maximum amount of
-    //        				+ polls before
-    //        				+ returning.
-    //
-    // DESCRIPTION
-    // Listens on a given socket, and returns a string (received)
-    // payload. This method polls the socket, so it will only return
-    // if there is data.
-    //
-    // The amount of polls is controlled by <maxPolls>, which in a
-    // time domain will wait for (timoutSec * maxPolls).
-    //
-    // HISTORY
-    // 18 November 2004
-    // o Initial design and coding.
-    //
+string asynchEvent_poll(c_SSocket_UDP_receive *pCSocketUDPR, int maxPolls) {
+  //
+  // ARGS
+  // pcSocketUDPR   		in  	socket on which to
+  //        				+ listen
+  // maxPolls   		in  	maximum amount of
+  //        				+ polls before
+  //        				+ returning.
+  //
+  // DESCRIPTION
+  // Listens on a given socket, and returns a string (received)
+  // payload. This method polls the socket, so it will only return
+  // if there is data.
+  //
+  // The amount of polls is controlled by <maxPolls>, which in a
+  // time domain will wait for (timoutSec * maxPolls).
+  //
+  // HISTORY
+  // 18 November 2004
+  // o Initial design and coding.
+  //
 
-    int  i, rval;
-    string str_payload = "TERM";
+  int i, rval;
+  string str_payload = "TERM";
 
-    if (!pCSocketUDPR)
-        return str_payload;
-
-    for (i=0; i<maxPolls; i++) {
-        rval = pCSocketUDPR->recv(str_payload);
-        if (rval > 0)
-        break;
-    }
-
+  if (!pCSocketUDPR)
     return str_payload;
+
+  for (i = 0; i < maxPolls; i++) {
+    rval = pCSocketUDPR->recv(str_payload);
+    if (rval > 0)
+      break;
+  }
+
+  return str_payload;
 }
 
 /* eof */

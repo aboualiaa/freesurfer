@@ -14,10 +14,8 @@
 #include "jinclude.h"
 #include "jpeglib.h"
 
-
 /* Forward declarations */
 LOCAL(void) transdecode_master_selection JPP((j_decompress_ptr cinfo));
-
 
 /*
  * Read the coefficient arrays from a JPEG file.
@@ -42,8 +40,7 @@ LOCAL(void) transdecode_master_selection JPP((j_decompress_ptr cinfo));
  */
 
 GLOBAL(jvirt_barray_ptr *)
-jpeg_read_coefficients (j_decompress_ptr cinfo)
-{
+jpeg_read_coefficients(j_decompress_ptr cinfo) {
   if (cinfo->global_state == DSTATE_READY) {
     /* First call: initialize active modules */
     transdecode_master_selection(cinfo);
@@ -55,20 +52,20 @@ jpeg_read_coefficients (j_decompress_ptr cinfo)
       int retcode;
       /* Call progress monitor hook if present */
       if (cinfo->progress != NULL)
-	(*cinfo->progress->progress_monitor) ((j_common_ptr) cinfo);
+        (*cinfo->progress->progress_monitor)((j_common_ptr)cinfo);
       /* Absorb some more input */
-      retcode = (*cinfo->inputctl->consume_input) (cinfo);
+      retcode = (*cinfo->inputctl->consume_input)(cinfo);
       if (retcode == JPEG_SUSPENDED)
-	return NULL;
+        return NULL;
       if (retcode == JPEG_REACHED_EOI)
-	break;
+        break;
       /* Advance progress counter if appropriate */
       if (cinfo->progress != NULL &&
-	  (retcode == JPEG_ROW_COMPLETED || retcode == JPEG_REACHED_SOS)) {
-	if (++cinfo->progress->pass_counter >= cinfo->progress->pass_limit) {
-	  /* startup underestimated number of scans; ratchet up one scan */
-	  cinfo->progress->pass_limit += (long) cinfo->total_iMCU_rows;
-	}
+          (retcode == JPEG_ROW_COMPLETED || retcode == JPEG_REACHED_SOS)) {
+        if (++cinfo->progress->pass_counter >= cinfo->progress->pass_limit) {
+          /* startup underestimated number of scans; ratchet up one scan */
+          cinfo->progress->pass_limit += (long)cinfo->total_iMCU_rows;
+        }
       }
     }
     /* Set state so that jpeg_finish_decompress does the right thing */
@@ -79,14 +76,14 @@ jpeg_read_coefficients (j_decompress_ptr cinfo)
    * to the coefficients during a full buffered-image-mode decompression.
    */
   if ((cinfo->global_state == DSTATE_STOPPING ||
-       cinfo->global_state == DSTATE_BUFIMAGE) && cinfo->buffered_image) {
+       cinfo->global_state == DSTATE_BUFIMAGE) &&
+      cinfo->buffered_image) {
     return cinfo->coef->coef_arrays;
   }
   /* Oops, improper usage */
   ERREXIT1(cinfo, JERR_BAD_STATE, cinfo->global_state);
-  return NULL;			/* keep compiler happy */
+  return NULL; /* keep compiler happy */
 }
-
 
 /*
  * Master selection of decompression modules for transcoding.
@@ -94,8 +91,7 @@ jpeg_read_coefficients (j_decompress_ptr cinfo)
  */
 
 LOCAL(void)
-transdecode_master_selection (j_decompress_ptr cinfo)
-{
+transdecode_master_selection(j_decompress_ptr cinfo) {
   /* This is effectively a buffered-image operation. */
   cinfo->buffered_image = TRUE;
 
@@ -117,10 +113,10 @@ transdecode_master_selection (j_decompress_ptr cinfo)
   jinit_d_coef_controller(cinfo, TRUE);
 
   /* We can now tell the memory manager to allocate virtual arrays. */
-  (*cinfo->mem->realize_virt_arrays) ((j_common_ptr) cinfo);
+  (*cinfo->mem->realize_virt_arrays)((j_common_ptr)cinfo);
 
   /* Initialize input side of decompressor to consume first scan. */
-  (*cinfo->inputctl->start_input_pass) (cinfo);
+  (*cinfo->inputctl->start_input_pass)(cinfo);
 
   /* Initialize progress monitoring. */
   if (cinfo->progress != NULL) {
@@ -136,7 +132,7 @@ transdecode_master_selection (j_decompress_ptr cinfo)
       nscans = 1;
     }
     cinfo->progress->pass_counter = 0L;
-    cinfo->progress->pass_limit = (long) cinfo->total_iMCU_rows * nscans;
+    cinfo->progress->pass_limit = (long)cinfo->total_iMCU_rows * nscans;
     cinfo->progress->completed_passes = 0;
     cinfo->progress->total_passes = 1;
   }

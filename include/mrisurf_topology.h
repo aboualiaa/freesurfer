@@ -1,6 +1,6 @@
 #pragma once
 /*
- * @file utilities dealing with the topology 
+ * @file utilities dealing with the topology
  *
  */
 /*
@@ -21,16 +21,13 @@
 #include "mrisurf_aaa.h"
 #include "mrisurf.h"
 
-
-// MRIS code dealing with the existence and connectedness of the vertices, edges, and faces
+// MRIS code dealing with the existence and connectedness of the vertices,
+// edges, and faces
 //                   and with their partitioning into sets (ripped, marked, ...)
 //                   but not with their placement in the xyz coordinate space
 
-
-
 int edgeExists(MRIS *mris, int vno1, int vno2);
 int mrisRemoveLink(MRIS *mris, int vno1, int vno2);
-
 
 // Each VERTEX has a list of neighbours at varying distances
 // Sadly there are several algorithms that maintain this list
@@ -40,43 +37,44 @@ int mrisRemoveLink(MRIS *mris, int vno1, int vno2);
 
 typedef struct MRIS_VertexNeighbourInfo {
   size_t hops;
-  int    vnum[MRIS_VertexNeighbourInfo_MAX_HOPS + 1];
-  int    v   [MAX_NEIGHBORS];
+  int vnum[MRIS_VertexNeighbourInfo_MAX_HOPS + 1];
+  int v[MAX_NEIGHBORS];
 } MRIS_VertexNeighbourInfo;
 
-void MRIS_VertexNeighbourInfo_check            (MRIS_VertexNeighbourInfo* lhs,  MRIS_VertexNeighbourInfo* rhs);
-void MRIS_VertexNeighbourInfo_load_from_VERTEX (MRIS_VertexNeighbourInfo* info, MRIS* mris, int vno);
+void MRIS_VertexNeighbourInfo_check(MRIS_VertexNeighbourInfo *lhs,
+                                    MRIS_VertexNeighbourInfo *rhs);
+void MRIS_VertexNeighbourInfo_load_from_VERTEX(MRIS_VertexNeighbourInfo *info,
+                                               MRIS *mris, int vno);
 
-void MRIS_check_vertexNeighbours(MRIS* mris);
+void MRIS_check_vertexNeighbours(MRIS *mris);
 
 void MRIS_setNsizeCur(MRIS *mris, int vno, int nsize);
-
 
 // Vertices and Faces interact via edges
 //
 int mrisCountValidLinks(MRIS *mris, int vno1, int vno2);
 
 int findFace(MRIS *mris, int vno0, int vno1, int vno2);
-    // Return the index of the triangular face vno0-->vno1-->vno2, or -1
+// Return the index of the triangular face vno0-->vno1-->vno2, or -1
 bool isFace(MRIS *mris, int vno0, int vno1, int vno2);
-    // Like findFace but returns findFace(...) >= 0
-    
+// Like findFace but returns findFace(...) >= 0
+
 int mrisValidFaces(MRIS *mris);
 int vertexInFace(MRIS *mris, int vno, int fno);
 int findOtherEdgeFace(MRIS const *mris, int fno, int vno, int vn1);
 
 int mrisCountTotalNeighbors(MRIS *mris);
 
-bool triangleMarked(MRIS *mris, int fno);               // are any of the face's vertices marked?
+bool triangleMarked(MRIS *mris,
+                    int fno); // are any of the face's vertices marked?
 int findNonMarkedFace(MRIS *mris, int vno, int vn1);
 
 int computeOrientation(MRIS *mris, int f, int v0, int v1);
 
-static int vertexNeighbor(MRIS *mris, int vno1, int vno2)
-{
+static int vertexNeighbor(MRIS *mris, int vno1, int vno2) {
   int n;
 
-  VERTEX_TOPOLOGY const * const v = &mris->vertices_topology[vno1];
+  VERTEX_TOPOLOGY const *const v = &mris->vertices_topology[vno1];
   for (n = 0; n < v->vnum; n++)
     if (v->v[n] == vno2) {
       return (1);

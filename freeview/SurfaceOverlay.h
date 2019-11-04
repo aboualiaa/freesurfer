@@ -32,10 +32,7 @@
 #include <QObject>
 #include <QString>
 
-
-
 #include "mri.h"
-
 
 class vtkLookupTable;
 class vtkRGBAColorTransferFunction;
@@ -43,121 +40,80 @@ class LayerSurface;
 class LayerMRI;
 class SurfaceOverlayProperty;
 
-class SurfaceOverlay  : public QObject
-{
+class SurfaceOverlay : public QObject {
   friend class SurfaceOverlayProperty;
   Q_OBJECT
 public:
-  SurfaceOverlay ( LayerSurface* surf );
-  ~SurfaceOverlay ();
+  SurfaceOverlay(LayerSurface *surf);
+  ~SurfaceOverlay();
 
-  void SetSurface( LayerSurface* surf );
+  void SetSurface(LayerSurface *surf);
 
-  SurfaceOverlayProperty* GetProperty()
-  {
-    return m_property;
-  }
+  SurfaceOverlayProperty *GetProperty() { return m_property; }
 
   QString GetName();
 
-  void SetName( const QString& name );
+  void SetName(const QString &name);
 
   void InitializeData();
-  void InitializeData(float* data_buffer_in, int nvertices, int nframes);
+  void InitializeData(float *data_buffer_in, int nvertices, int nframes);
 
-  void MapOverlay( unsigned char* colordata );
+  void MapOverlay(unsigned char *colordata);
 
-  float* GetData()
-  {
-    return m_fData;
-  }
+  float *GetData() { return m_fData; }
 
-  float* GetUnsmoothedData()
-  {
+  float *GetUnsmoothedData() {
     if (m_bComputeCorrelation)
       return m_fDataUnsmoothed;
     else
-      return m_fDataRaw + m_nActiveFrame*m_nDataSize;
+      return m_fDataRaw + m_nActiveFrame * m_nDataSize;
   }
 
-  int GetDataSize()
-  {
-    return m_nDataSize;
-  }
+  int GetDataSize() { return m_nDataSize; }
 
-  double GetDataAtVertex( int nVertex );
+  double GetDataAtVertex(int nVertex);
 
-  void GetRange( double* range );
+  void GetRange(double *range);
 
-  void GetNonZeroRange( double* range);
+  void GetNonZeroRange(double *range);
 
-  void GetRawRange( double* range );
+  void GetRawRange(double *range);
 
-  bool LoadCorrelationData( const QString& filename );
+  bool LoadCorrelationData(const QString &filename);
 
-  bool HasCorrelationData()
-  {
-    return m_bCorrelationData;
-  }
+  bool HasCorrelationData() { return m_bCorrelationData; }
 
-  void UpdateCorrelationAtVertex( int nVertex, int hemisphere = -1 );
+  void UpdateCorrelationAtVertex(int nVertex, int hemisphere = -1);
 
-  void CopyCorrelationData(SurfaceOverlay* overlay);
+  void CopyCorrelationData(SurfaceOverlay *overlay);
 
-  bool HasSharedCorrelationData()
-  {
-    return m_overlayPaired != 0;
-  }
+  bool HasSharedCorrelationData() { return m_overlayPaired != 0; }
 
-  void SetFileName(const QString& fn)
-  {
-    m_strFileName = fn;
-  }
+  void SetFileName(const QString &fn) { m_strFileName = fn; }
 
-  QString GetFileName()
-  {
-    return m_strFileName;
-  }
+  QString GetFileName() { return m_strFileName; }
 
-  void SetRegFileName(const QString& fn)
-  {
-    m_strRegFileName = fn;
-  }
+  void SetRegFileName(const QString &fn) { m_strRegFileName = fn; }
 
-  QString GetRegFileName()
-  {
-    return m_strRegFileName;
-  }
+  QString GetRegFileName() { return m_strRegFileName; }
 
-  void SmoothData(int nSteps = -1, float* data_out = NULL);
+  void SmoothData(int nSteps = -1, float *data_out = NULL);
 
-  int GetNumberOfFrames()
-  {
-    return m_nNumOfFrames;
-  }
+  int GetNumberOfFrames() { return m_nNumOfFrames; }
 
   void SetActiveFrame(int nFrame);
 
-  int GetActiveFrame()
-  {
-    return m_nActiveFrame;
-  }
+  int GetActiveFrame() { return m_nActiveFrame; }
 
-  bool GetComputeCorrelation()
-  {
-    return m_bComputeCorrelation;
-  }
+  bool GetComputeCorrelation() { return m_bComputeCorrelation; }
 
   void SetComputeCorrelation(bool flag);
 
-  void SetCorrelationSourceVolume(LayerMRI* mri);
+  void SetCorrelationSourceVolume(LayerMRI *mri);
 
-  LayerMRI* GetCorrelationSourceVolume()
-  {
-    return m_volumeCorrelationSource;
-  }
+  LayerMRI *GetCorrelationSourceVolume() { return m_volumeCorrelationSource; }
 
-  bool GetDataAtVertex(int nVertex, float* output);
+  bool GetDataAtVertex(int nVertex, float *output);
 
   double PercentileToPosition(double dPercentile);
 
@@ -167,55 +123,49 @@ public:
 
   double PositionToPercentile(double dPos, bool ignore_zeros);
 
-  qint64 GetID()
-  {
-    return m_nID;
-  }
+  qint64 GetID() { return m_nID; }
 
 signals:
   void DataUpdated();
 
 public slots:
   void UpdateSmooth(bool trigger_paired = true);
-  void UpdateCorrelationCoefficient(double* pos = NULL);
-  void OnCorrelationSourceDeleted(QObject* obj);
-  void EmitDataUpdated()
-  {
-    emit DataUpdated();
-  }
+  void UpdateCorrelationCoefficient(double *pos = NULL);
+  void OnCorrelationSourceDeleted(QObject *obj);
+  void EmitDataUpdated() { emit DataUpdated(); }
 
 private:
-  float*        m_fData;
-  float*        m_fDataRaw;
-  float*        m_fDataUnsmoothed;
-  qlonglong     m_nDataSize;
-  double        m_dMaxValue;
-  double        m_dMinValue;
-  double        m_dNonZeroMinValue;
-  double        m_dRawMaxValue;
-  double        m_dRawMinValue;
+  float *m_fData;
+  float *m_fDataRaw;
+  float *m_fDataUnsmoothed;
+  qlonglong m_nDataSize;
+  double m_dMaxValue;
+  double m_dMinValue;
+  double m_dNonZeroMinValue;
+  double m_dRawMaxValue;
+  double m_dRawMinValue;
 
-  QString       m_strName;
-  QString       m_strFileName;
-  QString       m_strRegFileName;
-  LayerSurface* m_surface;
+  QString m_strName;
+  QString m_strFileName;
+  QString m_strRegFileName;
+  LayerSurface *m_surface;
 
-  bool        m_bCorrelationData;
-  bool        m_bCorrelationDataReady;
-  bool        m_bComputeCorrelation;
+  bool m_bCorrelationData;
+  bool m_bCorrelationDataReady;
+  bool m_bComputeCorrelation;
 
-  MRI*      m_mriCorrelation;
-  SurfaceOverlayProperty* m_property;
+  MRI *m_mriCorrelation;
+  SurfaceOverlayProperty *m_property;
   // indicate there is a paired overlay sharing correlation data and property
-  SurfaceOverlay*  m_overlayPaired;
+  SurfaceOverlay *m_overlayPaired;
 
-  int       m_nActiveFrame;
-  int       m_nNumOfFrames;
-  LayerMRI*  m_volumeCorrelationSource;
-  float*    m_fCorrelationSourceData;
-  float*    m_fCorrelationDataBuffer;
+  int m_nActiveFrame;
+  int m_nNumOfFrames;
+  LayerMRI *m_volumeCorrelationSource;
+  float *m_fCorrelationSourceData;
+  float *m_fCorrelationDataBuffer;
 
-  qint64    m_nID;
+  qint64 m_nID;
 };
 
 #endif

@@ -22,16 +22,15 @@
  *
  */
 
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/utsname.h>
 #include <unistd.h>
-#include <string.h>
-#include <errno.h>
+#include <cstring>
+#include <cerrno>
 
 #include "MRIio_old.h"
 #include "error.h"
@@ -44,81 +43,86 @@
 #include "fio.h"
 #include "cma.h"
 
-static int  parse_commandline(int argc, char **argv);
-static void check_options(void);
-static void print_usage(void) ;
-static void usage_exit(void);
-static void print_help(void) ;
-static void print_version(void) ;
+static int parse_commandline(int argc, char **argv);
+static void check_options();
+static void print_usage();
+static void usage_exit();
+static void print_help();
+static void print_version();
 static void argnerr(char *option, int n);
 static void dump_options(FILE *fp);
-static int  singledash(char *flag);
+static int singledash(char *flag);
 
-int main(int argc, char *argv[]) ;
+int main(int argc, char *argv[]);
 
-static char vcid[] = "$Id: mri_annotation2label.c,v 1.32 2016/08/02 21:20:27 nicks Exp $";
-const char *Progname = NULL;
+static char vcid[] =
+    "$Id: mri_annotation2label.c,v 1.32 2016/08/02 21:20:27 nicks Exp $";
+const char *Progname = nullptr;
 
-char  *subject   = NULL;
-char  *annotation = "aparc";
-char  *hemi       = NULL;
-char  *surfacename = "white";
+char *subject = nullptr;
+char *annotation = "aparc";
+char *hemi = nullptr;
+char *surfacename = "white";
 
-char  *outdir = NULL;
-char  *labelbase = NULL;
+char *outdir = nullptr;
+char *labelbase = nullptr;
 
 MRI_SURFACE *Surf;
-LABEL *label     = NULL;
+LABEL *label = nullptr;
 
 int debug = 0;
 
-char *SUBJECTS_DIR = NULL;
+char *SUBJECTS_DIR = nullptr;
 FILE *fp;
 
 char tmpstr[2000];
 char annotfile[1000];
 char labelfile[1000];
-int  nperannot[1000];
+int nperannot[1000];
 
-char *segfile=NULL;
-MRI  *seg;
-int  segbase = -1000;
-char *ctabfile = NULL;
+char *segfile = nullptr;
+MRI *seg;
+int segbase = -1000;
+char *ctabfile = nullptr;
 
-char *borderfile=NULL;
-char *BorderAnnotFile=NULL;
-char *LobesFile=NULL;
-char *StatFile=NULL;
-MRI  *Stat=NULL;
-static int label_index = -1 ;  // if >= 0 only extract this label
+char *borderfile = nullptr;
+char *BorderAnnotFile = nullptr;
+char *LobesFile = nullptr;
+char *StatFile = nullptr;
+MRI *Stat = nullptr;
+static int label_index = -1; // if >= 0 only extract this label
 
 // The global 'gi_lobarDivision'
 typedef enum _lobarDivision {
-  e_default, e_strict, e_strict_phcg
+  e_default,
+  e_strict,
+  e_strict_phcg
 } e_LOBARDIVISION;
 e_LOBARDIVISION Ge_lobarDivision = e_default;
 
 /*-------------------------------------------------*/
 /*-------------------------------------------------*/
 /*-------------------------------------------------*/
-int main(int argc, char **argv)
-{
-  int err,vtxno,ano,ani,vtxani,animax;
-  int nargs,IsBorder,k;
+int main(int argc, char **argv) {
+  int err, vtxno, ano, ani, vtxani, animax;
+  int nargs, IsBorder, k;
   MRI *border;
 
   /* rkt: check for and handle version tag */
-  nargs = handle_version_option (argc, argv, "$Id: mri_annotation2label.c,v 1.32 2016/08/02 21:20:27 nicks Exp $", "$Name:  $");
+  nargs = handle_version_option(
+      argc, argv,
+      "$Id: mri_annotation2label.c,v 1.32 2016/08/02 21:20:27 nicks Exp $",
+      "$Name:  $");
   if (nargs && argc - nargs == 1) {
-    exit (0);
+    exit(0);
   }
   argc -= nargs;
 
-  Progname = argv[0] ;
-  argc --;
+  Progname = argv[0];
+  argc--;
   argv++;
-  ErrorInit(NULL, NULL, NULL) ;
-  DiagInit(NULL, NULL, NULL) ;
+  ErrorInit(NULL, NULL, NULL);
+  DiagInit(nullptr, nullptr, nullptr);
 
   if (argc == 0) {
     usage_exit();
@@ -128,46 +132,47 @@ int main(int argc, char **argv)
   check_options();
   dump_options(stdout);
 
-  if (outdir != NULL) {
+  if (outdir != nullptr) {
     // Create the output directory
-    err = mkdir(outdir,0777);
+    err = mkdir(outdir, 0777);
     if (err != 0 && errno != EEXIST) {
-      printf("ERROR: creating directory %s\n",outdir);
-      perror(NULL);
-      return(1);
+      printf("ERROR: creating directory %s\n", outdir);
+      perror(nullptr);
+      return (1);
     }
   }
 
   /*--- Get environment variables ------*/
-  if (SUBJECTS_DIR == NULL) { // otherwise specified on cmdline
+  if (SUBJECTS_DIR == nullptr) { // otherwise specified on cmdline
     SUBJECTS_DIR = getenv("SUBJECTS_DIR");
-    if (SUBJECTS_DIR==NULL) {
-      fprintf(stderr,"ERROR: SUBJECTS_DIR not defined in environment\n");
+    if (SUBJECTS_DIR == nullptr) {
+      fprintf(stderr, "ERROR: SUBJECTS_DIR not defined in environment\n");
       exit(1);
     }
   }
 
   /* ------ Load subject's surface ------ */
-  sprintf(tmpstr,"%s/%s/surf/%s.%s",SUBJECTS_DIR,subject,hemi,surfacename);
-  printf("Reading surface \n %s\n",tmpstr);
+  sprintf(tmpstr, "%s/%s/surf/%s.%s", SUBJECTS_DIR, subject, hemi, surfacename);
+  printf("Reading surface \n %s\n", tmpstr);
   Surf = MRISread(tmpstr);
-  if (Surf == NULL) {
-    fprintf(stderr,"ERROR: could not read %s\n",tmpstr);
+  if (Surf == nullptr) {
+    fprintf(stderr, "ERROR: could not read %s\n", tmpstr);
     exit(1);
   }
 
   /* ------ Load annotation ------ */
-  if(fio_FileExistsReadable(annotation)) {
-    strcpy(annotfile,annotation);
-  } else  sprintf(annotfile,"%s/%s/label/%s.%s.annot",
-                    SUBJECTS_DIR,subject,hemi,annotation);
-  printf("Loading annotations from %s\n",annotfile);
+  if (fio_FileExistsReadable(annotation)) {
+    strcpy(annotfile, annotation);
+  } else
+    sprintf(annotfile, "%s/%s/label/%s.%s.annot", SUBJECTS_DIR, subject, hemi,
+            annotation);
+  printf("Loading annotations from %s\n", annotfile);
   err = MRISreadAnnotation(Surf, annotfile);
   if (err) {
-    printf("INFO: could not load from %s, trying ",annotfile);
-    sprintf(annotfile,"%s/%s/label/%s_%s.annot",
-            SUBJECTS_DIR,subject,hemi,annotation);
-    printf("%s\n",annotfile);
+    printf("INFO: could not load from %s, trying ", annotfile);
+    sprintf(annotfile, "%s/%s/label/%s_%s.annot", SUBJECTS_DIR, subject, hemi,
+            annotation);
+    printf("%s\n", annotfile);
     err = MRISreadAnnotation(Surf, annotfile);
     if (err) {
       printf("ERROR: MRISreadAnnotation() failed\n");
@@ -175,27 +180,27 @@ int main(int argc, char **argv)
     }
     printf("OK, that worked.\n");
   }
-  if (Surf->ct == NULL) {
+  if (Surf->ct == nullptr) {
     printf("ERROR: cannot find embedded color table\n");
     exit(1);
   }
 
-  if(segbase == -1000) {
+  if (segbase == -1000) {
     // segbase has not been set with --segbase
-    if(!strcmp(annotation,"aparc")) {
-      if(!strcmp(hemi,"lh")) {
+    if (!strcmp(annotation, "aparc")) {
+      if (!strcmp(hemi, "lh")) {
         segbase = 1000;
       } else {
         segbase = 2000;
       }
-    } else if(!strcmp(annotation,"aparc.a2005s")) {
-      if(!strcmp(hemi,"lh")) {
+    } else if (!strcmp(annotation, "aparc.a2005s")) {
+      if (!strcmp(hemi, "lh")) {
         segbase = 1100;
       } else {
         segbase = 2100;
       }
-    } else if(!strcmp(annotation,"aparc.a2009s")) {
-      if(!strcmp(hemi,"lh")) {
+    } else if (!strcmp(annotation, "aparc.a2009s")) {
+      if (!strcmp(hemi, "lh")) {
         segbase = 11100;
       } else {
         segbase = 12100;
@@ -204,55 +209,53 @@ int main(int argc, char **argv)
       segbase = 0;
     }
   }
-  printf("Seg base %d\n",segbase);
+  printf("Seg base %d\n", segbase);
 
-  if(LobesFile) {
-    MRISaparc2lobes(Surf, (int) Ge_lobarDivision);
-    MRISwriteAnnotation(Surf,LobesFile);
-    if(ctabfile != NULL) {
+  if (LobesFile) {
+    MRISaparc2lobes(Surf, (int)Ge_lobarDivision);
+    MRISwriteAnnotation(Surf, LobesFile);
+    if (ctabfile != nullptr) {
       Surf->ct->idbase = segbase;
-      CTABwriteFileASCII(Surf->ct,ctabfile);
+      CTABwriteFileASCII(Surf->ct, ctabfile);
     }
     exit(0);
   }
-  if(ctabfile != NULL) {
+  if (ctabfile != nullptr) {
     Surf->ct->idbase = segbase;
-    CTABwriteFileASCII(Surf->ct,ctabfile);
+    CTABwriteFileASCII(Surf->ct, ctabfile);
   }
 
-
-  if(borderfile || BorderAnnotFile) {
+  if (borderfile || BorderAnnotFile) {
     printf("Computing annot border\n");
     border = MRISannot2border(Surf);
-    if(BorderAnnotFile) {
+    if (BorderAnnotFile) {
       for (vtxno = 0; vtxno < Surf->nvertices; vtxno++) {
-        IsBorder = MRIgetVoxVal(border,vtxno,0,0,0);
-        if(IsBorder) {
+        IsBorder = MRIgetVoxVal(border, vtxno, 0, 0, 0);
+        if (IsBorder) {
           continue;
         }
         Surf->vertices[vtxno].annotation = 0;
       }
-      err = MRISwriteAnnotation(Surf,BorderAnnotFile);
-      if(err) {
-        printf("ERROR: cannot write %s\n",BorderAnnotFile);
+      err = MRISwriteAnnotation(Surf, BorderAnnotFile);
+      if (err) {
+        printf("ERROR: cannot write %s\n", BorderAnnotFile);
         exit(1);
       }
     }
-    if(borderfile) {
-      MRIwrite(border,borderfile);
-      if(err) {
-        printf("ERROR: cannot write %s\n",BorderAnnotFile);
+    if (borderfile) {
+      MRIwrite(border, borderfile);
+      if (err) {
+        printf("ERROR: cannot write %s\n", BorderAnnotFile);
         exit(1);
       }
     }
     exit(0);
   }
 
-
-  if(segfile != NULL) {
+  if (segfile != nullptr) {
     printf("Converting to a segmentation\n");
-    seg = MRISannot2seg(Surf,segbase);
-    MRIwrite(seg,segfile);
+    seg = MRISannot2seg(Surf, segbase);
+    MRIwrite(seg, segfile);
     exit(0);
   }
 
@@ -264,85 +267,85 @@ int main(int argc, char **argv)
     ano = Surf->vertices[vtxno].annotation;
     // From annotation, get index into color table
     CTABfindAnnotation(Surf->ct, ano, &vtxani);
-    nperannot[vtxani] ++;
+    nperannot[vtxani]++;
     if (animax < vtxani) {
       animax = vtxani;
     }
   }
-  printf("max index = %d\n",animax);
+  printf("max index = %d\n", animax);
 
   // Load statistic file
-  if(StatFile) {
-    printf("Loading stat file %s\n",StatFile);
+  if (StatFile) {
+    printf("Loading stat file %s\n", StatFile);
     Stat = MRIread(StatFile);
-    if(Stat == NULL) {
+    if (Stat == nullptr) {
       exit(1);
     }
-    if(Stat->width != Surf->nvertices) {
+    if (Stat->width != Surf->nvertices) {
       printf("ERROR: dimension mismatch between surface (%d) and stat (%d)\n",
-             Surf->nvertices,Stat->width);
+             Surf->nvertices, Stat->width);
       exit(1);
     }
   }
 
   // Go thru each index present and save a label
-  for (ani=0; ani <= animax; ani++) {
+  for (ani = 0; ani <= animax; ani++) {
 
     if (label_index >= 0 && ani != label_index) {
-      continue ;
+      continue;
     }
     if (nperannot[ani] == 0) {
-      printf("%3d  %5d  empty --- skipping \n",ani,nperannot[ani]);
+      printf("%3d  %5d  empty --- skipping \n", ani, nperannot[ani]);
       continue;
     }
 
-    if (labelbase != NULL) {
-      sprintf(labelfile,"%s-%03d.label",labelbase,ani);
+    if (labelbase != nullptr) {
+      sprintf(labelfile, "%s-%03d.label", labelbase, ani);
     }
-    if (outdir != NULL)     sprintf(labelfile,"%s/%s.%s.label",outdir,hemi,
-                                      Surf->ct->entries[ani]->name);
+    if (outdir != nullptr)
+      sprintf(labelfile, "%s/%s.%s.label", outdir, hemi,
+              Surf->ct->entries[ani]->name);
 
-    printf("%3d  %5d %s\n",ani,nperannot[ani],labelfile);
+    printf("%3d  %5d %s\n", ani, nperannot[ani], labelfile);
     label = annotation2label(ani, Surf);
-    if(label == NULL) {
-      ErrorPrintf(ERROR_BADPARM, "index %d not found, cannot write %s - skipping",
-                  ani, labelfile) ;
-      continue ;
+    if (label == nullptr) {
+      ErrorPrintf(ERROR_BADPARM,
+                  "index %d not found, cannot write %s - skipping", ani,
+                  labelfile);
+      continue;
     }
-    strcpy(label->subject_name,subject);
+    strcpy(label->subject_name, subject);
 
-    if(Stat) {
-      for(k=0; k < label->n_points; k++) {
+    if (Stat) {
+      for (k = 0; k < label->n_points; k++) {
         vtxno = label->lv[k].vno;
-        label->lv[k].stat = MRIgetVoxVal(Stat,vtxno,0,0,0);
+        label->lv[k].stat = MRIgetVoxVal(Stat, vtxno, 0, 0, 0);
       }
     }
 
-    LabelWrite(label,labelfile);
+    LabelWrite(label, labelfile);
     LabelFree(&label);
   }
 
-  return(0);
+  return (0);
 }
 
-
 /* --------------------------------------------- */
-static int parse_commandline(int argc, char **argv)
-{
-  int  nargc , nargsused;
-  char **pargv, *option ;
+static int parse_commandline(int argc, char **argv) {
+  int nargc, nargsused;
+  char **pargv, *option;
 
   if (argc < 1) {
     usage_exit();
   }
 
-  nargc   = argc;
+  nargc = argc;
   pargv = argv;
   while (nargc > 0) {
 
     option = pargv[0];
     if (debug) {
-      printf("%d %s\n",nargc,option);
+      printf("%d %s\n", nargc, option);
     }
     nargc -= 1;
     pargv += 1;
@@ -350,11 +353,11 @@ static int parse_commandline(int argc, char **argv)
     nargsused = 0;
 
     if (!strcmp(option, "--help")) {
-      print_help() ;
+      print_help();
     }
 
     else if (!strcmp(option, "--version")) {
-      print_version() ;
+      print_version();
     }
 
     else if (!strcmp(option, "--debug")) {
@@ -364,53 +367,53 @@ static int parse_commandline(int argc, char **argv)
     }
 
     /* -------- source inputs ------ */
-    else if(!strcmp(option, "--subject") || !strcmp(option, "--s")) {
+    else if (!strcmp(option, "--subject") || !strcmp(option, "--s")) {
       if (nargc < 1) {
-        argnerr(option,1);
+        argnerr(option, 1);
       }
       subject = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--sd")) {
       if (nargc < 1) {
-        argnerr(option,1);
+        argnerr(option, 1);
       }
       SUBJECTS_DIR = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--surface") || !strcmp(option, "--surf")) {
       if (nargc < 1) {
-        argnerr(option,1);
+        argnerr(option, 1);
       }
       surfacename = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--stat")) {
-      if(nargc < 1) {
-        argnerr(option,1);
+      if (nargc < 1) {
+        argnerr(option, 1);
       }
       StatFile = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--labelbase")) {
       if (nargc < 1) {
-        argnerr(option,1);
+        argnerr(option, 1);
       }
       labelbase = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--label")) {
       if (nargc < 1) {
-        argnerr(option,1);
+        argnerr(option, 1);
       }
       label_index = atoi(pargv[0]);
-      printf("only extracting label %s (%d)\n",
-             cma_label_to_name(label_index), label_index) ;
+      printf("only extracting label %s (%d)\n", cma_label_to_name(label_index),
+             label_index);
       nargsused = 1;
     } else if (!strcmp(option, "--outdir")) {
       if (nargc < 1) {
-        argnerr(option,1);
+        argnerr(option, 1);
       }
       outdir = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--annotation")) {
       if (nargc < 1) {
-        argnerr(option,1);
+        argnerr(option, 1);
       }
       annotation = pargv[0];
       nargsused = 1;
@@ -421,83 +424,81 @@ static int parse_commandline(int argc, char **argv)
       exit(1);
     } else if (!strcmp(option, "--hemi")) {
       if (nargc < 1) {
-        argnerr(option,1);
+        argnerr(option, 1);
       }
       hemi = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--seg")) {
       if (nargc < 1) {
-        argnerr(option,1);
+        argnerr(option, 1);
       }
       segfile = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--segbase")) {
       if (nargc < 1) {
-        argnerr(option,1);
+        argnerr(option, 1);
       }
-      sscanf(pargv[0],"%d",&segbase);
+      sscanf(pargv[0], "%d", &segbase);
       nargsused = 1;
     } else if (!strcmp(option, "--ctab")) {
       if (nargc < 1) {
-        argnerr(option,1);
+        argnerr(option, 1);
       }
       ctabfile = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--border")) {
       if (nargc < 1) {
-        argnerr(option,1);
+        argnerr(option, 1);
       }
       borderfile = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--border-annot")) {
       if (nargc < 1) {
-        argnerr(option,1);
+        argnerr(option, 1);
       }
       BorderAnnotFile = pargv[0];
       nargsused = 1;
     } else if (!strcmp(option, "--lobes")) {
       if (nargc < 1) {
-        argnerr(option,1);
+        argnerr(option, 1);
       }
       LobesFile = pargv[0];
       nargsused = 1;
       Ge_lobarDivision = e_default;
     } else if (!strcmp(option, "--lobesStrict")) {
       if (nargc < 1) {
-        argnerr(option,1);
+        argnerr(option, 1);
       }
       LobesFile = pargv[0];
       nargsused = 1;
       Ge_lobarDivision = e_strict;
     } else if (!strcmp(option, "--lobesStrictPHCG")) {
       if (nargc < 1) {
-        argnerr(option,1);
+        argnerr(option, 1);
       }
       LobesFile = pargv[0];
       nargsused = 1;
       Ge_lobarDivision = e_strict_phcg;
     } else {
-      fprintf(stderr,"ERROR: Option %s unknown\n",option);
+      fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (singledash(option)) {
-        fprintf(stderr,"       Did you really mean -%s ?\n",option);
+        fprintf(stderr, "       Did you really mean -%s ?\n", option);
       }
       exit(-1);
     }
     nargc -= nargsused;
     pargv += nargsused;
   }
-  return(0);
+  return (0);
 }
 /* ------------------------------------------------------ */
-static void usage_exit(void)
-{
-  print_usage() ;
-  exit(1) ;
+static void usage_exit() {
+  print_usage();
+  exit(1);
 }
 /* --------------------------------------------- */
-static void print_usage(void)
-{
-  printf("USAGE: %s \n",Progname) ;
+static void print_usage() {
+  printf("USAGE: %s \n", Progname);
   printf("\n");
   printf("   --subject    source subject\n");
   printf("   --hemi       hemisphere (lh or rh) (with surface)\n");
@@ -512,8 +513,10 @@ static void print_usage(void)
   printf("   	with the 'parietal' lobe.\n");
   printf("   	The lobar annotation is saved to <LobesFile>.\n");
   printf("   --lobesStrictPHCG <LobesFile>\n");
-  printf("   	Use stricter lobe definition, and adds an additional lobe called\n");
-  printf("   	parahippocampalgyrus, which includes parahippocampal, entorhinal,\n");
+  printf("   	Use stricter lobe definition, and adds an additional lobe "
+         "called\n");
+  printf("   	parahippocampalgyrus, which includes parahippocampal, "
+         "entorhinal,\n");
   printf("   	temporalpole and fusiform.\n");
   printf("   	The lobar annotation is saved to <LobesFile>.\n");
   printf("\n");
@@ -522,15 +525,19 @@ static void print_usage(void)
   printf("   --labelbase  output will be base-XXX.label \n");
   printf("   --outdir dir :  output will be dir/hemi.name.label \n");
   printf("   --seg segfile : output will be a segmentation 'volume'\n");
-  printf("   --segbase base : add base to the annotation number to get seg value\n");
+  printf("   --segbase base : add base to the annotation number to get seg "
+         "value\n");
   printf("   --ctab colortable : colortable like FreeSurferColorLUT.txt\n");
-  printf("   --border borderfile : output will be a binary overlay of the parc borders \n");
+  printf("   --border borderfile : output will be a binary overlay of the parc "
+         "borders \n");
   printf("   --border-annot borderannot : default goes in subject/label\n");
   printf("\n");
   printf("   --annotation as found in SUBJDIR/labels <aparc>\n");
-  printf("   --sd <SUBJECTS_DIR>  specify SUBJECTS_DIR on cmdline\n") ;
-  printf("   --surface    name of surface <white>. Only affect xyz in label.\n");
-  printf("   --stat statfile : surface overlay file (curv or volume format).\n");
+  printf("   --sd <SUBJECTS_DIR>  specify SUBJECTS_DIR on cmdline\n");
+  printf(
+      "   --surface    name of surface <white>. Only affect xyz in label.\n");
+  printf(
+      "   --stat statfile : surface overlay file (curv or volume format).\n");
   printf("\n");
   printf("   --table : obsolete. Now gets from annotation file\n");
   printf("\n");
@@ -539,165 +546,178 @@ static void print_usage(void)
   printf("\n");
 }
 /* --------------------------------------------- */
-static void dump_options(FILE *fp)
-{
-  fprintf(fp,"subject = %s\n",subject);
-  fprintf(fp,"annotation = %s\n",annotation);
-  fprintf(fp,"hemi = %s\n",hemi);
-  if(labelbase) {
-    fprintf(fp,"labelbase = %s\n",labelbase);
+static void dump_options(FILE *fp) {
+  fprintf(fp, "subject = %s\n", subject);
+  fprintf(fp, "annotation = %s\n", annotation);
+  fprintf(fp, "hemi = %s\n", hemi);
+  if (labelbase) {
+    fprintf(fp, "labelbase = %s\n", labelbase);
   }
-  if(outdir) {
-    fprintf(fp,"outdir = %s\n",outdir);
+  if (outdir) {
+    fprintf(fp, "outdir = %s\n", outdir);
   }
-  if(segfile) {
-    fprintf(fp,"segfile = %s\n",segfile);
+  if (segfile) {
+    fprintf(fp, "segfile = %s\n", segfile);
   }
-  fprintf(fp,"surface   = %s\n",surfacename);
-  fprintf(fp,"\n");
+  fprintf(fp, "surface   = %s\n", surfacename);
+  fprintf(fp, "\n");
   return;
 }
 /* --------------------------------------------- */
-static void print_help(void)
-{
-  print_usage() ;
+static void print_help() {
+  print_usage();
   printf("This program will convert an annotation into multiple label files\n");
-  printf("or into a segmentaion 'volume'. It can also create a border overlay.\n\n");
+  printf("or into a segmentaion 'volume'. It can also create a border "
+         "overlay.\n\n");
 
   printf(
-    "User specifies the subject, hemisphere, label base, and (optionally)\n"
-    "the annotation base and surface. By default, the annotation base is\n"
-    "aparc. The program will retrieves the annotations from\n"
-    "SUBJECTS_DIR/subject/label/hemi_annotbase.annot. A separate label file\n"
-    "is created for each annotation index. The output file names can take\n"
-    "one of two forms: (1) If --outdir dir is used, then the output will\n"
-    "be dir/hemi.name.lable, where name is the corresponding name in \n"
-    "the embedded color table. (2) If --labelbase is used, name of the file conforms to\n"
-    "labelbase-XXX.label, where XXX is the zero-padded 3 digit annotation\n"
-    "index. If labelbase includes a directory path, that directory must\n"
-    "already exist. If there are no points in the annotation file for a\n"
-    "particular index, no label file is created. The xyz coordinates in the\n"
-    "label file are obtained from the values at that vertex of the\n"
-    "specified surface. The default surface is 'white'. Other options\n"
-    "include 'pial' and 'orig'.\n"
-    "\n"
-    "The human-readable names that correspond to the annotation indices for \n"
-    "aparc are embedded in the annotation file itself. It is no longer\n"
-    "necessary (or possible) to specify the table explicitly with the\n"
-    "--table option.\n"
-    " \n"
-    "--seg segfile \n"
-    "--segbase segbase \n"
-    " \n"
-    "Convert annotation into a volume-encoded surface segmentation file. This \n"
-    "is a volume format where the value at each 'voxel' is an integer index.\n"
-    "The value of the index depends on several factors. By default, it should \n"
-    "match the index for the label as found in $FREESURFER_HOME/FreeSurferColorLUT.txt;\n"
-    "this requires that the annotation be either aparc or aparc.a2005s. If \n"
-    "aparc and hemi=lh, then segbase=1000, etc. This makes the index match\n"
-    "that found in aparc+aseg.mgz. If the annotation is neither \n"
-    "aparc nor aparc.a2005s, then segbase=0. This behavior can be overridden \n"
-    "by manually specifying a segbase with --segbase.\n"
-    "\n"
-    " \n"
-    "--border borderfile \n"
-    "\n"
-    "Creates an overlay file in which the boundaries of the parcellations are \n"
-    "set to 1 and everything else is 0. This can then be loaded as an overlay\n"
-    "in tksurfer.\n"
-    " \n"
-    " --stat StatFile\n"
-    " \n"
-    " Put the value from the StatFile into the Stat field in the label. StatFile\n"
-    " must be a curv or surface overlay (eg, mgh) format (eg, lh.thickness).\n"
-    " \n"
-    " \n"
-    "Convert annotation into a volume-encoded surface segmentation file. This \n"
-    "Bugs:\n"
-    "\n"
-    "  If the name of the label base does not include a forward slash (ie, '/') \n"
-    "  then the program will attempt to put the label files in \n"
-    "  $SUBJECTS_DIR/subject/label.  So, if you want the labels to go into the \n"
-    "  current directory, make sure to put a './' in front of the label base.\n"
-    "\n"
-    "Example:\n"
-    "\n"
-    "  mri_annotation2label --subject LW --hemi rh \n"
-    "        --labelbase ./labels/aparc-rh \n"
-    "\n"
-    "  This will get annotations from $SUBJECTS_DIR/LW/label/rh_aparc.annot\n"
-    "  and then create about 94 label files: aparc-rh-001.label, \n"
-    "  aparc-rh-002.label, ... Note that the directory 'labels' must already\n"
-    "  exist. \n"
-    "\n"
-    "Example:\n"
-    "\n"
-    "  mri_annotation2label --subject LW --hemi rh \n"
-    "        --outdir ./labels \n"
-    "\n"
-    "  This will do the same thing as above except that the output files\n"
-    "  will have names of the form lh.S_occipital_anterior.label\n"
-    "\n"
-    "Testing:\n"
-    "\n"
-    "  1. Start tksurfer:  \n"
-    "       tksurfer -LW lh inflated\n"
-    "       read_annotations lh_aparc\n"
-    "     When a point is clicked on, it prints out a lot of info, including\n"
-    "     something like:\n"
-    "       annot = S_temporalis_sup (93, 3988701) (221, 220, 60)\n"
-    "     This indicates that annotion number 93 was hit. Save this point.\n"
-    "   \n"
-    "  2. Start another tksurfer and load the label:\n"
-    "       tksurfer -LW lh inflated\n"
-    "       [edit label field and hit the 'Read' button]\n"
-    "     Verify that label pattern looks like the annotation as seen in\n"
-    "     the tksurfer window from step 1.\n"
-    "\n"
-    "  3. Load label into tkmedit\n"
-    "       tkmedit LW T1\n"
-    "       [Load the label]\n"
-    "      [Goto the point saved from step 1] \n\n\n");
+      "User specifies the subject, hemisphere, label base, and (optionally)\n"
+      "the annotation base and surface. By default, the annotation base is\n"
+      "aparc. The program will retrieves the annotations from\n"
+      "SUBJECTS_DIR/subject/label/hemi_annotbase.annot. A separate label file\n"
+      "is created for each annotation index. The output file names can take\n"
+      "one of two forms: (1) If --outdir dir is used, then the output will\n"
+      "be dir/hemi.name.lable, where name is the corresponding name in \n"
+      "the embedded color table. (2) If --labelbase is used, name of the file "
+      "conforms to\n"
+      "labelbase-XXX.label, where XXX is the zero-padded 3 digit annotation\n"
+      "index. If labelbase includes a directory path, that directory must\n"
+      "already exist. If there are no points in the annotation file for a\n"
+      "particular index, no label file is created. The xyz coordinates in the\n"
+      "label file are obtained from the values at that vertex of the\n"
+      "specified surface. The default surface is 'white'. Other options\n"
+      "include 'pial' and 'orig'.\n"
+      "\n"
+      "The human-readable names that correspond to the annotation indices for "
+      "\n"
+      "aparc are embedded in the annotation file itself. It is no longer\n"
+      "necessary (or possible) to specify the table explicitly with the\n"
+      "--table option.\n"
+      " \n"
+      "--seg segfile \n"
+      "--segbase segbase \n"
+      " \n"
+      "Convert annotation into a volume-encoded surface segmentation file. "
+      "This \n"
+      "is a volume format where the value at each 'voxel' is an integer "
+      "index.\n"
+      "The value of the index depends on several factors. By default, it "
+      "should \n"
+      "match the index for the label as found in "
+      "$FREESURFER_HOME/FreeSurferColorLUT.txt;\n"
+      "this requires that the annotation be either aparc or aparc.a2005s. If \n"
+      "aparc and hemi=lh, then segbase=1000, etc. This makes the index match\n"
+      "that found in aparc+aseg.mgz. If the annotation is neither \n"
+      "aparc nor aparc.a2005s, then segbase=0. This behavior can be overridden "
+      "\n"
+      "by manually specifying a segbase with --segbase.\n"
+      "\n"
+      " \n"
+      "--border borderfile \n"
+      "\n"
+      "Creates an overlay file in which the boundaries of the parcellations "
+      "are \n"
+      "set to 1 and everything else is 0. This can then be loaded as an "
+      "overlay\n"
+      "in tksurfer.\n"
+      " \n"
+      " --stat StatFile\n"
+      " \n"
+      " Put the value from the StatFile into the Stat field in the label. "
+      "StatFile\n"
+      " must be a curv or surface overlay (eg, mgh) format (eg, "
+      "lh.thickness).\n"
+      " \n"
+      " \n"
+      "Convert annotation into a volume-encoded surface segmentation file. "
+      "This \n"
+      "Bugs:\n"
+      "\n"
+      "  If the name of the label base does not include a forward slash (ie, "
+      "'/') \n"
+      "  then the program will attempt to put the label files in \n"
+      "  $SUBJECTS_DIR/subject/label.  So, if you want the labels to go into "
+      "the \n"
+      "  current directory, make sure to put a './' in front of the label "
+      "base.\n"
+      "\n"
+      "Example:\n"
+      "\n"
+      "  mri_annotation2label --subject LW --hemi rh \n"
+      "        --labelbase ./labels/aparc-rh \n"
+      "\n"
+      "  This will get annotations from $SUBJECTS_DIR/LW/label/rh_aparc.annot\n"
+      "  and then create about 94 label files: aparc-rh-001.label, \n"
+      "  aparc-rh-002.label, ... Note that the directory 'labels' must "
+      "already\n"
+      "  exist. \n"
+      "\n"
+      "Example:\n"
+      "\n"
+      "  mri_annotation2label --subject LW --hemi rh \n"
+      "        --outdir ./labels \n"
+      "\n"
+      "  This will do the same thing as above except that the output files\n"
+      "  will have names of the form lh.S_occipital_anterior.label\n"
+      "\n"
+      "Testing:\n"
+      "\n"
+      "  1. Start tksurfer:  \n"
+      "       tksurfer -LW lh inflated\n"
+      "       read_annotations lh_aparc\n"
+      "     When a point is clicked on, it prints out a lot of info, "
+      "including\n"
+      "     something like:\n"
+      "       annot = S_temporalis_sup (93, 3988701) (221, 220, 60)\n"
+      "     This indicates that annotion number 93 was hit. Save this point.\n"
+      "   \n"
+      "  2. Start another tksurfer and load the label:\n"
+      "       tksurfer -LW lh inflated\n"
+      "       [edit label field and hit the 'Read' button]\n"
+      "     Verify that label pattern looks like the annotation as seen in\n"
+      "     the tksurfer window from step 1.\n"
+      "\n"
+      "  3. Load label into tkmedit\n"
+      "       tkmedit LW T1\n"
+      "       [Load the label]\n"
+      "      [Goto the point saved from step 1] \n\n\n");
 
-  //printf("Annotation Key\n");
-  //print_annotation_table(stdout);
+  // printf("Annotation Key\n");
+  // print_annotation_table(stdout);
 
-  exit(1) ;
+  exit(1);
 }
 /* --------------------------------------------- */
-static void print_version(void)
-{
-  printf("%s\n", vcid) ;
-  exit(1) ;
+static void print_version() {
+  printf("%s\n", vcid);
+  exit(1);
 }
 /* --------------------------------------------- */
-static void argnerr(char *option, int n)
-{
-  if (n==1) {
-    fprintf(stderr,"ERROR: %s flag needs %d argument\n",option,n);
+static void argnerr(char *option, int n) {
+  if (n == 1) {
+    fprintf(stderr, "ERROR: %s flag needs %d argument\n", option, n);
   } else {
-    fprintf(stderr,"ERROR: %s flag needs %d arguments\n",option,n);
+    fprintf(stderr, "ERROR: %s flag needs %d arguments\n", option, n);
   }
   exit(-1);
 }
 /* --------------------------------------------- */
-static void check_options(void)
-{
-  if (subject == NULL) {
-    fprintf(stderr,"ERROR: no source subject specified\n");
+static void check_options() {
+  if (subject == nullptr) {
+    fprintf(stderr, "ERROR: no source subject specified\n");
     exit(1);
   }
-  if (hemi == NULL) {
-    fprintf(stderr,"ERROR: No hemisphere specified\n");
+  if (hemi == nullptr) {
+    fprintf(stderr, "ERROR: No hemisphere specified\n");
     exit(1);
   }
-  if(outdir == NULL && labelbase == NULL && segfile == NULL &&
-      borderfile == NULL && LobesFile == NULL && ctabfile == NULL) {
-    fprintf(stderr,"ERROR: no output specified\n");
+  if (outdir == nullptr && labelbase == nullptr && segfile == nullptr &&
+      borderfile == nullptr && LobesFile == nullptr && ctabfile == nullptr) {
+    fprintf(stderr, "ERROR: no output specified\n");
     exit(1);
   }
-  if(outdir != NULL && labelbase != NULL) {
-    fprintf(stderr,"ERROR: cannot specify both --outdir and --labelbase\n");
+  if (outdir != nullptr && labelbase != nullptr) {
+    fprintf(stderr, "ERROR: cannot specify both --outdir and --labelbase\n");
     exit(1);
   }
 
@@ -705,17 +725,15 @@ static void check_options(void)
 }
 
 /*---------------------------------------------------------------*/
-static int singledash(char *flag)
-{
+static int singledash(char *flag) {
   int len;
   len = strlen(flag);
   if (len < 2) {
-    return(0);
+    return (0);
   }
 
   if (flag[0] == '-' && flag[1] != '-') {
-    return(1);
+    return (1);
   }
-  return(0);
+  return (0);
 }
-

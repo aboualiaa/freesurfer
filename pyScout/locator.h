@@ -6,16 +6,16 @@
 
 #include "WrapperPolyData.h"
 
-class Locator
-{
- public:
+class Locator {
+public:
   Locator();
   ~Locator();
-  void SetInputData(WrapperPolyData* input);
+  void SetInputData(WrapperPolyData *input);
 
   int FindClosestPoint(double x, double y, double z);
- private:
-  vtkCellLocator* locator;
+
+private:
+  vtkCellLocator *locator;
 };
 
 #endif

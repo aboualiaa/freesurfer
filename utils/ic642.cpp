@@ -23,7 +23,7 @@
  *
  */
 
-#include <stdio.h>
+#include <cstdio>
 #include "diag.h"
 #include "error.h"
 #include "icosahedron.h"
@@ -1964,8 +1964,7 @@ IC_FACE  ic642_faces[1280] =
     {{ 634, 607,  12 }}
   } ;
 // clang-format on
-MRI_SURFACE *ic642_make_surface(int max_vertices, int max_faces)
-{
+MRI_SURFACE *ic642_make_surface(int max_vertices, int max_faces) {
   static int first_time = 1;
 
   if (first_time) {
@@ -1978,13 +1977,7 @@ MRI_SURFACE *ic642_make_surface(int max_vertices, int max_faces)
     }
   }
 
-  ICOSAHEDRON icos =
-    {
-        ICO_NVERTICES, 
-        ICO_NFACES, 
-        ic642_vertices,
-        ic642_faces
-    };
-    
+  ICOSAHEDRON icos = {ICO_NVERTICES, ICO_NFACES, ic642_vertices, ic642_faces};
+
   return ICOtoMRIS(&icos, max_vertices, max_faces);
 }

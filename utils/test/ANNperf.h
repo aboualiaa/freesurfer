@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:55 $
@@ -22,7 +22,6 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
-
 
 //----------------------------------------------------------------------
 // File:  ANNperf.h
@@ -57,9 +56,9 @@
 //  basic includes
 //----------------------------------------------------------------------
 #include <stdlib.h>   // standard libaries
-#include <stdio.h>   // standard I/O
-#include <iostream.h>   // C++ I/O streams
-#include <math.h>   // math routines
+#include <stdio.h>    // standard I/O
+#include <iostream.h> // C++ I/O streams
+#include <math.h>     // math routines
 #include <values.h>
 
 //----------------------------------------------------------------------
@@ -68,23 +67,21 @@
 // or bd-tree.
 //----------------------------------------------------------------------
 
-class ANNkdStats
-{   // stats on kd-tree
+class ANNkdStats { // stats on kd-tree
 public:
-  int dim;    // dimension of space
+  int dim;      // dimension of space
   int n_pts;    // no. of points
-  int bkt_size;   // bucket size
-  int n_lf;    // no. of leaves
-  int n_tl;    // no. of trivial leaves (no points)
+  int bkt_size; // bucket size
+  int n_lf;     // no. of leaves
+  int n_tl;     // no. of trivial leaves (no points)
   int n_spl;    // no. of splitting nodes
   int n_shr;    // no. of shrinking nodes (for bd-trees)
   int depth;    // depth of tree
-  float sum_ar;   // sum of leaf aspect ratios
-  float avg_ar;   // average leaf aspect ratio
-//
+  float sum_ar; // sum of leaf aspect ratios
+  float avg_ar; // average leaf aspect ratio
+                //
   // reset stats
-  void reset(int d=0, int n=0, int bs=0)
-  {
+  void reset(int d = 0, int n = 0, int bs = 0) {
     dim = d;
     n_pts = n;
     bkt_size = bs;
@@ -92,8 +89,9 @@ public:
     sum_ar = avg_ar = 0.0;
   }
 
-  ANNkdStats()   // basic constructor
-  { reset();
+  ANNkdStats() // basic constructor
+  {
+    reset();
   }
 
   void merge(const ANNkdStats &st); // merge stats from child
@@ -114,58 +112,42 @@ public:
 //  min()  Return minimum of samples.
 //  max()  Return maximum of samples.
 //----------------------------------------------------------------------
-class SampStat
-{
-  int n;    // number of samples
-  double sum;    // sum
-  double sum2;   // sum of squares
-  double minVal, maxVal;  // min and max
-public :
-  void reset()   // reset everything
-  {  n = 0;
+class SampStat {
+  int n;                 // number of samples
+  double sum;            // sum
+  double sum2;           // sum of squares
+  double minVal, maxVal; // min and max
+public:
+  void reset() // reset everything
+  {
+    n = 0;
     sum = sum2 = 0;
     minVal = MAXDOUBLE;
     maxVal = -MAXDOUBLE;
   }
 
-  SampStat()
-  {
-    reset();
-  }  // constructor
+  SampStat() { reset(); } // constructor
 
-  void operator+=(double x)  // add sample
+  void operator+=(double x) // add sample
   {
     n++;
     sum += x;
-    sum2 += x*x;
-    if (x < minVal) minVal = x;
-    if (x > maxVal) maxVal = x;
+    sum2 += x * x;
+    if (x < minVal)
+      minVal = x;
+    if (x > maxVal)
+      maxVal = x;
   }
 
-  int  samples()
-  {
-    return n;
-  } // number of samples
+  int samples() { return n; } // number of samples
 
-  double mean()
-  {
-    return sum/n;
-  } // mean
+  double mean() { return sum / n; } // mean
 
   // standard deviation
-  double stdDev()
-  {
-    return sqrt((sum2 - (sum*sum)/n)/(n-1));
-  }
+  double stdDev() { return sqrt((sum2 - (sum * sum) / n) / (n - 1)); }
 
-  double min()
-  {
-    return minVal;
-  } // minimum
-  double max()
-  {
-    return maxVal;
-  } // maximum
+  double min() { return minVal; } // minimum
+  double max() { return maxVal; } // maximum
 };
 
 //----------------------------------------------------------------------
@@ -173,12 +155,18 @@ public :
 //----------------------------------------------------------------------
 
 #ifdef PERF
-#define FLOP(n)  {N_float_ops += (n);}
-#define LEAF(n)  {N_visit_lfs += (n);}
-#define SPL(n)   {N_visit_spl += (n);}
-#define SHR(n)   {N_visit_shr += (n);}
-#define PTS(n)   {N_visit_pts += (n);}
-#define COORD(n) {N_coord_hts += (n);}
+#define FLOP(n)                                                                \
+  { N_float_ops += (n); }
+#define LEAF(n)                                                                \
+  { N_visit_lfs += (n); }
+#define SPL(n)                                                                 \
+  { N_visit_spl += (n); }
+#define SHR(n)                                                                 \
+  { N_visit_shr += (n); }
+#define PTS(n)                                                                 \
+  { N_visit_pts += (n); }
+#define COORD(n)                                                               \
+  { N_coord_hts += (n); }
 #else
 #define FLOP(n)
 #define LEAF(n)
@@ -239,22 +227,22 @@ public :
 //    a counter, but used in stats computation.
 //----------------------------------------------------------------------
 
-extern int N_data_pts; // number of data points
-extern int N_visit_lfs; // number of leaf nodes visited
-extern int N_visit_spl; // number of splitting nodes visited
-extern int N_visit_shr; // number of shrinking nodes visited
-extern int N_visit_pts; // visited points for one query
-extern int N_coord_hts; // coordinate hits for one query
-extern int N_float_ops; // floating ops for one query
-extern SampStat visit_lfs; // stats on leaf nodes visits
-extern SampStat visit_spl; // stats on splitting nodes visits
-extern SampStat visit_shr; // stats on shrinking nodes visits
-extern SampStat visit_nds; // stats on total nodes visits
-extern SampStat visit_pts; // stats on points visited
-extern SampStat coord_hts; // stats on coordinate hits
-extern SampStat float_ops; // stats on floating ops
+extern int N_data_pts;       // number of data points
+extern int N_visit_lfs;      // number of leaf nodes visited
+extern int N_visit_spl;      // number of splitting nodes visited
+extern int N_visit_shr;      // number of shrinking nodes visited
+extern int N_visit_pts;      // visited points for one query
+extern int N_coord_hts;      // coordinate hits for one query
+extern int N_float_ops;      // floating ops for one query
+extern SampStat visit_lfs;   // stats on leaf nodes visits
+extern SampStat visit_spl;   // stats on splitting nodes visits
+extern SampStat visit_shr;   // stats on shrinking nodes visits
+extern SampStat visit_nds;   // stats on total nodes visits
+extern SampStat visit_pts;   // stats on points visited
+extern SampStat coord_hts;   // stats on coordinate hits
+extern SampStat float_ops;   // stats on floating ops
 extern SampStat average_err; // average error
-extern SampStat rank_err; // rank error
+extern SampStat rank_err;    // rank error
 
 //----------------------------------------------------------------------
 //  Declaration of externally accessible routines for statistics
@@ -262,9 +250,9 @@ extern SampStat rank_err; // rank error
 
 void reset_stats(int data_size); // reset stats for a set of queries
 
-void reset_counts();   // reset counts for one queries
+void reset_counts(); // reset counts for one queries
 
-void update_stats();   // update stats with current counts
+void update_stats(); // update stats with current counts
 
 void print_stats(ANNbool validate); // print statistics for a run
 

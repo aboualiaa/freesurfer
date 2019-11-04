@@ -28,14 +28,15 @@
 
 #include "version.h"
 #include <pwd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/utsname.h>
-#include <time.h>
+#include <ctime>
 #include <unistd.h>
+#include <vector>
 #include "const.h"
 #include "error.h"
 #include "utils.h"
@@ -44,6 +45,9 @@
 #if defined(__INTEL_COMPILER)
 #undef __GNUC__
 #define COMPILER_NAME "INTEL_COMPILER"
+#elif defined(__clang__)
+#undef __GNUC__
+#define COMPILER_NAME "Clang"
 #elif defined(__GNUC__)
 #define COMPILER_NAME "GCC"
 #else
@@ -53,9 +57,17 @@
 /* If GCC (probably is) get the version number */
 #if defined(__GNUC__)
 #if defined(__GNU_PATCHLEVEL__)
-#define COMPILER_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
+#define COMPILER_VERSION                                                       \
+  (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
 #else
 #define COMPILER_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100)
+#endif
+#elif defined(__clang__)
+#if defined(__clang_patchlevel__)
+#define COMPILER_VERSION                                                       \
+  (__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__)
+#else
+#define COMPILER_VERSION (__clang_major__ * 10000 + __clang_minor__ * 100)
 #endif
 #else
 #define COMPILER_VERSION 0
@@ -113,9 +125,8 @@
    exit (0);
    argc -= nargs;
 */
-int make_cmd_version_string(
-    int argc, char **argv, const char *id_string, const char *version_string, char *return_string)
-{
+int make_cmd_version_string(int argc, char **argv, const char *id_string,
+                            const char *version_string, char *return_string) {
   int nnarg = 0;
   char stripped_version_string[1024];
   int length;
@@ -138,8 +149,7 @@ int make_cmd_version_string(
     if (length > 2) {
       stripped_version_string[length - 2] = '\0';
     }
-  }
-  else {
+  } else {
     strcpy(stripped_version_string, version_string);
   }
 
@@ -156,21 +166,19 @@ int make_cmd_version_string(
       // sprintf (arguments, "%s %s", arguments, argv[nnarg]);
       // the correct way to do this is:
       strcat(arguments, " ");
-      if (strlen(arguments) + strlen(argv[nnarg]) >= 1023) break;
+      if (strlen(arguments) + strlen(argv[nnarg]) >= 1023)
+        break;
       strcat(arguments, argv[nnarg]);
     }
   }
 
   /* Find the time string. */
-  seconds = time(NULL);
+  seconds = time(nullptr);
   gmtime_r(&seconds, &broken_time);
-  sprintf(current_time_stamp,
-          "20%02d/%02d/%02d-%02d:%02d:%02d-GMT",
+  sprintf(current_time_stamp, "20%02d/%02d/%02d-%02d:%02d:%02d-GMT",
           broken_time.tm_year % 100, /* mod here to change 103 to 03 */
           broken_time.tm_mon + 1,    /* +1 here because tm_mon is 0-11 */
-          broken_time.tm_mday,
-          broken_time.tm_hour,
-          broken_time.tm_min,
+          broken_time.tm_mday, broken_time.tm_hour, broken_time.tm_min,
           broken_time.tm_sec);
 
   /* As suggested by the getlogin() manpage, use getpwuid(geteuid())
@@ -180,7 +188,7 @@ int make_cmd_version_string(
      and don't use cuserid() because the manpage says not to.
   */
   pw = getpwuid(geteuid());
-  if ((pw != NULL) && (pw->pw_name != NULL))
+  if ((pw != nullptr) && (pw->pw_name != nullptr))
     strcpy(user, pw->pw_name);
   else
     strcpy(user, "UNKNOWN");
@@ -191,8 +199,7 @@ int make_cmd_version_string(
     // fprintf (stderr, "uname() returned %d\n", result);
     strcpy(machine, "UNKNOWN");
     strcpy(platform_version, "UNKNOWN");
-  }
-  else {
+  } else {
     strcpy(machine, kernel_info.nodename);
     strcpy(platform_version, kernel_info.release);
   }
@@ -215,30 +222,21 @@ int make_cmd_version_string(
           "BuildTimeStamp: %s  Id: %s  User: %s  "
           "Machine: %s  Platform: %s  PlatformVersion: %s  "
           "CompilerName: %s  CompilerVersion: %d  ",
-          program_name,
-          argstr,
-          version_string,
-          current_time_stamp,
-          build_timestamp,
-          id_string,
-          user,
-          machine,
-          PLATFORM,
-          platform_version,
-          COMPILER_NAME,
-          COMPILER_VERSION);
+          program_name, argstr, version_string, current_time_stamp,
+          build_timestamp, id_string, user, machine, PLATFORM, platform_version,
+          COMPILER_NAME, COMPILER_VERSION);
 
   return (NO_ERROR);
 }
 
-int handle_version_option(int argc, char **argv, const char *id_string, const char *version_string)
-{
+int handle_version_option(int argc, char **argv, const char *id_string,
+                          const char *version_string) {
   int narg = 0;
   int nnarg = 0;
   int num_processed_args = 0;
   char stripped_version_string[1024];
   int length;
-  char *option = NULL;
+  char *option = nullptr;
   time_t seconds;
   struct tm broken_time;
   struct utsname kernel_info;
@@ -280,8 +278,7 @@ int handle_version_option(int argc, char **argv, const char *id_string, const ch
         if (length > 2) {
           stripped_version_string[length - 2] = '\0';
         }
-      }
-      else {
+      } else {
         strcpy(stripped_version_string, version_string);
       }
 
@@ -289,7 +286,8 @@ int handle_version_option(int argc, char **argv, const char *id_string, const ch
         // on the dev build, where a sticky tag does not exist,
         // just a dollar sign is printed, which isnt very helpful,
         // so print something...
-        strcpy(stripped_version_string, "dev build (use --all-info flag for full version info)");
+        strcpy(stripped_version_string,
+               "dev build (use --all-info flag for full version info)");
       }
       fprintf(stdout, "%s\n", stripped_version_string);
 
@@ -304,13 +302,13 @@ int handle_version_option(int argc, char **argv, const char *id_string, const ch
       }
     }
 
-    if (!strncmp(option, "--all-info", 11) || !strncmp(option, "-all-info", 10)) {
+    if (!strncmp(option, "--all-info", 11) ||
+        !strncmp(option, "-all-info", 10)) {
       /* Copy argv[0] without the path into program_name. */
       begin = strrchr(argv[0], (int)'/');
-      if (NULL == begin) {
+      if (nullptr == begin) {
         begin = argv[0];
-      }
-      else {
+      } else {
         begin = begin + 1;
       }
       strcpy(program_name, begin);
@@ -330,15 +328,12 @@ int handle_version_option(int argc, char **argv, const char *id_string, const ch
       }
 
       /* Find the time string. */
-      seconds = time(NULL);
+      seconds = time(nullptr);
       gmtime_r(&seconds, &broken_time);
-      sprintf(current_time_stamp,
-              "20%02d/%02d/%02d-%02d:%02d:%02d-GMT",
+      sprintf(current_time_stamp, "20%02d/%02d/%02d-%02d:%02d:%02d-GMT",
               broken_time.tm_year % 100, /* mod here to change 103 to 03 */
               broken_time.tm_mon + 1,    /* +1 here because tm_mon is 0-11 */
-              broken_time.tm_mday,
-              broken_time.tm_hour,
-              broken_time.tm_min,
+              broken_time.tm_mday, broken_time.tm_hour, broken_time.tm_min,
               broken_time.tm_sec);
 
       /* As suggested by the getlogin() manpage, use getpwuid(geteuid())
@@ -348,7 +343,7 @@ int handle_version_option(int argc, char **argv, const char *id_string, const ch
          and don't use cuserid() because the manpage says not to.
       */
       pw = getpwuid(geteuid());
-      if ((pw != NULL) && (pw->pw_name != NULL))
+      if ((pw != nullptr) && (pw->pw_name != nullptr))
         strcpy(user, pw->pw_name);
       else
         strcpy(user, "UNKNOWN");
@@ -359,8 +354,7 @@ int handle_version_option(int argc, char **argv, const char *id_string, const ch
         // fprintf (stderr, "uname() returned %d\n", result);
         strcpy(machine, "UNKNOWN");
         strcpy(platform_version, "UNKNOWN");
-      }
-      else {
+      } else {
         strcpy(machine, kernel_info.nodename);
         strcpy(platform_version, kernel_info.release);
       }
@@ -377,18 +371,9 @@ int handle_version_option(int argc, char **argv, const char *id_string, const ch
               "BuildTimeStamp: %s  Id: %s  User: %s  "
               "Machine: %s  Platform: %s  PlatformVersion: %s  "
               "CompilerName: %s  CompilerVersion: %d \n",
-              program_name,
-              arguments,
-              version_string,
-              current_time_stamp,
-              build_timestamp,
-              id_string,
-              user,
-              machine,
-              PLATFORM,
-              platform_version,
-              COMPILER_NAME,
-              COMPILER_VERSION);
+              program_name, arguments, version_string, current_time_stamp,
+              build_timestamp, id_string, user, machine, PLATFORM,
+              platform_version, COMPILER_NAME, COMPILER_VERSION);
 
       num_processed_args++;
 
@@ -405,16 +390,85 @@ int handle_version_option(int argc, char **argv, const char *id_string, const ch
   return num_processed_args;
 }
 
+int handle_version_option(bool all_info, gsl::multi_span<char *> args,
+                          const std::string id_string,
+                          const std::string version_string) {
+  if (!all_info) {
+    std::cout << "dev build (use --all-info flag for full version info)\n"
+              << id_string << std::endl;
+    return 0;
+  }
+
+  time_t seconds;
+  struct tm broken_time = {0};
+  struct utsname kernel_info = {0};
+  std::string arguments = argv2cmdline(args, false);
+  std::stringstream curr_time_stamp;
+  std::string user = "UNKNOWN";
+  std::string hostname = "UNKNOWN";
+  std::string arch = "UNKNOWN";
+  std::string platform_version = "UNKNOWN";
+  struct passwd *pw;
+
+  // TODO: build_timestamp really ought to be passed-in as a parameter
+  // from the calling binary, to get a more accurate build time, but for
+  // now, the build time of version.c (libutils) is better than nothing
+  std::string build_timestamp = __DATE__ " " __TIME__;
+
+  seconds = time(nullptr);
+  gmtime_r(&seconds, &broken_time);
+  curr_time_stamp
+      << "20" << broken_time.tm_year % 100 /* mod here to change 103 to 03 */
+      << "/"
+      << (broken_time.tm_mon + 1) /* +1 here because tm_mon is 0-11 */ << "/"
+      << broken_time.tm_mday << "-" << __TIME__ << "-GMT";
+
+  /* As suggested by the getlogin() manpage, use getpwuid(geteuid())
+     to get the user controlling this process. don't use getlogin()
+     as that returns the name of the user logged in on the controlling
+     terminal of the process (ie the person sitting at the terminal),
+     and don't use cuserid() because the manpage says not to.
+  */
+  pw = getpwuid(geteuid());
+  if ((pw != nullptr) && (pw->pw_name != nullptr)) {
+    user = pw->pw_name;
+  }
+
+  /* Call uname to get the hostname. */
+  if (uname(&kernel_info) == 0) {
+    hostname = kernel_info.nodename;
+    platform_version = kernel_info.release;
+    arch = kernel_info.machine;
+  }
+
+  /* Build the info string. */
+  std::cout << "ProgramName: " << args[0] << "\n"
+            << "ProgramArguments: " << arguments << "\n"
+            << "ProgramVersion: " << version_string << "\n"
+            << "TimeStamp: " << curr_time_stamp.str() << "\n"
+            << "BuildTimeStamp: " << build_timestamp << "\n"
+            << "Id: " << id_string << "\n"
+            << "User: " << user << "\n"
+            << "Hostname: " << hostname << "\n"
+            << "Platform: " << kernel_info.sysname << "\n"
+            << "Architecture: " << arch << "\n"
+            << "PlatformVersion: " << platform_version << "\n"
+            << "CompilerName: " << COMPILER_NAME << "\n"
+            << "CompilerVersion: " << COMPILER_VERSION << std::endl;
+  return 0;
+}
+
 /*------------------------------------------------------------------------
   argv2cmdline() - converts argv into a single string.
   ------------------------------------------------------------------------*/
-char *argv2cmdline(int argc, char *argv[])
-{
+// TODO: Deprecate
+char *argv2cmdline(int argc, char *argv[]) {
   int len, n;
   char *cmdline;
 
   len = 0;
-  for (n = 0; n < argc; n++) len += strlen(argv[n]);
+  for (n = 0; n < argc; n++)
+    len += strlen(argv[n]);
 
   cmdline = (char *)calloc(sizeof(char), len + n + 1);
   for (n = 0; n < argc; n++) {
@@ -425,12 +479,27 @@ char *argv2cmdline(int argc, char *argv[])
   return (cmdline);
 }
 
+std::string argv2cmdline(gsl::multi_span<char *> args, bool progname) {
+  std::string arguments;
+  if (progname) {
+    arguments += args[0];
+    arguments += " ";
+  }
+
+  arguments += args[1];
+  for (int64_t i = 2; i < args.size(); i++) {
+    arguments += " ";
+    arguments += args[i];
+  }
+
+  return arguments;
+}
+
 /*----------------------------------------------------------
   VERuser(void) - returns the user id (or UNKNOWN). Allocates
   char, so caller must free.
   *----------------------------------------------------------*/
-char *VERuser(void)
-{
+char *VERuser() {
   char *user;
   struct passwd *pw;
 
@@ -441,7 +510,7 @@ char *VERuser(void)
      and don't use cuserid() because the manpage says not to.
   */
   pw = getpwuid(geteuid());
-  if ((pw != NULL) && (pw->pw_name != NULL))
+  if ((pw != nullptr) && (pw->pw_name != nullptr))
     user = strcpyalloc(pw->pw_name);
   else
     user = strcpyalloc("UNKNOWN");
@@ -452,27 +521,21 @@ char *VERuser(void)
 /*----------------------------------------------------------
   VERfileTimeStamp(fname)
   *----------------------------------------------------------*/
-char *VERfileTimeStamp(char *fname)
-{
+char *VERfileTimeStamp(char *fname) {
   struct stat buf;
-  struct tm *lt = NULL;
+  struct tm *lt = nullptr;
   int err;
   char *timestamp, tmpstr[1000];
 
   err = stat(fname, &buf);
   if (err) {
     printf("ERROR: stating file %s\n", fname);
-    return (NULL);
+    return (nullptr);
   }
   lt = localtime(&buf.st_mtime);
-  sprintf(tmpstr,
-          "%04d/%02d/%02d %02d:%02d:%02d",
-          lt->tm_year + 1900,
+  sprintf(tmpstr, "%04d/%02d/%02d %02d:%02d:%02d", lt->tm_year + 1900,
           lt->tm_mon + 1, /* +1 here because tm_mon is 0-11 */
-          lt->tm_mday,
-          lt->tm_hour,
-          lt->tm_min,
-          lt->tm_sec);
+          lt->tm_mday, lt->tm_hour, lt->tm_min, lt->tm_sec);
   // free(lt); // Dies here
   timestamp = strcpyalloc(tmpstr);
   return (timestamp);
@@ -482,20 +545,16 @@ char *VERfileTimeStamp(char *fname)
   VERcurTimeStamp() - time stamp at the time this function
   is called.
   *----------------------------------------------------------*/
-char *VERcurTimeStamp(void)
-{
+char *VERcurTimeStamp() {
   char tmpstr[2000], *current_time_stamp;
   time_t seconds;
   struct tm broken_time;
-  seconds = time(NULL);
+  seconds = time(nullptr);
   gmtime_r(&seconds, &broken_time);
-  sprintf(tmpstr,
-          "20%02d/%02d/%02d-%02d:%02d:%02d-GMT",
+  sprintf(tmpstr, "20%02d/%02d/%02d-%02d:%02d:%02d-GMT",
           broken_time.tm_year % 100, /* mod here to change 103 to 03 */
           broken_time.tm_mon + 1,    /* +1 here because tm_mon is 0-11 */
-          broken_time.tm_mday,
-          broken_time.tm_hour,
-          broken_time.tm_min,
+          broken_time.tm_mday, broken_time.tm_hour, broken_time.tm_min,
           broken_time.tm_sec);
   // Note: NOT Y3K compliant!
   current_time_stamp = strcpyalloc(tmpstr);

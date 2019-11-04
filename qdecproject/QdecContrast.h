@@ -35,36 +35,29 @@
 
 using namespace std;
 
-class QdecContrast
-{
+class QdecContrast {
 public:
-
   // Constructors/Destructors
   //
 
-  QdecContrast ( vector< double > iaVector,
-                 string isName,
-                 string isQuestion );
+  QdecContrast(vector<double> iaVector, string isName, string isQuestion);
 
-  virtual ~QdecContrast ( );
+  virtual ~QdecContrast();
 
   /**
    * @return string
    */
-  string GetName ( );
-
-
-  /**
-   * @return string
-   */
-  string GetQuestion ( );
-
+  string GetName();
 
   /**
    * @return string
    */
-  string GetContrastStr ( );
+  string GetQuestion();
 
+  /**
+   * @return string
+   */
+  string GetContrastStr();
 
   /**
    * Writes the contrast vector to a .mat file, which is readable by matlab,
@@ -72,24 +65,21 @@ public:
    * @return int
    * @param string ifnWorkingDir
    */
-  int WriteDotMatFile ( string ifnWorkingDir );
-
+  int WriteDotMatFile(string ifnWorkingDir);
 
   /**
    * @return string
    */
-  string GetDotMatFileName ( );
+  string GetDotMatFileName();
 
 private:
-
   // private attributes
   //
 
-  vector< double > maVector;
+  vector<double> maVector;
   string msName;
   string msQuestion;
   string mfnDotMatFileName;
-
 };
 
 #endif // QDECCONTRAST_H

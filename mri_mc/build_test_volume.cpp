@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:23 $
@@ -23,7 +23,6 @@
  *
  */
 
-
 #include <stdio.h>
 #include "mri.h"
 
@@ -31,19 +30,19 @@ const char *Progname;
 
 int main(int argc, char *argv[]) {
   MRI *mri;
-  Progname=argv[0];
+  Progname = argv[0];
   printf("Generating test_volume.mgz...\n");
 
-  mri=MRIalloc(20,20,20,MRI_UCHAR);
+  mri = MRIalloc(20, 20, 20, MRI_UCHAR);
 
-  MRIvox(mri,10,10,10)=255;
-  MRIvox(mri,11,10,10)=255;
-  MRIvox(mri,11,11,10)=255;
-  MRIvox(mri,11,11,11)=255;
-  MRIvox(mri,10,11,11)=255;
-  MRIvox(mri,10,10,11)=255;
+  MRIvox(mri, 10, 10, 10) = 255;
+  MRIvox(mri, 11, 10, 10) = 255;
+  MRIvox(mri, 11, 11, 10) = 255;
+  MRIvox(mri, 11, 11, 11) = 255;
+  MRIvox(mri, 10, 11, 11) = 255;
+  MRIvox(mri, 10, 10, 11) = 255;
 
-  MRIwrite(mri,"test_volume.mgz");
+  MRIwrite(mri, "test_volume.mgz");
 
   return 0;
 }

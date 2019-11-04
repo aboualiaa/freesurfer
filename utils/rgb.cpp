@@ -1,15 +1,15 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <fcntl.h>
 #include <unistd.h>
 
 #include "rgb.h"
 
-#define OPEN_GL_CODE  1
+#define OPEN_GL_CODE 1
 
 void isetname(RGB_IMAGE *image, const char *name) {
-  strncpy(image->name,name,80);
+  strncpy(image->name, name, 80);
 }
 
 void isetcolormap(RGB_IMAGE *image, int colormap) {
@@ -21,51 +21,52 @@ int iclose(RGB_IMAGE *image) {
 
   iflush(image);
   img_optseek(image, 0);
-  if (image->flags&_IOWRT) {
+  if (image->flags & _IOWRT) {
     if (image->dorev)
       cvtimage((long *)image);
-    swapImage(image) ;
-    if (img_write(image,(char *)image,sizeof(RGB_IMAGE)) != sizeof(RGB_IMAGE)) {
-      i_errhdlr("iclose: error on write of image header\n",0,0,0,0);
+    swapImage(image);
+    if (img_write(image, (char *)image, sizeof(RGB_IMAGE)) !=
+        sizeof(RGB_IMAGE)) {
+      i_errhdlr("iclose: error on write of image header\n", 0, 0, 0, 0);
       return EOF;
     }
-    swapImage(image) ;
+    swapImage(image);
     if (image->dorev)
       cvtimage((long *)image);
     if (ISRLE(image->type)) {
       img_optseek(image, 512L);
-      tablesize = image->ysize*image->zsize*sizeof(long);
+      tablesize = image->ysize * image->zsize * sizeof(long);
       if (image->dorev)
-        cvtlongs((long *)image->rowstart,(long)tablesize);
-      if (img_write(image,(char *)(image->rowstart),tablesize) != tablesize) {
-        i_errhdlr("iclose: error on write of rowstart\n",0,0,0,0);
+        cvtlongs((long *)image->rowstart, (long)tablesize);
+      if (img_write(image, (char *)(image->rowstart), tablesize) != tablesize) {
+        i_errhdlr("iclose: error on write of rowstart\n", 0, 0, 0, 0);
         return EOF;
       }
       if (image->dorev)
-        cvtlongs((long *)image->rowsize,tablesize);
-      if (img_write(image,(char *)(image->rowsize),tablesize) != tablesize) {
-        i_errhdlr("iclose: error on write of rowsize\n",0,0,0,0);
+        cvtlongs((long *)image->rowsize, tablesize);
+      if (img_write(image, (char *)(image->rowsize), tablesize) != tablesize) {
+        i_errhdlr("iclose: error on write of rowsize\n", 0, 0, 0, 0);
         return EOF;
       }
     }
   }
   if (image->base) {
     free(image->base);
-    image->base = 0;
+    image->base = nullptr;
   }
   if (image->tmpbuf) {
     free(image->tmpbuf);
-    image->tmpbuf = 0;
+    image->tmpbuf = nullptr;
   }
   if (ISRLE(image->type)) {
     free(image->rowstart);
-    image->rowstart = 0;
+    image->rowstart = nullptr;
     free(image->rowsize);
-    image->rowsize = 0;
+    image->rowsize = nullptr;
   }
   ret = close(image->file);
   if (ret != 0)
-    i_errhdlr("iclose: error on close of file\n",0,0,0,0);
+    i_errhdlr("iclose: error on close of file\n", 0, 0, 0, 0);
   free(image);
   return ret;
 }
@@ -73,29 +74,29 @@ int iclose(RGB_IMAGE *image) {
 int iflush(RGB_IMAGE *image) {
   unsigned short *base;
 
-  if ( (image->flags&_IOWRT)
-       && (base=image->base)!=NULL && (image->ptr-base)>0) {
-    if (putrow(image, base, image->y,image->z)!=image->xsize) {
+  if ((image->flags & _IOWRT) && (base = image->base) != nullptr &&
+      (image->ptr - base) > 0) {
+    if (putrow(image, base, image->y, image->z) != image->xsize) {
       image->flags |= _IOERR;
-      return(EOF);
+      return (EOF);
     }
   }
-  return(0);
+  return (0);
 }
 
 int ifilbuf(RGB_IMAGE *image) {
   int size;
 
-  if ((image->flags&_IOREAD) == 0)
-    return(EOF);
-  if (image->base==NULL) {
+  if ((image->flags & _IOREAD) == 0)
+    return (EOF);
+  if (image->base == nullptr) {
     size = IBUFSIZE(image->xsize);
-    if ((image->base = ibufalloc(image)) == NULL) {
-      i_errhdlr("can't alloc image buffer\n",0,0,0,0);
+    if ((image->base = ibufalloc(image)) == nullptr) {
+      i_errhdlr("can't alloc image buffer\n", 0, 0, 0, 0);
       return EOF;
     }
   }
-  image->cnt = getrow(image,image->base,image->y,image->z);
+  image->cnt = getrow(image, image->base, image->y, image->z);
   image->ptr = image->base;
   if (--image->cnt < 0) {
     if (image->cnt == -1) {
@@ -110,7 +111,7 @@ int ifilbuf(RGB_IMAGE *image) {
   if (++image->y >= image->ysize) {
     image->y = 0;
     if (++image->z >= image->zsize) {
-      image->z = image->zsize-1;
+      image->z = image->zsize - 1;
       image->flags |= _IOEOF;
       return -1;
     }
@@ -123,53 +124,53 @@ unsigned int iflsbuf(RGB_IMAGE *image, unsigned int c) {
   int n, rn;
   int size;
 
-  if ((image->flags&_IOWRT)==0)
-    return(EOF);
-  if ((base=image->base)==NULL) {
+  if ((image->flags & _IOWRT) == 0)
+    return (EOF);
+  if ((base = image->base) == nullptr) {
     size = IBUFSIZE(image->xsize);
-    if ((image->base=base=ibufalloc(image)) == NULL) {
-      i_errhdlr("flsbuf: error on buf alloc\n",0,0,0,0);
+    if ((image->base = base = ibufalloc(image)) == nullptr) {
+      i_errhdlr("flsbuf: error on buf alloc\n", 0, 0, 0, 0);
       return EOF;
     }
     rn = n = 0;
-  } else if ((rn = n = image->ptr - base) > 0)  {
-    n = putrow(image,base,image->y,image->z);
+  } else if ((rn = n = image->ptr - base) > 0) {
+    n = putrow(image, base, image->y, image->z);
     if (++image->y >= image->ysize) {
       image->y = 0;
       if (++image->z >= image->zsize) {
-        image->z = image->zsize-1;
+        image->z = image->zsize - 1;
         image->flags |= _IOEOF;
         return -1;
       }
     }
   }
-  image->cnt = image->xsize-1;
+  image->cnt = image->xsize - 1;
   *base++ = c;
   image->ptr = base;
   if (rn != n) {
     image->flags |= _IOERR;
-    return(EOF);
+    return (EOF);
   }
-  return(c);
+  return (c);
 }
 
 int getpix(RGB_IMAGE *image) {
-  if (--(image)->cnt>=0)
+  if (--(image)->cnt >= 0)
     return (int)(*(image)->ptr++);
   else
     return ifilbuf(image);
 }
 
 unsigned int putpix(RGB_IMAGE *image, unsigned int pix) {
-  if (--(image)->cnt>=0)
+  if (--(image)->cnt >= 0)
     return (unsigned int)(*(image)->ptr++ = pix);
   else
-    return iflsbuf(image,pix);
+    return iflsbuf(image, pix);
 }
 
 unsigned long img_seek(RGB_IMAGE *image, unsigned int y, unsigned int z) {
-  if (img_badrow(image,y,z)) {
-    i_errhdlr("img_seek: row number out of range\n", 0,0,0,0);
+  if (img_badrow(image, y, z)) {
+    i_errhdlr("img_seek: row number out of range\n", 0, 0, 0, 0);
     return EOF;
   }
   image->x = 0;
@@ -180,13 +181,13 @@ unsigned long img_seek(RGB_IMAGE *image, unsigned int y, unsigned int z) {
     case 1:
       return img_optseek(image, 512L);
     case 2:
-      return img_optseek(image,512L+(y*image->xsize)*BPP(image->type));
+      return img_optseek(image, 512L + (y * image->xsize) * BPP(image->type));
     case 3:
-      return img_optseek(image,
-                         512L+(y*image->xsize+z*image->xsize*image->ysize)*
-                         BPP(image->type));
+      return img_optseek(
+          image, 512L + (y * image->xsize + z * image->xsize * image->ysize) *
+                            BPP(image->type));
     default:
-      i_errhdlr("img_seek: weird dim\n",0,0,0,0);
+      i_errhdlr("img_seek: weird dim\n", 0, 0, 0, 0);
       break;
     }
   } else if (ISRLE(image->type)) {
@@ -196,27 +197,27 @@ unsigned long img_seek(RGB_IMAGE *image, unsigned int y, unsigned int z) {
     case 2:
       return img_optseek(image, image->rowstart[y]);
     case 3:
-      return img_optseek(image, image->rowstart[y+z*image->ysize]);
+      return img_optseek(image, image->rowstart[y + z * image->ysize]);
     default:
-      i_errhdlr("img_seek: weird dim\n",0,0,0,0);
+      i_errhdlr("img_seek: weird dim\n", 0, 0, 0, 0);
       break;
     }
   } else
-    i_errhdlr("img_seek: weird image type\n",0,0,0,0);
-  return((unsigned long)-1);
+    i_errhdlr("img_seek: weird image type\n", 0, 0, 0, 0);
+  return ((unsigned long)-1);
 }
 
 int img_badrow(RGB_IMAGE *image, unsigned int y, unsigned int z) {
-  if (y>=image->ysize || z>=image->zsize)
+  if (y >= image->ysize || z >= image->zsize)
     return 1;
   else
     return 0;
 }
 
-int img_write(RGB_IMAGE *image, char *buffer,int count) {
+int img_write(RGB_IMAGE *image, char *buffer, int count) {
   int retval;
 
-  retval =  write(image->file,buffer,count);
+  retval = write(image->file, buffer, count);
   if (retval == count)
     image->offset += count;
   else
@@ -227,7 +228,7 @@ int img_write(RGB_IMAGE *image, char *buffer,int count) {
 int img_read(RGB_IMAGE *image, char *buffer, int count) {
   int retval;
 
-  retval =  read(image->file,buffer,count);
+  retval = read(image->file, buffer, count);
   if (retval == count)
     image->offset += count;
   else
@@ -238,7 +239,7 @@ int img_read(RGB_IMAGE *image, char *buffer, int count) {
 unsigned long img_optseek(RGB_IMAGE *image, unsigned long offset) {
   if (image->offset != offset) {
     image->offset = offset;
-    return ((unsigned long) lseek(image->file,offset,0));
+    return ((unsigned long)lseek(image->file, offset, 0));
   }
   return offset;
 }
@@ -250,15 +251,15 @@ long img_getrowsize(RGB_IMAGE *image) {
   case 2:
     return image->rowsize[image->y];
   case 3:
-    return image->rowsize[image->y+image->z*image->ysize];
+    return image->rowsize[image->y + image->z * image->ysize];
   }
-  return(0L) ;
+  return (0L);
 }
 
 void img_setrowsize(RGB_IMAGE *image, long cnt, long y, long z) {
   int *sizeptr;
 
-  if (img_badrow(image,y,z))
+  if (img_badrow(image, y, z))
     return;
   switch (image->dim) {
   default:
@@ -271,8 +272,8 @@ void img_setrowsize(RGB_IMAGE *image, long cnt, long y, long z) {
     image->rowstart[y] = image->rleend;
     break;
   case 3:
-    sizeptr = &image->rowsize[y+z*image->ysize];
-    image->rowstart[y+z*image->ysize] = image->rleend;
+    sizeptr = &image->rowsize[y + z * image->ysize];
+    image->rowstart[y + z * image->ysize] = image->rleend;
   }
   if (*sizeptr != -1)
     image->wastebytes += *sizeptr;
@@ -280,40 +281,41 @@ void img_setrowsize(RGB_IMAGE *image, long cnt, long y, long z) {
   image->rleend += cnt;
 }
 
-#define docompact               \
-  while(iptr<ibufend) {           \
-      sptr = iptr;            \
-      iptr += 2;              \
-      while((iptr<ibufend)&&((iptr[-2]!=iptr[-1])||(iptr[-1]!=iptr[0])))\
-    iptr++;             \
-      iptr -= 2;              \
-      count = iptr-sptr;            \
-      while(count) {            \
-    todo = count>126 ? 126:count;         \
-    count -= todo;            \
-    *optr++ = 0x80|todo;          \
-    while(todo--)           \
-        *optr++ = *sptr++;          \
-      }               \
-      sptr = iptr;            \
-      cc = *iptr++;           \
-      while( (iptr<ibufend) && (*iptr == cc) )      \
-    iptr++;             \
-      count = iptr-sptr;            \
-      while(count) {            \
-    todo = count>126 ? 126:count;         \
-    count -= todo;            \
-    *optr++ = todo;           \
-    *optr++ = cc;           \
-      }               \
-  }               \
+#define docompact                                                              \
+  while (iptr < ibufend) {                                                     \
+    sptr = iptr;                                                               \
+    iptr += 2;                                                                 \
+    while ((iptr < ibufend) &&                                                 \
+           ((iptr[-2] != iptr[-1]) || (iptr[-1] != iptr[0])))                  \
+      iptr++;                                                                  \
+    iptr -= 2;                                                                 \
+    count = iptr - sptr;                                                       \
+    while (count) {                                                            \
+      todo = count > 126 ? 126 : count;                                        \
+      count -= todo;                                                           \
+      *optr++ = 0x80 | todo;                                                   \
+      while (todo--)                                                           \
+        *optr++ = *sptr++;                                                     \
+    }                                                                          \
+    sptr = iptr;                                                               \
+    cc = *iptr++;                                                              \
+    while ((iptr < ibufend) && (*iptr == cc))                                  \
+      iptr++;                                                                  \
+    count = iptr - sptr;                                                       \
+    while (count) {                                                            \
+      todo = count > 126 ? 126 : count;                                        \
+      count -= todo;                                                           \
+      *optr++ = todo;                                                          \
+      *optr++ = cc;                                                            \
+    }                                                                          \
+  }                                                                            \
   *optr++ = 0;
 
-int img_rle_compact(unsigned short *expbuf, int ibpp,
-                    unsigned short *rlebuf, int obpp, int cnt) {
+int img_rle_compact(unsigned short *expbuf, int ibpp, unsigned short *rlebuf,
+                    int obpp, int cnt) {
   if (ibpp == 1 && obpp == 1) {
     unsigned char *iptr = (unsigned char *)expbuf;
-    unsigned char *ibufend = iptr+cnt;
+    unsigned char *ibufend = iptr + cnt;
     unsigned char *sptr;
     unsigned char *optr = (unsigned char *)rlebuf;
     short todo, cc;
@@ -323,7 +325,7 @@ int img_rle_compact(unsigned short *expbuf, int ibpp,
     return optr - (unsigned char *)rlebuf;
   } else if (ibpp == 1 && obpp == 2) {
     unsigned char *iptr = (unsigned char *)expbuf;
-    unsigned char *ibufend = iptr+cnt;
+    unsigned char *ibufend = iptr + cnt;
     unsigned char *sptr;
     unsigned short *optr = rlebuf;
     short todo, cc;
@@ -333,7 +335,7 @@ int img_rle_compact(unsigned short *expbuf, int ibpp,
     return optr - rlebuf;
   } else if (ibpp == 2 && obpp == 1) {
     unsigned short *iptr = expbuf;
-    unsigned short *ibufend = iptr+cnt;
+    unsigned short *ibufend = iptr + cnt;
     unsigned short *sptr;
     unsigned char *optr = (unsigned char *)rlebuf;
     short todo, cc;
@@ -343,7 +345,7 @@ int img_rle_compact(unsigned short *expbuf, int ibpp,
     return optr - (unsigned char *)rlebuf;
   } else if (ibpp == 2 && obpp == 2) {
     unsigned short *iptr = expbuf;
-    unsigned short *ibufend = iptr+cnt;
+    unsigned short *ibufend = iptr + cnt;
     unsigned short *sptr;
     unsigned short *optr = rlebuf;
     short todo, cc;
@@ -351,69 +353,70 @@ int img_rle_compact(unsigned short *expbuf, int ibpp,
 
     docompact;
     return optr - rlebuf;
-  } else  {
-    i_errhdlr("rle_compact: bad bpp: %d %d\n",ibpp,obpp,0,0);
+  } else {
+    i_errhdlr("rle_compact: bad bpp: %d %d\n", ibpp, obpp, 0, 0);
     return 0;
   }
 }
 
-#define doexpand        \
-  while(1) {        \
-      pixel = *iptr++;      \
-      if ( !(count = (pixel & 0x7f)) )  \
-    return;       \
-      if(pixel & 0x80) {      \
-         while(count--)     \
-        *optr++ = *iptr++;    \
-      } else {        \
-         pixel = *iptr++;     \
-         while(count--)     \
-        *optr++ = pixel;    \
-      }         \
+#define doexpand                                                               \
+  while (1) {                                                                  \
+    pixel = *iptr++;                                                           \
+    if (!(count = (pixel & 0x7f)))                                             \
+      return;                                                                  \
+    if (pixel & 0x80) {                                                        \
+      while (count--)                                                          \
+        *optr++ = *iptr++;                                                     \
+    } else {                                                                   \
+      pixel = *iptr++;                                                         \
+      while (count--)                                                          \
+        *optr++ = pixel;                                                       \
+    }                                                                          \
   }
 
-void img_rle_expand(unsigned short *rlebuf, int ibpp,
-                    unsigned short *expbuf, int obpp) {
+void img_rle_expand(unsigned short *rlebuf, int ibpp, unsigned short *expbuf,
+                    int obpp) {
   if (ibpp == 1 && obpp == 1) {
     unsigned char *iptr = (unsigned char *)rlebuf;
     unsigned char *optr = (unsigned char *)expbuf;
-    unsigned short pixel,count;
+    unsigned short pixel, count;
 
     doexpand;
   } else if (ibpp == 1 && obpp == 2) {
     unsigned char *iptr = (unsigned char *)rlebuf;
     unsigned short *optr = expbuf;
-    unsigned short pixel,count;
+    unsigned short pixel, count;
 
     doexpand;
   } else if (ibpp == 2 && obpp == 1) {
     unsigned short *iptr = rlebuf;
-    unsigned char  *optr = (unsigned char *)expbuf;
-    unsigned short pixel,count;
+    unsigned char *optr = (unsigned char *)expbuf;
+    unsigned short pixel, count;
 
     doexpand;
   } else if (ibpp == 2 && obpp == 2) {
     unsigned short *iptr = rlebuf;
     unsigned short *optr = expbuf;
-    unsigned short pixel,count;
+    unsigned short pixel, count;
 
     doexpand;
   } else
-    i_errhdlr("rle_expand: bad bpp: %d %d\n",ibpp,obpp,0,0);
+    i_errhdlr("rle_expand: bad bpp: %d %d\n", ibpp, obpp, 0, 0);
 }
 
-int putrow_uc(RGB_IMAGE *image, unsigned char *buffer, unsigned int y, unsigned int z) {
-  unsigned char   *sptr;
-  unsigned char      *cptr;
+int putrow_uc(RGB_IMAGE *image, unsigned char *buffer, unsigned int y,
+              unsigned int z) {
+  unsigned char *sptr;
+  unsigned char *cptr;
   unsigned int x;
   unsigned long min, max;
   long cnt;
 
-  if ( !(image->flags & (_IORW|_IOWRT)) )
+  if (!(image->flags & (_IORW | _IOWRT)))
     return -1;
-  if (image->dim<3)
+  if (image->dim < 3)
     z = 0;
-  if (image->dim<2)
+  if (image->dim < 2)
     y = 0;
   if (ISVERBATIM(image->type)) {
     switch (BPP(image->type)) {
@@ -423,45 +426,48 @@ int putrow_uc(RGB_IMAGE *image, unsigned char *buffer, unsigned int y, unsigned 
       cptr = (unsigned char *)image->tmpbuf;
       sptr = buffer;
       /* this might be uneccessary for this uc function */
-      for (x=image->xsize; x--;) {
+      for (x = image->xsize; x--;) {
         *cptr = *sptr++;
-        if (*cptr > max) max = *cptr;
-        if (*cptr < min) min = *cptr;
+        if (*cptr > max)
+          max = *cptr;
+        if (*cptr < min)
+          min = *cptr;
         cptr++;
       }
       image->min = min;
       image->max = max;
-      img_seek(image,y,z);
+      img_seek(image, y, z);
       cnt = image->xsize;
-      if (img_write(image,(char *)(image->tmpbuf),cnt) != cnt) {
-        i_errhdlr("putrow: error on write of row\n",0,0,0,0);
+      if (img_write(image, (char *)(image->tmpbuf), cnt) != cnt) {
+        i_errhdlr("putrow: error on write of row\n", 0, 0, 0, 0);
         return -1;
       } else
         return cnt;
     case 2:
       printf("ERROR: this rgb save function BPP=2 is not implemented\n");
     default:
-      i_errhdlr("putrow: weird bpp\n",0,0,0,0);
+      i_errhdlr("putrow: weird bpp\n", 0, 0, 0, 0);
     }
   } else if (ISRLE(image->type)) {
     printf("ERROR: compressed RGB is not implemented !\n");
   } else
-    i_errhdlr("putrow: weird image type\n",0,0,0,0);
-  return(-1);
+    i_errhdlr("putrow: weird image type\n", 0, 0, 0, 0);
+  return (-1);
 }
 
-int putrow(RGB_IMAGE *image, unsigned short *buffer, unsigned int y, unsigned int z) {
-  unsigned short   *sptr;
-  unsigned char      *cptr;
+int putrow(RGB_IMAGE *image, unsigned short *buffer, unsigned int y,
+           unsigned int z) {
+  unsigned short *sptr;
+  unsigned char *cptr;
   unsigned int x;
   unsigned long min, max;
   long cnt;
 
-  if ( !(image->flags & (_IORW|_IOWRT)) )
+  if (!(image->flags & (_IORW | _IOWRT)))
     return -1;
-  if (image->dim<3)
+  if (image->dim < 3)
     z = 0;
-  if (image->dim<2)
+  if (image->dim < 2)
     y = 0;
   if (ISVERBATIM(image->type)) {
     switch (BPP(image->type)) {
@@ -470,18 +476,20 @@ int putrow(RGB_IMAGE *image, unsigned short *buffer, unsigned int y, unsigned in
       max = image->max;
       cptr = (unsigned char *)image->tmpbuf;
       sptr = buffer;
-      for (x=image->xsize; x--;) {
+      for (x = image->xsize; x--;) {
         *cptr = *sptr++;
-        if (*cptr > max) max = *cptr;
-        if (*cptr < min) min = *cptr;
+        if (*cptr > max)
+          max = *cptr;
+        if (*cptr < min)
+          min = *cptr;
         cptr++;
       }
       image->min = min;
       image->max = max;
-      img_seek(image,y,z);
+      img_seek(image, y, z);
       cnt = image->xsize;
-      if (img_write(image,(char *)(image->tmpbuf),cnt) != cnt) {
-        i_errhdlr("putrow: error on write of row\n",0,0,0,0);
+      if (img_write(image, (char *)(image->tmpbuf), cnt) != cnt) {
+        i_errhdlr("putrow: error on write of row\n", 0, 0, 0, 0);
         return -1;
       } else
         return cnt;
@@ -491,31 +499,33 @@ int putrow(RGB_IMAGE *image, unsigned short *buffer, unsigned int y, unsigned in
       min = image->min;
       max = image->max;
       sptr = buffer;
-      for (x=image->xsize; x--;) {
-        if (*sptr > max) max = *sptr;
-        if (*sptr < min) min = *sptr;
+      for (x = image->xsize; x--;) {
+        if (*sptr > max)
+          max = *sptr;
+        if (*sptr < min)
+          min = *sptr;
         sptr++;
       }
       image->min = min;
       image->max = max;
-      img_seek(image,y,z);
-      cnt = image->xsize<<1;
+      img_seek(image, y, z);
+      cnt = image->xsize << 1;
       if (image->dorev)
-        cvtshorts(buffer,cnt);
-      if (img_write(image,(char *)(buffer),cnt) != cnt) {
+        cvtshorts(buffer, cnt);
+      if (img_write(image, (char *)(buffer), cnt) != cnt) {
         if (image->dorev)
-          cvtshorts(buffer,cnt);
-        i_errhdlr("putrow: error on write of row\n",0,0,0,0);
+          cvtshorts(buffer, cnt);
+        i_errhdlr("putrow: error on write of row\n", 0, 0, 0, 0);
         return -1;
       } else {
         if (image->dorev)
-          cvtshorts(buffer,cnt);
+          cvtshorts(buffer, cnt);
         return image->xsize;
       }
       /* NOTREACHED */
 
     default:
-      i_errhdlr("putrow: weird bpp\n",0,0,0,0);
+      i_errhdlr("putrow: weird bpp\n", 0, 0, 0, 0);
     }
   } else if (ISRLE(image->type)) {
     switch (BPP(image->type)) {
@@ -523,18 +533,20 @@ int putrow(RGB_IMAGE *image, unsigned short *buffer, unsigned int y, unsigned in
       min = image->min;
       max = image->max;
       sptr = buffer;
-      for (x=image->xsize; x--;) {
-        if (*sptr > max) max = *sptr;
-        if (*sptr < min) min = *sptr;
+      for (x = image->xsize; x--;) {
+        if (*sptr > max)
+          max = *sptr;
+        if (*sptr < min)
+          min = *sptr;
         sptr++;
       }
       image->min = min;
       image->max = max;
-      cnt = img_rle_compact(buffer,2,image->tmpbuf,1,image->xsize);
-      img_setrowsize(image,cnt,y,z);
-      img_seek(image,y,z);
-      if (img_write(image,(char *)(image->tmpbuf),cnt) != cnt) {
-        i_errhdlr("putrow: error on write of row\n",0,0,0,0);
+      cnt = img_rle_compact(buffer, 2, image->tmpbuf, 1, image->xsize);
+      img_setrowsize(image, cnt, y, z);
+      img_seek(image, y, z);
+      if (img_write(image, (char *)(image->tmpbuf), cnt) != cnt) {
+        i_errhdlr("putrow: error on write of row\n", 0, 0, 0, 0);
         return -1;
       } else
         return image->xsize;
@@ -544,168 +556,176 @@ int putrow(RGB_IMAGE *image, unsigned short *buffer, unsigned int y, unsigned in
       min = image->min;
       max = image->max;
       sptr = buffer;
-      for (x=image->xsize; x--;) {
-        if (*sptr > max) max = *sptr;
-        if (*sptr < min) min = *sptr;
+      for (x = image->xsize; x--;) {
+        if (*sptr > max)
+          max = *sptr;
+        if (*sptr < min)
+          min = *sptr;
         sptr++;
       }
       image->min = min;
       image->max = max;
-      cnt = img_rle_compact(buffer,2,image->tmpbuf,2,image->xsize);
+      cnt = img_rle_compact(buffer, 2, image->tmpbuf, 2, image->xsize);
       cnt <<= 1;
-      img_setrowsize(image,cnt,y,z);
-      img_seek(image,y,z);
+      img_setrowsize(image, cnt, y, z);
+      img_seek(image, y, z);
       if (image->dorev)
-        cvtshorts(image->tmpbuf,cnt);
-      if (img_write(image,(char *)(image->tmpbuf),cnt) != cnt) {
+        cvtshorts(image->tmpbuf, cnt);
+      if (img_write(image, (char *)(image->tmpbuf), cnt) != cnt) {
         if (image->dorev)
-          cvtshorts(image->tmpbuf,cnt);
-        i_errhdlr("putrow: error on write of row\n",0,0,0,0);
+          cvtshorts(image->tmpbuf, cnt);
+        i_errhdlr("putrow: error on write of row\n", 0, 0, 0, 0);
         return -1;
       } else {
         if (image->dorev)
-          cvtshorts(image->tmpbuf,cnt);
+          cvtshorts(image->tmpbuf, cnt);
         return image->xsize;
       }
       /* NOTREACHED */
 
     default:
-      i_errhdlr("putrow: weird bpp\n",0,0,0,0);
+      i_errhdlr("putrow: weird bpp\n", 0, 0, 0, 0);
     }
   } else
-    i_errhdlr("putrow: weird image type\n",0,0,0,0);
-  return(-1);
+    i_errhdlr("putrow: weird image type\n", 0, 0, 0, 0);
+  return (-1);
 }
 
-int getrow(RGB_IMAGE *image, unsigned short *buffer,
-           unsigned int y, unsigned int z) {
+int getrow(RGB_IMAGE *image, unsigned short *buffer, unsigned int y,
+           unsigned int z) {
   short i;
   unsigned char *cptr;
   unsigned short *sptr;
   short cnt;
 
-  if ( !(image->flags & (_IORW|_IOREAD)) )
+  if (!(image->flags & (_IORW | _IOREAD)))
     return -1;
-  if (image->dim<3)
+  if (image->dim < 3)
     z = 0;
-  if (image->dim<2)
+  if (image->dim < 2)
     y = 0;
   img_seek(image, y, z);
   if (ISVERBATIM(image->type)) {
     switch (BPP(image->type)) {
     case 1:
-      if (img_read(image,(char *)image->tmpbuf,image->xsize)
-          != image->xsize) {
-        i_errhdlr("getrow: error on read of row\n",0,0,0,0);
+      if (img_read(image, (char *)image->tmpbuf, image->xsize) !=
+          image->xsize) {
+        i_errhdlr("getrow: error on read of row\n", 0, 0, 0, 0);
         return -1;
       } else {
         cptr = (unsigned char *)image->tmpbuf;
         sptr = buffer;
-        for (i=image->xsize; i--;)
+        for (i = image->xsize; i--;)
           *sptr++ = *cptr++;
       }
       return image->xsize;
       /* NOTREACHED */
 
     case 2:
-      cnt = image->xsize<<1;
-      if (img_read(image,(char *)(buffer),cnt) != cnt) {
-        i_errhdlr("getrow: error on read of row\n",0,0,0,0);
+      cnt = image->xsize << 1;
+      if (img_read(image, (char *)(buffer), cnt) != cnt) {
+        i_errhdlr("getrow: error on read of row\n", 0, 0, 0, 0);
         return -1;
       } else {
         if (image->dorev)
-          cvtshorts(buffer,cnt);
+          cvtshorts(buffer, cnt);
         return image->xsize;
       }
       /* NOTREACHED */
 
     default:
-      i_errhdlr("getrow: weird bpp\n",0,0,0,0);
+      i_errhdlr("getrow: weird bpp\n", 0, 0, 0, 0);
       break;
     }
   } else if (ISRLE(image->type)) {
     switch (BPP(image->type)) {
     case 1:
-      if ( (cnt = img_getrowsize(image)) == -1 )
+      if ((cnt = img_getrowsize(image)) == -1)
         return -1;
-      if ( img_read(image,(char *)(image->tmpbuf),cnt) != cnt ) {
-        i_errhdlr("getrow: error on read of row\n",0,0,0,0);
+      if (img_read(image, (char *)(image->tmpbuf), cnt) != cnt) {
+        i_errhdlr("getrow: error on read of row\n", 0, 0, 0, 0);
         return -1;
       } else {
-        img_rle_expand(image->tmpbuf,1,buffer,2);
+        img_rle_expand(image->tmpbuf, 1, buffer, 2);
         return image->xsize;
       }
       /* NOTREACHED */
 
     case 2:
-      if ( (cnt = img_getrowsize(image)) == -1 )
+      if ((cnt = img_getrowsize(image)) == -1)
         return -1;
-      if ( cnt != img_read(image,(char *)(image->tmpbuf),cnt) ) {
-        i_errhdlr("getrow: error on read of row\n",0,0,0,0);
+      if (cnt != img_read(image, (char *)(image->tmpbuf), cnt)) {
+        i_errhdlr("getrow: error on read of row\n", 0, 0, 0, 0);
         return -1;
       } else {
         if (image->dorev)
-          cvtshorts(image->tmpbuf,cnt);
-        img_rle_expand(image->tmpbuf,2,buffer,2);
+          cvtshorts(image->tmpbuf, cnt);
+        img_rle_expand(image->tmpbuf, 2, buffer, 2);
         return image->xsize;
       }
       /* NOTREACHED */
 
     default:
-      i_errhdlr("getrow: weird bpp\n",0,0,0,0);
+      i_errhdlr("getrow: weird bpp\n", 0, 0, 0, 0);
       break;
     }
   } else
-    i_errhdlr("getrow: weird image type\n",0,0,0,0);
-  return(-1) ;
+    i_errhdlr("getrow: weird image type\n", 0, 0, 0, 0);
+  return (-1);
 }
 
-RGB_IMAGE *imgopen(int, const char *, const char *,unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
+RGB_IMAGE *imgopen(int, const char *, const char *, unsigned int, unsigned int,
+                   unsigned int, unsigned int, unsigned int);
 
-RGB_IMAGE *iopen(const char *file, const char *mode, unsigned int type, unsigned int dim, unsigned int xsize, unsigned int ysize, unsigned int zsize) {
-  return(imgopen(0, file, mode, type, dim, xsize, ysize, zsize));
+RGB_IMAGE *iopen(const char *file, const char *mode, unsigned int type,
+                 unsigned int dim, unsigned int xsize, unsigned int ysize,
+                 unsigned int zsize) {
+  return (imgopen(0, file, mode, type, dim, xsize, ysize, zsize));
 }
 
-RGB_IMAGE *fiopen(int f, const char *mode, unsigned int type, unsigned int dim, unsigned int xsize, unsigned int ysize, unsigned int zsize) {
-  return(imgopen(f, 0, mode, type, dim, xsize, ysize, zsize));
+RGB_IMAGE *fiopen(int f, const char *mode, unsigned int type, unsigned int dim,
+                  unsigned int xsize, unsigned int ysize, unsigned int zsize) {
+  return (imgopen(f, nullptr, mode, type, dim, xsize, ysize, zsize));
 }
 
-RGB_IMAGE *imgopen(int f, const char *file, const char *mode, unsigned int type, unsigned int dim, unsigned int xsize, unsigned int ysize, unsigned int zsize) {
-  RGB_IMAGE  *image;
+RGB_IMAGE *imgopen(int f, const char *file, const char *mode, unsigned int type,
+                   unsigned int dim, unsigned int xsize, unsigned int ysize,
+                   unsigned int zsize) {
+  RGB_IMAGE *image;
   int rw;
   int tablesize;
   int i, max;
 
-  image = (RGB_IMAGE*)calloc(1,sizeof(RGB_IMAGE));
-  if (!image ) {
-    i_errhdlr("iopen: error on image struct alloc\n",0,0,0,0);
-    return NULL;
+  image = (RGB_IMAGE *)calloc(1, sizeof(RGB_IMAGE));
+  if (!image) {
+    i_errhdlr("iopen: error on image struct alloc\n", 0, 0, 0, 0);
+    return nullptr;
   }
   rw = mode[1] == '+';
   if (rw) {
-    i_errhdlr("iopen: read/write mode not supported\n",0,0,0,0);
-    return NULL;
+    i_errhdlr("iopen: read/write mode not supported\n", 0, 0, 0, 0);
+    return nullptr;
   }
-  if (*mode=='w') {
+  if (*mode == 'w') {
     if (file) {
       f = creat(file, 0666);
-      if (rw && f>=0) {
+      if (rw && f >= 0) {
         close(f);
         f = open(file, 2);
       }
     }
     if (f < 0) {
-      i_errhdlr("iopen: can't open output file %s\n",0,0,0,0);
-      return NULL;
+      i_errhdlr("iopen: can't open output file %s\n", 0, 0, 0, 0);
+      return nullptr;
     }
     image->imagic = IMAGIC;
     image->type = type;
     image->xsize = xsize;
     image->ysize = 1;
     image->zsize = 1;
-    if (dim>1)
+    if (dim > 1)
       image->ysize = ysize;
-    if (dim>2)
+    if (dim > 2)
       image->zsize = zsize;
     if (image->zsize == 1) {
       image->dim = 2;
@@ -716,33 +736,32 @@ RGB_IMAGE *imgopen(int f, const char *file, const char *mode, unsigned int type,
     }
     image->min = 10000000;
     image->max = 0;
-    isetname(image,"no name");
+    isetname(image, "no name");
     image->wastebytes = 0;
     image->dorev = 0;
-    swapImage(image) ;
-    if (write(f,image,sizeof(RGB_IMAGE)) != sizeof(RGB_IMAGE)) {
-      i_errhdlr("iopen: error on write of image header\n",0,0,0,0);
-      return NULL;
+    swapImage(image);
+    if (write(f, image, sizeof(RGB_IMAGE)) != sizeof(RGB_IMAGE)) {
+      i_errhdlr("iopen: error on write of image header\n", 0, 0, 0, 0);
+      return nullptr;
     }
-    swapImage(image) ;
+    swapImage(image);
   } else {
     if (file)
-      f = open(file, rw? 2: 0);
+      f = open(file, rw ? 2 : 0);
     if (f < 0)
-      return(NULL);
-    if (read(f,image,sizeof(RGB_IMAGE)) != sizeof(RGB_IMAGE)) {
-      i_errhdlr("iopen: error on read of image header\n",0,0,0,0);
-      return NULL;
+      return (nullptr);
+    if (read(f, image, sizeof(RGB_IMAGE)) != sizeof(RGB_IMAGE)) {
+      i_errhdlr("iopen: error on read of image header\n", 0, 0, 0, 0);
+      return nullptr;
     }
-    if ( ((image->imagic>>8) | ((image->imagic&0xff)<<8))
-         == IMAGIC ) {
+    if (((image->imagic >> 8) | ((image->imagic & 0xff) << 8)) == IMAGIC) {
       image->dorev = 1;
       cvtimage((long *)image);
     } else
       image->dorev = 0;
     if (image->imagic != IMAGIC) {
-      i_errhdlr("iopen: bad magic in image file %x\n",image->imagic,0,0,0);
-      return NULL;
+      i_errhdlr("iopen: bad magic in image file %x\n", image->imagic, 0, 0, 0);
+      return nullptr;
     }
   }
   if (rw)
@@ -752,49 +771,49 @@ RGB_IMAGE *imgopen(int f, const char *file, const char *mode, unsigned int type,
   else
     image->flags = _IOREAD;
   if (ISRLE(image->type)) {
-    tablesize = image->ysize*image->zsize*sizeof(long);
+    tablesize = image->ysize * image->zsize * sizeof(long);
     image->rowstart = (unsigned int *)malloc(tablesize);
     image->rowsize = (int *)malloc(tablesize);
-    if ( image->rowstart == 0 || image->rowsize == 0 ) {
-      i_errhdlr("iopen: error on table alloc\n",0,0,0,0);
-      return NULL;
+    if (image->rowstart == nullptr || image->rowsize == nullptr) {
+      i_errhdlr("iopen: error on table alloc\n", 0, 0, 0, 0);
+      return nullptr;
     }
-    image->rleend = 512L+2*tablesize;
-    if (*mode=='w') {
-      max = image->ysize*image->zsize;
-      for (i=0; i<max; i++) {
+    image->rleend = 512L + 2 * tablesize;
+    if (*mode == 'w') {
+      max = image->ysize * image->zsize;
+      for (i = 0; i < max; i++) {
         image->rowstart[i] = 0;
         image->rowsize[i] = -1;
       }
     } else {
-      tablesize = image->ysize*image->zsize*sizeof(long);
+      tablesize = image->ysize * image->zsize * sizeof(long);
       lseek(f, 512L, 0);
-      if (read(f,image->rowstart,tablesize) != tablesize) {
-        i_errhdlr("iopen: error on read of rowstart\n",0,0,0,0);
-        return NULL;
+      if (read(f, image->rowstart, tablesize) != tablesize) {
+        i_errhdlr("iopen: error on read of rowstart\n", 0, 0, 0, 0);
+        return nullptr;
       }
       if (image->dorev)
-        cvtlongs((long *)image->rowstart,tablesize);
-      if (read(f,image->rowsize,tablesize) != tablesize) {
-        i_errhdlr("iopen: error on read of rowsize\n",0,0,0,0);
-        return NULL;
+        cvtlongs((long *)image->rowstart, tablesize);
+      if (read(f, image->rowsize, tablesize) != tablesize) {
+        i_errhdlr("iopen: error on read of rowsize\n", 0, 0, 0, 0);
+        return nullptr;
       }
       if (image->dorev)
-        cvtlongs((long *)image->rowsize,tablesize);
+        cvtlongs((long *)image->rowsize, tablesize);
     }
   }
   image->cnt = 0;
-  image->ptr = 0;
-  image->base = 0;
-  if ( (image->tmpbuf = ibufalloc(image)) == 0 ) {
-    i_errhdlr("iopen: error on tmpbuf alloc %d\n",image->xsize,0,0,0);
-    return NULL;
+  image->ptr = nullptr;
+  image->base = nullptr;
+  if ((image->tmpbuf = ibufalloc(image)) == nullptr) {
+    i_errhdlr("iopen: error on tmpbuf alloc %d\n", image->xsize, 0, 0, 0);
+    return nullptr;
   }
   image->x = image->y = image->z = 0;
   image->file = f;
-  image->offset = 512L;     /* set up for img_optseek */
+  image->offset = 512L; /* set up for img_optseek */
   lseek(image->file, 512L, 0);
-  return(image);
+  return (image);
 }
 
 unsigned short *ibufalloc(RGB_IMAGE *image) {
@@ -802,42 +821,37 @@ unsigned short *ibufalloc(RGB_IMAGE *image) {
 }
 
 long reverse(unsigned long lwrd) {
-  return ((lwrd>>24)    |
-          (lwrd>>8 & 0xff00)   |
-          (lwrd<<8 & 0xff0000) |
-          (lwrd<<24)     );
+  return ((lwrd >> 24) | (lwrd >> 8 & 0xff00) | (lwrd << 8 & 0xff0000) |
+          (lwrd << 24));
 }
 
-void cvtshorts( unsigned short *buffer, long n) {
+void cvtshorts(unsigned short *buffer, long n) {
   short i;
-  long nshorts = n>>1;
+  long nshorts = n >> 1;
   unsigned short swrd;
 
-  for (i=0; i<nshorts; i++) {
+  for (i = 0; i < nshorts; i++) {
     swrd = *buffer;
-    *buffer++ = (swrd>>8) | (swrd<<8);
+    *buffer++ = (swrd >> 8) | (swrd << 8);
   }
 }
 
-
-void cvtlongs( long *buffer, long n) {
+void cvtlongs(long *buffer, long n) {
   short i;
-  long nlongs = n>>2;
+  long nlongs = n >> 2;
   unsigned long lwrd;
 
-  for (i=0; i<nlongs; i++) {
+  for (i = 0; i < nlongs; i++) {
     lwrd = buffer[i];
-    buffer[i] =     ((lwrd>>24)     |
-                     (lwrd>>8 & 0xff00)  |
-                     (lwrd<<8 & 0xff0000)  |
-                     (lwrd<<24)    );
+    buffer[i] = ((lwrd >> 24) | (lwrd >> 8 & 0xff00) | (lwrd << 8 & 0xff0000) |
+                 (lwrd << 24));
   }
 }
 
-void cvtimage( long *buffer) {
-  cvtshorts((unsigned short *)buffer,12);
-  cvtlongs(buffer+3,12);
-  cvtlongs(buffer+26,4);
+void cvtimage(long *buffer) {
+  cvtshorts((unsigned short *)buffer, 12);
+  cvtlongs(buffer + 3, 12);
+  cvtlongs(buffer + 26, 4);
 }
 
 static void (*i_errfunc)(char *ebuf);
@@ -852,9 +866,9 @@ static void (*i_errfunc)(char *ebuf);
 /* most args currently used is 2 */
 void i_errhdlr(const char *fmt, int a1, int a2, int a3, int a4) {
   if (i_errfunc) {
-    char ebuf[2048];  /* be generous; if an error includes a
-                                         pathname, the maxlen is 1024, so we shouldn't ever
-                                         overflow this! */
+    char ebuf[2048]; /* be generous; if an error includes a
+                                        pathname, the maxlen is 1024, so we
+                        shouldn't ever overflow this! */
     sprintf(ebuf, fmt, a1, a2, a3, a4);
     (*i_errfunc)(ebuf);
     return;
@@ -864,63 +878,61 @@ void i_errhdlr(const char *fmt, int a1, int a2, int a3, int a4) {
 }
 
 /* this function sets the error handler for i_errhdlr */
-void i_seterror(void (*func)(char *)) {
-  i_errfunc = func;
-}
+void i_seterror(void (*func)(char *)) { i_errfunc = func; }
 
 typedef union {
-  short  s ;
-  char   buf[sizeof(short)] ;
-} SSWAP_SHORT ;
+  short s;
+  char buf[sizeof(short)];
+} SSWAP_SHORT;
 
 typedef union {
-  float f ;
-  int   i ;
-  char  buf[4] ;
-  short s[2] ;
-} SSWAP_LONG ;
+  float f;
+  int i;
+  char buf[4];
+  short s[2];
+} SSWAP_LONG;
 
 short tmpswapShort(short s) {
-  SSWAP_SHORT ss ;
-  char       c ;
+  SSWAP_SHORT ss;
+  char c;
 
   /* first swap bytes in word */
-  ss.s = s ;
-  c = ss.buf[0] ;
-  ss.buf[0] = ss.buf[1] ;
-  ss.buf[1] = c ;
+  ss.s = s;
+  c = ss.buf[0];
+  ss.buf[0] = ss.buf[1];
+  ss.buf[1] = c;
 
-  return(ss.s) ;
+  return (ss.s);
 }
 
 int tmpswapInt(int i) {
-  SSWAP_LONG  sl ;
-  short      s ;
+  SSWAP_LONG sl;
+  short s;
 
   /* first swap bytes in each word */
-  sl.i = i ;
-  sl.s[0] = tmpswapShort(sl.s[0]) ;
-  sl.s[1] = tmpswapShort(sl.s[1]) ;
+  sl.i = i;
+  sl.s[0] = tmpswapShort(sl.s[0]);
+  sl.s[1] = tmpswapShort(sl.s[1]);
 
   /* now swap words */
-  s = sl.s[0] ;
-  sl.s[0] = sl.s[1] ;
-  sl.s[1] = s ;
+  s = sl.s[0];
+  sl.s[0] = sl.s[1];
+  sl.s[1] = s;
 
-  return(sl.i) ;
+  return (sl.i);
 }
 
 void swapImage(RGB_IMAGE *image) {
 #if (BYTE_ORDER == LITTLE_ENDIAN)
-  image->imagic = tmpswapShort(image->imagic) ;
-  image->type = tmpswapShort(image->type) ;
-  image->dim = tmpswapShort(image->dim) ;
-  image->xsize = tmpswapShort(image->xsize) ;
-  image->ysize = tmpswapShort(image->ysize) ;
-  image->zsize = tmpswapShort(image->zsize) ;
-  image->min = tmpswapInt(image->min) ;
-  image->max = tmpswapInt(image->max) ;
-  image->wastebytes = tmpswapShort(image->wastebytes) ;
-  image->colormap = tmpswapInt(image->colormap) ;
+  image->imagic = tmpswapShort(image->imagic);
+  image->type = tmpswapShort(image->type);
+  image->dim = tmpswapShort(image->dim);
+  image->xsize = tmpswapShort(image->xsize);
+  image->ysize = tmpswapShort(image->ysize);
+  image->zsize = tmpswapShort(image->zsize);
+  image->min = tmpswapInt(image->min);
+  image->max = tmpswapInt(image->max);
+  image->wastebytes = tmpswapShort(image->wastebytes);
+  image->colormap = tmpswapInt(image->colormap);
 #endif
 }

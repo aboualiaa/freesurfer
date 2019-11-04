@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:09 $
@@ -23,24 +23,21 @@
  *
  */
 
-
 #ifndef IMAUTILS_H
 #define IMAUTILS_H
 
-
-#define IMA_TYPE_SHORT  0
-#define IMA_TYPE_INT    1
-#define IMA_TYPE_LONG   2
-#define IMA_TYPE_FLOAT  3
+#define IMA_TYPE_SHORT 0
+#define IMA_TYPE_INT 1
+#define IMA_TYPE_LONG 2
+#define IMA_TYPE_FLOAT 3
 #define IMA_TYPE_DOUBLE 4
 #define IMA_TYPE_STRING 5
 
-typedef struct
-{
+typedef struct {
   char *FileName;
   char *PatientName;
   char *PatientDOB;
-  char  PatientGender[7];
+  char PatientGender[7];
   char *StudyDate;
   char *StudyTime;
   char *PulseSequence;
@@ -50,61 +47,58 @@ typedef struct
   float RepetitionTime;
   float InversionTime;
 
-  int  StudyNo;
-  int  SeriesNo;
-  int  NFilesInSeries;    /* Actual number */
-  int  NFilesInSeriesExp; /* Expected */
-  int  ImageNo;    /* within the study, not series */
-  int  NImageRows;
-  int  NImageCols;
+  int StudyNo;
+  int SeriesNo;
+  int NFilesInSeries;    /* Actual number */
+  int NFilesInSeriesExp; /* Expected */
+  int ImageNo;           /* within the study, not series */
+  int NImageRows;
+  int NImageCols;
   float ImgCenter[3];
   float SliceThickness;
   float DistanceFactor;
 
   /* Volume/Run Related parameters */
-  float Vc[3];     /* RAS col direction cosines*/
-  float Vr[3];     /* RAS row direction cosines*/
-  float Vs[3];     /* RAS slice direction cosines*/
+  float Vc[3]; /* RAS col direction cosines*/
+  float Vr[3]; /* RAS row direction cosines*/
+  float Vs[3]; /* RAS slice direction cosines*/
 
-  int   IsMosaic;    /* Image is a mosaic of slices */
-  int   VolDim[3];   /* number of cols rows slices */
-  float VolRes[3];   /* Resolution of col, row, slice in mm */
-  int   NFrames;
+  int IsMosaic;    /* Image is a mosaic of slices */
+  int VolDim[3];   /* number of cols rows slices */
+  float VolRes[3]; /* Resolution of col, row, slice in mm */
+  int NFrames;
 
-  int   NFilesPerFrame;
+  int NFilesPerFrame;
 
-  //float VolCenter[3]; /* Exact RAS center of the volume */
+  // float VolCenter[3]; /* Exact RAS center of the volume */
 
-  int   ErrorFlag;   /* Set for error, eg, aborted run */
+  int ErrorFlag; /* Set for error, eg, aborted run */
 
-}
-IMAFILEINFO;
+} IMAFILEINFO;
 
 /*******************************************/
-typedef struct
-{
+typedef struct {
   const char *key;
-  int   offset;
+  int offset;
   const char *typestring;
-  int   type;
-  int   typesize;
-  int   nitems;
-}
-IMA_DICTIONARY_ENTRY;
+  int type;
+  int typesize;
+  int nitems;
+} IMA_DICTIONARY_ENTRY;
 #define NMAX_IMA_DICTIONARY 500
 
 extern IMA_DICTIONARY_ENTRY ImaDictionary[NMAX_IMA_DICTIONARY];
-extern int   nImaDictionary, ImaDictionaryGood;
+extern int nImaDictionary, ImaDictionaryGood;
 extern const char *imaTypeString[6];
-extern int   imaTypeSize[6];
+extern int imaTypeSize[6];
 
 int imaTypeFromString(const char *typestring);
 void *imaLoadVal(FILE *imafp, int offset, int nbytes, int nitems, void *pval);
 
-void MkImaDictionary(void);
+void MkImaDictionary();
 void DumpImaDictionary(FILE *fp);
-int  DumpImaDictionaryVal(FILE *fp,const  char *imafile);
-void *imaLoadValFromKey(FILE *imafp,const  char *key, void *pval);
+int DumpImaDictionaryVal(FILE *fp, const char *imafile);
+void *imaLoadValFromKey(FILE *imafp, const char *key, void *pval);
 int imaPrintVal(FILE *fp, int type, void *pval);
 int imaTypeFromKey(const char *key);
 

@@ -28,77 +28,87 @@
 #include "VTKPolyDataToPolylineMeshFilter.h"
 
 using namespace itk;
-enum DirectionsType{ALL=0, DIAGONAL=1, STRAIGHT=2};
+enum DirectionsType { ALL = 0, DIAGONAL = 1, STRAIGHT = 2 };
 
 template <class TColorMesh, class TImage, class THistogramMesh>
-class ClusterTools:	public LightObject //<TColorMesh, TColorMesh>
+class ClusterTools : public LightObject //<TColorMesh, TColorMesh>
 {
-	public:
-		typedef ClusterTools Self;
-		typedef MeshToMeshFilter<TColorMesh, TColorMesh>       Superclass;
-		typedef SmartPointer<Self>                              Pointer;
-		typedef SmartPointer<const Self>                        ConstPointer;
+public:
+  using Self = ClusterTools<TColorMesh, TImage, THistogramMesh>;
+  using Superclass = MeshToMeshFilter<TColorMesh, TColorMesh>;
+  using Pointer = SmartPointer<Self>;
+  using ConstPointer = SmartPointer<const Self>;
 
-		itkNewMacro  (Self);
-		itkTypeMacro (ClusterTools, LightObject); // MeshToMeshFilter);
+  itkNewMacro(Self);
+  itkTypeMacro(ClusterTools, LightObject); // MeshToMeshFilter);
 
-		typedef TColorMesh                         ColorMeshType;
-		typedef typename ColorMeshType::Pointer  ColorMeshPointer;
-		typedef typename ColorMeshType::PointType  ColorPointType;
-		typedef typename ColorMeshType::PixelType  ColorPixelType;
+  using ColorMeshType = TColorMesh;
+  using ColorMeshPointer = typename ColorMeshType::Pointer;
+  using ColorPointType = typename ColorMeshType::PointType;
+  using ColorPixelType = typename ColorMeshType::PixelType;
 
+  using CellType = typename ColorMeshType::CellType;
+  using CellAutoPointer = typename CellType::CellAutoPointer;
+  using VTKConverterType = PolylineMeshToVTKPolyDataFilter<ColorMeshType>;
+  using MeshConverterType = VTKPolyDataToPolylineMeshFilter<ColorMeshType>;
 
-		typedef typename  ColorMeshType::CellType              CellType;
-		typedef typename CellType::CellAutoPointer       CellAutoPointer;
-		typedef PolylineMeshToVTKPolyDataFilter<ColorMeshType> VTKConverterType;
-		typedef VTKPolyDataToPolylineMeshFilter<ColorMeshType> MeshConverterType;
-		
-		typedef THistogramMesh                         HistogramMeshType;
-		typedef typename HistogramMeshType::Pointer  HistogramMeshPointer;
-		typedef typename HistogramMeshType::PointType  HistogramPointType;
-		typedef typename HistogramMeshType::PixelType  HistogramPixelType;
-		typedef typename HistogramMeshType::CellPixelType HistogramDataType;
-		typedef LabelPerPointVariableLengthVector<ColorPixelType , HistogramMeshType> MeasurementVectorType;	
-		typedef LabelsEntropyAndIntersectionMembershipFunction<MeasurementVectorType>  MembershipFunctionType;	
-		//typedef EuclideanMembershipFunction<MeasurementVectorType> MembershipFunctionType;
+  using HistogramMeshType = THistogramMesh;
+  using HistogramMeshPointer = typename HistogramMeshType::Pointer;
+  using HistogramPointType = typename HistogramMeshType::PointType;
+  using HistogramPixelType = typename HistogramMeshType::PixelType;
+  using HistogramDataType = typename HistogramMeshType::CellPixelType;
+  using MeasurementVectorType =
+      LabelPerPointVariableLengthVector<ColorPixelType, HistogramMeshType>;
+  using MembershipFunctionType =
+      LabelsEntropyAndIntersectionMembershipFunction<MeasurementVectorType>;
+  // typedef EuclideanMembershipFunction<MeasurementVectorType>
+  // MembershipFunctionType;
 
-		typedef typename ColorMeshType::PointsContainerPointer PointsContainerPointer;
+  using PointsContainerPointer = typename ColorMeshType::PointsContainerPointer;
 
-		typedef typename ColorMeshType::PointsContainer 		PointsContainer;
+  using PointsContainer = typename ColorMeshType::PointsContainer;
 
-		typedef TImage ImageType;
-		typedef typename ImageType::Pointer ImagePointer;
-		typedef typename ImageType::IndexType IndexType;
+  using ImageType = TImage;
+  using ImagePointer = typename ImageType::Pointer;
+  using IndexType = typename ImageType::IndexType;
 
-		void GetPolyDatas(std::vector<std::string> files, std::vector<vtkSmartPointer<vtkPolyData>>* polydatas, ImagePointer image);
-		std::vector<ColorMeshPointer>* FixSampleClusters(std::vector<vtkSmartPointer<vtkPolyData>> p , int i);
-		std::vector<ColorMeshPointer>* PolydataToMesh(std::vector<vtkSmartPointer<vtkPolyData>> p );
-		std::vector<HistogramMeshPointer>* ColorMeshToHistogramMesh(std::vector<ColorMeshPointer> basicMeshes, ImagePointer segmentation, bool removeInterHemispheric);
-		void  SetDirectionalNeighbors(std::vector<HistogramMeshPointer>* meshes, ImagePointer segmentation, std::vector<itk::Vector<float>> direcciones, bool symmetry);
-	
-		int GetAverageStreamline(ColorMeshPointer mesh);
-		float  GetStandardDeviation(HistogramMeshPointer mesh, int averageStreamlineIndex);
-		float GetDistance(HistogramMeshPointer mesh, int index_i, int index_j); 
-		
-			//typedef std::vector<int>                  PointDataType;
-		
-		
-		void SaveMesh(ColorMeshPointer mesh, ImagePointer image,std::string outputFilename, std::string refFiber);
+  void GetPolyDatas(std::vector<std::string> files,
+                    std::vector<vtkSmartPointer<vtkPolyData>> *polydatas,
+                    ImagePointer image);
+  std::vector<ColorMeshPointer> *
+  FixSampleClusters(std::vector<vtkSmartPointer<vtkPolyData>> p, int i);
+  std::vector<ColorMeshPointer> *
+  PolydataToMesh(std::vector<vtkSmartPointer<vtkPolyData>> p);
+  std::vector<HistogramMeshPointer> *
+  ColorMeshToHistogramMesh(std::vector<ColorMeshPointer> basicMeshes,
+                           ImagePointer segmentation,
+                           bool removeInterHemispheric);
+  void SetDirectionalNeighbors(std::vector<HistogramMeshPointer> *meshes,
+                               ImagePointer segmentation,
+                               std::vector<itk::Vector<float>> direcciones,
+                               bool symmetry);
 
+  int GetAverageStreamline(ColorMeshPointer mesh);
+  float GetStandardDeviation(HistogramMeshPointer mesh,
+                             int averageStreamlineIndex);
+  float GetDistance(HistogramMeshPointer mesh, int index_i, int index_j);
 
-		int SymmetricLabelId(int);
-		std::vector<itk::Vector<float>>* GetDirections(DirectionsType dir);
-		
-	protected:
-		ClusterTools(){}
-		~ClusterTools() {}
+  // typedef std::vector<int>                  PointDataType;
 
+  void SaveMesh(ColorMeshPointer mesh, ImagePointer image,
+                std::string outputFilename, std::string refFiber);
 
-	private:
-		ClusterTools (const Self&);
-		void operator=(const Self&);
+  int SymmetricLabelId(int);
+  std::vector<itk::Vector<float>> *GetDirections(DirectionsType dir);
+
+protected:
+  ClusterTools() {}
+  ~ClusterTools() {}
+
+private:
+  ClusterTools(const Self &);
+  void operator=(const Self &);
 };
-
 
 #include "ClusterTools.txx"
 #endif

@@ -24,40 +24,28 @@
 // Derivative-free method which may be faster if your
 // function is expensive to compute and many-dimensional.
 // Implemented from scratch from NR.
-class fs_powell : public vnl_nonlinear_minimizer
-{
+class fs_powell : public vnl_nonlinear_minimizer {
 public:
-
   //: Initialize a powell with the given cost function
-  fs_powell(fs_cost_function* functor)
-      : functor_(functor), linmin_xtol_(1e-4), initial_step_(1.0)
-  {}
+  fs_powell(fs_cost_function *functor)
+      : functor_(functor), linmin_xtol_(1e-4), initial_step_(1.0) {}
 
   //: Run minimization, place result in x.
-  ReturnCodes minimize(vnl_vector<double>& x, vnl_matrix<double>* xi);
+  ReturnCodes minimize(vnl_vector<double> &x, vnl_matrix<double> *xi);
 
   //: Set tolerance on line search parameter step
   //  Default value is 0.0001
-  void set_linmin_xtol(double tol)
-  {
-    linmin_xtol_ = tol;
-  }
+  void set_linmin_xtol(double tol) { linmin_xtol_ = tol; }
 
   //: Set initial step when bracketting minima along a line
   //  Default value is 1.0
-  void set_initial_step(double step)
-  {
-    initial_step_ = step;
-  }
+  void set_initial_step(double step) { initial_step_ = step; }
 
 protected:
-  fs_cost_function* functor_;
+  fs_cost_function *functor_;
 
   friend class fs_powell_1dfun;
-  void pub_report_eval(double e)
-  {
-    report_eval(e);
-  }
+  void pub_report_eval(double e) { report_eval(e); }
 
   //: Tolerance on line search parameter step
   double linmin_xtol_;

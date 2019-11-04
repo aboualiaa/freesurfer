@@ -7,14 +7,12 @@ namespace Ui {
 class DialogVolumeSegmentation;
 }
 
-class DialogVolumeSegmentation : public QDialog
-{
+class DialogVolumeSegmentation : public QDialog {
   Q_OBJECT
 
 public:
   explicit DialogVolumeSegmentation(QWidget *parent = 0);
   ~DialogVolumeSegmentation();
-
 
   bool ValidateInput();
 

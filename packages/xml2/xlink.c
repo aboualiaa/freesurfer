@@ -7,7 +7,6 @@
  * daniel@veillard.com
  */
 
-
 #define IN_LIBXML
 #include "libxml.h"
 
@@ -47,9 +46,9 @@
  *           Default setting and related functions		*
  *								*
  ****************************************************************/
- 
+
 static xlinkHandlerPtr xlinkDefaultHandler = NULL;
-static xlinkNodeDetectFunc	xlinkDefaultDetect = NULL;
+static xlinkNodeDetectFunc xlinkDefaultDetect = NULL;
 
 /**
  * xlinkGetDefaultHandler:
@@ -58,11 +57,7 @@ static xlinkNodeDetectFunc	xlinkDefaultDetect = NULL;
  *
  * Returns the current xlinkHandlerPtr value.
  */
-xlinkHandlerPtr
-xlinkGetDefaultHandler(void) {
-    return(xlinkDefaultHandler);
-}
-
+xlinkHandlerPtr xlinkGetDefaultHandler(void) { return (xlinkDefaultHandler); }
 
 /**
  * xlinkSetDefaultHandler:
@@ -70,9 +65,8 @@ xlinkGetDefaultHandler(void) {
  *
  * Set the default xlink handlers
  */
-void
-xlinkSetDefaultHandler(xlinkHandlerPtr handler) {
-    xlinkDefaultHandler = handler;
+void xlinkSetDefaultHandler(xlinkHandlerPtr handler) {
+  xlinkDefaultHandler = handler;
 }
 
 /**
@@ -82,10 +76,7 @@ xlinkSetDefaultHandler(xlinkHandlerPtr handler) {
  *
  * Returns the current function or NULL;
  */
-xlinkNodeDetectFunc
-xlinkGetDefaultDetect	(void) {
-    return(xlinkDefaultDetect);
-}
+xlinkNodeDetectFunc xlinkGetDefaultDetect(void) { return (xlinkDefaultDetect); }
 
 /**
  * xlinkSetDefaultDetect:
@@ -93,9 +84,8 @@ xlinkGetDefaultDetect	(void) {
  *
  * Set the default xlink detection routine
  */
-void 
-xlinkSetDefaultDetect	(xlinkNodeDetectFunc func) {
-    xlinkDefaultDetect = func;
+void xlinkSetDefaultDetect(xlinkNodeDetectFunc func) {
+  xlinkDefaultDetect = func;
 }
 
 /****************************************************************
@@ -104,7 +94,6 @@ xlinkSetDefaultDetect	(xlinkNodeDetectFunc func) {
  *								*
  ****************************************************************/
 
- 
 /**
  * xlinkIsLink:
  * @doc:  the document containing the node
@@ -119,64 +108,66 @@ xlinkSetDefaultDetect	(xlinkNodeDetectFunc func) {
  * Returns the xlinkType of the node (XLINK_TYPE_NONE if there is no
  *         link detected.
  */
-xlinkType 
-xlinkIsLink	(xmlDocPtr doc, xmlNodePtr node) {
-    xmlChar *type = NULL, *role = NULL;
-    xlinkType ret = XLINK_TYPE_NONE;
+xlinkType xlinkIsLink(xmlDocPtr doc, xmlNodePtr node) {
+  xmlChar *type = NULL, *role = NULL;
+  xlinkType ret = XLINK_TYPE_NONE;
 
-    if (node == NULL) return(XLINK_TYPE_NONE);
-    if (doc == NULL) doc = node->doc;
-    if ((doc != NULL) && (doc->type == XML_HTML_DOCUMENT_NODE)) {
-        /*
-	 * This is an HTML document.
-	 */
-    } else if ((node->ns != NULL) &&
-               (xmlStrEqual(node->ns->href, XHTML_NAMESPACE))) {
-	/*
-	 * !!!! We really need an IS_XHTML_ELEMENT function from HTMLtree.h @@@
-	 */
-        /*
-	 * This is an XHTML element within an XML document
-	 * Check whether it's one of the element able to carry links
-	 * and in that case if it holds the attributes.
-	 */
-    }
-
+  if (node == NULL)
+    return (XLINK_TYPE_NONE);
+  if (doc == NULL)
+    doc = node->doc;
+  if ((doc != NULL) && (doc->type == XML_HTML_DOCUMENT_NODE)) {
     /*
-     * We don't prevent a-priori having XML Linking constructs on
-     * XHTML elements
+     * This is an HTML document.
      */
-    type = xmlGetNsProp(node, BAD_CAST"type", XLINK_NAMESPACE);
-    if (type != NULL) {
-	if (xmlStrEqual(type, BAD_CAST "simple")) {
-            ret = XLINK_TYPE_SIMPLE;
-	} if (xmlStrEqual(type, BAD_CAST "extended")) {
-	    role = xmlGetNsProp(node, BAD_CAST "role", XLINK_NAMESPACE);
-	    if (role != NULL) {
-		xmlNsPtr xlink;
-		xlink = xmlSearchNs(doc, node, XLINK_NAMESPACE);
-		if (xlink == NULL) {
-		    /* Humm, fallback method */
-		    if (xmlStrEqual(role, BAD_CAST"xlink:external-linkset")) 
-			ret = XLINK_TYPE_EXTENDED_SET;
-		} else {
-		    xmlChar buf[200];
-		    snprintf((char *) buf, sizeof(buf), "%s:external-linkset",
-			     (char *) xlink->prefix);
-                    buf[sizeof(buf) - 1] = 0;
-		    if (xmlStrEqual(role, buf))
-			ret = XLINK_TYPE_EXTENDED_SET;
+  } else if ((node->ns != NULL) &&
+             (xmlStrEqual(node->ns->href, XHTML_NAMESPACE))) {
+    /*
+     * !!!! We really need an IS_XHTML_ELEMENT function from HTMLtree.h @@@
+     */
+    /*
+     * This is an XHTML element within an XML document
+     * Check whether it's one of the element able to carry links
+     * and in that case if it holds the attributes.
+     */
+  }
 
-		}
-
-	    }
-	    ret = XLINK_TYPE_EXTENDED;
-	}
+  /*
+   * We don't prevent a-priori having XML Linking constructs on
+   * XHTML elements
+   */
+  type = xmlGetNsProp(node, BAD_CAST "type", XLINK_NAMESPACE);
+  if (type != NULL) {
+    if (xmlStrEqual(type, BAD_CAST "simple")) {
+      ret = XLINK_TYPE_SIMPLE;
     }
+    if (xmlStrEqual(type, BAD_CAST "extended")) {
+      role = xmlGetNsProp(node, BAD_CAST "role", XLINK_NAMESPACE);
+      if (role != NULL) {
+        xmlNsPtr xlink;
+        xlink = xmlSearchNs(doc, node, XLINK_NAMESPACE);
+        if (xlink == NULL) {
+          /* Humm, fallback method */
+          if (xmlStrEqual(role, BAD_CAST "xlink:external-linkset"))
+            ret = XLINK_TYPE_EXTENDED_SET;
+        } else {
+          xmlChar buf[200];
+          snprintf((char *)buf, sizeof(buf), "%s:external-linkset",
+                   (char *)xlink->prefix);
+          buf[sizeof(buf) - 1] = 0;
+          if (xmlStrEqual(role, buf))
+            ret = XLINK_TYPE_EXTENDED_SET;
+        }
+      }
+      ret = XLINK_TYPE_EXTENDED;
+    }
+  }
 
-    if (type != NULL) xmlFree(type);
-    if (role != NULL) xmlFree(role);
-    return(ret);
+  if (type != NULL)
+    xmlFree(type);
+  if (role != NULL)
+    xmlFree(role);
+  return (ret);
 }
 #endif /* LIBXML_XPTR_ENABLED */
 #define bottom_xlink

@@ -3,9 +3,6 @@
 
 #include "TrackIO.h"
 
-class TrackExporter
-{
-	
-};
+class TrackExporter {};
 
 #endif

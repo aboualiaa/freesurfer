@@ -10,8 +10,7 @@ class PanelFCD;
 class LayerFCD;
 class QTreeWidgetItem;
 
-class PanelFCD : public PanelLayer
-{
+class PanelFCD : public PanelLayer {
   Q_OBJECT
 
 public:
@@ -25,9 +24,9 @@ public slots:
   void OnTextSigmaReturned();
   void OnSliderMinAreaReleased();
   void OnTextMinAreaReturned();
-  void UpdateLabelList(LayerFCD* layer = NULL);
+  void UpdateLabelList(LayerFCD *layer = NULL);
   void OnLabelSelectionChanged();
-  void OnLabelItemChanged(QTreeWidgetItem* item);
+  void OnLabelItemChanged(QTreeWidgetItem *item);
 
   void OnSliderOpacityChanged(int);
   void OnSliderThresholdChanged(int);
@@ -41,7 +40,7 @@ public slots:
 protected:
   void DoUpdateWidgets();
   void DoIdle();
-  virtual void ConnectLayer( Layer* layer );
+  virtual void ConnectLayer(Layer *layer);
 
 private:
   Ui::PanelFCD *ui;

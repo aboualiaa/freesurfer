@@ -37,11 +37,11 @@ struct fibheap {
   int (*fh_cmp_fnct)(void *, void *);
   int fh_n;
   int fh_Dl;
-  struct  fibheap_el **fh_cons;
-  struct  fibheap_el *fh_min;
-  struct  fibheap_el *fh_root;
-  void  *fh_neginf;
-  int fh_keys   : 1;
+  struct fibheap_el **fh_cons;
+  struct fibheap_el *fh_min;
+  struct fibheap_el *fh_root;
+  void *fh_neginf;
+  int fh_keys : 1;
 #ifdef FH_STATS
   int fh_maxn;
   int fh_ninserts;
@@ -55,25 +55,25 @@ struct fibheap {
 struct fibheap_el {
   int fhe_degree;
   int fhe_mark;
-  struct  fibheap_el *fhe_p;
-  struct  fibheap_el *fhe_child;
-  struct  fibheap_el *fhe_left;
-  struct  fibheap_el *fhe_right;
+  struct fibheap_el *fhe_p;
+  struct fibheap_el *fhe_child;
+  struct fibheap_el *fhe_left;
+  struct fibheap_el *fhe_right;
   int fhe_key;
-  void  *fhe_data;
+  void *fhe_data;
 };
 
-typedef int (*voidcmp)(void *, void *);
+using voidcmp = int (*)(void *, void *);
 
 /* functions for key heaps */
-struct fibheap *fh_makekeyheap(void);
+struct fibheap *fh_makekeyheap();
 struct fibheap_el *fh_insertkey(struct fibheap *, int, void *);
 int fh_minkey(struct fibheap *);
 int fh_replacekey(struct fibheap *, struct fibheap_el *, int);
 void *fh_replacekeydata(struct fibheap *, struct fibheap_el *, int, void *);
 
 /* functions for void * heaps */
-struct fibheap *fh_makeheap(void);
+struct fibheap *fh_makeheap();
 voidcmp fh_setcmp(struct fibheap *, voidcmp);
 void *fh_setneginf(struct fibheap *, void *);
 struct fibheap_el *fh_insert(struct fibheap *, void *);

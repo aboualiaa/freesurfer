@@ -30,20 +30,15 @@
 
 class LayerMRI;
 
-class VolumeFilterOpen : public VolumeFilter
-{
+class VolumeFilterOpen : public VolumeFilter {
 public:
-  VolumeFilterOpen( LayerMRI* input = 0, LayerMRI* output = 0, QObject* parent = 0 );
+  VolumeFilterOpen(LayerMRI *input = 0, LayerMRI *output = 0,
+                   QObject *parent = 0);
 
-  QString GetName()
-  {
-    return "Dilate";
-  }
+  QString GetName() { return "Dilate"; }
 
 protected:
   bool Execute();
 };
 
 #endif
-
-

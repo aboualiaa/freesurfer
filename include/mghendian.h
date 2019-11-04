@@ -84,7 +84,7 @@
 #endif
 
 #ifndef BIG_ENDIAN
-#define BIG_ENDIAN    4321
+#define BIG_ENDIAN 4321
 #endif
 
 #include <sys/isa_defs.h>
@@ -114,7 +114,7 @@
 #endif
 
 #ifndef BIG_ENDIAN
-#define BIG_ENDIAN    4321
+#define BIG_ENDIAN 4321
 #endif
 
 ///////////////////////////////////////////////////
@@ -122,7 +122,7 @@
 ///////////////////////////////////////////////////
 
 /* final check   bomb if not */
-#if !defined(BYTE_ORDER) || \
+#if !defined(BYTE_ORDER) ||                                                    \
     (BYTE_ORDER != BIG_ENDIAN && BYTE_ORDER != LITTLE_ENDIAN)
 /*  && BYTE_ORDER != PDP_ENDIAN) */
 #error "Undefined or invalid BYTE_ORDER";

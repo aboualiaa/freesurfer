@@ -25,10 +25,10 @@
  *
  */
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include "diag.h"
 #include "error.h"
@@ -49,7 +49,9 @@ static int sclustCompare(const void *a, const void *b);
 /*---------------------------------------------------------------
   sculstSrcVersion(void) - returns CVS version of this file.
   ---------------------------------------------------------------*/
-const char *sculstSrcVersion(void) { return ("$Id: surfcluster.c,v 1.36 2016/11/01 19:40:11 greve Exp $"); }
+const char *sculstSrcVersion() {
+  return ("$Id: surfcluster.c,v 1.36 2016/11/01 19:40:11 greve Exp $");
+}
 
 /* ------------------------------------------------------------
    sclustMapSurfClusters() - grows a clusters on the surface.  The
@@ -59,16 +61,17 @@ const char *sculstSrcVersion(void) { return ("$Id: surfcluster.c,v 1.36 2016/11/
    element of the MRI_SURF structure. If a vertex meets the cluster
    criteria, then undefval is set to the cluster number.
    ------------------------------------------------------------ */
-SCS *sclustMapSurfClusters(MRI_SURFACE *Surf, float thmin, float thmax, int thsign, 
-			   float minarea, int *nClusters, MATRIX *XFM, MRI *fwhmmap)
-{
+SCS *sclustMapSurfClusters(MRI_SURFACE *Surf, float thmin, float thmax,
+                           int thsign, float minarea, int *nClusters,
+                           MATRIX *XFM, MRI *fwhmmap) {
   SCS *scs, *scs_sorted;
   int vtx, vtx_inrange, vtx_clustno, CurrentClusterNo;
   float vtx_val, ClusterArea;
   int nVtxsInCluster;
 
   /* initialized all cluster numbers to 0 */
-  for (vtx = 0; vtx < Surf->nvertices; vtx++) Surf->vertices[vtx].undefval = 0; /* overloads this elem of struct */
+  for (vtx = 0; vtx < Surf->nvertices; vtx++)
+    Surf->vertices[vtx].undefval = 0; /* overloads this elem of struct */
 
   /* Go through each vertex looking for one that meets the threshold
      criteria and has not been previously assigned to a cluster.
@@ -83,7 +86,8 @@ SCS *sclustMapSurfClusters(MRI_SURFACE *Surf, float thmin, float thmax, int thsi
       sclustGrowSurfCluster(CurrentClusterNo, vtx, Surf, thmin, thmax, thsign);
       if (minarea > 0) {
         /* If the cluster does not meet the area criteria, delete it */
-        ClusterArea = sclustSurfaceArea(CurrentClusterNo, Surf, &nVtxsInCluster);
+        ClusterArea =
+            sclustSurfaceArea(CurrentClusterNo, Surf, &nVtxsInCluster);
         if (ClusterArea < minarea) {
           sclustZeroSurfaceClusterNo(CurrentClusterNo, Surf);
           continue;
@@ -94,7 +98,8 @@ SCS *sclustMapSurfClusters(MRI_SURFACE *Surf, float thmin, float thmax, int thsi
   }
 
   *nClusters = CurrentClusterNo - 1;
-  if (*nClusters == 0) return (NULL);
+  if (*nClusters == 0)
+    return (nullptr);
 
   /* Get a summary of the clusters */
   scs = SurfClusterSummary(Surf, XFM, nClusters, fwhmmap);
@@ -125,8 +130,8 @@ SCS *sclustMapSurfClusters(MRI_SURFACE *Surf, float thmin, float thmax, int thsi
    cluster criteria, then undefval is set to the ClusterNo.
    The ClustNo cannot be 0.
    ------------------------------------------------------------ */
-int sclustGrowSurfCluster(int ClusterNo, int SeedVtx, MRI_SURFACE *Surf, float thmin, float thmax, int thsign)
-{
+int sclustGrowSurfCluster(int ClusterNo, int SeedVtx, MRI_SURFACE *Surf,
+                          float thmin, float thmax, int thsign) {
   int nbr, nbr_vtx, nbr_inrange, nbr_clustno;
   float nbr_val;
 
@@ -140,11 +145,14 @@ int sclustGrowSurfCluster(int ClusterNo, int SeedVtx, MRI_SURFACE *Surf, float t
   for (nbr = 0; nbr < Surf->vertices_topology[SeedVtx].vnum; nbr++) {
     nbr_vtx = Surf->vertices_topology[SeedVtx].v[nbr];
     nbr_clustno = Surf->vertices[nbr_vtx].undefval;
-    if (nbr_clustno != 0) continue;
+    if (nbr_clustno != 0)
+      continue;
     nbr_val = Surf->vertices[nbr_vtx].val;
-    if (fabs(nbr_val) < thmin) continue;
+    if (fabs(nbr_val) < thmin)
+      continue;
     nbr_inrange = clustValueInRange(nbr_val, thmin, thmax, thsign);
-    if (!nbr_inrange) continue;
+    if (!nbr_inrange)
+      continue;
     sclustGrowSurfCluster(ClusterNo, nbr_vtx, Surf, thmin, thmax, thsign);
   }
   return (0);
@@ -154,8 +162,7 @@ int sclustGrowSurfCluster(int ClusterNo, int SeedVtx, MRI_SURFACE *Surf, float t
   cluster. Note:   MRIScomputeMetricProperties() must have been
   run on the surface.
   ----------------------------------------------------------------*/
-float sclustSurfaceArea(int ClusterNo, MRI_SURFACE *Surf, int *nvtxs)
-{
+float sclustSurfaceArea(int ClusterNo, MRI_SURFACE *Surf, int *nvtxs) {
   int vtx, vtx_clusterno;
   float ClusterArea;
 
@@ -163,7 +170,8 @@ float sclustSurfaceArea(int ClusterNo, MRI_SURFACE *Surf, int *nvtxs)
   ClusterArea = 0.0;
   for (vtx = 0; vtx < Surf->nvertices; vtx++) {
     vtx_clusterno = Surf->vertices[vtx].undefval;
-    if (vtx_clusterno != ClusterNo) continue;
+    if (vtx_clusterno != ClusterNo)
+      continue;
     if (!Surf->group_avg_vtxarea_loaded)
       ClusterArea += Surf->vertices[vtx].area;
     else
@@ -211,16 +219,16 @@ float sclustSurfaceArea(int ClusterNo, MRI_SURFACE *Surf, int *nvtxs)
   field in Surf is used. If UseArea==1, then the value at a vertex
   is weighted by the area at the vertex.
   ----------------------------------------------------------------*/
-float sclustWeight(int ClusterNo, MRI_SURFACE *Surf, MRI *mri, int UseArea)
-{
+float sclustWeight(int ClusterNo, MRI_SURFACE *Surf, MRI *mri, int UseArea) {
   int vtx, vtx_clusterno;
   double ClusterWeight, h, vtxarea;
 
   ClusterWeight = 0.0;
   for (vtx = 0; vtx < Surf->nvertices; vtx++) {
     vtx_clusterno = Surf->vertices[vtx].undefval;
-    if (vtx_clusterno != ClusterNo) continue;
-    if (mri == NULL)
+    if (vtx_clusterno != ClusterNo)
+      continue;
+    if (mri == nullptr)
       h = Surf->vertices[vtx].val;
     else
       h = MRIgetVoxVal(mri, vtx, 0, 0, 0);
@@ -242,15 +250,15 @@ float sclustWeight(int ClusterNo, MRI_SURFACE *Surf, MRI *mri, int UseArea)
   sclustSurfaceMax() - returns the maximum intensity value of
   inside a given cluster and the vertex at which it occured.
 ----------------------------------------------------------------*/
-float sclustSurfaceMax(int ClusterNo, MRI_SURFACE *Surf, int *vtxmax)
-{
+float sclustSurfaceMax(int ClusterNo, MRI_SURFACE *Surf, int *vtxmax) {
   int vtx, vtx_clusterno, first_hit;
   float vtx_val, vtx_val_max = 0;
 
   first_hit = 1;
   for (vtx = 0; vtx < Surf->nvertices; vtx++) {
     vtx_clusterno = Surf->vertices[vtx].undefval;
-    if (vtx_clusterno != ClusterNo) continue;
+    if (vtx_clusterno != ClusterNo)
+      continue;
 
     vtx_val = Surf->vertices[vtx].val;
     if (first_hit) {
@@ -271,8 +279,8 @@ float sclustSurfaceMax(int ClusterNo, MRI_SURFACE *Surf, int *vtxmax)
 /*----------------------------------------------------------------
   sclustSurfaceCentroid() - returns the centroid of a cluster.
 ----------------------------------------------------------------*/
-int sclustSurfaceCentroid(const int ClusterNo, const MRI_SURFACE *Surf, double *xyz)
-{
+int sclustSurfaceCentroid(const int ClusterNo, const MRI_SURFACE *Surf,
+                          double *xyz) {
   int vtx, vtx_clusterno, nvtx;
   float xsum, ysum, zsum;
   nvtx = 0;
@@ -281,7 +289,8 @@ int sclustSurfaceCentroid(const int ClusterNo, const MRI_SURFACE *Surf, double *
   zsum = 0;
   for (vtx = 0; vtx < Surf->nvertices; vtx++) {
     vtx_clusterno = Surf->vertices[vtx].undefval;
-    if (vtx_clusterno != ClusterNo) continue;
+    if (vtx_clusterno != ClusterNo)
+      continue;
     xsum += Surf->vertices[vtx].x;
     ysum += Surf->vertices[vtx].y;
     zsum += Surf->vertices[vtx].z;
@@ -301,13 +310,13 @@ int sclustSurfaceCentroid(const int ClusterNo, const MRI_SURFACE *Surf, double *
   is good for pruning clusters that do not meet some other
   criteria (eg, area threshold).
   ----------------------------------------------------------------*/
-float sclustZeroSurfaceClusterNo(int ClusterNo, MRI_SURFACE *Surf)
-{
+float sclustZeroSurfaceClusterNo(int ClusterNo, MRI_SURFACE *Surf) {
   int vtx, vtx_clusterno;
 
   for (vtx = 0; vtx < Surf->nvertices; vtx++) {
     vtx_clusterno = Surf->vertices[vtx].undefval;
-    if (vtx_clusterno == ClusterNo) Surf->vertices[vtx].undefval = 0;
+    if (vtx_clusterno == ClusterNo)
+      Surf->vertices[vtx].undefval = 0;
   }
 
   return (0);
@@ -317,13 +326,13 @@ float sclustZeroSurfaceClusterNo(int ClusterNo, MRI_SURFACE *Surf)
   that are not assocated with a cluster. The cluster number is the
   undefval member of the surface structure.
   ----------------------------------------------------------------*/
-float sclustZeroSurfaceNonClusters(MRI_SURFACE *Surf)
-{
+float sclustZeroSurfaceNonClusters(MRI_SURFACE *Surf) {
   int vtx, vtx_clusterno;
 
   for (vtx = 0; vtx < Surf->nvertices; vtx++) {
     vtx_clusterno = Surf->vertices[vtx].undefval;
-    if (vtx_clusterno == 0) Surf->vertices[vtx].val = 0.0;
+    if (vtx_clusterno == 0)
+      Surf->vertices[vtx].val = 0.0;
   }
 
   return (0);
@@ -333,8 +342,7 @@ float sclustZeroSurfaceNonClusters(MRI_SURFACE *Surf)
   cluster number. The cluster number is the undefval member of the
   surface structure.
   ----------------------------------------------------------------*/
-float sclustSetSurfaceValToClusterNo(MRI_SURFACE *Surf)
-{
+float sclustSetSurfaceValToClusterNo(MRI_SURFACE *Surf) {
   int vtx, vtx_clusterno;
 
   for (vtx = 0; vtx < Surf->nvertices; vtx++) {
@@ -348,8 +356,7 @@ float sclustSetSurfaceValToClusterNo(MRI_SURFACE *Surf)
   sclustSetSurfaceClusterToCWP() - sets the value of a vertex to
   -log10(cluster-wise pvalue).
   ----------------------------------------------------------------*/
-float sclustSetSurfaceValToCWP(MRI_SURFACE *Surf, SCS *scs)
-{
+float sclustSetSurfaceValToCWP(MRI_SURFACE *Surf, SCS *scs) {
   int vtx, vtx_clusterno;
   float val;
 
@@ -376,14 +383,14 @@ float sclustSetSurfaceValToCWP(MRI_SURFACE *Surf, SCS *scs)
   just returns the largest cluster number, which will be the
   number of clusters if there are no holes.
   ----------------------------------------------------------------*/
-float sclustCountClusters(MRI_SURFACE *Surf)
-{
+float sclustCountClusters(MRI_SURFACE *Surf) {
   int vtx, vtx_clusterno, maxclusterno;
 
   maxclusterno = 0;
   for (vtx = 0; vtx < Surf->nvertices; vtx++) {
     vtx_clusterno = Surf->vertices[vtx].undefval;
-    if (maxclusterno < vtx_clusterno) maxclusterno = vtx_clusterno;
+    if (maxclusterno < vtx_clusterno)
+      maxclusterno = vtx_clusterno;
   }
   return (maxclusterno);
 }
@@ -392,39 +399,42 @@ float sclustCountClusters(MRI_SURFACE *Surf)
   SurfClusterSummary() - (was "Fast") gives identical results as
     SurfClusterSummaryOld() but much, much faster.
   ----------------------------------------------------------------*/
-SCS *SurfClusterSummary(MRI_SURFACE *Surf, MATRIX *T, int *nClusters, MRI *fwhmmap)
-{
+SCS *SurfClusterSummary(MRI_SURFACE *Surf, MATRIX *T, int *nClusters,
+                        MRI *fwhmmap) {
   int n, vtx, clusterno;
   SURFCLUSTERSUM *scs;
   MATRIX *xyz, *xyzxfm;
   float vtxarea, vtxval;
   int msecTime;
-  double *weightvtx, *weightarea;  // to be consistent with orig code
+  double *weightvtx, *weightarea; // to be consistent with orig code
   double fwhm;
   VERTEX *v;
-  int ClusterUseAvgVertexArea=0;
+  int ClusterUseAvgVertexArea = 0;
   double avgvertexarea = 0, fwhmmean2 = 0;
 
-  if(Surf->group_avg_vtxarea_loaded)
-    avgvertexarea = Surf->group_avg_surface_area/Surf->nvertices;
+  if (Surf->group_avg_vtxarea_loaded)
+    avgvertexarea = Surf->group_avg_surface_area / Surf->nvertices;
   else
-    avgvertexarea = Surf->total_area/Surf->nvertices;
+    avgvertexarea = Surf->total_area / Surf->nvertices;
 
-  if(getenv("FS_CLUSTER_USE_AVG_VERTEX_AREA") != NULL){
+  if (getenv("FS_CLUSTER_USE_AVG_VERTEX_AREA") != nullptr) {
     // When setenv FS_CLUSTER_USE_AVG_VERTEX_AREA 1, this computes the cluster
-    // size as the vertex count * average area rather than the sum of the 
+    // size as the vertex count * average area rather than the sum of the
     // of each vertex area
-    sscanf(getenv("FS_CLUSTER_USE_AVG_VERTEX_AREA"),"%d",&ClusterUseAvgVertexArea);
+    sscanf(getenv("FS_CLUSTER_USE_AVG_VERTEX_AREA"), "%d",
+           &ClusterUseAvgVertexArea);
   }
-  if(Gdiag_no > 0){
-    printf("ClusterUseAvgVertexArea = %d, avgvertexarea = %g\n",ClusterUseAvgVertexArea,avgvertexarea);
+  if (Gdiag_no > 0) {
+    printf("ClusterUseAvgVertexArea = %d, avgvertexarea = %g\n",
+           ClusterUseAvgVertexArea, avgvertexarea);
     fflush(stdout);
   }
 
   Timer mytimer;
 
   *nClusters = sclustCountClusters(Surf);
-  if (*nClusters == 0) return (NULL);
+  if (*nClusters == 0)
+    return (nullptr);
 
   xyz = MatrixAlloc(4, 1, MATRIX_REAL);
   xyz->rptr[4][1] = 1;
@@ -434,25 +444,27 @@ SCS *SurfClusterSummary(MRI_SURFACE *Surf, MATRIX *T, int *nClusters, MRI *fwhmm
   weightvtx = (double *)calloc(*nClusters, sizeof(double));
   weightarea = (double *)calloc(*nClusters, sizeof(double));
 
-  if(fwhmmap){
-    double fwhmsum=0, fwhmmean;
-    int nhits=0;
+  if (fwhmmap) {
+    double fwhmsum = 0, fwhmmean;
+    int nhits = 0;
     for (vtx = 0; vtx < Surf->nvertices; vtx++) {
-      fwhm = MRIgetVoxVal(fwhmmap,vtx,0,0,0);
-      if(fwhm > 0){
-	fwhmsum += fwhm;
-	nhits ++;
+      fwhm = MRIgetVoxVal(fwhmmap, vtx, 0, 0, 0);
+      if (fwhm > 0) {
+        fwhmsum += fwhm;
+        nhits++;
       }
     }
-    fwhmmean = fwhmsum/nhits;
-    if(Gdiag_no > 0) printf("fwhm mean = %g\n",fwhmmean);
-    fwhmmean2 = (fwhmmean*fwhmmean);
+    fwhmmean = fwhmsum / nhits;
+    if (Gdiag_no > 0)
+      printf("fwhm mean = %g\n", fwhmmean);
+    fwhmmean2 = (fwhmmean * fwhmmean);
   }
 
   for (vtx = 0; vtx < Surf->nvertices; vtx++) {
     v = &(Surf->vertices[vtx]);
     clusterno = v->undefval;
-    if (clusterno == 0) continue;
+    if (clusterno == 0)
+      continue;
 
     n = clusterno - 1;
     scs[n].nmembers++;
@@ -469,23 +481,25 @@ SCS *SurfClusterSummary(MRI_SURFACE *Surf, MATRIX *T, int *nClusters, MRI *fwhmm
       scs[n].cz = 0.0;
     }
 
-    if(ClusterUseAvgVertexArea == 0){
+    if (ClusterUseAvgVertexArea == 0) {
       if (!Surf->group_avg_vtxarea_loaded)
-	vtxarea = v->area;
+        vtxarea = v->area;
       else
-	vtxarea = v->group_avg_area;
-    }
-    else vtxarea = avgvertexarea; // effectively measure cluster size as vertex count
+        vtxarea = v->group_avg_area;
+    } else
+      vtxarea =
+          avgvertexarea; // effectively measure cluster size as vertex count
 
     // Convert to resels
-    if(fwhmmap){
-      fwhm = MRIgetVoxVal(fwhmmap,vtx,0,0,0);
-      if(fwhm == 0) fwhm = 1.0; // invalid, not sure what to do 
+    if (fwhmmap) {
+      fwhm = MRIgetVoxVal(fwhmmap, vtx, 0, 0, 0);
+      if (fwhm == 0)
+        fwhm = 1.0; // invalid, not sure what to do
       // Using fwhmmean2 here just provides a rescaling so that the
       // final cluster areas are reasonable. This might have a mild
       // effect on the distribution of cluster sizes when performing
       // non-stationary perm
-      vtxarea *= (fwhmmean2)/(fwhm*fwhm);
+      vtxarea *= (fwhmmean2) / (fwhm * fwhm);
     }
 
     scs[n].area += vtxarea;
@@ -499,7 +513,7 @@ SCS *SurfClusterSummary(MRI_SURFACE *Surf, MATRIX *T, int *nClusters, MRI *fwhmm
     scs[n].cx += v->x;
     scs[n].cy += v->y;
     scs[n].cz += v->z;
-  }  // end loop over vertices
+  } // end loop over vertices
 
   for (n = 0; n < *nClusters; n++) {
     scs[n].clusterno = n + 1;
@@ -511,7 +525,7 @@ SCS *SurfClusterSummary(MRI_SURFACE *Surf, MATRIX *T, int *nClusters, MRI *fwhmm
     scs[n].cx /= scs[n].nmembers;
     scs[n].cy /= scs[n].nmembers;
     scs[n].cz /= scs[n].nmembers;
-    if (T != NULL) {
+    if (T != nullptr) {
       xyz->rptr[1][1] = scs[n].x;
       xyz->rptr[2][1] = scs[n].y;
       xyz->rptr[3][1] = scs[n].z;
@@ -535,14 +549,14 @@ SCS *SurfClusterSummary(MRI_SURFACE *Surf, MATRIX *T, int *nClusters, MRI *fwhmm
   free(weightvtx);
   free(weightarea);
   msecTime = mytimer.milliseconds();
-  if (Gdiag_no > 0) printf("SurfClusterSumFast: n=%d, t = %g\n", *nClusters, msecTime / 1000.0);
+  if (Gdiag_no > 0)
+    printf("SurfClusterSumFast: n=%d, t = %g\n", *nClusters, msecTime / 1000.0);
 
   return (scs);
 }
 
 /*----------------------------------------------------------------*/
-SCS *SurfClusterSummaryOld(MRI_SURFACE *Surf, MATRIX *T, int *nClusters)
-{
+SCS *SurfClusterSummaryOld(MRI_SURFACE *Surf, MATRIX *T, int *nClusters) {
   int n;
   SURFCLUSTERSUM *scs;
   MATRIX *xyz, *xyzxfm;
@@ -552,17 +566,20 @@ SCS *SurfClusterSummaryOld(MRI_SURFACE *Surf, MATRIX *T, int *nClusters)
 
   // Must explicity "setenv USE_FAST_SURF_SMOOTHER 0" to turn off fast
   UFSS = getenv("USE_FAST_SURF_SMOOTHER");
-  if (!UFSS) UFSS = "1";
+  if (!UFSS)
+    UFSS = "1";
   if (strcmp(UFSS, "0")) {
-    scs = SurfClusterSummary(Surf, T, nClusters, NULL);
+    scs = SurfClusterSummary(Surf, T, nClusters, nullptr);
     return (scs);
   }
-  if (Gdiag_no > 0) printf("SurfClusterSummary()\n");
+  if (Gdiag_no > 0)
+    printf("SurfClusterSummary()\n");
 
   Timer mytimer;
 
   *nClusters = sclustCountClusters(Surf);
-  if (*nClusters == 0) return (NULL);
+  if (*nClusters == 0)
+    return (nullptr);
 
   xyz = MatrixAlloc(4, 1, MATRIX_REAL);
   xyz->rptr[4][1] = 1;
@@ -573,8 +590,8 @@ SCS *SurfClusterSummaryOld(MRI_SURFACE *Surf, MATRIX *T, int *nClusters)
   for (n = 0; n < *nClusters; n++) {
     scs[n].clusterno = n + 1;
     scs[n].area = sclustSurfaceArea(n + 1, Surf, &scs[n].nmembers);
-    scs[n].weightvtx = sclustWeight(n + 1, Surf, NULL, 0);
-    scs[n].weightarea = sclustWeight(n + 1, Surf, NULL, 1);
+    scs[n].weightvtx = sclustWeight(n + 1, Surf, nullptr, 0);
+    scs[n].weightarea = sclustWeight(n + 1, Surf, nullptr, 1);
     scs[n].maxval = sclustSurfaceMax(n + 1, Surf, &scs[n].vtxmaxval);
     scs[n].x = Surf->vertices[scs[n].vtxmaxval].x;
     scs[n].y = Surf->vertices[scs[n].vtxmaxval].y;
@@ -583,7 +600,7 @@ SCS *SurfClusterSummaryOld(MRI_SURFACE *Surf, MATRIX *T, int *nClusters)
     scs[n].cx = centroidxyz[0];
     scs[n].cy = centroidxyz[1];
     scs[n].cz = centroidxyz[2];
-    if (T != NULL) {
+    if (T != nullptr) {
       xyz->rptr[1][1] = scs[n].x;
       xyz->rptr[2][1] = scs[n].y;
       xyz->rptr[3][1] = scs[n].z;
@@ -605,43 +622,34 @@ SCS *SurfClusterSummaryOld(MRI_SURFACE *Surf, MATRIX *T, int *nClusters)
   MatrixFree(&xyz);
   MatrixFree(&xyzxfm);
   msecTime = mytimer.milliseconds();
-  if (Gdiag_no > 0) printf("SurfClusterSum: n=%d, t = %g\n", *nClusters, msecTime / 1000.0);
+  if (Gdiag_no > 0)
+    printf("SurfClusterSum: n=%d, t = %g\n", *nClusters, msecTime / 1000.0);
 
   return (scs);
 }
 /*----------------------------------------------------------------*/
-int DumpSurfClusterSum(FILE *fp, SCS *scs, int nClusters)
-{
+int DumpSurfClusterSum(FILE *fp, SCS *scs, int nClusters) {
   int n;
 
   for (n = 0; n < nClusters; n++) {
     fprintf(fp,
             "%4d  %4d  %8.4f  %6d    %6.2f  %4d   %5.1f %5.1f %5.1f   "
             "%5.1f %5.1f %5.1f\n",
-            n,
-            scs[n].clusterno,
-            scs[n].maxval,
-            scs[n].vtxmaxval,
-            scs[n].area,
-            scs[n].nmembers,
-            scs[n].x,
-            scs[n].y,
-            scs[n].z,
-            scs[n].xxfm,
-            scs[n].yxfm,
-            scs[n].zxfm);
+            n, scs[n].clusterno, scs[n].maxval, scs[n].vtxmaxval, scs[n].area,
+            scs[n].nmembers, scs[n].x, scs[n].y, scs[n].z, scs[n].xxfm,
+            scs[n].yxfm, scs[n].zxfm);
   }
   return (0);
 }
 /*----------------------------------------------------------------*/
-SCS *SortSurfClusterSum(SCS *scs, int nClusters)
-{
+SCS *SortSurfClusterSum(SCS *scs, int nClusters) {
   SCS *scs_sorted;
   int n;
 
   scs_sorted = (SCS *)calloc(nClusters, sizeof(SCS));
 
-  for (n = 0; n < nClusters; n++) memmove(&scs_sorted[n], &scs[n], sizeof(SCS));
+  for (n = 0; n < nClusters; n++)
+    memmove(&scs_sorted[n], &scs[n], sizeof(SCS));
 
   /* Note: scs_sorted.clusterno does not changed */
   qsort((void *)scs_sorted, nClusters, sizeof(SCS), sclustCompare);
@@ -655,8 +663,7 @@ SCS *SortSurfClusterSum(SCS *scs, int nClusters)
   (SCS). It is assumed that the scs.clusterno in the sorted SCS
   is the cluster id that corresponds to the original cluster id.
   ----------------------------------------------------------------*/
-int sclustReMap(MRI_SURFACE *Surf, int nClusters, SCS *scs_sorted)
-{
+int sclustReMap(MRI_SURFACE *Surf, int nClusters, SCS *scs_sorted) {
   int vtx, c, cOld;
   int *Orig2Sorted;
 
@@ -677,20 +684,21 @@ int sclustReMap(MRI_SURFACE *Surf, int nClusters, SCS *scs_sorted)
   }
 
   // Change cluster numbers in table
-  for (c = 1; c <= nClusters; c++) scs_sorted[c - 1].clusterno = c;
+  for (c = 1; c <= nClusters; c++)
+    scs_sorted[c - 1].clusterno = c;
 
   free(Orig2Sorted);
 
   return (0);
 }
 /* Older, slower version of sclustReMap()*/
-int sclustReMap0(MRI_SURFACE *Surf, int nClusters, SCS *scs_sorted)
-{
+int sclustReMap0(MRI_SURFACE *Surf, int nClusters, SCS *scs_sorted) {
   int vtx, vtx_clusterno, c;
 
   if (Gdiag_no > 1) {
     printf("sclustReMap:\n");
-    for (c = 1; c <= nClusters; c++) printf("new = %3d old = %3d\n", c, scs_sorted[c - 1].clusterno);
+    for (c = 1; c <= nClusters; c++)
+      printf("new = %3d old = %3d\n", c, scs_sorted[c - 1].clusterno);
   }
 
   for (vtx = 0; vtx < Surf->nvertices; vtx++) {
@@ -714,21 +722,26 @@ int sclustReMap0(MRI_SURFACE *Surf, int nClusters, SCS *scs_sorted)
   sclustCompare() - compares two surface cluster summaries (for
   use with qsort().
   ----------------------------------------------------------------*/
-static int sclustCompare(const void *a, const void *b)
-{
+static int sclustCompare(const void *a, const void *b) {
   SCS sc1, sc2;
 
   sc1 = *((SURFCLUSTERSUM *)a);
   sc2 = *((SURFCLUSTERSUM *)b);
 
-  if (sc1.pval_clusterwise < sc2.pval_clusterwise) return (-1);
-  if (sc1.pval_clusterwise > sc2.pval_clusterwise) return (+1);
+  if (sc1.pval_clusterwise < sc2.pval_clusterwise)
+    return (-1);
+  if (sc1.pval_clusterwise > sc2.pval_clusterwise)
+    return (+1);
 
-  if (sc1.area > sc2.area) return (-1);
-  if (sc1.area < sc2.area) return (+1);
+  if (sc1.area > sc2.area)
+    return (-1);
+  if (sc1.area < sc2.area)
+    return (+1);
 
-  if (fabs(sc1.maxval) > fabs(sc2.maxval)) return (-1);
-  if (fabs(sc1.maxval) < fabs(sc2.maxval)) return (+1);
+  if (fabs(sc1.maxval) > fabs(sc2.maxval))
+    return (-1);
+  if (fabs(sc1.maxval) < fabs(sc2.maxval))
+    return (+1);
 
   return (0);
 }
@@ -737,16 +750,17 @@ static int sclustCompare(const void *a, const void *b)
   sclustMaxClusterArea() - returns the area of the cluster with the
   maximum area.
   -------------------------------------------------------------------*/
-double sclustMaxClusterArea(SURFCLUSTERSUM *scs, int nClusters)
-{
+double sclustMaxClusterArea(SURFCLUSTERSUM *scs, int nClusters) {
   int n;
   double maxarea;
 
-  if (nClusters == 0) return (0);
+  if (nClusters == 0)
+    return (0);
 
   maxarea = scs[0].area;
   for (n = 0; n < nClusters; n++)
-    if (maxarea < scs[n].area) maxarea = scs[n].area;
+    if (maxarea < scs[n].area)
+      maxarea = scs[n].area;
   return (maxarea);
 }
 
@@ -754,16 +768,17 @@ double sclustMaxClusterArea(SURFCLUSTERSUM *scs, int nClusters)
   sclustMaxClusterCount() - returns the area of the cluster with the
   maximum number of members (count)
   -------------------------------------------------------------------*/
-int sclustMaxClusterCount(SURFCLUSTERSUM *scs, int nClusters)
-{
+int sclustMaxClusterCount(SURFCLUSTERSUM *scs, int nClusters) {
   int n;
   int maxcount;
 
-  if (nClusters == 0) return (0);
+  if (nClusters == 0)
+    return (0);
 
   maxcount = scs[0].nmembers;
   for (n = 0; n < nClusters; n++)
-    if (maxcount < scs[n].nmembers) maxcount = scs[n].nmembers;
+    if (maxcount < scs[n].nmembers)
+      maxcount = scs[n].nmembers;
   return (maxcount);
 }
 
@@ -771,12 +786,13 @@ int sclustMaxClusterCount(SURFCLUSTERSUM *scs, int nClusters)
   sclustMaxClusterWeightVtx() - returns the weightvtx of the cluster
   with the maximum weightvtx.
   -------------------------------------------------------------------*/
-float sclustMaxClusterWeightVtx(SURFCLUSTERSUM *scs, int nClusters, int thsign)
-{
+float sclustMaxClusterWeightVtx(SURFCLUSTERSUM *scs, int nClusters,
+                                int thsign) {
   int n;
   float maxw, w;
 
-  if (nClusters == 0) return (0);
+  if (nClusters == 0)
+    return (0);
 
   if (thsign == 0)
     maxw = 0;
@@ -784,23 +800,27 @@ float sclustMaxClusterWeightVtx(SURFCLUSTERSUM *scs, int nClusters, int thsign)
     maxw = -thsign * 10e10;
   for (n = 0; n < nClusters; n++) {
     w = scs[n].weightvtx;
-    if (thsign == 0 && fabs(maxw) < fabs(w)) maxw = w;
-    if (thsign == +1 && maxw < w) maxw = w;
-    if (thsign == -1 && maxw > w) maxw = w;
+    if (thsign == 0 && fabs(maxw) < fabs(w))
+      maxw = w;
+    if (thsign == +1 && maxw < w)
+      maxw = w;
+    if (thsign == -1 && maxw > w)
+      maxw = w;
   }
   return (maxw);
 }
 
 /*---------------------------------------------------------------*/
-SCS *sclustPruneByCWPval(SCS *ClusterList, int nclusters, double cwpvalthresh, int *nPruned, MRIS *surf)
-{
+SCS *sclustPruneByCWPval(SCS *ClusterList, int nclusters, double cwpvalthresh,
+                         int *nPruned, MRIS *surf) {
   int n, nth, vtxno, map[10000];
   SCS *scs;
 
   // Construct a new SCS with pruned clusters
   nth = 0;
   for (n = 0; n < nclusters; n++)
-    if (ClusterList[n].pval_clusterwise <= cwpvalthresh) nth++;
+    if (ClusterList[n].pval_clusterwise <= cwpvalthresh)
+      nth++;
   *nPruned = nth;
 
   scs = (SCS *)calloc(*nPruned, sizeof(SCS));
@@ -814,14 +834,14 @@ SCS *sclustPruneByCWPval(SCS *ClusterList, int nclusters, double cwpvalthresh, i
   }
 
   for (vtxno = 0; vtxno < surf->nvertices; vtxno++) {
-    n = surf->vertices[vtxno].undefval;  // 1-based
-    if (n == 0) continue;
+    n = surf->vertices[vtxno].undefval; // 1-based
+    if (n == 0)
+      continue;
     if (ClusterList[n - 1].pval_clusterwise > cwpvalthresh) {
       // Remove clusters/values from surface
       surf->vertices[vtxno].undefval = 0;
       surf->vertices[vtxno].val = 0;
-    }
-    else {
+    } else {
       // Re-number
       surf->vertices[vtxno].undefval = map[n - 1] + 1;
     }
@@ -834,15 +854,14 @@ SCS *sclustPruneByCWPval(SCS *ClusterList, int nclusters, double cwpvalthresh, i
    int sclustAnnot(MRIS *surf, int NClusters)
    Convert clusters into annotation
    ------------------------------------------------------------*/
-int sclustAnnot(MRIS *surf, int NClusters)
-{
+int sclustAnnot(MRIS *surf, int NClusters) {
   COLOR_TABLE *ct;
   int vtxno, vtx_clusterno, annot, n;
 
   ct = CTABalloc(NClusters + 1);
   surf->ct = ct;
 
-  for (n = 1; n < NClusters + 1; n++)  // no cluster 0
+  for (n = 1; n < NClusters + 1; n++) // no cluster 0
     sprintf(surf->ct->entries[n]->name, "%s-%03d", "cluster", n);
 
   for (vtxno = 0; vtxno < surf->nvertices; vtxno++) {
@@ -870,15 +889,15 @@ int sclustAnnot(MRIS *surf, int NClusters)
   is a recursive function. Recursive calls will have the
   the vtxno >= 0, so set vtxno = -1 when you call this function.
 */
-int sclustGrowByDist(MRIS *surf, int seedvtxno, double dthresh, int shape, int vtxno, int *vtxlist)
-{
+int sclustGrowByDist(MRIS *surf, int seedvtxno, double dthresh, int shape,
+                     int vtxno, int *vtxlist) {
   static double radius = 0, radius2 = 0;
   static int nhits = 0, ncalls = 0;
-  static VERTEX *v1 = NULL;
+  static VERTEX *v1 = nullptr;
   double theta = 0, costheta = 0, d = 0;
   int nthnbr, nbrvtxno;
 
-  if (vtxlist == NULL) {
+  if (vtxlist == nullptr) {
     printf("ERROR: vtxlist is NULL\n");
     return (-1);
   }
@@ -886,7 +905,8 @@ int sclustGrowByDist(MRIS *surf, int seedvtxno, double dthresh, int shape, int v
   // This is just a check to make sure that the caller has done the right thing.
   // Note: this check does not work after the first call.
   if (ncalls == 0 && vtxno >= 0) {
-    printf("ERROR: set vtxno to a negative value when calling this function!\n");
+    printf(
+        "ERROR: set vtxno to a negative value when calling this function!\n");
     return (-1);
   }
 
@@ -899,28 +919,31 @@ int sclustGrowByDist(MRIS *surf, int seedvtxno, double dthresh, int shape, int v
       radius2 = (v1->x * v1->x + v1->y * v1->y + v1->z * v1->z);
       radius = sqrt(radius2);
     }
-    for (vtxno = 0; vtxno < surf->nvertices; vtxno++) surf->vertices[vtxno].undefval = 0;
+    for (vtxno = 0; vtxno < surf->nvertices; vtxno++)
+      surf->vertices[vtxno].undefval = 0;
     vtxno = seedvtxno;
   }
 
-  VERTEX_TOPOLOGY const * const v2t = &surf->vertices_topology[vtxno];
-  VERTEX    	        * const v2  = &surf->vertices         [vtxno];
+  VERTEX_TOPOLOGY const *const v2t = &surf->vertices_topology[vtxno];
+  VERTEX *const v2 = &surf->vertices[vtxno];
   ncalls++;
 
-  if (v2->undefval) return (0);
+  if (v2->undefval)
+    return (0);
 
   if (shape == SPHERICAL_COORDS) {
     costheta = ((v1->x * v2->x) + (v1->y * v2->y) + (v1->z * v2->z)) / radius2;
     theta = acos(costheta);
     d = radius * theta;
     // printf("%g %g %g %g\n",costheta,theta,radius,radius2);
-  }
-  else {
-    d = sqrt((v1->x - v2->x) * (v1->x - v2->x) + (v1->y - v2->y) * (v1->y - v2->y));
+  } else {
+    d = sqrt((v1->x - v2->x) * (v1->x - v2->x) +
+             (v1->y - v2->y) * (v1->y - v2->y));
   }
 
   // Check distance against threshold
-  if (d > dthresh) return (0);
+  if (d > dthresh)
+    return (0);
 
   // Add to the list
   vtxlist[nhits] = vtxno;
@@ -941,25 +964,24 @@ int sclustGrowByDist(MRIS *surf, int seedvtxno, double dthresh, int shape, int v
 }
 
 /*!
-  \fn int sclustSaveAsPointSet(char *fname, SCS *scslist, int NClusters, MRIS *surf)
-  \brief Outputs a file that can be loaded into freeview with -c
+  \fn int sclustSaveAsPointSet(char *fname, SCS *scslist, int NClusters, MRIS
+  *surf) \brief Outputs a file that can be loaded into freeview with -c
  */
-int sclustSaveAsPointSet(char *fname, SCS *scslist, int NClusters, MRIS *surf)
-{
-  int n,vtxno;
+int sclustSaveAsPointSet(char *fname, SCS *scslist, int NClusters, MRIS *surf) {
+  int n, vtxno;
   VERTEX *v;
   FILE *fp;
 
-  fp = fopen(fname,"w");
-  for (n=0; n < NClusters; n++) {
+  fp = fopen(fname, "w");
+  for (n = 0; n < NClusters; n++) {
     vtxno = scslist[n].vtxmaxval;
     v = &(surf->vertices[vtxno]);
-    fprintf(fp,"%g %g %g\n",v->x,v->y,v->z);
+    fprintf(fp, "%g %g %g\n", v->x, v->y, v->z);
   }
-  fprintf(fp,"info\n");
-  fprintf(fp,"numpoints %d\n",NClusters);
-  fprintf(fp,"useRealRAS 0\n");
+  fprintf(fp, "info\n");
+  fprintf(fp, "numpoints %d\n", NClusters);
+  fprintf(fp, "useRealRAS 0\n");
   fclose(fp);
 
-  return(0);
+  return (0);
 }

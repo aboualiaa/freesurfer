@@ -9,16 +9,14 @@
 #include "glutstroke.h"
 
 /* CENTRY */
-int APIENTRY
-glutStrokeWidth(GLUTstrokeFont font, int c)
-{
+int APIENTRY glutStrokeWidth(GLUTstrokeFont font, int c) {
   StrokeFontPtr fontinfo;
   const StrokeCharRec *ch;
 
 #if defined(_WIN32)
-  fontinfo = (StrokeFontPtr) __glutFont(font);
+  fontinfo = (StrokeFontPtr)__glutFont(font);
 #else
-  fontinfo = (StrokeFontPtr) font;
+  fontinfo = (StrokeFontPtr)font;
 #endif
 
   if (c < 0 || c >= fontinfo->num_chars)
@@ -30,25 +28,22 @@ glutStrokeWidth(GLUTstrokeFont font, int c)
     return 0;
 }
 
-int APIENTRY
-glutStrokeLength(GLUTstrokeFont font, const unsigned char *string)
-{
+int APIENTRY glutStrokeLength(GLUTstrokeFont font,
+                              const unsigned char *string) {
   int c, length;
   StrokeFontPtr fontinfo;
   const StrokeCharRec *ch;
 
 #if defined(_WIN32)
-  fontinfo = (StrokeFontPtr) __glutFont(font);
+  fontinfo = (StrokeFontPtr)__glutFont(font);
 #else
-  fontinfo = (StrokeFontPtr) font;
+  fontinfo = (StrokeFontPtr)font;
 #endif
 
   length = 0;
-  for (; *string != '\0'; string++)
-  {
+  for (; *string != '\0'; string++) {
     c = *string;
-    if (c >= 0 && c < fontinfo->num_chars)
-    {
+    if (c >= 0 && c < fontinfo->num_chars) {
       ch = &(fontinfo->ch[c]);
       if (ch)
         length += ch->right;

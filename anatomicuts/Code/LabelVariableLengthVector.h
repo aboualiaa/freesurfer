@@ -12,38 +12,33 @@
 
 using namespace itk;
 
-template <typename TValueType , class TMesh>
-class LabelVariableLengthVector : public VariableLengthVector<TValueType>
-{
+template <typename TValueType, class TMesh>
+class LabelVariableLengthVector : public VariableLengthVector<TValueType> {
 public:
- 
   /** The element type stored at each location in the Array. */
-  typedef TValueType                                    ValueType;
-  typedef TValueType                                    ComponentType;
-  typedef typename NumericTraits< ValueType >::RealType RealValueType;
-  typedef LabelVariableLengthVector                          Self;
-  typedef VariableLengthVector<TValueType>              Superclass;
-  typedef TMesh						MeshType;
-  typedef typename MeshType::Pointer			MeshPointerType;
-  typedef typename MeshType::CellType		CellType; //??
-  typedef typename MeshType::CellAutoPointer		CellAutoPointerType; //??
+  using ValueType = TValueType;
+  using ComponentType = TValueType;
+  using RealValueType = typename NumericTraits<ValueType>::RealType;
+  using Self = LabelVariableLengthVector<TValueType, TMesh>;
+  using Superclass = VariableLengthVector<TValueType>;
+  using MeshType = TMesh;
+  using MeshPointerType = typename MeshType::Pointer;
+  using CellType = typename MeshType::CellType;                   //??
+  using CellAutoPointerType = typename MeshType::CellAutoPointer; //??
 
-  LabelVariableLengthVector():Superclass(){
-	;
-}; 
+  LabelVariableLengthVector() : Superclass() { ; };
 
   /** Constructor with size. Size can only be changed by assignment */
-  LabelVariableLengthVector(unsigned int dimension):Superclass(dimension){
-	;
-};
-  LabelVariableLengthVector( ValueType* data, unsigned int sz, 
-                                        bool LetArrayManageMemory = false):Superclass(data, sz, LetArrayManageMemory){};
- 	void SetCell(MeshPointerType mesh, int cellID);
-void Print() const{};
+  LabelVariableLengthVector(unsigned int dimension) : Superclass(dimension) {
+    ;
+  };
+  LabelVariableLengthVector(ValueType *data, unsigned int sz,
+                            bool LetArrayManageMemory = false)
+      : Superclass(data, sz, LetArrayManageMemory){};
+  void SetCell(MeshPointerType mesh, int cellID);
+  void Print() const {};
+
 private:
 };
-
-
-
 
 #endif

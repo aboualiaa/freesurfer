@@ -27,13 +27,11 @@
 #include "PanelLayer.h"
 #include <QList>
 
-namespace Ui
-{
+namespace Ui {
 class PanelROI;
 }
 
-class PanelROI : public PanelLayer
-{
+class PanelROI : public PanelLayer {
   Q_OBJECT
 
 public:
@@ -43,13 +41,13 @@ public:
 protected:
   void DoUpdateWidgets();
   void DoIdle();
-  virtual void ConnectLayer( Layer* layer );
+  virtual void ConnectLayer(Layer *layer);
 
 protected slots:
-  void OnSliderOpacity( int val );
-  void OnEditThreshold(const QString& text);
-  void OnEditHeatscaleMin(const QString& text);
-  void OnEditHeatscaleMax(const QString& text);
+  void OnSliderOpacity(int val);
+  void OnEditThreshold(const QString &text);
+  void OnEditHeatscaleMin(const QString &text);
+  void OnEditHeatscaleMax(const QString &text);
   void OnComboMappedSurface(int nIndex);
   void OnButtonDilate();
   void OnButtonErode();
@@ -59,7 +57,7 @@ protected slots:
 
 private:
   Ui::PanelROI *ui;
-  QList<QWidget*>   m_listWidgetsHeatscale;
+  QList<QWidget *> m_listWidgetsHeatscale;
 };
 
 #endif // PANELROI_H

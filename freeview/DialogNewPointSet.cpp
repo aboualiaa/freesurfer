@@ -29,19 +29,17 @@
 #include "LayerPropertyPointSet.h"
 #include <QMessageBox>
 
-DialogNewPointSet::DialogNewPointSet(QWidget *parent) :
-  QDialog(parent),
-  ui(new Ui::DialogNewPointSet)
-{
+DialogNewPointSet::DialogNewPointSet(QWidget *parent)
+    : QDialog(parent), ui(new Ui::DialogNewPointSet) {
   ui->setupUi(this);
-  LayerCollection* col_mri = MainWindow::GetMainWindow()->GetLayerCollection("MRI");
-  QList<Layer*> layers = col_mri->GetLayers();
+  LayerCollection *col_mri =
+      MainWindow::GetMainWindow()->GetLayerCollection("MRI");
+  QList<Layer *> layers = col_mri->GetLayers();
   int nSel = 0;
-  for ( int i = 0; i < layers.size(); i++ )
-  {
-    ui->comboBoxTemplate->addItem(layers[i]->GetName(), QVariant::fromValue((QObject*)layers[i]));
-    if ( layers[i] == col_mri->GetActiveLayer() )
-    {
+  for (int i = 0; i < layers.size(); i++) {
+    ui->comboBoxTemplate->addItem(layers[i]->GetName(),
+                                  QVariant::fromValue((QObject *)layers[i]));
+    if (layers[i] == col_mri->GetActiveLayer()) {
       nSel = i;
     }
   }
@@ -49,40 +47,32 @@ DialogNewPointSet::DialogNewPointSet(QWidget *parent) :
   ui->lineEditName->setFocus();
 }
 
-DialogNewPointSet::~DialogNewPointSet()
-{
-  delete ui;
-}
+DialogNewPointSet::~DialogNewPointSet() { delete ui; }
 
-QString DialogNewPointSet::GetPointSetName()
-{
+QString DialogNewPointSet::GetPointSetName() {
   return ui->lineEditName->text().trimmed();
 }
 
-void DialogNewPointSet::SetPointSetName( const QString& name )
-{
-  ui->lineEditName->setText( name );
+void DialogNewPointSet::SetPointSetName(const QString &name) {
+  ui->lineEditName->setText(name);
 }
 
-LayerMRI* DialogNewPointSet::GetTemplate()
-{
-  return qobject_cast<LayerMRI*>(
-        ui->comboBoxTemplate->itemData(ui->comboBoxTemplate->currentIndex()).value<QObject*>());
+LayerMRI *DialogNewPointSet::GetTemplate() {
+  return qobject_cast<LayerMRI *>(
+      ui->comboBoxTemplate->itemData(ui->comboBoxTemplate->currentIndex())
+          .value<QObject *>());
 }
 
-void DialogNewPointSet::OnOK()
-{
-  if ( GetPointSetName().isEmpty())
-  {
-    QMessageBox::warning( this, "Error", "Point set name can not be empty." );
+void DialogNewPointSet::OnOK() {
+  if (GetPointSetName().isEmpty()) {
+    QMessageBox::warning(this, "Error", "Point set name can not be empty.");
     return;
   }
   accept();
 }
 
-int DialogNewPointSet::GetType()
-{
-  return ( ui->radioButtonControlPoint->isChecked() ?
-             LayerPropertyPointSet::ControlPoint :
-             LayerPropertyPointSet::WayPoint );
+int DialogNewPointSet::GetType() {
+  return (ui->radioButtonControlPoint->isChecked()
+              ? LayerPropertyPointSet::ControlPoint
+              : LayerPropertyPointSet::WayPoint);
 }

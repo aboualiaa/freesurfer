@@ -9,26 +9,19 @@
 
 #include "glutint.h"
 
-void APIENTRY
-glutTabletMotionFunc(GLUTtabletMotionCB tabletMotionFunc)
-{
+void APIENTRY glutTabletMotionFunc(GLUTtabletMotionCB tabletMotionFunc) {
   __glutCurrentWindow->tabletMotion = tabletMotionFunc;
   __glutUpdateInputDeviceMaskFunc = __glutUpdateInputDeviceMask;
-  __glutPutOnWorkList(__glutCurrentWindow,
-                      GLUT_DEVICE_MASK_WORK);
+  __glutPutOnWorkList(__glutCurrentWindow, GLUT_DEVICE_MASK_WORK);
   /* If deinstalling callback, invalidate tablet position. */
-  if (tabletMotionFunc == NULL)
-  {
+  if (tabletMotionFunc == NULL) {
     __glutCurrentWindow->tabletPos[0] = -1;
     __glutCurrentWindow->tabletPos[1] = -1;
   }
 }
 
-void APIENTRY
-glutTabletButtonFunc(GLUTtabletButtonCB tabletButtonFunc)
-{
+void APIENTRY glutTabletButtonFunc(GLUTtabletButtonCB tabletButtonFunc) {
   __glutCurrentWindow->tabletButton = tabletButtonFunc;
   __glutUpdateInputDeviceMaskFunc = __glutUpdateInputDeviceMask;
-  __glutPutOnWorkList(__glutCurrentWindow,
-                      GLUT_DEVICE_MASK_WORK);
+  __glutPutOnWorkList(__glutCurrentWindow, GLUT_DEVICE_MASK_WORK);
 }

@@ -42,13 +42,12 @@
 // version of BFGS only maintains a certain number of vector corrections
 // to a diagonal estimate of the inverse Hessian estimate.
 
-class fs_lbfgs : public vnl_nonlinear_minimizer, public fs_lbfgs_subject
-{
+class fs_lbfgs : public vnl_nonlinear_minimizer, public fs_lbfgs_subject {
 public:
   fs_lbfgs();
-  fs_lbfgs(vnl_cost_function& f);
+  fs_lbfgs(vnl_cost_function &f);
 
-  bool minimize(vnl_vector<double>& x);
+  bool minimize(vnl_vector<double> &x);
 
   //: Step accuracy/speed tradeoff.
   // Effectively the number of correction vectors to the diagonal approximation
@@ -74,7 +73,7 @@ public:
 
 private:
   void init_parameters();
-  vnl_cost_function* f_;
+  vnl_cost_function *f_;
   //  vnl_lbfgs() {} // default constructor makes no sense
   // does too.  Can set values for parameters.
 };

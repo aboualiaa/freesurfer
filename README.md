@@ -29,3 +29,22 @@ If you've found a bug in the software, feel free to open an issue or submit a pa
 ## License
 
 Terms and conditions for use, reproduction, distribution and contribution are found in [LICENSE.txt](https://github.com/freesurfer/freesurfer/blob/dev/LICENSE.txt).
+
+## Milestones
+
+- [x] ITK 5
+- [x] Catalina: Apple Clang 11
+- [ ] Catalina: LLVM Clang 9
+- [ ] Catalina: GCC 9
+- [ ] Centos: GCC 9
+- [ ] Centos: Clang 9
+- [ ] no banned functions
+- [ ] Boost Program Options
+- [ ] TDD (GoogleTest)
+- [ ] Benchmarks
+- [ ] DataOrientedDesign
+- [ ] Logging
+- [ ] ContiniousIntegration
+- [ ] C++17/20
+- [ ] Documentation
+- [ ] Guides

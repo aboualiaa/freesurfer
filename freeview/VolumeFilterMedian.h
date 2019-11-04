@@ -30,20 +30,15 @@
 
 class LayerMRI;
 
-class VolumeFilterMedian : public VolumeFilter
-{
+class VolumeFilterMedian : public VolumeFilter {
 public:
-  VolumeFilterMedian( LayerMRI* input = 0, LayerMRI* output = 0, QObject* parent = 0 );
+  VolumeFilterMedian(LayerMRI *input = 0, LayerMRI *output = 0,
+                     QObject *parent = 0);
 
-  QString GetName()
-  {
-    return "Median";
-  }
+  QString GetName() { return "Median"; }
 
 protected:
   bool Execute();
 };
 
 #endif
-
-

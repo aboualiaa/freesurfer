@@ -5,6 +5,6 @@
 #include "morph.h"
 
 // the morph needs to be serialized before doing this
-void initOctree( gmp::VolumeMorph& morph );
+void initOctree(gmp::VolumeMorph &morph);
 
 #endif

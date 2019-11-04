@@ -23,10 +23,10 @@
  *
  */
 
-#include <ctype.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cctype>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
 
 #include "const.h"
 #include "diag.h"
@@ -37,13 +37,13 @@
 
 #define DEBUG_POINT(x, y, z) (((x == 140) && (y == 74)) && ((z) == 174))
 
-MRI *MRIapplyBayesLaw(MRI *mri_priors, MRI *mri_p1, MRI *mri_p2, MRI *mri_dst)
-{
+MRI *MRIapplyBayesLaw(MRI *mri_priors, MRI *mri_p1, MRI *mri_p2, MRI *mri_dst) {
   int x, y, z, width, height, depth;
   BUFTYPE *ppriors, *pdst;
   float p, p1, p2, prior, *pp1, *pp2;
 
-  if (!mri_dst) mri_dst = MRIclone(mri_priors, NULL);
+  if (!mri_dst)
+    mri_dst = MRIclone(mri_priors, nullptr);
 
   width = mri_dst->width;
   height = mri_dst->height;
@@ -56,7 +56,8 @@ MRI *MRIapplyBayesLaw(MRI *mri_priors, MRI *mri_p1, MRI *mri_p2, MRI *mri_dst)
       pp2 = &MRIFvox(mri_p2, 0, y, z);
       pdst = &MRIvox(mri_dst, 0, y, z);
       for (x = 0; x < width; x++) {
-        if (DEBUG_POINT(x, y, z)) DiagBreak();
+        if (DEBUG_POINT(x, y, z))
+          DiagBreak();
         p1 = (float)*pp1++;
         p2 = (float)*pp2++;
         prior = (float)*ppriors++;
@@ -72,8 +73,8 @@ MRI *MRIapplyBayesLaw(MRI *mri_priors, MRI *mri_p1, MRI *mri_p2, MRI *mri_dst)
   }
   return (mri_dst);
 }
-MRI *MRIcomputeConditionalProbabilities(MRI *mri_T1, MRI *mri_mean, MRI *mri_std, MRI *mri_dst)
-{
+MRI *MRIcomputeConditionalProbabilities(MRI *mri_T1, MRI *mri_mean,
+                                        MRI *mri_std, MRI *mri_dst) {
   int x, y, z, width, height, depth;
   BUFTYPE *pT1, *pmean, *pstd;
   float p, mean, std, val, n, *pdst;
@@ -82,7 +83,8 @@ MRI *MRIcomputeConditionalProbabilities(MRI *mri_T1, MRI *mri_mean, MRI *mri_std
   height = mri_T1->height;
   depth = mri_T1->depth;
 
-  if (!mri_dst) mri_dst = MRIalloc(width, height, depth, MRI_FLOAT);
+  if (!mri_dst)
+    mri_dst = MRIalloc(width, height, depth, MRI_FLOAT);
 
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
@@ -91,11 +93,13 @@ MRI *MRIcomputeConditionalProbabilities(MRI *mri_T1, MRI *mri_mean, MRI *mri_std
       pstd = &MRIvox(mri_std, 0, y, z);
       pdst = &MRIFvox(mri_dst, 0, y, z);
       for (x = 0; x < width; x++) {
-        if (DEBUG_POINT(x, y, z)) DiagBreak();
+        if (DEBUG_POINT(x, y, z))
+          DiagBreak();
         val = (float)*pT1++;
         mean = (float)*pmean++;
         std = (float)*pstd++;
-        if (FZERO(std)) std = 1.0;
+        if (FZERO(std))
+          std = 1.0;
 #if 0
         if (std < 10.0)  /* hack!!!!! - not enough observations */
           std = 10.0 ;
@@ -113,15 +117,20 @@ MRI *MRIcomputeConditionalProbabilities(MRI *mri_T1, MRI *mri_mean, MRI *mri_std
 
            Description:
 ----------------------------------------------------------------------*/
-MRI *MRIprobabilityThresholdNeighborhoodOff(MRI *mri_src, MRI *mri_prob, MRI *mri_dst, float threshold, int nsize)
-{
+MRI *MRIprobabilityThresholdNeighborhoodOff(MRI *mri_src, MRI *mri_prob,
+                                            MRI *mri_dst, float threshold,
+                                            int nsize) {
   BUFTYPE *pprob, out_val;
-  int width, height, depth, x, y, z, x1, y1, z1, xi, yi, zi, xmin, xmax, ymin, ymax, zmin, zmax, nchanged;
+  int width, height, depth, x, y, z, x1, y1, z1, xi, yi, zi, xmin, xmax, ymin,
+      ymax, zmin, zmax, nchanged;
   float nvox;
 
-  if (mri_prob->type != MRI_UCHAR) ErrorReturn(NULL, (ERROR_UNSUPPORTED, "MRI3Dthreshold: prob must be MRI_UCHAR"));
+  if (mri_prob->type != MRI_UCHAR)
+    ErrorReturn(NULL,
+                (ERROR_UNSUPPORTED, "MRI3Dthreshold: prob must be MRI_UCHAR"));
 
-  if (!mri_dst) mri_dst = MRIclone(mri_src, NULL);
+  if (!mri_dst)
+    mri_dst = MRIclone(mri_src, nullptr);
 
   width = mri_src->width;
   height = mri_src->height;
@@ -140,12 +149,18 @@ MRI *MRIprobabilityThresholdNeighborhoodOff(MRI *mri_src, MRI *mri_prob, MRI *mr
       pprob = &MRIvox(mri_prob, 0, y, z);
       for (x = 0; x < width; x++) {
         if (*pprob++ > threshold) {
-          if (x < xmin) xmin = x;
-          if (x > xmax) xmax = x;
-          if (y < ymin) ymin = y;
-          if (y > ymax) ymax = y;
-          if (z < zmin) zmin = z;
-          if (z > zmax) zmax = z;
+          if (x < xmin)
+            xmin = x;
+          if (x > xmax)
+            xmax = x;
+          if (y < ymin)
+            ymin = y;
+          if (y > ymax)
+            ymax = y;
+          if (z < zmin)
+            zmin = z;
+          if (z > zmax)
+            zmax = z;
         }
       }
     }
@@ -158,13 +173,16 @@ MRI *MRIprobabilityThresholdNeighborhoodOff(MRI *mri_src, MRI *mri_prob, MRI *mr
   zmax = MIN(zmax + nsize, depth - 1);
 
   if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
-    fprintf(stderr, "bounding box = (%d:%d, %d:%d, %d:%d).\n", xmin, xmax, ymin, ymax, zmin, zmax);
+    fprintf(stderr, "bounding box = (%d:%d, %d:%d, %d:%d).\n", xmin, xmax, ymin,
+            ymax, zmin, zmax);
 
   /* remove stuff outside bounding box */
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
       for (x = 0; x < width; x++) {
-        if ((x < xmin || x > xmax) || (y < ymin || y > ymax) || (z < zmin || z > zmax)) MRIvox(mri_dst, x, y, z) = 0;
+        if ((x < xmin || x > xmax) || (y < ymin || y > ymax) ||
+            (z < zmin || z > zmax))
+          MRIvox(mri_dst, x, y, z) = 0;
       }
     }
   }
@@ -173,7 +191,8 @@ MRI *MRIprobabilityThresholdNeighborhoodOff(MRI *mri_src, MRI *mri_prob, MRI *mr
   for (z = zmin; z <= zmax; z++) {
     for (y = ymin; y <= ymax; y++) {
       for (x = xmin; x <= xmax; x++) {
-        if (DEBUG_POINT(x, y, z)) DiagBreak();
+        if (DEBUG_POINT(x, y, z))
+          DiagBreak();
         out_val = 0;
         for (z1 = -nsize; z1 <= nsize; z1++) {
           zi = mri_src->zi[z + z1];
@@ -186,18 +205,22 @@ MRI *MRIprobabilityThresholdNeighborhoodOff(MRI *mri_src, MRI *mri_prob, MRI *mr
                 break;
               }
             }
-            if (out_val > 0) break;
+            if (out_val > 0)
+              break;
           }
-          if (out_val > 0) break;
+          if (out_val > 0)
+            break;
         }
-        if (out_val == 0 && MRIvox(mri_src, x, y, z) > 0) nchanged++;
+        if (out_val == 0 && MRIvox(mri_src, x, y, z) > 0)
+          nchanged++;
         MRIvox(mri_dst, x, y, z) = out_val;
       }
     }
   }
 
   nvox = (float)(width * height * depth);
-  fprintf(stderr, "%8d of %8d voxels changed - %2.1f%%.\n", nchanged, (int)nvox, 100.0f * (float)nchanged / nvox);
+  fprintf(stderr, "%8d of %8d voxels changed - %2.1f%%.\n", nchanged, (int)nvox,
+          100.0f * (float)nchanged / nvox);
 
   return (mri_dst);
 }
@@ -206,16 +229,20 @@ MRI *MRIprobabilityThresholdNeighborhoodOff(MRI *mri_src, MRI *mri_prob, MRI *mr
 
            Description:
 ----------------------------------------------------------------------*/
-MRI *MRIprobabilityThresholdNeighborhoodOn(
-    MRI *mri_src, MRI *mri_prob, MRI *mri_dst, float threshold, int nsize, int out_label)
-{
+MRI *MRIprobabilityThresholdNeighborhoodOn(MRI *mri_src, MRI *mri_prob,
+                                           MRI *mri_dst, float threshold,
+                                           int nsize, int out_label) {
   BUFTYPE *pprob, out_val;
-  int width, height, depth, x, y, z, x1, y1, z1, xi, yi, zi, xmin, xmax, ymin, ymax, zmin, zmax, nchanged;
+  int width, height, depth, x, y, z, x1, y1, z1, xi, yi, zi, xmin, xmax, ymin,
+      ymax, zmin, zmax, nchanged;
   float nvox;
 
-  if (mri_prob->type != MRI_UCHAR) ErrorReturn(NULL, (ERROR_UNSUPPORTED, "MRI3Dthreshold: prob must be MRI_UCHAR"));
+  if (mri_prob->type != MRI_UCHAR)
+    ErrorReturn(NULL,
+                (ERROR_UNSUPPORTED, "MRI3Dthreshold: prob must be MRI_UCHAR"));
 
-  if (!mri_dst) mri_dst = MRIclone(mri_src, NULL);
+  if (!mri_dst)
+    mri_dst = MRIclone(mri_src, nullptr);
 
   width = mri_src->width;
   height = mri_src->height;
@@ -234,12 +261,18 @@ MRI *MRIprobabilityThresholdNeighborhoodOn(
       pprob = &MRIvox(mri_prob, 0, y, z);
       for (x = 0; x < width; x++) {
         if (*pprob++ > threshold) {
-          if (x < xmin) xmin = x;
-          if (x > xmax) xmax = x;
-          if (y < ymin) ymin = y;
-          if (y > ymax) ymax = y;
-          if (z < zmin) zmin = z;
-          if (z > zmax) zmax = z;
+          if (x < xmin)
+            xmin = x;
+          if (x > xmax)
+            xmax = x;
+          if (y < ymin)
+            ymin = y;
+          if (y > ymax)
+            ymax = y;
+          if (z < zmin)
+            zmin = z;
+          if (z > zmax)
+            zmax = z;
         }
       }
     }
@@ -252,7 +285,8 @@ MRI *MRIprobabilityThresholdNeighborhoodOn(
   zmax = MIN(zmax + nsize, depth - 1);
 
   if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
-    fprintf(stderr, "bounding box = (%d:%d, %d:%d, %d:%d).\n", xmin, xmax, ymin, ymax, zmin, zmax);
+    fprintf(stderr, "bounding box = (%d:%d, %d:%d, %d:%d).\n", xmin, xmax, ymin,
+            ymax, zmin, zmax);
 
 #if 0
   xmin = ymin = zmin = 0 ;
@@ -265,7 +299,8 @@ MRI *MRIprobabilityThresholdNeighborhoodOn(
   for (z = zmin; z <= zmax; z++) {
     for (y = ymin; y <= ymax; y++) {
       for (x = xmin; x <= xmax; x++) {
-        if (DEBUG_POINT(x, y, z)) DiagBreak();
+        if (DEBUG_POINT(x, y, z))
+          DiagBreak();
         out_val = out_label;
         for (z1 = -nsize; z1 <= nsize; z1++) {
           zi = mri_src->zi[z + z1];
@@ -280,27 +315,32 @@ MRI *MRIprobabilityThresholdNeighborhoodOn(
             }
           }
         }
-        if (out_val == out_label && MRIvox(mri_src, x, y, z) != out_label) nchanged++;
+        if (out_val == out_label && MRIvox(mri_src, x, y, z) != out_label)
+          nchanged++;
         MRIvox(mri_dst, x, y, z) = out_val;
       }
     }
   }
 
   nvox = (float)(width * height * depth);
-  fprintf(stderr, "%8d of %8d voxels changed - %2.1f%%.\n", nchanged, (int)nvox, 100.0f * (float)nchanged / nvox);
+  fprintf(stderr, "%8d of %8d voxels changed - %2.1f%%.\n", nchanged, (int)nvox,
+          100.0f * (float)nchanged / nvox);
 
   return (mri_dst);
 }
 
-MRI *MRIprobabilityThreshold(MRI *mri_src, MRI *mri_prob, MRI *mri_dst, float threshold, int out_label)
-{
+MRI *MRIprobabilityThreshold(MRI *mri_src, MRI *mri_prob, MRI *mri_dst,
+                             float threshold, int out_label) {
   BUFTYPE *pprob, *pdst, *psrc, out_val, prob, in_val;
   int width, height, depth, x, y, z, nchanged, noff, non;
   float nvox;
 
-  if (mri_prob->type != MRI_UCHAR) ErrorReturn(NULL, (ERROR_UNSUPPORTED, "MRI3Dthreshold: prob must be MRI_UCHAR"));
+  if (mri_prob->type != MRI_UCHAR)
+    ErrorReturn(NULL,
+                (ERROR_UNSUPPORTED, "MRI3Dthreshold: prob must be MRI_UCHAR"));
 
-  if (!mri_dst) mri_dst = MRIclone(mri_src, NULL);
+  if (!mri_dst)
+    mri_dst = MRIclone(mri_src, nullptr);
 
   width = mri_src->width;
   height = mri_src->height;
@@ -316,7 +356,8 @@ MRI *MRIprobabilityThreshold(MRI *mri_src, MRI *mri_prob, MRI *mri_dst, float th
       psrc = &MRIvox(mri_src, 0, y, z);
       pdst = &MRIvox(mri_dst, 0, y, z);
       for (x = 0; x < width; x++) {
-        if (DEBUG_POINT(x, y, z)) DiagBreak();
+        if (DEBUG_POINT(x, y, z))
+          DiagBreak();
         out_val = 0;
         prob = *pprob++; /* value from inverse morphed volume */
         in_val = *psrc++;
@@ -338,8 +379,11 @@ MRI *MRIprobabilityThreshold(MRI *mri_src, MRI *mri_prob, MRI *mri_dst, float th
   }
 
   nvox = (float)(width * height * depth);
-  fprintf(stderr, "%8d of %8d voxels changed - %2.1f%%.\n", nchanged, (int)nvox, 100.0f * (float)nchanged / nvox);
-  fprintf(stderr, "%8d of %8d voxels off     - %2.1f%%.\n", noff, (int)nvox, 100.0f * (float)noff / nvox);
-  fprintf(stderr, "%8d of %8d voxels on      - %2.1f%%.\n", nchanged, (int)nvox, 100.0f * (float)non / nvox);
+  fprintf(stderr, "%8d of %8d voxels changed - %2.1f%%.\n", nchanged, (int)nvox,
+          100.0f * (float)nchanged / nvox);
+  fprintf(stderr, "%8d of %8d voxels off     - %2.1f%%.\n", noff, (int)nvox,
+          100.0f * (float)noff / nvox);
+  fprintf(stderr, "%8d of %8d voxels on      - %2.1f%%.\n", nchanged, (int)nvox,
+          100.0f * (float)non / nvox);
   return (mri_dst);
 }

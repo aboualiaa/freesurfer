@@ -26,15 +26,13 @@
 
 #include <QDialog>
 
-namespace Ui
-{
+namespace Ui {
 class DialogNewPointSet;
 }
 
 class LayerMRI;
 
-class DialogNewPointSet : public QDialog
-{
+class DialogNewPointSet : public QDialog {
   Q_OBJECT
 
 public:
@@ -42,9 +40,9 @@ public:
   ~DialogNewPointSet();
 
   QString GetPointSetName();
-  void SetPointSetName( const QString& name );
+  void SetPointSetName(const QString &name);
 
-  LayerMRI* GetTemplate();
+  LayerMRI *GetTemplate();
 
   int GetType();
 

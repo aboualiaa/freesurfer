@@ -35,73 +35,75 @@
  * - MySlot(vtkObject* caller)
  * - MySlot(vtkObject* caller, unsigned long vtk_event)
  * - MySlot(vtkObject* caller, unsigned long vtk_event, void* client_data)
- * - MySlot(vtkObject* caller, unsigned long vtk_event, void* client_data, void* call_data)
- * - MySlot(vtkObject* caller, unsigned long vtk_event, void* client_data, void* call_data, vtkCommand*)
-*/
+ * - MySlot(vtkObject* caller, unsigned long vtk_event, void* client_data, void*
+ * call_data)
+ * - MySlot(vtkObject* caller, unsigned long vtk_event, void* client_data, void*
+ * call_data, vtkCommand*)
+ */
 
 #ifndef vtkEventQtSlotConnect_h
 #define vtkEventQtSlotConnect_h
 
 #include "vtkGUISupportQtModule.h" // For export macro
 #include "vtkObject.h"
-#include "vtkCommand.h"  // for event defines
-#include "QVTKWin32Header.h"  // for export define
-#include <QtCore/QObject>          // for version info
+#include "vtkCommand.h"      // for event defines
+#include "QVTKWin32Header.h" // for export define
+#include <QtCore/QObject>    // for version info
 
 class QObject;
 class vtkQtConnections;
 class vtkQtConnection;
 
 // manage connections between VTK object events and Qt slots
-class VTKGUISUPPORTQT_EXPORT vtkEventQtSlotConnect : public vtkObject
-{
-  public:
-    static vtkEventQtSlotConnect* New();
-    vtkTypeMacro(vtkEventQtSlotConnect, vtkObject)
+class VTKGUISUPPORTQT_EXPORT vtkEventQtSlotConnect : public vtkObject {
+public:
+  static vtkEventQtSlotConnect *New();
+  vtkTypeMacro(vtkEventQtSlotConnect, vtkObject)
 
-    /**
-     * Print the current connections between VTK and Qt
-     */
-    void PrintSelf(ostream& os, vtkIndent indent);
+      /**
+       * Print the current connections between VTK and Qt
+       */
+      void PrintSelf(ostream &os, vtkIndent indent);
 
-    /**
-     * Connect a vtk object's event with a Qt object's slot.  Multiple
-     * connections which are identical are treated as separate connections.
-     */
-    virtual void Connect(vtkObject* vtk_obj, unsigned long event,
-                         const QObject* qt_obj, const char* slot,
-                         void* client_data=NULL, float priority=0.0
-                         ,Qt::ConnectionType type = Qt::AutoConnection);
+  /**
+   * Connect a vtk object's event with a Qt object's slot.  Multiple
+   * connections which are identical are treated as separate connections.
+   */
+  virtual void Connect(vtkObject *vtk_obj, unsigned long event,
+                       const QObject *qt_obj, const char *slot,
+                       void *client_data = NULL, float priority = 0.0,
+                       Qt::ConnectionType type = Qt::AutoConnection);
 
-    /**
-     * Disconnect a vtk object from a qt object.
-     * Passing no arguments will disconnect all slots maintained by this object.
-     * Passing in only a vtk object will disconnect all slots from it.
-     * Passing only a vtk object and event, will disconnect all slots matching
-     * the vtk object and event.
-     * Passing all information in will match all information.
-     */
-    virtual void Disconnect(
-      vtkObject* vtk_obj=NULL, unsigned long event=vtkCommand::NoEvent,
-      const QObject* qt_obj=NULL, const char* slot = 0, void* client_data=NULL);
+  /**
+   * Disconnect a vtk object from a qt object.
+   * Passing no arguments will disconnect all slots maintained by this object.
+   * Passing in only a vtk object will disconnect all slots from it.
+   * Passing only a vtk object and event, will disconnect all slots matching
+   * the vtk object and event.
+   * Passing all information in will match all information.
+   */
+  virtual void Disconnect(vtkObject *vtk_obj = NULL,
+                          unsigned long event = vtkCommand::NoEvent,
+                          const QObject *qt_obj = NULL, const char *slot = 0,
+                          void *client_data = NULL);
 
-    /**
-     * Allow to query vtkEventQtSlotConnect to know if some Connect() have been
-     * setup and how many.
-     */
-    virtual int GetNumberOfConnections() const;
+  /**
+   * Allow to query vtkEventQtSlotConnect to know if some Connect() have been
+   * setup and how many.
+   */
+  virtual int GetNumberOfConnections() const;
 
-  protected:
-    vtkQtConnections* Connections;
-    friend class vtkQtConnection;
-    void RemoveConnection(vtkQtConnection*);
+protected:
+  vtkQtConnections *Connections;
+  friend class vtkQtConnection;
+  void RemoveConnection(vtkQtConnection *);
 
-    vtkEventQtSlotConnect();
-    ~vtkEventQtSlotConnect();
+  vtkEventQtSlotConnect();
+  ~vtkEventQtSlotConnect();
 
-  private:
-    vtkEventQtSlotConnect(const vtkEventQtSlotConnect&) VTK_DELETE_FUNCTION;
-    void operator=(const vtkEventQtSlotConnect&) VTK_DELETE_FUNCTION;
+private:
+  vtkEventQtSlotConnect(const vtkEventQtSlotConnect &) VTK_DELETE_FUNCTION;
+  void operator=(const vtkEventQtSlotConnect &) VTK_DELETE_FUNCTION;
 };
 
 #endif

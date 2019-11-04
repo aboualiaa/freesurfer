@@ -17,28 +17,25 @@
 
 /* Transparent type values */
 /* None                       0 */
-#define TransparentPixel      1
-#define TransparentMask       2
+#define TransparentPixel 1
+#define TransparentMask 2
 
 /* layered visual info template flags */
-#define VisualLayerMask  0x200
+#define VisualLayerMask 0x200
 #define VisualTransparentType 0x400
 #define VisualTransparentValue 0x800
 #define VisualAllLayerMask 0xFFF
 
 /* layered visual info structure */
-typedef struct _XLayerVisualInfo
-{
+typedef struct _XLayerVisualInfo {
   XVisualInfo vinfo;
   long layer;
   long type;
   unsigned long value;
-}
-XLayerVisualInfo;
+} XLayerVisualInfo;
 
 /* SERVER_OVERLAY_VISUALS property element */
-typedef struct _OverlayInfo
-{
+typedef struct _OverlayInfo {
   /* Avoid 64-bit portability problems by being careful to use
      longs due to the way XGetWindowProperty is specified. Note
      that these parameters are passed as CARD32s over X
@@ -47,13 +44,12 @@ typedef struct _OverlayInfo
   long transparent_type;
   long value;
   long layer;
-}
-OverlayInfo;
+} OverlayInfo;
 
 extern int __glutGetTransparentPixel(Display *, XVisualInfo *);
-extern XLayerVisualInfo *__glutXGetLayerVisualInfo(Display *,
-      long, XLayerVisualInfo *, int *);
-extern Status __glutXMatchLayerVisualInfo(Display *,
-      int, int, int, int, XLayerVisualInfo *);
+extern XLayerVisualInfo *__glutXGetLayerVisualInfo(Display *, long,
+                                                   XLayerVisualInfo *, int *);
+extern Status __glutXMatchLayerVisualInfo(Display *, int, int, int, int,
+                                          XLayerVisualInfo *);
 
 #endif /* __layerutil_h__ */

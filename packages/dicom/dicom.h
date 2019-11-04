@@ -60,68 +60,67 @@
 #include "dicom_platform.h"
 /* #endif */
 
-#ifdef  __cplusplus
-extern "C"
-{
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 #ifndef _SITE_MACROS
-  typedef unsigned long CONDITION;
-  typedef unsigned short U_SHORT; /* normal unsigned short */
-  typedef unsigned long U_LONG; /* normal unsigned long */
-  typedef unsigned long MASK_32; /* For bit masks  */
-  typedef unsigned long CTNBOOLEAN; /* for boolean ops  */
+typedef unsigned long CONDITION;
+typedef unsigned short U_SHORT;   /* normal unsigned short */
+typedef unsigned long U_LONG;     /* normal unsigned long */
+typedef unsigned long MASK_32;    /* For bit masks  */
+typedef unsigned long CTNBOOLEAN; /* for boolean ops  */
 
 #if !defined(SHORTSIZE) || SHORTSIZE != 16
-  /* The writers of this code assume that shorts are 16 bits long.
-  ** If that is not the case, this system will not operate properly.
-  ** This code will trip the compiler.  This code also tripes the
-  ** compiler if you have not defined the macro SHORTSIZE.  You
-  ** also want to define INTSIZE and LONGSIZE.
-  */
+/* The writers of this code assume that shorts are 16 bits long.
+** If that is not the case, this system will not operate properly.
+** This code will trip the compiler.  This code also tripes the
+** compiler if you have not defined the macro SHORTSIZE.  You
+** also want to define INTSIZE and LONGSIZE.
+*/
 
-  /* RKT - commented this out, our shorts are ints. but it seems to
-     work anyway. */
-  /*     short c; */
-  /*     char c;  */  /* See note above */
+/* RKT - commented this out, our shorts are ints. but it seems to
+   work anyway. */
+/*     short c; */
+/*     char c;  */ /* See note above */
 #endif
 
-  typedef unsigned short U16; /* unsigned, 16 bit */
-  typedef short S16;  /* signed, 16 bit */
+typedef unsigned short U16; /* unsigned, 16 bit */
+typedef short S16;          /* signed, 16 bit */
 
-#if LONGSIZE==32
-  /* note that under both 64 bit and 32 bit OS, unsigned int is 32 bit
-     and int is 32 bit.  Thus we can avoid setting the above */
-  typedef unsigned int U32;
-  typedef int S32;
-  // the following is unnecessary
-  // #if LONGSIZE == 64 && INTSIZE == 32 /* Such as an Alpha */
-  //  typedef unsigned int U32;
-  //  typedef int S32;
+#if LONGSIZE == 32
+/* note that under both 64 bit and 32 bit OS, unsigned int is 32 bit
+   and int is 32 bit.  Thus we can avoid setting the above */
+typedef unsigned int U32;
+typedef int S32;
+// the following is unnecessary
+// #if LONGSIZE == 64 && INTSIZE == 32 /* Such as an Alpha */
+//  typedef unsigned int U32;
+//  typedef int S32;
 
-  // #elif LONGSIZE == 32  /* Most 32 bit workstations */
-  //  typedef unsigned long U32;
-  //   typedef long S32;
-#else    /* Something we do not support */
+// #elif LONGSIZE == 32  /* Most 32 bit workstations */
+//  typedef unsigned long U32;
+//   typedef long S32;
+#else /* Something we do not support */
 
-  /* The writers of this code assume that we can find a 32 bit integer
-  ** defined for this system as an int or a long.  If that assumption
-  ** is not true, this code will not operate properly.
-  ** This code will trip the compiler.
-  */
+/* The writers of this code assume that we can find a 32 bit integer
+** defined for this system as an int or a long.  If that assumption
+** is not true, this code will not operate properly.
+** This code will trip the compiler.
+*/
 
-  /* RKT - commented this out, our shorts are ints. but it seems to
-  work anyway. */
-  /*     short c; */
-  /*     char c;  */  /* See note above */
-
-#endif
+/* RKT - commented this out, our shorts are ints. but it seems to
+work anyway. */
+/*     short c; */
+/*     char c;  */ /* See note above */
 
 #endif
 
-#define FORM_COND(facility, severity, value) \
- (CONDITION)((((unsigned long)value)<<16) | \
- (((unsigned long)facility) << 4) | ((unsigned long)severity))
+#endif
+
+#define FORM_COND(facility, severity, value)                                   \
+  (CONDITION)((((unsigned long)value) << 16) |                                 \
+              (((unsigned long)facility) << 4) | ((unsigned long)severity))
 
 #define SEV_SUCC 1
 #define SEV_INFORM 3
@@ -146,52 +145,53 @@ extern "C"
 #define FATAL(A) (zzzz)
 #endif
 
-#define FACILITY(A) ((unsigned long)(A)>>4) & 0xfff
+#define FACILITY(A) ((unsigned long)(A) >> 4) & 0xfff
 
 #ifndef _FACILITY_CODES
-#define FAC_DUL  1
+#define FAC_DUL 1
 #define FAC_IDBMB 2 /* IDB Multibyte */
-#define FAC_IDX  3
-#define FAC_LST  4
+#define FAC_IDX 3
+#define FAC_LST 4
 #define FAC_DIAG 5
 #define FAC_COND 6
-#define FAC_GQ  7
-#define FAC_SRV  8
-#define FAC_DCM  9
-#define FAC_MSG  10
+#define FAC_GQ 7
+#define FAC_SRV 8
+#define FAC_DCM 9
+#define FAC_MSG 10
 #define FAC_HUNK 11
-#define FAC_DB  12
-#define FAC_CFG  13
-#define FAC_IAP  14
-#define FAC_HIS  15
-#define FAC_HAP  16
-#define FAC_IE  17
-#define FAC_UID  18
-#define FAC_SQ  19
+#define FAC_DB 12
+#define FAC_CFG 13
+#define FAC_IAP 14
+#define FAC_HIS 15
+#define FAC_HAP 16
+#define FAC_IE 17
+#define FAC_UID 18
+#define FAC_SQ 19
 #define FAC_ICON 20
-#define FAC_PRN  21
-#define FAC_TBL  22 /* Table functions (relational database) */
-#define FAC_DMAN 23 /* DICOM Management of application
-  * connections */
-#define FAC_UTL  24 /* Utility functions */
-#define FAC_IDB  25 /* Image database */
-#define FAC_MUT  26 /* Motif utilities */
-#define FAC_IMAN 27 /* Image management */
-#define FAC_ICPY 30 /* Image copy (structures for queueing) */
-#define FAC_FIS  31 /* Fake information system */
-#define FAC_SNP  32 /* TCP/IP snoop facility */
-#define FAC_LUT  34 /* LUT facility */
-#define FAC_IODV 35 /* IOD Verification */
-#define FAC_THR  36 /* CTN Threading routines */
-#define FAC_DDR  37 /* DICOM Directory Services */
-#define FAC_ATH  38 /* Application thread usage */
-#define FAC_IRS  39 /* Image recycle system */
+#define FAC_PRN 21
+#define FAC_TBL 22 /* Table functions (relational database) */
+#define FAC_DMAN                                                               \
+  23                 /* DICOM Management of application                        \
+                      * connections */
+#define FAC_UTL 24   /* Utility functions */
+#define FAC_IDB 25   /* Image database */
+#define FAC_MUT 26   /* Motif utilities */
+#define FAC_IMAN 27  /* Image management */
+#define FAC_ICPY 30  /* Image copy (structures for queueing) */
+#define FAC_FIS 31   /* Fake information system */
+#define FAC_SNP 32   /* TCP/IP snoop facility */
+#define FAC_LUT 34   /* LUT facility */
+#define FAC_IODV 35  /* IOD Verification */
+#define FAC_THR 36   /* CTN Threading routines */
+#define FAC_DDR 37   /* DICOM Directory Services */
+#define FAC_ATH 38   /* Application thread usage */
+#define FAC_IRS 39   /* Image recycle system */
 #define FAC_TBLMB 40 /* Table functions (relational database) */
-#define FAC_CHR  41 /* Character set encoding utilities */
+#define FAC_CHR 41   /* Character set encoding utilities */
 
 #define FAC_MAXIMUM 50 /* Maximum number of facilities.  This can increase */
 
-#define FAC_APP 0x0fff  /* for stand-alone programs  */
+#define FAC_APP 0x0fff /* for stand-alone programs  */
 #endif
 
 #ifndef TRUE
@@ -199,27 +199,24 @@ extern "C"
 #define FALSE 0
 #endif
 
-
 #ifndef MAX
 #define MAX(x, y) (((x) < (y)) ? (y) : (x))
 #endif
 #ifndef MIN
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 #endif
-#define IS_EVEN(i) (~(i) & 0x01)
+#define IS_EVEN(i) (~(i)&0x01)
 #define DIM_OF(a) (sizeof(a) / sizeof(a[0]))
 #define IN_RANGE(n, lo, hi) ((lo) <= n && (n) <= (hi))
-#define STRUCT_OFFSET(s, f)  (off_t)(((s *)(0))->f)
+#define STRUCT_OFFSET(s, f) (off_t)(((s *)(0))->f)
 
 #ifdef NO_STRERROR
-  static char *
-  strerror(int e)
-  {
-    static char string[256];
+static char *strerror(int e) {
+  static char string[256];
 
-    sprintf(string, "Error number: %d", e);
-    return string;
-  }
+  sprintf(string, "Error number: %d", e);
+  return string;
+}
 #endif
 
 #define DICOM_AS_LENGTH 4
@@ -275,9 +272,9 @@ extern "C"
 #endif
 
 #define CTN_MALLOC(a) malloc((a))
-#define CTN_FREE(a)   free((a))
+#define CTN_FREE(a) free((a))
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 }
 #endif
 

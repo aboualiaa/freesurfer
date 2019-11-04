@@ -22,7 +22,6 @@
  *
  */
 
-
 #ifndef __IconLoaderTest_h
 #define __IconLoaderTest_h
 
@@ -34,15 +33,12 @@ class vtkKWTopLevel;
 
 class IconLoaderTest : public vtkKWApplication {
 
- public:
+public:
+  static IconLoaderTest *New();
 
-  static IconLoaderTest* New ();
-
- protected:
-
-  IconLoaderTest ();
-  ~IconLoaderTest ();
-
+protected:
+  IconLoaderTest();
+  ~IconLoaderTest();
 };
 
 #endif

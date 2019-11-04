@@ -29,37 +29,29 @@
 #include <vtkImageData.h>
 #include "ProgressCallback.h"
 
-
-
 #include "utils.h"
 
+VolumeFilterErode::VolumeFilterErode(LayerMRI *input, LayerMRI *output,
+                                     QObject *parent)
+    : VolumeFilter(input, output, parent) {}
 
-VolumeFilterErode::VolumeFilterErode( LayerMRI* input, LayerMRI* output, QObject* parent ) :
-  VolumeFilter( input, output, parent )
-{
-}
-
-bool VolumeFilterErode::Execute()
-{
+bool VolumeFilterErode::Execute() {
   ::SetProgressCallback(ProgressCallback, 0, 50);
-  MRI* mri_src = CreateMRIFromVolume( m_volumeInput );
-  if ( !mri_src )
-  {
+  MRI *mri_src = CreateMRIFromVolume(m_volumeInput);
+  if (!mri_src) {
     return false;
   }
 
   ::SetProgressCallback(ProgressCallback, 50, 60);
-  MRI* mri_dest = MRIerode( mri_src, NULL );
-  if ( !mri_dest )
-  {
+  MRI *mri_dest = MRIerode(mri_src, NULL);
+  if (!mri_dest) {
     return false;
   }
 
   ::SetProgressCallback(ProgressCallback, 60, 100);
-  MapMRIToVolume( mri_dest, m_volumeOutput );
-  MRIfree( &mri_src );
-  MRIfree( &mri_dest );
+  MapMRIToVolume(mri_dest, m_volumeOutput);
+  MRIfree(&mri_src);
+  MRIfree(&mri_dest);
 
   return true;
 }
-

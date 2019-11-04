@@ -22,20 +22,18 @@
  *
  */
 
-
 #include <stdlib.h>
 #include <time.h>
 
 #include "numerics.h"
 
-const char* Progname = "test_c_nr_wrapper";
+const char *Progname = "test_c_nr_wrapper";
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   // just trying to make sure that we can call the functions from c
-  long seed = -1L * (long)( abs( (int)time(NULL) ) );
+  long seed = -1L * (long)(abs((int)time(NULL)));
 
-  printf("random number: %f\n", OpenRan1( &seed ));
+  printf("random number: %f\n", OpenRan1(&seed));
 
   return 0;
 }

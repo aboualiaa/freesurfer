@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:10 $
@@ -23,11 +23,10 @@
  *
  */
 
-
 #ifndef TrainingParameters_h
 #define TrainingParameters_h
 
-using namespace std ;
+using namespace std;
 
 #include <iostream>
 #include <fstream>
@@ -37,66 +36,63 @@ using namespace std ;
 #include "mri_ca_measure.h"
 #include "mri_ca_util.h"
 
+enum LabeledVolumeSourceType {
+  enumCMA = 0,
+  enumNMRAutoFixer,
+  enumKilliany,
+  enumUnknown
+};
 
-
-enum LabeledVolumeSourceType { enumCMA=0, enumNMRAutoFixer, enumKilliany, enumUnknown};
-
-LabeledVolumeSourceType stringToLabeledVolumeSourceType(string strLabeledVolumeSourceType)
-{
+LabeledVolumeSourceType
+stringToLabeledVolumeSourceType(string strLabeledVolumeSourceType) {
   LabeledVolumeSourceType newEnumLabeledVolumeSourceType;
-  if (strLabeledVolumeSourceType=="CMA")
-  {
-    newEnumLabeledVolumeSourceType=enumCMA;
-  }
-  else if (strLabeledVolumeSourceType=="NMRAutoFixer")
-  {
-    newEnumLabeledVolumeSourceType=enumNMRAutoFixer;
-  }
-  else if (strLabeledVolumeSourceType=="Killiany")
-  {
-    newEnumLabeledVolumeSourceType=enumKilliany;
-  }
-  else
-  {
-    newEnumLabeledVolumeSourceType=enumUnknown;
+  if (strLabeledVolumeSourceType == "CMA") {
+    newEnumLabeledVolumeSourceType = enumCMA;
+  } else if (strLabeledVolumeSourceType == "NMRAutoFixer") {
+    newEnumLabeledVolumeSourceType = enumNMRAutoFixer;
+  } else if (strLabeledVolumeSourceType == "Killiany") {
+    newEnumLabeledVolumeSourceType = enumKilliany;
+  } else {
+    newEnumLabeledVolumeSourceType = enumUnknown;
   };
-  return(newEnumLabeledVolumeSourceType);
+  return (newEnumLabeledVolumeSourceType);
 }
 
-class CTrainingParameters
-{
+class CTrainingParameters {
 
 public:
-
-
-
-  void read()
-  { // init the data members to be empty
+  void read() { // init the data members to be empty
     strStatisticsVolumeHeaderPath.erase();
     arr2DstrSubjectsToTrain.clear();
     measures.clear();
 
     // get the values from the config file
-    trainingConfigFile.get(strLabelLUT, "GeneralTrainingParameters", "LabelLUT");
-    trainingConfigFile.get(strLabeledVolumeSourceType, "GeneralTrainingParameters", "LabeledVolumeSourceType");
-    enumLabeledVolumeSourceType=stringToLabeledVolumeSourceType(strLabeledVolumeSourceType);
-    trainingConfigFile.get(strStatisticsVolumeHeaderPath, "GeneralTrainingParameters", "StatisticsVolumeHeaderPath");
+    trainingConfigFile.get(strLabelLUT, "GeneralTrainingParameters",
+                           "LabelLUT");
+    trainingConfigFile.get(strLabeledVolumeSourceType,
+                           "GeneralTrainingParameters",
+                           "LabeledVolumeSourceType");
+    enumLabeledVolumeSourceType =
+        stringToLabeledVolumeSourceType(strLabeledVolumeSourceType);
+    trainingConfigFile.get(strStatisticsVolumeHeaderPath,
+                           "GeneralTrainingParameters",
+                           "StatisticsVolumeHeaderPath");
     trainingConfigFile.get(arr2DstrSubjectsToTrain, "SubjectsToTrain", "");
     measures.get(trainingConfigFile);
-
 
     // test(); // call this to test the CConfigFile class
   }
 
-  void write(bool bEchoToStdOut=false)
-  {
-    trainingConfigFile.writeSection("GeneralTrainingParameters",bEchoToStdOut);
-    trainingConfigFile.write(strLabelLUT, "LabelLUT",bEchoToStdOut);
-    trainingConfigFile.write(strLabeledVolumeSourceType,  "LabeledVolumeSourceType",bEchoToStdOut);
-    trainingConfigFile.write(strStatisticsVolumeHeaderPath, "StatisticsVolumeHeaderPath",bEchoToStdOut);
-    trainingConfigFile.writeSection("SubjectsToTrain",bEchoToStdOut);
-    trainingConfigFile.write(arr2DstrSubjectsToTrain, "",bEchoToStdOut);
-    measures.write(trainingConfigFile,bEchoToStdOut);
+  void write(bool bEchoToStdOut = false) {
+    trainingConfigFile.writeSection("GeneralTrainingParameters", bEchoToStdOut);
+    trainingConfigFile.write(strLabelLUT, "LabelLUT", bEchoToStdOut);
+    trainingConfigFile.write(strLabeledVolumeSourceType,
+                             "LabeledVolumeSourceType", bEchoToStdOut);
+    trainingConfigFile.write(strStatisticsVolumeHeaderPath,
+                             "StatisticsVolumeHeaderPath", bEchoToStdOut);
+    trainingConfigFile.writeSection("SubjectsToTrain", bEchoToStdOut);
+    trainingConfigFile.write(arr2DstrSubjectsToTrain, "", bEchoToStdOut);
+    measures.write(trainingConfigFile, bEchoToStdOut);
 
 #if 0
     trainingConfigFile.write(strLabelLUT, "GeneralTrainingParameters", "LabelLUT",bEchoToStdOut);
@@ -105,22 +101,17 @@ public:
     trainingConfigFile.write(arr2DstrSubjectsToTrain, "SubjectsToTrain", "",bEchoToStdOut);
     measures.write(trainingConfigFile,bEchoToStdOut);
 #endif
-
-
   }
 
   // default dtor, copy , assign OK
-  CTrainingParameters(string strFilepath, int nProt=0)
-  {
+  CTrainingParameters(string strFilepath, int nProt = 0) {
     trainingConfigFile.init(strFilepath, nProt);
     strStatisticsVolumeHeaderPath.erase();
     arr2DstrSubjectsToTrain.clear();
     measures.clear();
   }
 
-
-public:  // changed to public access so that these could be accessed in train.cxx
-
+public: // changed to public access so that these could be accessed in train.cxx
   LabeledVolumeSourceType enumLabeledVolumeSourceType;
   string strLabeledVolumeSourceType;
   string strStatisticsVolumeHeaderPath;
@@ -131,13 +122,7 @@ public:  // changed to public access so that these could be accessed in train.cx
   CConfigFile trainingConfigFile;
 
 private:
-  CTrainingParameters()
-  {};  // disable default ctor
+  CTrainingParameters(){}; // disable default ctor
 };
 
 #endif
-
-
-
-
-

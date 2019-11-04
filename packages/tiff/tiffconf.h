@@ -1,30 +1,31 @@
-/* $Header: /cvsroot/osrs/libtiff/libtiff/tiffconf.h,v 1.8 2003/12/26 10:20:03 dron Exp $ */
+/* $Header: /cvsroot/osrs/libtiff/libtiff/tiffconf.h,v 1.8 2003/12/26 10:20:03
+ * dron Exp $ */
 /*
  * Copyright (c) 1988-1997 Sam Leffler
  * Copyright (c) 1991-1997 Silicon Graphics, Inc.
  *
- * Permission to use, copy, modify, distribute, and sell this software and 
+ * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation for any purpose is hereby granted without fee, provided
  * that (i) the above copyright notices and this permission notice appear in
  * all copies of the software and related documentation, and (ii) the names of
  * Sam Leffler and Silicon Graphics may not be used in any advertising or
  * publicity relating to the software without the specific, prior written
  * permission of Sam Leffler and Silicon Graphics.
- * 
- * THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND, 
- * EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY 
- * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  
- * 
+ *
+ * THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
+ * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+ *
  * IN NO EVENT SHALL SAM LEFFLER OR SILICON GRAPHICS BE LIABLE FOR
  * ANY SPECIAL, INCIDENTAL, INDIRECT OR CONSEQUENTIAL DAMAGES OF ANY KIND,
  * OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
- * WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF 
- * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE 
+ * WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF
+ * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  */
 
 #ifndef _TIFFCONF_
-#define	_TIFFCONF_
+#define _TIFFCONF_
 /*
  * Library Configuration Definitions.
  *
@@ -55,17 +56,17 @@
  *                      fstat64() and stat64 allowing 2-4GB files.
  */
 #ifndef HAVE_IEEEFP
-#define	HAVE_IEEEFP	1
+#define HAVE_IEEEFP 1
 #endif
 #ifndef HOST_FILLORDER
-#define	HOST_FILLORDER	FILLORDER_MSB2LSB
+#define HOST_FILLORDER FILLORDER_MSB2LSB
 #endif
-#ifndef	HOST_BIGENDIAN
-#define	HOST_BIGENDIAN	1
+#ifndef HOST_BIGENDIAN
+#define HOST_BIGENDIAN 1
 #endif
 
 #ifndef USE_64BIT_API
-#  define USE_64BIT_API	0
+#define USE_64BIT_API 0
 #endif
 
 #ifndef COMPRESSION_SUPPORT
@@ -86,11 +87,11 @@
  *    PIXARLOG_SUPPORT	enable support for Pixar log-format algorithm
  *    LOGLUV_SUPPORT	enable support for LogLuv high dynamic range encoding
  */
-#define	CCITT_SUPPORT
-#define	PACKBITS_SUPPORT
-#define	LZW_SUPPORT
-#define	THUNDER_SUPPORT
-#define	NEXT_SUPPORT
+#define CCITT_SUPPORT
+#define PACKBITS_SUPPORT
+#define LZW_SUPPORT
+#define THUNDER_SUPPORT
+#define NEXT_SUPPORT
 #define LOGLUV_SUPPORT
 #endif /* COMPRESSION_SUPPORT */
 
@@ -100,10 +101,10 @@
  */
 #ifdef JPEG_SUPPORT
 #ifndef YCBCR_SUPPORT
-#define	YCBCR_SUPPORT
+#define YCBCR_SUPPORT
 #endif
 #ifndef COLORIMETRY_SUPPORT
-#define	COLORIMETRY_SUPPORT
+#define COLORIMETRY_SUPPORT
 #endif
 #endif /* JPEG_SUPPORT */
 
@@ -123,13 +124,13 @@
  *                      Enable picking up YCbCr subsampling info from the
  *                      JPEG data stream to support files lacking the tag.
  *                      See Bug 168 in Bugzilla, and JPEGFixupTestSubsampling()
- *                      for details. 
+ *                      for details.
  */
 #ifndef STRIPCHOP_DEFAULT
-#define	STRIPCHOP_DEFAULT	TIFF_STRIPCHOP	/* default is to enable */
+#define STRIPCHOP_DEFAULT TIFF_STRIPCHOP /* default is to enable */
 #endif
 #ifndef SUBIFD_SUPPORT
-#define	SUBIFD_SUPPORT		1	/* enable SubIFD tag (330) support */
+#define SUBIFD_SUPPORT 1 /* enable SubIFD tag (330) support */
 #endif
 #ifndef DEFAULT_EXTRASAMPLE_AS_ALPHA
 #define DEFAULT_EXTRASAMPLE_AS_ALPHA 1
@@ -143,10 +144,10 @@
  * XXX: These macros are obsoleted. Don't use them in your apps!
  * Macros stays here for backward compatibility and should be always defined.
  */
-#define	COLORIMETRY_SUPPORT
-#define	YCBCR_SUPPORT
-#define	CMYK_SUPPORT
-#define	ICC_SUPPORT
+#define COLORIMETRY_SUPPORT
+#define YCBCR_SUPPORT
+#define CMYK_SUPPORT
+#define ICC_SUPPORT
 #define PHOTOSHOP_SUPPORT
 #define IPTC_SUPPORT
 

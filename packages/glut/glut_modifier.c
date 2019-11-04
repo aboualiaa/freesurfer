@@ -8,19 +8,16 @@
 #include "glutint.h"
 
 /* CENTRY */
-int APIENTRY
-glutGetModifiers(void)
-{
+int APIENTRY glutGetModifiers(void) {
   int modifiers;
 
-  if (__glutModifierMask == (unsigned int) ~0)
-  {
+  if (__glutModifierMask == (unsigned int)~0) {
     __glutWarning(
-      "glutCurrentModifiers: do not call outside core input callback.");
+        "glutCurrentModifiers: do not call outside core input callback.");
     return 0;
   }
   modifiers = 0;
-  if (__glutModifierMask & (ShiftMask|LockMask))
+  if (__glutModifierMask & (ShiftMask | LockMask))
     modifiers |= GLUT_ACTIVE_SHIFT;
   if (__glutModifierMask & ControlMask)
     modifiers |= GLUT_ACTIVE_CTRL;

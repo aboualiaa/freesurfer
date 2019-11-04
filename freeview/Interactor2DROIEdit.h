@@ -28,14 +28,10 @@
 
 #include "Interactor2DVolumeEdit.h"
 
-class Interactor2DROIEdit : public Interactor2DVolumeEdit
-{
+class Interactor2DROIEdit : public Interactor2DVolumeEdit {
 public:
-  Interactor2DROIEdit( QObject* parent );
-  virtual ~Interactor2DROIEdit()
-  {}
+  Interactor2DROIEdit(QObject *parent);
+  virtual ~Interactor2DROIEdit() {}
 };
 
 #endif
-
-

@@ -3,23 +3,18 @@
 
 #include "TensorReaderStrategy.h"
 
-class AsymmetricTensorVectorReaderStrategy : public TensorReaderStrategy
-{
+class AsymmetricTensorVectorReaderStrategy : public TensorReaderStrategy {
 public:
-
   typedef TensorReaderStrategy::TensorPixelType TensorPixelType;
   typedef TensorReaderStrategy::TensorImageType TensorImageType;
 
   AsymmetricTensorVectorReaderStrategy();
-  
-  ~AsymmetricTensorVectorReaderStrategy();  
-  
-  virtual TensorImageType::Pointer GetTensors();  
-  
-  
+
+  ~AsymmetricTensorVectorReaderStrategy();
+
+  virtual TensorImageType::Pointer GetTensors();
+
 private:
-
 };
-
 
 #endif /*ASYMMETRICTENSORVECTORREADER_H_*/

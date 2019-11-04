@@ -43,17 +43,16 @@
 #ifndef __SVM_KERNEL_PARAM_H__
 #define __SVM_KERNEL_PARAM_H__
 
-#include <stdio.h>
-#include <math.h>
+#include <cstdio>
+#include <cmath>
 
 #include "svm-element-type.h"
 #include "svm-similarity.h"
 
-
-const int NO_KERNEL     = 0;
+const int NO_KERNEL = 0;
 const int LINEAR_KERNEL = 1;
-const int POLY_KERNEL   = 2;
-const int RBF_KERNEL    = 3;
+const int POLY_KERNEL = 2;
+const int RBF_KERNEL = 3;
 
 class KernelParam {
 protected:
@@ -61,53 +60,42 @@ protected:
   char _str[100];
 
 public:
-  KernelParam() : _type(NO_KERNEL) {};
-  virtual ~KernelParam() {};
+  KernelParam() : _type(NO_KERNEL){};
+  virtual ~KernelParam(){};
 
   // Value
-  virtual double operator() (const SvmReal* v1, const SvmReal* v2, int n) const {
+  virtual double operator()(const SvmReal *v1, const SvmReal *v2, int n) const {
     return 1;
   };
 
-  virtual double operator() (SvmReal dist) const {
-    return 1;
-  };
-
+  virtual double operator()(SvmReal dist) const { return 1; };
 
   // First order derivative functions: return either a particular component of
   // the derivative or a vector of all components.
 
-  virtual SvmReal d10(int index, const SvmReal* x, const SvmReal* y, int n) const = 0;
-  virtual void d10(SvmReal* res, const SvmReal* x, const SvmReal* y, int n) const = 0;
-
+  virtual SvmReal d10(int index, const SvmReal *x, const SvmReal *y,
+                      int n) const = 0;
+  virtual void d10(SvmReal *res, const SvmReal *x, const SvmReal *y,
+                   int n) const = 0;
 
   // Second order derivatives, mixed: u_i v_j
-  virtual SvmReal d11(int index1, int index2, const SvmReal* x, const SvmReal* y, int n) const = 0;
+  virtual SvmReal d11(int index1, int index2, const SvmReal *x,
+                      const SvmReal *y, int n) const = 0;
 
   // Accessors
 
-  int type() const {
-    return _type;
-  }
+  int type() const { return _type; }
 
-  const char* getString() const {
-    return _str;
-  }
+  const char *getString() const { return _str; }
 
   // I/O
 
-  void write (FILE *f) const {
-    fprintf(f,"%s\n", getString());
-  }
+  void write(FILE *f) const { fprintf(f, "%s\n", getString()); }
 };
 
-
-
-class LinearKernelParam: public KernelParam {
+class LinearKernelParam : public KernelParam {
 protected:
-
 public:
-
   LinearKernelParam() {
     _type = LINEAR_KERNEL;
     sprintf(_str, "1 ");
@@ -115,130 +103,111 @@ public:
 
   // Value
 
-  virtual double operator() (const SvmReal* v1, const SvmReal* v2, int n) const {
-    return 1.0+Product(v1,v2,n);
+  virtual double operator()(const SvmReal *v1, const SvmReal *v2, int n) const {
+    return 1.0 + Product(v1, v2, n);
   }
 
-  virtual double operator() (SvmReal dist) const {
-    return 1.0+dist;
-  }
-
+  virtual double operator()(SvmReal dist) const { return 1.0 + dist; }
 
   // First order derivatives
 
-  virtual SvmReal d10(int index, const SvmReal *x, const SvmReal* y, int n) const {
+  virtual SvmReal d10(int index, const SvmReal *x, const SvmReal *y,
+                      int n) const {
     return y[index];
   };
 
-  virtual void d10(SvmReal* res, const SvmReal *x, const SvmReal* y, int n) const {
-    for ( int i = 0; i < n; i++ )
+  virtual void d10(SvmReal *res, const SvmReal *x, const SvmReal *y,
+                   int n) const {
+    for (int i = 0; i < n; i++)
       res[i] = y[i];
   }
 
-
   // Second order derivatives, mixed: u_i v_j
-  virtual SvmReal d11(int index1, int index2, const SvmReal* x, const SvmReal* y, int n) const {
-    return (index1==index2);
+  virtual SvmReal d11(int index1, int index2, const SvmReal *x,
+                      const SvmReal *y, int n) const {
+    return (index1 == index2);
   }
-
 };
 
-
-
-
-class PolyKernelParam: public KernelParam {
+class PolyKernelParam : public KernelParam {
   int _d;
-public:
 
+public:
   PolyKernelParam(int d) {
     _type = POLY_KERNEL;
     _d = d;
-    sprintf(_str,"%d %d ", _type, _d);
+    sprintf(_str, "%d %d ", _type, _d);
   }
-
 
   // Value
 
-  virtual double operator() (const SvmReal* v1, const SvmReal* v2, int n) const {
-    return pow(1.0+Product(v1,v2,n),_d);
+  virtual double operator()(const SvmReal *v1, const SvmReal *v2, int n) const {
+    return pow(1.0 + Product(v1, v2, n), _d);
   }
 
-  virtual double operator() (SvmReal dist) const {
-    return pow(1.0+dist,_d);
-  };
-
+  virtual double operator()(SvmReal dist) const { return pow(1.0 + dist, _d); };
 
   // First order derivatives
 
-  virtual SvmReal d10(int index, const SvmReal *x, const SvmReal* y, int n) const {
-    return y[index]*_d*pow(1+Product(x,y,n),_d-1);
+  virtual SvmReal d10(int index, const SvmReal *x, const SvmReal *y,
+                      int n) const {
+    return y[index] * _d * pow(1 + Product(x, y, n), _d - 1);
   };
 
-  virtual void d10(SvmReal* res, const SvmReal *x, const SvmReal* y, int n) const {
-    double coef = _d*(1+Product(x,y,n),_d-1);
-    for ( int i = 0; i < n; i++ )
-      res[i] = (SvmReal)(y[i]*coef);
+  virtual void d10(SvmReal *res, const SvmReal *x, const SvmReal *y,
+                   int n) const {
+    double coef = _d * (1 + Product(x, y, n), _d - 1);
+    for (int i = 0; i < n; i++)
+      res[i] = (SvmReal)(y[i] * coef);
   };
 
   // Second order derivatives, mixed: u_i v_j
-  virtual SvmReal d11(int index1, int index2, const SvmReal* x, const SvmReal* y, int n) const {
-    double dataProduct = Product(x,y,n);
-    return (SvmReal)(_d*(_d-1)*pow(1+dataProduct,_d-2)*x[index2]*y[index1]+
-                     (index1==index2)*_d*pow(1+dataProduct,_d-1));
+  virtual SvmReal d11(int index1, int index2, const SvmReal *x,
+                      const SvmReal *y, int n) const {
+    double dataProduct = Product(x, y, n);
+    return (SvmReal)(_d * (_d - 1) * pow(1 + dataProduct, _d - 2) * x[index2] *
+                         y[index1] +
+                     (index1 == index2) * _d * pow(1 + dataProduct, _d - 1));
   }
-
 };
 
-
-class RbfKernelParam: public KernelParam {
+class RbfKernelParam : public KernelParam {
   double _gamma;
 
 public:
-
   RbfKernelParam(SvmReal gamma) {
     _type = RBF_KERNEL;
     _gamma = gamma;
-    sprintf(_str,"%d %.12g ", _type, _gamma);
+    sprintf(_str, "%d %.12g ", _type, _gamma);
   }
-
 
   // Value
 
-  virtual double operator() (const SvmReal* v1, const SvmReal* v2, int n) const {
-    return exp(-Distance(v1,v2,n)/_gamma);
+  virtual double operator()(const SvmReal *v1, const SvmReal *v2, int n) const {
+    return exp(-Distance(v1, v2, n) / _gamma);
   }
 
-  virtual double operator() (SvmReal dist) const {
-    return exp(-dist/_gamma);
-  }
-
+  virtual double operator()(SvmReal dist) const { return exp(-dist / _gamma); }
 
   // First order derivatives
 
-  virtual SvmReal d10(int index, const SvmReal *x, const SvmReal* y, int n) const {
-    return (SvmReal)(-2/_gamma*operator()(x,y,n)*(x[index]-y[index]));
+  virtual SvmReal d10(int index, const SvmReal *x, const SvmReal *y,
+                      int n) const {
+    return (SvmReal)(-2 / _gamma * operator()(x, y, n) * (x[index] - y[index]));
   }
 
-  virtual void d10(SvmReal* res, const SvmReal *x, const SvmReal* y, int n) const {
-    double val = -2*operator()(x,y,n)/_gamma;
-    for ( int i = 0; i < n; i++ )
-      res[i] = (SvmReal)((x[i]-y[i])*val);
+  virtual void d10(SvmReal *res, const SvmReal *x, const SvmReal *y,
+                   int n) const {
+    double val = -2 * operator()(x, y, n) / _gamma;
+    for (int i = 0; i < n; i++)
+      res[i] = (SvmReal)((x[i] - y[i]) * val);
   }
 
   // Second order derivatives, mixed: u_i v_j
-  virtual SvmReal d11(int index1, int index2, const SvmReal* x, const SvmReal* y, int n) const {
-    return (SvmReal)((index1==index2)*2/_gamma);
+  virtual SvmReal d11(int index1, int index2, const SvmReal *x,
+                      const SvmReal *y, int n) const {
+    return (SvmReal)((index1 == index2) * 2 / _gamma);
   }
-
 };
 
-
-
 #endif // __SVM_KERNEL_PARAM_H__
-
-
-
-
-
-
-

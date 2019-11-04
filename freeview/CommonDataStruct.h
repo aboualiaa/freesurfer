@@ -25,50 +25,44 @@
  *
  */
 
-
 #ifndef CommonDataStruct_h
 #define CommonDataStruct_h
 
 #include <QString>
 #include <QColor>
 
-struct SettingsGeneral
-{
-  QColor    BackgroundColor;
-  QColor    CursorColor;
-  int       CursorStyle;
-  bool      SaveCopy;
+struct SettingsGeneral {
+  QColor BackgroundColor;
+  QColor CursorColor;
+  int CursorStyle;
+  bool SaveCopy;
 };
 
-struct Settings2D
-{
-  bool      SyncZoomFactor;
+struct Settings2D {
+  bool SyncZoomFactor;
 };
 
-struct SettingsScreenshot
-{
+struct SettingsScreenshot {
   bool HideCursor;
   bool HideCoords;
   bool HideScaleBar;
   bool AntiAliasing;
-  int  Magnification;
+  int Magnification;
   bool AutoTrim;
 };
 
-struct SettingsMovieFrames
-{
-  QString   OutputLocation;
-  QString   OutputExtension;
-  double    AngleStep;
-  int       StepCount;
+struct SettingsMovieFrames {
+  QString OutputLocation;
+  QString OutputExtension;
+  double AngleStep;
+  int StepCount;
 };
 
-struct RotationElement
-{
-  int     Plane;
-  double  Angle;
-  double  Point[3];
-  int     SampleMethod;
+struct RotationElement {
+  int Plane;
+  double Angle;
+  double Point[3];
+  int SampleMethod;
 };
 
 #endif

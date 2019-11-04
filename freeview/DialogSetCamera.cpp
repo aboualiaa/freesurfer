@@ -3,23 +3,17 @@
 #include "MainWindow.h"
 #include "RenderView3D.h"
 
-DialogSetCamera::DialogSetCamera(QWidget *parent) :
-  QDialog(parent),
-  ui(new Ui::DialogSetCamera)
-{
+DialogSetCamera::DialogSetCamera(QWidget *parent)
+    : QDialog(parent), ui(new Ui::DialogSetCamera) {
   ui->setupUi(this);
-  this->setWindowFlags( Qt::Tool | Qt::WindowTitleHint |
-                        Qt::WindowCloseButtonHint| Qt::CustomizeWindowHint );
+  this->setWindowFlags(Qt::Tool | Qt::WindowTitleHint |
+                       Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint);
   ui->labelMessage->hide();
 }
 
-DialogSetCamera::~DialogSetCamera()
-{
-  delete ui;
-}
+DialogSetCamera::~DialogSetCamera() { delete ui; }
 
-void DialogSetCamera::OnRefresh()
-{
+void DialogSetCamera::OnRefresh() {
   MainWindow::GetMainWindow()->GetRenderView(3)->Reset();
   QStringList cmd;
   cmd << "camera";
@@ -30,10 +24,9 @@ void DialogSetCamera::OnRefresh()
   MainWindow::GetMainWindow()->CommandSetCamera(cmd);
 }
 
-void DialogSetCamera::OnReset()
-{
-  QList<QWidget*> widgets = findChildren<QWidget*>();
-  foreach(QWidget* w, widgets)
+void DialogSetCamera::OnReset() {
+  QList<QWidget *> widgets = findChildren<QWidget *>();
+  foreach (QWidget *w, widgets)
     w->blockSignals(true);
 
   ui->doubleSpinBoxAzimuth->setValue(0);
@@ -41,13 +34,10 @@ void DialogSetCamera::OnReset()
   ui->doubleSpinBoxRoll->setValue(0);
   ui->doubleSpinBoxZoom->setValue(1);
 
-  foreach(QWidget* w, widgets)
+  foreach (QWidget *w, widgets)
     w->blockSignals(false);
 
   OnRefresh();
 }
 
-void DialogSetCamera::OnSettingChanged()
-{
-  OnRefresh();
-}
+void DialogSetCamera::OnSettingChanged() { OnRefresh(); }

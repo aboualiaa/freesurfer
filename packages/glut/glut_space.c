@@ -7,29 +7,20 @@
 
 #include "glutint.h"
 
-void APIENTRY
-glutSpaceballMotionFunc(GLUTspaceMotionCB spaceMotionFunc)
-{
+void APIENTRY glutSpaceballMotionFunc(GLUTspaceMotionCB spaceMotionFunc) {
   __glutCurrentWindow->spaceMotion = spaceMotionFunc;
   __glutUpdateInputDeviceMaskFunc = __glutUpdateInputDeviceMask;
-  __glutPutOnWorkList(__glutCurrentWindow,
-                      GLUT_DEVICE_MASK_WORK);
+  __glutPutOnWorkList(__glutCurrentWindow, GLUT_DEVICE_MASK_WORK);
 }
 
-void APIENTRY
-glutSpaceballRotateFunc(GLUTspaceRotateCB spaceRotateFunc)
-{
+void APIENTRY glutSpaceballRotateFunc(GLUTspaceRotateCB spaceRotateFunc) {
   __glutCurrentWindow->spaceRotate = spaceRotateFunc;
   __glutUpdateInputDeviceMaskFunc = __glutUpdateInputDeviceMask;
-  __glutPutOnWorkList(__glutCurrentWindow,
-                      GLUT_DEVICE_MASK_WORK);
+  __glutPutOnWorkList(__glutCurrentWindow, GLUT_DEVICE_MASK_WORK);
 }
 
-void APIENTRY
-glutSpaceballButtonFunc(GLUTspaceButtonCB spaceButtonFunc)
-{
+void APIENTRY glutSpaceballButtonFunc(GLUTspaceButtonCB spaceButtonFunc) {
   __glutCurrentWindow->spaceButton = spaceButtonFunc;
   __glutUpdateInputDeviceMaskFunc = __glutUpdateInputDeviceMask;
-  __glutPutOnWorkList(__glutCurrentWindow,
-                      GLUT_DEVICE_MASK_WORK);
+  __glutPutOnWorkList(__glutCurrentWindow, GLUT_DEVICE_MASK_WORK);
 }

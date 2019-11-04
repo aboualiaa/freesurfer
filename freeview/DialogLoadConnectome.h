@@ -4,11 +4,10 @@
 #include <QDialog>
 
 namespace Ui {
-    class DialogLoadConnectome;
+class DialogLoadConnectome;
 }
 
-class DialogLoadConnectome : public QDialog
-{
+class DialogLoadConnectome : public QDialog {
   Q_OBJECT
 
 public:

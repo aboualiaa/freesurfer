@@ -17,16 +17,15 @@
 #if defined(_SGI_EXTRA_PREDEFINES) && !defined(NO_FAST_ATOMS)
 #include <X11/SGIFastAtom.h>
 #else
-#define XSGIFastInternAtom(dpy,string,fast_name,how) XInternAtom(dpy,string,how)
+#define XSGIFastInternAtom(dpy, string, fast_name, how)                        \
+  XInternAtom(dpy, string, how)
 #endif
 
 static Bool layersRead = False;
 static OverlayInfo **overlayInfoPerScreen;
 static unsigned long *numOverlaysPerScreen;
 
-static void
-findServerOverlayVisualsInfo(Display * dpy)
-{
+static void findServerOverlayVisualsInfo(Display *dpy) {
   static Atom overlayVisualsAtom;
   Atom actualType;
   Status status;
@@ -34,32 +33,23 @@ findServerOverlayVisualsInfo(Display * dpy)
   Window root;
   int actualFormat, numScreens, i;
 
-  if (layersRead == False)
-  {
-    overlayVisualsAtom = XSGIFastInternAtom
-      (dpy,
-       "SERVER_OVERLAY_VISUALS", SGI_XA_SERVER_OVERLAY_VISUALS, True);
-    if (overlayVisualsAtom != None)
-    {
+  if (layersRead == False) {
+    overlayVisualsAtom = XSGIFastInternAtom(
+        dpy, "SERVER_OVERLAY_VISUALS", SGI_XA_SERVER_OVERLAY_VISUALS, True);
+    if (overlayVisualsAtom != None) {
       numScreens = ScreenCount(dpy);
-      overlayInfoPerScreen = (OverlayInfo **)
-                             malloc(numScreens * sizeof(OverlayInfo *));
-      numOverlaysPerScreen = (unsigned long *)
-                             malloc(numScreens * sizeof(unsigned long));
-      if (overlayInfoPerScreen != NULL &&
-          numOverlaysPerScreen != NULL)
-      {
-        for (i = 0; i < numScreens; i++)
-        {
+      overlayInfoPerScreen =
+          (OverlayInfo **)malloc(numScreens * sizeof(OverlayInfo *));
+      numOverlaysPerScreen =
+          (unsigned long *)malloc(numScreens * sizeof(unsigned long));
+      if (overlayInfoPerScreen != NULL && numOverlaysPerScreen != NULL) {
+        for (i = 0; i < numScreens; i++) {
           root = RootWindow(dpy, i);
-          status = XGetWindowProperty
-            (dpy, root,
-             overlayVisualsAtom, 0L, (long) 10000, False,
-             overlayVisualsAtom, &actualType, &actualFormat,
-             &sizeData, &bytesLeft,
-             (unsigned char **) &overlayInfoPerScreen[i]);
-          if (status != Success ||
-              actualType != overlayVisualsAtom ||
+          status = XGetWindowProperty(
+              dpy, root, overlayVisualsAtom, 0L, (long)10000, False,
+              overlayVisualsAtom, &actualType, &actualFormat, &sizeData,
+              &bytesLeft, (unsigned char **)&overlayInfoPerScreen[i]);
+          if (status != Success || actualType != overlayVisualsAtom ||
               actualFormat != 32 || sizeData < 4)
             numOverlaysPerScreen[i] = 0;
           else
@@ -68,9 +58,7 @@ findServerOverlayVisualsInfo(Display * dpy)
             numOverlaysPerScreen[i] = sizeData / 4;
         }
         layersRead = True;
-      }
-      else
-      {
+      } else {
         if (overlayInfoPerScreen != NULL)
           free(overlayInfoPerScreen);
         if (numOverlaysPerScreen != NULL)
@@ -80,26 +68,18 @@ findServerOverlayVisualsInfo(Display * dpy)
   }
 }
 
-int
-__glutGetTransparentPixel(Display * dpy, XVisualInfo * vinfo)
-{
+int __glutGetTransparentPixel(Display *dpy, XVisualInfo *vinfo) {
   int i, screen = vinfo->screen;
   OverlayInfo *overlayInfo;
 
   findServerOverlayVisualsInfo(dpy);
-  if (layersRead)
-  {
-    for (i = 0; i < numOverlaysPerScreen[screen]; i++)
-    {
+  if (layersRead) {
+    for (i = 0; i < numOverlaysPerScreen[screen]; i++) {
       overlayInfo = &overlayInfoPerScreen[screen][i];
-      if (vinfo->visualid == overlayInfo->overlay_visual)
-      {
-        if (overlayInfo->transparent_type == TransparentPixel)
-        {
-          return (int) overlayInfo->value;
-        }
-        else
-        {
+      if (vinfo->visualid == overlayInfo->overlay_visual) {
+        if (overlayInfo->transparent_type == TransparentPixel) {
+          return (int)overlayInfo->value;
+        } else {
           return -1;
         }
       }
@@ -108,10 +88,9 @@ __glutGetTransparentPixel(Display * dpy, XVisualInfo * vinfo)
   return -1;
 }
 
-XLayerVisualInfo *
-__glutXGetLayerVisualInfo(Display * dpy, long lvinfo_mask,
-                          XLayerVisualInfo * lvinfo_template, int *nitems_return)
-{
+XLayerVisualInfo *__glutXGetLayerVisualInfo(Display *dpy, long lvinfo_mask,
+                                            XLayerVisualInfo *lvinfo_template,
+                                            int *nitems_return) {
   XVisualInfo *vinfo;
   XLayerVisualInfo *layerInfo;
   int numVisuals, count, i, j;
@@ -122,56 +101,42 @@ __glutXGetLayerVisualInfo(Display * dpy, long lvinfo_mask,
     return NULL;
   numVisuals = *nitems_return;
   findServerOverlayVisualsInfo(dpy);
-  layerInfo = (XLayerVisualInfo *)
-              malloc(numVisuals * sizeof(XLayerVisualInfo));
-  if (layerInfo == NULL)
-  {
+  layerInfo = (XLayerVisualInfo *)malloc(numVisuals * sizeof(XLayerVisualInfo));
+  if (layerInfo == NULL) {
     XFree(vinfo);
     return NULL;
   }
   count = 0;
-  for (i = 0; i < numVisuals; i++)
-  {
+  for (i = 0; i < numVisuals; i++) {
     XVisualInfo *pVinfo = &vinfo[i];
     int screen = pVinfo->screen;
     OverlayInfo *overlayInfo = NULL;
 
     overlayInfo = NULL;
-    if (layersRead)
-    {
-      for (j = 0; j < numOverlaysPerScreen[screen]; j++)
-      {
+    if (layersRead) {
+      for (j = 0; j < numOverlaysPerScreen[screen]; j++) {
         if (pVinfo->visualid ==
-            overlayInfoPerScreen[screen][j].overlay_visual)
-        {
+            overlayInfoPerScreen[screen][j].overlay_visual) {
           overlayInfo = &overlayInfoPerScreen[screen][j];
           break;
         }
       }
     }
-    if (lvinfo_mask & VisualLayerMask)
-    {
-      if (overlayInfo == NULL)
-      {
+    if (lvinfo_mask & VisualLayerMask) {
+      if (overlayInfo == NULL) {
         if (lvinfo_template->layer != 0)
           continue;
-      }
-      else if (lvinfo_template->layer != overlayInfo->layer)
+      } else if (lvinfo_template->layer != overlayInfo->layer)
         continue;
     }
-    if (lvinfo_mask & VisualTransparentType)
-    {
-      if (overlayInfo == NULL)
-      {
+    if (lvinfo_mask & VisualTransparentType) {
+      if (overlayInfo == NULL) {
         if (lvinfo_template->type != None)
           continue;
-      }
-      else if (lvinfo_template->type !=
-               overlayInfo->transparent_type)
+      } else if (lvinfo_template->type != overlayInfo->transparent_type)
         continue;
     }
-    if (lvinfo_mask & VisualTransparentValue)
-    {
+    if (lvinfo_mask & VisualTransparentValue) {
       if (overlayInfo == NULL)
         /* Non-overlay visuals have no sense of
            TransparentValue. */
@@ -180,14 +145,11 @@ __glutXGetLayerVisualInfo(Display * dpy, long lvinfo_mask,
         continue;
     }
     layerInfo[count].vinfo = *pVinfo;
-    if (overlayInfo == NULL)
-    {
+    if (overlayInfo == NULL) {
       layerInfo[count].layer = 0;
       layerInfo[count].type = None;
-      layerInfo[count].value = 0;  /* meaningless */
-    }
-    else
-    {
+      layerInfo[count].value = 0; /* meaningless */
+    } else {
       layerInfo[count].layer = overlayInfo->layer;
       layerInfo[count].type = overlayInfo->transparent_type;
       layerInfo[count].value = overlayInfo->value;
@@ -196,16 +158,14 @@ __glutXGetLayerVisualInfo(Display * dpy, long lvinfo_mask,
   }
   XFree(vinfo);
   *nitems_return = count;
-  if (count == 0)
-  {
+  if (count == 0) {
     XFree(layerInfo);
     return NULL;
-  }
-  else
+  } else
     return layerInfo;
 }
 
-#if 0                   /* Unused by GLUT. */
+#if 0 /* Unused by GLUT. */
 Status
 __glutXMatchLayerVisualInfo(Display * dpy, int screen,
                             int depth, int visualClass, int layer,

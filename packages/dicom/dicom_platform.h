@@ -54,8 +54,7 @@
 #define DICOMPLATFORM_IS_IN 1
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 #define LONGSIZE 32
@@ -64,8 +63,8 @@ extern "C"
 
 #define TBL_SQLSERVER
 
-  /* RKT - commeted this out, we don't want to use threads. */
-  /* #define CTN_USE_THREADS */
+/* RKT - commeted this out, we don't want to use threads. */
+/* #define CTN_USE_THREADS */
 
 #ifdef __cplusplus
 }

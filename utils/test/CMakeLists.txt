@@ -26,21 +26,21 @@ add_executable(sse_mathfun_test EXCLUDE_FROM_ALL sse_mathfun_test.c)
 target_link_libraries(sse_mathfun_test m)
 
 add_test_script(NAME utils_test SCRIPT test.sh
-  DEPENDS
-  test_TriangleFile_readWrite
-  topology_test
-  testcolortab
-  test_c_nr_wrapper
-  extest
-  inftest
-  tiff_write_image
-  sc_test
-  sse_mathfun_test
-)
+        DEPENDS
+        test_TriangleFile_readWrite
+        topology_test
+        testcolortab
+        test_c_nr_wrapper
+        extest
+        inftest
+        tiff_write_image
+        sc_test
+        sse_mathfun_test
+        )
 
 add_subdirectories(
-  mriBuildVoronoiDiagramFloat
-  MRIScomputeBorderValues
-  mrishash
-  mriSoapBubbleFloat
+        mriBuildVoronoiDiagramFloat
+        MRIScomputeBorderValues
+        mrishash
+        mriSoapBubbleFloat
 )

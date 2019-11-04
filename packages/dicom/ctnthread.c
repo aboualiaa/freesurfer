@@ -71,10 +71,7 @@ static CTNBOOLEAN initialized = FALSE;
 #endif
 
 #ifdef _MSC_VER
-static void
-mutexName(int i, char *name) {
-  sprintf(name, "CTN-MUTEX-%d", i);
-}
+static void mutexName(int i, char *name) { sprintf(name, "CTN-MUTEX-%d", i); }
 #endif
 
 CONDITION
@@ -86,7 +83,7 @@ THR_Init() {
   if (initialized)
     return THR_NORMAL;
 
-  for (i = 0; i < (int) DIM_OF(hMutex); i++) {
+  for (i = 0; i < (int)DIM_OF(hMutex); i++) {
     char name[32];
     mutexName(i, name);
     hMutex[i] = CreateMutex(NULL, FALSE, name);
@@ -100,7 +97,7 @@ THR_Init() {
   if (initialized)
     return;
 
-  for (i = 0; i < (int) DIM_OF(mutex); i++) {
+  for (i = 0; i < (int)DIM_OF(mutex); i++) {
     cond = mutex_init(&mutex[i], USYNC_THREAD, NULL);
     if (cond != 0) {
       fprintf(stderr, "Fatal error in THR_Init; could not initialize mutex\n");
@@ -125,7 +122,7 @@ THR_Shutdown() {
     fprintf(stderr, "Threads not initialized in call to THR_Shutdown\n");
     return THR_NOTINITIALIZED;
   }
-  for (i = 0; i < (int) DIM_OF(hMutex); i++)
+  for (i = 0; i < (int)DIM_OF(hMutex); i++)
     CloseHandle(hMutex[i]);
 
   return THR_NORMAL;
@@ -138,7 +135,7 @@ THR_Shutdown() {
     fprintf(stderr, "Threads not initialized in call to THR_Shutdown\n");
     return THR_NOTINITIALIZED;
   }
-  for (i = 0; i < (int) DIM_OF(mutex); i++) {
+  for (i = 0; i < (int)DIM_OF(mutex); i++) {
     cond = mutex_destroy(&mutex[i]);
     if (cond != 0) {
       fprintf(stderr, "Failed on call to mutex_destroy in THR_Shutdown\n");

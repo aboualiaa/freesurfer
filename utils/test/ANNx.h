@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:55 $
@@ -22,7 +22,6 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
-
 
 //----------------------------------------------------------------------
 // File:  ANNx.h
@@ -57,32 +56,33 @@
 #ifndef ANNx_H
 #define ANNx_H
 
-#include <iomanip.h>   // I/O manipulators
-#include <ANN/ANN.h>   // ANN includes
+#include <iomanip.h> // I/O manipulators
+#include <ANN/ANN.h> // ANN includes
 
 //----------------------------------------------------------------------
 //  Our own assertion checking
 //----------------------------------------------------------------------
 
 #ifdef ASSERT
-#define assert(expression)  \
-  ((void) ((expression) ? 0 : __assert(__FILE__, __LINE__)))
+#define assert(expression)                                                     \
+  ((void)((expression) ? 0 : __assert(__FILE__, __LINE__)))
 
-#define __assert(file, lineno)  \
-  (fprintf (stderr, "%s:%u: failed assertion. Conact the authors.\n", \
-  file, lineno), abort (), 0)
+#define __assert(file, lineno)                                                 \
+  (fprintf(stderr, "%s:%u: failed assertion. Conact the authors.\n", file,     \
+           lineno),                                                            \
+   abort(), 0)
 #else
-#define assert(ignore) ((void) 0)
+#define assert(ignore) ((void)0)
 #endif
 
 //----------------------------------------------------------------------
 //  Global constants and types
 //----------------------------------------------------------------------
-enum {LO=0, HI=1};   // splitting indices
-enum {IN=0, OUT=1};   // shrinking indices
+enum { LO = 0, HI = 1 };  // splitting indices
+enum { IN = 0, OUT = 1 }; // shrinking indices
 
 // what to do in case of error
-enum ANNerr {ANNwarn = 0, ANNabort = 1};
+enum ANNerr { ANNwarn = 0, ANNabort = 1 };
 
 //----------------------------------------------------------------------
 //  Maximum number of points to visit
@@ -92,21 +92,21 @@ enum ANNerr {ANNwarn = 0, ANNabort = 1};
 // and the algorithm applies its normal termination condition.
 //----------------------------------------------------------------------
 
-extern int  ANNmaxPtsVisited;// maximum number of pts visited
-extern int  ANNptsVisited; // number of pts visited in search
+extern int ANNmaxPtsVisited; // maximum number of pts visited
+extern int ANNptsVisited;    // number of pts visited in search
 
 //----------------------------------------------------------------------
 //  Global function declarations
 //----------------------------------------------------------------------
 
-void annError(   // ANN error routine
-  char  *msg,  // error message
-  ANNerr  level);  // level of error
+void annError(     // ANN error routine
+    char *msg,     // error message
+    ANNerr level); // level of error
 
-void annPrintPt(  // print a point
-  ANNpoint  pt,  // the point
-  int   dim,  // the dimension
-  ostream  &out);  // output stream
+void annPrintPt(   // print a point
+    ANNpoint pt,   // the point
+    int dim,       // the dimension
+    ostream &out); // output stream
 
 //----------------------------------------------------------------------
 //  Orthogonal (axis aligned) rectangle
@@ -125,50 +125,50 @@ void annPrintPt(  // print a point
 // you get into big trouble in the calling procedure.)
 //----------------------------------------------------------------------
 
-class ANNorthRect
-{
+class ANNorthRect {
 public:
-  ANNpoint lo;   // rectangle lower bounds
-  ANNpoint hi;   // rectangle upper bounds
-//
-  ANNorthRect(   // basic constructor
-    int dd,    // dimension of space
-    ANNcoord l=0,   // default is empty
-    ANNcoord h=0)
-  {
+  ANNpoint lo;        // rectangle lower bounds
+  ANNpoint hi;        // rectangle upper bounds
+                      //
+  ANNorthRect(        // basic constructor
+      int dd,         // dimension of space
+      ANNcoord l = 0, // default is empty
+      ANNcoord h = 0) {
     lo = annAllocPt(dd, l);
     hi = annAllocPt(dd, h);
   }
 
-  ANNorthRect(   // (almost a) copy constructor
-    int dd,    // dimension
-    const ANNorthRect &r)  // rectangle to copy
+  ANNorthRect(              // (almost a) copy constructor
+      int dd,               // dimension
+      const ANNorthRect &r) // rectangle to copy
   {
     lo = annCopyPt(dd, r.lo);
     hi = annCopyPt(dd, r.hi);
   }
 
-  ANNorthRect(   // construct from points
-    int dd,    // dimension
-    ANNpoint l,   // low point
-    ANNpoint h)   // hight point
-  {  lo = annCopyPt(dd, l);
+  ANNorthRect(    // construct from points
+      int dd,     // dimension
+      ANNpoint l, // low point
+      ANNpoint h) // hight point
+  {
+    lo = annCopyPt(dd, l);
     hi = annCopyPt(dd, h);
   }
 
-  ~ANNorthRect()   // destructor
-  {  delete lo;
+  ~ANNorthRect() // destructor
+  {
+    delete lo;
     delete hi;
     lo = hi = NULL;
   }
 
-  ANNbool inside(int dim, ANNpoint p);// is point p inside rectangle?
+  ANNbool inside(int dim, ANNpoint p); // is point p inside rectangle?
 };
 
-void annAssignRect(  // assign one rect to another
-  int   dim,  // dimension (both must be same)
-  ANNorthRect  &dest,  // destination (modified)
-  const ANNorthRect &source); // source
+void annAssignRect(             // assign one rect to another
+    int dim,                    // dimension (both must be same)
+    ANNorthRect &dest,          // destination (modified)
+    const ANNorthRect &source); // source
 
 //----------------------------------------------------------------------
 //  Orthogonal (axis aligned) halfspace
@@ -178,57 +178,62 @@ void annAssignRect(  // assign one rect to another
 // (closed) halfspace if (q[cd] - cv)*sd >= 0.
 //----------------------------------------------------------------------
 
-class ANNorthHalfSpace
-{
+class ANNorthHalfSpace {
 public:
-  int  cd;   // cutting dimension
-  ANNcoord cv;   // cutting value
-  int  sd;   // which side
-//
-  ANNorthHalfSpace()   // default constructor
-  {  cd = 0;
+  int cd;            // cutting dimension
+  ANNcoord cv;       // cutting value
+  int sd;            // which side
+                     //
+  ANNorthHalfSpace() // default constructor
+  {
+    cd = 0;
     cv = 0;
     sd = 0;
   }
 
-  ANNorthHalfSpace(   // basic constructor
-    int  cdd,  // dimension of space
-    ANNcoord cvv,  // cutting value
-    int  sdd)  // side
-  {  cd = cdd;
+  ANNorthHalfSpace( // basic constructor
+      int cdd,      // dimension of space
+      ANNcoord cvv, // cutting value
+      int sdd)      // side
+  {
+    cd = cdd;
     cv = cvv;
     sd = sdd;
   }
 
   ANNbool in(ANNpoint q) const // is q inside halfspace?
   {
-    return  (ANNbool) ((q[cd] - cv)*sd >= 0);
+    return (ANNbool)((q[cd] - cv) * sd >= 0);
   }
 
   ANNbool out(ANNpoint q) const // is q outside halfspace?
   {
-    return  (ANNbool) ((q[cd] - cv)*sd < 0);
+    return (ANNbool)((q[cd] - cv) * sd < 0);
   }
 
   ANNdist dist(ANNpoint q) const // (squared) distance from q
   {
-    return  (ANNdist) ANN_POW(q[cd] - cv);
+    return (ANNdist)ANN_POW(q[cd] - cv);
   }
 
-  void setLowerBound(int d, ANNpoint p)// set to lower bound at p[i]
-  {  cd = d;
+  void setLowerBound(int d, ANNpoint p) // set to lower bound at p[i]
+  {
+    cd = d;
     cv = p[d];
     sd = +1;
   }
 
-  void setUpperBound(int d, ANNpoint p)// set to upper bound at p[i]
-  {  cd = d;
+  void setUpperBound(int d, ANNpoint p) // set to upper bound at p[i]
+  {
+    cd = d;
     cv = p[d];
     sd = -1;
   }
 
-  void project(ANNpoint &q)  // project q (modified) onto halfspace
-  {  if (out(q)) q[cd] = cv;
+  void project(ANNpoint &q) // project q (modified) onto halfspace
+  {
+    if (out(q))
+      q[cd] = cv;
   }
 };
 

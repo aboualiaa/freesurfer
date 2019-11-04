@@ -31,13 +31,13 @@
   selxavg or selavg (selectively averaged).
  ****************************************************************/
 
-#include <errno.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cerrno>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
 #include <strings.h>
 
-#include <string.h>
+#include <cstring>
 #include "mri_identify.h"
 #include "selxavgio.h"
 
@@ -47,14 +47,13 @@ extern int errno;
    sv_sxadat_by_stem() - save selxavg.dat structure using
    volid as base. volid can be either a stem or stem.ext
    ---------------------------------------------------- */
-int sv_sxadat_by_stem(SXADAT *sxadat, const char *volid)
-{
+int sv_sxadat_by_stem(SXADAT *sxadat, const char *volid) {
   char tmpstr[1000];
   int err;
   char *stem;
 
   stem = IDstemFromName(volid);
-  if (stem == NULL)
+  if (stem == nullptr)
     sprintf(tmpstr, "%s.dat", volid);
   else {
     sprintf(tmpstr, "%s.dat", stem);
@@ -64,16 +63,16 @@ int sv_sxadat_by_stem(SXADAT *sxadat, const char *volid)
   return (err);
 }
 /* ---------------------------------------------------- */
-SXADAT *ld_sxadat_from_stem(const char *volid)
-{
+SXADAT *ld_sxadat_from_stem(const char *volid) {
   char tmpstr[1000];
   char *stem;
   SXADAT *sxa;
 
-  if (!is_sxa_volume(volid)) return (NULL);
+  if (!is_sxa_volume(volid))
+    return (nullptr);
 
   stem = IDstemFromName(volid);
-  if (stem == NULL)
+  if (stem == nullptr)
     sprintf(tmpstr, "%s.dat", volid);
   else {
     sprintf(tmpstr, "%s.dat", stem);
@@ -85,8 +84,7 @@ SXADAT *ld_sxadat_from_stem(const char *volid)
 }
 
 /* ---------------------------------------------------- */
-float *sxa_framepower(SXADAT *sxa, int *nframes)
-{
+float *sxa_framepower(SXADAT *sxa, int *nframes) {
   int frame;
   int h, statid, condition;
   float *framepower;
@@ -98,8 +96,10 @@ float *sxa_framepower(SXADAT *sxa, int *nframes)
   for (condition = 0; condition < sxa->Nc; condition++) {
     for (statid = 0; statid < 2; statid++) {
       for (h = 0; h < sxa->Nh; h++) {
-        if (statid == 0) framepower[frame] = 1.0; /* avereage */
-        if (statid == 1) framepower[frame] = 2.0; /* std/var */
+        if (statid == 0)
+          framepower[frame] = 1.0; /* avereage */
+        if (statid == 1)
+          framepower[frame] = 2.0; /* std/var */
         frame++;
       }
     }
@@ -108,15 +108,15 @@ float *sxa_framepower(SXADAT *sxa, int *nframes)
 }
 
 /* ---------------------------------------------------- */
-int is_sxa_volume(const char *volid)
-{
+int is_sxa_volume(const char *volid) {
   char tmpstr[1000];
   FILE *fp;
   char *stem;
 
-  if (volid == NULL) return (0);
+  if (volid == nullptr)
+    return (0);
   stem = IDstemFromName(volid);
-  if (stem == NULL)
+  if (stem == nullptr)
     sprintf(tmpstr, "%s.dat", volid);
   else {
     sprintf(tmpstr, "%s.dat", stem);
@@ -124,31 +124,31 @@ int is_sxa_volume(const char *volid)
   }
 
   fp = fopen(tmpstr, "r");
-  if (fp == NULL) return (0);
+  if (fp == nullptr)
+    return (0);
   fclose(fp);
 
   return (1);
 }
 
 /* ---------------------------------------------------- */
-SXADAT *ld_sxadat(const char *sxadatfile)
-{
+SXADAT *ld_sxadat(const char *sxadatfile) {
   FILE *fp;
   SXADAT *sxa;
   int n, r, c, Nch;
 
   fp = fopen(sxadatfile, "r");
-  if (fp == NULL) {
+  if (fp == nullptr) {
     perror("ldsxdat():");
     fprintf(stderr, "Could not open %s\n", sxadatfile);
-    return (NULL);
+    return (nullptr);
   }
 
   sxa = (SXADAT *)calloc(1, sizeof(SXADAT));
-  if (sxa == NULL) {
+  if (sxa == nullptr) {
     fprintf(stderr, "Could not alloc SXADAT\n");
     fclose(fp);
-    return (NULL);
+    return (nullptr);
   }
 
   fscanf(fp, "%*s %f", &sxa->TR);
@@ -167,7 +167,8 @@ SXADAT *ld_sxadat(const char *sxadatfile)
 
   fscanf(fp, "%*s");
   sxa->npercond = (int *)calloc(sxa->Nc, sizeof(int));
-  for (n = 0; n < sxa->Nc; n++) fscanf(fp, "%d", &sxa->npercond[n]);
+  for (n = 0; n < sxa->Nc; n++)
+    fscanf(fp, "%d", &sxa->npercond[n]);
   fscanf(fp, "%*s %d", &sxa->nruns);
   fscanf(fp, "%*s %d", &sxa->ntp);
   fscanf(fp, "%*s %d", &sxa->nrows);
@@ -181,9 +182,11 @@ SXADAT *ld_sxadat(const char *sxadatfile)
   fscanf(fp, "%*s %d", &sxa->GammaFit);
   if (sxa->GammaFit) {
     fscanf(fp, "%*s");
-    for (n = 0; n < sxa->GammaFit; n++) fscanf(fp, "%f", &sxa->gfDelta[n]);
+    for (n = 0; n < sxa->GammaFit; n++)
+      fscanf(fp, "%f", &sxa->gfDelta[n]);
     fscanf(fp, "%*s");
-    for (n = 0; n < sxa->GammaFit; n++) fscanf(fp, "%f", &sxa->gfTau[n]);
+    for (n = 0; n < sxa->GammaFit; n++)
+      fscanf(fp, "%f", &sxa->gfTau[n]);
   }
   fscanf(fp, "%*s %d", &sxa->NullCondId);
 
@@ -199,7 +202,8 @@ SXADAT *ld_sxadat(const char *sxadatfile)
     }
   }
 
-  if (sxa->version == 1) return (sxa);
+  if (sxa->version == 1)
+    return (sxa);
 
   fscanf(fp, "%*s");
   sxa->hCovMtx = (float *)calloc(Nch * Nch, sizeof(float));
@@ -213,7 +217,8 @@ SXADAT *ld_sxadat(const char *sxadatfile)
 
   fscanf(fp, "%*s");
   sxa->CondIdMap = (int *)calloc(sxa->Nc, sizeof(int));
-  for (n = 0; n < sxa->Nc; n++) fscanf(fp, "%d", &sxa->CondIdMap[n]);
+  for (n = 0; n < sxa->Nc; n++)
+    fscanf(fp, "%d", &sxa->CondIdMap[n]);
 
   fclose(fp);
 
@@ -221,13 +226,12 @@ SXADAT *ld_sxadat(const char *sxadatfile)
 }
 
 /* ---------------------------------------------------- */
-int sv_sxadat(SXADAT *sxa, const char *sxadatfile)
-{
+int sv_sxadat(SXADAT *sxa, const char *sxadatfile) {
   FILE *fp;
   int n, r, c, Nch;
 
   fp = fopen(sxadatfile, "w");
-  if (fp == NULL) {
+  if (fp == nullptr) {
     perror("sv_sxdat():");
     fprintf(stderr, "Could not open %s\n", sxadatfile);
     return (1);
@@ -247,7 +251,8 @@ int sv_sxadat(SXADAT *sxa, const char *sxadatfile)
   fprintf(fp, "DOF %f\n", sxa->DOF);
 
   fprintf(fp, "NPerCond ");
-  for (n = 0; n < sxa->Nc; n++) fprintf(fp, "%d ", sxa->npercond[n]);
+  for (n = 0; n < sxa->Nc; n++)
+    fprintf(fp, "%d ", sxa->npercond[n]);
   fprintf(fp, "\n");
 
   fprintf(fp, "nruns %d\n", sxa->nruns);
@@ -263,10 +268,12 @@ int sv_sxadat(SXADAT *sxa, const char *sxadatfile)
   fprintf(fp, "GammaFit %d\n", sxa->GammaFit);
   if (sxa->GammaFit) {
     fprintf(fp, "gfDelta ");
-    for (n = 0; n < sxa->GammaFit; n++) fprintf(fp, "%f ", sxa->gfDelta[n]);
+    for (n = 0; n < sxa->GammaFit; n++)
+      fprintf(fp, "%f ", sxa->gfDelta[n]);
     fprintf(fp, "\n");
     fprintf(fp, "gfTau ");
-    for (n = 0; n < sxa->GammaFit; n++) fprintf(fp, "%f ", sxa->gfTau[n]);
+    for (n = 0; n < sxa->GammaFit; n++)
+      fprintf(fp, "%f ", sxa->gfTau[n]);
     fprintf(fp, "\n");
   }
   fprintf(fp, "NullCondId %d\n", sxa->NullCondId);
@@ -282,7 +289,8 @@ int sv_sxadat(SXADAT *sxa, const char *sxadatfile)
     }
   }
 
-  if (sxa->version == 1) return (0);
+  if (sxa->version == 1)
+    return (0);
 
   fprintf(fp, "hCovMtx\n");
   n = 0;
@@ -294,7 +302,8 @@ int sv_sxadat(SXADAT *sxa, const char *sxadatfile)
   }
 
   fprintf(fp, "CondIdMap ");
-  for (n = 0; n < sxa->Nc; n++) fprintf(fp, "%d ", sxa->CondIdMap[n]);
+  for (n = 0; n < sxa->Nc; n++)
+    fprintf(fp, "%d ", sxa->CondIdMap[n]);
   fprintf(fp, "\n");
 
   fclose(fp);

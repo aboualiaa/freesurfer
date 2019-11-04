@@ -30,20 +30,15 @@
 
 class LayerMRI;
 
-class VolumeFilterDilate : public VolumeFilter
-{
+class VolumeFilterDilate : public VolumeFilter {
 public:
-  VolumeFilterDilate( LayerMRI* input = 0, LayerMRI* output = 0, QObject* parent = 0 );
+  VolumeFilterDilate(LayerMRI *input = 0, LayerMRI *output = 0,
+                     QObject *parent = 0);
 
-  QString GetName()
-  {
-    return "Dilate";
-  }
+  QString GetName() { return "Dilate"; }
 
 protected:
   bool Execute();
 };
 
 #endif
-
-

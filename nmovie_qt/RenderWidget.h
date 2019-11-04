@@ -5,30 +5,25 @@
 #include <QTimer>
 #include <QImage>
 
-class RenderWidget : public QWidget
-{
-    Q_OBJECT
+class RenderWidget : public QWidget {
+  Q_OBJECT
 public:
-    explicit RenderWidget(QWidget *parent = 0);
+  explicit RenderWidget(QWidget *parent = nullptr);
 
-    void paintEvent(QPaintEvent *);
-    void resizeEvent(QResizeEvent *);
+  void paintEvent(QPaintEvent *);
+  void resizeEvent(QResizeEvent *);
 
-    void mousePressEvent(QMouseEvent *);
-    void mouseMoveEvent(QMouseEvent *);
-    void mouseReleaseEvent(QMouseEvent *);
+  void mousePressEvent(QMouseEvent *);
+  void mouseMoveEvent(QMouseEvent *);
+  void mouseReleaseEvent(QMouseEvent *);
 
-    int LoadImages(const QStringList& filenames);
+  int LoadImages(const QStringList &filenames);
 
-
-    int GetNumberOfImages()
-    {
-      return m_images.size();
-    }
+  int GetNumberOfImages() { return m_images.size(); }
 
 signals:
-    void CurrentImageChanged(const QImage& image, int nIndex );
-    void ErrorMessage(const QString& msg);
+  void CurrentImageChanged(const QImage &image, int nIndex);
+  void ErrorMessage(const QString &msg);
 
 public slots:
   void OnLoop();
@@ -43,14 +38,14 @@ public slots:
 
 private:
   QTimer m_timerRender;
-  bool   m_bAutoResize;
-  int    m_nCurrentImageIndex;
+  bool m_bAutoResize;
+  int m_nCurrentImageIndex;
   QList<QImage> m_images;
   QList<QImage> m_resizedImages;
-  bool   m_bSwing;
-  int    m_nInterval;
-  int    m_nY;
-  bool   m_bPressed;
+  bool m_bSwing;
+  int m_nInterval;
+  int m_nY;
+  bool m_bPressed;
 };
 
 #endif // RENDERWIDGET_H

@@ -35,50 +35,47 @@
 class vtkActor;
 class LayerMRI;
 
-struct Landmark
-{
+struct Landmark {
   Landmark();
 
   double pos[3];
   QColor color;
-  bool   valid;
+  bool valid;
   vtkSmartPointer<vtkActor> actorSphere;
   vtkSmartPointer<vtkActor> actorSlice[3];
 };
 
-
-class LayerLandmarks : public LayerEditable
-{
+class LayerLandmarks : public LayerEditable {
   Q_OBJECT
 
 public:
-  LayerLandmarks(QObject* parent = NULL);
+  LayerLandmarks(QObject *parent = NULL);
   ~LayerLandmarks();
 
-  void Append2DProps( vtkRenderer* renderer, int nPlane );
-  void Append3DProps( vtkRenderer* renderer, bool* bPlaneVisibility = NULL );
+  void Append2DProps(vtkRenderer *renderer, int nPlane);
+  void Append3DProps(vtkRenderer *renderer, bool *bPlaneVisibility = NULL);
 
-  bool HasProp( vtkProp* prop );
+  bool HasProp(vtkProp *prop);
 
   bool IsVisible();
 
   void SetLandmarkPosition(int n, double x, double y, double z);
-  void SetLandmarkPosition(int n, double* pos);
+  void SetLandmarkPosition(int n, double *pos);
 
-  void SetLandmarkColor(int n, const QColor& color);
+  void SetLandmarkColor(int n, const QColor &color);
 
-  Landmark& GetLandmark(int n);
+  Landmark &GetLandmark(int n);
 
   void SetRadius(double dRadius);
 
-  void SetVisible( bool bVisible = true );
+  void SetVisible(bool bVisible = true);
 
 signals:
-  void LandmarkChanged(int n, const Landmark& lm);
+  void LandmarkChanged(int n, const Landmark &lm);
   void LandmarkAdded();
 
 public slots:
-  void SetMRIRef(LayerMRI* mri);
+  void SetMRIRef(LayerMRI *mri);
 
 protected:
   void OnSlicePositionChanged(int nPlane);
@@ -91,8 +88,8 @@ private:
 
   QList<Landmark> m_landmarks;
   QList<Landmark> m_landmarksOriginal;
-  double        m_dRadius;
-  QPointer<LayerMRI>     m_mriRef;
+  double m_dRadius;
+  QPointer<LayerMRI> m_mriRef;
 };
 
 #endif // LAYERLANDMARKS_H

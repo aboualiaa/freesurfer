@@ -38,50 +38,52 @@
 
 /** BSpline structure has degree, coefficient image (float), source type and
     if the source had negative values */
-typedef struct
-{
-   int degree;
-   MRI * coeff;
-   int srctype;
-   int srcneg;
-}
-MRI_BSPLINE;
+typedef struct {
+  int degree;
+  MRI *coeff;
+  int srctype;
+  int srcneg;
+} MRI_BSPLINE;
 
 /**
   Allocate BSpline (mainly coefficients).
   Usually not called from outside.
   Has to be same size as the MRI for which this will be computed. */
-MRI_BSPLINE* MRIallocBSpline(int width, int height, int depth, int nframes);
+MRI_BSPLINE *MRIallocBSpline(int width, int height, int depth, int nframes);
 
 /** Free BSpline */
-int MRIfreeBSpline(MRI_BSPLINE **pbspline) ;
+int MRIfreeBSpline(MRI_BSPLINE **pbspline);
 
 /** Compute B-spline coefficients from image (step 1)
     bspline needs to be same dim as mri_src or NULL. */
-MRI_BSPLINE* MRItoBSpline (const MRI *mri_src, MRI_BSPLINE *bspline, int degree);
+MRI_BSPLINE *MRItoBSpline(const MRI *mri_src, MRI_BSPLINE *bspline, int degree);
 
 /** Based on pre-computed B-spline coefficients interpolate image */
-int MRIsampleBSpline(const MRI_BSPLINE * bspline, double x, double y, double z, int frame, double *pval);
+int MRIsampleBSpline(const MRI_BSPLINE *bspline, double x, double y, double z,
+                     int frame, double *pval);
 
 /** Based on pre-computed B-spline coefficients interpolate image sequence */
-int MRIsampleSeqBSpline(const MRI_BSPLINE *bspline, double x, double y, double z,
-                        float *valvect, int firstframe, int lastframe);
+int MRIsampleSeqBSpline(const MRI_BSPLINE *bspline, double x, double y,
+                        double z, float *valvect, int firstframe,
+                        int lastframe);
 
-/** Based on pre-computed B-spline coefficients interpolate image using voxel map MATRIX*/
-MRI *MRIlinearTransformBSpline(const MRI_BSPLINE *bspline, MRI *mri_dst, MATRIX *mA);
+/** Based on pre-computed B-spline coefficients interpolate image using voxel
+ * map MATRIX*/
+MRI *MRIlinearTransformBSpline(const MRI_BSPLINE *bspline, MRI *mri_dst,
+                               MATRIX *mA);
 
-/** Based on pre-computed B-spline coefficients interpolate image using RAS map MATRIX*/
-MRI *MRIapplyRASlinearTransformBSpline(const MRI_BSPLINE *bspline, MRI *mri_dst, MATRIX *mA) ;
-
+/** Based on pre-computed B-spline coefficients interpolate image using RAS map
+ * MATRIX*/
+MRI *MRIapplyRASlinearTransformBSpline(const MRI_BSPLINE *bspline, MRI *mri_dst,
+                                       MATRIX *mA);
 
 /** Based on pre-computed B-spline coefficients interpolate image using LTA*/
-MRI *LTAtransformBSpline(const MRI_BSPLINE *bspline, MRI *mri_dst, LTA *lta) ;
-
+MRI *LTAtransformBSpline(const MRI_BSPLINE *bspline, MRI *mri_dst, LTA *lta);
 
 /** Direct methods for downsample (based on simplified algorithm) */
-MRI *MRIdownsample2BSpline(const MRI* mri_src, MRI *mri_dst) ;
+MRI *MRIdownsample2BSpline(const MRI *mri_src, MRI *mri_dst);
 
 /** Direct methods for upsample (based on simplified algorithm) */
-MRI *MRIupsample2BSpline(const MRI* mri_src, MRI *mri_dst) ;
+MRI *MRIupsample2BSpline(const MRI *mri_src, MRI *mri_dst);
 
 #endif

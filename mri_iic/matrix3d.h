@@ -27,8 +27,7 @@
 
 #include <vnl/vnl_matrix.h>
 
-class Matrix3d
-{
+class Matrix3d {
 public:
   // default constructor, creates matrix with all dimentions 0 and NULL data
   Matrix3d();
@@ -37,9 +36,9 @@ public:
   // destructor, deletes the array of matricies and all matricies within
   ~Matrix3d();
   // copy constructor, creates exact replica of other
-  Matrix3d(const Matrix3d& other);
+  Matrix3d(const Matrix3d &other);
   // copies information from other matrix, overwriting old data
-  Matrix3d& operator=(const Matrix3d& other);
+  Matrix3d &operator=(const Matrix3d &other);
 
   // returns the value at the given coordinate
   float getVal(int row, int col, int slice) const;
@@ -53,15 +52,14 @@ public:
   // returns the depth of the matrix (number of slices)
   int getDepth() const;
 
-  vnl_matrix<float> const& getSlice(int sliceNum) const;
+  vnl_matrix<float> const &getSlice(int sliceNum) const;
   // DEBUG FUNCTIONS
 
-  //prints matrix slices to terminal
+  // prints matrix slices to terminal
   void print();
 
 private:
-
-  //Array of pointers to 2d matricies
+  // Array of pointers to 2d matricies
   vnl_matrix<float> **data;
 
   int width;

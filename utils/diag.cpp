@@ -25,9 +25,9 @@
 /*-----------------------------------------------------
                     INCLUDE FILES
 -------------------------------------------------------*/
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include "const.h"
 #include "diag.h"
@@ -48,7 +48,7 @@
 FILE *Gstdout;
 FILE *Gstderr;
 FILE *Gstdin;
-FILE *Gdiag_fp = NULL;
+FILE *Gdiag_fp = nullptr;
 
 int Gprofile = 0;
 int Gvx = -1;
@@ -83,25 +83,25 @@ static int (*diag_vfprintf)(FILE *fp, const char *fmt, va_list args) = vfprintf;
                     GLOBAL FUNCTIONS
 -------------------------------------------------------*/
 
-void assertFailed(const char* file, int line, const char* tst) {
-    fprintf(stdout, "ASSERTION FAILED: %s:%d %s\n", file, line, tst);
-    fprintf(stderr, "ASSERTION FAILED: %s:%d %s\n", file, line, tst);
+void assertFailed(const char *file, int line, const char *tst) {
+  fprintf(stdout, "ASSERTION FAILED: %s:%d %s\n", file, line, tst);
+  fprintf(stderr, "ASSERTION FAILED: %s:%d %s\n", file, line, tst);
+  fflush(stdout);
+  fflush(stderr);
+
+  while (!!getenv("FREESURFER_HANG_ON_ASSERT")) {
+    fprintf(stdout, "FREESURFER_HANG_ON_ASSERT\n");
+    fprintf(stderr, "FREESURFER_HANG_ON_ASSERT\n");
     fflush(stdout);
     fflush(stderr);
-    
-    while (!!getenv("FREESURFER_HANG_ON_ASSERT")) {
-      fprintf(stdout, "FREESURFER_HANG_ON_ASSERT\n");
-      fprintf(stderr, "FREESURFER_HANG_ON_ASSERT\n");
-      fflush(stdout);
-      fflush(stderr);
-      static volatile long count;
-      count = 0;
-      while (count < 4000000000L) count++;
-    }
-    
-    *(int*)(-1) = 0;
-}
+    static volatile long count;
+    count = 0;
+    while (count < 4000000000L)
+      count++;
+  }
 
+  *(int *)(-1) = 0;
+}
 
 /*------------------------------------------------------------------------
        Parameters:
@@ -114,38 +114,48 @@ void assertFailed(const char* file, int line, const char* tst) {
 ------------------------------------------------------------------------*/
 unsigned long DiagInit(char *fname,
                        int (*vfprint)(FILE *fp, const char *fmt, va_list args),
-                       int (*vprint)(const char *fmt, va_list args))
-{
-  char *cp = 0;
+                       int (*vprint)(const char *fmt, va_list args)) {
+  char *cp = nullptr;
   unsigned long diag = 0L;
 
   FSinit();
   Gstdout = stdout;
   Gstdin = stdin;
-  Gstderr = stderr;  // for use in gdb
-  if (fname) strcpy(diag_fname, fname);
-  if (vfprint) diag_vfprintf = vfprint;
-  if (vprint) diag_vprintf = vprint;
+  Gstderr = stderr; // for use in gdb
+  if (fname)
+    strcpy(diag_fname, fname);
+  if (vfprint)
+    diag_vfprintf = vfprint;
+  if (vprint)
+    diag_vprintf = vprint;
 
   cp = getenv("DIAG_NO");
-  if (cp) Gdiag_no = atoi(cp);
+  if (cp)
+    Gdiag_no = atoi(cp);
 
   cp = getenv("IMAGE_SIZE");
-  if (cp) IMAGE_SIZE = atoi(cp);
+  if (cp)
+    IMAGE_SIZE = atoi(cp);
 
   cp = getenv("DIAGX");
-  if (cp) Gx = atoi(cp);
+  if (cp)
+    Gx = atoi(cp);
   cp = getenv("DIAGY");
-  if (cp) Gy = atoi(cp);
+  if (cp)
+    Gy = atoi(cp);
   cp = getenv("DIAGZ");
-  if (cp) Gz = atoi(cp);
+  if (cp)
+    Gz = atoi(cp);
 
   cp = getenv("DIAGVX");
-  if (cp) Gvx = atoi(cp);
+  if (cp)
+    Gvx = atoi(cp);
   cp = getenv("DIAGVY");
-  if (cp) Gvy = atoi(cp);
+  if (cp)
+    Gvy = atoi(cp);
   cp = getenv("DIAGVZ");
-  if (cp) Gvz = atoi(cp);
+  if (cp)
+    Gvz = atoi(cp);
 
   cp = getenv("PROFILE");
   if (cp) {
@@ -153,14 +163,17 @@ unsigned long DiagInit(char *fname,
     printf("turning profiling diagnostics on (%d)...\n", Gprofile);
   }
   cp = getenv("diag");
-  if (!cp) cp = getenv("DIAG");
+  if (!cp)
+    cp = getenv("DIAG");
   if (cp) {
     sscanf(cp, "0x%lx", &diag);
     Gdiag |= diag;
   }
 
-  if (getenv("DIAG_VERBOSE")) Gdiag |= DIAG_VERBOSE;
-  if (Gdiag & DIAG_VERBOSE) printf("verbose diagnostics enabled...\n");
+  if (getenv("DIAG_VERBOSE"))
+    Gdiag |= DIAG_VERBOSE;
+  if (Gdiag & DIAG_VERBOSE)
+    printf("verbose diagnostics enabled...\n");
 
 #if 0
   if (Gdiag)
@@ -183,8 +196,8 @@ unsigned long DiagInit(char *fname,
 
         Description
 ------------------------------------------------------*/
-int DiagShowImage(unsigned long diag_bits, int win, int which, IMAGE *I, char *fmt, ...)
-{
+int DiagShowImage(unsigned long diag_bits, int win, int which, IMAGE *I,
+                  char *fmt, ...) {
 #if 0
   char    name[100] ;
   va_list args ;
@@ -214,8 +227,8 @@ int DiagShowImage(unsigned long diag_bits, int win, int which, IMAGE *I, char *f
 
         Description
 ------------------------------------------------------*/
-int DiagDrawBox(unsigned long diag_bits, int win, int row0, int col, int rows, int cols, int color)
-{
+int DiagDrawBox(unsigned long diag_bits, int win, int row0, int col, int rows,
+                int cols, int color) {
   // int i;
   // i = win;
   // i = row0;
@@ -224,9 +237,8 @@ int DiagDrawBox(unsigned long diag_bits, int win, int row0, int col, int rows, i
   // i = cols;
   // i = color; /* prevent warning (dng) */
 
-
-
-  if (diag_bits && !(diag_bits & Gdiag)) return (-1);
+  if (diag_bits && !(diag_bits & Gdiag))
+    return (-1);
 
   if (diag_bits & DIAG_WAIT) /* wait for a keystroke before continuing */
     fgetc(stdin);
@@ -240,9 +252,9 @@ int DiagDrawBox(unsigned long diag_bits, int win, int row0, int col, int rows, i
 
         Description
 ------------------------------------------------------*/
-int DiagCloseWindow(unsigned long diag_bits, int win)
-{
-  if (diag_bits && !(diag_bits & Gdiag)) return (-1);
+int DiagCloseWindow(unsigned long diag_bits, int win) {
+  if (diag_bits && !(diag_bits & Gdiag))
+    return (-1);
 
   win = win + (int)diag_bits; /* to remove warning */
   return (0);
@@ -254,8 +266,8 @@ int DiagCloseWindow(unsigned long diag_bits, int win)
 
         Description
 ------------------------------------------------------*/
-int DiagCreateWindow(unsigned long diag_bits, int wrows, int wcols, int rows, int cols)
-{
+int DiagCreateWindow(unsigned long diag_bits, int wrows, int wcols, int rows,
+                     int cols) {
   int win = -1;
 #if 0
   int i;
@@ -284,14 +296,14 @@ int DiagCreateWindow(unsigned long diag_bits, int wrows, int wcols, int rows, in
 
         Description
 ------------------------------------------------------*/
-int DiagFprintf(unsigned long diag_bits, char *fmt, ...)
-{
+int DiagFprintf(unsigned long diag_bits, char *fmt, ...) {
   static int first = 1;
   va_list args;
   FILE *fp;
   int len;
 
-  if (diag_bits && !(diag_bits & Gdiag)) return (-1);
+  if (diag_bits && !(diag_bits & Gdiag))
+    return (-1);
 
   if (first)
     fp = fopen(diag_fname, "w");
@@ -310,11 +322,11 @@ int DiagFprintf(unsigned long diag_bits, char *fmt, ...)
 
         Description
 ------------------------------------------------------*/
-int DiagPrintf(unsigned long diag_bits, const char *fmt, ...)
-{
+int DiagPrintf(unsigned long diag_bits, const char *fmt, ...) {
   va_list args;
 
-  if (diag_bits && !(diag_bits & Gdiag)) return (-1);
+  if (diag_bits && !(diag_bits & Gdiag))
+    return (-1);
 
   va_start(args, fmt);
   return ((*diag_vprintf)(fmt, args));
@@ -327,7 +339,7 @@ int DiagPrintf(unsigned long diag_bits, const char *fmt, ...)
         Description
           dummy for break points in debugger
 ------------------------------------------------------*/
-void DiagBreak(void) {}
+void DiagBreak() {}
 /*-----------------------------------------------------
         Parameters:
 
@@ -336,8 +348,7 @@ void DiagBreak(void) {}
         Description
           dummy for break points in debugger
 ------------------------------------------------------*/
-void DiagHeartbeat(float pct_done)
-{
+void DiagHeartbeat(float pct_done) {
   static float old_pct = -10.0f;
 
 #if 0
@@ -349,10 +360,12 @@ void DiagHeartbeat(float pct_done)
   if (pct_done >= 0.999f)
     fprintf(stderr, "\n") ;
 #else
-  if (pct_done < old_pct) old_pct = -20;
+  if (pct_done < old_pct)
+    old_pct = -20;
   if (pct_done - old_pct > .10) {
     old_pct = pct_done;
-    if (Gdiag & DIAG_HEARTBEAT) fprintf(stderr, "%2.1f%% finished\n", 100.0f * pct_done);
+    if (Gdiag & DIAG_HEARTBEAT)
+      fprintf(stderr, "%2.1f%% finished\n", 100.0f * pct_done);
   }
 #endif
 }
@@ -365,19 +378,19 @@ void DiagHeartbeat(float pct_done)
         Description
           dummy for break points in debugger
 ------------------------------------------------------*/
-void DiagShowPctDone(float pct_done, int nprints)
-{
+void DiagShowPctDone(float pct_done, int nprints) {
   static float old_pct = -10.0f;
 
-  if (pct_done < old_pct) old_pct = -20;
+  if (pct_done < old_pct)
+    old_pct = -20;
   if (pct_done - old_pct > 1 / (float)nprints) {
     old_pct = pct_done;
-    if (Gdiag & DIAG_HEARTBEAT) fprintf(stderr, "%2.1f%% finished\n", 100.0f * pct_done);
+    if (Gdiag & DIAG_HEARTBEAT)
+      fprintf(stderr, "%2.1f%% finished\n", 100.0f * pct_done);
   }
 }
 
-int check_finite(const char *where, double what)
-{
+int check_finite(const char *where, double what) {
   if (!isfinite(what)) {
     ErrorPrintf(ERROR_BADPARM, "%s not finite!\n", where);
     DiagBreak();

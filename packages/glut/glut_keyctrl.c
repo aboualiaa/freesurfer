@@ -8,15 +8,11 @@
 #include "glutint.h"
 
 /* CENTRY */
-void APIENTRY
-glutIgnoreKeyRepeat(int ignore)
-{
+void APIENTRY glutIgnoreKeyRepeat(int ignore) {
   __glutCurrentWindow->ignoreKeyRepeat = ignore;
 }
 
-void APIENTRY
-glutSetKeyRepeat(int repeatMode)
-{
+void APIENTRY glutSetKeyRepeat(int repeatMode) {
 #if !defined(_WIN32)
   XKeyboardControl values;
 

@@ -36,11 +36,10 @@ class vtkCellArray;
 class LayerPropertyTrack;
 class vtkUnsignedCharArray;
 
-class LayerTrack : public Layer
-{
+class LayerTrack : public Layer {
   Q_OBJECT
 public:
-  LayerTrack(LayerMRI* ref, QObject* parent = NULL, bool bCluster = false);
+  LayerTrack(LayerMRI *ref, QObject *parent = NULL, bool bCluster = false);
   ~LayerTrack();
 
   bool LoadTrackFromFiles();
@@ -53,25 +52,21 @@ public:
 
   bool IsVisible();
 
-  inline LayerPropertyTrack* GetProperty()
-  {
-    return (LayerPropertyTrack*)mProperty;
+  inline LayerPropertyTrack *GetProperty() {
+    return (LayerPropertyTrack *)mProperty;
   }
 
-  virtual void SetVisible( bool bVisible = true );
+  virtual void SetVisible(bool bVisible = true);
 
-  void SetFileName(const QString& filename);
+  void SetFileName(const QString &filename);
 
-  void SetFileNames(const QStringList& filenames);
+  void SetFileNames(const QStringList &filenames);
 
-  void SetClusterData(const QVariantMap& data);
+  void SetClusterData(const QVariantMap &data);
 
   bool IsCluster();
 
-  QVariantMap GetClusterData()
-  {
-    return m_mapCluster;
-  }
+  QVariantMap GetClusterData() { return m_mapCluster; }
 
   bool HasEmbeddedColor();
 
@@ -81,8 +76,7 @@ signals:
 public slots:
   void RebuildActors();
   void UpdateColor(bool emitSignal = true);
-  void LoadTrackFromFiles(const QStringList& filenames)
-  {
+  void LoadTrackFromFiles(const QStringList &filenames) {
     SetFileNames(filenames);
     LoadTrackFromFiles();
   }
@@ -91,12 +85,13 @@ public slots:
 protected:
   virtual void OnSlicePositionChanged(int nPlane);
 
-  vtkActor* ConstructActor(vtkPoints* points, vtkCellArray* lines, vtkUnsignedCharArray* scalars);
-  void VectorToColor(float* pt1, float* pt2, float* c_out, int nMappingType);
+  vtkActor *ConstructActor(vtkPoints *points, vtkCellArray *lines,
+                           vtkUnsignedCharArray *scalars);
+  void VectorToColor(float *pt1, float *pt2, float *c_out, int nMappingType);
 
-  FSTrack*    m_trackData;
-  LayerMRI*   m_layerMRIRef;
-  QList<vtkActor*>  m_actors;
+  FSTrack *m_trackData;
+  LayerMRI *m_layerMRIRef;
+  QList<vtkActor *> m_actors;
   QStringList m_listFilenames;
   QVariantMap m_mapCluster;
 };

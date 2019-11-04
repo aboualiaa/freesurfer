@@ -3,58 +3,46 @@
 
 #include "kvlAtlasMeshDeformationOptimizer.h"
 
-
-namespace kvl
-{
-
-
+namespace kvl {
 
 /**
  *
  */
-class AtlasMeshDeformationFixedStepGradientDescentOptimizer: public AtlasMeshDeformationOptimizer
-{
-public :
-  
+class AtlasMeshDeformationFixedStepGradientDescentOptimizer
+    : public AtlasMeshDeformationOptimizer {
+public:
   /** Standard class typedefs */
-  typedef AtlasMeshDeformationFixedStepGradientDescentOptimizer  Self;
-  typedef AtlasMeshDeformationOptimizer  Superclass;
-  typedef itk::SmartPointer< Self >  Pointer;
-  typedef itk::SmartPointer< const Self >  ConstPointer;
+  using Self = AtlasMeshDeformationFixedStepGradientDescentOptimizer;
+  using Superclass = AtlasMeshDeformationOptimizer;
+  using Pointer = itk::SmartPointer<Self>;
+  using ConstPointer = itk::SmartPointer<const Self>;
 
   /** Method for creation through the object factory. */
-  itkNewMacro( Self );
+  itkNewMacro(Self);
 
   /** Run-time type information (and related methods). */
-  itkTypeMacro( AtlasMeshDeformationFixedStepGradientDescentOptimizer, AtlasMeshDeformationOptimizer );
+  itkTypeMacro(AtlasMeshDeformationFixedStepGradientDescentOptimizer,
+               AtlasMeshDeformationOptimizer);
 
   //
-  void SetStepSize( double stepSize )
-    {
-    m_StepSize = stepSize;
-    }  
-  
-  double GetStepSize() const
-    {
-    return m_StepSize;
-    }
-  
+  void SetStepSize(double stepSize) { m_StepSize = stepSize; }
+
+  double GetStepSize() const { return m_StepSize; }
 
 protected:
   AtlasMeshDeformationFixedStepGradientDescentOptimizer();
   virtual ~AtlasMeshDeformationFixedStepGradientDescentOptimizer();
-  
+
   double FindAndOptimizeNewSearchDirection();
-  
+
 private:
-  AtlasMeshDeformationFixedStepGradientDescentOptimizer(const Self&); //purposely not implemented
-  void operator=(const Self&); //purposely not implemented
-  
-  double  m_StepSize;
-  double  m_LineSearchStopCriterion;
-  
+  AtlasMeshDeformationFixedStepGradientDescentOptimizer(
+      const Self &);            // purposely not implemented
+  void operator=(const Self &); // purposely not implemented
+
+  double m_StepSize;
+  double m_LineSearchStopCriterion;
 };
- 
 
 } // end namespace kvl
 

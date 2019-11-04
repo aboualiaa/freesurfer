@@ -26,13 +26,11 @@
 
 #include <QDialog>
 
-namespace Ui
-{
+namespace Ui {
 class DialogLoadPointSet;
 }
 
-class DialogLoadPointSet : public QDialog
-{
+class DialogLoadPointSet : public QDialog {
   Q_OBJECT
 public:
   explicit DialogLoadPointSet(QWidget *parent = 0);
@@ -42,10 +40,7 @@ public:
 
   int GetPointSetType();
 
-  void SetLastDir( const QString& dir )
-  {
-    m_strLastDir = dir;
-  }
+  void SetLastDir(const QString &dir) { m_strLastDir = dir; }
 
 protected slots:
   void OnOK();

@@ -27,14 +27,13 @@
 /*-----------------------------------------------------
   INCLUDE FILES
   -------------------------------------------------------*/
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
 #include "cmat.h"
 #include "error.h"
 
-CMAT *CMATread(const char *fname)
-{
+CMAT *CMATread(const char *fname) {
   CMAT *cmat;
   int nlabels, i, j, ind1, ind2;
   FILE *fp;
@@ -42,69 +41,79 @@ CMAT *CMATread(const char *fname)
   fp = fopen(fname, "r");
 
   if (!fp) {
-    ErrorReturn(NULL, (ERROR_NOFILE, "CMATread(%s): could not open file", fname));
+    ErrorReturn(NULL,
+                (ERROR_NOFILE, "CMATread(%s): could not open file", fname));
   }
 
   if (fscanf(fp, "CMAT - %d\n", &nlabels) != 1) {
-    ErrorPrintf(ERROR_BAD_FILE, "CMATread(%s): could not read parameter(s)", fname);
+    ErrorPrintf(ERROR_BAD_FILE, "CMATread(%s): could not read parameter(s)",
+                fname);
   }
-  cmat = CMATalloc(nlabels, NULL);
+  cmat = CMATalloc(nlabels, nullptr);
 
   for (i = 0; i < nlabels; i++) {
     if (fscanf(fp, "%d\n", &cmat->labels[i]) != 1) {
-      ErrorPrintf(ERROR_BAD_FILE, "CMATread(%s): could not read parameter(s)", fname);
+      ErrorPrintf(ERROR_BAD_FILE, "CMATread(%s): could not read parameter(s)",
+                  fname);
     }
   }
 
   for (i = 0; i < cmat->nlabels - 1; i++) {
     for (j = i + 1; j < cmat->nlabels; j++) {
       if (fscanf(fp, "%lf", &cmat->weights[i][j]) != 1) {
-        ErrorPrintf(ERROR_BAD_FILE, "CMATread(%s): could not read parameter(s)", fname);
+        ErrorPrintf(ERROR_BAD_FILE, "CMATread(%s): could not read parameter(s)",
+                    fname);
       }
     }
     if (fscanf(fp, "\n") != 1) {
-      ErrorPrintf(ERROR_BAD_FILE, "CMATread(%s): could not read parameter(s)", fname);
+      ErrorPrintf(ERROR_BAD_FILE, "CMATread(%s): could not read parameter(s)",
+                  fname);
     }
   }
   for (i = 0; i < cmat->nlabels - 1; i++) {
     for (j = i + 1; j < cmat->nlabels; j++) {
       if (fscanf(fp, "%d %d\n", &ind1, &ind2) != 2) {
-        ErrorPrintf(ERROR_BAD_FILE, "CMATread(%s): could not read parameter(s)", fname);
+        ErrorPrintf(ERROR_BAD_FILE, "CMATread(%s): could not read parameter(s)",
+                    fname);
       }
       if (feof(fp)) {
         break;
       }
-      cmat->splines[ind1][ind2] = LabelReadFrom(NULL, fp);
+      cmat->splines[ind1][ind2] = LabelReadFrom(nullptr, fp);
       if (cmat->coords == LABEL_COORDS_NONE) {
         cmat->coords = cmat->splines[ind1][ind2]->coords;
         printf("reading cmat in coords %d\n", cmat->coords);
       }
-      if (feof(fp)) break;
+      if (feof(fp))
+        break;
     }
-    if (feof(fp)) break;
+    if (feof(fp))
+      break;
   }
   fclose(fp);
   return (cmat);
 }
 
-int CMATwrite(CMAT *cmat, const char *fname)
-{
+int CMATwrite(CMAT *cmat, const char *fname) {
   FILE *fp;
   int i, j;
 
   fp = fopen(fname, "w");
 
   fprintf(fp, "CMAT - %d\n", cmat->nlabels);
-  for (i = 0; i < cmat->nlabels; i++) fprintf(fp, "%d\n", cmat->labels[i]);
+  for (i = 0; i < cmat->nlabels; i++)
+    fprintf(fp, "%d\n", cmat->labels[i]);
 
   for (i = 0; i < cmat->nlabels - 1; i++) {
-    for (j = i + 1; j < cmat->nlabels; j++) fprintf(fp, "%f", cmat->weights[i][j]);
+    for (j = i + 1; j < cmat->nlabels; j++)
+      fprintf(fp, "%f", cmat->weights[i][j]);
     fprintf(fp, "\n");
   }
 
   for (i = 0; i < cmat->nlabels - 1; i++)
     for (j = i + 1; j < cmat->nlabels; j++) {
-      if (cmat->splines[i][j] == NULL) continue;
+      if (cmat->splines[i][j] == nullptr)
+        continue;
       fprintf(fp, "%d %d\n", i, j);
       LabelWriteInto(cmat->splines[i][j], fp);
     }
@@ -112,47 +121,59 @@ int CMATwrite(CMAT *cmat, const char *fname)
   return (NO_ERROR);
 }
 
-CMAT *CMATalloc(int nlabels, int *labels)
-{
+CMAT *CMATalloc(int nlabels, int *labels) {
   CMAT *cmat;
   int i;
 
   cmat = (CMAT *)calloc(1, sizeof(CMAT));
-  if (cmat == NULL) ErrorExit(ERROR_NOMEMORY, "CMATalloc(%d): could not allocate cmat", nlabels);
+  if (cmat == nullptr)
+    ErrorExit(ERROR_NOMEMORY, "CMATalloc(%d): could not allocate cmat",
+              nlabels);
 
   cmat->coords = LABEL_COORDS_NONE;
   cmat->nlabels = nlabels;
   cmat->labels = (int *)calloc(nlabels, sizeof(int));
-  if (cmat->labels == NULL) ErrorExit(ERROR_NOMEMORY, "CMATalloc(%d): could not allocate cmat->labels", nlabels);
+  if (cmat->labels == nullptr)
+    ErrorExit(ERROR_NOMEMORY, "CMATalloc(%d): could not allocate cmat->labels",
+              nlabels);
   cmat->splines = (LABEL ***)calloc(nlabels, sizeof(LABEL **));
-  if (cmat->splines == NULL) ErrorExit(ERROR_NOMEMORY, "CMATalloc(%d): could not allocate cmat->splines", nlabels);
+  if (cmat->splines == nullptr)
+    ErrorExit(ERROR_NOMEMORY, "CMATalloc(%d): could not allocate cmat->splines",
+              nlabels);
   cmat->weights = (double **)calloc(nlabels, sizeof(double *));
-  if (cmat->weights == NULL) ErrorExit(ERROR_NOMEMORY, "CMATalloc(%d): could not allocate cmat->weights", nlabels);
+  if (cmat->weights == nullptr)
+    ErrorExit(ERROR_NOMEMORY, "CMATalloc(%d): could not allocate cmat->weights",
+              nlabels);
   for (i = 0; i < nlabels; i++) {
-    if (labels) cmat->labels[i] = labels[i];
+    if (labels)
+      cmat->labels[i] = labels[i];
     cmat->splines[i] = (LABEL **)calloc(nlabels, sizeof(LABEL *));
     cmat->weights[i] = (double *)calloc(nlabels, sizeof(double));
-    if (cmat->weights[i] == NULL)
-      ErrorExit(ERROR_NOMEMORY, "CMATalloc(%d): could not allocate cmat->weights[%d]", nlabels, i);
-    if (cmat->splines[i] == NULL)
-      ErrorExit(ERROR_NOMEMORY, "CMATalloc(%d): could not allocate cmat->splines[%d]", nlabels, i);
+    if (cmat->weights[i] == nullptr)
+      ErrorExit(ERROR_NOMEMORY,
+                "CMATalloc(%d): could not allocate cmat->weights[%d]", nlabels,
+                i);
+    if (cmat->splines[i] == nullptr)
+      ErrorExit(ERROR_NOMEMORY,
+                "CMATalloc(%d): could not allocate cmat->splines[%d]", nlabels,
+                i);
   }
 
   return (cmat);
 }
 
-int CMATfree(CMAT **pcmat)
-{
+int CMATfree(CMAT **pcmat) {
   CMAT *cmat;
   int i, j;
 
   cmat = *pcmat;
-  *pcmat = NULL;
+  *pcmat = nullptr;
 
   free(cmat->labels);
   for (i = 0; i < cmat->nlabels; i++) {
     for (j = i + 1; j < cmat->nlabels; j++) {
-      if (cmat->splines[i]) LabelFree(&cmat->splines[i][j]);
+      if (cmat->splines[i])
+        LabelFree(&cmat->splines[i][j]);
     }
     free(cmat->splines[i]);
     free(cmat->weights[i]);
@@ -163,8 +184,8 @@ int CMATfree(CMAT **pcmat)
   free(cmat);
   return (NO_ERROR);
 }
-CMAT *CMATtransform(CMAT *csrc, TRANSFORM *xform, MRI *mri_src, MRI *mri_dst, CMAT *cdst)
-{
+CMAT *CMATtransform(CMAT *csrc, TRANSFORM *xform, MRI *mri_src, MRI *mri_dst,
+                    CMAT *cdst) {
   int i, j;
 
   cdst = CMATalloc(csrc->nlabels, csrc->labels);
@@ -172,7 +193,8 @@ CMAT *CMATtransform(CMAT *csrc, TRANSFORM *xform, MRI *mri_src, MRI *mri_dst, CM
     cdst->weights[i] = csrc->weights[i];
     for (j = i + 1; j < csrc->nlabels; j++) {
       if (csrc->splines[i][j]) {
-        cdst->splines[i][j] = LabelTransform(csrc->splines[i][j], xform, mri_src, NULL);
+        cdst->splines[i][j] =
+            LabelTransform(csrc->splines[i][j], xform, mri_src, nullptr);
       }
     }
   }
@@ -180,8 +202,7 @@ CMAT *CMATtransform(CMAT *csrc, TRANSFORM *xform, MRI *mri_src, MRI *mri_dst, CM
   return (cdst);
 }
 
-int CMATtoVoxel(CMAT *cmat, MRI *mri)
-{
+int CMATtoVoxel(CMAT *cmat, MRI *mri) {
   int i, j;
 
   cmat->coords = LABEL_COORDS_VOXEL;
@@ -196,8 +217,7 @@ int CMATtoVoxel(CMAT *cmat, MRI *mri)
 
   return (NO_ERROR);
 }
-int CMATtoTKreg(CMAT *cmat, MRI *mri)
-{
+int CMATtoTKreg(CMAT *cmat, MRI *mri) {
   int i, j;
 
   cmat->coords = LABEL_COORDS_TKREG_RAS;
@@ -212,8 +232,7 @@ int CMATtoTKreg(CMAT *cmat, MRI *mri)
 
   return (NO_ERROR);
 }
-int CMATtoScannerRAS(CMAT *cmat, MRI *mri)
-{
+int CMATtoScannerRAS(CMAT *cmat, MRI *mri) {
   int i, j;
 
   cmat->coords = LABEL_COORDS_SCANNER_RAS;

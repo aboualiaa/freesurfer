@@ -29,40 +29,33 @@
 #include <QList>
 #include <QString>
 
-
-
 #include "colortab.h"
 
-
-class LUTDataHolder
-{
+class LUTDataHolder {
 public:
   LUTDataHolder();
   virtual ~LUTDataHolder();
 
-  QString GetName( int i );
+  QString GetName(int i);
 
-  COLOR_TABLE* GetColorTable( int i );
+  COLOR_TABLE *GetColorTable(int i);
 
-  COLOR_TABLE* GetColorTable( const QString& name );
+  COLOR_TABLE *GetColorTable(const QString &name);
 
-  int GetIndex( COLOR_TABLE* ct );
+  int GetIndex(COLOR_TABLE *ct);
 
   int GetCount();
 
-  COLOR_TABLE* LoadColorTable( const QString& fn );
+  COLOR_TABLE *LoadColorTable(const QString &fn);
 
 protected:
-  struct ColorTableData
-  {
-    COLOR_TABLE* table;
-    QString  name;
-    QString  filename;
+  struct ColorTableData {
+    COLOR_TABLE *table;
+    QString name;
+    QString filename;
   };
 
   QList<ColorTableData> m_tables;
 };
 
 #endif
-
-

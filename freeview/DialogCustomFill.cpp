@@ -2,31 +2,33 @@
 #include "ui_DialogCustomFill.h"
 #include <QSettings>
 
-DialogCustomFill::DialogCustomFill(QWidget *parent) :
-  QDialog(parent),
-  ui(new Ui::DialogCustomFill)
-{
+DialogCustomFill::DialogCustomFill(QWidget *parent)
+    : QDialog(parent), ui(new Ui::DialogCustomFill) {
   ui->setupUi(this);
 
   QSettings s;
-  ui->checkBoxFillToPaths->setChecked(s.value("CustomFill/FillToPaths", true).toBool());
-  ui->checkBoxFillToLabels->setChecked(s.value("CustomFill/FillToLabels").toBool());
-  ui->checkBoxFillToThreashold->setChecked(s.value("CustomFill/FillToThreshold", true).toBool());
-  ui->checkBoxFillToCurvature->setChecked(s.value("CustomFill/FillToCurvature").toBool());
+  ui->checkBoxFillToPaths->setChecked(
+      s.value("CustomFill/FillToPaths", true).toBool());
+  ui->checkBoxFillToLabels->setChecked(
+      s.value("CustomFill/FillToLabels").toBool());
+  ui->checkBoxFillToThreashold->setChecked(
+      s.value("CustomFill/FillToThreshold", true).toBool());
+  ui->checkBoxFillToCurvature->setChecked(
+      s.value("CustomFill/FillToCurvature").toBool());
 }
 
-DialogCustomFill::~DialogCustomFill()
-{
+DialogCustomFill::~DialogCustomFill() {
   QSettings s;
   s.setValue("CustomFill/FillToPaths", ui->checkBoxFillToPaths->isChecked());
   s.setValue("CustomFill/FillToLabels", ui->checkBoxFillToLabels->isChecked());
-  s.setValue("CustomFill/FillToThreshold", ui->checkBoxFillToThreashold->isChecked());
-  s.setValue("CustomFill/FillToCurvature", ui->checkBoxFillToCurvature->isChecked());
+  s.setValue("CustomFill/FillToThreshold",
+             ui->checkBoxFillToThreashold->isChecked());
+  s.setValue("CustomFill/FillToCurvature",
+             ui->checkBoxFillToCurvature->isChecked());
   delete ui;
 }
 
-void DialogCustomFill::OnButtonFill()
-{
+void DialogCustomFill::OnButtonFill() {
   QVariantMap map;
   map["DoNotMarkSurface"] = true;
   map["DoNotCrossPaths"] = ui->checkBoxFillToPaths->isChecked();

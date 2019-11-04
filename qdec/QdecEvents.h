@@ -30,12 +30,10 @@
 
 class QdecEvents {
 
- public:
-
+public:
   // Description:
   // Our event constants.
   enum { UserSelectedVertex = vtkCommand::UserEvent + 1 };
-
 };
 
 #endif

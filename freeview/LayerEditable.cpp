@@ -25,19 +25,15 @@
 
 #include "LayerEditable.h"
 
-LayerEditable::LayerEditable( QObject* parent ) : Layer( parent ),
-  m_nMaxUndoSteps( 100 ),
-  m_bModified( false ),
-  m_bEditable( true )
-{
-  m_strTypeNames.push_back( "Editable" );
+LayerEditable::LayerEditable(QObject *parent)
+    : Layer(parent), m_nMaxUndoSteps(100), m_bModified(false),
+      m_bEditable(true) {
+  m_strTypeNames.push_back("Editable");
 }
 
-LayerEditable::~LayerEditable()
-{}
+LayerEditable::~LayerEditable() {}
 
-void LayerEditable::SetModified()
-{
+void LayerEditable::SetModified() {
   m_bModified = true;
   emit Modified();
 }

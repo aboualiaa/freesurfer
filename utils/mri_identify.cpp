@@ -21,10 +21,10 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
-#include <errno.h>
+#include <cerrno>
 #include <libgen.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -49,91 +49,90 @@ extern int errno;
 int stricmp(char *str1, char *str2);
 #endif
 
-char *type_to_string(int type)
-{
+char *type_to_string(int type) {
   char *typestring;
   const char *tmpstr;
   int lentmp;
 
   switch (type) {
-    case MRI_CORONAL_SLICE_DIRECTORY:
-      tmpstr = "COR";
-      break;
-    case MRI_GCA_FILE:
-      tmpstr = "GCA";
-      break;
-    case MRI_MINC_FILE:
-      tmpstr = "MINC";
-      break;
-    case MRI_ANALYZE_FILE:
-      tmpstr = "analyze3d";
-      break;
-    case MRI_ANALYZE4D_FILE:
-      tmpstr = "analyze4d";
-      break;
-    case MRI_MGH_FILE:
-      tmpstr = "MGH";
-      break;
-    case GENESIS_FILE:
-      tmpstr = "genesis";
-      break;
-    case GE_LX_FILE:
-      tmpstr = "gelx";
-      break;
-    case SIEMENS_FILE:
-      tmpstr = "siemens";
-      break;
-    case DICOM_FILE:
-      tmpstr = "dicom";
-      break;
-    case SIEMENS_DICOM_FILE:
-      tmpstr = "siemens_dicom";
-      break;
-    case BRIK_FILE:
-      tmpstr = "brik";
-      break;
-    case BSHORT_FILE:
-      tmpstr = "bshort";
-      break;
-    case BFLOAT_FILE:
-      tmpstr = "bfloat";
-      break;
-    case BHDR:
-      tmpstr = "bhdr";
-      break;
-    case SDT_FILE:
-      tmpstr = "varian";
-      break;
-    case OTL_FILE:
-      tmpstr = "outline";
-      break;
-    case GDF_FILE:
-      tmpstr = "gdf";
-      break;
-    case BRUKER_FILE:
-      tmpstr = "bruker";
-      break;
-    case XIMG_FILE:
-      tmpstr = "ximg";
-      break;
-    case NIFTI1_FILE:
-      tmpstr = "nifti1";
-      break;
-    case NII_FILE:
-      tmpstr = "nii";
-      break;
-    case NRRD_FILE:
-      tmpstr = "nrrd";
-      break;
-    case MRI_CURV_FILE:
-      tmpstr = "curv";
-      break;
-    case GIFTI_FILE:
-      tmpstr = "gii";
-      break;
-    default:
-      tmpstr = "unknown";
-      break;
+  case MRI_CORONAL_SLICE_DIRECTORY:
+    tmpstr = "COR";
+    break;
+  case MRI_GCA_FILE:
+    tmpstr = "GCA";
+    break;
+  case MRI_MINC_FILE:
+    tmpstr = "MINC";
+    break;
+  case MRI_ANALYZE_FILE:
+    tmpstr = "analyze3d";
+    break;
+  case MRI_ANALYZE4D_FILE:
+    tmpstr = "analyze4d";
+    break;
+  case MRI_MGH_FILE:
+    tmpstr = "MGH";
+    break;
+  case GENESIS_FILE:
+    tmpstr = "genesis";
+    break;
+  case GE_LX_FILE:
+    tmpstr = "gelx";
+    break;
+  case SIEMENS_FILE:
+    tmpstr = "siemens";
+    break;
+  case DICOM_FILE:
+    tmpstr = "dicom";
+    break;
+  case SIEMENS_DICOM_FILE:
+    tmpstr = "siemens_dicom";
+    break;
+  case BRIK_FILE:
+    tmpstr = "brik";
+    break;
+  case BSHORT_FILE:
+    tmpstr = "bshort";
+    break;
+  case BFLOAT_FILE:
+    tmpstr = "bfloat";
+    break;
+  case BHDR:
+    tmpstr = "bhdr";
+    break;
+  case SDT_FILE:
+    tmpstr = "varian";
+    break;
+  case OTL_FILE:
+    tmpstr = "outline";
+    break;
+  case GDF_FILE:
+    tmpstr = "gdf";
+    break;
+  case BRUKER_FILE:
+    tmpstr = "bruker";
+    break;
+  case XIMG_FILE:
+    tmpstr = "ximg";
+    break;
+  case NIFTI1_FILE:
+    tmpstr = "nifti1";
+    break;
+  case NII_FILE:
+    tmpstr = "nii";
+    break;
+  case NRRD_FILE:
+    tmpstr = "nrrd";
+    break;
+  case MRI_CURV_FILE:
+    tmpstr = "curv";
+    break;
+  case GIFTI_FILE:
+    tmpstr = "gii";
+    break;
+  default:
+    tmpstr = "unknown";
+    break;
   }
 
   lentmp = strlen(tmpstr);
@@ -142,61 +141,94 @@ char *type_to_string(int type)
   return (typestring);
 }
 
-int string_to_type(const char *string)
-{
+int string_to_type(const char *string) {
   int type = MRI_VOLUME_TYPE_UNKNOWN;
   char ls[STRLEN];
 
   // no extension, then return
-  if (strlen(string) == 0) return MRI_VOLUME_TYPE_UNKNOWN;
+  if (strlen(string) == 0)
+    return MRI_VOLUME_TYPE_UNKNOWN;
 
   strcpy(ls, string);
   StrLower(ls);
   // is this compressed?
-  if (strcmp(ls, "gz") == 0) type = MRI_GZIPPED;
-  if ((strcmp(ls, "ae") == 0) || (strcmp(ls, "sae") == 0) || (strcmp(ls, "csae") == 0)) type = MGH_AUTOENCODER;
-  if ((strcmp(ls, "m3z") == 0) || (strcmp(ls, "m3d") == 0)) type = MGH_MORPH;
-  if (strcmp(ls, "cor") == 0) type = MRI_CORONAL_SLICE_DIRECTORY;
-  if (strcmp(ls, "minc") == 0 || strcmp(ls, "mnc") == 0) type = MRI_MINC_FILE;
-  if (strcmp(ls, "spm") == 0 || strcmp(ls, "analyze") == 0 || strcmp(ls, "analyze3d") == 0) type = MRI_ANALYZE_FILE;
-  if (strcmp(ls, "analyze4d") == 0 || strcmp(ls, "img") == 0)  // img used to be 3d
+  if (strcmp(ls, "gz") == 0)
+    type = MRI_GZIPPED;
+  if ((strcmp(ls, "ae") == 0) || (strcmp(ls, "sae") == 0) ||
+      (strcmp(ls, "csae") == 0))
+    type = MGH_AUTOENCODER;
+  if ((strcmp(ls, "m3z") == 0) || (strcmp(ls, "m3d") == 0))
+    type = MGH_MORPH;
+  if (strcmp(ls, "cor") == 0)
+    type = MRI_CORONAL_SLICE_DIRECTORY;
+  if (strcmp(ls, "minc") == 0 || strcmp(ls, "mnc") == 0)
+    type = MRI_MINC_FILE;
+  if (strcmp(ls, "spm") == 0 || strcmp(ls, "analyze") == 0 ||
+      strcmp(ls, "analyze3d") == 0)
+    type = MRI_ANALYZE_FILE;
+  if (strcmp(ls, "analyze4d") == 0 ||
+      strcmp(ls, "img") == 0) // img used to be 3d
     type = MRI_ANALYZE4D_FILE;
-  if (strcmp(ls, "mgh") == 0 || strcmp(ls, "mgz") == 0) type = MRI_MGH_FILE;
-  if (strcmp(ls, "gca") == 0) type = MRI_GCA_FILE;
-  if (strcmp(ls, "signa") == 0) type = SIGNA_FILE;
-  if (strcmp(ls, "ge") == 0 || strcmp(ls, "genesis") == 0) type = GENESIS_FILE;
-  if (strcmp(ls, "gelx") == 0 || strcmp(ls, "lx") == 0) type = GE_LX_FILE;
-  if (strcmp(ls, "bshort") == 0) type = BSHORT_FILE;
-  if (strcmp(ls, "bfloat") == 0) type = BFLOAT_FILE;
-  if (strcmp(ls, "bhdr") == 0) type = BHDR;
-  if (strcmp(ls, "siemens") == 0 || strcmp(ls, "ima") == 0) type = SIEMENS_FILE;
-  if (strcmp(ls, "dicom") == 0) type = DICOM_FILE;
-  if (strcmp(ls, "siemens_dicom") == 0) type = SIEMENS_DICOM_FILE;
-  if (strcmp(ls, "brik") == 0 || strcmp(ls, "afni") == 0) type = BRIK_FILE;
-  if (strcmp(ls, "sdt") == 0 || strcmp(ls, "varian") == 0) type = SDT_FILE;
-  if (strcmp(ls, "otl") == 0 || strcmp(ls, "outline") == 0) type = OTL_FILE;
-  if (strcmp(ls, "gdf") == 0) type = GDF_FILE;
-  if (strcmp(ls, "bruker") == 0) type = BRUKER_FILE;
-  if (strcmp(ls, "ximg") == 0) type = XIMG_FILE;
-  if (strcmp(ls, "nifti1") == 0) type = NIFTI1_FILE;
-  if (strcmp(ls, "nii") == 0) type = NII_FILE;
-  if (strcmp(ls, "nrrd") == 0) type = NRRD_FILE;
+  if (strcmp(ls, "mgh") == 0 || strcmp(ls, "mgz") == 0)
+    type = MRI_MGH_FILE;
+  if (strcmp(ls, "gca") == 0)
+    type = MRI_GCA_FILE;
+  if (strcmp(ls, "signa") == 0)
+    type = SIGNA_FILE;
+  if (strcmp(ls, "ge") == 0 || strcmp(ls, "genesis") == 0)
+    type = GENESIS_FILE;
+  if (strcmp(ls, "gelx") == 0 || strcmp(ls, "lx") == 0)
+    type = GE_LX_FILE;
+  if (strcmp(ls, "bshort") == 0)
+    type = BSHORT_FILE;
+  if (strcmp(ls, "bfloat") == 0)
+    type = BFLOAT_FILE;
+  if (strcmp(ls, "bhdr") == 0)
+    type = BHDR;
+  if (strcmp(ls, "siemens") == 0 || strcmp(ls, "ima") == 0)
+    type = SIEMENS_FILE;
+  if (strcmp(ls, "dicom") == 0)
+    type = DICOM_FILE;
+  if (strcmp(ls, "siemens_dicom") == 0)
+    type = SIEMENS_DICOM_FILE;
+  if (strcmp(ls, "brik") == 0 || strcmp(ls, "afni") == 0)
+    type = BRIK_FILE;
+  if (strcmp(ls, "sdt") == 0 || strcmp(ls, "varian") == 0)
+    type = SDT_FILE;
+  if (strcmp(ls, "otl") == 0 || strcmp(ls, "outline") == 0)
+    type = OTL_FILE;
+  if (strcmp(ls, "gdf") == 0)
+    type = GDF_FILE;
+  if (strcmp(ls, "bruker") == 0)
+    type = BRUKER_FILE;
+  if (strcmp(ls, "ximg") == 0)
+    type = XIMG_FILE;
+  if (strcmp(ls, "nifti1") == 0)
+    type = NIFTI1_FILE;
+  if (strcmp(ls, "nii") == 0)
+    type = NII_FILE;
+  if (strcmp(ls, "nrrd") == 0)
+    type = NRRD_FILE;
   // check for IMAGE file
-  if (!strcmp(ls, "mat") || !strcmp(ls, "tif") || !strcmp(ls, "tiff") || !strcmp(ls, "jpg") || !strcmp(ls, "jpeg") ||
-      !strcmp(ls, "pgm") || !strcmp(ls, "ppm") || !strcmp(ls, "pbm") || !strcmp(ls, "rgb"))
+  if (!strcmp(ls, "mat") || !strcmp(ls, "tif") || !strcmp(ls, "tiff") ||
+      !strcmp(ls, "jpg") || !strcmp(ls, "jpeg") || !strcmp(ls, "pgm") ||
+      !strcmp(ls, "ppm") || !strcmp(ls, "pbm") || !strcmp(ls, "rgb"))
     type = IMAGE_FILE;
-  if (strcmp(ls, "curv") == 0) type = MRI_CURV_FILE;
-  if (strcmp(ls, "gii") == 0) type = GIFTI_FILE;
-  if (strcmp(ls, "vtk") == 0) type = VTK_FILE;
-  if (strcmp(ls, "label") == 0) type = MGH_LABEL_FILE;
+  if (strcmp(ls, "curv") == 0)
+    type = MRI_CURV_FILE;
+  if (strcmp(ls, "gii") == 0)
+    type = GIFTI_FILE;
+  if (strcmp(ls, "vtk") == 0)
+    type = VTK_FILE;
+  if (strcmp(ls, "label") == 0)
+    type = MGH_LABEL_FILE;
 
   return (type);
 
 } /* end string_to_type() */
 
 // why the routine does not check ANALYZE4D?
-int mri_identify(const char *fname_passed)
-{
+int mri_identify(const char *fname_passed) {
   char fname[STRLEN];
   int type = 0;
   char *ext;
@@ -206,24 +238,24 @@ int mri_identify(const char *fname_passed)
   MRIgetVolumeName(fname_passed, fname);
 
   // check whether this is a directory
-  if (!fio_IsDirectory(fname))  // if not a directory, then do extension check
+  if (!fio_IsDirectory(fname)) // if not a directory, then do extension check
   {
     // now get the extension
     ext = strrchr(fname, '.');
-    if (ext) {  // if found a dot (.)
-      ++ext;    // now points to extension
+    if (ext) { // if found a dot (.)
+      ++ext;   // now points to extension
       // first use the extension to identify
       type = string_to_type(ext);
 
       if (type == MRI_GZIPPED) {
-        if (strstr(fname, ".mgh.gz")) type = MRI_MGH_FILE;
+        if (strstr(fname, ".mgh.gz"))
+          type = MRI_MGH_FILE;
         if (strstr(fname, ".nii.gz"))
           type = NII_FILE;
         else {
           type = MRI_VOLUME_TYPE_UNKNOWN;
-          printf(
-              "INFO: Currently supports gzipped mgh or nifti file "
-              "(.mgz, .mgh.gz, or nii.gz) only.\n");
+          printf("INFO: Currently supports gzipped mgh or nifti file "
+                 "(.mgz, .mgh.gz, or nii.gz) only.\n");
           printf("fname = %s\n", fname);
           return type;
         }
@@ -232,97 +264,120 @@ int mri_identify(const char *fname_passed)
       ///////////////////////////////////////////////
       // if type is found then verify
       // IMAGE file uses only extension
-      if (type == IMAGE_FILE) return type;
+      if (type == IMAGE_FILE)
+        return type;
 
       if (type != MRI_VOLUME_TYPE_UNKNOWN) {
         switch (type) {
-          case MRI_GCA_FILE:
-            return (type);
-            break;
-          case BRUKER_FILE:  // this cannot be identified by extension
-            if (is_bruker(fname)) return type;
-            break;
-          case MRI_CORONAL_SLICE_DIRECTORY:
-            if (is_cor(fname)) return type;
-            break;
-          case BHDR:
+        case MRI_GCA_FILE:
+          return (type);
+          break;
+        case BRUKER_FILE: // this cannot be identified by extension
+          if (is_bruker(fname))
             return type;
-            break;
-          case BSHORT_FILE:
-            if (is_bshort(fname)) return type;
-            break;
-          case BFLOAT_FILE:
-            if (is_bfloat(fname)) return type;
-            break;
-          case SIEMENS_DICOM_FILE:
-            if (IsSiemensDICOM(fname)) return type;
-            break;
-          case DICOM_FILE:
-            if (IsDICOM(fname)) return type;
-            break;
-          case GENESIS_FILE:
-            if (is_genesis(fname)) return type;
-            break;
-          case SIGNA_FILE:
-            if (is_signa(fname)) return type;
-            break;
-          case GE_LX_FILE:
-            if (is_ge_lx(fname)) return type;
-            break;
-          case SDT_FILE:
-            if (is_sdt(fname)) return type;
-            break;
-          case MRI_MGH_FILE:
-            if (is_mgh(fname)) return type;
-            break;
-          case MRI_MINC_FILE:
-            if (is_mnc(fname)) return type;
-            break;
-          case NII_FILE:
-            if (is_nii(fname)) return type;
-            break;
-          case NIFTI1_FILE:
-            if (is_nifti1(fname)) return type;
-            break;
-          case MRI_ANALYZE_FILE:
-            // Need to check nifti1 here because it has .img/.hdr
-            // like analyze but has a different header
-            if (is_nifti1(fname)) return NIFTI1_FILE;
-            if (is_analyze(fname)) return type;
-            break;
-          case MRI_ANALYZE4D_FILE:
-            // must add is_analyze4d().  I have no idea what to do thus return
+          break;
+        case MRI_CORONAL_SLICE_DIRECTORY:
+          if (is_cor(fname))
             return type;
-            break;
-          case SIEMENS_FILE:
-            if (is_siemens(fname)) return type;
-            break;
-          case BRIK_FILE:
-            if (is_brik(fname)) return type;
-            break;
-          case OTL_FILE:
-            if (is_otl(fname)) return type;
-            break;
-          case GDF_FILE:
-            if (is_gdf(fname)) return type;
-            break;
-          case XIMG_FILE:
-            if (is_ximg(fname)) return type;
-            break;
-          case NRRD_FILE:
-            if (is_nrrd(fname)) return type;
-            break;
-          case GIFTI_FILE:
+          break;
+        case BHDR:
+          return type;
+          break;
+        case BSHORT_FILE:
+          if (is_bshort(fname))
             return type;
-            break;
-          case VTK_FILE:
+          break;
+        case BFLOAT_FILE:
+          if (is_bfloat(fname))
             return type;
-            break;
-	case MGH_LABEL_FILE:
-	  return type ;
-	  break ;
-          default:
-            break;
+          break;
+        case SIEMENS_DICOM_FILE:
+          if (IsSiemensDICOM(fname))
+            return type;
+          break;
+        case DICOM_FILE:
+          if (IsDICOM(fname))
+            return type;
+          break;
+        case GENESIS_FILE:
+          if (is_genesis(fname))
+            return type;
+          break;
+        case SIGNA_FILE:
+          if (is_signa(fname))
+            return type;
+          break;
+        case GE_LX_FILE:
+          if (is_ge_lx(fname))
+            return type;
+          break;
+        case SDT_FILE:
+          if (is_sdt(fname))
+            return type;
+          break;
+        case MRI_MGH_FILE:
+          if (is_mgh(fname))
+            return type;
+          break;
+        case MRI_MINC_FILE:
+          if (is_mnc(fname))
+            return type;
+          break;
+        case NII_FILE:
+          if (is_nii(fname))
+            return type;
+          break;
+        case NIFTI1_FILE:
+          if (is_nifti1(fname))
+            return type;
+          break;
+        case MRI_ANALYZE_FILE:
+          // Need to check nifti1 here because it has .img/.hdr
+          // like analyze but has a different header
+          if (is_nifti1(fname))
+            return NIFTI1_FILE;
+          if (is_analyze(fname))
+            return type;
+          break;
+        case MRI_ANALYZE4D_FILE:
+          // must add is_analyze4d().  I have no idea what to do thus return
+          return type;
+          break;
+        case SIEMENS_FILE:
+          if (is_siemens(fname))
+            return type;
+          break;
+        case BRIK_FILE:
+          if (is_brik(fname))
+            return type;
+          break;
+        case OTL_FILE:
+          if (is_otl(fname))
+            return type;
+          break;
+        case GDF_FILE:
+          if (is_gdf(fname))
+            return type;
+          break;
+        case XIMG_FILE:
+          if (is_ximg(fname))
+            return type;
+          break;
+        case NRRD_FILE:
+          if (is_nrrd(fname))
+            return type;
+          break;
+        case GIFTI_FILE:
+          return type;
+          break;
+        case VTK_FILE:
+          return type;
+          break;
+        case MGH_LABEL_FILE:
+          return type;
+          break;
+        default:
+          break;
         }
       }
     }
@@ -355,7 +410,7 @@ int mri_identify(const char *fname_passed)
     return (MRI_MGH_FILE);
   else if (is_mnc(fname))
     return (MRI_MINC_FILE);
-  else if (is_nifti1(fname))  // must appear before ANALYZE
+  else if (is_nifti1(fname)) // must appear before ANALYZE
     return (NIFTI1_FILE);
   else if (is_nii(fname))
     return (NII_FILE);
@@ -389,27 +444,32 @@ int mri_identify(const char *fname_passed)
      This can be dependent on order, if more than one file type
      exists with the same stem.
 */
-int IDtypeFromStem(const char *stem)
-{
+int IDtypeFromStem(const char *stem) {
   char tmpstr[2000];
 
   sprintf(tmpstr, "%s.nii", stem);
-  if (fio_FileExistsReadable(tmpstr)) return (NII_FILE);
+  if (fio_FileExistsReadable(tmpstr))
+    return (NII_FILE);
 
   sprintf(tmpstr, "%s.nii.gz", stem);
-  if (fio_FileExistsReadable(tmpstr)) return (NII_FILE);
+  if (fio_FileExistsReadable(tmpstr))
+    return (NII_FILE);
 
   sprintf(tmpstr, "%s.mgh", stem);
-  if (fio_FileExistsReadable(tmpstr)) return (MRI_MGH_FILE);
+  if (fio_FileExistsReadable(tmpstr))
+    return (MRI_MGH_FILE);
 
   sprintf(tmpstr, "%s.mgz", stem);
-  if (fio_FileExistsReadable(tmpstr)) return (MRI_MGH_FILE);
+  if (fio_FileExistsReadable(tmpstr))
+    return (MRI_MGH_FILE);
 
   sprintf(tmpstr, "%s_000.bfloat", stem);
-  if (fio_FileExistsReadable(tmpstr)) return (BFLOAT_FILE);
+  if (fio_FileExistsReadable(tmpstr))
+    return (BFLOAT_FILE);
 
   sprintf(tmpstr, "%s_000.bshort", stem);
-  if (fio_FileExistsReadable(tmpstr)) return (BSHORT_FILE);
+  if (fio_FileExistsReadable(tmpstr))
+    return (BSHORT_FILE);
 
   return (MRI_VOLUME_TYPE_UNKNOWN);
 }
@@ -418,14 +478,14 @@ int IDtypeFromStem(const char *stem)
   \fn int IDstemFromName(char *stem)
   \brief Returns the file stem by looking for various extensions.
 */
-char *IDstemFromName(const char *name)
-{
-  char *stem = NULL;
+char *IDstemFromName(const char *name) {
+  char *stem = nullptr;
   const char *ext;
   int len;
 
   len = strlen(name);
-  if (len < 3) return (NULL);  // cant be right
+  if (len < 3)
+    return (nullptr); // cant be right
 
   // Try extensions of length 1
   ext = &(name[len - 2]);
@@ -436,16 +496,19 @@ char *IDstemFromName(const char *name)
   }
 
   // Try extensions of length 3
-  if (len < 5) return (NULL);  // cant be right
+  if (len < 5)
+    return (nullptr); // cant be right
   ext = &(name[len - 4]);
-  if (!strcmp(ext, ".nii") || !strcmp(ext, ".mgz") || !strcmp(ext, ".mgh") || !strcmp(ext, ".img")) {
+  if (!strcmp(ext, ".nii") || !strcmp(ext, ".mgz") || !strcmp(ext, ".mgh") ||
+      !strcmp(ext, ".img")) {
     stem = (char *)calloc(len - 4 + 1, sizeof(char));
     memmove(stem, name, len - 4);
     return (stem);
   }
 
   // Try extensions of length 4
-  if (len < 6) return (NULL);  // cant be right
+  if (len < 6)
+    return (nullptr); // cant be right
   ext = &(name[len - 5]);
   if (!strcmp(ext, ".bhdr")) {
     stem = (char *)calloc(len - 5 + 1, sizeof(char));
@@ -454,7 +517,8 @@ char *IDstemFromName(const char *name)
   }
 
   // Try extensions of length 6
-  if (len < 8) return (NULL);  // cant be right
+  if (len < 8)
+    return (nullptr); // cant be right
   ext = &(name[len - 7]);
   if (!strcmp(ext, ".nii.gz")) {
     stem = (char *)calloc(len - 7 + 1, sizeof(char));
@@ -463,7 +527,8 @@ char *IDstemFromName(const char *name)
   }
 
   // Try _000.bfloat and _000.short
-  if (len < 12) return (NULL);  // cant be right
+  if (len < 12)
+    return (nullptr); // cant be right
   ext = &(name[len - 11]);
   if (!strcmp(ext, "_000.bfloat") || !strcmp(ext, "_000.bshort")) {
     stem = (char *)calloc(len - 11 + 1, sizeof(char));
@@ -474,42 +539,50 @@ char *IDstemFromName(const char *name)
   // Quietly return
   // printf("ERROR: cannot determine stem from %s\n",name);
 
-  return (NULL);
+  return (nullptr);
 }
 
 /*
   \fn int IDextensionFromName(char *stem)
   \brief Returns the file extension by looking for various extensions.
 */
-char *IDextensionFromName(const char *name)
-{
+char *IDextensionFromName(const char *name) {
   int len;
   char *ext;
 
   len = strlen(name);
-  if (len < 3) return (NULL);  // cant be right
+  if (len < 3)
+    return (nullptr); // cant be right
 
   ext = (char *)calloc(20, sizeof(char));
 
   // Does not do .w
 
   // Try extensions of length 3
-  if (len < 5) return (NULL);  // cant be right
+  if (len < 5)
+    return (nullptr); // cant be right
   ext = strncpy(ext, &(name[len - 3]), 3);
-  if (!strcmp(ext, "nii") || !strcmp(ext, "mgz") || !strcmp(ext, "mgh") || !strcmp(ext, "img")) return (ext);
+  if (!strcmp(ext, "nii") || !strcmp(ext, "mgz") || !strcmp(ext, "mgh") ||
+      !strcmp(ext, "img"))
+    return (ext);
 
   // Try extensions of length 4
-  if (len < 6) return (NULL);  // cant be right
+  if (len < 6)
+    return (nullptr); // cant be right
   ext = strncpy(ext, &(name[len - 4]), 4);
-  if (!strcmp(ext, "bhdr")) return (ext);
+  if (!strcmp(ext, "bhdr"))
+    return (ext);
 
   // Try extensions of length 6
-  if (len < 8) return (NULL);  // cant be right
+  if (len < 8)
+    return (nullptr); // cant be right
   ext = strncpy(ext, &(name[len - 6]), 6);
-  if (!strcmp(ext, "nii.gz")) return (ext);
+  if (!strcmp(ext, "nii.gz"))
+    return (ext);
 
   // Try _000.bfloat and _000.short
-  if (len < 12) return (NULL);  // cant be right
+  if (len < 12)
+    return (nullptr); // cant be right
   ext = strncpy(ext, &(name[len - 11]), 11);
   if (!strcmp(ext, "_000.bfloat")) {
     sprintf(ext, "bfloat");
@@ -520,7 +593,7 @@ char *IDextensionFromName(const char *name)
     return (ext);
   }
 
-  return (NULL);
+  return (nullptr);
 }
 
 /*
@@ -529,55 +602,65 @@ char *IDextensionFromName(const char *name)
      This can be dependent on order, if more than one file type
      exists with the same stem.
 */
-char *IDnameFromStem(const char *stem)
-{
+char *IDnameFromStem(const char *stem) {
   char tmpstr[2000];
 
   sprintf(tmpstr, "%s.nii", stem);
-  if (fio_FileExistsReadable(tmpstr)) return (strcpyalloc(tmpstr));
+  if (fio_FileExistsReadable(tmpstr))
+    return (strcpyalloc(tmpstr));
 
   sprintf(tmpstr, "%s.nii.gz", stem);
-  if (fio_FileExistsReadable(tmpstr)) return (strcpyalloc(tmpstr));
+  if (fio_FileExistsReadable(tmpstr))
+    return (strcpyalloc(tmpstr));
 
   sprintf(tmpstr, "%s.mgh", stem);
-  if (fio_FileExistsReadable(tmpstr)) return (strcpyalloc(tmpstr));
+  if (fio_FileExistsReadable(tmpstr))
+    return (strcpyalloc(tmpstr));
 
   sprintf(tmpstr, "%s.mgz", stem);
-  if (fio_FileExistsReadable(tmpstr)) return (strcpyalloc(tmpstr));
+  if (fio_FileExistsReadable(tmpstr))
+    return (strcpyalloc(tmpstr));
 
   sprintf(tmpstr, "%s.img", stem);
-  if (fio_FileExistsReadable(tmpstr)) return (strcpyalloc(tmpstr));
+  if (fio_FileExistsReadable(tmpstr))
+    return (strcpyalloc(tmpstr));
 
   sprintf(tmpstr, "%s.bhdr", stem);
-  if (fio_FileExistsReadable(tmpstr)) return (strcpyalloc(tmpstr));
+  if (fio_FileExistsReadable(tmpstr))
+    return (strcpyalloc(tmpstr));
 
   sprintf(tmpstr, "%s_000.bfloat", stem);
-  if (fio_FileExistsReadable(tmpstr)) return (strcpyalloc(tmpstr));
+  if (fio_FileExistsReadable(tmpstr))
+    return (strcpyalloc(tmpstr));
 
   sprintf(tmpstr, "%s_000.bshort", stem);
-  if (fio_FileExistsReadable(tmpstr)) return (strcpyalloc(tmpstr));
+  if (fio_FileExistsReadable(tmpstr))
+    return (strcpyalloc(tmpstr));
 
   sprintf(tmpstr, "%s.w", stem);
-  if (fio_FileExistsReadable(tmpstr)) return (strcpyalloc(tmpstr));
+  if (fio_FileExistsReadable(tmpstr))
+    return (strcpyalloc(tmpstr));
 
-  return (NULL);
+  return (nullptr);
 }
 
-int is_cor(const char *fname)
-{
+int is_cor(const char *fname) {
   struct stat stat_buf;
   char *fname2, *base;
   int iscor = 0;
 
-  if (stat(fname, &stat_buf) < 0) return (0);
+  if (stat(fname, &stat_buf) < 0)
+    return (0);
 
   /* if it's a directory, it's a COR dir. */
-  if (S_ISDIR(stat_buf.st_mode)) iscor = 1;
+  if (S_ISDIR(stat_buf.st_mode))
+    iscor = 1;
 
   /* if the first four letters are COR- */
   fname2 = strdup(fname);
   base = basename(fname2);
-  if (strncmp(base, "COR-", 4) == 0) iscor = 1;
+  if (strncmp(base, "COR-", 4) == 0)
+    iscor = 1;
 
   free(fname2);
 
@@ -586,32 +669,32 @@ int is_cor(const char *fname)
 
 } /*  end is_cor()  */
 
-int is_brik(const char *fname)
-{
+int is_brik(const char *fname) {
   const char *dot;
 
   dot = strrchr(fname, '.');
   if (dot) {
     dot++;
-    if (!stricmp(dot, "BRIK")) return (1);
+    if (!stricmp(dot, "BRIK"))
+      return (1);
   }
 
   return (0);
 
 } /* end is_brik() */
 
-int is_siemens(const char *fname)
-{
+int is_siemens(const char *fname) {
   FILE *fp;
   char string[4];
   const char *dot;
 
   dot = strrchr(fname, '.');
   if (dot) {
-    if (!stricmp(dot + 1, "ima")) return (1);
+    if (!stricmp(dot + 1, "ima"))
+      return (1);
   }
 
-  if ((fp = fopen(fname, "r")) == NULL) {
+  if ((fp = fopen(fname, "r")) == nullptr) {
     errno = 0;
     return (0);
   }
@@ -656,20 +739,21 @@ int is_siemens(const char *fname)
 
 } /* end is_siemens() */
 
-int is_genesis(const char *fname)
-{
+int is_genesis(const char *fname) {
   FILE *fp;
   long32 magic;
   const char *dot;
 
-  if (!strncmp(fname, "I.", 2)) return (1);
+  if (!strncmp(fname, "I.", 2))
+    return (1);
 
   dot = strrchr(fname, '.');
   if (dot) {
-    if (!strcmp(dot + 1, "MR")) return (1);
+    if (!strcmp(dot + 1, "MR"))
+      return (1);
   }
 
-  if ((fp = fopen(fname, "r")) == NULL) {
+  if ((fp = fopen(fname, "r")) == nullptr) {
     errno = 0;
     return (0);
   }
@@ -683,18 +767,18 @@ int is_genesis(const char *fname)
 
   fclose(fp);
 
-  if (magic == GE_MAGIC) return (1);
+  if (magic == GE_MAGIC)
+    return (1);
 
   return (0);
 
 } /*  end is_genesis()  */
 
-int is_ge_lx(const char *fname)
-{
+int is_ge_lx(const char *fname) {
   FILE *fp;
   long32 magic;
 
-  if ((fp = fopen(fname, "r")) == NULL) {
+  if ((fp = fopen(fname, "r")) == nullptr) {
     errno = 0;
     return (0);
   }
@@ -709,14 +793,14 @@ int is_ge_lx(const char *fname)
 
   fclose(fp);
 
-  if (magic == GE_MAGIC) return (1);
+  if (magic == GE_MAGIC)
+    return (1);
 
   return (0);
 
 } /*  end is_ge_lx()  */
 
-int is_analyze(const char *fname)
-{
+int is_analyze(const char *fname) {
   FILE *fp;
   dsr hdr;
   char hfname[STRLEN];
@@ -727,13 +811,14 @@ int is_analyze(const char *fname)
 
   dot = strrchr(fname, '.');
   if (dot) {
-    if (!stricmp(dot + 1, "img")) return (1);
+    if (!stricmp(dot + 1, "img"))
+      return (1);
     return (0);
   }
 
   strcat(hfname, ".hdr");
 
-  if ((fp = fopen(hfname, "r")) == NULL) {
+  if ((fp = fopen(hfname, "r")) == nullptr) {
     errno = 0;
     return (0);
   }
@@ -748,33 +833,37 @@ int is_analyze(const char *fname)
   hdr_length = ftell(fp);
   fclose(fp);
 
-  if (hdr_length != orderIntBytes(hdr.hk.sizeof_hdr)) return (0);
-  if (orderIntBytes(hdr.hk.extents) != 16384) return (0);
-  if (hdr.hk.regular != 'r') return (0);
+  if (hdr_length != orderIntBytes(hdr.hk.sizeof_hdr))
+    return (0);
+  if (orderIntBytes(hdr.hk.extents) != 16384)
+    return (0);
+  if (hdr.hk.regular != 'r')
+    return (0);
 
   return (1);
 
 } /*  end is_analyze()  */
 
-int is_mnc(const char *fname)
-{
+int is_mnc(const char *fname) {
   char buf[3];
   FILE *fp;
   const char *dot;
 
   dot = strrchr(fname, '.');
   if (dot) {
-    if (!stricmp(dot + 1, "mnc")) return (1);
+    if (!stricmp(dot + 1, "mnc"))
+      return (1);
 
     if (!stricmp(dot + 1, "gz")) {
       /* --- get the next to last dot or the beginning of the file name --- */
       for (dot--; *dot != '.' && dot > fname; dot--)
         ;
-      if (stricmp(dot, ".mnc.gz") == 0) return (1);
+      if (stricmp(dot, ".mnc.gz") == 0)
+        return (1);
     }
   }
 
-  if ((fp = fopen(fname, "r")) == NULL) {
+  if ((fp = fopen(fname, "r")) == nullptr) {
     errno = 0;
     return (0);
   }
@@ -787,21 +876,23 @@ int is_mnc(const char *fname)
 
   fclose(fp);
 
-  if (strncmp(buf, "CDF", 3) == 0) return (1);
+  if (strncmp(buf, "CDF", 3) == 0)
+    return (1);
 
   return (0);
 
 } /*  end is_mnc()  */
 
-int is_mgh(const char *fname)
-{
+int is_mgh(const char *fname) {
   FILE *fp;
   int width, height, depth, nframes;
   // int version, type, dof;
 
-  if (strstr(fname, ".mgh") || strstr(fname, ".mgz") || strstr(fname, ".mgh.gz")) return 1;
+  if (strstr(fname, ".mgh") || strstr(fname, ".mgz") ||
+      strstr(fname, ".mgh.gz"))
+    return 1;
 
-  if ((fp = fopen(fname, "r")) == NULL) {
+  if ((fp = fopen(fname, "r")) == nullptr) {
     errno = 0;
     return (0);
   }
@@ -820,44 +911,47 @@ int is_mgh(const char *fname)
   fclose(fp);
 
   /* my estimates (ch) */
-  if (width < 64 || height < 64 || width > 1024 || height > 1024) return (0);
-  if (depth > 2000) return (0);
-  if (nframes > 2000) return (0);
+  if (width < 64 || height < 64 || width > 1024 || height > 1024)
+    return (0);
+  if (depth > 2000)
+    return (0);
+  if (nframes > 2000)
+    return (0);
 
   return (1);
 
 } /*  end is_mgh()  */
 /*--------------------------------------*/
-int is_bshort(const char *fname)
-{
+int is_bshort(const char *fname) {
   const char *dot;
   dot = strrchr(fname, '.');
   if (dot) {
     dot++;
-    if (!strcmp(dot, "bshort")) return (1);
+    if (!strcmp(dot, "bshort"))
+      return (1);
   }
   return (0);
 
 } /*  end is_bshort()  */
 /*--------------------------------------*/
-int is_bfloat(const char *fname)
-{
+int is_bfloat(const char *fname) {
   const char *dot;
   dot = strrchr(fname, '.');
   if (dot) {
     dot++;
-    if (!strcmp(dot, "bfloat")) return (1);
+    if (!strcmp(dot, "bfloat"))
+      return (1);
   }
   return (0);
 } /*  end is_bfloat()  */
 /*--------------------------------------*/
-int is_bhdr(const char *fname)
-{
+int is_bhdr(const char *fname) {
   const char *dot;
   dot = strrchr(fname, '.');
   if (dot) {
     dot++;
-    if (!strcmp(dot, "bhdr")) return (1);
+    if (!strcmp(dot, "bhdr"))
+      return (1);
   }
   return (0);
 } /*  end is_bhdr()  */
@@ -865,12 +959,12 @@ int is_bhdr(const char *fname)
   bhdr_stem(). Given fname = stem.bhdr,
   returns stem.
 --------------------------------------*/
-char *bhdr_stem(const char *fname)
-{
+char *bhdr_stem(const char *fname) {
   char *stem;
   int i, len;
 
-  if (!is_bhdr(fname)) return (NULL);
+  if (!is_bhdr(fname))
+    return (nullptr);
   len = strlen(fname);
   stem = (char *)calloc(len + 1, sizeof(char));
   memmove(stem, fname, len);
@@ -889,12 +983,12 @@ char *bhdr_stem(const char *fname)
   where precision is either bfloat or bshort.
   This can then be used as input to MRIread().
   --------------------------------------------*/
-char *bhdr_firstslicefname(const char *fname)
-{
+char *bhdr_firstslicefname(const char *fname) {
   char *stem, *firstslicefname;
   int len;
 
-  if (!is_bhdr(fname)) return (NULL);
+  if (!is_bhdr(fname))
+    return (nullptr);
   stem = bhdr_stem(fname);
 
   len = strlen(stem) + 12;
@@ -913,19 +1007,19 @@ char *bhdr_firstslicefname(const char *fname)
   }
 
   free(stem);
-  return (NULL);
+  return (nullptr);
 }
 /*-------------------------------------------------------------
   bhdr_precisionstring(). Given fname = stem.bhdr, finds
   stem_000.precision on disk, where precision is either bfloat or
   bshort.
   --------------------------------------------------------------*/
-char *bhdr_precisionstring(const char *fname)
-{
+char *bhdr_precisionstring(const char *fname) {
   char *stem, *precision;
   char tmpstr[2000];
 
-  if (!is_bhdr(fname)) return (NULL);
+  if (!is_bhdr(fname))
+    return (nullptr);
   stem = bhdr_stem(fname);
 
   precision = (char *)calloc(7, sizeof(char));
@@ -945,7 +1039,7 @@ char *bhdr_precisionstring(const char *fname)
   }
 
   free(stem);
-  return (NULL);
+  return (nullptr);
 }
 
 /*----------------------------------------------------------------------
@@ -953,12 +1047,12 @@ char *bhdr_precisionstring(const char *fname)
   on disk, where precision is either bfloat or bshort. If bfloat, then
   returns MRI_FLOAT. If bshort, then returns  MRI_SHORT.
   ---------------------------------------------------------------------*/
-int bhdr_precision(const char *fname)
-{
+int bhdr_precision(const char *fname) {
   char *stem;
   char tmpstr[2000];
 
-  if (!is_bhdr(fname)) return (0);
+  if (!is_bhdr(fname))
+    return (0);
   stem = bhdr_stem(fname);
 
   sprintf(tmpstr, "%s_000.bfloat", stem);
@@ -978,13 +1072,12 @@ int bhdr_precision(const char *fname)
 }
 
 /*--------------------------------------*/
-int is_sdt(const char *fname)
-{
+int is_sdt(const char *fname) {
   char header_fname[STR_LEN];
   char *dot;
   FILE *fp;
 
-  if ((fp = fopen(fname, "r")) == NULL) {
+  if ((fp = fopen(fname, "r")) == nullptr) {
     errno = 0;
     return (0);
   }
@@ -998,7 +1091,7 @@ int is_sdt(const char *fname)
   else
     strcat(header_fname, ".spr");
 
-  if ((fp = fopen(header_fname, "r")) == NULL) {
+  if ((fp = fopen(header_fname, "r")) == nullptr) {
     errno = 0;
     return (0);
   }
@@ -1009,26 +1102,26 @@ int is_sdt(const char *fname)
 
 } /* end is_sdt() */
 
-int is_gdf(const char *fname)
-{
+int is_gdf(const char *fname) {
   const char *dot;
 
   dot = strrchr(fname, '.');
-  if (dot != NULL) {
-    if (strcmp(dot, ".gdf") == 0) return (TRUE);
+  if (dot != nullptr) {
+    if (strcmp(dot, ".gdf") == 0)
+      return (TRUE);
   }
 
   return (FALSE);
 
 } /* end is_gdf() */
 
-int is_otl(const char *fname)
-{
+int is_otl(const char *fname) {
   const char *dot;
 
   dot = strrchr(fname, '.');
-  if (dot != NULL) {
-    if (strcmp(dot, ".otl") == 0) return (TRUE);
+  if (dot != nullptr) {
+    if (strcmp(dot, ".otl") == 0)
+      return (TRUE);
   }
 
   return (FALSE);
@@ -1037,8 +1130,7 @@ int is_otl(const char *fname)
 
 int is_ximg(const char *fname) { return (FALSE); } /* end is_ximg() */
 
-int is_nifti1(const char *fname)
-{
+int is_nifti1(const char *fname) {
   char fname_stem[STRLEN];
   char hdr_fname[STRLEN];
   char *dot;
@@ -1049,12 +1141,13 @@ int is_nifti1(const char *fname)
 
   strcpy(fname_stem, fname);
   dot = strrchr(fname_stem, '.');
-  if (dot != NULL)
-    if (strcmp(dot, ".img") == 0 || strcmp(dot, ".hdr") == 0) *dot = '\0';
+  if (dot != nullptr)
+    if (strcmp(dot, ".img") == 0 || strcmp(dot, ".hdr") == 0)
+      *dot = '\0';
   sprintf(hdr_fname, "%s.hdr", fname_stem);
 
   fp = fopen(hdr_fname, "r");
-  if (fp == NULL) {
+  if (fp == nullptr) {
     errno = 0;
     return (FALSE);
   }
@@ -1075,29 +1168,31 @@ int is_nifti1(const char *fname)
 
   // printf("Checking magic number %s %s\n",magic,NIFTI1_MAGIC);
 
-  if (memcmp(magic, NIFTI1_MAGIC, 4) != 0) return (FALSE);
+  if (memcmp(magic, NIFTI1_MAGIC, 4) != 0)
+    return (FALSE);
 
   return (TRUE);
 
 } /*  end is_nifti1()  */
 
-int is_nii(const char *fname)
-{
+int is_nii(const char *fname) {
   const char *dot;
   FILE *fp;
   char magic[4];
 
   dot = strrchr(fname, '.');
 
-  if (dot != NULL) {
-    if (strcmp(dot, ".nii") == 0) return (TRUE);
+  if (dot != nullptr) {
+    if (strcmp(dot, ".nii") == 0)
+      return (TRUE);
     if (strcmp(dot, ".gz") == 0) {
-      if (strstr(fname, ".nii.gz")) return (TRUE);
+      if (strstr(fname, ".nii.gz"))
+        return (TRUE);
     }
   }
 
   fp = fopen(fname, "r");
-  if (fp == NULL) {
+  if (fp == nullptr) {
     errno = 0;
     return (FALSE);
   }
@@ -1116,14 +1211,14 @@ int is_nii(const char *fname)
 
   fclose(fp);
 
-  if (memcmp(magic, NII_MAGIC, 4) != 0) return (FALSE);
+  if (memcmp(magic, NII_MAGIC, 4) != 0)
+    return (FALSE);
 
   return (TRUE);
 
 } /*  end is_nii()  */
 
-int is_nrrd(const char *fname)
-{
+int is_nrrd(const char *fname) {
   const char *dot;
   FILE *fp;
   char magic[4];
@@ -1131,8 +1226,9 @@ int is_nrrd(const char *fname)
   // Check that the extension is .nrrd
   dot = strrchr(fname, '.');
 
-  if (dot != NULL) {
-    if ((strcmp(dot, ".nrrd") == 0) && ((signed)strlen(fname) == dot - fname + 5)) {
+  if (dot != nullptr) {
+    if ((strcmp(dot, ".nrrd") == 0) &&
+        ((signed)strlen(fname) == dot - fname + 5)) {
       return (TRUE);
     }
   }
@@ -1144,7 +1240,7 @@ int is_nrrd(const char *fname)
 
   // should it read as binary instead?
   fp = fopen(fname, "r");
-  if (fp == NULL) {
+  if (fp == nullptr) {
     errno = 0;
     return (FALSE);
   }
@@ -1156,7 +1252,8 @@ int is_nrrd(const char *fname)
   }
   fclose(fp);
 
-  if (memcmp(magic, NRRD_MAGIC, 4) != 0) return (FALSE);
+  if (memcmp(magic, NRRD_MAGIC, 4) != 0)
+    return (FALSE);
 
   return (TRUE);
 
@@ -1203,16 +1300,17 @@ END c++ version of is_nrrd()
 /*----------------------------------------
   IDisCurv() - surface curve file format
   ----------------------------------------*/
-int IDisCurv(const char *curvfile)
-{
+int IDisCurv(const char *curvfile) {
   int magno;
   FILE *fp;
 
   fp = fopen(curvfile, "r");
-  if (fp == NULL) return (0);  // return quietly
+  if (fp == nullptr)
+    return (0); // return quietly
   fread3(&magno, fp);
   fclose(fp);
-  if (magno != NEW_VERSION_MAGIC_NUMBER) return (FALSE);
+  if (magno != NEW_VERSION_MAGIC_NUMBER)
+    return (FALSE);
   return (TRUE);
 }
 

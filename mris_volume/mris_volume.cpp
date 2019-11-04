@@ -23,7 +23,6 @@
  *
  */
 
-
 //
 // mris_measure_volume.c
 // compute the volume enclosed by a closed triangulated surface
@@ -36,10 +35,10 @@
 //
 ////////////////////////////////////////////////////////////////////
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+#include <cctype>
 #include "mri.h"
 #include "mrisurf.h"
 #include "macros.h"
@@ -54,74 +53,80 @@
 #include "label.h"
 #include "mrisutils.h"
 
-#define VERTEX_EDGE(vec, v0, v1)   VECTOR_LOAD(vec,v1->x-v0->x,v1->y-v0->y, v1->z-v0->z)
+#define VERTEX_EDGE(vec, v0, v1)                                               \
+  VECTOR_LOAD(vec, v1->x - v0->x, v1->y - v0->y, v1->z - v0->z)
 
 static int verbose = 0;
 
-int main(int argc, char *argv[]) ;
-static int get_option(int argc, char *argv[]) ;
+int main(int argc, char *argv[]);
+static int get_option(int argc, char *argv[]);
 
-const char *Progname ;
+const char *Progname;
 
-static void usage_exit(int code) ;
+static void usage_exit(int code);
 
 int main(int argc, char *argv[]) {
-  char   **av, *in_fname;
-  int    ac, nargs;
-  MRIS    *mris;
-  int    msec, minutes, seconds, nv, nf, ne, eno ;
-  Timer start ;
+  char **av, *in_fname;
+  int ac, nargs;
+  MRIS *mris;
+  int msec, minutes, seconds, nv, nf, ne, eno;
+  Timer start;
   double total_volume;
 
   /* rkt: check for and handle version tag */
-  nargs = handle_version_option (argc, argv, "$Id: mris_volume.c,v 1.6 2011/03/02 00:04:34 nicks Exp $", "$Name:  $");
+  nargs = handle_version_option(
+      argc, argv, "$Id: mris_volume.c,v 1.6 2011/03/02 00:04:34 nicks Exp $",
+      "$Name:  $");
   if (nargs && argc - nargs == 1)
-    exit (0);
+    exit(0);
   argc -= nargs;
 
-  Progname = argv[0] ;
-  ErrorInit(NULL, NULL, NULL) ;
-  DiagInit(NULL, NULL, NULL) ;
+  Progname = argv[0];
+  ErrorInit(NULL, NULL, NULL);
+  DiagInit(nullptr, nullptr, nullptr);
 
-  start.reset() ;
+  start.reset();
 
-  ac = argc ;
-  av = argv ;
-  for ( ; argc > 1 && ISOPTION(*argv[1]) ; argc--, argv++) {
-    nargs = get_option(argc, argv) ;
-    argc -= nargs ;
-    argv += nargs ;
+  ac = argc;
+  av = argv;
+  for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
+    nargs = get_option(argc, argv);
+    argc -= nargs;
+    argv += nargs;
   }
 
   if (argc < 2)
-    usage_exit(1) ;
+    usage_exit(1);
 
   //  printf("command line parsing finished\n");
 
   /*** Read in the input surfaces ***/
-  in_fname = argv[1] ;
-  if (verbose) printf("reading %s...\n", in_fname) ;
+  in_fname = argv[1];
+  if (verbose)
+    printf("reading %s...\n", in_fname);
 
-  mris = MRISread(in_fname) ;
-  if(mris == NULL)
-    ErrorExit(ERROR_NOFILE, "%s: could not read surface %s",
-              Progname, in_fname) ;
-  eno = MRIScomputeEulerNumber(mris, &nv, &nf, &ne) ;
+  mris = MRISread(in_fname);
+  if (mris == nullptr)
+    ErrorExit(ERROR_NOFILE, "%s: could not read surface %s", Progname,
+              in_fname);
+  eno = MRIScomputeEulerNumber(mris, &nv, &nf, &ne);
   if (eno != 2)
-    ErrorExit(ERROR_BADPARM, "%s: surface %s has an incorrect topology (eno=%d)",
-              Progname, in_fname, eno) ;
+    ErrorExit(ERROR_BADPARM,
+              "%s: surface %s has an incorrect topology (eno=%d)", Progname,
+              in_fname, eno);
 
-  if(verbose) printf("surface file read in.\n");
+  if (verbose)
+    printf("surface file read in.\n");
 
   total_volume = MRISvolumeInSurf(mris);
 
-  msec = start.milliseconds() ;
-  seconds = nint((float)msec/1000.0f) ;
-  minutes = seconds / 60 ;
-  seconds = seconds % 60 ;
+  msec = start.milliseconds();
+  seconds = nint((float)msec / 1000.0f);
+  minutes = seconds / 60;
+  seconds = seconds % 60;
   if (verbose)
-    printf("Volume computation took %d minutes and %d seconds.\n", 
-	   minutes, seconds) ;
+    printf("Volume computation took %d minutes and %d seconds.\n", minutes,
+           seconds);
 
   if (verbose)
     printf("total volume surrounded by the surface is %g\n", total_volume);
@@ -138,12 +143,11 @@ int main(int argc, char *argv[]) {
 
            Description:
 ----------------------------------------------------------------------*/
-static int
-get_option(int argc, char *argv[]) {
-  int  nargs = 0 ;
-  char *option ;
+static int get_option(int argc, char *argv[]) {
+  int nargs = 0;
+  char *option;
 
-  option = argv[1] + 1 ;            /* past '-' */
+  option = argv[1] + 1; /* past '-' */
 
   switch (*option) {
   case 'v':
@@ -156,7 +160,7 @@ get_option(int argc, char *argv[]) {
     break;
   }
 
-  return(nargs) ;
+  return (nargs);
 }
 
 /*----------------------------------------------------------------------
@@ -164,13 +168,10 @@ get_option(int argc, char *argv[]) {
 
   Description:
   ----------------------------------------------------------------------*/
-static void
-usage_exit(int code) {
-  printf("usage: %s surface_file_name\n", Progname) ;
-  printf("\t This program computes the volume of the given closed surface using a divergence formula \n");
+static void usage_exit(int code) {
+  printf("usage: %s surface_file_name\n", Progname);
+  printf("\t This program computes the volume of the given closed surface "
+         "using a divergence formula \n");
   printf("\t use -v option to output more messages\n");
-  exit(code) ;
+  exit(code);
 }
-
-
-

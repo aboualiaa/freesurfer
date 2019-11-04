@@ -2,72 +2,66 @@
 #define __kvlAtlasParameterEstimationConsole_h
 
 #include "kvlAtlasParameterEstimationConsoleGUI.h"
-#include <vector>
-#include <string>
 #include "kvlAtlasParameterEstimator.h"
+#include <string>
+#include <vector>
 
+namespace kvl {
 
+class AtlasParameterEstimationConsole
+    : public kvlAtlasParameterEstimationConsoleGUI {
 
-namespace kvl
-{
-
-class AtlasParameterEstimationConsole : public kvlAtlasParameterEstimationConsoleGUI
-{
-
-public: 
-
+public:
   //
   AtlasParameterEstimationConsole();
-  
-  //
-  virtual ~AtlasParameterEstimationConsole();
 
   //
-  void SetLabelImages( const std::vector< std::string >&  fileNames );
-    
-  // 
+//  ~AtlasParameterEstimationConsole() override = default;;
+
+  //
+  void SetLabelImages(const std::vector<std::string> &fileNames);
+
+  //
   void Show();
 
   //
-  void Estimate();
-  
+  void Estimate() override;
+
   //
-  void HandleEstimatorEvent( itk::Object* object, const itk::EventObject & event );
-  
+  void HandleEstimatorEvent(itk::Object *object, const itk::EventObject &event);
+
 protected:
+  //
+  void DisplayLabelImage(unsigned int labelImageNumber) override;
 
   //
-  void DisplayLabelImage( unsigned int labelImageNumber );
-  
-  //
-  void InitializeMesh();
-  
-  //
-  void Step();
+  void InitializeMesh() override;
+
+  void SelectTriangleContainingPoint(float /*unused*/,
+                                     float /*unused*/) override {};
 
   //
-  void Interrupt();
+  void Step() override;
 
   //
-  void Continue();
+  void Interrupt() override;
 
   //
-  void SetPositionEstimationResolution( unsigned int positionEstimationResolution );
+  void Continue() override;
 
-private:  
-  
-  AtlasParameterEstimator::Pointer  m_Estimator;
-  
-  std::string  m_TotalProgressLabel;
-  std::string  m_SubProgressLabel;
-  
-  bool  m_Interrupted;
-  bool  m_Stepping;
-  
-  
+  //
+  void SetPositionEstimationResolution(
+      unsigned int positionEstimationResolution) override;
+
+private:
+  AtlasParameterEstimator::Pointer m_Estimator;
+
+  std::string m_TotalProgressLabel;
+  std::string m_SubProgressLabel;
+
+  bool m_Interrupted;
+  bool m_Stepping;
 };
-
-
 
 } // end namespace kvl
 

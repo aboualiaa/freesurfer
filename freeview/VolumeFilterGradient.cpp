@@ -36,51 +36,47 @@
 #include <vtkDataArray.h>
 #include <vtkImageShiftScale.h>
 
-VolumeFilterGradient::VolumeFilterGradient( LayerMRI* input, LayerMRI* output, QObject* parent ) :
-  VolumeFilter( input, output, parent ),
-  m_bSmoothing( false ),
-  m_dSD( 1.0 )
-{
-}
+VolumeFilterGradient::VolumeFilterGradient(LayerMRI *input, LayerMRI *output,
+                                           QObject *parent)
+    : VolumeFilter(input, output, parent), m_bSmoothing(false), m_dSD(1.0) {}
 
-bool VolumeFilterGradient::Execute()
-{
+bool VolumeFilterGradient::Execute() {
   TriggerFakeProgress(50);
-  vtkSmartPointer<vtkImageGradientMagnitude> grad = vtkSmartPointer<vtkImageGradientMagnitude>::New();
-  grad->SetDimensionality( 3 );
+  vtkSmartPointer<vtkImageGradientMagnitude> grad =
+      vtkSmartPointer<vtkImageGradientMagnitude>::New();
+  grad->SetDimensionality(3);
   grad->HandleBoundariesOn();
 
-  if ( m_bSmoothing )
-  {
-    vtkSmartPointer<vtkImageGaussianSmooth> smooth = vtkSmartPointer<vtkImageGaussianSmooth>::New();
+  if (m_bSmoothing) {
+    vtkSmartPointer<vtkImageGaussianSmooth> smooth =
+        vtkSmartPointer<vtkImageGaussianSmooth>::New();
 #if VTK_MAJOR_VERSION > 5
-    smooth->SetInputData( m_volumeInput->GetImageData() );
+    smooth->SetInputData(m_volumeInput->GetImageData());
 #else
-    smooth->SetInput( m_volumeInput->GetImageData() );
+    smooth->SetInput(m_volumeInput->GetImageData());
 #endif
-    smooth->SetStandardDeviations( m_dSD, m_dSD, m_dSD );
-    smooth->SetRadiusFactors( 1, 1, 1 );
-    grad->SetInputConnection( smooth->GetOutputPort() );
-  }
-  else
-  {
+    smooth->SetStandardDeviations(m_dSD, m_dSD, m_dSD);
+    smooth->SetRadiusFactors(1, 1, 1);
+    grad->SetInputConnection(smooth->GetOutputPort());
+  } else {
 #if VTK_MAJOR_VERSION > 5
-    grad->SetInputData( m_volumeInput->GetImageData() );
+    grad->SetInputData(m_volumeInput->GetImageData());
 #else
-    grad->SetInput( m_volumeInput->GetImageData() );
+    grad->SetInput(m_volumeInput->GetImageData());
 #endif
   }
 
   grad->Update();
-  double* orig_range = m_volumeInput->GetImageData()->GetPointData()->GetScalars()->GetRange();
-  vtkImageData* img = grad->GetOutput();
-  double* range = img->GetPointData()->GetScalars()->GetRange();
-  double scale = orig_range[1]/range[1];
-  if (scale < 0)
-  {
+  double *orig_range =
+      m_volumeInput->GetImageData()->GetPointData()->GetScalars()->GetRange();
+  vtkImageData *img = grad->GetOutput();
+  double *range = img->GetPointData()->GetScalars()->GetRange();
+  double scale = orig_range[1] / range[1];
+  if (scale < 0) {
     scale = -scale;
   }
-  vtkSmartPointer<vtkImageShiftScale> scaler = vtkSmartPointer<vtkImageShiftScale>::New();
+  vtkSmartPointer<vtkImageShiftScale> scaler =
+      vtkSmartPointer<vtkImageShiftScale>::New();
 #if VTK_MAJOR_VERSION > 5
   scaler->SetInputData(img);
 #else
@@ -90,8 +86,7 @@ bool VolumeFilterGradient::Execute()
   scaler->SetScale(scale);
   scaler->SetOutputScalarType(m_volumeInput->GetImageData()->GetScalarType());
   scaler->Update();
-  m_volumeOutput->GetImageData()->DeepCopy( scaler->GetOutput() );
+  m_volumeOutput->GetImageData()->DeepCopy(scaler->GetOutput());
 
   return true;
 }
-

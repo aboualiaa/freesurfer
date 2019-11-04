@@ -24,6 +24,6 @@
 
 #pragma once
 
-#include "base.h"     // uses __MYFUNCTION__
-    //
-    // a lot of the signatures are in base.h to get them widely used
+#include "base.h" // uses __MYFUNCTION__
+                  //
+// a lot of the signatures are in base.h to get them widely used

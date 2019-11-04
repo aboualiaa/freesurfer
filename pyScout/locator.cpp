@@ -3,18 +3,12 @@
 
 #include "locator.h"
 
-Locator::Locator()
-{
-  locator = 0;
-}
+Locator::Locator() { locator = 0; }
 
-Locator::~Locator()
-{}
+Locator::~Locator() {}
 
-void
-Locator::SetInputData(WrapperPolyData* input)
-{
-  vtkPolyData* data = GetPolyData(input);
+void Locator::SetInputData(WrapperPolyData *input) {
+  vtkPolyData *data = GetPolyData(input);
 
   locator = vtkCellLocator::New();
   locator->SetDataSet(data);
@@ -22,12 +16,9 @@ Locator::SetInputData(WrapperPolyData* input)
   locator->BuildLocator();
 }
 
-int
-Locator::FindClosestPoint(double x,
-			  double y,
-			  double z)
-{
-  if (!locator) return -1;
+int Locator::FindClosestPoint(double x, double y, double z) {
+  if (!locator)
+    return -1;
 
   double input[3];
   input[0] = x;
@@ -37,9 +28,7 @@ Locator::FindClosestPoint(double x,
   double dist2;
   vtkIdType id;
   int subId;
-  
-  locator->FindClosestPoint(input, returnedPoint,
-			    id, subId, dist2);
+
+  locator->FindClosestPoint(input, returnedPoint, id, subId, dist2);
   return id;
 }
-

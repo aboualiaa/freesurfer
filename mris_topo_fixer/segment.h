@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:11 $
@@ -23,7 +23,6 @@
  *
  */
 
-
 #ifndef TOPOLOGY_SEGMENT_H
 #define TOPOLOGY_SEGMENT_H
 
@@ -32,21 +31,20 @@
 #define NUMBER_OF_POINTS 10
 #define INCREASE_NUMBER_OF_POINTS 1.2
 
-class Segment
-{
+class Segment {
 private:
-  int npoints,maxpoints;
-  int* points;
+  int npoints, maxpoints;
+  int *points;
 
-  int nvertices,nfaces,nedges,euler;
+  int nvertices, nfaces, nedges, euler;
   int marked;
 
-  void _ReallocSegment(int new_maxpoints=-1);
+  void _ReallocSegment(int new_maxpoints = -1);
 
 public:
   // constructor / destructor
-  Segment(void);
-  ~Segment(void);
+  Segment();
+  ~Segment();
 
   int size() const;
   void clear();
@@ -54,7 +52,7 @@ public:
   void AddSegment(Segment *s);
   void Transfer(Segment &b);
   int GetEuler();
-  const int* GetPointList(void) const;
+  const int *GetPointList() const;
   int GetMark() const;
   void SetMark(int m);
 };

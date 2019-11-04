@@ -26,13 +26,11 @@
 
 #include <QDialog>
 
-namespace Ui
-{
+namespace Ui {
 class DialogGradientFilter;
 }
 
-class DialogGradientFilter : public QDialog
-{
+class DialogGradientFilter : public QDialog {
   Q_OBJECT
 
 public:

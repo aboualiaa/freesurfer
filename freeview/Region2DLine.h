@@ -34,48 +34,44 @@ class RenderView2D;
 class vtkRenderer;
 class vtkTextActor;
 
-class Region2DLine : public Region2D
-{
+class Region2DLine : public Region2D {
 public:
-  Region2DLine( RenderView2D* view );
+  Region2DLine(RenderView2D *view);
   virtual ~Region2DLine();
 
-  void SetLine( int x1, int y1, int x2, int y2 );
+  void SetLine(int x1, int y1, int x2, int y2);
 
-  void SetPoint1( int x1, int y1 );
-  void SetPoint2( int x2, int y2 );
+  void SetPoint1(int x1, int y1);
+  void SetPoint2(int x2, int y2);
 
-  void Offset( int x, int y );
+  void Offset(int x, int y);
 
-  bool Contains( int x, int y, int* nIndexOut = NULL );
-  void UpdatePoint( int nIndex, int nX, int nY );
+  bool Contains(int x, int y, int *nIndexOut = NULL);
+  void UpdatePoint(int nIndex, int nX, int nY);
 
-  void AppendProp( vtkRenderer* renderer );
+  void AppendProp(vtkRenderer *renderer);
 
-  void Show( bool bshow = true );
-  void Highlight( bool bHighlight = true );
+  void Show(bool bshow = true);
+  void Highlight(bool bHighlight = true);
 
   void Update();
   void UpdateStats();
 
-  void UpdateSlicePosition( int nPlane, double pos );
+  void UpdateSlicePosition(int nPlane, double pos);
 
-  void GetWorldPoint( int nIndex, double* pt );
+  void GetWorldPoint(int nIndex, double *pt);
 
   QString DataToString();
 
-  Region2D* ObjectFromString(RenderView2D* view, const QString& text);
+  Region2D *ObjectFromString(RenderView2D *view, const QString &text);
 
 protected:
   void UpdateWorldCoords();
 
-  vtkSmartPointer<vtkActor2D>   m_actorLine;
-  int       m_nX1, m_nX2, m_nY1, m_nY2;
-  double    m_dPt1[3];
-  double    m_dPt2[3];
-
+  vtkSmartPointer<vtkActor2D> m_actorLine;
+  int m_nX1, m_nX2, m_nY1, m_nY2;
+  double m_dPt1[3];
+  double m_dPt2[3];
 };
 
 #endif
-
-

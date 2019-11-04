@@ -27,7 +27,6 @@
 #ifndef GCAMORPH_TEST_UTILS_HPP
 #define GCAMORPH_TEST_UTILS_HPP
 
-
 #include <string>
 #include <map>
 #include <iostream>
@@ -35,53 +34,46 @@
 
 #include "netcdf.h"
 
-
 #include "gcamorph.h"
 
 // ======================================================================
 
-#define NC_SAFE_CALL( call ) do {   \
-    int err = call;       \
-    if( NC_NOERR != err ) {     \
-      std::cerr << __FUNCTION__ \
-    << ": NetCDF failure on line " << __LINE__  \
-    << " of file " << __FILE__      \
-    << std::endl;         \
-      std::cerr << "Error code was " << err << std::endl; \
-      std::cerr << "Error string was : " << nc_strerror(err)  \
-    << std::endl;         \
-      abort();                                                  \
-    }               \
-  } while ( 0 );
+#define NC_SAFE_CALL(call)                                                     \
+  do {                                                                         \
+    int err = call;                                                            \
+    if (NC_NOERR != err) {                                                     \
+      std::cerr << __FUNCTION__ << ": NetCDF failure on line " << __LINE__     \
+                << " of file " << __FILE__ << std::endl;                       \
+      std::cerr << "Error code was " << err << std::endl;                      \
+      std::cerr << "Error string was : " << nc_strerror(err) << std::endl;     \
+      abort();                                                                 \
+    }                                                                          \
+  } while (0);
 
 // ======================================================================
 
-
 //! Class to hold utility routines for GCAMorph with one input
 
-class GCAMorphUtils
-{
+class GCAMorphUtils {
 public:
-
   //! Constructor fills in the type map
-  GCAMorphUtils( void );
+  GCAMorphUtils();
 
   //! Writes out a GCAM with one input
-  void Write( const GCAM* src, std::string fName ) const;
+  void Write(const GCAM *src, std::string fName) const;
 
   //! Reads in a GCAM with one input
-  void Read( GCAM** dst, std::string fName ) const;
+  void Read(GCAM **dst, std::string fName) const;
 
 private:
-
   //! Indicies into small arrays defining the dimensions
   enum dimIndices { iX, iY, iZ };
 
   //! Map of variable names and types
-  std::map<std::string,nc_type> varTypeMap;
+  std::map<std::string, nc_type> varTypeMap;
 
   //! Map of the scalar names and types
-  std::map<std::string,nc_type> scalarTypeMap;
+  std::map<std::string, nc_type> scalarTypeMap;
 
   //! Number of dimensions we will store
   static const unsigned int nDims = 3;
@@ -91,7 +83,7 @@ private:
   static const unsigned int nScalars = 2;
 
   //! Total number of variables which will be in a NetCDF file
-  static const unsigned int totalVars = nVars+nScalars;
+  static const unsigned int totalVars = nVars + nScalars;
 };
 
 #endif

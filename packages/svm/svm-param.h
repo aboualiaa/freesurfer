@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:40 $
@@ -23,7 +23,6 @@
  *
  */
 
-
 ////SVM-LIB////////////////////////////////////////////////////////////////
 //
 // Name: SvmParam
@@ -34,8 +33,6 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-
-
 #ifndef __SVM_PARAM_H__
 #define __SVM_PARAM_H__
 
@@ -43,61 +40,51 @@
 
 class SvmParam {
 public:
-
   // SVM parameters
 
-  double C;                              // soft margin constant
+  double C; // soft margin constant
   static const double dC;
-  static const char* nameC;
+  static const char *nameC;
 
-  Kernel kernel;                         // kernel
+  Kernel kernel; // kernel
   static const Kernel dKernel;
-  static const char* nameKernel;
-
+  static const char *nameKernel;
 
   // Programming parameters
 
-  int verbose;                           // verbose mode
+  int verbose; // verbose mode
   static const int dVerbose;
-  static const char* nameVerbose ;
+  static const char *nameVerbose;
 
-  double alphaEpsilon;                    // threshold to decide that
-  static const double dAlphaEpsilon;      // alpha is zero
-  static const char* nameAlphaEpsilon;
+  double alphaEpsilon;               // threshold to decide that
+  static const double dAlphaEpsilon; // alpha is zero
+  static const char *nameAlphaEpsilon;
 
-  double classEpsilon;                  // threshold for classification
-  static const double dClassEpsilon;    // comparison to 0 and +/-1.
-  static const char* nameClassEpsilon;
-
+  double classEpsilon;               // threshold for classification
+  static const double dClassEpsilon; // comparison to 0 and +/-1.
+  static const char *nameClassEpsilon;
 
   // Interior point - specific optimization parameters
 
-  int maxIterations;                     // max. number of iterations
+  int maxIterations; // max. number of iterations
   static const int dMaxIterations;
-  static const char* nameMaxIterations;
+  static const char *nameMaxIterations;
 
-  double sigDig;                          // the primal and the dual must
-  static const double dSigDig;            // agree to that many digits
-  static const char* nameSigDig;
+  double sigDig;               // the primal and the dual must
+  static const double dSigDig; // agree to that many digits
+  static const char *nameSigDig;
 
-  double optEpsilon;                     // initialization parameter
+  double optEpsilon; // initialization parameter
   static const double dOptEpsilon;
-  static const char* nameOptEpsilon;
-
+  static const char *nameOptEpsilon;
 
   // Constructors
   SvmParam();
 
-
   // I/O
-  void parse(const char* const* argv, int argc);
+  void parse(const char *const *argv, int argc);
 
-  static std::ostream& printUsage(std::ostream& s);
+  static std::ostream &printUsage(std::ostream &s);
 };
 
-
 #endif // __SVM_PARAM_H__
-
-
-
-

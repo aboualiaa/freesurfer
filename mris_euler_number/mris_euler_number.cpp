@@ -22,12 +22,11 @@
  *
  */
 
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <ctype.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <cctype>
 
 #include "macros.h"
 #include "error.h"
@@ -39,119 +38,112 @@
 #include "version.h"
 
 static char vcid[] =
-  "$Id: mris_euler_number.c,v 1.10 2013/01/14 22:39:14 greve Exp $";
+    "$Id: mris_euler_number.c,v 1.10 2013/01/14 22:39:14 greve Exp $";
 
-int main(int argc, char *argv[]) ;
+int main(int argc, char *argv[]);
 
-static int  get_option(int argc, char *argv[]) ;
-static void usage_exit(void) ;
-static void print_usage(void) ;
-static void print_help(void) ;
-static void print_version(void) ;
+static int get_option(int argc, char *argv[]);
+static void usage_exit();
+static void print_usage();
+static void print_help();
+static void print_version();
 
-const char *Progname ;
+const char *Progname;
 
-static float curv_thresh = 2.0f ;
-static int patch_flag = 0 ;
-char *outfile=NULL;
+static float curv_thresh = 2.0f;
+static int patch_flag = 0;
+char *outfile = nullptr;
 
-int
-main(int argc, char *argv[])
-{
-  char         **av, *in_fname, fname[STRLEN] ;
-  int          ac, nargs, nvertices, nfaces, nedges, eno, dno ;
-  MRI_SURFACE  *mris ;
+int main(int argc, char *argv[]) {
+  char **av, *in_fname, fname[STRLEN];
+  int ac, nargs, nvertices, nfaces, nedges, eno, dno;
+  MRI_SURFACE *mris;
 
   /* rkt: check for and handle version tag */
-  nargs = handle_version_option
-    (argc, argv,
-     "$Id: mris_euler_number.c,v 1.10 2013/01/14 22:39:14 greve Exp $",
-     "$Name:  $");
-  if (nargs && argc - nargs == 1)
-  {
-    exit (0);
+  nargs = handle_version_option(
+      argc, argv,
+      "$Id: mris_euler_number.c,v 1.10 2013/01/14 22:39:14 greve Exp $",
+      "$Name:  $");
+  if (nargs && argc - nargs == 1) {
+    exit(0);
   }
   argc -= nargs;
 
-  Progname = argv[0] ;
-  ErrorInit(NULL, NULL, NULL) ;
-  DiagInit(NULL, NULL, NULL) ;
+  Progname = argv[0];
+  ErrorInit(NULL, NULL, NULL);
+  DiagInit(nullptr, nullptr, nullptr);
 
-  ac = argc ;
-  av = argv ;
-  for ( ; argc > 1 && ISOPTION(*argv[1]) ; argc--, argv++)
-  {
-    nargs = get_option(argc, argv) ;
-    argc -= nargs ;
-    argv += nargs ;
+  ac = argc;
+  av = argv;
+  for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
+    nargs = get_option(argc, argv);
+    argc -= nargs;
+    argv += nargs;
   }
 
-  if (argc < 2)
-  {
-    usage_exit() ;
+  if (argc < 2) {
+    usage_exit();
   }
 
-  in_fname = argv[1] ;
+  in_fname = argv[1];
 
-  mris = MRISread(in_fname) ;
+  mris = MRISread(in_fname);
   if (!mris)
-    ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s",
-              Progname, in_fname) ;
-  eno = MRIScomputeEulerNumber(mris, &nvertices, &nfaces, &nedges) ;
+    ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s", Progname,
+              in_fname);
+  eno = MRIScomputeEulerNumber(mris, &nvertices, &nfaces, &nedges);
   fprintf(stderr, "euler # = v-e+f = 2g-2: %d - %d + %d = %d --> %d holes\n",
-          nvertices, nedges, nfaces, eno, 1-eno/2) ;
+          nvertices, nedges, nfaces, eno, 1 - eno / 2);
 
-  fprintf(stderr, "      F =2V-4:          %d %s= %d-4 (%d)\n",
-          nfaces, nfaces == 2*nvertices-4 ? "" : "!", 2*nvertices,
-          2*nvertices-4-nfaces) ;
-  fprintf(stderr, "      2E=3F:            %d %s= %d (%d)\n",
-          2*nedges, 2*nedges == 3*nfaces ? "" : "!", 3*nfaces,
-          2*nedges-3*nfaces) ;
+  fprintf(stderr, "      F =2V-4:          %d %s= %d-4 (%d)\n", nfaces,
+          nfaces == 2 * nvertices - 4 ? "" : "!", 2 * nvertices,
+          2 * nvertices - 4 - nfaces);
+  fprintf(stderr, "      2E=3F:            %d %s= %d (%d)\n", 2 * nedges,
+          2 * nedges == 3 * nfaces ? "" : "!", 3 * nfaces,
+          2 * nedges - 3 * nfaces);
 
-  dno = MRIStopologicalDefectIndex(mris) ;
-  fprintf(stderr, "\ntotal defect index = %d\n", dno) ;
-  if(outfile && !patch_flag){
+  dno = MRIStopologicalDefectIndex(mris);
+  fprintf(stderr, "\ntotal defect index = %d\n", dno);
+  if (outfile && !patch_flag) {
     // write out number of holes
     FILE *fp;
-    fp = fopen(outfile,"w");
-    fprintf(fp,"%5d\n",1-eno/2);
+    fp = fopen(outfile, "w");
+    fprintf(fp, "%5d\n", 1 - eno / 2);
     fclose(fp);
   }
 
-  if (patch_flag)
-  {
-    MRISremoveTopologicalDefects(mris, curv_thresh) ;
-    fprintf(stderr, "\nafter editing:\n") ;
+  if (patch_flag) {
+    MRISremoveTopologicalDefects(mris, curv_thresh);
+    fprintf(stderr, "\nafter editing:\n");
 
-    eno = MRIScomputeEulerNumber(mris, &nvertices, &nfaces, &nedges) ;
+    eno = MRIScomputeEulerNumber(mris, &nvertices, &nfaces, &nedges);
     fprintf(stderr, "euler # = v-e+f = 2g-2: %d - %d + %d = %d --> %d holes\n",
-            nvertices, nedges, nfaces, eno, 2-eno) ;
+            nvertices, nedges, nfaces, eno, 2 - eno);
 
-    fprintf(stderr, "      F =2V-4:          %d %s= %d-4 (%d)\n",
-            nfaces, nfaces == 2*nvertices-4 ? "" : "!", 2*nvertices,
-            2*nvertices-4-nfaces) ;
-    fprintf(stderr, "      2E=3F:            %d %s= %d (%d)\n",
-            2*nedges, 2*nedges == 3*nfaces ? "" : "!", 3*nfaces,
-            2*nedges-3*nfaces) ;
+    fprintf(stderr, "      F =2V-4:          %d %s= %d-4 (%d)\n", nfaces,
+            nfaces == 2 * nvertices - 4 ? "" : "!", 2 * nvertices,
+            2 * nvertices - 4 - nfaces);
+    fprintf(stderr, "      2E=3F:            %d %s= %d (%d)\n", 2 * nedges,
+            2 * nedges == 3 * nfaces ? "" : "!", 3 * nfaces,
+            2 * nedges - 3 * nfaces);
 
-    dno = MRIStopologicalDefectIndex(mris) ;
-    fprintf(stderr, "total defect index = %d\n", dno) ;
+    dno = MRIStopologicalDefectIndex(mris);
+    fprintf(stderr, "total defect index = %d\n", dno);
 
-    sprintf(fname, "%s.edit", in_fname) ;
-    fprintf(stderr, "writing out patched surface to %s\n", fname) ;
-    MRISwritePatch(mris, fname) ;
-    if(outfile){
+    sprintf(fname, "%s.edit", in_fname);
+    fprintf(stderr, "writing out patched surface to %s\n", fname);
+    MRISwritePatch(mris, fname);
+    if (outfile) {
       // write out number of holes
       FILE *fp;
-      fp = fopen(outfile,"w");
-      fprintf(fp,"%5d\n",2-eno);
+      fp = fopen(outfile, "w");
+      fprintf(fp, "%5d\n", 2 - eno);
       fclose(fp);
     }
   }
 
-
-  exit(0) ;
-  return(0) ;  /* for ansi */
+  exit(0);
+  return (0); /* for ansi */
 }
 
 /*----------------------------------------------------------------------
@@ -159,75 +151,59 @@ main(int argc, char *argv[])
 
            Description:
 ----------------------------------------------------------------------*/
-static int
-get_option(int argc, char *argv[])
-{
-  int  nargs = 0 ;
-  char *option ;
+static int get_option(int argc, char *argv[]) {
+  int nargs = 0;
+  char *option;
 
-  option = argv[1] + 1 ;            /* past '-' */
-  if (!stricmp(option, "-help")||!stricmp(option, "-usage"))
-  {
-    print_help() ;
-  }
-  else if (!stricmp(option, "-version"))
-  {
-    print_version() ;
-  }
-  else switch (toupper(*option))
-    {
+  option = argv[1] + 1; /* past '-' */
+  if (!stricmp(option, "-help") || !stricmp(option, "-usage")) {
+    print_help();
+  } else if (!stricmp(option, "-version")) {
+    print_version();
+  } else
+    switch (toupper(*option)) {
     case 'P':
-      patch_flag = 1 ;
-      break ;
+      patch_flag = 1;
+      break;
     case '?':
     case 'H':
     case 'U':
-      print_usage() ;
-      exit(1) ;
-      break ;
+      print_usage();
+      exit(1);
+      break;
     case 'T':
-      curv_thresh = (float)atof(argv[2]) ;
-      nargs = 1 ;
-      break ;
+      curv_thresh = (float)atof(argv[2]);
+      nargs = 1;
+      break;
     case 'O':
       outfile = argv[2];
-      nargs = 1 ;
-      break ;
+      nargs = 1;
+      break;
     default:
-      fprintf(stderr, "unknown option %s\n", argv[1]) ;
-      exit(1) ;
-      break ;
+      fprintf(stderr, "unknown option %s\n", argv[1]);
+      exit(1);
+      break;
     }
 
-  return(nargs) ;
+  return (nargs);
 }
 
-static void
-usage_exit(void)
-{
-  print_usage() ;
-  exit(1) ;
+static void usage_exit() {
+  print_usage();
+  exit(1);
 }
 
 #include "mris_euler_number.help.xml.h"
-static void
-print_usage(void)
-{
-  outputHelpXml(mris_euler_number_help_xml,
-                mris_euler_number_help_xml_len);
+static void print_usage() {
+  outputHelpXml(mris_euler_number_help_xml, mris_euler_number_help_xml_len);
 }
 
-static void
-print_help(void)
-{
-  print_usage() ;
-  exit(1) ;
+static void print_help() {
+  print_usage();
+  exit(1);
 }
 
-static void
-print_version(void)
-{
-  fprintf(stderr, "%s\n", vcid) ;
-  exit(1) ;
+static void print_version() {
+  fprintf(stderr, "%s\n", vcid);
+  exit(1);
 }
-

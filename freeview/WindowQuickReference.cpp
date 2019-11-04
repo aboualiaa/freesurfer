@@ -26,12 +26,10 @@
 #include <QFile>
 #include <QSettings>
 
-WindowQuickReference::WindowQuickReference(QWidget *parent) :
-  QWidget(parent),
-  ui(new Ui::WindowQuickReference)
-{
+WindowQuickReference::WindowQuickReference(QWidget *parent)
+    : QWidget(parent), ui(new Ui::WindowQuickReference) {
   ui->setupUi(this);
-  setWindowFlags( Qt::Tool );
+  setWindowFlags(Qt::Tool);
   QFile file(":/resource/QuickRef.html");
   file.open(QIODevice::ReadOnly | QIODevice::Text);
   QByteArray ba = file.readAll();
@@ -44,8 +42,7 @@ WindowQuickReference::WindowQuickReference(QWidget *parent) :
   restoreGeometry(settings.value("WindowQuickRef/Geometry").toByteArray());
 }
 
-WindowQuickReference::~WindowQuickReference()
-{
+WindowQuickReference::~WindowQuickReference() {
   QSettings settings;
   settings.setValue("WindowQuickRef/Geometry", this->saveGeometry());
   delete ui;

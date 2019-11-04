@@ -4,17 +4,11 @@
 
 #include <string>
 
-class gmpErr
-{
+class gmpErr {
 public:
-  gmpErr(std::string msg)
-  {
-    m_msg = msg;
-  }
-  std::string what() const
-  {
-    return m_msg;
-  }
+  gmpErr(std::string msg) { m_msg = msg; }
+  std::string what() const { return m_msg; }
+
 protected:
   std::string m_msg;
 };

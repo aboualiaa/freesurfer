@@ -26,13 +26,11 @@
 
 #include <QWidget>
 
-namespace Ui
-{
+namespace Ui {
 class ToolWindowROIEdit;
 }
 
-class ToolWindowROIEdit : public QWidget
-{
+class ToolWindowROIEdit : public QWidget {
   Q_OBJECT
 
 public:

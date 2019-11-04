@@ -28,29 +28,26 @@
 
 #include "Interactor2D.h"
 
-class Interactor2DNavigate : public Interactor2D
-{
+class Interactor2DNavigate : public Interactor2D {
   Q_OBJECT
 public:
-  Interactor2DNavigate( QObject* parent );
+  Interactor2DNavigate(QObject *parent);
 
-  // return true if to have parent Interactor2DPointSetEdit continue processing the event
-  // return false to stop event from further processing
-  virtual bool ProcessMouseDownEvent( QMouseEvent* event, RenderView* view );
-  virtual bool ProcessMouseUpEvent( QMouseEvent* event, RenderView* view );
-  virtual bool ProcessMouseMoveEvent( QMouseEvent* event, RenderView* view );
-  virtual bool ProcessKeyDownEvent( QKeyEvent* event, RenderView* view );
+  // return true if to have parent Interactor2DPointSetEdit continue processing
+  // the event return false to stop event from further processing
+  virtual bool ProcessMouseDownEvent(QMouseEvent *event, RenderView *view);
+  virtual bool ProcessMouseUpEvent(QMouseEvent *event, RenderView *view);
+  virtual bool ProcessMouseMoveEvent(QMouseEvent *event, RenderView *view);
+  virtual bool ProcessKeyDownEvent(QKeyEvent *event, RenderView *view);
 
 public slots:
   void SetCurrentLandmark(int n);
 
 protected:
-  void UpdateCursor( QEvent* event, QWidget* wnd );
+  void UpdateCursor(QEvent *event, QWidget *wnd);
 
   bool m_bEditing;
-  int  m_nCurrentLandmark;
+  int m_nCurrentLandmark;
 };
 
 #endif
-
-

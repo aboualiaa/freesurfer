@@ -17,68 +17,49 @@ class vtkProp;
 class RenderView3D;
 class LayerSurface;
 
-class SurfacePath : public QObject
-{
+class SurfacePath : public QObject {
   Q_OBJECT
 public:
-  SurfacePath( LayerSurface* owner );
+  SurfacePath(LayerSurface *owner);
   virtual ~SurfacePath();
 
-  bool AddPoint( double* pt );
+  bool AddPoint(double *pt);
 
-  bool AddPoint( int nvo );
+  bool AddPoint(int nvo);
 
-  bool RemovePoint( double* pt);
+  bool RemovePoint(double *pt);
 
-  bool RemovePoint( int nvo );
+  bool RemovePoint(int nvo);
 
   void Clear();
 
   QColor GetColor();
-  void SetColor( const QColor& color );
+  void SetColor(const QColor &color);
 
   void Update();
 
-  void AppendProps( vtkRenderer* renderer );
+  void AppendProps(vtkRenderer *renderer);
 
-  void Show( bool bShow = true );
+  void Show(bool bShow = true);
 
-  vtkActor* GetActor();
+  vtkActor *GetActor();
 
-  LayerSurface* GetSurface()
-  {
-    return m_mris;
-  }
+  LayerSurface *GetSurface() { return m_mris; }
 
-  bool IsPathMade()
-  {
-    return m_bPathMade;
-  }
+  bool IsPathMade() { return m_bPathMade; }
 
-  bool IsCutLineMade()
-  {
-    return m_bCutLineMade;
-  }
+  bool IsCutLineMade() { return m_bCutLineMade; }
 
   bool Contains(int nvo);
 
-  QVector<int> GetPathVerts()
-  {
-    return m_listVertices;
-  }
+  QVector<int> GetPathVerts() { return m_listVertices; }
 
-  void SetUndoVerts(const QVector<int>& verts)
-  {
-    m_undoVertices = verts;
-  }
+  void SetUndoVerts(const QVector<int> &verts) { m_undoVertices = verts; }
 
-  QVector<int> GetUndoVerts()
-  {
-    return m_undoVertices;
-  }
+  QVector<int> GetUndoVerts() { return m_undoVertices; }
 
 signals:
-  void ColorChanged( const QColor& );
+  void ColorChanged(const QColor &);
   void Progress(int n);
   void Updated();
   void CutLineMade();
@@ -92,19 +73,19 @@ public slots:
 
 private:
   void RebuildActor();
-  QVector<int> DoMakePath(const QVector<int>& verts);
+  QVector<int> DoMakePath(const QVector<int> &verts);
   void UpdatePoints();
 
-  vtkSmartPointer<vtkActor>   m_actorOutline;
-  vtkSmartPointer<vtkPoints>  m_points;
-  QVector<int>        m_listVertices;
-  QVector<int>        m_undoVertices;
-  bool  m_bPathMade;
-  bool  m_bCutLineMade;
-  bool  m_bClosed;
+  vtkSmartPointer<vtkActor> m_actorOutline;
+  vtkSmartPointer<vtkPoints> m_points;
+  QVector<int> m_listVertices;
+  QVector<int> m_undoVertices;
+  bool m_bPathMade;
+  bool m_bCutLineMade;
+  bool m_bClosed;
 
-  LayerSurface*   m_mris;
-  QColor      m_color;
+  LayerSurface *m_mris;
+  QColor m_color;
 };
 
 #endif // SURFACEPATH_H

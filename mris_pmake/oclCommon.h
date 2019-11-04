@@ -19,16 +19,15 @@
 #endif
 
 #ifdef __APPLE__
-    #include <OpenCL/cl.h>
+#include <OpenCL/cl.h>
 #else
-    #include <CL/cl.h>
+#include <CL/cl.h>
 #endif
-
 
 ///
 //  Macros
 //
-#define oclCheckError(a, b) oclCheckErrorFileLine(a, b, __FILE__ , __LINE__)
+#define oclCheckError(a, b) oclCheckErrorFileLine(a, b, __FILE__, __LINE__)
 
 ///
 //  Public Functions
@@ -41,14 +40,17 @@
 void oclPrintDevInfo(cl_device_id device);
 
 ///
-/// Loads a Program file and prepends the cPreamble to the code. (from the NVIDIA SDK)
+/// Loads a Program file and prepends the cPreamble to the code. (from the
+/// NVIDIA SDK)
 ///
 /// @return the source string if succeeded, 0 otherwise
 /// @param cFilename        program filename
-/// @param cPreamble        code that is prepended to the loaded file, typically a set of #defines or a header
+/// @param cPreamble        code that is prepended to the loaded file, typically
+/// a set of #defines or a header
 /// @param szFinalLength    returned length of the code string
 ///
-char* oclLoadProgSource(const char* cFilename, const char* cPreamble, size_t* szFinalLength);
+char *oclLoadProgSource(const char *cFilename, const char *cPreamble,
+                        size_t *szFinalLength);
 
 ///
 /// Gets the id of the nth device from the context (from the NVIDIA SDK)
@@ -84,7 +86,8 @@ cl_device_id oclGetMaxFlopsDev(cl_context cxGPUContext);
 /// @param file File name (filled in by macro)
 /// @param lineNumber Line number (filled in by macro)
 ///
-void oclCheckErrorFileLine(int errNum, int expected, const char* file, const int lineNumber);
+void oclCheckErrorFileLine(int errNum, int expected, const char *file,
+                           const int lineNumber);
 
 ///
 /// Round the local work size up to the next multiple of the size

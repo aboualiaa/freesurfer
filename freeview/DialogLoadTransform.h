@@ -7,8 +7,7 @@ namespace Ui {
 class DialogLoadTransform;
 }
 
-class DialogLoadTransform : public QDialog
-{
+class DialogLoadTransform : public QDialog {
   Q_OBJECT
 
 public:
@@ -26,7 +25,7 @@ public slots:
 private:
   Ui::DialogLoadTransform *ui;
 
-  QString     m_strLastDir;
+  QString m_strLastDir;
 };
 
 #endif // DIALOGLOADTRANSFORM_H

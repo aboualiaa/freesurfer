@@ -10,7 +10,8 @@ static char *gifti_history[] = {
     "history (of gifti library changes):\n"
     "\n",
     "0.0  18 July, 2007\n"
-    "     (Rick Reynolds of the National Institutes of Health, SSCC/DIRP/NIMH)\n"
+    "     (Rick Reynolds of the National Institutes of Health, "
+    "SSCC/DIRP/NIMH)\n"
     "     - initial version\n"
     "0.1  31 July, 2007\n",
     "     - changed dim0..dim5 to dims[]\n"
@@ -66,7 +67,8 @@ static char *gifti_history[] = {
     "     - many minor changes\n"
     "0.11 11 January, 2008:\n",
     "     - attribute/data setting functions are more flexible\n"
-    "     - added gifti_disp_dtd_url, gifti_set_DA_meta, gifti_valid_int_list,\n"
+    "     - added gifti_disp_dtd_url, gifti_set_DA_meta, "
+    "gifti_valid_int_list,\n"
     "       DA_data_exists, gifti_add_to_meta \n"
     "0.12 16 January, 2008:\n",
     "     - added gifti_copy_gifti_image() and gifti_convert_to_float()\n"
@@ -91,13 +93,15 @@ static char *gifti_history[] = {
     "     - NIFTI_INTENT_NONE is considered valid\n"
     "     - write LabelTables using CDATA\n"
     "0.17 28 March, 2008 : added copy MetaData routines\n",
-    "     - gifti_copy_gifti_meta, gifti_copy_DA_meta, gifti_copy_all_DA_meta,\n"
+    "     - gifti_copy_gifti_meta, gifti_copy_DA_meta, "
+    "gifti_copy_all_DA_meta,\n"
     "     - gifti_copy_DA_meta_many, gifti_copy_nvpairs\n"
     "0.18 08 May, 2008 : DataArray can now contain a list of CoordSystems\n",
     "     - modified giiDataArray struct: new numCS, coordsys is now CS**\n"
     "     - added gifti_free_CS_list, gifti_add_empty_CS\n"
     "\n"
-    "------------------------ initial release version -----------------------\n",
+    "------------------------ initial release version "
+    "-----------------------\n",
     "1.00 13 May, 2008 : release version of gifticlib\n",
     "     - allowed external data\n"
     "     - added gifti_read/write_extern_DA_data() and\n"
@@ -116,7 +120,8 @@ static char *gifti_history[] = {
     "     - compare_labeltable requires equality of RGBA values (no approx.)\n",
     "1.05 08 December, 2009: ignore invalid GIFTI attrs by default\n"
     "1.06 24 December, 2009: added approximate difference functions\n",
-    "     - added gifti_approx_gifti_images, DA_pair, labeltables, diff_offset\n"
+    "     - added gifti_approx_gifti_images, DA_pair, labeltables, "
+    "diff_offset\n"
     "     - added gifti_triangle_diff_offset\n"
     "     - gifti_compare_coordsys takes comp_data param\n"
     "1.07 04 March, 2010: minor changes (also see NITRC IDs 4619 and 4644)\n",
@@ -138,7 +143,8 @@ static char gifti_version[] = "gifti library version 1.09, 28 June, 2010";
 /*! global lists of XML strings */
 
 /*! this should match GIFTI_IND_ORD_* */
-char *gifti_index_order_list[] = {"Undefined", "RowMajorOrder", "ColumnMajorOrder"};
+char *gifti_index_order_list[] = {"Undefined", "RowMajorOrder",
+                                  "ColumnMajorOrder"};
 
 /*! gifti_type_list is an array of gifti_type_ele structs which list, for
     each type, the bytes per value, swapsize and corresponding name string
@@ -163,63 +169,67 @@ static gifti_type_ele gifti_type_list[] = {
     {NIFTI_TYPE_COMPLEX256, 32, 16, "NIFTI_TYPE_COMPLEX256"}};
 
 /*! this list provides a link between intent codes and their name strings */
-typedef struct
-{
+typedef struct {
   int code;
   char *name;
 } gifti_intent_ele;
-static gifti_intent_ele gifti_intent_list[] = {{NIFTI_INTENT_NONE, "NIFTI_INTENT_NONE"},
-                                               {NIFTI_INTENT_CORREL, "NIFTI_INTENT_CORREL"},
-                                               {NIFTI_INTENT_TTEST, "NIFTI_INTENT_TTEST"},
-                                               {NIFTI_INTENT_FTEST, "NIFTI_INTENT_FTEST"},
-                                               {NIFTI_INTENT_ZSCORE, "NIFTI_INTENT_ZSCORE"},
-                                               {NIFTI_INTENT_CHISQ, "NIFTI_INTENT_CHISQ"},
-                                               {NIFTI_INTENT_BETA, "NIFTI_INTENT_BETA"},
-                                               {NIFTI_INTENT_BINOM, "NIFTI_INTENT_BINOM"},
-                                               {NIFTI_INTENT_GAMMA, "NIFTI_INTENT_GAMMA"},
-                                               {NIFTI_INTENT_POISSON, "NIFTI_INTENT_POISSON"},
-                                               {NIFTI_INTENT_NORMAL, "NIFTI_INTENT_NORMAL"},
-                                               {NIFTI_INTENT_FTEST_NONC, "NIFTI_INTENT_FTEST_NONC"},
-                                               {NIFTI_INTENT_CHISQ_NONC, "NIFTI_INTENT_CHISQ_NONC"},
-                                               {NIFTI_INTENT_LOGISTIC, "NIFTI_INTENT_LOGISTIC"},
-                                               {NIFTI_INTENT_LAPLACE, "NIFTI_INTENT_LAPLACE"},
-                                               {NIFTI_INTENT_UNIFORM, "NIFTI_INTENT_UNIFORM"},
-                                               {NIFTI_INTENT_TTEST_NONC, "NIFTI_INTENT_TTEST_NONC"},
-                                               {NIFTI_INTENT_WEIBULL, "NIFTI_INTENT_WEIBULL"},
-                                               {NIFTI_INTENT_CHI, "NIFTI_INTENT_CHI"},
-                                               {NIFTI_INTENT_INVGAUSS, "NIFTI_INTENT_INVGAUSS"},
-                                               {NIFTI_INTENT_EXTVAL, "NIFTI_INTENT_EXTVAL"},
-                                               {NIFTI_INTENT_PVAL, "NIFTI_INTENT_PVAL"},
-                                               {NIFTI_INTENT_LOGPVAL, "NIFTI_INTENT_LOGPVAL"},
-                                               {NIFTI_INTENT_LOG10PVAL, "NIFTI_INTENT_LOG10PVAL"},
-                                               {NIFTI_INTENT_ESTIMATE, "NIFTI_INTENT_ESTIMATE"},
-                                               {NIFTI_INTENT_LABEL, "NIFTI_INTENT_LABEL"},
-                                               {NIFTI_INTENT_NEURONAME, "NIFTI_INTENT_NEURONAME"},
-                                               {NIFTI_INTENT_GENMATRIX, "NIFTI_INTENT_GENMATRIX"},
-                                               {NIFTI_INTENT_SYMMATRIX, "NIFTI_INTENT_SYMMATRIX"},
-                                               {NIFTI_INTENT_DISPVECT, "NIFTI_INTENT_DISPVECT"},
-                                               {NIFTI_INTENT_VECTOR, "NIFTI_INTENT_VECTOR"},
-                                               {NIFTI_INTENT_POINTSET, "NIFTI_INTENT_POINTSET"},
-                                               {NIFTI_INTENT_TRIANGLE, "NIFTI_INTENT_TRIANGLE"},
-                                               {NIFTI_INTENT_QUATERNION, "NIFTI_INTENT_QUATERNION"},
-                                               {NIFTI_INTENT_DIMLESS, "NIFTI_INTENT_DIMLESS"},
-                                               {NIFTI_INTENT_TIME_SERIES, "NIFTI_INTENT_TIME_SERIES"},
-                                               {NIFTI_INTENT_NODE_INDEX, "NIFTI_INTENT_NODE_INDEX"},
-                                               {NIFTI_INTENT_RGB_VECTOR, "NIFTI_INTENT_RGB_VECTOR"},
-                                               {NIFTI_INTENT_RGBA_VECTOR, "NIFTI_INTENT_RGBA_VECTOR"},
-                                               {NIFTI_INTENT_SHAPE, "NIFTI_INTENT_SHAPE"}};
+static gifti_intent_ele gifti_intent_list[] = {
+    {NIFTI_INTENT_NONE, "NIFTI_INTENT_NONE"},
+    {NIFTI_INTENT_CORREL, "NIFTI_INTENT_CORREL"},
+    {NIFTI_INTENT_TTEST, "NIFTI_INTENT_TTEST"},
+    {NIFTI_INTENT_FTEST, "NIFTI_INTENT_FTEST"},
+    {NIFTI_INTENT_ZSCORE, "NIFTI_INTENT_ZSCORE"},
+    {NIFTI_INTENT_CHISQ, "NIFTI_INTENT_CHISQ"},
+    {NIFTI_INTENT_BETA, "NIFTI_INTENT_BETA"},
+    {NIFTI_INTENT_BINOM, "NIFTI_INTENT_BINOM"},
+    {NIFTI_INTENT_GAMMA, "NIFTI_INTENT_GAMMA"},
+    {NIFTI_INTENT_POISSON, "NIFTI_INTENT_POISSON"},
+    {NIFTI_INTENT_NORMAL, "NIFTI_INTENT_NORMAL"},
+    {NIFTI_INTENT_FTEST_NONC, "NIFTI_INTENT_FTEST_NONC"},
+    {NIFTI_INTENT_CHISQ_NONC, "NIFTI_INTENT_CHISQ_NONC"},
+    {NIFTI_INTENT_LOGISTIC, "NIFTI_INTENT_LOGISTIC"},
+    {NIFTI_INTENT_LAPLACE, "NIFTI_INTENT_LAPLACE"},
+    {NIFTI_INTENT_UNIFORM, "NIFTI_INTENT_UNIFORM"},
+    {NIFTI_INTENT_TTEST_NONC, "NIFTI_INTENT_TTEST_NONC"},
+    {NIFTI_INTENT_WEIBULL, "NIFTI_INTENT_WEIBULL"},
+    {NIFTI_INTENT_CHI, "NIFTI_INTENT_CHI"},
+    {NIFTI_INTENT_INVGAUSS, "NIFTI_INTENT_INVGAUSS"},
+    {NIFTI_INTENT_EXTVAL, "NIFTI_INTENT_EXTVAL"},
+    {NIFTI_INTENT_PVAL, "NIFTI_INTENT_PVAL"},
+    {NIFTI_INTENT_LOGPVAL, "NIFTI_INTENT_LOGPVAL"},
+    {NIFTI_INTENT_LOG10PVAL, "NIFTI_INTENT_LOG10PVAL"},
+    {NIFTI_INTENT_ESTIMATE, "NIFTI_INTENT_ESTIMATE"},
+    {NIFTI_INTENT_LABEL, "NIFTI_INTENT_LABEL"},
+    {NIFTI_INTENT_NEURONAME, "NIFTI_INTENT_NEURONAME"},
+    {NIFTI_INTENT_GENMATRIX, "NIFTI_INTENT_GENMATRIX"},
+    {NIFTI_INTENT_SYMMATRIX, "NIFTI_INTENT_SYMMATRIX"},
+    {NIFTI_INTENT_DISPVECT, "NIFTI_INTENT_DISPVECT"},
+    {NIFTI_INTENT_VECTOR, "NIFTI_INTENT_VECTOR"},
+    {NIFTI_INTENT_POINTSET, "NIFTI_INTENT_POINTSET"},
+    {NIFTI_INTENT_TRIANGLE, "NIFTI_INTENT_TRIANGLE"},
+    {NIFTI_INTENT_QUATERNION, "NIFTI_INTENT_QUATERNION"},
+    {NIFTI_INTENT_DIMLESS, "NIFTI_INTENT_DIMLESS"},
+    {NIFTI_INTENT_TIME_SERIES, "NIFTI_INTENT_TIME_SERIES"},
+    {NIFTI_INTENT_NODE_INDEX, "NIFTI_INTENT_NODE_INDEX"},
+    {NIFTI_INTENT_RGB_VECTOR, "NIFTI_INTENT_RGB_VECTOR"},
+    {NIFTI_INTENT_RGBA_VECTOR, "NIFTI_INTENT_RGBA_VECTOR"},
+    {NIFTI_INTENT_SHAPE, "NIFTI_INTENT_SHAPE"}};
 
 /*! this should match GIFTI_ENCODING_* */
-char *gifti_encoding_list[] = {"Undefined", "ASCII", "Base64Binary", "GZipBase64Binary", "ExternalFileBinary"};
+char *gifti_encoding_list[] = {"Undefined", "ASCII", "Base64Binary",
+                               "GZipBase64Binary", "ExternalFileBinary"};
 
 /*! this should match GIFTI_ENDIAN_* */
 char *gifti_endian_list[] = {"Undefined", "BigEndian", "LittleEndian"};
 
 /* ---------------------------------------------------------------------- */
 /* local prototypes */
-static int can_compare_DA_data(const giiDataArray *d1, const giiDataArray *d2, int verb);
-static int compare_labeltables(const giiLabelTable *t1, const giiLabelTable *t2, int verb, int approx);
-static int copy_data_as_float(void *dest, int dtype, void *src, int stype, long long nvals);
+static int can_compare_DA_data(const giiDataArray *d1, const giiDataArray *d2,
+                               int verb);
+static int compare_labeltables(const giiLabelTable *t1, const giiLabelTable *t2,
+                               int verb, int approx);
+static int copy_data_as_float(void *dest, int dtype, void *src, int stype,
+                              long long nvals);
 static int DA_data_exists(gifti_image *gim, const int *dalist, int len);
 static int str2list_index(char *list[], int max, const char *str);
 
@@ -233,8 +243,7 @@ static gifti_globals G = {1};
 /*! user variable accessor functions - basically use gxml interface       */
 
 int gifti_get_verb(void) { return G.verb; }
-int gifti_set_verb(int level)
-{
+int gifti_set_verb(int level) {
   G.verb = level;
   return 1;
 }
@@ -245,11 +254,11 @@ int gifti_set_b64_check(int level) { return gxml_set_b64_check(level); }
 int gifti_get_update_ok(void) { return gxml_get_update_ok(); }
 int gifti_set_update_ok(int level) { return gxml_set_update_ok(level); }
 int gifti_get_zlevel(void) { return gxml_get_zlevel(); }
-int gifti_set_zlevel(int level)
-{
+int gifti_set_zlevel(int level) {
   /* note that the default currently results in 6 */
   if (level != GZ_DEFAULT_COMPRESSION && (level < 0 || level > 9)) {
-    fprintf(stderr, "** invalid zlevel, must be %d (default) or {0..9}\n", GZ_DEFAULT_COMPRESSION);
+    fprintf(stderr, "** invalid zlevel, must be %d (default) or {0..9}\n",
+            GZ_DEFAULT_COMPRESSION);
     return 1;
   }
   return gxml_set_zlevel(level);
@@ -259,8 +268,7 @@ int gifti_get_xml_buf_size(void) { return gxml_get_buf_size(); }
 int gifti_set_xml_buf_size(int buf_size) { return gxml_set_buf_size(buf_size); }
 
 /*! reset user variables to their defaults(via set to -1) */
-int gifti_reset_user_vars(void)
-{
+int gifti_reset_user_vars(void) {
   gxml_set_verb(-1);
   gxml_set_dstore(-1);
   gxml_set_indent(-1);
@@ -283,34 +291,36 @@ int gifti_reset_user_vars(void)
  *! apply the attr=value GIFTI attribute to the gifti_image
  *
  *  return 0 on success
-*/ /*-------------------------------------------------------------------*/
-int gifti_str2attr_gifti(gifti_image *gim, const char *attr, const char *val)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_str2attr_gifti(gifti_image *gim, const char *attr, const char *val) {
   if (!gim || !attr || !val) {
-    fprintf(stderr, "** GS2AG: bad params (%p,%p,%p)\n", (void *)gim, (void *)attr, (void *)val);
+    fprintf(stderr, "** GS2AG: bad params (%p,%p,%p)\n", (void *)gim,
+            (void *)attr, (void *)val);
     return 1;
   }
 
-  if (G.verb > 2) fprintf(stderr, "++ setting GIFTI attr '%s' from '%s'\n", attr, val);
+  if (G.verb > 2)
+    fprintf(stderr, "++ setting GIFTI attr '%s' from '%s'\n", attr, val);
 
   if (!strcmp(attr, "Version")) {
-    if (gim->version) free(gim->version); /* lose any old copy */
+    if (gim->version)
+      free(gim->version); /* lose any old copy */
     gim->version = gifti_strdup(val);
-  }
-  else if (!strcmp(attr, "NumberOfDataArrays")) {
+  } else if (!strcmp(attr, "NumberOfDataArrays")) {
     gim->numDA = atol(val);
     if (gim->numDA < 0) {
       fprintf(stderr, "** invalid NumberOfDataArrays attribute: %s\n", val);
       gim->numDA = 0;
       return 1;
     }
-  }
-  else if (!strcmp(attr, "xmlns:xsi") || !strcmp(attr, "xsi:noNamespaceSchemaLocation")) {
-    if (G.verb > 1) fprintf(stderr, "-- have GIFTI attr, '%s'='%s'\n", attr, val);
+  } else if (!strcmp(attr, "xmlns:xsi") ||
+             !strcmp(attr, "xsi:noNamespaceSchemaLocation")) {
+    if (G.verb > 1)
+      fprintf(stderr, "-- have GIFTI attr, '%s'='%s'\n", attr, val);
     return 1;
-  }
-  else {
-    if (G.verb > 1) fprintf(stderr, "** unknown GIFTI attrib, '%s'='%s'\n", attr, val);
+  } else {
+    if (G.verb > 1)
+      fprintf(stderr, "** unknown GIFTI attrib, '%s'='%s'\n", attr, val);
     return 1;
   }
 
@@ -326,9 +336,8 @@ int gifti_str2attr_gifti(gifti_image *gim, const char *attr, const char *val)
  *
  *  return an allocated gifti_image struct on success,
  *         NULL on error
-*/ /*-------------------------------------------------------------------*/
-gifti_image *gifti_read_image(const char *fname, int read_data)
-{
+ */ /*-------------------------------------------------------------------*/
+gifti_image *gifti_read_image(const char *fname, int read_data) {
   if (!fname) {
     fprintf(stderr, "** gifti_read_image: missing filename\n");
     return NULL;
@@ -352,9 +361,9 @@ gifti_image *gifti_read_image(const char *fname, int read_data)
  *
  *  return an allocated gifti_image struct on success,
  *         NULL on error
-*/ /*-------------------------------------------------------------------*/
-gifti_image *gifti_read_da_list(const char *fname, int read_data, const int *dalist, int len)
-{
+ */ /*-------------------------------------------------------------------*/
+gifti_image *gifti_read_da_list(const char *fname, int read_data,
+                                const int *dalist, int len) {
   if (!fname) {
     fprintf(stderr, "** gifti_read_da_list: missing filename\n");
     return NULL;
@@ -372,21 +381,20 @@ gifti_image *gifti_read_da_list(const char *fname, int read_data, const int *dal
  *
  *  return 0 on success
  *         1 on error
-*/ /*-------------------------------------------------------------------*/
-int gifti_write_image(gifti_image *gim, const char *fname, int write_data)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_write_image(gifti_image *gim, const char *fname, int write_data) {
   int errs = 0;
 
   if (!gim) {
     fprintf(stderr, "** gifti_write_image, missing gifti_image\n");
     errs++;
-  }
-  else if (!fname) {
+  } else if (!fname) {
     fprintf(stderr, "** gifti_write_image: missing filename\n");
     errs++;
   }
 
-  if (errs) return 1;
+  if (errs)
+    return 1;
 
   gxml_set_verb(G.verb);
 
@@ -399,15 +407,16 @@ int gifti_write_image(gifti_image *gim, const char *fname, int write_data)
  *  passing NULL (to this and any child function) should be okay
  *
  *  the pointer is garbage after this call
-*/ /*-------------------------------------------------------------------*/
-int gifti_free_image(gifti_image *gim)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_free_image(gifti_image *gim) {
   if (!gim) {
-    if (G.verb > 2) fprintf(stderr, "** free gifti_image w/NULL pointer\n");
+    if (G.verb > 2)
+      fprintf(stderr, "** free gifti_image w/NULL pointer\n");
     return 1;
   }
 
-  if (G.verb > 2) fprintf(stderr, "-- freeing gifti_image\n");
+  if (G.verb > 2)
+    fprintf(stderr, "-- freeing gifti_image\n");
 
   if (gim->version) {
     free(gim->version);
@@ -427,15 +436,16 @@ int gifti_free_image(gifti_image *gim)
  *! free the contents of the gifti_image struct (but not the pointer)
  *
  *  the pointer is garbage after this call
-*/ /*-------------------------------------------------------------------*/
-int gifti_free_image_contents(gifti_image *gim)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_free_image_contents(gifti_image *gim) {
   if (!gim) {
-    if (G.verb > 2) fprintf(stderr, "** GFIC: free w/NULL gifti_image ptr\n");
+    if (G.verb > 2)
+      fprintf(stderr, "** GFIC: free w/NULL gifti_image ptr\n");
     return 1;
   }
 
-  if (G.verb > 2) fprintf(stderr, "-- freeing gifti_image contents\n");
+  if (G.verb > 2)
+    fprintf(stderr, "-- freeing gifti_image contents\n");
 
   if (gim->version) {
     free(gim->version);
@@ -454,22 +464,25 @@ int gifti_free_image_contents(gifti_image *gim)
  *! free the contents of the nvpairs struct (but not the pointer)
  *
  *  passing NULL is okay
-*/ /*-------------------------------------------------------------------*/
-int gifti_free_nvpairs(nvpairs *p)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_free_nvpairs(nvpairs *p) {
   int c;
 
   if (!p) {
-    if (G.verb > 3) fprintf(stderr, "** free w/NULL nvpairs ptr\n");
+    if (G.verb > 3)
+      fprintf(stderr, "** free w/NULL nvpairs ptr\n");
     return 1;
   }
 
-  if (G.verb > 3) fprintf(stderr, "-- freeing %d nvpairs\n", p->length);
+  if (G.verb > 3)
+    fprintf(stderr, "-- freeing %d nvpairs\n", p->length);
 
   if (p->name && p->value) {
     for (c = 0; c < p->length; c++) {
-      if (p->name[c]) free(p->name[c]);
-      if (p->value[c]) free(p->value[c]);
+      if (p->name[c])
+        free(p->name[c]);
+      if (p->value[c])
+        free(p->value[c]);
     }
     free(p->name);
     free(p->value);
@@ -485,21 +498,23 @@ int gifti_free_nvpairs(nvpairs *p)
  *! free the contents of the LabelTable struct (but not the pointer)
  *
  *  passing NULL is okay
-*/ /*-------------------------------------------------------------------*/
-int gifti_free_LabelTable(giiLabelTable *T)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_free_LabelTable(giiLabelTable *T) {
   int c;
 
   if (!T) {
-    if (G.verb > 3) fprintf(stderr, "** free w/NULL giiLabelTable ptr\n");
+    if (G.verb > 3)
+      fprintf(stderr, "** free w/NULL giiLabelTable ptr\n");
     return 1;
   }
 
-  if (G.verb > 3) fprintf(stderr, "-- freeing %d giiLabelTable entries\n", T->length);
+  if (G.verb > 3)
+    fprintf(stderr, "-- freeing %d giiLabelTable entries\n", T->length);
 
   if (T->key && T->label) {
     for (c = 0; c < T->length; c++)
-      if (T->label[c]) free(T->label[c]);
+      if (T->label[c])
+        free(T->label[c]);
     free(T->key);
     free(T->label);
     T->key = NULL;
@@ -522,22 +537,25 @@ int gifti_free_LabelTable(giiLabelTable *T)
  *  the darray list pointer is garbage after this call
  *
  *  passing NULL is okay
-*/ /*-------------------------------------------------------------------*/
-int gifti_free_DataArray_list(giiDataArray **darray, int numDA)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_free_DataArray_list(giiDataArray **darray, int numDA) {
   int c;
 
   if (!darray) {
-    if (G.verb > 3) fprintf(stderr, "** GFDA: free NULL darray list\n");
+    if (G.verb > 3)
+      fprintf(stderr, "** GFDA: free NULL darray list\n");
     return 1;
   }
 
-  if (G.verb > 3) fprintf(stderr, "-- freeing %d giiDataArrays\n", numDA);
+  if (G.verb > 3)
+    fprintf(stderr, "-- freeing %d giiDataArrays\n", numDA);
 
-  if (numDA < 0) return 1;
+  if (numDA < 0)
+    return 1;
 
   for (c = 0; c < numDA; c++)
-    if (gifti_free_DataArray(darray[c])) return 1;
+    if (gifti_free_DataArray(darray[c]))
+      return 1;
 
   free(darray);
 
@@ -550,15 +568,16 @@ int gifti_free_DataArray_list(giiDataArray **darray, int numDA)
  *  the DataArray pointer is garbage after this call
  *
  *  passing NULL is okay
-*/ /*-------------------------------------------------------------------*/
-int gifti_free_DataArray(giiDataArray *darray)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_free_DataArray(giiDataArray *darray) {
   if (!darray) {
-    if (G.verb > 3) fprintf(stderr, "** tried to free NULL darray ptr\n");
+    if (G.verb > 3)
+      fprintf(stderr, "** tried to free NULL darray ptr\n");
     return 1;
   }
 
-  if (G.verb > 3) fprintf(stderr, "-- freeing giiDataArray\n");
+  if (G.verb > 3)
+    fprintf(stderr, "-- freeing giiDataArray\n");
 
   if (darray->ext_fname) {
     free(darray->ext_fname);
@@ -580,17 +599,19 @@ int gifti_free_DataArray(giiDataArray *darray)
 /*----------------------------------------------------------------------
  *! free the CoordSystem array from a DataArray
  *  passing NULL is okay
-*/ /*-------------------------------------------------------------------*/
-int gifti_free_CS_list(giiDataArray *da)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_free_CS_list(giiDataArray *da) {
   int c;
 
-  if (!da) return 0;
+  if (!da)
+    return 0;
 
-  if (G.verb > 3) fprintf(stderr, "-- freeing giiCoordSystem list\n");
+  if (G.verb > 3)
+    fprintf(stderr, "-- freeing giiCoordSystem list\n");
 
   if (da->coordsys && da->numCS > 0) {
-    for (c = 0; c < da->numCS; c++) gifti_free_CoordSystem(da->coordsys[c]);
+    for (c = 0; c < da->numCS; c++)
+      gifti_free_CoordSystem(da->coordsys[c]);
     free(da->coordsys);
   }
 
@@ -606,12 +627,13 @@ int gifti_free_CS_list(giiDataArray *da)
  *  the CoordSystem pointer is garbage after this call
  *
  *  passing NULL is okay
-*/ /*-------------------------------------------------------------------*/
-int gifti_free_CoordSystem(giiCoordSystem *cs)
-{
-  if (!cs) return 0;
+ */ /*-------------------------------------------------------------------*/
+int gifti_free_CoordSystem(giiCoordSystem *cs) {
+  if (!cs)
+    return 0;
 
-  if (G.verb > 3) fprintf(stderr, "-- freeing giiCoordSystem\n");
+  if (G.verb > 3)
+    fprintf(stderr, "-- freeing giiCoordSystem\n");
 
   if (cs->dataspace) {
     free(cs->dataspace);
@@ -636,13 +658,15 @@ int gifti_free_CoordSystem(giiCoordSystem *cs)
  *
  *  if add_to_extras, add any bad attribute pairs to ex_atrs
  *  else              whine about any bad ones and return
-*/ /*-------------------------------------------------------------------*/
-int gifti_set_DA_atrs(giiDataArray *da, const char **attr, int alen, int add_to_extras)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_set_DA_atrs(giiDataArray *da, const char **attr, int alen,
+                      int add_to_extras) {
   int c, length = alen;
 
   if (!da || !attr) {
-    if (G.verb > 1) fprintf(stderr, "** G_IDFA: bad params (%p,%p)\n", (void *)da, (void *)attr);
+    if (G.verb > 1)
+      fprintf(stderr, "** G_IDFA: bad params (%p,%p)\n", (void *)da,
+              (void *)attr);
     return 1;
   }
 
@@ -651,17 +675,21 @@ int gifti_set_DA_atrs(giiDataArray *da, const char **attr, int alen, int add_to_
     for (length = 0; attr[length]; length++) /* nada */
       ;
 
-  if (G.verb > 5) fprintf(stderr, "++ init darray attrs, len %d, ex_atrs = %d\n", length, add_to_extras);
+  if (G.verb > 5)
+    fprintf(stderr, "++ init darray attrs, len %d, ex_atrs = %d\n", length,
+            add_to_extras);
 
   /* insert attributes - if unknown, store with extras */
   for (c = 0; c < length; c += 2)
     if (gifti_str2attr_darray(da, attr[c], attr[c + 1])) {
       /* a bad name=value pair, maybe add to ex_atrs */
       if (add_to_extras) {
-        if (gifti_add_to_nvpairs(&da->ex_atrs, attr[c], attr[c + 1])) return 1;
-      }
-      else {
-        if (G.verb > 0) fprintf(stderr, "** set_darray_atrs, bad pair '%s'='%s'\n", attr[c], attr[c + 1]);
+        if (gifti_add_to_nvpairs(&da->ex_atrs, attr[c], attr[c + 1]))
+          return 1;
+      } else {
+        if (G.verb > 0)
+          fprintf(stderr, "** set_darray_atrs, bad pair '%s'='%s'\n", attr[c],
+                  attr[c + 1]);
         return 1;
       }
     }
@@ -681,18 +709,19 @@ int gifti_set_DA_atrs(giiDataArray *da, const char **attr, int alen, int add_to_
  *
  *  return 1, if valid
  *         0, if not
-*/ /*-------------------------------------------------------------------*/
-int gifti_valid_DataArray(const giiDataArray *da, int whine)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_valid_DataArray(const giiDataArray *da, int whine) {
   int errs = 0, nbyper;
 
   if (!da) {
-    if (whine || G.verb > 2) fprintf(stderr, "** invalid darray pointer\n");
+    if (whine || G.verb > 2)
+      fprintf(stderr, "** invalid darray pointer\n");
     return 0;
   }
 
   if (!gifti_intent_is_valid(da->intent)) {
-    if (whine || G.verb > 3) fprintf(stderr, "** invalid darray intent code = %d\n", da->intent);
+    if (whine || G.verb > 3)
+      fprintf(stderr, "** invalid darray intent code = %d\n", da->intent);
     errs++;
   }
 
@@ -702,7 +731,8 @@ int gifti_valid_DataArray(const giiDataArray *da, int whine)
   /* no checks for ext_fname and ext_offset (until reading) */
 
   if (da->ind_ord <= GIFTI_IND_ORD_UNDEF || da->ind_ord > GIFTI_IND_ORD_MAX) {
-    if (whine || G.verb > 3) fprintf(stderr, "** invalid darray ind_ord = %d\n", da->ind_ord);
+    if (whine || G.verb > 3)
+      fprintf(stderr, "** invalid darray ind_ord = %d\n", da->ind_ord);
     errs++;
   }
 
@@ -712,13 +742,16 @@ int gifti_valid_DataArray(const giiDataArray *da, int whine)
   if (!gifti_valid_dims(da, whine)) /* message printed */
     errs++;
 
-  if (da->encoding <= GIFTI_ENCODING_UNDEF || da->encoding > GIFTI_ENCODING_MAX) {
-    if (whine || G.verb > 3) fprintf(stderr, "** invalid darray encoding = %d\n", da->encoding);
+  if (da->encoding <= GIFTI_ENCODING_UNDEF ||
+      da->encoding > GIFTI_ENCODING_MAX) {
+    if (whine || G.verb > 3)
+      fprintf(stderr, "** invalid darray encoding = %d\n", da->encoding);
     errs++;
   }
 
   if (da->endian <= GIFTI_ENDIAN_UNDEF || da->endian > GIFTI_ENDIAN_MAX) {
-    if (whine || G.verb > 3) fprintf(stderr, "** invalid darray endian = %d\n", da->endian);
+    if (whine || G.verb > 3)
+      fprintf(stderr, "** invalid darray endian = %d\n", da->endian);
     errs++;
   }
 
@@ -727,61 +760,71 @@ int gifti_valid_DataArray(const giiDataArray *da, int whine)
     errs++;
 
   if (da->nvals <= 0) {
-    if (whine || G.verb > 3) fprintf(stderr, "** invalid darray nvals = %u\n", (unsigned)da->nvals);
+    if (whine || G.verb > 3)
+      fprintf(stderr, "** invalid darray nvals = %u\n", (unsigned)da->nvals);
     errs++;
   }
 
-  if (!gifti_valid_nbyper(da->nbyper, whine)) errs++;
-  if (!gifti_valid_nvpairs(&da->ex_atrs, whine)) errs++;
+  if (!gifti_valid_nbyper(da->nbyper, whine))
+    errs++;
+  if (!gifti_valid_nvpairs(&da->ex_atrs, whine))
+    errs++;
 
   /* compare nbyper to what is expected for type */
   errs += gifti_datatype_sizes(da->datatype, &nbyper, NULL);
   if (gifti_valid_nbyper(nbyper, 0) && nbyper != da->nbyper) {
     if (whine || G.verb > 3)
-      fprintf(stderr, "** nbyper %d, does not match type %s\n", nbyper, gifti_datatype2str(da->datatype));
+      fprintf(stderr, "** nbyper %d, does not match type %s\n", nbyper,
+              gifti_datatype2str(da->datatype));
     errs++;
   }
 
-  if (errs) return 0;
+  if (errs)
+    return 0;
 
   return 1;
 }
 
 /*----------------------------------------------------------------------
  *! check whether pointers are valid and consistent with length
-*/ /*-------------------------------------------------------------------*/
-int gifti_valid_nvpairs(const nvpairs *nvp, int whine)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_valid_nvpairs(const nvpairs *nvp, int whine) {
   int c;
 
   if (!nvp) {
-    if (G.verb > 3 || whine) fprintf(stderr, "** invalid nvpairs pointer\n");
+    if (G.verb > 3 || whine)
+      fprintf(stderr, "** invalid nvpairs pointer\n");
     return 0;
   }
 
   if (nvp->length < 0) {
-    if (G.verb > 3 || whine) fprintf(stderr, "** invalid nvpair length = %d\n", nvp->length);
+    if (G.verb > 3 || whine)
+      fprintf(stderr, "** invalid nvpair length = %d\n", nvp->length);
     return 0;
   }
 
-  if (nvp->length == 0) return 1; /* quick case: valid */
+  if (nvp->length == 0)
+    return 1; /* quick case: valid */
 
   if (!nvp->name || !nvp->value) {
     if (G.verb > 3 || whine)
-      fprintf(stderr, "** invalid nvpair name, value lists = %p, %p\n", (void *)nvp->name, (void *)nvp->value);
+      fprintf(stderr, "** invalid nvpair name, value lists = %p, %p\n",
+              (void *)nvp->name, (void *)nvp->value);
     return 0;
   }
 
   /* quit on first error */
   for (c = 0; c < nvp->length; c++) {
     if (!nvp->name[c]) {
-      if (G.verb > 5 || whine) fprintf(stderr, "** invalid nvpair, missing name @ %d\n", c);
+      if (G.verb > 5 || whine)
+        fprintf(stderr, "** invalid nvpair, missing name @ %d\n", c);
       return 0;
     }
 
     /* value string is not required   25 Feb 2008 */
     if (!nvp->value[c] && G.verb > 3)
-      fprintf(stderr, "-- missing nvpair value[%d], name %s (is OK)\n", c, nvp->name[c]);
+      fprintf(stderr, "-- missing nvpair value[%d], name %s (is OK)\n", c,
+              nvp->name[c]);
   }
 
   return 1;
@@ -791,27 +834,30 @@ int gifti_valid_nvpairs(const nvpairs *nvp, int whine)
  *! check whether pointers are valid and consistent with length
  *
  *  no check is done on the actual indices or labels
-*/ /*-------------------------------------------------------------------*/
-int gifti_valid_LabelTable(const giiLabelTable *T, int whine)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_valid_LabelTable(const giiLabelTable *T, int whine) {
   float *rgba;
   int c, c2;
 
   if (!T) {
-    if (G.verb > 2 || whine) fprintf(stderr, "** invalid LabelTable pointer\n");
+    if (G.verb > 2 || whine)
+      fprintf(stderr, "** invalid LabelTable pointer\n");
     return 0;
   }
 
   if (T->length < 0) {
-    if (G.verb > 3 || whine) fprintf(stderr, "** invalid LabelTable length = %d\n", T->length);
+    if (G.verb > 3 || whine)
+      fprintf(stderr, "** invalid LabelTable length = %d\n", T->length);
     return 0;
   }
 
-  if (T->length == 0) return 1; /* quick case: valid */
+  if (T->length == 0)
+    return 1; /* quick case: valid */
 
   if (!T->key || !T->label) {
     if (G.verb > 3 || whine)
-      fprintf(stderr, "** invalid nvpair key, label = %p, %p\n", (void *)T->key, (void *)T->label);
+      fprintf(stderr, "** invalid nvpair key, label = %p, %p\n", (void *)T->key,
+              (void *)T->label);
     return 0;
   }
 
@@ -819,7 +865,8 @@ int gifti_valid_LabelTable(const giiLabelTable *T, int whine)
   rgba = T->rgba;
   for (c = 0; c < T->length; c++) {
     if (!T->label[c]) {
-      if (G.verb > 3 || whine) fprintf(stderr, "** invalid nvpair label[%d]\n", c);
+      if (G.verb > 3 || whine)
+        fprintf(stderr, "** invalid nvpair label[%d]\n", c);
       return 0;
     }
     if (rgba) {
@@ -841,11 +888,11 @@ int gifti_valid_LabelTable(const giiLabelTable *T, int whine)
 
 /*----------------------------------------------------------------------
  *! check the bounds on num_dim
-*/ /*-------------------------------------------------------------------*/
-int gifti_valid_num_dim(int num_dim, int whine)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_valid_num_dim(int num_dim, int whine) {
   if (num_dim <= 0 || num_dim > GIFTI_DARRAY_DIM_LEN) {
-    if (G.verb > 3 || whine) fprintf(stderr, "** invalid num_dim = %d\n", num_dim);
+    if (G.verb > 3 || whine)
+      fprintf(stderr, "** invalid num_dim = %d\n", num_dim);
     return 0;
   }
   return 1;
@@ -853,60 +900,64 @@ int gifti_valid_num_dim(int num_dim, int whine)
 
 /*----------------------------------------------------------------------
  *! check that the datatype is in the list
-*/ /*-------------------------------------------------------------------*/
-int gifti_valid_datatype(int dtype, int whine)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_valid_datatype(int dtype, int whine) {
   int c;
 
   /* check for valid */
   for (c = sizeof(gifti_type_list) / sizeof(gifti_type_ele) - 1; c > 0; c--)
-    if (dtype == gifti_type_list[c].type) return 1;
+    if (dtype == gifti_type_list[c].type)
+      return 1;
 
-  if (whine || G.verb > 3) fprintf(stderr, "** invalid datatype value %d\n", dtype);
+  if (whine || G.verb > 3)
+    fprintf(stderr, "** invalid datatype value %d\n", dtype);
 
   return 0;
 }
 
 /*----------------------------------------------------------------------
  *! check that nbyper is one of the values in gifti_type_list
-*/ /*-------------------------------------------------------------------*/
-int gifti_valid_nbyper(int nbyper, int whine)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_valid_nbyper(int nbyper, int whine) {
   int c;
 
   /* check for valid */
   for (c = sizeof(gifti_type_list) / sizeof(gifti_type_ele) - 1; c > 0; c--)
-    if (nbyper == gifti_type_list[c].nbyper) return 1;
+    if (nbyper == gifti_type_list[c].nbyper)
+      return 1;
 
-  if (whine || G.verb > 3) fprintf(stderr, "** invalid nbyper value %d\n", nbyper);
+  if (whine || G.verb > 3)
+    fprintf(stderr, "** invalid nbyper value %d\n", nbyper);
 
   return 0;
 }
 
 /*----------------------------------------------------------------------
  *! check that dimension values are consistent (and with datatype)
- *  
+ *
  *      - num_dim is in range
  *      - each dims[c] is postive (c < num_dim)
  *      - nvals is product of dims
  *      - datatype is valid (required to check nbyper)
  *      - nbyper is correct
-*/ /*-------------------------------------------------------------------*/
-int gifti_valid_dims(const giiDataArray *da, int whine)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_valid_dims(const giiDataArray *da, int whine) {
   long long vals = 1;
   int c, nbyper;
 
   if (!da) {
-    if (G.verb > 2) fprintf(stderr, "** GVD: no giiDataArray\n");
+    if (G.verb > 2)
+      fprintf(stderr, "** GVD: no giiDataArray\n");
     return 0;
   }
 
-  if (!gifti_valid_num_dim(da->num_dim, whine)) return 0;
+  if (!gifti_valid_num_dim(da->num_dim, whine))
+    return 0;
 
   for (c = 0; c < da->num_dim; c++) {
     if (da->dims[c] <= 0) {
-      if (G.verb > 3 || whine) fprintf(stderr, "** invalid dims[%d] = %d\n", c, da->dims[c]);
+      if (G.verb > 3 || whine)
+        fprintf(stderr, "** invalid dims[%d] = %d\n", c, da->dims[c]);
       return 0;
     }
 
@@ -916,7 +967,9 @@ int gifti_valid_dims(const giiDataArray *da, int whine)
   /* verify computed vals and nbyper against stored ones */
   if (vals != da->nvals) {
     if (G.verb > 3) {
-      fprintf(stderr, "** nvals = %lld does not match %lld for dims[%d]: ", da->nvals, vals, da->num_dim);
+      fprintf(stderr,
+              "** nvals = %lld does not match %lld for dims[%d]: ", da->nvals,
+              vals, da->num_dim);
       gifti_disp_raw_data(da->dims, DT_INT32, da->num_dim, 1, stderr);
     }
     return 0;
@@ -924,7 +977,8 @@ int gifti_valid_dims(const giiDataArray *da, int whine)
 
   gifti_datatype_sizes(da->datatype, &nbyper, NULL);
   if (nbyper != da->nbyper) {
-    fprintf(stderr, "** nbyper %d not correct for type %s\n", da->nbyper, gifti_datatype2str(da->datatype));
+    fprintf(stderr, "** nbyper %d not correct for type %s\n", da->nbyper,
+            gifti_datatype2str(da->datatype));
     return 0;
   }
 
@@ -932,11 +986,8 @@ int gifti_valid_dims(const giiDataArray *da, int whine)
    * is not allowed to be 1
    * (requested by N Schmansky)                       11 Mar 2010 */
   if (da->num_dim > 1 && da->dims[da->num_dim - 1] < 2) {
-    fprintf(stderr,
-            "** num_dim violation: num_dim = %d, yet dim[%d] = %d\n",
-            da->num_dim,
-            da->num_dim - 1,
-            da->dims[da->num_dim - 1]);
+    fprintf(stderr, "** num_dim violation: num_dim = %d, yet dim[%d] = %d\n",
+            da->num_dim, da->num_dim - 1, da->dims[da->num_dim - 1]);
     return 0;
   }
 
@@ -948,15 +999,18 @@ int gifti_valid_dims(const giiDataArray *da, int whine)
  *
  *  return 0 on success
  *         1 on error
-*/ /*-------------------------------------------------------------------*/
-int gifti_str2attr_darray(giiDataArray *DA, const char *attr, const char *value)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_str2attr_darray(giiDataArray *DA, const char *attr,
+                          const char *value) {
   if (!DA || !attr || !value) {
-    if (G.verb > 0) fprintf(stderr, "** G_S2A_D: bad params (%p,%p,%p)\n", (void *)DA, (void *)attr, (void *)value);
+    if (G.verb > 0)
+      fprintf(stderr, "** G_S2A_D: bad params (%p,%p,%p)\n", (void *)DA,
+              (void *)attr, (void *)value);
     return 1;
   }
 
-  if (G.verb > 3) fprintf(stderr, "++ setting DA attr '%s'='%s'\n", attr, value);
+  if (G.verb > 3)
+    fprintf(stderr, "++ setting DA attr '%s'='%s'\n", attr, value);
 
   if (!strcmp(attr, "Intent"))
     DA->intent = gifti_intent_from_string(value);
@@ -988,7 +1042,8 @@ int gifti_str2attr_darray(giiDataArray *DA, const char *attr, const char *value)
     DA->ext_offset = atoll(value); /* assumes C99 */
   else {
     if (G.verb > 1) /* might go into ex_atrs */
-      fprintf(stderr, "** unknown giiDataArray attr, '%s'='%s'\n", G_CHECK_NULL_STR(attr), G_CHECK_NULL_STR(value));
+      fprintf(stderr, "** unknown giiDataArray attr, '%s'='%s'\n",
+              G_CHECK_NULL_STR(attr), G_CHECK_NULL_STR(value));
     return 1;
   }
 
@@ -996,37 +1051,39 @@ int gifti_str2attr_darray(giiDataArray *DA, const char *attr, const char *value)
 }
 
 /* return 0 (UNDEFINED) on failure */
-static int str2list_index(char *list[], int max, const char *str)
-{
+static int str2list_index(char *list[], int max, const char *str) {
   int index;
   if (!list || !str) {
-    if (G.verb > 0) fprintf(stderr, "** str2list: bad params (%p,%p)\n", (void *)list, (void *)str);
+    if (G.verb > 0)
+      fprintf(stderr, "** str2list: bad params (%p,%p)\n", (void *)list,
+              (void *)str);
     return 0; /* should be *_UNDEFINED */
   }
 
   for (index = max; index > 0; index--)
-    if (!strcmp(str, list[index])) return index;
+    if (!strcmp(str, list[index]))
+      return index;
 
   return 0; /* failure */
 }
 
 /*----------------------------------------------------------------------
  *! return the index for a GIFTI_IND_ORD_* string
-*/ /*-------------------------------------------------------------------*/
-int gifti_str2ind_ord(const char *str)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_str2ind_ord(const char *str) {
   int rv = str2list_index(gifti_index_order_list, GIFTI_IND_ORD_MAX, str);
-  if (rv <= GIFTI_IND_ORD_UNDEF && G.verb > 1) fprintf(stderr, "** bad index order, '%s'\n", str);
+  if (rv <= GIFTI_IND_ORD_UNDEF && G.verb > 1)
+    fprintf(stderr, "** bad index order, '%s'\n", str);
   return rv;
 }
 
 /*----------------------------------------------------------------------
  *! return the index for a GIFTI_ENDODING_* string
-*/ /*-------------------------------------------------------------------*/
-int gifti_str2encoding(const char *str)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_str2encoding(const char *str) {
   int rv = str2list_index(gifti_encoding_list, GIFTI_ENCODING_MAX, str);
-  if (rv <= GIFTI_ENCODING_UNDEF && G.verb > 1) fprintf(stderr, "** bad data encoding, '%s'\n", str);
+  if (rv <= GIFTI_ENCODING_UNDEF && G.verb > 1)
+    fprintf(stderr, "** bad data encoding, '%s'\n", str);
   return rv;
 }
 
@@ -1035,9 +1092,8 @@ int gifti_str2encoding(const char *str)
  *
  *  This function is meant to index into one of the gifti_*_list arrays,
  *  while being certain that the index is not out of range.
-*/ /*-------------------------------------------------------------------*/
-char *gifti_list_index2string(char *list[], int index)
-{
+ */ /*-------------------------------------------------------------------*/
+char *gifti_list_index2string(char *list[], int index) {
   int lsize; /* list size cannot be computed from the passed pointer */
 
   if (list == gifti_index_order_list)
@@ -1055,7 +1111,9 @@ char *gifti_list_index2string(char *list[], int index)
   }
 
   if (index < 0 || index >= lsize) {
-    if (G.verb > 0) fprintf(stderr, "** GLI2S: index %d out of range {0..%d}\n", index, lsize - 1);
+    if (G.verb > 0)
+      fprintf(stderr, "** GLI2S: index %d out of range {0..%d}\n", index,
+              lsize - 1);
     return "INDEX OUT OF RANGE";
   }
 
@@ -1066,48 +1124,48 @@ char *gifti_list_index2string(char *list[], int index)
 
 /*----------------------------------------------------------------------
  *! return the NIFTI_TYPE_ value corresponding to the given string
-*/ /*-------------------------------------------------------------------*/
-int gifti_str2datatype(const char *str)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_str2datatype(const char *str) {
   int len = sizeof(gifti_type_list) / sizeof(gifti_type_ele);
   int c;
 
   for (c = len - 1; c > 0; c--)
-    if (!strcmp(str, gifti_type_list[c].name)) break;
+    if (!strcmp(str, gifti_type_list[c].name))
+      break;
 
   return gifti_type_list[c].type;
 }
 
 /*----------------------------------------------------------------------
  *! return the GIFTI_ENDIAN_ value corresponding to the given string
-*/ /*-------------------------------------------------------------------*/
-int gifti_str2endian(const char *str)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_str2endian(const char *str) {
   int rv = str2list_index(gifti_endian_list, GIFTI_ENDIAN_MAX, str);
-  if (rv <= GIFTI_ENCODING_UNDEF && G.verb > 1) fprintf(stderr, "** bad endian, '%s'\n", G_CHECK_NULL_STR(str));
+  if (rv <= GIFTI_ENCODING_UNDEF && G.verb > 1)
+    fprintf(stderr, "** bad endian, '%s'\n", G_CHECK_NULL_STR(str));
   return rv;
 }
 
 /*----------------------------------------------------------------------
  *! return the NIFTI_TYPE_ value string corresponding to the given type
-*/ /*-------------------------------------------------------------------*/
-char *gifti_datatype2str(int type)
-{
+ */ /*-------------------------------------------------------------------*/
+char *gifti_datatype2str(int type) {
   int len = sizeof(gifti_type_list) / sizeof(gifti_type_ele);
   int c;
 
   for (c = len - 1; c > 0; c--)
-    if (type == gifti_type_list[c].type) break;
+    if (type == gifti_type_list[c].type)
+      break;
 
   return gifti_type_list[c].name;
 }
 
 /*----------------------------------------------------------------------
  *! simply set the struct contents to empty
-*/ /*-------------------------------------------------------------------*/
-int gifti_clear_nvpairs(nvpairs *p)
-{
-  if (!p) return 1;
+ */ /*-------------------------------------------------------------------*/
+int gifti_clear_nvpairs(nvpairs *p) {
+  if (!p)
+    return 1;
 
   p->length = 0;
   p->name = NULL;
@@ -1118,10 +1176,10 @@ int gifti_clear_nvpairs(nvpairs *p)
 
 /*----------------------------------------------------------------------
  *! simply set the struct contents to empty
-*/ /*-------------------------------------------------------------------*/
-int gifti_clear_LabelTable(giiLabelTable *p)
-{
-  if (!p) return 1;
+ */ /*-------------------------------------------------------------------*/
+int gifti_clear_LabelTable(giiLabelTable *p) {
+  if (!p)
+    return 1;
 
   p->length = 0;
   p->key = NULL;
@@ -1133,10 +1191,10 @@ int gifti_clear_LabelTable(giiLabelTable *p)
 
 /*----------------------------------------------------------------------
  *! simply set the struct contents to empty
-*/ /*-------------------------------------------------------------------*/
-int gifti_clear_CoordSystem(giiCoordSystem *p)
-{
-  if (!p) return 1;
+ */ /*-------------------------------------------------------------------*/
+int gifti_clear_CoordSystem(giiCoordSystem *p) {
+  if (!p)
+    return 1;
 
   p->dataspace = NULL;
   p->xformspace = NULL;
@@ -1147,10 +1205,10 @@ int gifti_clear_CoordSystem(giiCoordSystem *p)
 
 /*----------------------------------------------------------------------
  *! add an empty CoordSystem struct to the DataArray
-*/ /*-------------------------------------------------------------------*/
-int gifti_add_empty_CS(giiDataArray *da)
-{
-  if (!da) return 1;
+ */ /*-------------------------------------------------------------------*/
+int gifti_add_empty_CS(giiDataArray *da) {
+  if (!da)
+    return 1;
 
   /* be safe, if anything looks bad, start clean */
   if (da->numCS <= 0 || !da->coordsys) {
@@ -1158,12 +1216,15 @@ int gifti_add_empty_CS(giiDataArray *da)
     da->coordsys = NULL;
   }
 
-  if (G.verb > 3) fprintf(stderr, "++ adding empty CS[%d]\n", da->numCS);
+  if (G.verb > 3)
+    fprintf(stderr, "++ adding empty CS[%d]\n", da->numCS);
 
   /* realloc coordsys pointer array, and add an empty structure */
-  da->coordsys = (giiCoordSystem **)realloc(da->coordsys, (da->numCS + 1) * sizeof(giiCoordSystem *));
+  da->coordsys = (giiCoordSystem **)realloc(
+      da->coordsys, (da->numCS + 1) * sizeof(giiCoordSystem *));
   if (!da->coordsys) {
-    fprintf(stderr, "** AECS: failed to alloc %d CoordSys pointers\n", da->numCS + 1);
+    fprintf(stderr, "** AECS: failed to alloc %d CoordSys pointers\n",
+            da->numCS + 1);
     da->numCS = 0;
     return 1;
   }
@@ -1191,19 +1252,21 @@ int gifti_add_empty_CS(giiDataArray *da)
  *
  *  return 0 on success
  *         1 on error
-*/ /*-------------------------------------------------------------------*/
-int gifti_add_empty_darray(gifti_image *gim, int num_to_add)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_add_empty_darray(gifti_image *gim, int num_to_add) {
   giiDataArray *dptr;
   int c, ntot, nnew = num_to_add > 0 ? num_to_add : 1;
 
-  if (!gim) return 1;
+  if (!gim)
+    return 1;
 
-  if (G.verb > 3) fprintf(stderr, "++ alloc darray[%d] (+%d)\n", gim->numDA, nnew);
+  if (G.verb > 3)
+    fprintf(stderr, "++ alloc darray[%d] (+%d)\n", gim->numDA, nnew);
 
   /* allocate for additional pointers */
   ntot = gim->numDA + nnew;
-  gim->darray = (giiDataArray **)realloc(gim->darray, ntot * sizeof(giiDataArray *));
+  gim->darray =
+      (giiDataArray **)realloc(gim->darray, ntot * sizeof(giiDataArray *));
 
   if (!gim->darray) {
     fprintf(stderr, "** failed realloc darray, len %d\n", ntot);
@@ -1233,13 +1296,14 @@ int gifti_add_empty_darray(gifti_image *gim, int num_to_add)
  *
  *  this allocates memory for the p->name and p->value arrays, along
  *  with duplicating the passed name/value strings
-*/ /*-------------------------------------------------------------------*/
-int gifti_add_to_nvpairs(nvpairs *p, const char *name, const char *value)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_add_to_nvpairs(nvpairs *p, const char *name, const char *value) {
   int index;
 
   if (!p || !name || !value) {
-    if (G.verb > 1) fprintf(stderr, "** GATN: bad params(%p,%p,%p)\n", (void *)p, (void *)name, (void *)value);
+    if (G.verb > 1)
+      fprintf(stderr, "** GATN: bad params(%p,%p,%p)\n", (void *)p,
+              (void *)name, (void *)value);
     return 1;
   }
 
@@ -1250,9 +1314,9 @@ int gifti_add_to_nvpairs(nvpairs *p, const char *name, const char *value)
   if (!p->name || !p->value) {
     fprintf(stderr, "** GATN: failed to realloc %d pointers\n", p->length);
     return 1;
-  }
-  else if (G.verb > 3)
-    fprintf(stderr, "++ add_nvp [%d]: '%s', '%s'\n", p->length, name ? name : "NULL", value ? value : "NULL");
+  } else if (G.verb > 3)
+    fprintf(stderr, "++ add_nvp [%d]: '%s', '%s'\n", p->length,
+            name ? name : "NULL", value ? value : "NULL");
 
   index = p->length - 1;
   p->name[index] = gifti_strdup(name);
@@ -1268,9 +1332,8 @@ int gifti_add_to_nvpairs(nvpairs *p, const char *name, const char *value)
 
 /*----------------------------------------------------------------------
  *! display the contents of the nvpairs struct
-*/ /*-------------------------------------------------------------------*/
-int gifti_disp_nvpairs(const char *mesg, const nvpairs *p)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_disp_nvpairs(const char *mesg, const nvpairs *p) {
   int c;
 
   if (mesg) {
@@ -1286,17 +1349,18 @@ int gifti_disp_nvpairs(const char *mesg, const nvpairs *p)
   fprintf(stderr, "nvpairs struct, len = %d :\n", p->length);
 
   for (c = 0; c < p->length; c++)
-    fprintf(stderr, "    nvpair: '%s' = '%s'\n", G_CHECK_NULL_STR(p->name[c]), G_CHECK_NULL_STR(p->value[c]));
-  if (p->length > 0) fputc('\n', stderr);
+    fprintf(stderr, "    nvpair: '%s' = '%s'\n", G_CHECK_NULL_STR(p->name[c]),
+            G_CHECK_NULL_STR(p->value[c]));
+  if (p->length > 0)
+    fputc('\n', stderr);
 
   return 0;
 }
 
 /*----------------------------------------------------------------------
  *! display the contents of the LabelTable struct
-*/ /*-------------------------------------------------------------------*/
-int gifti_disp_LabelTable(const char *mesg, const giiLabelTable *p)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_disp_LabelTable(const char *mesg, const giiLabelTable *p) {
   float *rgba;
   int c;
 
@@ -1316,22 +1380,23 @@ int gifti_disp_LabelTable(const char *mesg, const giiLabelTable *p)
   for (c = 0; c < p->length; c++) {
     fprintf(stderr, "    key %d, ", p->key[c]);
     if (rgba) {
-      fprintf(stderr, "rgba (%5.3f, %5.3f, %5.3f, %5.3f), ", rgba[0], rgba[1], rgba[2], rgba[3]);
+      fprintf(stderr, "rgba (%5.3f, %5.3f, %5.3f, %5.3f), ", rgba[0], rgba[1],
+              rgba[2], rgba[3]);
       rgba += 4;
     }
     fprintf(stderr, "label '%s'\n", G_CHECK_NULL_STR(p->label[c]));
   }
 
-  if (p->length > 0) fputc('\n', stderr);
+  if (p->length > 0)
+    fputc('\n', stderr);
 
   return 0;
 }
 
 /*----------------------------------------------------------------------
  *! display the contents of the CoordSystem struct
-*/ /*-------------------------------------------------------------------*/
-int gifti_disp_CoordSystem(const char *mesg, const giiCoordSystem *p)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_disp_CoordSystem(const char *mesg, const giiCoordSystem *p) {
   int c1, c2;
 
   if (mesg) {
@@ -1348,11 +1413,11 @@ int gifti_disp_CoordSystem(const char *mesg, const giiCoordSystem *p)
           "giiCoordSystem struct\n"
           "    dataspace  = %s\n"
           "    xformspace = %s\n",
-          G_CHECK_NULL_STR(p->dataspace),
-          G_CHECK_NULL_STR(p->xformspace));
+          G_CHECK_NULL_STR(p->dataspace), G_CHECK_NULL_STR(p->xformspace));
   for (c1 = 0; c1 < 4; c1++) {
     fprintf(stderr, "    xform[%d] :", c1);
-    for (c2 = 0; c2 < 4; c2++) fprintf(stderr, "  %f", p->xform[c1][c2]);
+    for (c2 = 0; c2 < 4; c2++)
+      fprintf(stderr, "  %f", p->xform[c1][c2]);
     fputc('\n', stderr);
   }
 
@@ -1363,9 +1428,8 @@ int gifti_disp_CoordSystem(const char *mesg, const giiCoordSystem *p)
  *! display the contents of the DataArray struct
  *
  *  if 'subs' is set, display the contents of the sub-structures
-*/ /*-------------------------------------------------------------------*/
-int gifti_disp_DataArray(const char *mesg, const giiDataArray *p, int subs)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_disp_DataArray(const char *mesg, const giiDataArray *p, int subs) {
   int c;
   fprintf(stderr, "--------------------------------------------------\n");
 
@@ -1390,41 +1454,30 @@ int gifti_disp_DataArray(const char *mesg, const giiDataArray *p, int subs)
           "    endian     %2d = %s\n"
           "    ext_fname     = %s\n"
           "    ext_offset    = %lld\n",
-          p->intent,
-          gifti_intent_to_string(p->intent),
-          p->datatype,
-          gifti_datatype2str(p->datatype),
-          p->ind_ord,
+          p->intent, gifti_intent_to_string(p->intent), p->datatype,
+          gifti_datatype2str(p->datatype), p->ind_ord,
           gifti_list_index2string(gifti_index_order_list, p->ind_ord),
-          p->num_dim,
-          p->dims[0],
-          p->dims[1],
-          p->dims[2],
-          p->dims[3],
-          p->dims[4],
-          p->dims[5],
-          p->encoding,
-          gifti_list_index2string(gifti_encoding_list, p->encoding),
-          p->endian,
+          p->num_dim, p->dims[0], p->dims[1], p->dims[2], p->dims[3],
+          p->dims[4], p->dims[5], p->encoding,
+          gifti_list_index2string(gifti_encoding_list, p->encoding), p->endian,
           gifti_list_index2string(gifti_endian_list, p->endian),
-          G_CHECK_NULL_STR(p->ext_fname),
-          p->ext_offset);
+          G_CHECK_NULL_STR(p->ext_fname), p->ext_offset);
 
-  if (subs) gifti_disp_nvpairs("darray->meta", &p->meta);
   if (subs)
-    for (c = 0; c < p->numCS; c++) gifti_disp_CoordSystem("darray->coordsys", p->coordsys[c]);
+    gifti_disp_nvpairs("darray->meta", &p->meta);
+  if (subs)
+    for (c = 0; c < p->numCS; c++)
+      gifti_disp_CoordSystem("darray->coordsys", p->coordsys[c]);
 
   fprintf(stderr,
           "    data       = %s\n"
           "    nvals      = %u\n"
           "    nbyper     = %d\n"
           "    numCS      = %d\n",
-          p->data ? "<set>" : "NULL",
-          (unsigned)p->nvals,
-          p->nbyper,
-          p->numCS);
+          p->data ? "<set>" : "NULL", (unsigned)p->nvals, p->nbyper, p->numCS);
 
-  if (subs) gifti_disp_nvpairs("darray->ex_atrs", &p->ex_atrs);
+  if (subs)
+    gifti_disp_nvpairs("darray->ex_atrs", &p->ex_atrs);
   fprintf(stderr, "--------------------------------------------------\n");
 
   return 0;
@@ -1435,9 +1488,8 @@ int gifti_disp_DataArray(const char *mesg, const giiDataArray *p, int subs)
  *
  *  if 'subs' is set, display the contents of the sub-structures, such
  *  as all of the DataArray elements
-*/ /*-------------------------------------------------------------------*/
-int gifti_disp_gifti_image(const char *mesg, const gifti_image *p, int subs)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_disp_gifti_image(const char *mesg, const gifti_image *p, int subs) {
   fprintf(stderr, "==================================================\n");
 
   if (mesg) {
@@ -1454,8 +1506,7 @@ int gifti_disp_gifti_image(const char *mesg, const gifti_image *p, int subs)
           "gifti_image struct\n"
           "    version    = %s\n"
           "    numDA      = %d\n",
-          G_CHECK_NULL_STR(p->version),
-          p->numDA);
+          G_CHECK_NULL_STR(p->version), p->numDA);
 
   if (subs) {
     char buf[32];
@@ -1473,11 +1524,11 @@ int gifti_disp_gifti_image(const char *mesg, const gifti_image *p, int subs)
           "gifti_image struct\n"
           "    swapped    = %d\n"
           "    compressed = %d\n",
-          p->swapped,
-          p->compressed);
+          p->swapped, p->compressed);
 
   fprintf(stderr, " -- darray totals: %lld MB\n", gifti_gim_DA_size(p, 1));
-  if (subs) gifti_disp_nvpairs("gim->ex_atrs", &p->ex_atrs);
+  if (subs)
+    gifti_disp_nvpairs("gim->ex_atrs", &p->ex_atrs);
 
   fprintf(stderr, "==================================================\n");
 
@@ -1489,28 +1540,32 @@ int gifti_disp_gifti_image(const char *mesg, const gifti_image *p, int subs)
  *
  *  if in_mb is set, return the (rounded) number of megabytes
  *  (i.e. 17 is 17 MB)
-*/ /*-------------------------------------------------------------------*/
-long long gifti_gim_DA_size(const gifti_image *p, int in_mb)
-{
+ */ /*-------------------------------------------------------------------*/
+long long gifti_gim_DA_size(const gifti_image *p, int in_mb) {
   long long bytes = 0;
   int c;
 
-  if (!p) return -1;
-  if (!p->darray || p->numDA <= 0) return 0;
+  if (!p)
+    return -1;
+  if (!p->darray || p->numDA <= 0)
+    return 0;
 
   for (c = 0; c < p->numDA; c++) {
-    if (!p->darray[c]->data) continue; /* skip anything without data */
+    if (!p->darray[c]->data)
+      continue; /* skip anything without data */
     if (p->darray[c]->nvals <= 0 || p->darray[c]->nbyper <= 0) {
-      fprintf(
-          stderr, "** have data[%d], but nvals = %lld, nbyper = %d\n", c, p->darray[c]->nvals, p->darray[c]->nbyper);
+      fprintf(stderr, "** have data[%d], but nvals = %lld, nbyper = %d\n", c,
+              p->darray[c]->nvals, p->darray[c]->nbyper);
       return 0;
     }
     bytes += p->darray[c]->nvals * p->darray[c]->nbyper;
   }
 
-  if (bytes <= 0LL) return 0;
+  if (bytes <= 0LL)
+    return 0;
 
-  if (in_mb) bytes = (bytes + (1 << 19)) >> 20; /* round to nearest MB */
+  if (in_mb)
+    bytes = (bytes + (1 << 19)) >> 20; /* round to nearest MB */
 
   return bytes;
 }
@@ -1519,30 +1574,33 @@ long long gifti_gim_DA_size(const gifti_image *p, int in_mb)
  *! given a datatype, return the corresponding bytes per value and swapsize
  *
  *  nbyper and swapsize are filled only if the pointers are set
-*/ /*-------------------------------------------------------------------*/
-int gifti_datatype_sizes(int datatype, int *nbyper, int *swapsize)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_datatype_sizes(int datatype, int *nbyper, int *swapsize) {
   int c;
 
   for (c = sizeof(gifti_type_list) / sizeof(gifti_type_ele) - 1; c > 0; c--)
     if (datatype == gifti_type_list[c].type) {
-      if (nbyper) *nbyper = gifti_type_list[c].nbyper;
-      if (swapsize) *swapsize = gifti_type_list[c].swapsize;
+      if (nbyper)
+        *nbyper = gifti_type_list[c].nbyper;
+      if (swapsize)
+        *swapsize = gifti_type_list[c].swapsize;
       return 0;
     }
 
-  if (G.verb > 0) fprintf(stderr, "** GDS with bad datatype %d\n", datatype);
-  if (nbyper) *nbyper = 0;
-  if (swapsize) *swapsize = 0;
+  if (G.verb > 0)
+    fprintf(stderr, "** GDS with bad datatype %d\n", datatype);
+  if (nbyper)
+    *nbyper = 0;
+  if (swapsize)
+    *swapsize = 0;
 
   return 1;
 }
 
 /*----------------------------------------------------------------------
  *! compute the total number of data values in a DataArray element
-*/ /*-------------------------------------------------------------------*/
-long long gifti_darray_nvals(const giiDataArray *da)
-{
+ */ /*-------------------------------------------------------------------*/
+long long gifti_darray_nvals(const giiDataArray *da) {
   long long ndim = 1;
   int c;
 
@@ -1556,7 +1614,8 @@ long long gifti_darray_nvals(const giiDataArray *da)
     return 0;
   }
 
-  for (c = 0; c < da->num_dim; c++) ndim *= da->dims[c];
+  for (c = 0; c < da->num_dim; c++)
+    ndim *= da->dims[c];
 
   if (ndim <= 0) {
     gifti_disp_DataArray("** bad Dim list in ", da, 0);
@@ -1568,22 +1627,24 @@ long long gifti_darray_nvals(const giiDataArray *da)
 
 /*----------------------------------------------------------------------
  *! find giiDataArray element #index of the given intent
-*/ /*-------------------------------------------------------------------*/
-giiDataArray *gifti_find_DA(gifti_image *gim, int intent, int index)
-{
+ */ /*-------------------------------------------------------------------*/
+giiDataArray *gifti_find_DA(gifti_image *gim, int intent, int index) {
   int c, nfound;
 
   if (!gim || !gifti_intent_is_valid(intent) || index < 0) {
-    fprintf(stderr, "** find_DA: bad inputs (%p, %d, %d)\n", (void *)gim, intent, index);
+    fprintf(stderr, "** find_DA: bad inputs (%p, %d, %d)\n", (void *)gim,
+            intent, index);
     return NULL;
   }
 
-  if (!gim->darray) return NULL;
+  if (!gim->darray)
+    return NULL;
 
   for (c = 0, nfound = 0; c < gim->numDA; c++)
     if (gim->darray[c] && gim->darray[c]->intent == intent) {
-      if (nfound == index) return gim->darray[c]; /* success */
-      nfound++;                                   /* else, increment counter and keep looking */
+      if (nfound == index)
+        return gim->darray[c]; /* success */
+      nfound++;                /* else, increment counter and keep looking */
     }
 
   return NULL;
@@ -1593,17 +1654,19 @@ giiDataArray *gifti_find_DA(gifti_image *gim, int intent, int index)
  *! return an allocated list of giiDataArray pointers of the given intent
  *
  *  'list' should be freed or taken
-*/ /*-------------------------------------------------------------------*/
-int gifti_find_DA_list(gifti_image *gim, int intent, giiDataArray ***list, int *len)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_find_DA_list(gifti_image *gim, int intent, giiDataArray ***list,
+                       int *len) {
   int c, nfound;
 
   if (!gim || !gifti_intent_is_valid(intent) || !list || !len) {
-    fprintf(stderr, "** find_DA: bad inputs (%p, %d, %p, %p)\n", (void *)gim, intent, (void *)list, (void *)len);
+    fprintf(stderr, "** find_DA: bad inputs (%p, %d, %p, %p)\n", (void *)gim,
+            intent, (void *)list, (void *)len);
     return 1;
   }
 
-  if (!gim->darray) return 1;
+  if (!gim->darray)
+    return 1;
 
   /* create one big enough to hold everything */
   *len = gim->numDA;
@@ -1615,7 +1678,8 @@ int gifti_find_DA_list(gifti_image *gim, int intent, giiDataArray ***list, int *
   }
 
   for (c = 0, nfound = 0; c < gim->numDA; c++)
-    if (gim->darray[c] && gim->darray[c]->intent == intent) (*list)[nfound++] = gim->darray[c];
+    if (gim->darray[c] && gim->darray[c]->intent == intent)
+      (*list)[nfound++] = gim->darray[c];
 
   /* if we didn't find any, nuke list, but do not return an error */
   if (nfound == 0) {
@@ -1643,29 +1707,35 @@ int gifti_find_DA_list(gifti_image *gim, int intent, giiDataArray ***list, int *
  *! given metadata name, return the corresponding value (or NULL)
  *
  *  no allocation is done here
-*/ /*-------------------------------------------------------------------*/
-char *gifti_get_meta_value(const nvpairs *nvp, const char *name)
-{
+ */ /*-------------------------------------------------------------------*/
+char *gifti_get_meta_value(const nvpairs *nvp, const char *name) {
   int c;
 
   if (!nvp || !name) {
-    if (G.verb > 3) fprintf(stderr, "** get_meta_value: NULL input (%p, %p)\n", (void *)nvp, name);
+    if (G.verb > 3)
+      fprintf(stderr, "** get_meta_value: NULL input (%p, %p)\n", (void *)nvp,
+              name);
     return NULL;
   }
 
-  if (G.verb > 5) fprintf(stderr, "-- G_get_meta_value: looking for name = '%s'\n", name);
+  if (G.verb > 5)
+    fprintf(stderr, "-- G_get_meta_value: looking for name = '%s'\n", name);
 
   if (!nvp->name || !nvp->value || nvp->length <= 0) {
-    if (G.verb > 3) fprintf(stderr, "-- G_get_meta_value: no name/value array\n");
+    if (G.verb > 3)
+      fprintf(stderr, "-- G_get_meta_value: no name/value array\n");
     return NULL;
   }
 
   for (c = 0; c < nvp->length; c++)
-    if (!strcmp(nvp->name[c], name)) break; /* found */
+    if (!strcmp(nvp->name[c], name))
+      break; /* found */
 
-  if (c >= nvp->length) return NULL;
+  if (c >= nvp->length)
+    return NULL;
 
-  if (G.verb > 3) fprintf(stderr, "++ found meta '%s'='%s'\n", nvp->name[c], nvp->value[c]);
+  if (G.verb > 3)
+    fprintf(stderr, "++ found meta '%s'='%s'\n", nvp->name[c], nvp->value[c]);
 
   return nvp->value[c];
 }
@@ -1675,20 +1745,19 @@ char *gifti_get_meta_value(const nvpairs *nvp, const char *name)
  *
  *  define rows to be the number of nodes, which should be the slowest
  *  changing element, depending on the index order (kuru kuru pa)
-*/ /*-------------------------------------------------------------------*/
-int gifti_DA_rows_cols(giiDataArray *da, long long *rows, long long *cols)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_DA_rows_cols(giiDataArray *da, long long *rows, long long *cols) {
   *rows = da->dims[0]; /* init */
   *cols = 1;
 
-  if (da->num_dim == 1) return 0; /* use default */
+  if (da->num_dim == 1)
+    return 0; /* use default */
 
   if (da->ind_ord == GIFTI_IND_ORD_ROW_MAJOR) {
     /* treat Dim[0] as nodes (they change most slowly) */
     *rows = da->dims[0];
     *cols = (*rows) ? da->nvals / *rows : 1; /* be safe */
-  }
-  else {
+  } else {
     if (!gifti_valid_num_dim(da->num_dim, 1)) {
       fprintf(stderr, "** cannot assign DA_rows_cols");
       return 1;
@@ -1703,29 +1772,31 @@ int gifti_DA_rows_cols(giiDataArray *da, long long *rows, long long *cols)
 
 /*----------------------------------------------------------------------
  *! print the gifti library history string
-*/ /*-------------------------------------------------------------------*/
-void gifti_disp_lib_hist(void)
-{
+ */ /*-------------------------------------------------------------------*/
+void gifti_disp_lib_hist(void) {
   int c, len = sizeof(gifti_history) / sizeof(char *);
-  for (c = 0; c < len; c++) fputs(gifti_history[c], stdout);
+  for (c = 0; c < len; c++)
+    fputs(gifti_history[c], stdout);
 }
 
 /*----------------------------------------------------------------------
  *! print the gifti library version string
-*/ /*-------------------------------------------------------------------*/
-void gifti_disp_lib_version(void) { printf("%s, compiled %s\n", gifti_version, __DATE__); }
+ */ /*-------------------------------------------------------------------*/
+void gifti_disp_lib_version(void) {
+  printf("%s, compiled %s\n", gifti_version, __DATE__);
+}
 
 /*----------------------------------------------------------------------
  *! return the gifti library version string
-*/ /*-------------------------------------------------------------------*/
+ */ /*-------------------------------------------------------------------*/
 char *gifticlib_version(void) { return gifti_version; }
 
 /*----------------------------------------------------------------------
  *! print the gifti DTD URL
-*/ /*-------------------------------------------------------------------*/
-void gifti_disp_dtd_url(void)
-{
-  printf("The GIFTI Document Type Definition (DTD) is at:\n    %s\n", GIFTI_XML_DTD_SOURCE);
+ */ /*-------------------------------------------------------------------*/
+void gifti_disp_dtd_url(void) {
+  printf("The GIFTI Document Type Definition (DTD) is at:\n    %s\n",
+         GIFTI_XML_DTD_SOURCE);
 }
 
 /*----------------------------------------------------------------------
@@ -1733,29 +1804,30 @@ void gifti_disp_dtd_url(void)
  *
  *  if mesg is set, print the message first
  *  if fp is not set, print to stdout
-*/ /*-------------------------------------------------------------------*/
-int gifti_disp_hex_data(const char *mesg, const void *data, int len, FILE *fp)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_disp_hex_data(const char *mesg, const void *data, int len, FILE *fp) {
   const char *dp = (const char *)data;
   FILE *stream;
   int c;
 
   stream = fp ? fp : stdout;
 
-  if (!data || len < 1) return -1;
+  if (!data || len < 1)
+    return -1;
 
-  if (mesg) fputs(mesg, stream);
+  if (mesg)
+    fputs(mesg, stream);
 
-  for (c = 0; c < len; c++) fprintf(stream, " %02x", dp[c]);
+  for (c = 0; c < len; c++)
+    fprintf(stream, " %02x", dp[c]);
 
   return 0;
 }
 
 /*----------------------------------------------------------------------
  *! swap sets of 2-byte values
-*/ /*-------------------------------------------------------------------*/
-int gifti_swap_2bytes(void *data, long long nsets)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_swap_2bytes(void *data, long long nsets) {
   char *cp1 = (char *)data, *cp2;
   char tval;
   long long c;
@@ -1773,9 +1845,8 @@ int gifti_swap_2bytes(void *data, long long nsets)
 
 /*----------------------------------------------------------------------
  *! swap sets of 4-byte values
-*/ /*-------------------------------------------------------------------*/
-int gifti_swap_4bytes(void *data, long long nsets)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_swap_4bytes(void *data, long long nsets) {
   char *cp0 = (char *)data, *cp1, *cp2;
   char tval;
   long long c;
@@ -1799,20 +1870,20 @@ int gifti_swap_4bytes(void *data, long long nsets)
 
 /*----------------------------------------------------------------------
  *! swap sets of N-byte values
- *  
+ *
  *  if N < 2         : just return
  *  if N = 2 or N = 4: call explicit function for that size (speed)
  *  else             : swap in a loop
-*/ /*-------------------------------------------------------------------*/
-int gifti_swap_Nbytes(void *data, long long nsets, int swapsize)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_swap_Nbytes(void *data, long long nsets, int swapsize) {
   char *cp0, *cp1, *cp2;
   char tval;
   long long c;
   int offset; /* swapsize - 1, for speed */
 
   if (!data || nsets < 0 || swapsize < 0) {
-    fprintf(stderr, "** swap_Nbytes: bad params (%p,%lld,%d)\n", (void *)data, nsets, swapsize);
+    fprintf(stderr, "** swap_Nbytes: bad params (%p,%lld,%d)\n", (void *)data,
+            nsets, swapsize);
     return 1;
   }
 
@@ -1845,13 +1916,13 @@ int gifti_swap_Nbytes(void *data, long long nsets, int swapsize)
 
 /*----------------------------------------------------------------------
  *! return the current CPU endian: GIFTI_ENDIAN_BIG or _LITTLE
-*/ /*-------------------------------------------------------------------*/
-int gifti_get_this_endian(void)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_get_this_endian(void) {
   int one = 1;
   char *cp = (char *)&one;
 
-  if (*cp) return GIFTI_ENDIAN_LITTLE;
+  if (*cp)
+    return GIFTI_ENDIAN_LITTLE;
 
   return GIFTI_ENDIAN_BIG;
 }
@@ -1860,25 +1931,27 @@ int gifti_get_this_endian(void)
  *! if endian does not match that of this CPU, swap the data bytes
  *
  *  return whether bytes were swapped
-*/ /*-------------------------------------------------------------------*/
-int gifti_check_swap(void *data, int endian, long long nsets, int swapsize)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_check_swap(void *data, int endian, long long nsets, int swapsize) {
   if (!data || nsets < 0 || swapsize < 0) {
-    fprintf(stderr, "** check_swap: bad params (%p,%lld, %d)\n", (void *)data, nsets, swapsize);
+    fprintf(stderr, "** check_swap: bad params (%p,%lld, %d)\n", (void *)data,
+            nsets, swapsize);
     return 0;
-  }
-  else if (endian <= GIFTI_ENDIAN_UNDEF || endian > GIFTI_ENDIAN_MAX) {
+  } else if (endian <= GIFTI_ENDIAN_UNDEF || endian > GIFTI_ENDIAN_MAX) {
     fprintf(stderr, "** check_swap: invalid endian %d\n", endian);
     return 0;
   }
 
   /* if endian is the same as this one, just return */
   if (endian == gifti_get_this_endian()) {
-    if (G.verb > 2) fprintf(stderr, "-- darray no swap needed : %lld sets of %d bytes\n", nsets, swapsize);
+    if (G.verb > 2)
+      fprintf(stderr, "-- darray no swap needed : %lld sets of %d bytes\n",
+              nsets, swapsize);
     return 0;
   }
 
-  if (G.verb > 2) fprintf(stderr, "++ darray swap: %lld sets of %d bytes\n", nsets, swapsize);
+  if (G.verb > 2)
+    fprintf(stderr, "++ darray swap: %lld sets of %d bytes\n", nsets, swapsize);
 
   /* do the swap */
   (void)gifti_swap_Nbytes(data, nsets, swapsize);
@@ -1891,25 +1964,25 @@ int gifti_check_swap(void *data, int endian, long long nsets, int swapsize)
  *  external file.
  *
  *  return 0 on success
-*/ /*-------------------------------------------------------------------*/
-int gifti_read_extern_DA_data(giiDataArray *da)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_read_extern_DA_data(giiDataArray *da) {
   FILE *fp;
   long long nbytes, nread;
 
-  if (!da || !da->ext_fname || !*da->ext_fname) return 0;
+  if (!da || !da->ext_fname || !*da->ext_fname)
+    return 0;
 
-  if (G.verb > 4) fprintf(stderr, "-- external read of '%s'\n", da->ext_fname);
+  if (G.verb > 4)
+    fprintf(stderr, "-- external read of '%s'\n", da->ext_fname);
 
   if (da->ext_offset < 0) {
-    fprintf(stderr, "** want external DA data with bad offset %lld\n", da->ext_offset);
+    fprintf(stderr, "** want external DA data with bad offset %lld\n",
+            da->ext_offset);
     return 1;
-  }
-  else if (da->data) {
+  } else if (da->data) {
     fprintf(stderr, "** want external DA data but data already allocated\n");
     return 1;
-  }
-  else if (!gifti_valid_dims(da, 1)) {
+  } else if (!gifti_valid_dims(da, 1)) {
     fprintf(stderr, "** cannot read external DA data with bad dims...\n");
     return 1;
   }
@@ -1918,7 +1991,8 @@ int gifti_read_extern_DA_data(giiDataArray *da)
   nbytes = da->nvals * da->nbyper;
   da->data = calloc(da->nvals, da->nbyper); /* zero in case of read failure */
   if (!da->data) {
-    fprintf(stderr, "** failed to alloc %lld bytes for external read\n", nbytes);
+    fprintf(stderr, "** failed to alloc %lld bytes for external read\n",
+            nbytes);
     return 1;
   }
 
@@ -1930,7 +2004,8 @@ int gifti_read_extern_DA_data(giiDataArray *da)
   }
 
   if (fseek(fp, da->ext_offset, SEEK_SET)) {
-    fprintf(stderr, "** ext read: failed to seek to %lld in '%s'\n", da->ext_offset, da->ext_fname);
+    fprintf(stderr, "** ext read: failed to seek to %lld in '%s'\n",
+            da->ext_offset, da->ext_fname);
     fclose(fp);
     return 1;
   }
@@ -1939,12 +2014,14 @@ int gifti_read_extern_DA_data(giiDataArray *da)
   fclose(fp); /* close now in any case */
 
   if (nread != nbytes) {
-    fprintf(stderr, "** ext_read: read only %lld of %lld bytes from %s\n", nread, nbytes, da->ext_fname);
+    fprintf(stderr, "** ext_read: read only %lld of %lld bytes from %s\n",
+            nread, nbytes, da->ext_fname);
     return 1;
   }
 
   if (G.verb > 2)
-    fprintf(stderr, "-- read %lld bytes from external '%s' @ %lld\n", nbytes, da->ext_fname, da->ext_offset);
+    fprintf(stderr, "-- read %lld bytes from external '%s' @ %lld\n", nbytes,
+            da->ext_fname, da->ext_offset);
 
   return 0;
 }
@@ -1955,25 +2032,25 @@ int gifti_read_extern_DA_data(giiDataArray *da)
  *  Note: the given ext_offset _must_ refer to the current end of file.
  *
  *  return 0 on success
-*/ /*-------------------------------------------------------------------*/
-int gifti_write_extern_DA_data(giiDataArray *da)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_write_extern_DA_data(giiDataArray *da) {
   FILE *fp;
   long long nbytes, nwritten, posn;
 
-  if (!da || !da->ext_fname || !*da->ext_fname) return 0;
+  if (!da || !da->ext_fname || !*da->ext_fname)
+    return 0;
 
-  if (G.verb > 4) fprintf(stderr, "-- external write to '%s'\n", da->ext_fname);
+  if (G.verb > 4)
+    fprintf(stderr, "-- external write to '%s'\n", da->ext_fname);
 
   if (da->ext_offset < 0) {
-    fprintf(stderr, "** bad offset for external DA data write, %lld\n", da->ext_offset);
+    fprintf(stderr, "** bad offset for external DA data write, %lld\n",
+            da->ext_offset);
     return 1;
-  }
-  else if (!da->data) {
+  } else if (!da->data) {
     fprintf(stderr, "** no data for external DA data write\n");
     return 1;
-  }
-  else if (!gifti_valid_dims(da, 1)) {
+  } else if (!gifti_valid_dims(da, 1)) {
     fprintf(stderr, "** cannot write external DA data with bad dims...\n");
     return 1;
   }
@@ -1983,7 +2060,8 @@ int gifti_write_extern_DA_data(giiDataArray *da)
   /* open file for append and verify that the file offset matches this one */
   fp = fopen(da->ext_fname, "a+");
   if (!fp) {
-    fprintf(stderr, "** ext write: failed to open '%s' for append\n", da->ext_fname);
+    fprintf(stderr, "** ext write: failed to open '%s' for append\n",
+            da->ext_fname);
     return 1;
   }
 
@@ -1994,9 +2072,7 @@ int gifti_write_extern_DA_data(giiDataArray *da)
     fprintf(stderr,
             "** ext write: cur posn (%lld) not ext_offset (%lld)"
             " in file %s\n",
-            posn,
-            da->ext_offset,
-            da->ext_fname);
+            posn, da->ext_offset, da->ext_fname);
     fclose(fp);
     return 1;
   }
@@ -2006,12 +2082,14 @@ int gifti_write_extern_DA_data(giiDataArray *da)
   fclose(fp); /* close now in any case */
 
   if (nwritten != nbytes) {
-    fprintf(stderr, "** ext_write: appended only %lld of %lld bytes to %s\n", nwritten, nbytes, da->ext_fname);
+    fprintf(stderr, "** ext_write: appended only %lld of %lld bytes to %s\n",
+            nwritten, nbytes, da->ext_fname);
     return 1;
   }
 
   if (G.verb > 2)
-    fprintf(stderr, "-- appended %lld bytes to external '%s' @ %lld\n", nbytes, da->ext_fname, da->ext_offset);
+    fprintf(stderr, "-- appended %lld bytes to external '%s' @ %lld\n", nbytes,
+            da->ext_fname, da->ext_offset);
 
   return 0;
 }
@@ -2026,29 +2104,30 @@ int gifti_write_extern_DA_data(giiDataArray *da)
  *  read or write operation.
  *
  *  return 0 on success
-*/ /*-------------------------------------------------------------------*/
-int gifti_set_extern_filelist(gifti_image *gim, int nfiles, char **files)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_set_extern_filelist(gifti_image *gim, int nfiles, char **files) {
   giiDataArray *da;
   long long nbytes, offset;
   int nper;
   int daindex, findex, oindex;
 
   if (!gim || gim->numDA <= 0 || nfiles <= 0 || !files) {
-    if (G.verb > 1) fprintf(stderr, "-- set_extern_filelist: nothing to do\n");
+    if (G.verb > 1)
+      fprintf(stderr, "-- set_extern_filelist: nothing to do\n");
     return 1;
   }
 
   nper = gim->numDA / nfiles;
 
-  if (G.verb > 4) fprintf(stderr, "-- set_extern_flist for %d files (nper=%d)\n", nfiles, nper);
+  if (G.verb > 4)
+    fprintf(stderr, "-- set_extern_flist for %d files (nper=%d)\n", nfiles,
+            nper);
 
   if (nfiles * nper != gim->numDA) { /* be sure division is integral */
     fprintf(stderr,
             "** Cannot evenly divide %d DataArrays by %d"
             " external files\n",
-            gim->numDA,
-            nfiles);
+            gim->numDA, nfiles);
     return 1;
   }
 
@@ -2074,9 +2153,7 @@ int gifti_set_extern_filelist(gifti_image *gim, int nfiles, char **files)
         fprintf(stderr,
                 "** set_extern_flist: nbytes mismatch at DA[%d]\n"
                 "   (expected %lld, found %lld)\n",
-                daindex,
-                nbytes,
-                da->nvals * da->nbyper);
+                daindex, nbytes, da->nvals * da->nbyper);
         return 1;
       }
 
@@ -2089,7 +2166,9 @@ int gifti_set_extern_filelist(gifti_image *gim, int nfiles, char **files)
     }
   }
 
-  if (G.verb > 2) fprintf(stderr, "++ set extern file list, %d files, %d DAs per file", nfiles, nper);
+  if (G.verb > 2)
+    fprintf(stderr, "++ set extern file list, %d files, %d DAs per file",
+            nfiles, nper);
 
   return 0;
 }
@@ -2100,16 +2179,17 @@ int gifti_set_extern_filelist(gifti_image *gim, int nfiles, char **files)
  *  the macro value defined in nifti1.h.
  *
  *  return 0 on failure (NIFTI_INTENT_NONE)
-*/ /*-------------------------------------------------------------------*/
-int gifti_intent_from_string(const char *name)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_intent_from_string(const char *name) {
   int tablen = sizeof(gifti_intent_list) / sizeof(gifti_intent_ele);
   int c;
 
-  if (!name) return 0;
+  if (!name)
+    return 0;
 
   for (c = tablen - 1; c > 0; c--)
-    if (!strcmp(name, gifti_intent_list[c].name)) break;
+    if (!strcmp(name, gifti_intent_list[c].name))
+      break;
 
   return gifti_intent_list[c].code;
 }
@@ -2118,41 +2198,41 @@ int gifti_intent_from_string(const char *name)
 /*! Given a NIFTI_TYPE value, such as NIFTI_TYPE_INT16, return the
  *  corresponding macro label as a string.  The dtype code is the
  *  macro value defined in nifti1.h.
-*/ /*-------------------------------------------------------------------*/
-char *gifti_intent_to_string(int code)
-{
+ */ /*-------------------------------------------------------------------*/
+char *gifti_intent_to_string(int code) {
   int tablen = sizeof(gifti_intent_list) / sizeof(gifti_intent_ele);
   int c;
 
   for (c = tablen - 1; c > 0; c--)
-    if (gifti_intent_list[c].code == code) break;
+    if (gifti_intent_list[c].code == code)
+      break;
 
   return gifti_intent_list[c].name;
 }
 
 /*---------------------------------------------------------------------*/
 /*! Return whether the given code is a valid NIFTI_INTENT code.
-*/ /*-------------------------------------------------------------------*/
-int gifti_intent_is_valid(int code)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_intent_is_valid(int code) {
   int tablen = sizeof(gifti_intent_list) / sizeof(gifti_intent_ele);
   int c;
 
   for (c = tablen - 1; c > 0; c--)
-    if (gifti_intent_list[c].code == code) break;
+    if (gifti_intent_list[c].code == code)
+      break;
 
   return (c >= 0);
 }
 
 /*---------------------------------------------------------------------*/
 /*! duplicate the given string
-*/ /*-------------------------------------------------------------------*/
-char *gifti_strdup(const char *src)
-{
+ */ /*-------------------------------------------------------------------*/
+char *gifti_strdup(const char *src) {
   char *newstr;
   int len;
 
-  if (!src) return NULL; /* easy case */
+  if (!src)
+    return NULL; /* easy case */
 
   len = strlen(src) + 1;
 
@@ -2175,11 +2255,10 @@ char *gifti_strdup(const char *src)
  *  to be allocated, also.
  *
  *  If get_data is not set, gnew->data will be left as NULL.
- *  
+ *
  *  return the address of the newly allocated structure
-*/ /*-------------------------------------------------------------------*/
-giiDataArray *gifti_copy_DataArray(const giiDataArray *orig, int get_data)
-{
+ */ /*-------------------------------------------------------------------*/
+giiDataArray *gifti_copy_DataArray(const giiDataArray *orig, int get_data) {
   giiDataArray *gnew;
   int c;
 
@@ -2188,7 +2267,8 @@ giiDataArray *gifti_copy_DataArray(const giiDataArray *orig, int get_data)
     return NULL;
   }
 
-  if (G.verb > 5) fprintf(stderr, "++ copying giiDataArray...\n");
+  if (G.verb > 5)
+    fprintf(stderr, "++ copying giiDataArray...\n");
 
   gnew = (giiDataArray *)calloc(1, sizeof(giiDataArray));
   if (!gnew) {
@@ -2203,24 +2283,27 @@ giiDataArray *gifti_copy_DataArray(const giiDataArray *orig, int get_data)
   gnew->ext_fname = gifti_strdup(orig->ext_fname);
   gifti_copy_nvpairs(&gnew->meta, &orig->meta);
   if (orig->numCS > 0 && orig->coordsys) {
-    gnew->coordsys = (giiCoordSystem **)malloc(gnew->numCS * sizeof(giiCoordSystem *));
+    gnew->coordsys =
+        (giiCoordSystem **)malloc(gnew->numCS * sizeof(giiCoordSystem *));
     if (!gnew->coordsys) {
-      fprintf(stderr, "** copy_DA: failed to alloc %d CS pointers\n", gnew->numCS);
+      fprintf(stderr, "** copy_DA: failed to alloc %d CS pointers\n",
+              gnew->numCS);
       gnew->numCS = 0;
-    }
-    else
-      for (c = 0; c < gnew->numCS; c++) gnew->coordsys[c] = gifti_copy_CoordSystem(orig->coordsys[c]);
+    } else
+      for (c = 0; c < gnew->numCS; c++)
+        gnew->coordsys[c] = gifti_copy_CoordSystem(orig->coordsys[c]);
   }
 
   /* maybe the needy user wants data, too */
   if (orig->data && get_data) {
-    if (G.verb > 5) fprintf(stderr, "++ copy_DA, adding data\n");
+    if (G.verb > 5)
+      fprintf(stderr, "++ copy_DA, adding data\n");
     gnew->data = malloc(gnew->nvals * gnew->nbyper);
     if (!gnew->data) /* continue? */
-      fprintf(stderr, "** copy DA, failed to alloc %lld bytes for data\n", gnew->nvals * gnew->nbyper);
+      fprintf(stderr, "** copy DA, failed to alloc %lld bytes for data\n",
+              gnew->nvals * gnew->nbyper);
     memcpy(gnew->data, orig->data, gnew->nvals * gnew->nbyper);
-  }
-  else
+  } else
     gnew->data = NULL;
 
   /* last and certainly least, ex_atrs */
@@ -2231,15 +2314,16 @@ giiDataArray *gifti_copy_DataArray(const giiDataArray *orig, int get_data)
 
 /*---------------------------------------------------------------------*/
 /*! dupliate the giiCoordSystem struct (passing NULL is okay)
-*/ /*-------------------------------------------------------------------*/
-giiCoordSystem *gifti_copy_CoordSystem(const giiCoordSystem *src)
-{
+ */ /*-------------------------------------------------------------------*/
+giiCoordSystem *gifti_copy_CoordSystem(const giiCoordSystem *src) {
   giiCoordSystem *csnew;
   int r, c;
 
-  if (!src) return NULL; /* this may be okay */
+  if (!src)
+    return NULL; /* this may be okay */
 
-  if (G.verb > 6) fprintf(stderr, "++ copy_CS\n");
+  if (G.verb > 6)
+    fprintf(stderr, "++ copy_CS\n");
 
   csnew = (giiCoordSystem *)malloc(sizeof(giiCoordSystem));
   if (!csnew) {
@@ -2251,50 +2335,58 @@ giiCoordSystem *gifti_copy_CoordSystem(const giiCoordSystem *src)
   csnew->xformspace = gifti_strdup(src->xformspace);
 
   for (r = 0; r < 4; r++)
-    for (c = 0; c < 4; c++) csnew->xform[r][c] = src->xform[r][c];
+    for (c = 0; c < 4; c++)
+      csnew->xform[r][c] = src->xform[r][c];
 
   return csnew;
 }
 
 /*---------------------------------------------------------------------*/
 /*! dupliate the contents of the giiLabelTable struct
-*/ /*-------------------------------------------------------------------*/
-int gifti_copy_LabelTable(giiLabelTable *dest, const giiLabelTable *src)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_copy_LabelTable(giiLabelTable *dest, const giiLabelTable *src) {
   int c;
 
   if (!src || !dest) {
-    fprintf(stderr, "** copy_LabelTable: bad params (%p,%p)\n", (void *)src, (void *)dest);
+    fprintf(stderr, "** copy_LabelTable: bad params (%p,%p)\n", (void *)src,
+            (void *)dest);
     return 1;
   }
 
-  if (G.verb > 6) fprintf(stderr, "++ copy_LT\n");
+  if (G.verb > 6)
+    fprintf(stderr, "++ copy_LT\n");
 
   /* quick case: empty table */
-  if (src->length <= 0) return gifti_clear_LabelTable(dest);
+  if (src->length <= 0)
+    return gifti_clear_LabelTable(dest);
 
   /* otherwise, allocate and copy lists */
   dest->length = src->length;
 
   dest->key = (int *)malloc(dest->length * sizeof(int));
   dest->label = (char **)malloc(dest->length * sizeof(char *));
-  if (src->rgba) dest->rgba = (float *)malloc(dest->length * 4 * sizeof(float));
+  if (src->rgba)
+    dest->rgba = (float *)malloc(dest->length * 4 * sizeof(float));
 
   /* check for failure */
   if (!dest->key || !dest->label || (src->rgba && !dest->rgba)) {
-    fprintf(stderr, "** failed to dup label arrays of length %d\n", dest->length);
+    fprintf(stderr, "** failed to dup label arrays of length %d\n",
+            dest->length);
     gifti_free_LabelTable(dest);
     return 1;
   }
 
   /* copy any rgba list */
-  if (dest->rgba) memcpy(dest->rgba, src->rgba, dest->length * 4 * sizeof(float));
+  if (dest->rgba)
+    memcpy(dest->rgba, src->rgba, dest->length * 4 * sizeof(float));
 
   /* copy indices */
-  for (c = 0; c < dest->length; c++) dest->key[c] = src->key[c];
+  for (c = 0; c < dest->length; c++)
+    dest->key[c] = src->key[c];
 
   /* copy labels */
-  for (c = 0; c < dest->length; c++) dest->label[c] = gifti_strdup(src->label[c]);
+  for (c = 0; c < dest->length; c++)
+    dest->label[c] = gifti_strdup(src->label[c]);
 
   return 0;
 }
@@ -2303,15 +2395,16 @@ int gifti_copy_LabelTable(giiLabelTable *dest, const giiLabelTable *src)
 /*! dupliate the contents of one nvpairs structure into an empty one
  *
  *  return 0 on success
-*/ /*-------------------------------------------------------------------*/
-int gifti_copy_nvpairs(nvpairs *dest, const nvpairs *src)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_copy_nvpairs(nvpairs *dest, const nvpairs *src) {
   if (!dest || !src) {
-    fprintf(stderr, "** copy_NVP, bad params (%p,%p)\n", (void *)dest, (void *)src);
+    fprintf(stderr, "** copy_NVP, bad params (%p,%p)\n", (void *)dest,
+            (void *)src);
     return 1;
   }
 
-  if (G.verb > 6) fprintf(stderr, "++ copy_nvp, length %d\n", src->length);
+  if (G.verb > 6)
+    fprintf(stderr, "++ copy_nvp, length %d\n", src->length);
 
   /* check for a simple case */
   if (src->length <= 0 || !src->name || !src->value) {
@@ -2330,13 +2423,13 @@ int gifti_copy_nvpairs(nvpairs *dest, const nvpairs *src)
 
 /*---------------------------------------------------------------------*/
 /*! dupliate the list of strings
-*/ /*-------------------------------------------------------------------*/
-char **gifti_copy_char_list(char **list, int len)
-{
+ */ /*-------------------------------------------------------------------*/
+char **gifti_copy_char_list(char **list, int len) {
   char **newlist = NULL;
   int c;
 
-  if (!list || len <= 0) return NULL;
+  if (!list || len <= 0)
+    return NULL;
 
   newlist = (char **)malloc(len * sizeof(char *));
   if (!newlist) {
@@ -2354,19 +2447,22 @@ char **gifti_copy_char_list(char **list, int len)
 /*! copy any GIFTI MetaData named 'name' from dest to src (replace old)
  *
  *  return 0 on success, 1 on failure to find, -1 on error
-*/ /*-------------------------------------------------------------------*/
-int gifti_copy_gifti_meta(gifti_image *dest, gifti_image *src, const char *name)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_copy_gifti_meta(gifti_image *dest, gifti_image *src,
+                          const char *name) {
   char *value;
 
   if (!dest || !src || !name) {
-    if (G.verb > 0) fprintf(stderr, "** copy_gifti_meta: bad params(%p,%p,%p)\n", (void *)dest, (void *)src, name);
+    if (G.verb > 0)
+      fprintf(stderr, "** copy_gifti_meta: bad params(%p,%p,%p)\n",
+              (void *)dest, (void *)src, name);
     return -1;
   }
 
   value = gifti_get_meta_value(&src->meta, name);
   if (!value) {
-    if (G.verb > 4) fprintf(stderr, "-- GCGM: did not find meta name '%s'\n", name);
+    if (G.verb > 4)
+      fprintf(stderr, "-- GCGM: did not find meta name '%s'\n", name);
     return 1;
   }
 
@@ -2378,25 +2474,29 @@ int gifti_copy_gifti_meta(gifti_image *dest, gifti_image *src, const char *name)
  *  (apply to list of DAs, or to all)
  *
  *  return 0 on success, 1 on failure to find, -1 on error
-*/ /*-------------------------------------------------------------------*/
-int gifti_copy_DA_meta_many(gifti_image *dest, gifti_image *src, const char *name, const int *dalist, int len)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_copy_DA_meta_many(gifti_image *dest, gifti_image *src,
+                            const char *name, const int *dalist, int len) {
   int c, index, use_list, numDA, rv = 0;
 
   if (!dest || !dest->darray || !src || !src->darray || !name) {
-    if (G.verb > 1) fprintf(stderr, "** GCDAMM: bad params\n");
+    if (G.verb > 1)
+      fprintf(stderr, "** GCDAMM: bad params\n");
     return -1;
   }
 
   /* if they are not equal, it is probably a user mistake to be here */
   if (dest->numDA != src->numDA) {
-    if (G.verb > 0) fprintf(stderr, "-- cannot copy DA meta, numDA %d != %d\n", src->numDA, dest->numDA);
+    if (G.verb > 0)
+      fprintf(stderr, "-- cannot copy DA meta, numDA %d != %d\n", src->numDA,
+              dest->numDA);
     return -1;
   }
 
   /* the empty case is probably not an error */
   if (dest->numDA <= 0 || src->numDA <= 0) {
-    if (G.verb > 4) fprintf(stderr, "-- GCDAMM: numDA %d, %d\n", src->numDA, dest->numDA);
+    if (G.verb > 4)
+      fprintf(stderr, "-- GCDAMM: numDA %d, %d\n", src->numDA, dest->numDA);
     return 0;
   }
 
@@ -2404,7 +2504,8 @@ int gifti_copy_DA_meta_many(gifti_image *dest, gifti_image *src, const char *nam
   use_list = gifti_valid_int_list(dalist, len, 0, src->numDA - 1, G.verb);
 
   if (use_list && G.verb > 2)
-    fprintf(stderr, "++ copy_DA_meta_many, %s (list length %d)\n", use_list ? "DA in list" : "all DAs", len);
+    fprintf(stderr, "++ copy_DA_meta_many, %s (list length %d)\n",
+            use_list ? "DA in list" : "all DAs", len);
 
   /* finally, get to work */
   numDA = use_list ? len : src->numDA;
@@ -2422,19 +2523,22 @@ int gifti_copy_DA_meta_many(gifti_image *dest, gifti_image *src, const char *nam
 /*! copy any DataArray MetaData named 'name' from dest to src (replace old)
  *
  *  return 0 on success, 1 on failure to find, -1 on error
-*/ /*-------------------------------------------------------------------*/
-int gifti_copy_DA_meta(giiDataArray *dest, giiDataArray *src, const char *name)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_copy_DA_meta(giiDataArray *dest, giiDataArray *src,
+                       const char *name) {
   char *value;
 
   if (!dest || !src || !name) {
-    if (G.verb > 0) fprintf(stderr, "** copy_DA_meta: bad params(%p,%p,%p)\n", (void *)dest, (void *)src, name);
+    if (G.verb > 0)
+      fprintf(stderr, "** copy_DA_meta: bad params(%p,%p,%p)\n", (void *)dest,
+              (void *)src, name);
     return -1;
   }
 
   value = gifti_get_meta_value(&src->meta, name);
   if (!value) {
-    if (G.verb > 4) fprintf(stderr, "-- GCDAM: did not find meta name '%s'\n", name);
+    if (G.verb > 4)
+      fprintf(stderr, "-- GCDAM: did not find meta name '%s'\n", name);
     return 1;
   }
 
@@ -2445,17 +2549,19 @@ int gifti_copy_DA_meta(giiDataArray *dest, giiDataArray *src, const char *name)
 /*! copy ALL DataArray MetaData from dest to src (replace old)
  *
  *  return 0 on success, 1 on failure to find, -1 on error
-*/ /*-------------------------------------------------------------------*/
-int gifti_copy_all_DA_meta(giiDataArray *dest, giiDataArray *src)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_copy_all_DA_meta(giiDataArray *dest, giiDataArray *src) {
   int c, rv = 0;
 
   if (!dest || !src) {
-    if (G.verb > 0) fprintf(stderr, "** copy_all_DA_meta: bad params(%p,%p)\n", (void *)dest, (void *)src);
+    if (G.verb > 0)
+      fprintf(stderr, "** copy_all_DA_meta: bad params(%p,%p)\n", (void *)dest,
+              (void *)src);
     return -1;
   }
 
-  for (c = 0; c < src->meta.length; c++) rv |= gifti_copy_DA_meta(dest, src, src->meta.name[c]);
+  for (c = 0; c < src->meta.length; c++)
+    rv |= gifti_copy_DA_meta(dest, src, src->meta.name[c]);
 
   return rv;
 }
@@ -2466,25 +2572,30 @@ int gifti_copy_all_DA_meta(giiDataArray *dest, giiDataArray *src)
  *  verb  0-3 = quiet, state diff, state per DA, state all diffs
  *
  *  return 0 if they are the same, 1 if they differ
-*/ /*-------------------------------------------------------------------*/
-int gifti_compare_gifti_images(const gifti_image *g1, const gifti_image *g2, int comp_data, int verb)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_compare_gifti_images(const gifti_image *g1, const gifti_image *g2,
+                               int comp_data, int verb) {
   int diffs = 0, data_diffs = 0, gdiffs = 0, c, rv, numDA;
   int lverb = verb; /* possibly override passed 'verb' */
 
-  if (G.verb > lverb) lverb = G.verb;
+  if (G.verb > lverb)
+    lverb = G.verb;
 
   if (!g1 || !g2) {
-    if (!g1 && !g2) return 0; /* both NULL means equal */
+    if (!g1 && !g2)
+      return 0; /* both NULL means equal */
 
-    if (lverb) printf("-- gifti_images differ (exactly one is NULL)\n");
+    if (lverb)
+      printf("-- gifti_images differ (exactly one is NULL)\n");
     return 1;
   }
 
   /* check main structs */
   if (gifti_compare_gims_only(g1, g2, lverb)) {
-    if (lverb > 0) printf("++ gifti_images differ\n");
-    if (lverb < 2) return 1; /* all we need to know */
+    if (lverb > 0)
+      printf("++ gifti_images differ\n");
+    if (lverb < 2)
+      return 1; /* all we need to know */
     gdiffs++;
   }
 
@@ -2494,15 +2605,17 @@ int gifti_compare_gifti_images(const gifti_image *g1, const gifti_image *g2, int
     rv = gifti_compare_DA_pair(g1->darray[c], g2->darray[c], comp_data, lverb);
     if (rv) {
       diffs++;
-      if (rv & 2) data_diffs++;
-      if (lverb < 2) break;
-      printf("++ DataArray[%d] - difference (data %s)\n",
-             c,
+      if (rv & 2)
+        data_diffs++;
+      if (lverb < 2)
+        break;
+      printf("++ DataArray[%d] - difference (data %s)\n", c,
              !comp_data ? "untested" : data_diffs ? "differs" : "identical");
     }
   }
 
-  if (diffs && lverb > 0) printf("-- differences found in %d of %d DAs\n", diffs, numDA);
+  if (diffs && lverb > 0)
+    printf("-- differences found in %d of %d DAs\n", diffs, numDA);
 
   /* state data diffs separately */
   if (lverb > 2 && comp_data) {
@@ -2512,7 +2625,8 @@ int gifti_compare_gifti_images(const gifti_image *g1, const gifti_image *g2, int
       printf("-- data differences found in %d of %d DAs\n", data_diffs, numDA);
   }
 
-  if (diffs || gdiffs) return 1;
+  if (diffs || gdiffs)
+    return 1;
   return 0;
 }
 
@@ -2522,23 +2636,29 @@ int gifti_compare_gifti_images(const gifti_image *g1, const gifti_image *g2, int
  *  verb  0-2+ = quiet, state diff, state per DA
  *
  *  return 0 if they are the same, 1 if they differ
-*/ /*-------------------------------------------------------------------*/
-int gifti_compare_gifti_data(const gifti_image *g1, const gifti_image *g2, int verb)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_compare_gifti_data(const gifti_image *g1, const gifti_image *g2,
+                             int verb) {
   int lverb = verb, c, diffs = 0, numDA;
 
-  if (G.verb > lverb) lverb = G.verb;
+  if (G.verb > lverb)
+    lverb = G.verb;
 
   if (!g1 || !g2) {
-    if (!g1 && !g2) return 0; /* both NULL means equal */
-    if (lverb) printf("-- gim data difference (exactly one gim is NULL)\n");
+    if (!g1 && !g2)
+      return 0; /* both NULL means equal */
+    if (lverb)
+      printf("-- gim data difference (exactly one gim is NULL)\n");
     return 1;
   }
 
   /* if numDA does not match, they differ */
   if (g1->numDA != g2->numDA) {
-    if (lverb > 0) printf("-- gim data differs: numDA differs, %d vs. %d\n", g1->numDA, g2->numDA);
-    if (lverb < 2) return 1;
+    if (lverb > 0)
+      printf("-- gim data differs: numDA differs, %d vs. %d\n", g1->numDA,
+             g2->numDA);
+    if (lverb < 2)
+      return 1;
   }
 
   /* even if they differ, we may want to continue, so use minimum */
@@ -2546,8 +2666,10 @@ int gifti_compare_gifti_data(const gifti_image *g1, const gifti_image *g2, int v
   for (c = 0; c < numDA; c++) {
     if (gifti_compare_DA_data(g1->darray[c], g2->darray[c], lverb)) {
       diffs++;
-      if (lverb > 0) printf("++ data difference at DataArray[%d]\n", c);
-      if (lverb < 2) return 1;
+      if (lverb > 0)
+        printf("++ data difference at DataArray[%d]\n", c);
+      if (lverb < 2)
+        return 1;
     }
   }
 
@@ -2556,29 +2678,35 @@ int gifti_compare_gifti_data(const gifti_image *g1, const gifti_image *g2, int v
     return 1;
   }
 
-  if (G.verb > 1) fprintf(stderr, "-- no data diffs found\n");
+  if (G.verb > 1)
+    fprintf(stderr, "-- no data diffs found\n");
 
   return 0;
 }
 
-int gifti_compare_DA_data(const giiDataArray *d1, const giiDataArray *d2, int verb)
-{
+int gifti_compare_DA_data(const giiDataArray *d1, const giiDataArray *d2,
+                          int verb) {
   long long nbytes, offset;
 
   if (!d1 || !d2) {
-    if (!d1 && !d2) return 0; /* both NULL means equal */
-    if (verb > 1) printf("-- DA data difference (exactly one DA is NULL)\n");
+    if (!d1 && !d2)
+      return 0; /* both NULL means equal */
+    if (verb > 1)
+      printf("-- DA data difference (exactly one DA is NULL)\n");
     return 1;
   }
 
   if (!gifti_valid_dims(d1, verb > 1) || !gifti_valid_dims(d2, verb > 1)) {
-    if (verb > 1) printf("-- DA data diff: dims are not valid\n");
+    if (verb > 1)
+      printf("-- DA data diff: dims are not valid\n");
     return 1;
   }
 
   nbytes = d1->nvals * d1->nbyper;
   if (nbytes != (d2->nvals * d2->nbyper)) {
-    if (verb > 1) printf("-- DA data diff: nbytes differs, %lld vs. %lld\n", nbytes, d2->nvals * d2->nbyper);
+    if (verb > 1)
+      printf("-- DA data diff: nbytes differs, %lld vs. %lld\n", nbytes,
+             d2->nvals * d2->nbyper);
     return 1;
   }
 
@@ -2586,7 +2714,8 @@ int gifti_compare_DA_data(const giiDataArray *d1, const giiDataArray *d2, int ve
   offset = gifti_compare_raw_data(d1->data, d2->data, nbytes);
 
   if (offset >= 0) { /* difference in data */
-    if (verb > 1) printf("-- diff in DA data at posn %lld\n", offset / d1->nbyper);
+    if (verb > 1)
+      printf("-- diff in DA data at posn %lld\n", offset / d1->nbyper);
     return 1;
   }
 
@@ -2596,131 +2725,157 @@ int gifti_compare_DA_data(const giiDataArray *d1, const giiDataArray *d2, int ve
 /* compare everything but darray
  * (for diffs, only print if verb > 1)
  */
-int gifti_compare_gims_only(const gifti_image *g1, const gifti_image *g2, int verb)
-{
+int gifti_compare_gims_only(const gifti_image *g1, const gifti_image *g2,
+                            int verb) {
   int diffs = 0;
   int lverb = verb; /* possibly override passed 'verb' */
 
-  if (G.verb > lverb) lverb = G.verb;
+  if (G.verb > lverb)
+    lverb = G.verb;
 
   if (!g1 || !g2) {
-    if (!g1 && !g2) return 0; /* equal */
-    if (lverb > 1) printf("-- comp gifti ims: have NULL %p, %p\n", (void *)g1, (void *)g2);
+    if (!g1 && !g2)
+      return 0; /* equal */
+    if (lverb > 1)
+      printf("-- comp gifti ims: have NULL %p, %p\n", (void *)g1, (void *)g2);
     return 1; /* not equal */
   }
 
   if (g1->numDA != g2->numDA) {
     diffs++;
-    if (lverb > 1) fprintf(stderr, "-- diff in GIFTI numDA: %d vs %d\n", g1->numDA, g2->numDA);
-    if (lverb <= 1) return 1;
+    if (lverb > 1)
+      fprintf(stderr, "-- diff in GIFTI numDA: %d vs %d\n", g1->numDA,
+              g2->numDA);
+    if (lverb <= 1)
+      return 1;
   }
 
   if (!g1->version || !g2->version) { /* handle at least one NULL */
     if (g1->version || g2->version) {
       diffs++;
-      if (lverb > 1) fprintf(stderr, "-- diff in GIFTI version: one is NULL\n");
-      if (lverb <= 1) return 1;
+      if (lverb > 1)
+        fprintf(stderr, "-- diff in GIFTI version: one is NULL\n");
+      if (lverb <= 1)
+        return 1;
     }
     /* else both NULL, which means equal */
-  }
-  else if (strcmp(g1->version, g2->version)) {
+  } else if (strcmp(g1->version, g2->version)) {
     diffs++;
-    if (lverb > 1) fprintf(stderr, "-- diff in GIFTI version: %s vs. %s\n", g1->version, g2->version);
-    if (lverb <= 1) return 1;
+    if (lverb > 1)
+      fprintf(stderr, "-- diff in GIFTI version: %s vs. %s\n", g1->version,
+              g2->version);
+    if (lverb <= 1)
+      return 1;
   }
 
   if (gifti_compare_labeltable(&g1->labeltable, &g2->labeltable, verb)) {
     diffs++;
-    if (lverb > 1) printf("-- diff in gifti labeltable\n");
-    if (lverb <= 1) return 1;
+    if (lverb > 1)
+      printf("-- diff in gifti labeltable\n");
+    if (lverb <= 1)
+      return 1;
   }
 
   if (gifti_compare_nvpairs(&g1->meta, &g2->meta, verb)) {
     diffs++;
-    if (lverb > 1) printf("-- diff in gifti meta\n");
-    if (lverb <= 1) return 1;
+    if (lverb > 1)
+      printf("-- diff in gifti meta\n");
+    if (lverb <= 1)
+      return 1;
   }
 
   if (g1->swapped != g2->swapped) {
     diffs++;
-    if (lverb > 1) fprintf(stderr, "-- difference in GIM->swapped: %d vs %d\n", g1->swapped, g2->swapped);
-    if (lverb <= 1) return 1;
+    if (lverb > 1)
+      fprintf(stderr, "-- difference in GIM->swapped: %d vs %d\n", g1->swapped,
+              g2->swapped);
+    if (lverb <= 1)
+      return 1;
   }
 
   if (g1->compressed != g2->compressed) {
     diffs++;
-    if (lverb > 1) fprintf(stderr, "-- difference in GIM->compressed: %d vs %d\n", g1->compressed, g2->compressed);
-    if (lverb <= 1) return 1;
+    if (lverb > 1)
+      fprintf(stderr, "-- difference in GIM->compressed: %d vs %d\n",
+              g1->compressed, g2->compressed);
+    if (lverb <= 1)
+      return 1;
   }
 
   if (gifti_compare_nvpairs(&g1->ex_atrs, &g2->ex_atrs, verb)) {
     diffs++;
-    if (lverb > 1) printf("-- diff in gifti ex_atrs\n");
-    if (lverb <= 1) return 1;
+    if (lverb > 1)
+      printf("-- diff in gifti ex_atrs\n");
+    if (lverb <= 1)
+      return 1;
   }
 
   return diffs;
 }
 
 /*! return 0 if equal, 1 if diffs, 2 if data diffs (and 3 if both diffs) */
-int gifti_compare_DA_pair(const giiDataArray *d1, const giiDataArray *d2, int comp_data, int verb)
-{
+int gifti_compare_DA_pair(const giiDataArray *d1, const giiDataArray *d2,
+                          int comp_data, int verb) {
   long long offset;
   int c, top, diffs = 0, data_diffs = 0;
   int lverb = verb; /* possibly override passed 'verb' */
 
-  if (G.verb > lverb) lverb = G.verb;
+  if (G.verb > lverb)
+    lverb = G.verb;
 
   if (!d1 || !d2) {
-    if (!d1 && !d2) return 0; /* equal */
-    if (lverb > 2) printf("-- comp DA: have NULL: %p, %p\n", (void *)d1, (void *)d2);
+    if (!d1 && !d2)
+      return 0; /* equal */
+    if (lverb > 2)
+      printf("-- comp DA: have NULL: %p, %p\n", (void *)d1, (void *)d2);
     return 3; /* not equal */
   }
 
   if (d1->intent != d2->intent) {
     diffs = 1;
     if (lverb > 1)
-      printf("-- diff in DA intent: %d (%s) vs. %d (%s)\n",
-             d1->intent,
-             gifti_intent_to_string(d1->intent),
-             d2->intent,
+      printf("-- diff in DA intent: %d (%s) vs. %d (%s)\n", d1->intent,
+             gifti_intent_to_string(d1->intent), d2->intent,
              gifti_intent_to_string(d2->intent));
-    if (lverb < 3) return 1;
+    if (lverb < 3)
+      return 1;
   }
 
   if (d1->datatype != d2->datatype) {
     diffs = 1;
     if (lverb > 1)
-      printf("-- diff in DA datatype: %d (%s) vs. %d (%s)\n",
-             d1->datatype,
-             gifti_datatype2str(d1->datatype),
-             d2->datatype,
+      printf("-- diff in DA datatype: %d (%s) vs. %d (%s)\n", d1->datatype,
+             gifti_datatype2str(d1->datatype), d2->datatype,
              gifti_datatype2str(d2->datatype));
-    if (lverb < 3) return 1;
+    if (lverb < 3)
+      return 1;
   }
 
   if (d1->ind_ord != d2->ind_ord) {
     diffs = 1;
     if (lverb > 1)
-      printf("-- diff in DA ind_ord: %d (%s) vs. %d (%s)\n",
-             d1->ind_ord,
+      printf("-- diff in DA ind_ord: %d (%s) vs. %d (%s)\n", d1->ind_ord,
              gifti_list_index2string(gifti_index_order_list, d1->ind_ord),
              d2->ind_ord,
              gifti_list_index2string(gifti_index_order_list, d2->ind_ord));
-    if (lverb < 3) return 1;
+    if (lverb < 3)
+      return 1;
   }
 
   if (d1->num_dim != d2->num_dim) {
     diffs = 1;
     data_diffs = 1;
-    if (lverb > 1) printf("-- diff in DA num_dim: %d vs. %d\n", d1->num_dim, d2->num_dim);
-    if (lverb < 3) return 3;
+    if (lverb > 1)
+      printf("-- diff in DA num_dim: %d vs. %d\n", d1->num_dim, d2->num_dim);
+    if (lverb < 3)
+      return 3;
   }
 
   /* get minimum num_dim */
   top = d1->num_dim < d2->num_dim ? d1->num_dim : d2->num_dim;
   for (c = 0; c < top; c++)
-    if (d1->dims[c] != d2->dims[c]) break;
+    if (d1->dims[c] != d2->dims[c])
+      break;
   if (c < top) {
     diffs = 1;
     data_diffs = 1;
@@ -2730,57 +2885,67 @@ int gifti_compare_DA_pair(const giiDataArray *d1, const giiDataArray *d2, int co
       printf("  vs  ");
       gifti_disp_raw_data(d2->dims, NIFTI_TYPE_INT32, top, 1, stdout);
     }
-    if (lverb < 3) return 3;
+    if (lverb < 3)
+      return 3;
   }
 
   if (d1->encoding != d2->encoding) {
     diffs = 1;
     if (lverb > 1)
-      printf("-- diff in DA encoding: %d (%s) vs. %d (%s)\n",
-             d1->encoding,
+      printf("-- diff in DA encoding: %d (%s) vs. %d (%s)\n", d1->encoding,
              gifti_list_index2string(gifti_encoding_list, d1->encoding),
              d2->encoding,
              gifti_list_index2string(gifti_encoding_list, d2->encoding));
-    if (lverb < 3) return 1;
+    if (lverb < 3)
+      return 1;
   }
 
   if (d1->endian != d2->endian) {
     diffs = 1;
     if (lverb > 1)
-      printf("-- diff in DA endian: %d (%s) vs. %d (%s)\n",
-             d1->endian,
-             gifti_list_index2string(gifti_endian_list, d1->endian),
-             d2->endian,
+      printf("-- diff in DA endian: %d (%s) vs. %d (%s)\n", d1->endian,
+             gifti_list_index2string(gifti_endian_list, d1->endian), d2->endian,
              gifti_list_index2string(gifti_endian_list, d2->endian));
-    if (lverb < 3) return 1;
+    if (lverb < 3)
+      return 1;
   }
 
   if (d1->ext_fname || d2->ext_fname) {
-    if (!d1->ext_fname || !d2->ext_fname || strcmp(d1->ext_fname, d2->ext_fname)) {
+    if (!d1->ext_fname || !d2->ext_fname ||
+        strcmp(d1->ext_fname, d2->ext_fname)) {
       diffs = 1;
       if (lverb > 1)
-        printf(
-            "-- diff in DA ext_fname: %s vs. %s\n", G_CHECK_NULL_STR(d1->ext_fname), G_CHECK_NULL_STR(d2->ext_fname));
-      if (lverb < 3) return 1;
+        printf("-- diff in DA ext_fname: %s vs. %s\n",
+               G_CHECK_NULL_STR(d1->ext_fname),
+               G_CHECK_NULL_STR(d2->ext_fname));
+      if (lverb < 3)
+        return 1;
     }
   }
 
   if (d1->ext_offset != d2->ext_offset) {
     diffs = 1;
-    if (lverb > 1) printf("-- diff in DA ext_offset: %lld vs. %lld\n", d1->ext_offset, d2->ext_offset);
-    if (lverb < 3) return 1;
+    if (lverb > 1)
+      printf("-- diff in DA ext_offset: %lld vs. %lld\n", d1->ext_offset,
+             d2->ext_offset);
+    if (lverb < 3)
+      return 1;
   }
 
   if (gifti_compare_nvpairs(&d1->meta, &d2->meta, verb)) {
     diffs = 1;
-    if (lverb > 1) printf("-- diff in DA meta\n");
-    if (lverb < 3) return 1;
+    if (lverb > 1)
+      printf("-- diff in DA meta\n");
+    if (lverb < 3)
+      return 1;
   }
 
   if (d1->numCS != d2->numCS) {
     diffs = 1;
-    if (lverb > 1) printf("-- diff in DA numCS\n");
-    if (lverb < 3) return 1;
+    if (lverb > 1)
+      printf("-- diff in DA numCS\n");
+    if (lverb < 3)
+      return 1;
   }
 
   /* compare each of the CoordSystem structs */
@@ -2788,28 +2953,36 @@ int gifti_compare_DA_pair(const giiDataArray *d1, const giiDataArray *d2, int co
   for (c = 0; c < top; c++)
     if (gifti_compare_coordsys(d1->coordsys[c], d2->coordsys[c], 1, verb)) {
       diffs = 1;
-      if (lverb > 1) printf("-- diff in DA coordsys[%d]\n", c);
-      if (lverb < 3) return 1;
+      if (lverb > 1)
+        printf("-- diff in DA coordsys[%d]\n", c);
+      if (lverb < 3)
+        return 1;
     }
 
   if (d1->nvals != d2->nvals) {
     diffs = 1;
     data_diffs = 1;
-    if (lverb > 1) printf("-- diff in DA nvals: %lld vs. %lld\n", d1->nvals, d2->nvals);
-    if (lverb < 3) return 3;
+    if (lverb > 1)
+      printf("-- diff in DA nvals: %lld vs. %lld\n", d1->nvals, d2->nvals);
+    if (lverb < 3)
+      return 3;
   }
 
   if (d1->nbyper != d2->nbyper) {
     diffs = 1;
     data_diffs = 1;
-    if (lverb > 1) printf("-- diff in DA nbyper: %d vs. %d\n", d1->nbyper, d2->nbyper);
-    if (lverb < 3) return 3;
+    if (lverb > 1)
+      printf("-- diff in DA nbyper: %d vs. %d\n", d1->nbyper, d2->nbyper);
+    if (lverb < 3)
+      return 3;
   }
 
   if (gifti_compare_nvpairs(&d1->ex_atrs, &d2->ex_atrs, verb)) {
     diffs = 1;
-    if (lverb > 1) printf("-- diff in DA ex_atrs\n");
-    if (lverb < 3) return 1;
+    if (lverb > 1)
+      printf("-- diff in DA ex_atrs\n");
+    if (lverb < 3)
+      return 1;
   }
 
   /* check data last, and only if no data diffs and dims are valid */
@@ -2818,8 +2991,10 @@ int gifti_compare_DA_pair(const giiDataArray *d1, const giiDataArray *d2, int co
     offset = gifti_compare_raw_data(d1->data, d2->data, d1->nvals * d1->nbyper);
     if (offset >= 0) {
       diffs |= 2;
-      if (lverb > 1) printf("-- diff in DA data at position %lld\n", offset / d1->nbyper);
-      if (lverb < 3) return 3;
+      if (lverb > 1)
+        printf("-- diff in DA data at position %lld\n", offset / d1->nbyper);
+      if (lverb < 3)
+        return 3;
     }
   }
 
@@ -2839,30 +3014,37 @@ int gifti_compare_DA_pair(const giiDataArray *d1, const giiDataArray *d2, int co
  *  ignore version, meta, swapped, encoding, endian, ext_*, ex_atrs, etc.
  *
  *  return 1 if they are approximately the same, 0 if otherwise
-*/ /*-------------------------------------------------------------------*/
-int gifti_approx_gifti_images(const gifti_image *g1, const gifti_image *g2, int comp_data, int verb)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_approx_gifti_images(const gifti_image *g1, const gifti_image *g2,
+                              int comp_data, int verb) {
   int diffs = 0, c, numDA;
   int lverb = verb; /* possibly override passed 'verb' */
 
-  if (G.verb > lverb) lverb = G.verb;
+  if (G.verb > lverb)
+    lverb = G.verb;
 
   if (!g1 || !g2) {
-    if (!g1 && !g2) return 1; /* both NULL means equal */
+    if (!g1 && !g2)
+      return 1; /* both NULL means equal */
 
-    if (lverb) printf("-- gifti_images not approx (exactly one is NULL)\n");
+    if (lverb)
+      printf("-- gifti_images not approx (exactly one is NULL)\n");
     return 0;
   }
 
   if (g1->numDA != g2->numDA) {
-    if (lverb) printf("-- gifti_images differ in numDA\n");
-    if (lverb < 2) return 0;
+    if (lverb)
+      printf("-- gifti_images differ in numDA\n");
+    if (lverb < 2)
+      return 0;
     diffs++;
   }
 
   if (!gifti_approx_labeltables(&g1->labeltable, &g2->labeltable, lverb)) {
-    if (lverb) printf("-- gifti labeltables not approx. equal\n");
-    if (lverb < 2) return 0;
+    if (lverb)
+      printf("-- gifti labeltables not approx. equal\n");
+    if (lverb < 2)
+      return 0;
     diffs++;
   }
 
@@ -2871,12 +3053,15 @@ int gifti_approx_gifti_images(const gifti_image *g1, const gifti_image *g2, int 
   for (c = 0; c < numDA; c++) {
     if (!gifti_approx_DA_pair(g1->darray[c], g2->darray[c], comp_data, lverb)) {
       diffs++;
-      if (lverb) printf("++ DataArrays[%d] - not approximately equal\n", c);
-      if (lverb < 2) break;
+      if (lverb)
+        printf("++ DataArrays[%d] - not approximately equal\n", c);
+      if (lverb < 2)
+        break;
     }
   }
 
-  if (diffs && lverb > 0) printf("-- GIFTI: approx diffs found\n");
+  if (diffs && lverb > 0)
+    printf("-- GIFTI: approx diffs found\n");
 
   return !diffs;
 }
@@ -2897,20 +3082,22 @@ int gifti_approx_gifti_images(const gifti_image *g1, const gifti_image *g2, int 
  *         3    : print all diffs
  *
  */
-int gifti_approx_DA_pair(const giiDataArray *d1, const giiDataArray *d2, int comp_data, int verb)
-{
+int gifti_approx_DA_pair(const giiDataArray *d1, const giiDataArray *d2,
+                         int comp_data, int verb) {
   int c, top, can_comp, offset, diffs = 0;
   int lverb = verb; /* possibly override passed 'verb' */
 
-  if (G.verb > lverb) lverb = G.verb;
+  if (G.verb > lverb)
+    lverb = G.verb;
 
   /* deal with any NULLs for starter */
   if (!d1 && !d2) {
-    if (lverb > 2) printf("-- approx DA: have NULL\n");
+    if (lverb > 2)
+      printf("-- approx DA: have NULL\n");
     return 1; /* yes, these are equal */
-  }
-  else if (!d1 || !d2) {
-    if (lverb > 2) printf("-- approx DA: have one NULL\n");
+  } else if (!d1 || !d2) {
+    if (lverb > 2)
+      printf("-- approx DA: have one NULL\n");
     return 0; /* not approximately equal */
   }
 
@@ -2919,8 +3106,10 @@ int gifti_approx_DA_pair(const giiDataArray *d1, const giiDataArray *d2, int com
 
   if (d1->numCS != d2->numCS) {
     diffs = 1;
-    if (lverb > 1) printf("-- approx DA: diff in numCS\n");
-    if (lverb < 3) return 0;
+    if (lverb > 1)
+      printf("-- approx DA: diff in numCS\n");
+    if (lverb < 3)
+      return 0;
   }
 
   /* compare each of the CoordSystem structs */
@@ -2929,13 +3118,16 @@ int gifti_approx_DA_pair(const giiDataArray *d1, const giiDataArray *d2, int com
     /* first compare without checking the data */
     if (gifti_compare_coordsys(d1->coordsys[c], d2->coordsys[c], 1, verb)) {
       diffs = 1;
-      if (lverb > 1) printf("-- diff in DA coordsys[%d]\n", c);
-      if (lverb < 3) return 0;
+      if (lverb > 1)
+        printf("-- diff in DA coordsys[%d]\n", c);
+      if (lverb < 3)
+        return 0;
     }
   }
 
   /* if we cannot or do not want to compare the data, return */
-  if (!comp_data || !can_comp) return !diffs;
+  if (!comp_data || !can_comp)
+    return !diffs;
 
   /* if data is coordinates, compare percent diff
    * if trianges, compare exactly, but with any starting index
@@ -2944,27 +3136,30 @@ int gifti_approx_DA_pair(const giiDataArray *d1, const giiDataArray *d2, int com
     /* verify that these look like triangles */
     if (d1->num_dim < 2 || d1->dims[1] != 3) {
       if (lverb > 1)
-        printf(
-            "-- approx DA: bad dims for TRIANGLEs: "
-            "num_dim=%d, dims[1]=%d\n",
-            d1->num_dim,
-            d1->dims[1]);
+        printf("-- approx DA: bad dims for TRIANGLEs: "
+               "num_dim=%d, dims[1]=%d\n",
+               d1->num_dim, d1->dims[1]);
       return 0;
     }
 
-    offset = gifti_triangle_diff_offset(d1->data, d2->data, d1->dims[0], d1->datatype);
+    offset = gifti_triangle_diff_offset(d1->data, d2->data, d1->dims[0],
+                                        d1->datatype);
     if (offset >= 0) {
       diffs |= 2;
-      if (lverb > 1) printf("-- approx DA: triange diff at offset %d\n", offset);
-      if (lverb < 3) return 0;
+      if (lverb > 1)
+        printf("-- approx DA: triange diff at offset %d\n", offset);
+      if (lverb < 3)
+        return 0;
     }
-  }
-  else {
-    offset = gifti_approx_diff_offset(d1->data, d2->data, d1->nvals, d1->datatype, 1.0);
+  } else {
+    offset = gifti_approx_diff_offset(d1->data, d2->data, d1->nvals,
+                                      d1->datatype, 1.0);
     if (offset >= 0) {
       diffs |= 2;
-      if (lverb > 1) printf("-- approx DA: data diff at offset %d\n", offset);
-      if (lverb < 3) return 0;
+      if (lverb > 1)
+        printf("-- approx DA: data diff at offset %d\n", offset);
+      if (lverb < 3)
+        return 0;
     }
   }
 
@@ -2975,15 +3170,17 @@ int gifti_approx_DA_pair(const giiDataArray *d1, const giiDataArray *d2, int com
  *
  * apply the same verb as above
  */
-static int can_compare_DA_data(const giiDataArray *d1, const giiDataArray *d2, int verb)
-{
+static int can_compare_DA_data(const giiDataArray *d1, const giiDataArray *d2,
+                               int verb) {
   int c, top, rv = 1;
   int lverb = verb; /* possibly override passed 'verb' */
 
-  if (G.verb > lverb) lverb = G.verb;
+  if (G.verb > lverb)
+    lverb = G.verb;
 
   if (!d1 || !d2) {
-    if (lverb > 1) printf("-- comp DAs: have NULL DA(s) (%p, %p)\n", (void *)d1, (void *)d2);
+    if (lverb > 1)
+      printf("-- comp DAs: have NULL DA(s) (%p, %p)\n", (void *)d1, (void *)d2);
     return 0; /* not equal */
   }
 
@@ -2991,34 +3188,37 @@ static int can_compare_DA_data(const giiDataArray *d1, const giiDataArray *d2, i
     rv = 0;
     if (lverb > 1)
       printf("-- comp DAs: DA datatype diff: %d (%s) vs. %d (%s)\n",
-             d1->datatype,
-             gifti_datatype2str(d1->datatype),
-             d2->datatype,
+             d1->datatype, gifti_datatype2str(d1->datatype), d2->datatype,
              gifti_datatype2str(d2->datatype));
-    if (lverb < 3) return 0;
+    if (lverb < 3)
+      return 0;
   }
 
   if (d1->ind_ord != d2->ind_ord) {
     rv = 0;
     if (lverb > 1)
-      printf("-- comp DAs: ind_ord diff: %d (%s) vs. %d (%s)\n",
-             d1->ind_ord,
+      printf("-- comp DAs: ind_ord diff: %d (%s) vs. %d (%s)\n", d1->ind_ord,
              gifti_list_index2string(gifti_index_order_list, d1->ind_ord),
              d2->ind_ord,
              gifti_list_index2string(gifti_index_order_list, d2->ind_ord));
-    if (lverb < 3) return 0;
+    if (lverb < 3)
+      return 0;
   }
 
   if (d1->num_dim != d2->num_dim) {
     rv = 0;
-    if (lverb > 1) printf("-- comp DAs: num_dim diff: %d vs. %d\n", d1->num_dim, d2->num_dim);
-    if (lverb < 3) return 0;
+    if (lverb > 1)
+      printf("-- comp DAs: num_dim diff: %d vs. %d\n", d1->num_dim,
+             d2->num_dim);
+    if (lverb < 3)
+      return 0;
   }
 
   /* get minimum num_dim */
   top = d1->num_dim < d2->num_dim ? d1->num_dim : d2->num_dim;
   for (c = 0; c < top; c++)
-    if (d1->dims[c] != d2->dims[c]) break;
+    if (d1->dims[c] != d2->dims[c])
+      break;
   if (c < top) {
     rv = 0;
     if (lverb > 1) {
@@ -3027,25 +3227,31 @@ static int can_compare_DA_data(const giiDataArray *d1, const giiDataArray *d2, i
       printf("  vs  ");
       gifti_disp_raw_data(d2->dims, NIFTI_TYPE_INT32, top, 1, stdout);
     }
-    if (lverb < 3) return 0;
+    if (lverb < 3)
+      return 0;
   }
 
   if (d1->nvals != d2->nvals) {
     rv = 0;
-    if (lverb > 1) printf("-- comp DAs: nvals diff: %lld vs. %lld\n", d1->nvals, d2->nvals);
-    if (lverb < 3) return 0;
+    if (lverb > 1)
+      printf("-- comp DAs: nvals diff: %lld vs. %lld\n", d1->nvals, d2->nvals);
+    if (lverb < 3)
+      return 0;
   }
 
   if (d1->nbyper != d2->nbyper) {
     rv = 0;
-    if (lverb > 1) printf("-- comp DAs: nbyper diff: %d vs. %d\n", d1->nbyper, d2->nbyper);
-    if (lverb < 3) return 0;
+    if (lverb > 1)
+      printf("-- comp DAs: nbyper diff: %d vs. %d\n", d1->nbyper, d2->nbyper);
+    if (lverb < 3)
+      return 0;
   }
 
   /* as a last test, make sure dims are valid, not just the same */
   if (!gifti_valid_dims(d1, 0)) {
     rv = 0;
-    if (lverb > 1) printf("-- comp DAs: dims not valid\n");
+    if (lverb > 1)
+      printf("-- comp DAs: dims not valid\n");
   }
 
   return rv;
@@ -3056,57 +3262,69 @@ static int can_compare_DA_data(const giiDataArray *d1, const giiDataArray *d2, i
  *  and see if there is a matching Name=Value pari
  *
  *  only state diffs in the verb=3 case
-*/ /*-------------------------------------------------------------------*/
-int gifti_compare_nvpairs(const nvpairs *p1, const nvpairs *p2, int verb)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_compare_nvpairs(const nvpairs *p1, const nvpairs *p2, int verb) {
   char *value;
   int lverb = verb; /* possibly override passed verb */
   int c, diffs = 0;
   // int len = 0;
 
-  if (G.verb > lverb) lverb = G.verb;
+  if (G.verb > lverb)
+    lverb = G.verb;
 
   if (!p1 || !p2) {
-    if (!p1 && !p2) return 0; /* equal */
-    if (lverb > 2) printf("-- comp nvpairs: have NULL: %p, %p\n", (void *)p1, (void *)p2);
+    if (!p1 && !p2)
+      return 0; /* equal */
+    if (lverb > 2)
+      printf("-- comp nvpairs: have NULL: %p, %p\n", (void *)p1, (void *)p2);
     return 1; /* not equal */
   }
 
   /* they must be valid to proceed */
   if (!gifti_valid_nvpairs(p1, 0) || !gifti_valid_nvpairs(p2, 0)) {
-    if (lverb > 2) printf("-- cannot compare invalid nvpairs\n");
+    if (lverb > 2)
+      printf("-- cannot compare invalid nvpairs\n");
     return 1;
   }
 
   if (p1->length != p2->length) {
-    if (lverb > 2) printf("-- nvp list lengths differ: %d vs %d\n", p1->length, p2->length);
-    if (lverb < 3) return 1;
+    if (lverb > 2)
+      printf("-- nvp list lengths differ: %d vs %d\n", p1->length, p2->length);
+    if (lverb < 3)
+      return 1;
   }
 
   /* search for mis-matches or non-existence from list 1 into list 2  */
   /* assume Names are unique (each that is not will show a mis-match) */
   // len = p1->length < p2->length ? p1->length : p2->length;
   for (c = 0; c < p1->length; c++) {
-    if (!p1->value[c]) continue; /* skip anything that doesn't exist */
+    if (!p1->value[c])
+      continue; /* skip anything that doesn't exist */
     value = gifti_get_meta_value(p2, p1->name[c]);
     if (!value) {
-      if (lverb > 2) printf("-- nvp list 2 missing Name: '%s'\n", p1->name[c]);
+      if (lverb > 2)
+        printf("-- nvp list 2 missing Name: '%s'\n", p1->name[c]);
+      diffs++;
+    } else if (strcmp(value, p1->value[c])) {
+      if (lverb > 2)
+        printf("-- nvp diff for Name '%s':\n   '%s' vs. '%s'\n", p1->name[c],
+               p1->value[c], value);
       diffs++;
     }
-    else if (strcmp(value, p1->value[c])) {
-      if (lverb > 2) printf("-- nvp diff for Name '%s':\n   '%s' vs. '%s'\n", p1->name[c], p1->value[c], value);
-      diffs++;
-    }
-    if (diffs && lverb < 3) return 1;
+    if (diffs && lverb < 3)
+      return 1;
   }
 
   /* now just search for non-existence (mis-matches have been found) */
   for (c = 0; c < p2->length; c++) {
-    if (!p2->value[c]) continue; /* skip anything that doesn't exist */
+    if (!p2->value[c])
+      continue; /* skip anything that doesn't exist */
     value = gifti_get_meta_value(p1, p2->name[c]);
     if (!value) {
-      if (lverb > 2) printf("-- nvp list 1 missing Name: '%s'\n", p2->name[c]);
-      if (lverb < 3) return 1;
+      if (lverb > 2)
+        printf("-- nvp list 1 missing Name: '%s'\n", p2->name[c]);
+      if (lverb < 3)
+        return 1;
       diffs++;
     }
   }
@@ -3120,9 +3338,9 @@ int gifti_compare_nvpairs(const nvpairs *p1, const nvpairs *p2, int verb)
  *  return 0 if equal
  *
  *  only state diffs in the verb=3 case
-*/ /*-------------------------------------------------------------------*/
-int gifti_compare_labeltable(const giiLabelTable *t1, const giiLabelTable *t2, int verb)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_compare_labeltable(const giiLabelTable *t1, const giiLabelTable *t2,
+                             int verb) {
   return compare_labeltables(t1, t2, verb, 0);
 }
 
@@ -3132,9 +3350,9 @@ int gifti_compare_labeltable(const giiLabelTable *t1, const giiLabelTable *t2, i
  *  RGBA data is compared approximately
  *
  *  only state diffs in the verb=3 case
-*/ /*-------------------------------------------------------------------*/
-int gifti_approx_labeltables(const giiLabelTable *t1, const giiLabelTable *t2, int verb)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_approx_labeltables(const giiLabelTable *t1, const giiLabelTable *t2,
+                             int verb) {
   return (!compare_labeltables(t1, t2, verb, 1));
 }
 
@@ -3144,42 +3362,52 @@ int gifti_approx_labeltables(const giiLabelTable *t1, const giiLabelTable *t2, i
  *  only state diffs in the verb=3 case
  *
  *  if approx, compare RBGA approximately
-*/ /*-------------------------------------------------------------------*/
-static int compare_labeltables(const giiLabelTable *t1, const giiLabelTable *t2, int verb, int approx)
-{
+ */ /*-------------------------------------------------------------------*/
+static int compare_labeltables(const giiLabelTable *t1, const giiLabelTable *t2,
+                               int verb, int approx) {
   int lverb = verb; /* possibly override passed verb */
   int c, offset, diffs = 0;
   // int roff = 0;
 
-  if (G.verb > lverb) lverb = G.verb;
+  if (G.verb > lverb)
+    lverb = G.verb;
 
   if (!t1 || !t2) {
-    if (!t1 && !t2) return 0; /* equal */
-    if (lverb > 2) printf("-- Comp LabTab: have NULL: %p, %p\n", (void *)t1, (void *)t2);
+    if (!t1 && !t2)
+      return 0; /* equal */
+    if (lverb > 2)
+      printf("-- Comp LabTab: have NULL: %p, %p\n", (void *)t1, (void *)t2);
     return 1; /* not   */
   }
 
   /* if empty, return 0 */
-  if (t1->length <= 0 && t2->length <= 0) return 0;
+  if (t1->length <= 0 && t2->length <= 0)
+    return 0;
 
   if (t1->length != t2->length) {
-    if (lverb > 2) printf("-- labeltable lengths diff: %d vs. %d\n", t1->length, t2->length);
+    if (lverb > 2)
+      printf("-- labeltable lengths diff: %d vs. %d\n", t1->length, t2->length);
     return 1; /* cannot compare without equal lengths */
   }
 
   /* exactly 1 RGBA list is a difference */
   if ((t1->rgba && !t2->rgba) || (!t1->rgba && t2->rgba)) {
-    if (lverb > 2) printf("-- only 1 labeltable has RGBA list\n");
-    if (lverb < 3) return 1;
+    if (lverb > 2)
+      printf("-- only 1 labeltable has RGBA list\n");
+    if (lverb < 3)
+      return 1;
   }
 
   /* so lengths are positive and equal, compare index list and labels */
 
   /* set limit to 0.0 to compare indicies exactly */
-  offset = (int)gifti_approx_diff_offset(t1->key, t2->key, t1->length, NIFTI_TYPE_INT32, approx ? 1.0 : 0.0);
+  offset = (int)gifti_approx_diff_offset(t1->key, t2->key, t1->length,
+                                         NIFTI_TYPE_INT32, approx ? 1.0 : 0.0);
   if (offset >= 0) {
-    if (lverb > 2) printf("-- labeltable Key diff at index %d\n", offset);
-    if (lverb < 3) return 1;
+    if (lverb > 2)
+      printf("-- labeltable Key diff at index %d\n", offset);
+    if (lverb < 3)
+      return 1;
     diffs++;
   }
 
@@ -3187,8 +3415,10 @@ static int compare_labeltables(const giiLabelTable *t1, const giiLabelTable *t2,
   // roff = 0;
   for (c = 0; c < t1->length; c++) {
     if (gifti_strdiff(t1->label[c], t2->label[c])) {
-      if (lverb > 2) printf("-- labeltable Label diff at index %d\n", c);
-      if (lverb < 3) return 1;
+      if (lverb > 2)
+        printf("-- labeltable Label diff at index %d\n", c);
+      if (lverb < 3)
+        return 1;
       diffs++;
       break; /* stop at first difference */
     }
@@ -3196,11 +3426,15 @@ static int compare_labeltables(const giiLabelTable *t1, const giiLabelTable *t2,
 
   if (t1->rgba && t2->rgba) {
     /* if not approx, set limit to 0.0 to compare exactly */
-    offset = (int)gifti_approx_diff_offset(t1->rgba, t2->rgba, 4 * t1->length, NIFTI_TYPE_FLOAT32, approx ? 1.0 : 0.0);
+    offset =
+        (int)gifti_approx_diff_offset(t1->rgba, t2->rgba, 4 * t1->length,
+                                      NIFTI_TYPE_FLOAT32, approx ? 1.0 : 0.0);
     if (offset >= 0) {
       offset /= 4; /* convert from float index to RGBA index */
-      if (lverb > 2) printf("-- labeltable RGBA diff at index %d\n", offset);
-      if (lverb < 3) return 1;
+      if (lverb > 2)
+        printf("-- labeltable RGBA diff at index %d\n", offset);
+      if (lverb < 3)
+        return 1;
       diffs++;
     }
   }
@@ -3212,9 +3446,8 @@ static int compare_labeltables(const giiLabelTable *t1, const giiLabelTable *t2,
 /*! like strcmp, but also return:
  *      0: if both pointers are NULL
  *      1: if exactly one is NULL
-*/ /*-------------------------------------------------------------------*/
-int gifti_strdiff(const char *s1, const char *s2)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_strdiff(const char *s1, const char *s2) {
   if (!s1 || !s2) {
     if (s1 || s2)
       return 1; /* one NULL means different */
@@ -3229,55 +3462,69 @@ int gifti_strdiff(const char *s1, const char *s2)
 /*! check pointers, compare names and xforms
  *
  *  only state diffs in the verb=3 case
-*/ /*-------------------------------------------------------------------*/
-int gifti_compare_coordsys(const giiCoordSystem *s1, const giiCoordSystem *s2, int comp_data, int verb)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_compare_coordsys(const giiCoordSystem *s1, const giiCoordSystem *s2,
+                           int comp_data, int verb) {
   long long offset;
   int lverb = verb; /* possibly override passed verb */
   int diffs = 0;
 
-  if (G.verb > lverb) lverb = G.verb;
+  if (G.verb > lverb)
+    lverb = G.verb;
 
   if (!s1 || !s2) {
-    if (!s1 && !s2) return 0; /* equal */
-    if (lverb > 2) printf("-- Comp CoordSys: have NULL: %p, %p\n", (void *)s1, (void *)s2);
+    if (!s1 && !s2)
+      return 0; /* equal */
+    if (lverb > 2)
+      printf("-- Comp CoordSys: have NULL: %p, %p\n", (void *)s1, (void *)s2);
     return 1;
   }
 
   if (!s1->dataspace || !s2->dataspace) {
     if (s1->dataspace || s2->dataspace) {
-      if (lverb > 2) printf("-- coordsys dspace diff: exactly one is NULL\n");
-      if (lverb < 3) return 1;
+      if (lverb > 2)
+        printf("-- coordsys dspace diff: exactly one is NULL\n");
+      if (lverb < 3)
+        return 1;
       diffs++;
     }
-  }
-  else if (strcmp(s1->dataspace, s2->dataspace)) {
-    if (lverb > 2) printf("-- coordsys dspace diff: %s vs. %s\n", s1->dataspace, s2->dataspace);
-    if (lverb < 3) return 1;
+  } else if (strcmp(s1->dataspace, s2->dataspace)) {
+    if (lverb > 2)
+      printf("-- coordsys dspace diff: %s vs. %s\n", s1->dataspace,
+             s2->dataspace);
+    if (lverb < 3)
+      return 1;
     diffs++;
   }
 
   if (!s1->xformspace || !s2->xformspace) {
     if (s1->xformspace || s2->xformspace) {
-      if (lverb > 2) printf("-- coordsys xformspace diff: exactly one is NULL\n");
-      if (lverb < 3) return 1;
+      if (lverb > 2)
+        printf("-- coordsys xformspace diff: exactly one is NULL\n");
+      if (lverb < 3)
+        return 1;
       diffs++;
     }
-  }
-  else if (strcmp(s1->xformspace, s2->xformspace)) {
-    if (lverb > 2) printf("-- coordsys xformspace diff: %s vs. %s\n", s1->xformspace, s2->xformspace);
-    if (lverb < 3) return 1;
+  } else if (strcmp(s1->xformspace, s2->xformspace)) {
+    if (lverb > 2)
+      printf("-- coordsys xformspace diff: %s vs. %s\n", s1->xformspace,
+             s2->xformspace);
+    if (lverb < 3)
+      return 1;
     diffs++;
   }
 
-  if (!comp_data) return diffs; /* maybe we are done */
+  if (!comp_data)
+    return diffs; /* maybe we are done */
 
   offset = gifti_compare_raw_data(s1->xform, s2->xform, sizeof(s1->xform));
   if (offset >= 0) {
     /* convert to index (to avoid printf warning)  2 Mar 2010 */
     offset /= (long long)sizeof(double);
-    if (lverb > 2) printf("-- coordsys xform diff at offset %lld\n", offset);
-    if (lverb < 3) return 1;
+    if (lverb > 2)
+      printf("-- coordsys xform diff at offset %lld\n", offset);
+    if (lverb < 3)
+      return 1;
     diffs++;
   }
 
@@ -3288,23 +3535,27 @@ int gifti_compare_coordsys(const giiCoordSystem *s1, const giiCoordSystem *s2, i
 /*! compare raw data, returing the first location difference
  *
  * return byte position of difference, so that < 0 means no difference
-*/ /*-------------------------------------------------------------------*/
-long long gifti_compare_raw_data(const void *p1, const void *p2, long long length)
-{
+ */ /*-------------------------------------------------------------------*/
+long long gifti_compare_raw_data(const void *p1, const void *p2,
+                                 long long length) {
   long long posn;
   char *d1 = (char *)p1, *d2 = (char *)p2;
 
   if (!p1 || !p2) {
-    if (!p1 && !p2) return -1; /* both NULL -> same */
-    if (G.verb > 3) fprintf(stderr, "-- raw_data pointer diff\n");
+    if (!p1 && !p2)
+      return -1; /* both NULL -> same */
+    if (G.verb > 3)
+      fprintf(stderr, "-- raw_data pointer diff\n");
     return 0; /* set difference */
   }
 
   /* scan data until done or a difference is found */
-  for (d1 = (char *)p1, d2 = (char *)p2, posn = 0; posn < length && *d1 == *d2; posn++, d1++, d2++)
+  for (d1 = (char *)p1, d2 = (char *)p2, posn = 0; posn < length && *d1 == *d2;
+       posn++, d1++, d2++)
     ;
 
-  if (posn < length) return posn; /* differ at posn */
+  if (posn < length)
+    return posn; /* differ at posn */
 
   return -1; /* equal */
 }
@@ -3335,127 +3586,171 @@ long long gifti_compare_raw_data(const void *p1, const void *p2, long long lengt
  *
  * return offset index, so that < 0 (-1)  means no difference
  *
- * (return -1 if the pointers differ in whether they are set) 
-*/ /*-------------------------------------------------------------------*/
-long long gifti_approx_diff_offset(const void *p1, const void *p2, long long length, int ni_type, double limit)
-{
+ * (return -1 if the pointers differ in whether they are set)
+ */ /*-------------------------------------------------------------------*/
+long long gifti_approx_diff_offset(const void *p1, const void *p2,
+                                   long long length, int ni_type,
+                                   double limit) {
   long long posn;
   double llim = limit; /* local limit (passed limit or default) */
 
   if (!p1 || !p2) {
-    if (!p1 && !p2) return -1; /* same */
-    return 0;                  /* different */
+    if (!p1 && !p2)
+      return -1; /* same */
+    return 0;    /* different */
   }
 
   switch (ni_type) {
-    default:
-      fprintf(stderr, "** cannot test approx data with type %d (%s)\n", ni_type, nifti_datatype_to_string(ni_type));
-      return 0;
+  default:
+    fprintf(stderr, "** cannot test approx data with type %d (%s)\n", ni_type,
+            nifti_datatype_to_string(ni_type));
+    return 0;
 
-    case NIFTI_TYPE_INT8: {
-      char *d1 = (char *)p1, *d2 = (char *)p2;
-      if (llim >= 1.0) llim = 0.0; /* require equality for ints */
-      for (posn = 0; posn < length; posn++, d1++, d2++) {
-        if (*d1 == *d2) continue;              /* fast check for equality */
-        if (llim == 0.0) break;                /* fast check for inequality */
-        if (GIFTI_SFD(*d1, *d2) > llim) break; /* not approximate */
-      }
-      break;
+  case NIFTI_TYPE_INT8: {
+    char *d1 = (char *)p1, *d2 = (char *)p2;
+    if (llim >= 1.0)
+      llim = 0.0; /* require equality for ints */
+    for (posn = 0; posn < length; posn++, d1++, d2++) {
+      if (*d1 == *d2)
+        continue; /* fast check for equality */
+      if (llim == 0.0)
+        break; /* fast check for inequality */
+      if (GIFTI_SFD(*d1, *d2) > llim)
+        break; /* not approximate */
     }
-    case NIFTI_TYPE_INT16: {
-      short *d1 = (short *)p1, *d2 = (short *)p2;
-      if (llim >= 1.0) llim = 0.0; /* require equality for ints */
-      for (posn = 0; posn < length; posn++, d1++, d2++) {
-        if (*d1 == *d2) continue;              /* fast check for equality */
-        if (llim == 0.0) break;                /* fast check for inequality */
-        if (GIFTI_SFD(*d1, *d2) > llim) break; /* not approximate */
-      }
-      break;
+    break;
+  }
+  case NIFTI_TYPE_INT16: {
+    short *d1 = (short *)p1, *d2 = (short *)p2;
+    if (llim >= 1.0)
+      llim = 0.0; /* require equality for ints */
+    for (posn = 0; posn < length; posn++, d1++, d2++) {
+      if (*d1 == *d2)
+        continue; /* fast check for equality */
+      if (llim == 0.0)
+        break; /* fast check for inequality */
+      if (GIFTI_SFD(*d1, *d2) > llim)
+        break; /* not approximate */
     }
-    case NIFTI_TYPE_INT32: {
-      int *d1 = (int *)p1, *d2 = (int *)p2;
-      if (llim >= 1.0) llim = 0.0; /* require equality for ints */
-      for (posn = 0; posn < length; posn++, d1++, d2++) {
-        if (*d1 == *d2) continue;              /* fast check for equality */
-        if (llim == 0.0) break;                /* fast check for inequality */
-        if (GIFTI_SFD(*d1, *d2) > llim) break; /* not approximate */
-      }
-      break;
+    break;
+  }
+  case NIFTI_TYPE_INT32: {
+    int *d1 = (int *)p1, *d2 = (int *)p2;
+    if (llim >= 1.0)
+      llim = 0.0; /* require equality for ints */
+    for (posn = 0; posn < length; posn++, d1++, d2++) {
+      if (*d1 == *d2)
+        continue; /* fast check for equality */
+      if (llim == 0.0)
+        break; /* fast check for inequality */
+      if (GIFTI_SFD(*d1, *d2) > llim)
+        break; /* not approximate */
     }
-    case NIFTI_TYPE_INT64: {
-      long long *d1 = (long long *)p1, *d2 = (long long *)p2;
-      if (llim >= 1.0) llim = 0.0; /* require equality for ints */
-      for (posn = 0; posn < length; posn++, d1++, d2++) {
-        if (*d1 == *d2) continue;              /* fast check for equality */
-        if (llim == 0.0) break;                /* fast check for inequality */
-        if (GIFTI_SFD(*d1, *d2) > llim) break; /* not approximate */
-      }
-      break;
+    break;
+  }
+  case NIFTI_TYPE_INT64: {
+    long long *d1 = (long long *)p1, *d2 = (long long *)p2;
+    if (llim >= 1.0)
+      llim = 0.0; /* require equality for ints */
+    for (posn = 0; posn < length; posn++, d1++, d2++) {
+      if (*d1 == *d2)
+        continue; /* fast check for equality */
+      if (llim == 0.0)
+        break; /* fast check for inequality */
+      if (GIFTI_SFD(*d1, *d2) > llim)
+        break; /* not approximate */
     }
-    case NIFTI_TYPE_UINT8: {
-      unsigned char *d1 = (unsigned char *)p1, *d2 = (unsigned char *)p2;
-      if (llim >= 1.0) llim = 0.0; /* require equality for ints */
-      for (posn = 0; posn < length; posn++, d1++, d2++) {
-        if (*d1 == *d2) continue;              /* fast check for equality */
-        if (llim == 0.0) break;                /* fast check for inequality */
-        if (GIFTI_SFD(*d1, *d2) > llim) break; /* not approximate */
-      }
-      break;
+    break;
+  }
+  case NIFTI_TYPE_UINT8: {
+    unsigned char *d1 = (unsigned char *)p1, *d2 = (unsigned char *)p2;
+    if (llim >= 1.0)
+      llim = 0.0; /* require equality for ints */
+    for (posn = 0; posn < length; posn++, d1++, d2++) {
+      if (*d1 == *d2)
+        continue; /* fast check for equality */
+      if (llim == 0.0)
+        break; /* fast check for inequality */
+      if (GIFTI_SFD(*d1, *d2) > llim)
+        break; /* not approximate */
     }
-    case NIFTI_TYPE_UINT16: {
-      unsigned short *d1 = (unsigned short *)p1, *d2 = (unsigned short *)p2;
-      if (llim >= 1.0) llim = 0.0; /* require equality for ints */
-      for (posn = 0; posn < length; posn++, d1++, d2++) {
-        if (*d1 == *d2) continue;              /* fast check for equality */
-        if (llim == 0.0) break;                /* fast check for inequality */
-        if (GIFTI_SFD(*d1, *d2) > llim) break; /* not approximate */
-      }
-      break;
+    break;
+  }
+  case NIFTI_TYPE_UINT16: {
+    unsigned short *d1 = (unsigned short *)p1, *d2 = (unsigned short *)p2;
+    if (llim >= 1.0)
+      llim = 0.0; /* require equality for ints */
+    for (posn = 0; posn < length; posn++, d1++, d2++) {
+      if (*d1 == *d2)
+        continue; /* fast check for equality */
+      if (llim == 0.0)
+        break; /* fast check for inequality */
+      if (GIFTI_SFD(*d1, *d2) > llim)
+        break; /* not approximate */
     }
-    case NIFTI_TYPE_UINT32: {
-      unsigned int *d1 = (unsigned int *)p1, *d2 = (unsigned int *)p2;
-      if (llim >= 1.0) llim = 0.0; /* require equality for ints */
-      for (posn = 0; posn < length; posn++, d1++, d2++) {
-        if (*d1 == *d2) continue;              /* fast check for equality */
-        if (llim == 0.0) break;                /* fast check for inequality */
-        if (GIFTI_SFD(*d1, *d2) > llim) break; /* not approximate */
-      }
-      break;
+    break;
+  }
+  case NIFTI_TYPE_UINT32: {
+    unsigned int *d1 = (unsigned int *)p1, *d2 = (unsigned int *)p2;
+    if (llim >= 1.0)
+      llim = 0.0; /* require equality for ints */
+    for (posn = 0; posn < length; posn++, d1++, d2++) {
+      if (*d1 == *d2)
+        continue; /* fast check for equality */
+      if (llim == 0.0)
+        break; /* fast check for inequality */
+      if (GIFTI_SFD(*d1, *d2) > llim)
+        break; /* not approximate */
     }
-    case NIFTI_TYPE_UINT64: {
-      unsigned long long *d1 = (unsigned long long *)p1;
-      unsigned long long *d2 = (unsigned long long *)p2;
-      if (llim >= 1.0) llim = 0.0; /* require equality for ints */
-      for (posn = 0; posn < length; posn++, d1++, d2++) {
-        if (*d1 == *d2) continue;              /* fast check for equality */
-        if (llim == 0.0) break;                /* fast check for inequality */
-        if (GIFTI_SFD(*d1, *d2) > llim) break; /* not approximate */
-      }
-      break;
+    break;
+  }
+  case NIFTI_TYPE_UINT64: {
+    unsigned long long *d1 = (unsigned long long *)p1;
+    unsigned long long *d2 = (unsigned long long *)p2;
+    if (llim >= 1.0)
+      llim = 0.0; /* require equality for ints */
+    for (posn = 0; posn < length; posn++, d1++, d2++) {
+      if (*d1 == *d2)
+        continue; /* fast check for equality */
+      if (llim == 0.0)
+        break; /* fast check for inequality */
+      if (GIFTI_SFD(*d1, *d2) > llim)
+        break; /* not approximate */
     }
-    case NIFTI_TYPE_FLOAT32: {
-      float *d1 = (float *)p1, *d2 = (float *)p2;
-      if (llim >= 1.0) llim = 1e-5;
-      for (posn = 0; posn < length; posn++, d1++, d2++) {
-        if (*d1 == *d2) continue;              /* fast check for equality */
-        if (llim == 0.0) break;                /* fast check for inequality */
-        if (GIFTI_SFD(*d1, *d2) > llim) break; /* not approximate */
-      }
-      break;
+    break;
+  }
+  case NIFTI_TYPE_FLOAT32: {
+    float *d1 = (float *)p1, *d2 = (float *)p2;
+    if (llim >= 1.0)
+      llim = 1e-5;
+    for (posn = 0; posn < length; posn++, d1++, d2++) {
+      if (*d1 == *d2)
+        continue; /* fast check for equality */
+      if (llim == 0.0)
+        break; /* fast check for inequality */
+      if (GIFTI_SFD(*d1, *d2) > llim)
+        break; /* not approximate */
     }
-    case NIFTI_TYPE_FLOAT64: {
-      double *d1 = (double *)p1, *d2 = (double *)p2;
-      if (llim >= 1.0) llim = 1e-12;
-      for (posn = 0; posn < length; posn++, d1++, d2++) {
-        if (*d1 == *d2) continue;              /* fast check for equality */
-        if (llim == 0.0) break;                /* fast check for inequality */
-        if (GIFTI_SFD(*d1, *d2) > llim) break; /* not approximate */
-      }
-      break;
+    break;
+  }
+  case NIFTI_TYPE_FLOAT64: {
+    double *d1 = (double *)p1, *d2 = (double *)p2;
+    if (llim >= 1.0)
+      llim = 1e-12;
+    for (posn = 0; posn < length; posn++, d1++, d2++) {
+      if (*d1 == *d2)
+        continue; /* fast check for equality */
+      if (llim == 0.0)
+        break; /* fast check for inequality */
+      if (GIFTI_SFD(*d1, *d2) > llim)
+        break; /* not approximate */
     }
+    break;
+  }
   }
 
-  if (posn < length) return posn; /* differ at 1-based posn */
+  if (posn < length)
+    return posn; /* differ at 1-based posn */
 
   return -1; /* approximately equal */
 }
@@ -3468,117 +3763,126 @@ long long gifti_approx_diff_offset(const void *p1, const void *p2, long long len
  *  could cheat and compare as unsigned...
  *
  *  require consistent wrapping, but allow for varying first vertex
-*/ /*-------------------------------------------------------------------*/
-int gifti_triangle_diff_offset(const void *p1, const void *p2, int ntri, int ni_type)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_triangle_diff_offset(const void *p1, const void *p2, int ntri,
+                               int ni_type) {
   int posn = -1;
 
   /* if either pointer is not set, we're out of here */
   if (!p1 || !p2) {
-    if (!p1 && !p2) return -1; /* same */
-    return 0;                  /* different */
+    if (!p1 && !p2)
+      return -1; /* same */
+    return 0;    /* different */
   }
 
-  if (ntri <= 0) return -1;
+  if (ntri <= 0)
+    return -1;
 
   switch (ni_type) {
-    case NIFTI_TYPE_INT8: {
-      char *d1 = (char *)p1, *d2 = (char *)p2;
-      for (posn = 0; posn < ntri; posn++, d1 += 3, d2 += 3) {
-        if (*d1 == *d2) { /* same first index */
-          if (d1[1] != d2[1] || d1[2] != d2[2]) break;
-        }
-        else if (d1[0] == d2[1]) { /* index off by 1   */
-          if (d1[1] != d2[2] || d1[2] != d2[0]) break;
-        }
-        else if (d1[0] == d2[2]) { /* index off by 2   */
-          if (d1[1] != d2[0] || d1[2] != d2[1]) break;
-        }
+  case NIFTI_TYPE_INT8: {
+    char *d1 = (char *)p1, *d2 = (char *)p2;
+    for (posn = 0; posn < ntri; posn++, d1 += 3, d2 += 3) {
+      if (*d1 == *d2) { /* same first index */
+        if (d1[1] != d2[1] || d1[2] != d2[2])
+          break;
+      } else if (d1[0] == d2[1]) { /* index off by 1   */
+        if (d1[1] != d2[2] || d1[2] != d2[0])
+          break;
+      } else if (d1[0] == d2[2]) { /* index off by 2   */
+        if (d1[1] != d2[0] || d1[2] != d2[1])
+          break;
       }
-      break;
     }
-    case NIFTI_TYPE_INT16: {
-      short *d1 = (short *)p1, *d2 = (short *)p2;
-      for (posn = 0; posn < ntri; posn++, d1 += 3, d2 += 3) {
-        if (*d1 == *d2) { /* same first index */
-          if (d1[1] != d2[1] || d1[2] != d2[2]) break;
-        }
-        else if (d1[0] == d2[1]) { /* index off by 1   */
-          if (d1[1] != d2[2] || d1[2] != d2[0]) break;
-        }
-        else if (d1[0] == d2[2]) { /* index off by 2   */
-          if (d1[1] != d2[0] || d1[2] != d2[1]) break;
-        }
+    break;
+  }
+  case NIFTI_TYPE_INT16: {
+    short *d1 = (short *)p1, *d2 = (short *)p2;
+    for (posn = 0; posn < ntri; posn++, d1 += 3, d2 += 3) {
+      if (*d1 == *d2) { /* same first index */
+        if (d1[1] != d2[1] || d1[2] != d2[2])
+          break;
+      } else if (d1[0] == d2[1]) { /* index off by 1   */
+        if (d1[1] != d2[2] || d1[2] != d2[0])
+          break;
+      } else if (d1[0] == d2[2]) { /* index off by 2   */
+        if (d1[1] != d2[0] || d1[2] != d2[1])
+          break;
       }
-      break;
     }
-    case NIFTI_TYPE_INT32: {
-      int *d1 = (int *)p1, *d2 = (int *)p2;
-      for (posn = 0; posn < ntri; posn++, d1 += 3, d2 += 3) {
-        if (*d1 == *d2) { /* same first index */
-          if (d1[1] != d2[1] || d1[2] != d2[2]) break;
-        }
-        else if (d1[0] == d2[1]) { /* index off by 1   */
-          if (d1[1] != d2[2] || d1[2] != d2[0]) break;
-        }
-        else if (d1[0] == d2[2]) { /* index off by 2   */
-          if (d1[1] != d2[0] || d1[2] != d2[1]) break;
-        }
+    break;
+  }
+  case NIFTI_TYPE_INT32: {
+    int *d1 = (int *)p1, *d2 = (int *)p2;
+    for (posn = 0; posn < ntri; posn++, d1 += 3, d2 += 3) {
+      if (*d1 == *d2) { /* same first index */
+        if (d1[1] != d2[1] || d1[2] != d2[2])
+          break;
+      } else if (d1[0] == d2[1]) { /* index off by 1   */
+        if (d1[1] != d2[2] || d1[2] != d2[0])
+          break;
+      } else if (d1[0] == d2[2]) { /* index off by 2   */
+        if (d1[1] != d2[0] || d1[2] != d2[1])
+          break;
       }
-      break;
     }
-    case NIFTI_TYPE_UINT8: {
-      unsigned char *d1 = (unsigned char *)p1, *d2 = (unsigned char *)p2;
-      for (posn = 0; posn < ntri; posn++, d1 += 3, d2 += 3) {
-        if (*d1 == *d2) { /* same first index */
-          if (d1[1] != d2[1] || d1[2] != d2[2]) break;
-        }
-        else if (d1[0] == d2[1]) { /* index off by 1   */
-          if (d1[1] != d2[2] || d1[2] != d2[0]) break;
-        }
-        else if (d1[0] == d2[2]) { /* index off by 2   */
-          if (d1[1] != d2[0] || d1[2] != d2[1]) break;
-        }
+    break;
+  }
+  case NIFTI_TYPE_UINT8: {
+    unsigned char *d1 = (unsigned char *)p1, *d2 = (unsigned char *)p2;
+    for (posn = 0; posn < ntri; posn++, d1 += 3, d2 += 3) {
+      if (*d1 == *d2) { /* same first index */
+        if (d1[1] != d2[1] || d1[2] != d2[2])
+          break;
+      } else if (d1[0] == d2[1]) { /* index off by 1   */
+        if (d1[1] != d2[2] || d1[2] != d2[0])
+          break;
+      } else if (d1[0] == d2[2]) { /* index off by 2   */
+        if (d1[1] != d2[0] || d1[2] != d2[1])
+          break;
       }
-      break;
     }
-    case NIFTI_TYPE_UINT16: {
-      unsigned short *d1 = (unsigned short *)p1, *d2 = (unsigned short *)p2;
-      for (posn = 0; posn < ntri; posn++, d1 += 3, d2 += 3) {
-        if (*d1 == *d2) { /* same first index */
-          if (d1[1] != d2[1] || d1[2] != d2[2]) break;
-        }
-        else if (d1[0] == d2[1]) { /* index off by 1   */
-          if (d1[1] != d2[2] || d1[2] != d2[0]) break;
-        }
-        else if (d1[0] == d2[2]) { /* index off by 2   */
-          if (d1[1] != d2[0] || d1[2] != d2[1]) break;
-        }
+    break;
+  }
+  case NIFTI_TYPE_UINT16: {
+    unsigned short *d1 = (unsigned short *)p1, *d2 = (unsigned short *)p2;
+    for (posn = 0; posn < ntri; posn++, d1 += 3, d2 += 3) {
+      if (*d1 == *d2) { /* same first index */
+        if (d1[1] != d2[1] || d1[2] != d2[2])
+          break;
+      } else if (d1[0] == d2[1]) { /* index off by 1   */
+        if (d1[1] != d2[2] || d1[2] != d2[0])
+          break;
+      } else if (d1[0] == d2[2]) { /* index off by 2   */
+        if (d1[1] != d2[0] || d1[2] != d2[1])
+          break;
       }
-      break;
     }
-    case NIFTI_TYPE_UINT32: {
-      unsigned int *d1 = (unsigned int *)p1, *d2 = (unsigned int *)p2;
-      for (posn = 0; posn < ntri; posn++, d1 += 3, d2 += 3) {
-        if (*d1 == *d2) { /* same first index */
-          if (d1[1] != d2[1] || d1[2] != d2[2]) break;
-        }
-        else if (d1[0] == d2[1]) { /* index off by 1   */
-          if (d1[1] != d2[2] || d1[2] != d2[0]) break;
-        }
-        else if (d1[0] == d2[2]) { /* index off by 2   */
-          if (d1[1] != d2[0] || d1[2] != d2[1]) break;
-        }
+    break;
+  }
+  case NIFTI_TYPE_UINT32: {
+    unsigned int *d1 = (unsigned int *)p1, *d2 = (unsigned int *)p2;
+    for (posn = 0; posn < ntri; posn++, d1 += 3, d2 += 3) {
+      if (*d1 == *d2) { /* same first index */
+        if (d1[1] != d2[1] || d1[2] != d2[2])
+          break;
+      } else if (d1[0] == d2[1]) { /* index off by 1   */
+        if (d1[1] != d2[2] || d1[2] != d2[0])
+          break;
+      } else if (d1[0] == d2[2]) { /* index off by 2   */
+        if (d1[1] != d2[0] || d1[2] != d2[1])
+          break;
       }
-      break;
     }
-    default: {
-      fprintf(stderr, "** gifti_tri_diff: invalid type %d\n", ni_type);
-      return 1;
-    }
+    break;
+  }
+  default: {
+    fprintf(stderr, "** gifti_tri_diff: invalid type %d\n", ni_type);
+    return 1;
+  }
   }
 
-  if (posn < ntri) return posn; /* difference offset */
+  if (posn < ntri)
+    return posn; /* difference offset */
 
   return -1; /* no difference */
 }
@@ -3587,9 +3891,9 @@ int gifti_triangle_diff_offset(const void *p1, const void *p2, int ntri, int ni_
 /*! print raw data (nvals of type 'type') to the given file stream
  *
  *  possibly write a trailing newline
-*/ /*-------------------------------------------------------------------*/
-int gifti_disp_raw_data(const void *data, int type, int nvals, int newline, FILE *stream)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_disp_raw_data(const void *data, int type, int nvals, int newline,
+                        FILE *stream) {
   FILE *fp = stream ? stream : stdout;
   char *dp, fbuf[64];
   int c, size;
@@ -3602,48 +3906,50 @@ int gifti_disp_raw_data(const void *data, int type, int nvals, int newline, FILE
 
   for (c = 0, dp = (char *)data; c < nvals; c++, dp += size) {
     switch (type) {
-      case NIFTI_TYPE_INT8:
-        fprintf(fp, "%d", *(char *)dp);
-        break;
-      case NIFTI_TYPE_INT16:
-        fprintf(fp, "%d", *(short *)dp);
-        break;
-      case NIFTI_TYPE_INT32:
-        fprintf(fp, "%d", *(int *)dp);
-        break;
-      case NIFTI_TYPE_INT64:
-        fprintf(fp, "%lld", *(long long *)dp);
-        break;
-      case NIFTI_TYPE_UINT8:
-        fprintf(fp, "%u", *(unsigned char *)dp);
-        break;
-      case NIFTI_TYPE_UINT16:
-        fprintf(fp, "%u", *(unsigned short *)dp);
-        break;
-      case NIFTI_TYPE_UINT32:
-        fprintf(fp, "%u", *(unsigned int *)dp);
-        break;
-      case NIFTI_TYPE_UINT64:
-        fprintf(fp, "%llu", *(unsigned long long *)dp);
-        break;
-      case NIFTI_TYPE_FLOAT32:
-        sprintf(fbuf, "%f", *(float *)dp);
-        gifti_clear_float_zeros(fbuf);
-        fprintf(fp, "%s", fbuf);
-        break;
-      case NIFTI_TYPE_FLOAT64:
-        sprintf(fbuf, "%f", *(double *)dp);
-        gifti_clear_float_zeros(fbuf);
-        fprintf(fp, "%s", fbuf);
-        break;
-      default:
-        fprintf(stderr, "** Gdisp_raw_data: invalid type %d\n", type);
-        return 1;
+    case NIFTI_TYPE_INT8:
+      fprintf(fp, "%d", *(char *)dp);
+      break;
+    case NIFTI_TYPE_INT16:
+      fprintf(fp, "%d", *(short *)dp);
+      break;
+    case NIFTI_TYPE_INT32:
+      fprintf(fp, "%d", *(int *)dp);
+      break;
+    case NIFTI_TYPE_INT64:
+      fprintf(fp, "%lld", *(long long *)dp);
+      break;
+    case NIFTI_TYPE_UINT8:
+      fprintf(fp, "%u", *(unsigned char *)dp);
+      break;
+    case NIFTI_TYPE_UINT16:
+      fprintf(fp, "%u", *(unsigned short *)dp);
+      break;
+    case NIFTI_TYPE_UINT32:
+      fprintf(fp, "%u", *(unsigned int *)dp);
+      break;
+    case NIFTI_TYPE_UINT64:
+      fprintf(fp, "%llu", *(unsigned long long *)dp);
+      break;
+    case NIFTI_TYPE_FLOAT32:
+      sprintf(fbuf, "%f", *(float *)dp);
+      gifti_clear_float_zeros(fbuf);
+      fprintf(fp, "%s", fbuf);
+      break;
+    case NIFTI_TYPE_FLOAT64:
+      sprintf(fbuf, "%f", *(double *)dp);
+      gifti_clear_float_zeros(fbuf);
+      fprintf(fp, "%s", fbuf);
+      break;
+    default:
+      fprintf(stderr, "** Gdisp_raw_data: invalid type %d\n", type);
+      return 1;
     }
-    if (c < nvals - 1) fputc(' ', fp);
+    if (c < nvals - 1)
+      fputc(' ', fp);
   }
 
-  if (newline) fputc('\n', fp);
+  if (newline)
+    fputc('\n', fp);
 
   return 0;
 }
@@ -3652,56 +3958,65 @@ int gifti_disp_raw_data(const void *data, int type, int nvals, int newline, FILE
  *! remove trailing zeros from string of printed float
  *  return  1 if something was cleared
  *          0 if not
-*/ /*-------------------------------------------------------------------*/
-int gifti_clear_float_zeros(char *str)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_clear_float_zeros(char *str) {
   char *dp, *valp;
   int len;
 
-  if (!str || !*str) return 0; /* that was easy    */
+  if (!str || !*str)
+    return 0; /* that was easy    */
 
   dp = strchr(str, '.'); /* find '.'         */
-  if (!dp) return 0;     /* no '.', easy too */
+  if (!dp)
+    return 0; /* no '.', easy too */
 
   len = strlen(dp);
 
   /* never clear what is just to the right of '.' */
-  for (valp = dp + len - 1; (valp > dp + 1) && (*valp == ' ' || *valp == '0'); valp--)
+  for (valp = dp + len - 1; (valp > dp + 1) && (*valp == ' ' || *valp == '0');
+       valp--)
     *valp = '\0'; /* clear, so we don't worry about break conditions */
 
-  if (valp < dp + len - 1) return 1;
+  if (valp < dp + len - 1)
+    return 1;
 
   return 0;
 }
 
 /*----------------------------------------------------------------------
  *! set all DataArray attributes of the given name to the given value
-*/ /*-------------------------------------------------------------------*/
-int gifti_set_atr_in_DAs(gifti_image *gim, const char *name, const char *value, const int *dalist, int len)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_set_atr_in_DAs(gifti_image *gim, const char *name, const char *value,
+                         const int *dalist, int len) {
   int c, ind;
 
   if (!gim || !name || !value) {
-    fprintf(stderr, "** set_DA_atrs: bad params (%p,%p,%p)\n", (void *)gim, (void *)name, (void *)value);
+    fprintf(stderr, "** set_DA_atrs: bad params (%p,%p,%p)\n", (void *)gim,
+            (void *)name, (void *)value);
     return 1;
   }
 
-  if (!gim->darray) return 0; /* just leave */
+  if (!gim->darray)
+    return 0; /* just leave */
 
   if (dalist && len > 0) { /* set atrs for those DA in dalist */
-    if (!gifti_valid_int_list(dalist, len, 0, gim->numDA - 1, 1)) return 1;
+    if (!gifti_valid_int_list(dalist, len, 0, gim->numDA - 1, 1))
+      return 1;
 
     /* good to go */
     for (c = 0; c < len; c++) {
-      ind = dalist[c];                 /* for clarity */
-      if (!gim->darray[ind]) continue; /* trioanoid */
+      ind = dalist[c]; /* for clarity */
+      if (!gim->darray[ind])
+        continue; /* trioanoid */
       if (gifti_str2attr_darray(gim->darray[ind], name, value)) {
-        if (G.verb > 1) fprintf(stderr, "** bad DA attr '%s'='%s'\n", name, value);
+        if (G.verb > 1)
+          fprintf(stderr, "** bad DA attr '%s'='%s'\n", name, value);
         return 1;
       }
     }
 
-    if (G.verb > 2) fprintf(stderr, "++ set atrs in %d DAs, '%s'='%s'\n", len, name, value);
+    if (G.verb > 2)
+      fprintf(stderr, "++ set atrs in %d DAs, '%s'='%s'\n", len, name, value);
 
     return 0;
   }
@@ -3709,43 +4024,52 @@ int gifti_set_atr_in_DAs(gifti_image *gim, const char *name, const char *value, 
   /* else continue, do all of them */
 
   for (c = 0; c < gim->numDA; c++) {
-    if (!gim->darray[c]) continue; /* trioanoid */
+    if (!gim->darray[c])
+      continue; /* trioanoid */
     if (gifti_str2attr_darray(gim->darray[c], name, value)) {
-      if (G.verb > 1) fprintf(stderr, "** bad DA attr '%s'='%s'\n", name, value);
+      if (G.verb > 1)
+        fprintf(stderr, "** bad DA attr '%s'='%s'\n", name, value);
       return 1;
     }
   }
 
-  if (G.verb > 4) fprintf(stderr, "++ set attr in all DAs, '%s'='%s'\n", name, value);
+  if (G.verb > 4)
+    fprintf(stderr, "++ set attr in all DAs, '%s'='%s'\n", name, value);
 
   return 0;
 }
 
 /*----------------------------------------------------------------------
  *! set MetaData name/value pairs in all DAs in list (or all in gim)
-*/ /*-------------------------------------------------------------------*/
-int gifti_set_DA_meta(gifti_image *gim, const char *name, const char *value, const int *dalist, int len, int replace)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_set_DA_meta(gifti_image *gim, const char *name, const char *value,
+                      const int *dalist, int len, int replace) {
   int c, ind;
 
   if (!gim || !name || !value) {
-    fprintf(stderr, "** set_DA_meta: bad params (%p,%p,%p)\n", (void *)gim, (void *)name, (void *)value);
+    fprintf(stderr, "** set_DA_meta: bad params (%p,%p,%p)\n", (void *)gim,
+            (void *)name, (void *)value);
     return 1;
   }
 
-  if (!gim->darray) return 0; /* just leave */
+  if (!gim->darray)
+    return 0; /* just leave */
 
   if (dalist && len > 0) { /* set meta for those DA in dalist */
-    if (!gifti_valid_int_list(dalist, len, 0, gim->numDA - 1, 1)) return 1;
+    if (!gifti_valid_int_list(dalist, len, 0, gim->numDA - 1, 1))
+      return 1;
 
     /* good to go */
     for (c = 0; c < len; c++) {
-      ind = dalist[c];                 /* for clarity */
-      if (!gim->darray[ind]) continue; /* trioanoid */
-      if (gifti_add_to_meta(&gim->darray[ind]->meta, name, value, replace)) return 1;
+      ind = dalist[c]; /* for clarity */
+      if (!gim->darray[ind])
+        continue; /* trioanoid */
+      if (gifti_add_to_meta(&gim->darray[ind]->meta, name, value, replace))
+        return 1;
     }
 
-    if (G.verb > 2) fprintf(stderr, "++ set meta in %d DAs, '%s'='%s'\n", len, name, value);
+    if (G.verb > 2)
+      fprintf(stderr, "++ set meta in %d DAs, '%s'='%s'\n", len, name, value);
 
     return 0;
   }
@@ -3753,11 +4077,14 @@ int gifti_set_DA_meta(gifti_image *gim, const char *name, const char *value, con
   /* else continue, do all of them */
 
   for (c = 0; c < gim->numDA; c++) {
-    if (!gim->darray[c]) continue; /* trioanoid */
-    if (gifti_add_to_meta(&gim->darray[c]->meta, name, value, replace)) return 1;
+    if (!gim->darray[c])
+      continue; /* trioanoid */
+    if (gifti_add_to_meta(&gim->darray[c]->meta, name, value, replace))
+      return 1;
   }
 
-  if (G.verb > 4) fprintf(stderr, "++ set MetaData in all DAs, '%s'='%s'\n", name, value);
+  if (G.verb > 4)
+    fprintf(stderr, "++ set MetaData in all DAs, '%s'='%s'\n", name, value);
 
   return 0;
 }
@@ -3772,9 +4099,9 @@ int gifti_set_DA_meta(gifti_image *gim, const char *name, const char *value, con
  *  if alloc_data, allocate zero-filled data in each DA element
  *
  *  note that if numDA <= 0, the function returns an empty gifti_image
-*/ /*-------------------------------------------------------------------*/
-gifti_image *gifti_create_image(int numDA, int intent, int dtype, int ndim, const int *dims, int alloc_data)
-{
+ */ /*-------------------------------------------------------------------*/
+gifti_image *gifti_create_image(int numDA, int intent, int dtype, int ndim,
+                                const int *dims, int alloc_data) {
   gifti_image *gim;
   int c, errs = 0;
 
@@ -3784,12 +4111,8 @@ gifti_image *gifti_create_image(int numDA, int intent, int dtype, int ndim, cons
       fprintf(stderr,
               "     intent[%d] = %s, dtype[%d] = %s,\n"
               "     alloc_data = %d, ndim = %d, dims: ",
-              intent,
-              gifti_intent_to_string(intent),
-              dtype,
-              gifti_datatype2str(dtype),
-              alloc_data,
-              ndim);
+              intent, gifti_intent_to_string(intent), dtype,
+              gifti_datatype2str(dtype), alloc_data, ndim);
       if (!dims)
         fprintf(stderr, "<empty>\n");
       else
@@ -3807,7 +4130,8 @@ gifti_image *gifti_create_image(int numDA, int intent, int dtype, int ndim, cons
   gifti_clear_gifti_image(gim);
   gim->version = gifti_strdup(GIFTI_XML_VERSION);
 
-  if (numDA <= 0) return gim; /* done */
+  if (numDA <= 0)
+    return gim; /* done */
 
   /* apply numDA, which is incremented in add_empty_darray() */
   gim->numDA = 0;
@@ -3817,22 +4141,27 @@ gifti_image *gifti_create_image(int numDA, int intent, int dtype, int ndim, cons
   }
 
   /* init all to defaults */
-  for (c = 0; c < gim->numDA; c++) errs += gifti_set_DA_defaults(gim->darray[c]);
+  for (c = 0; c < gim->numDA; c++)
+    errs += gifti_set_DA_defaults(gim->darray[c]);
 
   /* and fill in any other pieces */
 
   if (gifti_intent_is_valid(intent))
-    errs += gifti_set_atr_in_DAs(gim, "Intent", gifti_intent_to_string(intent), NULL, 0);
+    errs += gifti_set_atr_in_DAs(gim, "Intent", gifti_intent_to_string(intent),
+                                 NULL, 0);
 
   if (gifti_valid_datatype(dtype, 1)) {
-    errs += gifti_set_atr_in_DAs(gim, "DataType", gifti_datatype2str(dtype), NULL, 0);
+    errs += gifti_set_atr_in_DAs(gim, "DataType", gifti_datatype2str(dtype),
+                                 NULL, 0);
     errs += gifti_update_nbyper(gim);
   }
 
-  if (dims && ndim >= 0) errs += gifti_set_dims_all_DA(gim, ndim, dims);
+  if (dims && ndim >= 0)
+    errs += gifti_set_dims_all_DA(gim, ndim, dims);
 
   /* don't try this if there are errors */
-  if (!errs && alloc_data) errs += gifti_alloc_DA_data(gim, NULL, 0);
+  if (!errs && alloc_data)
+    errs += gifti_alloc_DA_data(gim, NULL, 0);
 
   if (errs) { /* then fail out */
     gifti_free_image(gim);
@@ -3848,19 +4177,21 @@ gifti_image *gifti_create_image(int numDA, int intent, int dtype, int ndim, cons
  *
  *  return 0 on success
  *         1 on error
-*/ /*-------------------------------------------------------------------*/
-int gifti_alloc_DA_data(gifti_image *gim, const int *dalist, int len)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_alloc_DA_data(gifti_image *gim, const int *dalist, int len) {
   giiDataArray *da;
   long long nbytes, ntot = 0;
   int c, index, nset = 0, use_list, numDA;
 
-  if (!gim || !gim->darray || gim->numDA <= 0) return 0;
+  if (!gim || !gim->darray || gim->numDA <= 0)
+    return 0;
 
   /* decide whether to use dalist or allocate all data */
   use_list = gifti_valid_int_list(dalist, len, 0, gim->numDA - 1, 0);
 
-  if (use_list && G.verb > 2) fprintf(stderr, "++ allocating data for %s\n", use_list ? "DA in list" : "all DAs");
+  if (use_list && G.verb > 2)
+    fprintf(stderr, "++ allocating data for %s\n",
+            use_list ? "DA in list" : "all DAs");
 
   if (use_list && DA_data_exists(gim, dalist, len)) {
     fprintf(stderr, "** data already exists for some DAs in list\n");
@@ -3872,17 +4203,20 @@ int gifti_alloc_DA_data(gifti_image *gim, const int *dalist, int len)
     index = use_list ? dalist[c] : c; /* choose appropriate DA index */
     da = gim->darray[index];          /* set convenient pointer */
 
-    if (!da) continue;
+    if (!da)
+      continue;
 
     /* if dimensions do not make sense, fail out */
-    if (!gifti_valid_dims(da, G.verb > 0)) return 1;
+    if (!gifti_valid_dims(da, G.verb > 0))
+      return 1;
 
     if (da->nvals < 0 || da->nbyper < 0) {
       fprintf(stderr, "** bad nvals, nbyper in DA[%d]\n", index);
       return 1;
     }
     nbytes = da->nvals * da->nbyper;
-    if (nbytes <= 0) continue; /* skip empty data */
+    if (nbytes <= 0)
+      continue; /* skip empty data */
 
     ntot += nbytes; /* compute total bytes */
     nset++;
@@ -3892,15 +4226,13 @@ int gifti_alloc_DA_data(gifti_image *gim, const int *dalist, int len)
       fprintf(stderr,
               "** gifti_alloc_DA_data: failed on DA %d of %d\n"
               "     %lld bytes (%lld total)\n",
-              index,
-              numDA,
-              nbytes,
-              ntot);
+              index, numDA, nbytes, ntot);
       return 1;
     }
   }
 
-  if (G.verb > 3) fprintf(stderr, "++ alloc'd %lld bytes in %d DA elements\n", ntot, nset);
+  if (G.verb > 3)
+    fprintf(stderr, "++ alloc'd %lld bytes in %d DA elements\n", ntot, nset);
 
   return 0;
 }
@@ -3910,40 +4242,47 @@ int gifti_alloc_DA_data(gifti_image *gim, const int *dalist, int len)
  *
  *  return 0 on success
  *         1 on error
-*/ /*-------------------------------------------------------------------*/
-int gifti_set_dims_all_DA(gifti_image *gim, int ndim, const int *dims)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_set_dims_all_DA(gifti_image *gim, int ndim, const int *dims) {
   long long nvals;
   int c, d, nset = 0;
 
   if (!gim || ndim < 0 || ndim > GIFTI_DARRAY_DIM_LEN || !dims) {
-    fprintf(stderr, "** SDA_DA: bad params (%p, %d, %p)\n", (void *)gim, ndim, (void *)dims);
+    fprintf(stderr, "** SDA_DA: bad params (%p, %d, %p)\n", (void *)gim, ndim,
+            (void *)dims);
     return 1;
   }
 
-  if (!gim->darray || gim->numDA == 0) return 0;
+  if (!gim->darray || gim->numDA == 0)
+    return 0;
 
   /* first compute nvals */
-  for (d = 0, nvals = 1; d < ndim; d++) nvals *= dims[d];
+  for (d = 0, nvals = 1; d < ndim; d++)
+    nvals *= dims[d];
   if (nvals <= 0) {
     fprintf(stderr, "** GSDA_DA: malformed dims[%d]: ", ndim);
     gifti_disp_raw_data(dims, DT_INT32, GIFTI_DARRAY_DIM_LEN, 1, stderr);
     return 1;
   }
-  if (ndim == 0) nvals = 0;
+  if (ndim == 0)
+    nvals = 0;
 
   /* insert num_dim and fill dims (pad with 0s) */
   for (c = 0; c < gim->numDA; c++) {
-    if (!gim->darray[c]) continue; /* paranoid */
+    if (!gim->darray[c])
+      continue; /* paranoid */
     gim->darray[c]->num_dim = ndim;
-    for (d = 0; d < ndim; d++) gim->darray[c]->dims[d] = dims[d];
-    for (/* continue */; d < GIFTI_DARRAY_DIM_LEN; d++) gim->darray[c]->dims[d] = 0;
+    for (d = 0; d < ndim; d++)
+      gim->darray[c]->dims[d] = dims[d];
+    for (/* continue */; d < GIFTI_DARRAY_DIM_LEN; d++)
+      gim->darray[c]->dims[d] = 0;
     gim->darray[c]->nvals = nvals;
     nset++;
   }
 
   if (G.verb > 3) {
-    fprintf(stderr, "++ set dims in %d of %d DA elements to: ", nset, gim->numDA);
+    fprintf(stderr, "++ set dims in %d of %d DA elements to: ", nset,
+            gim->numDA);
     gifti_disp_raw_data(dims, DT_INT32, GIFTI_DARRAY_DIM_LEN, 1, stderr);
   }
 
@@ -3955,19 +4294,21 @@ int gifti_set_dims_all_DA(gifti_image *gim, int ndim, const int *dims)
  *
  *  return 0 on success
  *         1 on error
-*/ /*-------------------------------------------------------------------*/
-int gifti_update_nbyper(gifti_image *gim)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_update_nbyper(gifti_image *gim) {
   giiDataArray *da;
   int c, errs = 0;
 
-  if (!gim) return 1;
+  if (!gim)
+    return 1;
 
-  if (!gim->darray || gim->numDA == 0) return 0;
+  if (!gim->darray || gim->numDA == 0)
+    return 0;
 
   for (c = 0; c < gim->numDA; c++) {
     da = gim->darray[c]; /* just to look cleaner */
-    if (!da) continue;
+    if (!da)
+      continue;
     errs += gifti_datatype_sizes(da->datatype, &da->nbyper, NULL);
   }
 
@@ -3979,9 +4320,8 @@ int gifti_update_nbyper(gifti_image *gim)
  *
  *  return 0 on success
  *         1 on error
-*/ /*-------------------------------------------------------------------*/
-int gifti_set_DA_defaults(giiDataArray *da)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_set_DA_defaults(giiDataArray *da) {
   int c;
 
   if (!da) {
@@ -3989,7 +4329,8 @@ int gifti_set_DA_defaults(giiDataArray *da)
     return 1;
   }
 
-  if (G.verb > 6) fprintf(stderr, "-- setting DA defaults\n");
+  if (G.verb > 6)
+    fprintf(stderr, "-- setting DA defaults\n");
 
   gifti_clear_DataArray(da); /* start with empty struct */
 
@@ -4000,7 +4341,8 @@ int gifti_set_DA_defaults(giiDataArray *da)
   da->ind_ord = GIFTI_IND_ORD_ROW_MAJOR;
   da->num_dim = 1; /* one value per node */
 
-  for (c = 0; c < GIFTI_DARRAY_DIM_LEN; c++) da->dims[c] = 0;
+  for (c = 0; c < GIFTI_DARRAY_DIM_LEN; c++)
+    da->dims[c] = 0;
 
   da->encoding = GIFTI_ENCODING_B64BIN; /* zlib may not be available */
   da->endian = gifti_get_this_endian();
@@ -4015,15 +4357,15 @@ int gifti_set_DA_defaults(giiDataArray *da)
 
 /*----------------------------------------------------------------------
  *! clear the DataArray element
-*/ /*-------------------------------------------------------------------*/
-int gifti_clear_DataArray(giiDataArray *da)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_clear_DataArray(giiDataArray *da) {
   if (!da) {
     fprintf(stderr, "** NULL in clear_DataArray\n");
     return 1;
   }
 
-  if (G.verb > 5) fprintf(stderr, "-- clearing DataArray\n");
+  if (G.verb > 5)
+    fprintf(stderr, "-- clearing DataArray\n");
 
   memset(da, 0, sizeof(giiDataArray));
 
@@ -4042,19 +4384,19 @@ int gifti_clear_DataArray(giiDataArray *da)
  *
  *  return 0 on success
  *         1 on error
-*/ /*-------------------------------------------------------------------*/
-int gifti_clear_gifti_image(gifti_image *gim)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_clear_gifti_image(gifti_image *gim) {
   if (!gim) {
     fprintf(stderr, "** NULL in clear_gifti_image\n");
     return 1;
   }
 
-  if (G.verb > 5) fprintf(stderr, "-- clearing gifti_image\n");
+  if (G.verb > 5)
+    fprintf(stderr, "-- clearing gifti_image\n");
 
   /* set the version and clear all pointers */
   // memset(gim, 0, sizeof(gim)); // original
-  memset(gim, 0, sizeof(*gim));  // changed by dng
+  memset(gim, 0, sizeof(*gim)); // changed by dng
 
   gim->version = NULL;
   gifti_clear_nvpairs(&gim->meta);
@@ -4069,9 +4411,8 @@ int gifti_clear_gifti_image(gifti_image *gim)
  *! read a dataset, just for numDA
  *
  *  may write faster gxml function for this, if it seems important
-*/ /*-------------------------------------------------------------------*/
-int gifti_read_dset_numDA(const char *fname)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_read_dset_numDA(const char *fname) {
   gifti_image *gim;
   int numDA;
 
@@ -4080,15 +4421,19 @@ int gifti_read_dset_numDA(const char *fname)
     return -1;
   }
 
-  if (G.verb > 2) fprintf(stderr, "++ read dset numDA, file '%s'\n", fname);
+  if (G.verb > 2)
+    fprintf(stderr, "++ read dset numDA, file '%s'\n", fname);
 
   gim = gifti_read_da_list(fname, 0, NULL, 0);
 
-  if (!gim) return -1; /* errors already printed */
+  if (!gim)
+    return -1; /* errors already printed */
 
   numDA = gim->numDA;
 
-  if (G.verb > 1) fprintf(stderr, "++ read dset numDA, file '%s', numDA = %d\n", fname, numDA);
+  if (G.verb > 1)
+    fprintf(stderr, "++ read dset numDA, file '%s', numDA = %d\n", fname,
+            numDA);
 
   gifti_free_image(gim); /* lose dataset and return */
 
@@ -4097,16 +4442,19 @@ int gifti_read_dset_numDA(const char *fname)
 
 /*----------------------------------------------------------------------
  *! return whether the list values are from min to max
-*/ /*-------------------------------------------------------------------*/
-int gifti_valid_int_list(const int *list, int len, int min, int max, int whine)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_valid_int_list(const int *list, int len, int min, int max,
+                         int whine) {
   int c;
 
-  if (!list || len <= 0) return 0;
+  if (!list || len <= 0)
+    return 0;
 
   for (c = 0; c < len; c++)
     if (list[c] < min || list[c] > max) {
-      if (whine) fprintf(stderr, "** bad list index [%d] = %d, not in [%d,%d]\n", c, list[c], min, max);
+      if (whine)
+        fprintf(stderr, "** bad list index [%d] = %d, not in [%d,%d]\n", c,
+                list[c], min, max);
       return 0;
     }
 
@@ -4114,26 +4462,25 @@ int gifti_valid_int_list(const int *list, int len, int min, int max, int whine)
 }
 
 /* return whether any DAs in list have data */
-static int DA_data_exists(gifti_image *gim, const int *dalist, int len)
-{
+static int DA_data_exists(gifti_image *gim, const int *dalist, int len) {
   int length, uselist = 0;
   int c, ind;
 
   if (!dalist || len <= 0) { /* then scan all DA elements */
     length = gim->numDA;
-    if (length <= 0) return 0;
-  }
-  else if (!gifti_valid_int_list(dalist, len, 0, gim->numDA - 1, 1)) {
+    if (length <= 0)
+      return 0;
+  } else if (!gifti_valid_int_list(dalist, len, 0, gim->numDA - 1, 1)) {
     return 0;
-  }
-  else {
+  } else {
     uselist = 1;
     length = len;
   }
 
   for (c = 0; c < length; c++) {
     ind = uselist ? dalist[c] : c;
-    if (gim->darray[ind] && gim->darray[ind]->data) return 1;
+    if (gim->darray[ind] && gim->darray[ind]->data)
+      return 1;
   }
 
   return 0;
@@ -4145,14 +4492,17 @@ static int DA_data_exists(gifti_image *gim, const int *dalist, int len)
  *  if the name already exists, fail, unless 'replace' is set
  *
  *  return 0 on success, 1 on error
-*/ /*-------------------------------------------------------------------*/
-int gifti_add_to_meta(giiMetaData *md, const char *name, const char *value, int replace)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_add_to_meta(giiMetaData *md, const char *name, const char *value,
+                      int replace) {
   int c;
 
-  if (!md || !name || !value) return 1;
+  if (!md || !name || !value)
+    return 1;
 
-  if (G.verb > 5) fprintf(stderr, "++ GA2M: name '%s', value '%s', replace = %d\n", name, value, replace);
+  if (G.verb > 5)
+    fprintf(stderr, "++ GA2M: name '%s', value '%s', replace = %d\n", name,
+            value, replace);
 
   /* see if 'name' is already here */
   for (c = 0; c < md->length; c++) {
@@ -4169,12 +4519,13 @@ int gifti_add_to_meta(giiMetaData *md, const char *name, const char *value, int 
       }
 
       if (replace) {
-        if (G.verb > 5) fprintf(stderr, "   (add via REPLACE)\n");
-        if (md->value[c]) free(md->value[c]);
+        if (G.verb > 5)
+          fprintf(stderr, "   (add via REPLACE)\n");
+        if (md->value[c])
+          free(md->value[c]);
         md->value[c] = gifti_strdup(value);
         return 0;
-      }
-      else {
+      } else {
         fprintf(stderr, "** G_add_to_meta: name '%s', already exists\n", name);
         return 1;
       }
@@ -4183,7 +4534,8 @@ int gifti_add_to_meta(giiMetaData *md, const char *name, const char *value, int 
 
   /* name is new, so just add it */
 
-  if (G.verb > 5) fprintf(stderr, "   (adding new entry)\n");
+  if (G.verb > 5)
+    fprintf(stderr, "   (adding new entry)\n");
 
   md->length++;
   md->name = (char **)realloc(md->name, md->length * sizeof(char *));
@@ -4198,7 +4550,8 @@ int gifti_add_to_meta(giiMetaData *md, const char *name, const char *value, int 
   md->name[md->length - 1] = gifti_strdup(name);
   md->value[md->length - 1] = gifti_strdup(value);
 
-  if (!md->name[md->length - 1] || !md->value[md->length - 1]) return 1;
+  if (!md->name[md->length - 1] || !md->value[md->length - 1])
+    return 1;
 
   return 0;
 }
@@ -4209,21 +4562,23 @@ int gifti_add_to_meta(giiMetaData *md, const char *name, const char *value, int 
  *  if whine is set, complain about any errors
  *
  *  return 1 if valid, 0 otherwise
-*/ /*-------------------------------------------------------------------*/
-int gifti_valid_gifti_image(gifti_image *gim, int whine)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_valid_gifti_image(gifti_image *gim, int whine) {
   int c, errs = 0;
   float gim_version = 0.0f, gifti_xml_version = 0.0f;
 
   if (!gim) {
-    if (whine) fprintf(stderr, "** invalid: gifti_image ptr is NULL\n");
+    if (whine)
+      fprintf(stderr, "** invalid: gifti_image ptr is NULL\n");
     return 0;
   }
 
-  if (G.verb > 3) fprintf(stderr, "-- checking for valid gifti_image...\n");
+  if (G.verb > 3)
+    fprintf(stderr, "-- checking for valid gifti_image...\n");
 
   if (gim->numDA < 0) {
-    if (whine) fprintf(stderr, "** invalid: numDA = %d\n", gim->numDA);
+    if (whine)
+      fprintf(stderr, "** invalid: numDA = %d\n", gim->numDA);
     errs++;
   }
 
@@ -4232,33 +4587,41 @@ int gifti_valid_gifti_image(gifti_image *gim, int whine)
     sscanf(GIFTI_XML_VERSION, "%f", &gifti_xml_version);
   }
 
-#if 1  // NJS: original code checks string, not value, so '1' fails
+#if 1 // NJS: original code checks string, not value, so '1' fails
   if (gim_version != gifti_xml_version) {
-    if (whine) fprintf(stderr, "** invalid: gim version = %f, expected %f\n", gim_version, gifti_xml_version);
+    if (whine)
+      fprintf(stderr, "** invalid: gim version = %f, expected %f\n",
+              gim_version, gifti_xml_version);
     errs++;
   }
 #else
   if (!gim->version || strcmp(gim->version, GIFTI_XML_VERSION)) {
-    if (whine) fprintf(stderr, "** invalid: gim version = %s\n", G_CHECK_NULL_STR(gim->version));
+    if (whine)
+      fprintf(stderr, "** invalid: gim version = %s\n",
+              G_CHECK_NULL_STR(gim->version));
 #endif
 
-  if (!gifti_valid_nvpairs(&gim->meta, whine)) errs++;
+  if (!gifti_valid_nvpairs(&gim->meta, whine))
+    errs++;
 
-  if (!gifti_valid_LabelTable(&gim->labeltable, whine)) errs++;
+  if (!gifti_valid_LabelTable(&gim->labeltable, whine))
+    errs++;
 
   for (c = 0; c < gim->numDA; c++) {
-    if (G.verb > 5) fprintf(stderr, "-- checking DA[%d]\n", c);
+    if (G.verb > 5)
+      fprintf(stderr, "-- checking DA[%d]\n", c);
     if (!gifti_valid_DataArray(gim->darray[c], whine)) {
-      if (G.verb > 3) fprintf(stderr, "-- DA[%d] has errors\n", c);
+      if (G.verb > 3)
+        fprintf(stderr, "-- DA[%d] has errors\n", c);
       errs++;
-    }
-    else if (G.verb > 4)
+    } else if (G.verb > 4)
       fprintf(stderr, "-- DA[%d] is VALID\n", c);
   }
 
   /* no check on swapped or compressed */
 
-  if (!gifti_valid_nvpairs(&gim->ex_atrs, whine)) errs++;
+  if (!gifti_valid_nvpairs(&gim->ex_atrs, whine))
+    errs++;
 
   if (G.verb > 2) {
     fprintf(stderr, "-- gifti_image: errors = %d", errs);
@@ -4278,18 +4641,19 @@ int gifti_valid_gifti_image(gifti_image *gim, int whine)
 /*! return whether data exists
  *
  *  - darray, each darray[i] and darray[i]->data must be set
- *  
+ *
  *  return 1 if true, 0 otherwise
-*/ /*-------------------------------------------------------------------*/
-int gifti_image_has_data(const gifti_image *gim)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_image_has_data(const gifti_image *gim) {
   int c;
 
-  if (!gim || !gim->darray || gim->numDA <= 0) return 0;
+  if (!gim || !gim->darray || gim->numDA <= 0)
+    return 0;
 
   for (c = 0; c < gim->numDA; c++)
     if (!gim->darray[c]) {
-      if (G.verb > 3) fprintf(stderr, "** gim missing data at ind %d\n", c);
+      if (G.verb > 3)
+        fprintf(stderr, "** gim missing data at ind %d\n", c);
       return 0;
     }
 
@@ -4302,11 +4666,10 @@ int gifti_image_has_data(const gifti_image *gim)
  *  Allocate and copy all contents of the gifti_image structure and
  *  sub-structures.  If copy_data is not set, all data pointers within
  *  DataArray elements will be left as NULL.
- *  
+ *
  *  return a pointer to the newly allocated structure
-*/ /*-------------------------------------------------------------------*/
-gifti_image *gifti_copy_gifti_image(const gifti_image *gold, int copy_data)
-{
+ */ /*-------------------------------------------------------------------*/
+gifti_image *gifti_copy_gifti_image(const gifti_image *gold, int copy_data) {
   gifti_image *gnew;
   int c, errs = 0; /* check for errors at each step */
 
@@ -4315,7 +4678,9 @@ gifti_image *gifti_copy_gifti_image(const gifti_image *gold, int copy_data)
     return NULL;
   }
 
-  if (G.verb > 3) fprintf(stderr, "++ copying gifti_image (%s data)...\n", copy_data ? "with" : "without");
+  if (G.verb > 3)
+    fprintf(stderr, "++ copying gifti_image (%s data)...\n",
+            copy_data ? "with" : "without");
 
   gnew = (gifti_image *)calloc(1, sizeof(gifti_image));
   if (!gnew) {
@@ -4328,19 +4693,23 @@ gifti_image *gifti_copy_gifti_image(const gifti_image *gold, int copy_data)
   gnew->version = gifti_strdup(gold->version);
 
   errs = gifti_copy_nvpairs(&gnew->meta, &gold->meta);
-  if (!errs) errs = gifti_copy_LabelTable(&gnew->labeltable, &gold->labeltable);
+  if (!errs)
+    errs = gifti_copy_LabelTable(&gnew->labeltable, &gold->labeltable);
 
   /* if needed, create and copy the DataArray list */
   if (!errs && gold->darray && gold->numDA > 0) {
-    gnew->darray = (giiDataArray **)malloc(gold->numDA * sizeof(giiDataArray *));
+    gnew->darray =
+        (giiDataArray **)malloc(gold->numDA * sizeof(giiDataArray *));
     if (!gnew->darray) {
-      fprintf(stderr, "** copy_gim: failed to alloc darray of len %d\n", gold->numDA);
+      fprintf(stderr, "** copy_gim: failed to alloc darray of len %d\n",
+              gold->numDA);
       errs = 1;
     }
 
     for (c = 0; !errs && c < gold->numDA; c++) {
       gnew->darray[c] = gifti_copy_DataArray(gold->darray[c], copy_data);
-      if (!gnew->darray[c]) errs++;
+      if (!gnew->darray[c])
+        errs++;
     }
   }
 
@@ -4366,36 +4735,41 @@ gifti_image *gifti_copy_gifti_image(const gifti_image *gold, int copy_data)
  *  for each DataArray
  *      if data exists, convert it (free old, allocate new)
  *      else, leave as NULL
-*/ /*-------------------------------------------------------------------*/
-int gifti_convert_to_float(gifti_image *gim)
-{
+ */ /*-------------------------------------------------------------------*/
+int gifti_convert_to_float(gifti_image *gim) {
   giiDataArray *da;
   void *olddata;
   int oldtype, newtype = NIFTI_TYPE_FLOAT32; /* for future? */
   int c, nbyper, oldnbyper;
 
-  if (!gim) return 1;
+  if (!gim)
+    return 1;
 
   if (!gim->darray || gim->numDA <= 0) {
-    if (G.verb > 1) fprintf(stderr, "-- no darray to convert to float\n");
+    if (G.verb > 1)
+      fprintf(stderr, "-- no darray to convert to float\n");
     return 0;
   }
 
-  if (G.verb > 1) fprintf(stderr, "++ converting gifti_image to float\n");
+  if (G.verb > 1)
+    fprintf(stderr, "++ converting gifti_image to float\n");
 
   /* first, check for problems in any DA */
   for (c = 0; c < gim->numDA; c++) {
     da = gim->darray[c];
-    if (!da) continue;
+    if (!da)
+      continue;
 
     /* if the data has an unknown type, panic into error */
     if (da->data && !gifti_valid_datatype(da->datatype, 0)) {
-      fprintf(stderr, "** unknown dtype %d, cannot convert to floats\n", da->datatype);
+      fprintf(stderr, "** unknown dtype %d, cannot convert to floats\n",
+              da->datatype);
       return 1;
     }
 
     /* dimension information must be consistent */
-    if (!gifti_valid_dims(da, 1)) return 1;
+    if (!gifti_valid_dims(da, 1))
+      return 1;
   }
 
   /* will update nbyper in each DA, below */
@@ -4404,20 +4778,25 @@ int gifti_convert_to_float(gifti_image *gim)
   /* all is well, update all DA elements */
   for (c = 0; c < gim->numDA; c++) {
     da = gim->darray[c];
-    if (!da) continue;
+    if (!da)
+      continue;
 
     oldtype = da->datatype;
     oldnbyper = da->nbyper;
 
     if (oldtype == newtype) {
-      if (G.verb > 3) fprintf(stderr, "++ convert DA[%d] already type %s\n", c, gifti_datatype2str(newtype));
+      if (G.verb > 3)
+        fprintf(stderr, "++ convert DA[%d] already type %s\n", c,
+                gifti_datatype2str(newtype));
       continue; /* no change needed */
     }
 
     if (G.verb > 3)
-      fprintf(stderr, "++ convert DA[%d] from %s to %s\n", c, gifti_datatype2str(oldtype), gifti_datatype2str(newtype));
+      fprintf(stderr, "++ convert DA[%d] from %s to %s\n", c,
+              gifti_datatype2str(oldtype), gifti_datatype2str(newtype));
 
-    if (oldtype == newtype) continue; /* no change needed */
+    if (oldtype == newtype)
+      continue; /* no change needed */
 
     /* start trashing DataArray: adjust datatype and nbyper */
     da->datatype = newtype;
@@ -4425,14 +4804,16 @@ int gifti_convert_to_float(gifti_image *gim)
 
     /* if there is no data, we are done with this DA */
     if (!da->data) {
-      if (G.verb > 4) fprintf(stderr, "-- no data to convert\n");
+      if (G.verb > 4)
+        fprintf(stderr, "-- no data to convert\n");
       continue;
     }
 
     /* store old data pointer, and allocate new data space */
     olddata = da->data;
     da->data = NULL; /* so alloc_DA_data doesn't whine */
-    if (gifti_alloc_DA_data(gim, &c, 1)) return 1;
+    if (gifti_alloc_DA_data(gim, &c, 1))
+      return 1;
 
     /* copy the data, and nuke the old stuff */
     if (copy_data_as_float(da->data, newtype, olddata, oldtype, da->nvals)) {
@@ -4451,8 +4832,8 @@ int gifti_convert_to_float(gifti_image *gim)
 }
 
 /* copy old data to float array */
-static int copy_data_as_float(void *dest, int dtype, void *src, int stype, long long nvals)
-{
+static int copy_data_as_float(void *dest, int dtype, void *src, int stype,
+                              long long nvals) {
   float *dptr = (float *)dest;
   long long c;
 
@@ -4467,70 +4848,80 @@ static int copy_data_as_float(void *dest, int dtype, void *src, int stype, long 
   }
 
   switch (stype) {
-    default: {
-      fprintf(stderr, "** copy2float: can't handle src type %d\n", stype);
-      return 1;
-    }
+  default: {
+    fprintf(stderr, "** copy2float: can't handle src type %d\n", stype);
+    return 1;
+  }
 
-    case NIFTI_TYPE_INT8: {
-      char *sptr = (char *)src;
-      for (c = 0; c < nvals; c++) dptr[c] = (float)sptr[c];
-      break;
-    }
+  case NIFTI_TYPE_INT8: {
+    char *sptr = (char *)src;
+    for (c = 0; c < nvals; c++)
+      dptr[c] = (float)sptr[c];
+    break;
+  }
 
-    case NIFTI_TYPE_INT16: {
-      short *sptr = (short *)src;
-      for (c = 0; c < nvals; c++) dptr[c] = (float)sptr[c];
-      break;
-    }
+  case NIFTI_TYPE_INT16: {
+    short *sptr = (short *)src;
+    for (c = 0; c < nvals; c++)
+      dptr[c] = (float)sptr[c];
+    break;
+  }
 
-    case NIFTI_TYPE_INT32: {
-      int *sptr = (int *)src;
-      for (c = 0; c < nvals; c++) dptr[c] = (float)sptr[c];
-      break;
-    }
+  case NIFTI_TYPE_INT32: {
+    int *sptr = (int *)src;
+    for (c = 0; c < nvals; c++)
+      dptr[c] = (float)sptr[c];
+    break;
+  }
 
-    case NIFTI_TYPE_INT64: {
-      long long *sptr = (long long *)src;
-      for (c = 0; c < nvals; c++) dptr[c] = (float)sptr[c];
-      break;
-    }
+  case NIFTI_TYPE_INT64: {
+    long long *sptr = (long long *)src;
+    for (c = 0; c < nvals; c++)
+      dptr[c] = (float)sptr[c];
+    break;
+  }
 
-    case NIFTI_TYPE_UINT8: {
-      unsigned char *sptr = (unsigned char *)src;
-      for (c = 0; c < nvals; c++) dptr[c] = (float)sptr[c];
-      break;
-    }
+  case NIFTI_TYPE_UINT8: {
+    unsigned char *sptr = (unsigned char *)src;
+    for (c = 0; c < nvals; c++)
+      dptr[c] = (float)sptr[c];
+    break;
+  }
 
-    case NIFTI_TYPE_UINT16: {
-      unsigned short *sptr = (unsigned short *)src;
-      for (c = 0; c < nvals; c++) dptr[c] = (float)sptr[c];
-      break;
-    }
+  case NIFTI_TYPE_UINT16: {
+    unsigned short *sptr = (unsigned short *)src;
+    for (c = 0; c < nvals; c++)
+      dptr[c] = (float)sptr[c];
+    break;
+  }
 
-    case NIFTI_TYPE_UINT32: {
-      unsigned int *sptr = (unsigned int *)src;
-      for (c = 0; c < nvals; c++) dptr[c] = (float)sptr[c];
-      break;
-    }
+  case NIFTI_TYPE_UINT32: {
+    unsigned int *sptr = (unsigned int *)src;
+    for (c = 0; c < nvals; c++)
+      dptr[c] = (float)sptr[c];
+    break;
+  }
 
-    case NIFTI_TYPE_UINT64: {
-      unsigned long long *sptr = (unsigned long long *)src;
-      for (c = 0; c < nvals; c++) dptr[c] = (float)sptr[c];
-      break;
-    }
+  case NIFTI_TYPE_UINT64: {
+    unsigned long long *sptr = (unsigned long long *)src;
+    for (c = 0; c < nvals; c++)
+      dptr[c] = (float)sptr[c];
+    break;
+  }
 
-    case NIFTI_TYPE_FLOAT32: {
-      float *sptr = (float *)src;
-      for (c = 0; c < nvals; c++) dptr[c] = sptr[c];
-      break;
-    }
+  case NIFTI_TYPE_FLOAT32: {
+    float *sptr = (float *)src;
+    for (c = 0; c < nvals; c++)
+      dptr[c] = sptr[c];
+    break;
+  }
 
-    case NIFTI_TYPE_FLOAT64: {
-      double *sptr = (double *)src;
-      for (c = 0; c < nvals; c++) dptr[c] = (float)sptr[c];
-      break;
-    }
+  case NIFTI_TYPE_FLOAT64: {
+    double *sptr = (double *)src;
+    for (c = 0; c < nvals; c++)
+      dptr[c] = (float)sptr[c];
+    break;
+  }
   }
 
   return 0;

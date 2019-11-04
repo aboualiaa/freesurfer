@@ -38,36 +38,39 @@
 #if VTK_MAJOR_VERSION > 5
 #include "vtkImagingGeneralModule.h" // For export macro
 
-class VTKIMAGINGGENERAL_EXPORT vtkSimpleLabelEdgeFilter : public vtkSimpleImageToImageFilter
-{
+class VTKIMAGINGGENERAL_EXPORT vtkSimpleLabelEdgeFilter
+    : public vtkSimpleImageToImageFilter {
 public:
   static vtkSimpleLabelEdgeFilter *New();
-  vtkTypeMacro(vtkSimpleLabelEdgeFilter,vtkSimpleImageToImageFilter);
+  vtkTypeMacro(vtkSimpleLabelEdgeFilter, vtkSimpleImageToImageFilter);
 
 protected:
-  vtkSimpleLabelEdgeFilter() {};
-  ~vtkSimpleLabelEdgeFilter() override {};
+  vtkSimpleLabelEdgeFilter(){};
+  ~vtkSimpleLabelEdgeFilter() override{};
 
-  void SimpleExecute(vtkImageData* input, vtkImageData* output) override;
+  void SimpleExecute(vtkImageData *input, vtkImageData *output) override;
+
 private:
-  vtkSimpleLabelEdgeFilter(const vtkSimpleLabelEdgeFilter&) = delete;  // Not implemented.
-  void operator=(const vtkSimpleLabelEdgeFilter&) = delete;  // Not implemented.
+  vtkSimpleLabelEdgeFilter(const vtkSimpleLabelEdgeFilter &) =
+      delete;                                                // Not implemented.
+  void operator=(const vtkSimpleLabelEdgeFilter &) = delete; // Not implemented.
 };
 #else
-class vtkSimpleLabelEdgeFilter : public vtkSimpleImageToImageFilter
-{
+class vtkSimpleLabelEdgeFilter : public vtkSimpleImageToImageFilter {
 public:
   static vtkSimpleLabelEdgeFilter *New();
-  vtkTypeMacro(vtkSimpleLabelEdgeFilter,vtkSimpleImageToImageFilter);
+  vtkTypeMacro(vtkSimpleLabelEdgeFilter, vtkSimpleImageToImageFilter);
 
 protected:
-  vtkSimpleLabelEdgeFilter() {};
-  ~vtkSimpleLabelEdgeFilter() {};
+  vtkSimpleLabelEdgeFilter(){};
+  ~vtkSimpleLabelEdgeFilter(){};
 
-  virtual void SimpleExecute(vtkImageData* input, vtkImageData* output);
+  virtual void SimpleExecute(vtkImageData *input, vtkImageData *output);
+
 private:
-  vtkSimpleLabelEdgeFilter(const vtkSimpleLabelEdgeFilter&);  // Not implemented.
-  void operator=(const vtkSimpleLabelEdgeFilter&);  // Not implemented.
+  vtkSimpleLabelEdgeFilter(
+      const vtkSimpleLabelEdgeFilter &);            // Not implemented.
+  void operator=(const vtkSimpleLabelEdgeFilter &); // Not implemented.
 };
 #endif
 

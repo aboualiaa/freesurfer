@@ -22,10 +22,10 @@
  *
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+#include <cctype>
 
 #include "utils.h"
 #include "mri.h"
@@ -38,142 +38,118 @@
 #include "fio.h"
 #include "cmdargs.h"
 
-int main(int argc, char *argv[]) ;
-static int get_option(int argc, char *argv[]) ;
-static void print_usage(void) ;
-static void usage_exit(void);
+int main(int argc, char *argv[]);
+static int get_option(int argc, char *argv[]);
+static void print_usage();
+static void usage_exit();
 
-const char *Progname ;
+const char *Progname;
 
-int verbose = 0 ;
+int verbose = 0;
 int CopyNameOnly = 0;
 
-int
-main(int argc, char *argv[])
-{
-  char   **av ;
-  int    ac, nargs ;
-  MRI    *mri=NULL ;
-  char   *xform_fname=NULL, *in_fname=NULL, *out_fname=NULL ;
+int main(int argc, char *argv[]) {
+  char **av;
+  int ac, nargs;
+  MRI *mri = nullptr;
+  char *xform_fname = nullptr, *in_fname = nullptr, *out_fname = nullptr;
 
   /* rkt: check for and handle version tag */
-  nargs = handle_version_option
-          (argc, argv,
-           "$Id: mri_add_xform_to_header.c,v 1.12 2011/03/02 00:04:13 nicks Exp $",
-           "$Name:  $");
+  nargs = handle_version_option(
+      argc, argv,
+      "$Id: mri_add_xform_to_header.c,v 1.12 2011/03/02 00:04:13 nicks Exp $",
+      "$Name:  $");
 
   argc -= nargs;
 
-  Progname = argv[0] ;
-  ErrorInit(NULL, NULL, NULL) ;
-  DiagInit(NULL, NULL, NULL) ;
+  Progname = argv[0];
+  ErrorInit(NULL, NULL, NULL);
+  DiagInit(nullptr, nullptr, nullptr);
 
-  if (argc == 1)
-  {
+  if (argc == 1) {
     usage_exit();
   }
 
-  ac = argc ;
-  av = argv ;
-  for ( ; argc > 1 && ISOPTION(*argv[1]) ; argc--, argv++)
-  {
-    nargs = get_option(argc, argv) ;
-    argc -= nargs ;
-    argv += nargs ;
+  ac = argc;
+  av = argv;
+  for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
+    nargs = get_option(argc, argv);
+    argc -= nargs;
+    argv += nargs;
   }
 
-  if (argc < 2)
-  {
-    ErrorExit(ERROR_BADPARM, "%s: no transform name specified", Progname) ;
+  if (argc < 2) {
+    ErrorExit(ERROR_BADPARM, "%s: no transform name specified", Progname);
   }
-  xform_fname = argv[1] ;
+  xform_fname = argv[1];
 
-  if (argc < 3)
-  {
-    ErrorExit(ERROR_BADPARM, "%s: no input name specified", Progname) ;
+  if (argc < 3) {
+    ErrorExit(ERROR_BADPARM, "%s: no input name specified", Progname);
   }
-  in_fname = argv[2] ;
+  in_fname = argv[2];
 
-  if (argc < 4)
-  {
-    out_fname = in_fname ;
-  }
-  else
-  {
-    out_fname = argv[3] ;
+  if (argc < 4) {
+    out_fname = in_fname;
+  } else {
+    out_fname = argv[3];
   }
 
-  if (verbose)
-  {
-    fprintf(stderr, "reading from %s...", in_fname) ;
+  if (verbose) {
+    fprintf(stderr, "reading from %s...", in_fname);
   }
 
   // we have two cases, in_fname is just a directory name or .mgz
-  if (fio_IsDirectory(in_fname))
-  {
-    mri = MRIreadInfo(in_fname) ;  // must be old COR volume
-  }
-  else if (fio_FileExistsReadable(in_fname))
-  {
+  if (fio_IsDirectory(in_fname)) {
+    mri = MRIreadInfo(in_fname); // must be old COR volume
+  } else if (fio_FileExistsReadable(in_fname)) {
     char *ext = fio_extension(in_fname);
-    if (ext==0)
-    {
-      ErrorExit(ERROR_BADPARM, "%s: no extension found", Progname) ;
+    if (ext == nullptr) {
+      ErrorExit(ERROR_BADPARM, "%s: no extension found", Progname);
     }
     printf("INFO: extension is %s\n", ext);
-    if (strcmp(ext, "mgz")==0 || strcmp(ext, "mgh")==0)
-    {
-      mri = MRIread(in_fname);  // mgh or mgz
-    }
-    else
-    {
+    if (strcmp(ext, "mgz") == 0 || strcmp(ext, "mgh") == 0) {
+      mri = MRIread(in_fname); // mgh or mgz
+    } else {
       ErrorExit(ERROR_BADPARM,
                 "%s: currently only .mgz or .mgh saves transform name",
-                Progname) ;
+                Progname);
     }
   }
   if (!mri)
-    ErrorExit(ERROR_NO_FILE, "%s: could not open source file %s",
-              Progname, in_fname) ;
+    ErrorExit(ERROR_NO_FILE, "%s: could not open source file %s", Progname,
+              in_fname);
 
-  if (! CopyNameOnly)
-  {
+  if (!CopyNameOnly) {
     // why do we need to load the transform at this time
     // mri is removed anyway???? -- good point, added -s for noload
     if (input_transform_file(xform_fname, &mri->transform) != OK)
-      ErrorPrintf(ERROR_NO_MEMORY,
-                  "%s: could not read xform file '%s'\n",
+      ErrorPrintf(ERROR_NO_MEMORY, "%s: could not read xform file '%s'\n",
                   Progname, xform_fname);
     // my guess is just to verify the validity of the transform?
-    mri->linear_transform = get_linear_transform_ptr(&mri->transform) ;
+    mri->linear_transform = get_linear_transform_ptr(&mri->transform);
     mri->inverse_linear_transform =
-      get_inverse_linear_transform_ptr(&mri->transform) ;
-    mri->free_transform = 1 ;
+        get_inverse_linear_transform_ptr(&mri->transform);
+    mri->free_transform = 1;
   }
-  strcpy(mri->transform_fname, xform_fname) ;
+  strcpy(mri->transform_fname, xform_fname);
 
-  if (verbose)
-  {
-    fprintf(stderr, "done.\nwriting to %s...", out_fname) ;
+  if (verbose) {
+    fprintf(stderr, "done.\nwriting to %s...", out_fname);
   }
   // this writes COR-.info only
-  if (fio_IsDirectory(out_fname))
-  {
-    MRIwriteInfo(mri, out_fname) ;
-  }
-  else
-  {
-    MRIwrite(mri, out_fname);  // currently only mgh format write xform info
+  if (fio_IsDirectory(out_fname)) {
+    MRIwriteInfo(mri, out_fname);
+  } else {
+    MRIwrite(mri, out_fname); // currently only mgh format write xform info
   }
 
-  if (verbose)
-  {
-    fprintf(stderr, "done.\n") ;
+  if (verbose) {
+    fprintf(stderr, "done.\n");
   }
 
-  MRIfree(&mri) ;
-  exit(0) ;
-  return(0) ;
+  MRIfree(&mri);
+  exit(0);
+  return (0);
 }
 
 /*----------------------------------------------------------------------
@@ -181,54 +157,48 @@ main(int argc, char *argv[])
 
   Description:
 ----------------------------------------------------------------------*/
-static int
-get_option(int argc, char *argv[])
-{
-  int  nargs = 0 ;
-  char *option ;
+static int get_option(int argc, char *argv[]) {
+  int nargs = 0;
+  char *option;
 
-  option = argv[1] + 1 ;            /* past '-' */
-  if (!stricmp(option,"-help")||!stricmp(option,"-usage"))
-  {
+  option = argv[1] + 1; /* past '-' */
+  if (!stricmp(option, "-help") || !stricmp(option, "-usage")) {
     usage_exit();
-  }
-  else switch (toupper(*option))
-    {
+  } else
+    switch (toupper(*option)) {
     case 'C':
       CopyNameOnly = 1;
-      break ;
+      break;
     case 'V':
-      verbose = !verbose ;
-      break ;
+      verbose = !verbose;
+      break;
     case 'N':
-      nargs = 1 ;
-      break ;
+      nargs = 1;
+      break;
     case '?':
     case 'H':
     case 'U':
       print_usage();
-      exit(1) ;
-      break ;
+      exit(1);
+      break;
     default:
-      fprintf(stderr, "unknown option %s\n", argv[1]) ;
-      exit(1) ;
-      break ;
+      fprintf(stderr, "unknown option %s\n", argv[1]);
+      exit(1);
+      break;
     }
 
-  return(nargs) ;
+  return (nargs);
 }
 
 /* ------------------------------------------------------ */
-static void usage_exit(void)
-{
-  print_usage() ;
-  exit(1) ;
+static void usage_exit() {
+  print_usage();
+  exit(1);
 }
 
 /* --------------------------------------------- */
 #include "mri_add_xform_to_header.help.xml.h"
-static void print_usage(void)
-{
+static void print_usage() {
   outputHelpXml(mri_add_xform_to_header_help_xml,
                 mri_add_xform_to_header_help_xml_len);
 }

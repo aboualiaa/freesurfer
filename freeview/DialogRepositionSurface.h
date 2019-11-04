@@ -22,7 +22,6 @@
  *
  */
 
-
 #ifndef DIALOGREPOSITIONSURFACE_H
 #define DIALOGREPOSITIONSURFACE_H
 
@@ -32,8 +31,7 @@ namespace Ui {
 class DialogRepositionSurface;
 }
 
-class DialogRepositionSurface : public QDialog
-{
+class DialogRepositionSurface : public QDialog {
   Q_OBJECT
 
 public:
@@ -48,7 +46,7 @@ public:
 
   int GetSmoothingSteps();
 
-  void GetCoordinate( double* pos );
+  void GetCoordinate(double *pos);
 
   int GetFlags();
 

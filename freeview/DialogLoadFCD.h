@@ -7,8 +7,7 @@ namespace Ui {
 class DialogLoadFCD;
 }
 
-class DialogLoadFCD : public QDialog
-{
+class DialogLoadFCD : public QDialog {
   Q_OBJECT
 
 public:

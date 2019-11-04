@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 
-
 /// \class PointSet
 /// \brief A 3d point collection
 ///
@@ -14,16 +13,14 @@
 /// work-in-progress - and right now, pointsets can only be
 /// saved as json files
 
-class PointSet
-{
+class PointSet {
 public:
-
   // simple 3d point
   struct Point {
     double x, y, z, value;
     Point() : x(0), y(0), z(0), value(1) {}
     Point(double _x, double _y, double _z, double _value = 1.0)
-      : x(_x), y(_y), z(_z), value(_value) {}
+        : x(_x), y(_y), z(_z), value(_value) {}
   };
 
   bool save(std::string filename);
@@ -43,11 +40,11 @@ public:
   // let's make PointSet an extension of std::vector for ease of use
   void clear() { points.clear(); }
   void remove(int index) { points.erase(points.begin() + index); }
-  Point& operator[](int index) { return points[index]; }
+  Point &operator[](int index) { return points[index]; }
 
   // let's support iteration as well
-  typedef std::vector<Point>::iterator iterator;
-  typedef std::vector<Point>::const_iterator const_iterator;
+  using iterator = std::vector<Point>::iterator;
+  using const_iterator = std::vector<Point>::const_iterator;
   iterator begin() { return points.begin(); }
   iterator end() { return points.end(); }
 
@@ -55,7 +52,6 @@ public:
 
 private:
   std::vector<Point> points;
-
 };
 
 #endif

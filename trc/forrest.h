@@ -23,47 +23,46 @@
 #ifndef FORREST_H
 #define FORREST_H
 
-#include <vector>
-#include <iostream>
-#include <fstream>
-#include <sstream>
+#include "mri.h"
 #include <algorithm>
+#include <fstream>
+#include <iostream>
 #include <limits>
 #include <limits.h>
 #include <math.h>
-#include "mri.h"
+#include <sstream>
+#include <vector>
 
 class Forrest {
-  public:
-    Forrest();
-    ~Forrest();
-    void ReadTestSubject(const char *TestDir, const char *MaskFile,
-                         const char *AsegFile, const char *OrientFile);
-    void ReadTrainingSubjects(const char *TrainListFile, const char *MaskFile,
-                              const char *AsegFile, const char *OrientFile,
-                              std::vector<char *> TractFileList);
-    int GetNx();
-    int GetNy();
-    int GetNz();
-    int GetNumTrain();
-    bool IsInMask(int CoordX, int CoordY, int CoordZ);
-    std::vector<unsigned int> GetTestAseg(int CoordX, int CoordY, int CoordZ);
-    std::vector<float> GetTestOrient(int CoordX, int CoordY, int CoordZ);
-    std::vector<int> GetTrainXyz(int SampleIndex);
-    std::vector<unsigned int> GetTrainAseg(int SampleIndex);
-    std::vector<float> GetTrainOrient(int SampleIndex);
-    std::vector<unsigned int> GetTrainTractIds(int SampleIndex);
-  
-  private:
-    static const int mSampleStep;
+public:
+  Forrest();
+  ~Forrest();
+  void ReadTestSubject(const char *TestDir, const char *MaskFile,
+                       const char *AsegFile, const char *OrientFile);
+  void ReadTrainingSubjects(const char *TrainListFile, const char *MaskFile,
+                            const char *AsegFile, const char *OrientFile,
+                            std::vector<char *> TractFileList);
+  int GetNx();
+  int GetNy();
+  int GetNz();
+  int GetNumTrain();
+  bool IsInMask(int CoordX, int CoordY, int CoordZ);
+  std::vector<unsigned int> GetTestAseg(int CoordX, int CoordY, int CoordZ);
+  std::vector<float> GetTestOrient(int CoordX, int CoordY, int CoordZ);
+  std::vector<int> GetTrainXyz(int SampleIndex);
+  std::vector<unsigned int> GetTrainAseg(int SampleIndex);
+  std::vector<float> GetTrainOrient(int SampleIndex);
+  std::vector<unsigned int> GetTrainTractIds(int SampleIndex);
 
-    int mNx, mNy, mNz, mNumTrain, mNumLocal, mNumNear;
-    std::vector<int> mDirLocal, mDirNear, mTrainXyz;
-    std::vector<unsigned int> mTrainAsegIdsLocal, mTrainAsegIdsNear;
-    std::vector<float> mTrainAsegDist, mTrainOrient;
-    std::vector< std::vector<unsigned int> > mTrainTractIds;
-    MRI *mMask, *mAseg, *mOrient;
+private:
+  static const int mSampleStep;
+
+  int mNx, mNy, mNz, mNumTrain, mNumLocal, mNumNear;
+  std::vector<int> mDirLocal, mDirNear, mTrainXyz;
+  std::vector<unsigned int> mTrainAsegIdsLocal, mTrainAsegIdsNear;
+  std::vector<float> mTrainAsegDist, mTrainOrient;
+  std::vector<std::vector<unsigned int>> mTrainTractIds;
+  MRI *mMask, *mAseg, *mOrient;
 };
 
 #endif
-

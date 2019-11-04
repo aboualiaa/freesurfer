@@ -13,118 +13,110 @@
 #include "itkEuclideanDistanceMetric.h"
 
 using namespace itk;
- 
-  template<class TInputMesh, class TOutputImage>
-    class ITK_EXPORT MeshToImageFilter :
-  public ImageSource<TOutputImage>
-  {
-    
-  public:
-    
-    typedef MeshToImageFilter     Self;
-    typedef ImageSource<TOutputImage>  Superclass;
-    typedef SmartPointer<Self>         Pointer;
-    typedef SmartPointer<const Self>   ConstPointer;
 
-    itkNewMacro  (Self);
-    itkTypeMacro (MeshToImageFilter, ImageSource);
-    
-    itkStaticConstMacro(ImageDimension, unsigned int,
-			TOutputImage::ImageDimension);
+template <class TInputMesh, class TOutputImage>
+class ITK_EXPORT MeshToImageFilter : public ImageSource<TOutputImage> {
 
-    typedef TInputMesh                              MeshType;
-    typedef typename MeshType::Pointer              MeshTypePointer;
+public:
+  using Self = MeshToImageFilter<TInputMesh, TOutputImage>;
+  using Superclass = ImageSource<TOutputImage>;
+  using Pointer = SmartPointer<Self>;
+  using ConstPointer = SmartPointer<const Self>;
 
+  itkNewMacro(Self);
+  itkTypeMacro(MeshToImageFilter, ImageSource);
 
-    /** Image typedefs */
-    typedef TOutputImage                            OutputImageType;
-    typedef typename OutputImageType::PixelType     OutputPixelType;
-    typedef typename OutputImageType::RegionType    OutputImageRegionType;
-    typedef typename OutputImageType::PointType     PointType;
-    typedef typename OutputImageType::IndexType     IndexType;
-    typedef typename OutputImageType::SpacingType   SpacingType;
-    typedef typename OutputImageType::SizeType      SizeType;
-    typedef typename OutputImageType::DirectionType DirectionType;
+  itkStaticConstMacro(ImageDimension, unsigned int,
+                      TOutputImage::ImageDimension);
 
-    /** Typedefs for base image. */
-    typedef ImageBase< itkGetStaticConstMacro( ImageDimension ) > ImageBaseType;
-    
+  using MeshType = TInputMesh;
+  using MeshTypePointer = typename MeshType::Pointer;
 
-    /** Set the size of the output image. */
-    virtual void SetOutputSize( const SizeType & size );
+  /** Image typedefs */
+  using OutputImageType = TOutputImage;
+  using OutputPixelType = typename OutputImageType::PixelType;
+  using OutputImageRegionType = typename OutputImageType::RegionType;
+  using PointType = typename OutputImageType::PointType;
+  using IndexType = typename OutputImageType::IndexType;
+  using SpacingType = typename OutputImageType::SpacingType;
+  using SizeType = typename OutputImageType::SizeType;
+  using DirectionType = typename OutputImageType::DirectionType;
 
-    /** Get the size of the output image. */
-    virtual const SizeType & GetOutputSize();
+  /** Typedefs for base image. */
+  using ImageBaseType = ImageBase<(Self::ImageDimension)>;
 
-    /** Set the start index of the output largest possible region. 
-     * The default is an index of all zeros. */
-    virtual void SetOutputIndex( const IndexType & index );
-    
-    /** Get the start index of the output largest possible region. */
-    virtual const IndexType & GetOutputIndex();
-    
-    /** Set the region of the output image. */
-    itkSetMacro( OutputRegion, OutputImageRegionType );
+  /** Set the size of the output image. */
+  virtual void SetOutputSize(const SizeType &size);
 
-    /** Get the region of the output image. */
-    itkGetConstReferenceMacro( OutputRegion, OutputImageRegionType );
-     
-    /** Set the output image spacing. */
-    itkSetMacro( OutputSpacing, SpacingType );
-    virtual void SetOutputSpacing( const double* values );
+  /** Get the size of the output image. */
+  virtual const SizeType &GetOutputSize();
 
-    /** Get the output image spacing. */
-    itkGetConstReferenceMacro( OutputSpacing, SpacingType );
+  /** Set the start index of the output largest possible region.
+   * The default is an index of all zeros. */
+  virtual void SetOutputIndex(const IndexType &index);
 
-    /** Set the output image origin. */
-    itkSetMacro( OutputOrigin, PointType );
-    virtual void SetOutputOrigin( const double* values);
+  /** Get the start index of the output largest possible region. */
+  virtual const IndexType &GetOutputIndex();
 
-    /** Get the output image origin. */
-    itkGetConstReferenceMacro( OutputOrigin, PointType );
+  /** Set the region of the output image. */
+  itkSetMacro(OutputRegion, OutputImageRegionType);
 
-    /** Set the output direction cosine matrix. */
-    itkSetMacro( OutputDirection, DirectionType );
-    itkGetConstReferenceMacro( OutputDirection, DirectionType );
+  /** Get the region of the output image. */
+  itkGetConstReferenceMacro(OutputRegion, OutputImageRegionType);
 
-    /** Helper method to set the output parameters based on this image */
-    void SetOutputParametersFromImage( const ImageBaseType * image );
-  
-    /** TransformToVelocityFieldSource produces a vector image. */
-    virtual void GenerateOutputInformation( void );
+  /** Set the output image spacing. */
+  itkSetMacro(OutputSpacing, SpacingType);
+  virtual void SetOutputSpacing(const double *values);
 
-    /** Set/Get the vector of positions */
-    void SetInput(MeshTypePointer mesh)
-    { m_Input = mesh; }
-    MeshTypePointer GetInput()
-    { return this->m_Input; }
-    
-   float BinaryImageOfLabels(int label, int flip);
-  protected:
-    MeshToImageFilter();
-    ~MeshToImageFilter(){};
-    
-    /** Threaded implementation */
-    void GenerateData();
-    
-    void PrintSelf(std::ostream& os, Indent indent) const
-    {
-      Superclass::PrintSelf(os,indent);
-    }
+  /** Get the output image spacing. */
+  itkGetConstReferenceMacro(OutputSpacing, SpacingType);
 
-  private:
-    MeshToImageFilter (const Self&);
-    void operator=(const Self&);
+  /** Set the output image origin. */
+  itkSetMacro(OutputOrigin, PointType);
+  virtual void SetOutputOrigin(const double *values);
 
-    OutputImageRegionType   m_OutputRegion;      // region of the output image
-    SpacingType             m_OutputSpacing;     // output image spacing
-    PointType               m_OutputOrigin;      // output image origin
-    DirectionType           m_OutputDirection;   // output image direction cosines
+  /** Get the output image origin. */
+  itkGetConstReferenceMacro(OutputOrigin, PointType);
 
-    MeshTypePointer         m_Input;
-	bool m_usingLabels;
-  };
+  /** Set the output direction cosine matrix. */
+  itkSetMacro(OutputDirection, DirectionType);
+  itkGetConstReferenceMacro(OutputDirection, DirectionType);
 
+  /** Helper method to set the output parameters based on this image */
+  void SetOutputParametersFromImage(const ImageBaseType *image);
+
+  /** TransformToVelocityFieldSource produces a vector image. */
+  virtual void GenerateOutputInformation();
+
+  /** Set/Get the vector of positions */
+  void SetInput(MeshTypePointer mesh) { m_Input = mesh; }
+  MeshTypePointer GetInput() { return this->m_Input; }
+
+  float BinaryImageOfLabels(int label, int flip);
+
+protected:
+  MeshToImageFilter();
+  ~MeshToImageFilter(){};
+
+  /** Threaded implementation */
+  void GenerateData();
+
+  void PrintSelf(std::ostream &os, Indent indent) const {
+    Superclass::PrintSelf(os, indent);
+  }
+
+private:
+  MeshToImageFilter(const Self &);
+  void operator=(const Self &);
+
+  OutputImageRegionType m_OutputRegion; // region of the output image
+  SpacingType m_OutputSpacing;          // output image spacing
+  PointType m_OutputOrigin;             // output image origin
+  DirectionType m_OutputDirection;      // output image direction cosines
+
+  MeshTypePointer m_Input;
+  bool m_usingLabels;
+};
 
 #include "MeshToImageFilter.txx"
 #endif

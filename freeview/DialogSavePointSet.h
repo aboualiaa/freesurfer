@@ -26,27 +26,22 @@
 
 #include <QDialog>
 
-namespace Ui
-{
+namespace Ui {
 class DialogSavePointSet;
 }
 
-class DialogSavePointSet : public QDialog
-{
+class DialogSavePointSet : public QDialog {
   Q_OBJECT
 
 public:
   explicit DialogSavePointSet(QWidget *parent = 0);
   ~DialogSavePointSet();
 
-  void SetFileName(const QString& fn, int type);
+  void SetFileName(const QString &fn, int type);
 
-  void SetLastDir(const QString& dir)
-  {
-    m_strLastDir = dir;
-  }
+  void SetLastDir(const QString &dir) { m_strLastDir = dir; }
 
-  void SetType( int nType );
+  void SetType(int nType);
 
   int GetType();
 
@@ -61,7 +56,7 @@ private:
   Ui::DialogSavePointSet *ui;
   QString m_strLastDir;
 
-  bool  m_bRemind;
+  bool m_bRemind;
 };
 
 #endif // DIALOGSAVEPOINTSET_H

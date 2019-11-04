@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:09 $
@@ -23,7 +23,6 @@
  *
  */
 
-
 #ifndef ANNOTATION_H
 #define ANNOTATION_H
 
@@ -38,24 +37,26 @@ char *annotation_table_file = NULL;
 extern char *annotation_table_file;
 #endif
 
-int   	read_annotation_table(void) ;
-int   	read_named_annotation_table(char *fname) ;
-const char*	index_to_name(int index);
-const char*	annotation_to_name(int annotation, int *pindex) ;
-int   	annotation_to_index(int annotation) ;
-int   	print_annotation_table(FILE *fp);
-int   	print_annotation_colortable(FILE *fp);
-int   	index_to_annotation(int index) ;
-LABEL*	annotation2label(int annotid, MRIS *Surf);
-int 	set_atable_from_ctable(COLOR_TABLE *pct);
-int  	MRISdivideAnnotation(MRI_SURFACE *mris, int *nunits) ;
-int  	MRISdivideAnnotationUnit(MRI_SURFACE *mris, int annot, int nunits) ;
-std::vector<int> readAnnotationIntoVector(const std::string& filename);
-int  	MRISmergeAnnotations(MRIS *mris, int nparcs, std::vector<std::string> parcnames, const char *newparcname);
-MRI*	MRISannot2seg(MRIS *surf, int base);
-MRI*	MRISannot2border(MRIS *surf);
-int 	MRISaparc2lobes(MRIS *surf, int a_lobeDivisionType);
-int 	MRISfbirnAnnot(MRIS *surf);
-double*	MRISannotDice(MRIS *surf1, MRIS *surf2, int *nsegs, int **segidlist);
+int read_annotation_table();
+int read_named_annotation_table(char *fname);
+const char *index_to_name(int index);
+const char *annotation_to_name(int annotation, int *pindex);
+int annotation_to_index(int annotation);
+int print_annotation_table(FILE *fp);
+int print_annotation_colortable(FILE *fp);
+int index_to_annotation(int index);
+LABEL *annotation2label(int annotid, MRIS *Surf);
+int set_atable_from_ctable(COLOR_TABLE *pct);
+int MRISdivideAnnotation(MRI_SURFACE *mris, int *nunits);
+int MRISdivideAnnotationUnit(MRI_SURFACE *mris, int annot, int nunits);
+std::vector<int> readAnnotationIntoVector(const std::string &filename);
+int MRISmergeAnnotations(MRIS *mris, int nparcs,
+                         std::vector<std::string> parcnames,
+                         const char *newparcname);
+MRI *MRISannot2seg(MRIS *surf, int base);
+MRI *MRISannot2border(MRIS *surf);
+int MRISaparc2lobes(MRIS *surf, int a_lobeDivisionType);
+int MRISfbirnAnnot(MRIS *surf);
+double *MRISannotDice(MRIS *surf1, MRIS *surf2, int *nsegs, int **segidlist);
 
 #endif

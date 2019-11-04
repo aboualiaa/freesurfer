@@ -23,55 +23,55 @@
  *
  */
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-double round(double x);
+
+#include <float.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/utsname.h>
 #include <unistd.h>
-#include <float.h>
 
-#include <iostream>
 #include <fstream>
 #include <iomanip>
-#include <vector>
-#include <string>
+#include <iostream>
+#include <limits.h>
 #include <math.h>
 #include <stdlib.h>
+#include <string>
 #include <time.h>
-#include <limits.h>
+#include <vector>
 
 #include "cma.h"
-#include "error.h"
-#include "diag.h"
-#include "mri.h"
-#include "fio.h"
-#include "version.h"
 #include "cmdargs.h"
+#include "diag.h"
+#include "error.h"
+#include "fio.h"
+#include "mri.h"
 #include "timer.h"
+#include "version.h"
 
 using namespace std;
 
-static int  parse_commandline(int argc, char **argv);
-static void check_options(void);
-static void print_usage(void) ;
-static void usage_exit(void);
-static void print_help(void) ;
-static void print_version(void) ;
+static int parse_commandline(int argc, char **argv);
+static void check_options();
+static void print_usage();
+static void usage_exit();
+static void print_help();
+static void print_version();
 static void dump_options(FILE *fp);
 
 int debug = 0, checkoptsonly = 0;
 
-int main(int argc, char *argv[]) ;
+int main(int argc, char *argv[]);
 
 static char vcid[] = "";
 const char *Progname = "dmri_mergepaths";
 
 int nframe = 0;
 float dispThresh = 0;
-char *inDir = NULL, *inFile[100], *outFile = NULL, *ctabFile = NULL;
+char *inDir = nullptr, *inFile[100], *outFile = nullptr, *ctabFile = nullptr;
 
 struct utsname uts;
 char *cmdline, cwd[2000];
@@ -80,29 +80,37 @@ Timer cputimer;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int nargs, cputime;
+  int nargs;
+int cputime;
   char fname[PATH_MAX];
-  MRI *invol = 0, *outvol = 0;
+  MRI *invol = 0;
+MRI *outvol = 0;
 
   /* rkt: check for and handle version tag */
-  nargs = handle_version_option (argc, argv, vcid, "$Name:  $");
-  if (nargs && argc - nargs == 1) exit (0);
+  nargs = handle_version_option(argc, argv, vcid, "$Name:  $");
+  if ((nargs != 0) && argc - nargs == 1) {
+    exit(0);
+}
   argc -= nargs;
-  cmdline = argv2cmdline(argc,argv);
+  cmdline = argv2cmdline(argc, argv);
   uname(&uts);
   getcwd(cwd, 2000);
 
-  Progname = argv[0] ;
-  argc --;
+  Progname = argv[0];
+  argc--;
   argv++;
-  ErrorInit(NULL, NULL, NULL) ;
-  DiagInit(NULL, NULL, NULL) ;
+  ErrorInit(NULL, NULL, NULL);
+  DiagInit(nullptr, nullptr, nullptr);
 
-  if (argc == 0) usage_exit();
+  if (argc == 0) {
+    usage_exit();
+}
 
   parse_commandline(argc, argv);
   check_options();
-  if (checkoptsonly) return(0);
+  if (checkoptsonly != 0) {
+    return (0);
+}
 
   dump_options(stdout);
 
@@ -111,18 +119,20 @@ int main(int argc, char **argv) {
   for (int iframe = 0; iframe < nframe; iframe++) {
     float inmax = 0;
 
-    cout << "Merging volume " << iframe+1 << " of " << nframe << "... " << endl;
+    cout << "Merging volume " << iframe + 1 << " of " << nframe << "... "
+         << endl;
 
     // Read input volume
-    if (inDir)
+    if (inDir != nullptr) {
       sprintf(fname, "%s/%s", inDir, inFile[iframe]);
-    else
+    } else {
       strcpy(fname, inFile[iframe]);
+}
 
     invol = MRIread(fname);
 
-    if (invol) {
-      if (!outvol) {
+    if (invol != nullptr) {
+      if (outvol == nullptr) {
         // Allocate output 4D volume
         outvol = MRIcloneBySpace(invol, invol->type, nframe);
 
@@ -132,8 +142,9 @@ int main(int argc, char **argv) {
 
       MRIcopyFrame(invol, outvol, 0, iframe);
 
-      if (dispThresh > 0)
-        inmax = (float) MRIfindPercentile(invol, .99, 0);	// Robust max
+      if (dispThresh > 0) {
+        inmax = static_cast<float>(MRIfindPercentile(invol, .99, 0)); // Robust max
+}
     }
 
     outvol->frames[iframe].thresh = dispThresh * inmax;
@@ -143,7 +154,7 @@ int main(int argc, char **argv) {
     for (int ict = outvol->ct->nentries; ict > 0; ict--) {
       CTE *cte = outvol->ct->entries[ict];
 
-      if (cte != NULL && strstr(inFile[iframe], cte->name)) {
+      if (cte != nullptr && (strstr(inFile[iframe], cte->name) != nullptr)) {
         outvol->frames[iframe].label = ict;
         strcpy(outvol->frames[iframe].name, cma_label_to_name(ict));
 
@@ -152,91 +163,107 @@ int main(int argc, char **argv) {
     }
 
     cout << "Threshold: " << outvol->frames[iframe].thresh
-         << " Name: "     << outvol->frames[iframe].name << endl;
+         << " Name: " << outvol->frames[iframe].name << endl;
   }
 
   // Write output file
-  if (outvol)
+  if (outvol != nullptr) {
     MRIwrite(outvol, outFile);
-  else {
+  } else {
     cout << "ERROR: could not open any of the input files" << endl;
     exit(1);
   }
 
   cputime = cputimer.milliseconds();
-  printf("Done in %g sec.\n", cputime/1000.0);
+  printf("Done in %g sec.\n", cputime / 1000.0);
 
   printf("dmri_mergepaths done\n");
-  return(0);
+  return (0);
   exit(0);
 }
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int  nargc, nargsused;
-  char **pargv, *option;
+  int nargc;
+int nargsused;
+  char **pargv;
+char *option;
 
-  if (argc < 1) usage_exit();
+  if (argc < 1) {
+    usage_exit();
+}
 
   nargc = argc;
   pargv = argv;
   while (nargc > 0) {
     option = pargv[0];
-    if (debug) printf("%d %s\n",nargc,option);
+    if (debug != 0) {
+      printf("%d %s\n", nargc, option);
+}
     nargc -= 1;
     pargv += 1;
 
     nargsused = 0;
 
-    if (!strcasecmp(option, "--help"))  print_help() ;
-    else if (!strcasecmp(option, "--version")) print_version() ;
-    else if (!strcasecmp(option, "--debug"))   debug = 1;
-    else if (!strcasecmp(option, "--checkopts"))   checkoptsonly = 1;
-    else if (!strcasecmp(option, "--nocheckopts")) checkoptsonly = 0;
-    else if (!strcmp(option, "--indir")) {
-      if (nargc < 1) CMDargNErr(option,1);
+    if (strcasecmp(option, "--help") == 0) {
+      print_help();
+    } else if (strcasecmp(option, "--version") == 0) {
+      print_version();
+    } else if (strcasecmp(option, "--debug") == 0) {
+      debug = 1;
+    } else if (strcasecmp(option, "--checkopts") == 0) {
+      checkoptsonly = 1;
+    } else if (strcasecmp(option, "--nocheckopts") == 0) {
+      checkoptsonly = 0;
+    } else if (strcmp(option, "--indir") == 0) {
+      if (nargc < 1) {
+        CMDargNErr(option, 1);
+}
       inDir = fio_fullpath(pargv[0]);
       nargsused = 1;
-    }
-    else if (!strcmp(option, "--in")) {
-      if (nargc < 1) CMDargNErr(option,1);
+    } else if (strcmp(option, "--in") == 0) {
+      if (nargc < 1) {
+        CMDargNErr(option, 1);
+}
       nargsused = 0;
-      while (nargsused < nargc && strncmp(pargv[nargsused], "--", 2)) {
+      while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         inFile[nframe] = pargv[nargsused];
         nargsused++;
         nframe++;
       }
-    } 
-    else if (!strcmp(option, "--out")) {
-      if (nargc < 1) CMDargNErr(option,1);
+    } else if (strcmp(option, "--out") == 0) {
+      if (nargc < 1) {
+        CMDargNErr(option, 1);
+}
       outFile = fio_fullpath(pargv[0]);
       nargsused = 1;
-    } 
-    else if (!strcmp(option, "--ctab")) {
-      if (nargc < 1) CMDargNErr(option,1);
+    } else if (strcmp(option, "--ctab") == 0) {
+      if (nargc < 1) {
+        CMDargNErr(option, 1);
+}
       ctabFile = fio_fullpath(pargv[0]);
       nargsused = 1;
-    } 
-    else if (!strcmp(option, "--thresh")) {
-      if (nargc < 1) CMDargNErr(option,1);
-      sscanf(pargv[0],"%f",&dispThresh);
+    } else if (strcmp(option, "--thresh") == 0) {
+      if (nargc < 1) {
+        CMDargNErr(option, 1);
+}
+      sscanf(pargv[0], "%f", &dispThresh);
       nargsused = 1;
-    }
-    else {
-      fprintf(stderr,"ERROR: Option %s unknown\n",option);
-      if (CMDsingleDash(option))
-        fprintf(stderr,"       Did you really mean -%s ?\n",option);
+    } else {
+      fprintf(stderr, "ERROR: Option %s unknown\n", option);
+      if (CMDsingleDash(option) != 0) {
+        fprintf(stderr, "       Did you really mean -%s ?\n", option);
+}
       exit(-1);
     }
     nargc -= nargsused;
     pargv += nargsused;
   }
-  return(0);
+  return (0);
 }
 
 /* --------------------------------------------- */
-static void print_usage(void) 
-{
+static void print_usage() {
   printf("\n");
   printf("USAGE: ./dmri_mergepaths\n");
   printf("\n");
@@ -262,68 +289,66 @@ static void print_usage(void)
 }
 
 /* --------------------------------------------- */
-static void print_help(void) {
-  print_usage() ;
+static void print_help() {
+  print_usage();
   printf("\n");
   printf("...\n");
   printf("\n");
-  exit(1) ;
+  exit(1);
 }
 
 /* ------------------------------------------------------ */
-static void usage_exit(void) {
-  print_usage() ;
-  exit(1) ;
+static void usage_exit() {
+  print_usage();
+  exit(1);
 }
 
 /* --------------------------------------------- */
-static void print_version(void) {
-  printf("%s\n", vcid) ;
-  exit(1) ;
+static void print_version() {
+  printf("%s\n", vcid);
+  exit(1);
 }
 
 /* --------------------------------------------- */
-static void check_options(void) {
-  if(nframe == 0) {
+static void check_options() {
+  if (nframe == 0) {
     printf("ERROR: must specify input volume(s)\n");
     exit(1);
   }
-  if(!outFile) {
+  if (outFile == nullptr) {
     printf("ERROR: must specify output volume\n");
     exit(1);
   }
-  if(!ctabFile) {
+  if (ctabFile == nullptr) {
     printf("ERROR: must specify color table file\n");
     exit(1);
   }
-  if(dispThresh < 0 || dispThresh > 1) {
+  if (dispThresh < 0 || dispThresh > 1) {
     printf("ERROR: display threshold must a number between 0 and 1\n");
     exit(1);
   }
-  return;
-}
+  }
 
 /* --------------------------------------------- */
 static void dump_options(FILE *fp) {
-  fprintf(fp,"\n");
-  fprintf(fp,"%s\n",vcid);
-  fprintf(fp,"cwd %s\n",cwd);
-  fprintf(fp,"cmdline %s\n",cmdline);
-  fprintf(fp,"sysname  %s\n",uts.sysname);
-  fprintf(fp,"hostname %s\n",uts.nodename);
-  fprintf(fp,"machine  %s\n",uts.machine);
-  fprintf(fp,"user     %s\n",VERuser());
+  fprintf(fp, "\n");
+  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "cwd %s\n", cwd);
+  fprintf(fp, "cmdline %s\n", cmdline);
+  fprintf(fp, "sysname  %s\n", uts.sysname);
+  fprintf(fp, "hostname %s\n", uts.nodename);
+  fprintf(fp, "machine  %s\n", uts.machine);
+  fprintf(fp, "user     %s\n", VERuser());
 
-  if (inDir)
+  if (inDir != nullptr) {
     fprintf(fp, "Input directory: %s\n", inDir);
+}
   fprintf(fp, "Input files:");
-  for (int k = 0; k < nframe; k++)
+  for (int k = 0; k < nframe; k++) {
     fprintf(fp, " %s", inFile[k]);
+}
   fprintf(fp, "\n");
   fprintf(fp, "Output file: %s\n", outFile);
   fprintf(fp, "Color table file: %s\n", ctabFile);
   fprintf(fp, "Lower threshold for display: %f\n", dispThresh);
-
-  return;
 }
-

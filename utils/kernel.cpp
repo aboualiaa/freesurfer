@@ -26,10 +26,10 @@
 /*----------------------------------------------------------------------
                            INCLUDE FILES
 ----------------------------------------------------------------------*/
-#include <math.h>
+#include <cmath>
 #include <memory.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
 #include "diag.h"
 #include "image.h"
@@ -53,25 +53,26 @@
 
            Description:
 ----------------------------------------------------------------------*/
-KIMAGE *KernelImageAlloc(int rows, int cols, int krows, int kcols)
-{
+KIMAGE *KernelImageAlloc(int rows, int cols, int krows, int kcols) {
   KIMAGE *kimage;
   int kernel_bytes, row, col;
 
   kernel_bytes = rows * cols * sizeof(KERNEL);
   kimage = (KIMAGE *)calloc(1, sizeof(KIMAGE) + kernel_bytes);
   if (!kimage) {
-    fprintf(stderr, "KernelImageAlloc(%d, %d, %d, %d) - kimage failed\n", rows, cols, krows, kcols);
+    fprintf(stderr, "KernelImageAlloc(%d, %d, %d, %d) - kimage failed\n", rows,
+            cols, krows, kcols);
     exit(2);
   }
   kimage->krows = krows;
   kimage->kcols = kcols;
   kimage->rows = rows;
   kimage->cols = cols;
-  kimage->fname = NULL;
+  kimage->fname = nullptr;
 
   for (row = 0; row < rows; row++) {
-    for (col = 0; col < cols; col++) KernelInit(kimage, row, col);
+    for (col = 0; col < cols; col++)
+      KernelInit(kimage, row, col);
   }
 
   return (kimage);
@@ -81,11 +82,11 @@ KIMAGE *KernelImageAlloc(int rows, int cols, int krows, int kcols)
 
            Description:
 ----------------------------------------------------------------------*/
-KIMAGE *KernelImageClone(KIMAGE *kimage)
-{
+KIMAGE *KernelImageClone(KIMAGE *kimage) {
   KIMAGE *knew;
 
-  knew = KernelImageAlloc(kimage->rows, kimage->cols, kimage->krows, kimage->kcols);
+  knew = KernelImageAlloc(kimage->rows, kimage->cols, kimage->krows,
+                          kimage->kcols);
   return (knew);
 }
 /*----------------------------------------------------------------------
@@ -93,12 +94,12 @@ KIMAGE *KernelImageClone(KIMAGE *kimage)
 
            Description:
 ----------------------------------------------------------------------*/
-void KernelImageCopy(KIMAGE *ksrc, KIMAGE *kdst)
-{
+void KernelImageCopy(KIMAGE *ksrc, KIMAGE *kdst) {
   int row, col;
 
   for (row = 0; row < ksrc->rows; row++) {
-    for (col = 0; col < ksrc->cols; col++) KernelCopy(ksrc, kdst, row, col, row, col);
+    for (col = 0; col < ksrc->cols; col++)
+      KernelCopy(ksrc, kdst, row, col, row, col);
   }
 }
 /*----------------------------------------------------------------------
@@ -106,13 +107,14 @@ void KernelImageCopy(KIMAGE *ksrc, KIMAGE *kdst)
 
            Description:
 ----------------------------------------------------------------------*/
-void KernelCopy(KIMAGE *ksrc, KIMAGE *kdst, int src_row, int src_col, int dst_row, int dst_col)
-{
+void KernelCopy(KIMAGE *ksrc, KIMAGE *kdst, int src_row, int src_col,
+                int dst_row, int dst_col) {
   int row, col, cols;
   KERNEL *src_kernel, *dst_kernel;
   float *src_w, *dst_w;
 
-  // if (src_row == 8 && dst_row == 8) src_col = src_row = 8; /* remove warning for now */
+  // if (src_row == 8 && dst_row == 8) src_col = src_row = 8; /* remove warning
+  // for now */
 
   src_kernel = KIMAGEpix(ksrc, dst_row, dst_col);
   dst_kernel = KIMAGEpix(kdst, dst_row, dst_col);
@@ -120,7 +122,8 @@ void KernelCopy(KIMAGE *ksrc, KIMAGE *kdst, int src_row, int src_col, int dst_ro
   for (row = 0; row < src_kernel->rows; row++) {
     src_w = src_kernel->weights[row];
     dst_w = dst_kernel->weights[row];
-    for (col = 0; col < cols; col++) *dst_w++ = *src_w++;
+    for (col = 0; col < cols; col++)
+      *dst_w++ = *src_w++;
   }
 }
 /*----------------------------------------------------------------------
@@ -128,8 +131,7 @@ void KernelCopy(KIMAGE *ksrc, KIMAGE *kdst, int src_row, int src_col, int dst_ro
 
            Description:
 ----------------------------------------------------------------------*/
-void KernelInit(KIMAGE *kimage, int row, int col)
-{
+void KernelInit(KIMAGE *kimage, int row, int col) {
   KERNEL *kernel;
   int halfrows, halfcols, wrow;
 
@@ -165,7 +167,8 @@ void KernelInit(KIMAGE *kimage, int row, int col)
   /* allocate and initialize weights */
   kernel->weights = (float **)calloc(kernel->rows, sizeof(float *));
   if (!kernel->weights) {
-    fprintf(stderr, "KernelInit(%d, %d): could not allocate weights\n", row, col);
+    fprintf(stderr, "KernelInit(%d, %d): could not allocate weights\n", row,
+            col);
     exit(2);
   }
 
@@ -184,8 +187,7 @@ void KernelInit(KIMAGE *kimage, int row, int col)
 
            Description:
 ----------------------------------------------------------------------*/
-void KernelImageFree(KIMAGE *kimage)
-{
+void KernelImageFree(KIMAGE *kimage) {
   int row, col;
 
   for (row = 0; row < kimage->rows; row++) {
@@ -202,11 +204,11 @@ void KernelImageFree(KIMAGE *kimage)
               free all the contents of the kernel, but not the kernel
               itself
 ----------------------------------------------------------------------*/
-void KernelFree(KERNEL *kernel)
-{
+void KernelFree(KERNEL *kernel) {
   int wrow;
 
-  for (wrow = 0; wrow < kernel->rows; wrow++) free(kernel->weights[wrow]);
+  for (wrow = 0; wrow < kernel->rows; wrow++)
+    free(kernel->weights[wrow]);
 
   free(kernel->weights);
 }
@@ -215,26 +217,23 @@ void KernelFree(KERNEL *kernel)
 
            Description:
 ----------------------------------------------------------------------*/
-void KernelImageDump(KIMAGE *kimage, FILE *fp)
-{
+void KernelImageDump(KIMAGE *kimage, FILE *fp) {
   int row, col, krow, kcol;
   KERNEL *kernel;
 
-  fprintf(fp, "image size: %d x %d, kernel size: %d x %d\n", kimage->rows, kimage->cols, kimage->krows, kimage->kcols);
+  fprintf(fp, "image size: %d x %d, kernel size: %d x %d\n", kimage->rows,
+          kimage->cols, kimage->krows, kimage->kcols);
 
   for (row = 0; row < kimage->rows; row++) {
     for (col = 0; col < kimage->cols; col++) {
       kernel = KIMAGEpix(kimage, row, col);
-      fprintf(fp, "kernel at (%d, %d), row0, col0 = (%d, %d)\n", row, col, kernel->row0, kernel->col0);
+      fprintf(fp, "kernel at (%d, %d), row0, col0 = (%d, %d)\n", row, col,
+              kernel->row0, kernel->col0);
       for (krow = 0; krow < kernel->rows; krow++) {
         for (kcol = 0; kcol < kernel->cols; kcol++) {
           if (fabs(kernel->weights[krow][kcol]) > 0.00001) {
-            fprintf(fp,
-                    "\t(%d, %d) --> (%d, %d) = %f\n",
-                    krow,
-                    kcol,
-                    krow + kernel->row0,
-                    kcol + kernel->col0,
+            fprintf(fp, "\t(%d, %d) --> (%d, %d) = %f\n", krow, kcol,
+                    krow + kernel->row0, kcol + kernel->col0,
                     kernel->weights[krow][kcol]);
           }
         }
@@ -247,8 +246,7 @@ void KernelImageDump(KIMAGE *kimage, FILE *fp)
 
            Description:
 ----------------------------------------------------------------------*/
-void KernelDiscount(KIMAGE *kimage, int row, int col, float weight)
-{
+void KernelDiscount(KIMAGE *kimage, int row, int col, float weight) {
   KERNEL *kernel;
   float *w;
   int cols;
@@ -259,7 +257,8 @@ void KernelDiscount(KIMAGE *kimage, int row, int col, float weight)
   cols = kernel->cols;
   for (row = 0; row < kernel->rows; row++) {
     w = kernel->weights[row];
-    for (col = 0; col < cols; col++) *w++ *= weight;
+    for (col = 0; col < cols; col++)
+      *w++ *= weight;
   }
 }
 /*----------------------------------------------------------------------
@@ -267,13 +266,15 @@ void KernelDiscount(KIMAGE *kimage, int row, int col, float weight)
 
            Description:
 ----------------------------------------------------------------------*/
-void KernelUpdate(KIMAGE *ksrc, KIMAGE *kdst, int dst_row, int dst_col, int src_row, int src_col, float weight)
-{
+void KernelUpdate(KIMAGE *ksrc, KIMAGE *kdst, int dst_row, int dst_col,
+                  int src_row, int src_col, float weight) {
   KERNEL *src_kernel, *dst_kernel;
   float *w;
-  int row, col, src_rows, src_cols, dst_rows, dst_cols, dst_row0, dst_col0, src_row0, src_col0, drow, dcol;
+  int row, col, src_rows, src_cols, dst_rows, dst_cols, dst_row0, dst_col0,
+      src_row0, src_col0, drow, dcol;
 
-  DiagPrintf(DIAG_KERNELS, "KernelUpdate(%d, %d, %d, %d, %f)\n", dst_row, dst_col, src_row, src_col, weight);
+  DiagPrintf(DIAG_KERNELS, "KernelUpdate(%d, %d, %d, %d, %f)\n", dst_row,
+             dst_col, src_row, src_col, weight);
 
   src_kernel = KIMAGEpix(ksrc, src_row, src_col);
   dst_kernel = KIMAGEpix(kdst, dst_row, dst_col);
@@ -298,11 +299,14 @@ void KernelUpdate(KIMAGE *ksrc, KIMAGE *kdst, int dst_row, int dst_col, int src_
   for (row = 0; row < src_rows; row++) {
     w = src_kernel->weights[row];
     for (col = 0; col < src_cols; col++, w++) {
-      if (src_kernel->weights[row][col] > 0.0001) weight = weight * 1.0f;
+      if (src_kernel->weights[row][col] > 0.0001)
+        weight = weight * 1.0f;
 
       dst_row = row + drow;
       dst_col = col + dcol;
-      if ((dst_row < 0) || (dst_col < 0) || (dst_row >= dst_rows) || (dst_col >= dst_cols)) continue; /* out of range */
+      if ((dst_row < 0) || (dst_col < 0) || (dst_row >= dst_rows) ||
+          (dst_col >= dst_cols))
+        continue; /* out of range */
       dst_kernel->weights[dst_row][dst_col] += *w * weight;
     }
   }
@@ -312,12 +316,12 @@ void KernelUpdate(KIMAGE *ksrc, KIMAGE *kdst, int dst_row, int dst_col, int src_
 
            Description:
 ----------------------------------------------------------------------*/
-void KernelImageNormalize(KIMAGE *kimage)
-{
+void KernelImageNormalize(KIMAGE *kimage) {
   int row, col;
 
   for (row = 0; row < kimage->rows; row++) {
-    for (col = 0; col < kimage->cols; col++) KernelNormalize(kimage, row, col);
+    for (col = 0; col < kimage->cols; col++)
+      KernelNormalize(kimage, row, col);
   }
 }
 /*----------------------------------------------------------------------
@@ -325,8 +329,7 @@ void KernelImageNormalize(KIMAGE *kimage)
 
            Description:
 ----------------------------------------------------------------------*/
-void KernelNormalize(KIMAGE *kimage, int row, int col)
-{
+void KernelNormalize(KIMAGE *kimage, int row, int col) {
   KERNEL *kernel;
   float *w, total;
   int krow, kcol, cols, krows, kcols;
@@ -359,7 +362,8 @@ void KernelNormalize(KIMAGE *kimage, int row, int col)
   }
   krows = kernel->row0 + kernel->rows - kimage->rows;
   kcols = kernel->cols;
-  for (krow = kernel->rows - krows; krow < kernel->rows; krow++) { /* erase last krows */
+  for (krow = kernel->rows - krows; krow < kernel->rows;
+       krow++) { /* erase last krows */
     w = kernel->weights[krow];
     memset((char *)w, 0, kcols * sizeof(float));
   }
@@ -399,7 +403,8 @@ void KernelNormalize(KIMAGE *kimage, int row, int col)
 
   for (krow = 0; krow < kernel->rows; krow++) {
     w = kernel->weights[krow];
-    for (col = 0; col < cols; col++) *w++ /= total;
+    for (col = 0; col < cols; col++)
+      *w++ /= total;
   }
 }
 /*----------------------------------------------------------------------
@@ -407,8 +412,7 @@ void KernelNormalize(KIMAGE *kimage, int row, int col)
 
            Description:
 ----------------------------------------------------------------------*/
-void KernelImageConvolve(KIMAGE *kimage, IMAGE *src_image, IMAGE *dst_image)
-{
+void KernelImageConvolve(KIMAGE *kimage, IMAGE *src_image, IMAGE *dst_image) {
   int src_row, src_rows, src_cols, start_col, start_row;
   int dst_row, dst_col, dst_rows, dst_cols;
   int krow, kcol, krows, kcols, row0, col0;
@@ -448,16 +452,14 @@ void KernelImageConvolve(KIMAGE *kimage, IMAGE *src_image, IMAGE *dst_image)
       {
         start_col = -col0;
         col0 = 0;
-      }
-      else
+      } else
         start_col = 0;
 
       if (row0 < 0) /* kernel extends off of left edge of image */
       {
         start_row = -row0;
         row0 = 0;
-      }
-      else
+      } else
         start_row = 0;
 
       total = 0.0f;
@@ -467,7 +469,8 @@ void KernelImageConvolve(KIMAGE *kimage, IMAGE *src_image, IMAGE *dst_image)
         src_pix = IMAGEFpix(src_image, col0, src_row);
         w = kernel->weights[krow] + start_col;
 
-        for (kcol = start_col; kcol < kcols; kcol++) total += *w++ * *src_pix++;
+        for (kcol = start_col; kcol < kcols; kcol++)
+          total += *w++ * *src_pix++;
       }
       *dst_pix++ = total;
     }
@@ -478,8 +481,7 @@ void KernelImageConvolve(KIMAGE *kimage, IMAGE *src_image, IMAGE *dst_image)
 
            Description:
 ----------------------------------------------------------------------*/
-void KernelImageWrite(KIMAGE *kimage, char *fname, int argc, char *argv[])
-{
+void KernelImageWrite(KIMAGE *kimage, char *fname, int argc, char *argv[]) {
   IMAGE *image;
   int i;
   char str[100];
@@ -503,13 +505,13 @@ void KernelImageWrite(KIMAGE *kimage, char *fname, int argc, char *argv[])
 
            Description:
 ----------------------------------------------------------------------*/
-KIMAGE *KernelImageRead(char *fname)
-{
+KIMAGE *KernelImageRead(char *fname) {
   KIMAGE *kimage;
   IMAGE *image;
 
   image = ImageRead(fname);
-  if (!image) return (NULL);
+  if (!image)
+    return (nullptr);
 
   kimage = KernelImageFromSeq(image);
 
@@ -521,11 +523,10 @@ KIMAGE *KernelImageRead(char *fname)
 
            Description:
 ----------------------------------------------------------------------*/
-IMAGE *KernelImageToSeq(KIMAGE *kimage)
-{
+IMAGE *KernelImageToSeq(KIMAGE *kimage) {
   IMAGE *image;
-  int num_frame, row, col, rows, cols, krow, kcol, krows, kcols, pix_per_frame, row0, col0, drow, dcol, npix, col_dif,
-      row_dif;
+  int num_frame, row, col, rows, cols, krow, kcol, krows, kcols, pix_per_frame,
+      row0, col0, drow, dcol, npix, col_dif, row_dif;
   KERNEL *kernel;
   float *fsrc, *fdst, *fbase;
 
@@ -539,7 +540,7 @@ IMAGE *KernelImageToSeq(KIMAGE *kimage)
   image = ImageAlloc(krows, kcols, PFFLOAT, num_frame);
   if (!image) {
     fprintf(stderr, "KernelImageToSeq: could not allocate sequence\n");
-    return (NULL);
+    return (nullptr);
   }
 
   for (row = 0; row < rows; row++) {
@@ -552,8 +553,8 @@ IMAGE *KernelImageToSeq(KIMAGE *kimage)
 
       /*
             copy kernel into Image frame, changing coordinate systems so that
-            the kernel is centered in the frame. This involves truncating some of
-            the kernel.
+            the kernel is centered in the frame. This involves truncating some
+         of the kernel.
       */
       for (krow = 0; krow < krows; krow++) {
         row_dif = (row0 + krows / 2) - row;
@@ -569,15 +570,15 @@ IMAGE *KernelImageToSeq(KIMAGE *kimage)
         {
           kcol = -dcol;
           dcol = 0;
-        }
-        else
+        } else
           kcol = 0;
 
         npix = kcols - abs(col_dif);
 
         fsrc = kernel->weights[krow] + kcol;
         fdst = fbase + drow * kcols + dcol;
-        if (drow >= 0 && (drow < krows) && (npix > 0)) memmove((char *)fdst, (char *)fsrc, npix * sizeof(float));
+        if (drow >= 0 && (drow < krows) && (npix > 0))
+          memmove((char *)fdst, (char *)fsrc, npix * sizeof(float));
       }
     }
   }
@@ -589,9 +590,9 @@ IMAGE *KernelImageToSeq(KIMAGE *kimage)
 
            Description:
 ----------------------------------------------------------------------*/
-KIMAGE *KernelImageFromSeq(IMAGE *image)
-{
-  int rows, cols, krows, kcols, row, col, krow, kcol, pix_per_frame, row0, col0, drow, dcol, npix, col_dif, row_dif;
+KIMAGE *KernelImageFromSeq(IMAGE *image) {
+  int rows, cols, krows, kcols, row, col, krow, kcol, pix_per_frame, row0, col0,
+      drow, dcol, npix, col_dif, row_dif;
   KERNEL *kernel;
   float *fsrc, *fdst, *fbase;
   KIMAGE *kimage;
@@ -609,10 +610,11 @@ KIMAGE *KernelImageFromSeq(IMAGE *image)
   kimage = KernelImageAlloc(rows, cols, krows, kcols);
   if (!kimage) {
     fprintf(stderr, "KernelImageFromSeq: could not allocate kimage\n");
-    return (NULL);
+    return (nullptr);
   }
 
-  if (image->orig_name) kimage->fname = STRCPALLOC(image->orig_name);
+  if (image->orig_name)
+    kimage->fname = STRCPALLOC(image->orig_name);
   for (row = 0; row < rows; row++) {
     for (col = 0; col < cols; col++) {
       kernel = KIMAGEpix(kimage, row, col);
@@ -622,8 +624,8 @@ KIMAGE *KernelImageFromSeq(IMAGE *image)
 
       /*
             copy Image frame into kernel, changing coordinate systems so that
-            the kernel is centered in the frame. This involves truncating some of
-            the kernel.
+            the kernel is centered in the frame. This involves truncating some
+         of the kernel.
       */
       for (krow = 0; krow < krows; krow++) {
         row_dif = (row0 + krows / 2) - row;
@@ -639,15 +641,15 @@ KIMAGE *KernelImageFromSeq(IMAGE *image)
         {
           kcol = -dcol;
           dcol = 0;
-        }
-        else
+        } else
           kcol = 0;
 
         npix = kcols - abs(col_dif);
 
         fdst = kernel->weights[krow] + kcol;
         fsrc = fbase + drow * kcols + dcol;
-        if (drow >= 0 && (drow < krows) && (npix > 0)) memmove((char *)fdst, (char *)fsrc, npix * sizeof(float));
+        if (drow >= 0 && (drow < krows) && (npix > 0))
+          memmove((char *)fdst, (char *)fsrc, npix * sizeof(float));
       }
     }
   }

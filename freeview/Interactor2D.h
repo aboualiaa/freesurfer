@@ -30,30 +30,29 @@
 
 class QString;
 class Layer;
-class Interactor2D : public Interactor
-{
+class Interactor2D : public Interactor {
   Q_OBJECT
 public:
-  Interactor2D( QObject* parent = NULL );
+  Interactor2D(QObject *parent = NULL);
   virtual ~Interactor2D();
 
   // return true if to have parent Interactor2D continue processing the event
   // return false to stop event from further processing
-  virtual bool ProcessMouseDownEvent( QMouseEvent* event, RenderView* view );
-  virtual bool ProcessMouseUpEvent  ( QMouseEvent* event, RenderView* view );
-  virtual bool ProcessMouseMoveEvent( QMouseEvent* event, RenderView* view );
-  virtual bool ProcessKeyDownEvent  ( QKeyEvent* event, RenderView* view );
+  virtual bool ProcessMouseDownEvent(QMouseEvent *event, RenderView *view);
+  virtual bool ProcessMouseUpEvent(QMouseEvent *event, RenderView *view);
+  virtual bool ProcessMouseMoveEvent(QMouseEvent *event, RenderView *view);
+  virtual bool ProcessKeyDownEvent(QKeyEvent *event, RenderView *view);
 
-  virtual void ProcessPostMouseWheelEvent ( QWheelEvent* event, RenderView* view );
-  virtual void ProcessPostMouseMoveEvent  ( QMouseEvent* event, RenderView* view );
+  virtual void ProcessPostMouseWheelEvent(QWheelEvent *event, RenderView *view);
+  virtual void ProcessPostMouseMoveEvent(QMouseEvent *event, RenderView *view);
 
 signals:
-  void Error( const QString& message, Layer* layer = NULL );
+  void Error(const QString &message, Layer *layer = NULL);
   void CursorLocationClicked();
 
 protected:
-  int  m_nMousePosX;
-  int  m_nMousePosY;
+  int m_nMousePosX;
+  int m_nMousePosY;
 
   bool m_bWindowLevel;
   bool m_bChangeSlice;
@@ -62,5 +61,3 @@ protected:
 };
 
 #endif
-
-

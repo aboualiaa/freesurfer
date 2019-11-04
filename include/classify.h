@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: fischl $
  *    $Date: 2014/05/10 00:38:48 $
@@ -23,23 +23,21 @@
  *
  */
 
-
 #ifndef CLASSIFY_H
 #define CLASSIFY_H
 
-
-#define CLASSIFIER_GAUSSIAN        0
-#define CLASSIFIER_BACKPROP        1
-#define CLASSIFIER_ARTMAP          2
-#define CLASSIFIER_GAUSSIAN_ARRAY  3
-#define CLASSIFIER_RBF             4   /* radial basis function */
-#define CLASSIFIER_SVM             5
-#define CLASSIFIER_RFOREST         6
+#define CLASSIFIER_GAUSSIAN 0
+#define CLASSIFIER_BACKPROP 1
+#define CLASSIFIER_ARTMAP 2
+#define CLASSIFIER_GAUSSIAN_ARRAY 3
+#define CLASSIFIER_RBF 4 /* radial basis function */
+#define CLASSIFIER_SVM 5
+#define CLASSIFIER_RFOREST 6
 
 // different types of deep learning networks
-#define NET_DBN  0
-#define NET_RBM  1
+#define NET_DBN 0
+#define NET_RBM 1
 #define NET_CDBN 2
-#define NET_SAE  3
+#define NET_SAE 3
 
 #endif

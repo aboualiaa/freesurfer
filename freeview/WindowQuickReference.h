@@ -26,13 +26,11 @@
 
 #include <QWidget>
 
-namespace Ui
-{
+namespace Ui {
 class WindowQuickReference;
 }
 
-class WindowQuickReference : public QWidget
-{
+class WindowQuickReference : public QWidget {
   Q_OBJECT
 
 public:

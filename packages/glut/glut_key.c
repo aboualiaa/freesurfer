@@ -10,19 +10,17 @@
 #include "glutint.h"
 
 /* CENTRY */
-void APIENTRY
-glutKeyboardFunc(GLUTkeyboardCB keyboardFunc)
-{
+void APIENTRY glutKeyboardFunc(GLUTkeyboardCB keyboardFunc) {
   __glutChangeWindowEventMask(KeyPressMask,
-                              keyboardFunc != NULL || __glutCurrentWindow->special != NULL);
+                              keyboardFunc != NULL ||
+                                  __glutCurrentWindow->special != NULL);
   __glutCurrentWindow->keyboard = keyboardFunc;
 }
 
-void APIENTRY
-glutSpecialFunc(GLUTspecialCB specialFunc)
-{
+void APIENTRY glutSpecialFunc(GLUTspecialCB specialFunc) {
   __glutChangeWindowEventMask(KeyPressMask,
-                              specialFunc != NULL || __glutCurrentWindow->keyboard != NULL);
+                              specialFunc != NULL ||
+                                  __glutCurrentWindow->keyboard != NULL);
   __glutCurrentWindow->special = specialFunc;
 }
 

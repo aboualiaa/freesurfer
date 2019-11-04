@@ -33,16 +33,14 @@
 
 using namespace std;
 
-class QdecSubject
-{
+class QdecSubject {
 public:
-
   // Constructors/Destructors
   //
 
-  QdecSubject ( string isId, vector < QdecFactor* > iFactors );
+  QdecSubject(string isId, vector<QdecFactor *> iFactors);
 
-  virtual ~QdecSubject ( );
+  virtual ~QdecSubject();
 
   /**
    * Get the value of msId
@@ -51,53 +49,45 @@ public:
    * @return the value of msId
    * @return string
    */
-  string GetId ( ) { return this->msId; }
-
+  string GetId() { return this->msId; }
 
   /**
    * @return string
    * @param  isFactorName
    */
-  string GetDiscreteFactorValue ( const char* isFactorName );
-
+  string GetDiscreteFactorValue(const char *isFactorName);
 
   /**
    * @return double
    * @param  isFactorName
    */
-  double GetContinuousFactorValue ( const char* isFactorName );
-
-
-  /**
-   * @return vector < QdecFactor* >
-   */
-  vector < QdecFactor* > GetContinuousFactors ( );
-
+  double GetContinuousFactorValue(const char *isFactorName);
 
   /**
    * @return vector < QdecFactor* >
    */
-  vector < QdecFactor* > GetFactors ( ) { return this->mFactors; }
+  vector<QdecFactor *> GetContinuousFactors();
 
+  /**
+   * @return vector < QdecFactor* >
+   */
+  vector<QdecFactor *> GetFactors() { return this->mFactors; }
 
   /**
    * @return QdecFactor
    */
-  QdecFactor* GetFactor ( const char* isFactorName );
-
+  QdecFactor *GetFactor(const char *isFactorName);
 
   /**
    */
-  void AddFactor ( QdecFactor* iFactor ) {this->mFactors.push_back(iFactor);}
-
+  void AddFactor(QdecFactor *iFactor) { this->mFactors.push_back(iFactor); }
 
   /**
    * @param  isFactorName
    */
-  void DeleteFactor ( const char* isFactorName );
+  void DeleteFactor(const char *isFactorName);
 
 private:
-
   // private attributes
   //
 
@@ -107,8 +97,7 @@ private:
 
   // Stores factor values (either discrete or continous)
   // pertaining to this subject.
-  vector < QdecFactor* > mFactors;
-
+  vector<QdecFactor *> mFactors;
 };
 
 #endif // QDECSUBJECT_H

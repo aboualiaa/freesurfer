@@ -25,10 +25,8 @@
 #include "NrrdIO.h"
 
 #ifdef BUILD_MAIN
-void
-demoIO(char *filename)
-{
-  char me[]="demoIO", newname[]="foo.nrrd", *err, *key, *val;
+void demoIO(char *filename) {
+  char me[] = "demoIO", newname[] = "foo.nrrd", *err, *key, *val;
   int kvn, kvi;
   Nrrd *nin;
 
@@ -36,8 +34,7 @@ demoIO(char *filename)
   nin = nrrdNew();
 
   /* read in the nrrd from file */
-  if (nrrdLoad(nin, filename, NULL))
-  {
+  if (nrrdLoad(nin, filename, NULL)) {
     err = biffGetDone(NRRD);
     fprintf(stderr, "%s: trouble reading \"%s\":\n%s", me, filename, err);
     free(err);
@@ -45,18 +42,15 @@ demoIO(char *filename)
   }
 
   /* say something about the array */
-  printf("%s: \"%s\" is a %d-dimensional nrrd of type %d (%s)\n",
-         me, filename, nin->dim, nin->type,
-         airEnumStr(nrrdType, nin->type));
-  printf("%s: the array contains %d elements, each %d bytes in size\n",
-         me, (int)nrrdElementNumber(nin), (int)nrrdElementSize(nin));
+  printf("%s: \"%s\" is a %d-dimensional nrrd of type %d (%s)\n", me, filename,
+         nin->dim, nin->type, airEnumStr(nrrdType, nin->type));
+  printf("%s: the array contains %d elements, each %d bytes in size\n", me,
+         (int)nrrdElementNumber(nin), (int)nrrdElementSize(nin));
 
   /* print out the key/value pairs present */
   kvn = nrrdKeyValueSize(nin);
-  if (kvn)
-  {
-    for (kvi=0; kvi<kvn; kvi++)
-    {
+  if (kvn) {
+    for (kvi = 0; kvi < kvn; kvi++) {
       nrrdKeyValueIndex(nin, &key, &val, kvi);
       printf("%s: key:value %d = %s:%s\n", me, kvi, key, val);
       free(key);
@@ -68,8 +62,7 @@ demoIO(char *filename)
   /* modify key/value pairs, and write out the nrrd to a different file */
   nrrdKeyValueClear(nin);
   nrrdKeyValueAdd(nin, "new key", "precious value");
-  if (nrrdSave(newname, nin, NULL))
-  {
+  if (nrrdSave(newname, nin, NULL)) {
     err = biffGetDone(NRRD);
     fprintf(stderr, "%s: trouble writing \"%s\":\n%s", me, newname, err);
     free(err);
@@ -84,30 +77,23 @@ demoIO(char *filename)
   return;
 }
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   char *err;
 
-  fprintf(stderr, "(from Teem %s, %s)\n",
-          airTeemVersion, airTeemReleaseDate);
+  fprintf(stderr, "(from Teem %s, %s)\n", airTeemVersion, airTeemReleaseDate);
 
-  if (!nrrdSanity())
-  {
+  if (!nrrdSanity()) {
     fprintf(stderr, "\n");
     fprintf(stderr, "!!! nrrd sanity check FAILED: fix and re-compile\n");
     err = biffGet(NRRD);
     fprintf(stderr, "%s\n", err);
     free(err);
     return 1;
-  }
-  else
-  {
+  } else {
     fprintf(stderr, "(nrrdSanity check passed)\n\n");
   }
 
-  if (2 != argc)
-  {
+  if (2 != argc) {
     fprintf(stderr, "usage: demoIO <filename>\n");
     return 1;
   }

@@ -31,27 +31,20 @@
 
 #include <QObject>
 
-class LayerProperty : public QObject
-{
+class LayerProperty : public QObject {
   Q_OBJECT
 public:
-  LayerProperty ( QObject* parent = 0 );
-  ~LayerProperty ();
+  LayerProperty(QObject *parent = 0);
+  ~LayerProperty();
 
-  bool GetShowInfo()
-  {
-    return m_bShowInfo;
-  }
+  bool GetShowInfo() { return m_bShowInfo; }
 
 public slots:
-  void SetShowInfo( bool bShow );
-  void EmitChangeSignal()
-  {
-    emit PropertyChanged();
-  }
+  void SetShowInfo(bool bShow);
+  void EmitChangeSignal() { emit PropertyChanged(); }
 
 Q_SIGNALS:
-  void ShowInfoChanged( bool bShow );
+  void ShowInfoChanged(bool bShow);
   void PropertyChanged();
   void DisplayModeChanged();
 

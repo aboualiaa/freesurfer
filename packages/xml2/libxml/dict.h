@@ -27,41 +27,28 @@ typedef xmlDict *xmlDictPtr;
 /*
  * Constructor and destructor.
  */
-XMLPUBFUN xmlDictPtr XMLCALL
-			xmlDictCreate	(void);
-XMLPUBFUN xmlDictPtr XMLCALL
-			xmlDictCreateSub(xmlDictPtr sub);
-XMLPUBFUN int XMLCALL
-			xmlDictReference(xmlDictPtr dict);
-XMLPUBFUN void XMLCALL			
-			xmlDictFree	(xmlDictPtr dict);
+XMLPUBFUN xmlDictPtr XMLCALL xmlDictCreate(void);
+XMLPUBFUN xmlDictPtr XMLCALL xmlDictCreateSub(xmlDictPtr sub);
+XMLPUBFUN int XMLCALL xmlDictReference(xmlDictPtr dict);
+XMLPUBFUN void XMLCALL xmlDictFree(xmlDictPtr dict);
 
 /*
  * Lookup of entry in the dictionnary.
  */
-XMLPUBFUN const xmlChar * XMLCALL		
-			xmlDictLookup	(xmlDictPtr dict,
-		                         const xmlChar *name,
-		                         int len);
-XMLPUBFUN const xmlChar * XMLCALL		
-			xmlDictExists	(xmlDictPtr dict,
-		                         const xmlChar *name,
-		                         int len);
-XMLPUBFUN const xmlChar * XMLCALL		
-			xmlDictQLookup	(xmlDictPtr dict,
-		                         const xmlChar *prefix,
-		                         const xmlChar *name);
-XMLPUBFUN int XMLCALL
-			xmlDictOwns	(xmlDictPtr dict,
-					 const xmlChar *str);
-XMLPUBFUN int XMLCALL			
-			xmlDictSize	(xmlDictPtr dict);
+XMLPUBFUN const xmlChar *XMLCALL xmlDictLookup(xmlDictPtr dict,
+                                               const xmlChar *name, int len);
+XMLPUBFUN const xmlChar *XMLCALL xmlDictExists(xmlDictPtr dict,
+                                               const xmlChar *name, int len);
+XMLPUBFUN const xmlChar *XMLCALL xmlDictQLookup(xmlDictPtr dict,
+                                                const xmlChar *prefix,
+                                                const xmlChar *name);
+XMLPUBFUN int XMLCALL xmlDictOwns(xmlDictPtr dict, const xmlChar *str);
+XMLPUBFUN int XMLCALL xmlDictSize(xmlDictPtr dict);
 
 /*
  * Cleanup function
  */
-XMLPUBFUN void XMLCALL
-                        xmlDictCleanup  (void);
+XMLPUBFUN void XMLCALL xmlDictCleanup(void);
 
 #ifdef __cplusplus
 }

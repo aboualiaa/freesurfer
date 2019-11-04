@@ -5,11 +5,8 @@
 #include <QPixmapCache>
 #include <QGradient>
 
-BusyIndicator::BusyIndicator(QWidget *parent) :
-  QWidget(parent),
-  startAngle(0),
-  m_style(StyleArc)
-{
+BusyIndicator::BusyIndicator(QWidget *parent)
+    : QWidget(parent), startAngle(0), m_style(StyleArc) {
   QSizePolicy policy(QSizePolicy::Preferred, QSizePolicy::Fixed);
   policy.setHeightForWidth(true);
   setSizePolicy(policy);
@@ -21,32 +18,24 @@ BusyIndicator::BusyIndicator(QWidget *parent) :
   timer.start();
 }
 
-void BusyIndicator::rotate()
-{
+void BusyIndicator::rotate() {
   startAngle += 30;
   startAngle %= 360;
   update();
 }
 
-void BusyIndicator::setIndicatorStyle(IndicatorStyle style)
-{
+void BusyIndicator::setIndicatorStyle(IndicatorStyle style) {
   m_style = style;
   update();
 }
 
-void BusyIndicator::setColor(QColor color)
-{
-  fillColor = color;
-}
+void BusyIndicator::setColor(QColor color) { fillColor = color; }
 
-BusyIndicator::IndicatorStyle BusyIndicator::indicatorStyle() const
-{
+BusyIndicator::IndicatorStyle BusyIndicator::indicatorStyle() const {
   return m_style;
 }
 
-
-QPixmap BusyIndicator::generatePixmap(int side)
-{
+QPixmap BusyIndicator::generatePixmap(int side) {
   QPixmap pixmap(QSize(side, side));
   pixmap.fill(QColor(255, 255, 255, 0));
 
@@ -70,8 +59,7 @@ QPixmap BusyIndicator::generatePixmap(int side)
   return pixmap;
 }
 
-void BusyIndicator::drawRectStyle(QPainter *painter)
-{
+void BusyIndicator::drawRectStyle(QPainter *painter) {
   //    QColor color = palette().color(QPalette::WindowText);
   QColor color = fillColor;
   QBrush brush(color);
@@ -92,8 +80,7 @@ void BusyIndicator::drawRectStyle(QPainter *painter)
   }
 }
 
-void BusyIndicator::drawEllipseStyle(QPainter *painter)
-{
+void BusyIndicator::drawEllipseStyle(QPainter *painter) {
   //    QColor color = palette().color(QPalette::WindowText);
   QColor color = fillColor;
   QBrush brush(color);
@@ -114,8 +101,7 @@ void BusyIndicator::drawEllipseStyle(QPainter *painter)
   }
 }
 
-void BusyIndicator::drawArcStyle(QPainter *painter)
-{
+void BusyIndicator::drawArcStyle(QPainter *painter) {
   //    QColor color = palette().color(QPalette::WindowText);
   QColor color = fillColor;
   QConicalGradient gradient(0, 0, -startAngle);
@@ -133,14 +119,13 @@ void BusyIndicator::drawArcStyle(QPainter *painter)
   painter->drawArc(-85, -85, 170, 170, 0 * 16, 360 * 16);
 }
 
-void BusyIndicator::paintEvent(QPaintEvent *)
-{
+void BusyIndicator::paintEvent(QPaintEvent *) {
   QString key = QString("%1:%2:%3:%4:%5")
-      .arg(metaObject()->className())
-      .arg(width())
-      .arg(height())
-      .arg(startAngle)
-      .arg(m_style);
+                    .arg(metaObject()->className())
+                    .arg(width())
+                    .arg(height())
+                    .arg(startAngle)
+                    .arg(m_style);
 
   QPixmap pixmap;
   QPainter painter(this);
@@ -148,7 +133,7 @@ void BusyIndicator::paintEvent(QPaintEvent *)
 
   int side = qMin(width(), height());
 
-  if(!QPixmapCache::find(key, &pixmap)) {
+  if (!QPixmapCache::find(key, &pixmap)) {
     pixmap = generatePixmap(side);
     QPixmapCache::insert(key, pixmap);
   }
@@ -158,24 +143,16 @@ void BusyIndicator::paintEvent(QPaintEvent *)
   painter.drawPixmap(0, 0, side, side, pixmap);
 }
 
-QSize BusyIndicator::minimumSizeHint() const
-{
-  return QSize(15, 15);
-}
+QSize BusyIndicator::minimumSizeHint() const { return QSize(15, 15); }
 
-QSize BusyIndicator::sizeHint() const
-{
-  return QSize(30, 30);
-}
+QSize BusyIndicator::sizeHint() const { return QSize(30, 30); }
 
-void BusyIndicator::showEvent(QShowEvent *e)
-{
+void BusyIndicator::showEvent(QShowEvent *e) {
   timer.start();
   QWidget::showEvent(e);
 }
 
-void BusyIndicator::hideEvent(QHideEvent *e)
-{
+void BusyIndicator::hideEvent(QHideEvent *e) {
   timer.stop();
   QWidget::hideEvent(e);
 }

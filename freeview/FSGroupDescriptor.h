@@ -35,50 +35,44 @@
 
 class FSVolume;
 
-struct FSGDDataItem
-{
+struct FSGDDataItem {
   QString subject_id;
   int class_id;
   QList<double> variable_values;
   double measurement;
 };
 
-struct FSGDVariable
-{
+struct FSGDVariable {
   QString label;
   double range[2];
 };
 
-struct FSGDClass
-{
+struct FSGDClass {
   QString label;
   QString marker;
-  QColor  color;
+  QColor color;
 };
 
-class FSGroupDescriptor : public QObject
-{
+class FSGroupDescriptor : public QObject {
   Q_OBJECT
 public:
-  FSGroupDescriptor( QObject* parent );
+  FSGroupDescriptor(QObject *parent);
   virtual ~FSGroupDescriptor();
 
-  bool Read( const QString& filename );
+  bool Read(const QString &filename);
 
   void UpdateData(int nVertex);
 
-  FSGD*   m_fsgd;
-  double  m_dXStart;
-  double  m_dXDelta;
-  QList<FSGDClass>    m_classes;
+  FSGD *m_fsgd;
+  double m_dXStart;
+  double m_dXDelta;
+  QList<FSGDClass> m_classes;
   QList<FSGDVariable> m_variables;
   QList<FSGDDataItem> m_data;
-  int             m_nVertexNum;
-  QString         m_title;
-  QString         m_measureName;
+  int m_nVertexNum;
+  QString m_title;
+  QString m_measureName;
   double m_dMeasurementRange[2];
 };
 
 #endif
-
-

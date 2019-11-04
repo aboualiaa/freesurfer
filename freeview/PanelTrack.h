@@ -27,13 +27,11 @@
 #include "PanelLayer.h"
 #include <QList>
 
-namespace Ui
-{
+namespace Ui {
 class PanelTrack;
 }
 
-class PanelTrack : public PanelLayer
-{
+class PanelTrack : public PanelLayer {
   Q_OBJECT
 
 public:
@@ -43,17 +41,17 @@ public:
 protected:
   void DoUpdateWidgets();
   void DoIdle();
-  virtual void ConnectLayer( Layer* layer );
+  virtual void ConnectLayer(Layer *layer);
 
 protected slots:
   void OnSliderOpacity(int);
-  void OnLineEditOpacity(const QString&);
+  void OnLineEditOpacity(const QString &);
 
 private:
   Ui::PanelTrack *ui;
 
-  QList<QWidget*> m_widgetlistDirectionalColor;
-  QList<QWidget*> m_widgetlistSolidColor;
+  QList<QWidget *> m_widgetlistDirectionalColor;
+  QList<QWidget *> m_widgetlistSolidColor;
 };
 
 #endif // PANELTRACK_H

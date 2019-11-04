@@ -38,18 +38,17 @@ class LayerPropertyPointSet;
 class wxWindow;
 class wxCommandEvent;
 
-class LayerPointSet : public LayerEditable
-{
+class LayerPointSet : public LayerEditable {
   Q_OBJECT
 public:
-  LayerPointSet( LayerMRI* mri, int type = 0, QObject* parent = NULL );
+  LayerPointSet(LayerMRI *mri, int type = 0, QObject *parent = NULL);
   virtual ~LayerPointSet();
 
-  bool LoadFromFile( const QString& filename );
-  bool LoadFromJsonFile(const QString& filename);
-  bool LoadFromString( const QString& content);
+  bool LoadFromFile(const QString &filename);
+  bool LoadFromJsonFile(const QString &filename);
+  bool LoadFromString(const QString &content);
   bool Save();
-  bool SaveAsJson(const QString& filename);
+  bool SaveAsJson(const QString &filename);
 
   bool HasUndo();
   bool HasRedo();
@@ -59,50 +58,44 @@ public:
 
   void SaveForUndo();
 
-  void Append2DProps( vtkRenderer* renderer, int nPlane );
-  void Append3DProps( vtkRenderer* renderer, bool* bSliceVisibility = NULL );
+  void Append2DProps(vtkRenderer *renderer, int nPlane);
+  void Append3DProps(vtkRenderer *renderer, bool *bSliceVisibility = NULL);
 
-  void SetVisible( bool bVisible = true );
+  void SetVisible(bool bVisible = true);
   bool IsVisible();
 
-  bool HasProp( vtkProp* prop );
+  bool HasProp(vtkProp *prop);
 
-  int FindPoint( double* ras, double tolerance = -1 );
+  int FindPoint(double *ras, double tolerance = -1);
 
-  int AddPoint( double* ras, double value = 1 );
+  int AddPoint(double *ras, double value = 1);
 
-  bool RemovePoint( double* ras, double tolerance = -1 );
+  bool RemovePoint(double *ras, double tolerance = -1);
 
-  bool RemovePoint( int nIndex );
+  bool RemovePoint(int nIndex);
 
-  void UpdatePoint( int nIndex, double* ras, bool bRebuildActors = true );
+  void UpdatePoint(int nIndex, double *ras, bool bRebuildActors = true);
 
-  void UpdatePoint( int nIndex, const QString& key, const QVariant& value);
+  void UpdatePoint(int nIndex, const QString &key, const QVariant &value);
 
   void UpdateLabelData();
 
-  LayerMRI* GetReferenceVolume()
-  {
-    return m_layerRef;
+  LayerMRI *GetReferenceVolume() { return m_layerRef; }
+
+  inline LayerPropertyPointSet *GetProperty() {
+    return (LayerPropertyPointSet *)mProperty;
   }
 
-  inline LayerPropertyPointSet* GetProperty()
-  {
-    return (LayerPropertyPointSet*)mProperty;
-  }
-
-  bool Rotate( std::vector<RotationElement>& rotations, wxWindow* wnd, wxCommandEvent& event );
+  bool Rotate(std::vector<RotationElement> &rotations, wxWindow *wnd,
+              wxCommandEvent &event);
 
   std::vector<double> GetPoints();
 
-  void GetPoint(int nIndex, double* pt_out);
+  void GetPoint(int nIndex, double *pt_out);
 
   ControlPoint GetPoint(int nIndex);
 
-  FSPointSet* GetPointSetData()
-  {
-    return m_pointSetSource;
-  }
+  FSPointSet *GetPointSetData() { return m_pointSetSource; }
 
   int GetNumberOfPoints();
 
@@ -115,34 +108,32 @@ public:
 protected slots:
   void UpdateColorMap();
   void UpdateOpacity();
-  void UpdateScalars(vtkPolyData* polydata);
+  void UpdateScalars(vtkPolyData *polydata);
   void UpdateSnapToVoxelCenter();
   void UpdateSplineVisibility();
-  void RebuildActors( bool bRebuild3D = true );
+  void RebuildActors(bool bRebuild3D = true);
 
 signals:
   void PointAdded(int nIndex);
   void PointRemoved(int nIndex);
 
 protected:
-  virtual void OnSlicePositionChanged( int nPlane );
+  virtual void OnSlicePositionChanged(int nPlane);
 
   PointSet m_points;
-  vtkActor*    m_actorBalls;
-  vtkActor*    m_actorSpline;
-  vtkActor*    m_actorSlice[3];
-  vtkActor*    m_actorSplineSlice[3];
+  vtkActor *m_actorBalls;
+  vtkActor *m_actorSpline;
+  vtkActor *m_actorSlice[3];
+  vtkActor *m_actorSplineSlice[3];
 
-  vtkSmartPointer<vtkPolyDataMapper>  m_mapper;
+  vtkSmartPointer<vtkPolyDataMapper> m_mapper;
 
-  LayerMRI*    m_layerRef;
-  QList< PointSet > m_bufferUndo;
-  QList< PointSet > m_bufferRedo;
+  LayerMRI *m_layerRef;
+  QList<PointSet> m_bufferUndo;
+  QList<PointSet> m_bufferRedo;
 
-  FSPointSet*   m_pointSetSource;
-  QVariantMap   m_mapEnhancedData;
+  FSPointSet *m_pointSetSource;
+  QVariantMap m_mapEnhancedData;
 };
 
 #endif
-
-

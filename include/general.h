@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:09 $
@@ -23,19 +23,18 @@
  *
  */
 
-
 #ifndef GENERAL_H
 #define GENERAL_H
 
-void order(int *small, int *big) ;
+void order(int *small, int *big);
 
 #if 1
 /* putting these prototypes in causes the canny edge detecter to fail, so
    leave them out for now */
-short nearestshort(float x) ;
-void  fporder(float *big, float *small) ;
-float fpclip(float x, float bound1, float bound2) ;
-int nearestint(float x) ;
+short nearestshort(float x);
+void fporder(float *big, float *small);
+float fpclip(float x, float bound1, float bound2);
+int nearestint(float x);
 #endif
 
 #endif

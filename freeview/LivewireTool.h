@@ -37,27 +37,24 @@ class vtkDijkstraImageGeodesicPath;
 class vtkPoints;
 class vtkImageChangeInformation;
 
-class LivewireTool
-{
+class LivewireTool {
 public:
-  LivewireTool( );
+  LivewireTool();
   virtual ~LivewireTool();
 
-  void UpdateImageDataInfo( vtkImageData* image, int nPlane, int nSlice );
+  void UpdateImageDataInfo(vtkImageData *image, int nPlane, int nSlice);
 
-  void GetLivewirePoints( double* pt1_in, double* pt2_in, vtkPoints* pts_out );
+  void GetLivewirePoints(double *pt1_in, double *pt2_in, vtkPoints *pts_out);
 
-  void GetLivewirePoints( vtkImageData* image, int nPlane, int nSlice,
-                          double* pt1_in, double* pt2_in, vtkPoints* pts_out );
+  void GetLivewirePoints(vtkImageData *image, int nPlane, int nSlice,
+                         double *pt1_in, double *pt2_in, vtkPoints *pts_out);
 
 protected:
-  int  m_nPlane;
-  int  m_nSlice;
-  vtkSmartPointer<vtkDijkstraImageGeodesicPath>  m_path;
-  vtkImageData*         m_imageData;
-  vtkImageData*         m_imageSlice;
+  int m_nPlane;
+  int m_nSlice;
+  vtkSmartPointer<vtkDijkstraImageGeodesicPath> m_path;
+  vtkImageData *m_imageData;
+  vtkImageData *m_imageSlice;
 };
 
 #endif
-
-

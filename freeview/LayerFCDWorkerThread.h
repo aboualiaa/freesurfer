@@ -11,8 +11,7 @@ typedef QList<int> IntList;
 
 class LayerFCD;
 
-class LayerFCDWorkerThread : public QThread
-{
+class LayerFCDWorkerThread : public QThread {
   Q_OBJECT
 public:
   explicit LayerFCDWorkerThread(LayerFCD *fcd);

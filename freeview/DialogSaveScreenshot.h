@@ -27,13 +27,11 @@
 #include <QDialog>
 #include "CommonDataStruct.h"
 
-namespace Ui
-{
+namespace Ui {
 class DialogSaveScreenshot;
 }
 
-class DialogSaveScreenshot : public QDialog
-{
+class DialogSaveScreenshot : public QDialog {
   Q_OBJECT
 
 public:
@@ -42,14 +40,11 @@ public:
 
   QString GetFileName();
 
-  void SetSettings( SettingsScreenshot s );
+  void SetSettings(SettingsScreenshot s);
 
   SettingsScreenshot GetSettings();
 
-  void SetLastDir( const QString& dir )
-  {
-    m_strLastDir = dir;
-  }
+  void SetLastDir(const QString &dir) { m_strLastDir = dir; }
 
 protected slots:
   void OnSave();

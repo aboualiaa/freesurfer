@@ -22,7 +22,6 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-
 #include "NrrdIO.h"
 #include "teemDio.h"
 
@@ -42,9 +41,7 @@ const int airMyDio = 1;
 
 int airDisableDio = AIR_FALSE;
 
-const char
-_airNoDioErr[AIR_NODIO_MAX+2][AIR_STRLEN_SMALL] =
-  {
+const char _airNoDioErr[AIR_NODIO_MAX + 2][AIR_STRLEN_SMALL] = {
     "(invalid noDio value)",
     "CAN TOO do direct I/O!",
     "direct I/O apparently not available on this architecture",
@@ -58,19 +55,13 @@ _airNoDioErr[AIR_NODIO_MAX+2][AIR_STRLEN_SMALL] =
     "current file position not multiple of d_miniosz",
     "fcntl(F_SETFL, FDIRECT) to turn on direct I/O failed",
     "memalign() test (on a small chuck of memory) failed",
-    "direct I/O (in air library) has been disabled with airDisableDio"
-  };
+    "direct I/O (in air library) has been disabled with airDisableDio"};
 
-const char *
-airNoDioErr(int noDio)
-{
+const char *airNoDioErr(int noDio) {
 
-  if (AIR_IN_CL(0, noDio, AIR_NODIO_MAX))
-  {
-    return _airNoDioErr[noDio+1];
-  }
-  else
-  {
+  if (AIR_IN_CL(0, noDio, AIR_NODIO_MAX)) {
+    return _airNoDioErr[noDio + 1];
+  } else {
     return _airNoDioErr[0];
   }
 }
@@ -87,9 +78,7 @@ airNoDioErr(int noDio)
 ** be possible here".
 */
 #if TEEM_DIO == 0
-int
-airDioTest(int fd, const void *ptr, size_t size)
-{
+int airDioTest(int fd, const void *ptr, size_t size) {
   AIR_UNUSED(fd);
   AIR_UNUSED(ptr);
   AIR_UNUSED(size);
@@ -98,20 +87,16 @@ airDioTest(int fd, const void *ptr, size_t size)
   return airNoDio_arch;
 }
 #else
-int
-airDioTest(int fd, const void *ptr, size_t size)
-{
+int airDioTest(int fd, const void *ptr, size_t size) {
   struct dioattr dioinfo;
   void *tmp;
   int flags;
 
-  if (airDisableDio)
-  {
+  if (airDisableDio) {
     /* user turned direct I/O off */
     return airNoDio_disable;
   }
-  if (0 == fd || 1 == fd || 2 == fd)
-  {
+  if (0 == fd || 1 == fd || 2 == fd) {
     /* This was added because I was noticing a problem with piping
     between unrrdu programs- sometimes the fread() of the receiving
     data through a unix pipe ("|") failed to read all the data.  If
@@ -130,19 +115,16 @@ airDioTest(int fd, const void *ptr, size_t size)
     number (0, 1, 2).  */
     return airNoDio_std;
   }
-  if (-1 == fd)
-  {
+  if (-1 == fd) {
     /* caller probably couldn't get the underlying file descriptor */
     return airNoDio_fd;
   }
-  if (0 != fcntl(fd, F_DIOINFO, &dioinfo))
-  {
+  if (0 != fcntl(fd, F_DIOINFO, &dioinfo)) {
     /* couldn't learn direct I/O specifics */
     return airNoDio_dioinfo;
   }
 
-  if (size)
-  {
+  if (size) {
     /*
     ** direct I/O requirements:
     ** 1) xfer size between d_miniosz and d_maxiosz
@@ -155,45 +137,36 @@ airDioTest(int fd, const void *ptr, size_t size)
     ** We can test #3 here if we're given non-NULL ptr
     ** We can always test #4
     */
-    if (size < dioinfo.d_miniosz)
-    {
+    if (size < dioinfo.d_miniosz) {
       /* fails req. #1 above */
       return airNoDio_small;
     }
     /* we don't actually check for being too large, since we can always
     do IO on d_maxiosz-sized pieces */
-    if (size % dioinfo.d_miniosz)
-    {
+    if (size % dioinfo.d_miniosz) {
       /* fails req. #2 above */
       return airNoDio_size;
     }
   }
-  if (ptr)
-  {
-    if ((unsigned long)(ptr) % dioinfo.d_mem)
-    {
+  if (ptr) {
+    if ((unsigned long)(ptr) % dioinfo.d_mem) {
       /* fails req. #3 above */
       return airNoDio_ptr;
     }
-  }
-  else
-  {
+  } else {
     tmp = memalign(dioinfo.d_mem, dioinfo.d_miniosz);
-    if (!tmp)
-    {
+    if (!tmp) {
       /* couldn't even alloc (via memalign) the minimum size */
       return airNoDio_test;
     }
     free(tmp);
   }
-  if (lseek(fd, 0, SEEK_CUR) % dioinfo.d_miniosz)
-  {
+  if (lseek(fd, 0, SEEK_CUR) % dioinfo.d_miniosz) {
     /* fails req. #4 above */
     return airNoDio_fpos;
   }
   flags = fcntl(fd, F_GETFL);
-  if (-1 == fcntl(fd, F_SETFL, flags | FDIRECT))
-  {
+  if (-1 == fcntl(fd, F_SETFL, flags | FDIRECT)) {
     /* couln't turn on direct I/O */
     return airNoDio_setfl;
   }
@@ -217,9 +190,7 @@ airDioTest(int fd, const void *ptr, size_t size)
 ** that you've already called airDioTest without incident.
 */
 #if TEEM_DIO == 0
-void
-airDioInfo(int *align, int *min, int *max, int fd)
-{
+void airDioInfo(int *align, int *min, int *max, int fd) {
   AIR_UNUSED(align);
   AIR_UNUSED(min);
   AIR_UNUSED(max);
@@ -227,13 +198,10 @@ airDioInfo(int *align, int *min, int *max, int fd)
   return;
 }
 #else
-void
-airDioInfo(int *align, int *min, int *max, int fd)
-{
+void airDioInfo(int *align, int *min, int *max, int fd) {
   struct dioattr dioinfo;
 
-  if (align && min && max && !fcntl(fd, F_DIOINFO, &dioinfo))
-  {
+  if (align && min && max && !fcntl(fd, F_DIOINFO, &dioinfo)) {
     *align = dioinfo.d_mem;
     *min = dioinfo.d_miniosz;
     *max = dioinfo.d_maxiosz;
@@ -251,18 +219,14 @@ airDioInfo(int *align, int *min, int *max, int fd)
 ** without incident
 */
 #if TEEM_DIO == 0
-void *
-airDioMalloc(size_t size, int fd)
-{
+void *airDioMalloc(size_t size, int fd) {
   AIR_UNUSED(size);
   AIR_UNUSED(fd);
 
   return NULL;
 }
 #else
-void *
-airDioMalloc(size_t size, int fd)
-{
+void *airDioMalloc(size_t size, int fd) {
   int align, min, max;
 
   airDioInfo(&align, &min, &max, fd);
@@ -280,9 +244,7 @@ airDioMalloc(size_t size, int fd)
 ** without incident
 */
 #if TEEM_DIO == 0
-size_t
-airDioRead(int fd, void *_ptr, size_t size)
-{
+size_t airDioRead(int fd, void *_ptr, size_t size) {
   AIR_UNUSED(fd);
   AIR_UNUSED(_ptr);
   AIR_UNUSED(size);
@@ -290,16 +252,13 @@ airDioRead(int fd, void *_ptr, size_t size)
   return 0;
 }
 #else
-size_t
-airDioRead(int fd, void *_ptr, size_t size)
-{
+size_t airDioRead(int fd, void *_ptr, size_t size) {
   size_t red, totalred;
   int align, min, max, flags;
   size_t remain, part;
   char *ptr;
 
-  if (!( _ptr && airNoDio_okay == airDioTest(fd, _ptr, size) ))
-  {
+  if (!(_ptr && airNoDio_okay == airDioTest(fd, _ptr, size))) {
     return 0;
   }
 
@@ -308,20 +267,17 @@ airDioRead(int fd, void *_ptr, size_t size)
   airDioInfo(&align, &min, &max, fd);
   remain = size;
   totalred = 0;
-  ptr = (char*)_ptr;
-  do
-  {
+  ptr = (char *)_ptr;
+  do {
     part = AIR_MIN(remain, max);
     red = read(fd, ptr, part);
     totalred += red;
-    if (red != part)
-    {
+    if (red != part) {
       break;
     }
     ptr += red;
     remain -= red;
-  }
-  while (remain);
+  } while (remain);
   fcntl(fd, F_SETFL, flags);
 
   return totalred;
@@ -338,9 +294,7 @@ airDioRead(int fd, void *_ptr, size_t size)
 ** without incident
 */
 #if TEEM_DIO == 0
-size_t
-airDioWrite(int fd, const void *_ptr, size_t size)
-{
+size_t airDioWrite(int fd, const void *_ptr, size_t size) {
   AIR_UNUSED(fd);
   AIR_UNUSED(_ptr);
   AIR_UNUSED(size);
@@ -348,16 +302,13 @@ airDioWrite(int fd, const void *_ptr, size_t size)
   return 0;
 }
 #else
-size_t
-airDioWrite(int fd, const void *_ptr, size_t size)
-{
+size_t airDioWrite(int fd, const void *_ptr, size_t size) {
   size_t rit, totalrit;
   int align, min, max, flags;
   size_t remain, part;
   char *ptr;
 
-  if (!( _ptr && (airNoDio_okay == airDioTest(fd, _ptr, size)) ))
-  {
+  if (!(_ptr && (airNoDio_okay == airDioTest(fd, _ptr, size)))) {
     return 0;
   }
 
@@ -366,20 +317,17 @@ airDioWrite(int fd, const void *_ptr, size_t size)
   airDioInfo(&align, &min, &max, fd);
   remain = size;
   totalrit = 0;
-  ptr = (char*)_ptr;
-  do
-  {
+  ptr = (char *)_ptr;
+  do {
     part = AIR_MIN(remain, max);
     rit = write(fd, ptr, part);
     totalrit += rit;
-    if (rit != part)
-    {
+    if (rit != part) {
       break;
     }
     ptr += rit;
     remain -= rit;
-  }
-  while (remain);
+  } while (remain);
   fcntl(fd, F_SETFL, flags);
 
   return totalrit;

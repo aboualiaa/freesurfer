@@ -25,64 +25,51 @@
 #include "NrrdIO.h"
 #include "privateNrrd.h"
 
-int
-_nrrdEncodingAscii_available(void)
-{
+int _nrrdEncodingAscii_available(void) { return AIR_TRUE; }
 
-  return AIR_TRUE;
-}
-
-int
-_nrrdEncodingAscii_read(FILE *file, void *_data, size_t elNum,
-                        Nrrd *nrrd, NrrdIoState *nio)
-{
-  char me[]="_nrrdEncodingAscii_read", err[BIFF_STRLEN],
-            numbStr[AIR_STRLEN_HUGE];  /* HEY: fix this */
+int _nrrdEncodingAscii_read(FILE *file, void *_data, size_t elNum, Nrrd *nrrd,
+                            NrrdIoState *nio) {
+  char me[] = "_nrrdEncodingAscii_read", err[BIFF_STRLEN],
+       numbStr[AIR_STRLEN_HUGE]; /* HEY: fix this */
   size_t I;
   char *data;
   int tmp;
 
   AIR_UNUSED(nio);
-  if (nrrdTypeBlock == nrrd->type)
-  {
+  if (nrrdTypeBlock == nrrd->type) {
     sprintf(err, "%s: can't read nrrd type %s from %s", me,
-            airEnumStr(nrrdType, nrrdTypeBlock),
-            nrrdEncodingAscii->name);
+            airEnumStr(nrrdType, nrrdTypeBlock), nrrdEncodingAscii->name);
     biffAdd(NRRD, err);
     return 1;
   }
-  data = (char*)_data;
-  for (I=0; I<elNum; I++)
-  {
-    if (1 != fscanf(file, "%s", numbStr))
-    {
-      sprintf(err, "%s: couldn't parse element " _AIR_SIZE_T_CNV
-              " of " _AIR_SIZE_T_CNV, me, I+1, elNum);
+  data = (char *)_data;
+  for (I = 0; I < elNum; I++) {
+    if (1 != fscanf(file, "%s", numbStr)) {
+      sprintf(err,
+              "%s: couldn't parse element " _AIR_SIZE_T_CNV
+              " of " _AIR_SIZE_T_CNV,
+              me, I + 1, elNum);
       biffAdd(NRRD, err);
       return 1;
     }
-    if (nrrd->type >= nrrdTypeInt)
-    {
+    if (nrrd->type >= nrrdTypeInt) {
       /* sscanf supports putting value directly into this type */
       if (1 != airSingleSscanf(numbStr, nrrdTypePrintfStr[nrrd->type],
-                               (void*)(data + I*nrrdElementSize(nrrd))))
-      {
-        sprintf(err, "%s: couln't parse %s " _AIR_SIZE_T_CNV
-                " of " _AIR_SIZE_T_CNV " (\"%s\")", me,
-                airEnumStr(nrrdType, nrrd->type),
-                I+1, elNum, numbStr);
+                               (void *)(data + I * nrrdElementSize(nrrd)))) {
+        sprintf(err,
+                "%s: couln't parse %s " _AIR_SIZE_T_CNV " of " _AIR_SIZE_T_CNV
+                " (\"%s\")",
+                me, airEnumStr(nrrdType, nrrd->type), I + 1, elNum, numbStr);
         biffAdd(NRRD, err);
         return 1;
       }
-    }
-    else
-    {
+    } else {
       /* sscanf value into an int first */
-      if (1 != airSingleSscanf(numbStr, "%d", &tmp))
-      {
-        sprintf(err, "%s: couln't parse element " _AIR_SIZE_T_CNV
+      if (1 != airSingleSscanf(numbStr, "%d", &tmp)) {
+        sprintf(err,
+                "%s: couln't parse element " _AIR_SIZE_T_CNV
                 " of " _AIR_SIZE_T_CNV " (\"%s\")",
-                me, I+1, elNum, numbStr);
+                me, I + 1, elNum, numbStr);
         biffAdd(NRRD, err);
         return 1;
       }
@@ -93,49 +80,34 @@ _nrrdEncodingAscii_read(FILE *file, void *_data, size_t elNum,
   return 0;
 }
 
-int
-_nrrdEncodingAscii_write(FILE *file, const void *_data, size_t elNum,
-                         const Nrrd *nrrd, NrrdIoState *nio)
-{
-  char me[]="_nrrdEncodingAscii_write", err[BIFF_STRLEN],
-            buff[AIR_STRLEN_MED];
+int _nrrdEncodingAscii_write(FILE *file, const void *_data, size_t elNum,
+                             const Nrrd *nrrd, NrrdIoState *nio) {
+  char me[] = "_nrrdEncodingAscii_write", err[BIFF_STRLEN],
+       buff[AIR_STRLEN_MED];
   unsigned int bufflen, linelen;
   const char *data;
   size_t I;
 
-  if (nrrdTypeBlock == nrrd->type)
-  {
+  if (nrrdTypeBlock == nrrd->type) {
     sprintf(err, "%s: can't write nrrd type %s to %s", me,
-            airEnumStr(nrrdType, nrrdTypeBlock),
-            nrrdEncodingAscii->name);
+            airEnumStr(nrrdType, nrrdTypeBlock), nrrdEncodingAscii->name);
     biffAdd(NRRD, err);
     return 1;
   }
-  data = (char*)_data;
+  data = (char *)_data;
   linelen = 0;
-  for (I=0; I<elNum; I++)
-  {
+  for (I = 0; I < elNum; I++) {
     nrrdSprint[nrrd->type](buff, data);
-    if (1 == nrrd->dim)
-    {
+    if (1 == nrrd->dim) {
       fprintf(file, "%s\n", buff);
-    }
-    else if (nrrd->dim == 2
-             && nrrd->axis[0].size <= nio->valsPerLine)
-    {
-      fprintf(file, "%s%c", buff,
-              (I+1)%(nrrd->axis[0].size) ? ' ' : '\n');
-    }
-    else
-    {
+    } else if (nrrd->dim == 2 && nrrd->axis[0].size <= nio->valsPerLine) {
+      fprintf(file, "%s%c", buff, (I + 1) % (nrrd->axis[0].size) ? ' ' : '\n');
+    } else {
       bufflen = strlen(buff);
-      if (linelen+bufflen+1 <= nio->charsPerLine)
-      {
+      if (linelen + bufflen + 1 <= nio->charsPerLine) {
         fprintf(file, "%s%s", I ? " " : "", buff);
         linelen += (I ? 1 : 0) + bufflen;
-      }
-      else
-      {
+      } else {
         fprintf(file, "\n%s", buff);
         linelen = bufflen;
       }
@@ -148,17 +120,12 @@ _nrrdEncodingAscii_write(FILE *file, const void *_data, size_t elNum,
   return 0;
 }
 
-const NrrdEncoding
-_nrrdEncodingAscii =
-  {
-    "ASCII",      /* name */
-    "ascii",      /* suffix */
-    AIR_FALSE,   /* endianMatters */
-    AIR_FALSE,   /* isCompression */
-    _nrrdEncodingAscii_available,
-    _nrrdEncodingAscii_read,
-    _nrrdEncodingAscii_write
-  };
+const NrrdEncoding _nrrdEncodingAscii = {"ASCII",   /* name */
+                                         "ascii",   /* suffix */
+                                         AIR_FALSE, /* endianMatters */
+                                         AIR_FALSE, /* isCompression */
+                                         _nrrdEncodingAscii_available,
+                                         _nrrdEncodingAscii_read,
+                                         _nrrdEncodingAscii_write};
 
-const NrrdEncoding *const
-nrrdEncodingAscii = &_nrrdEncodingAscii;
+const NrrdEncoding *const nrrdEncodingAscii = &_nrrdEncodingAscii;

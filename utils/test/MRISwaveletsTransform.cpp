@@ -24,8 +24,7 @@
 
 #include "ANN.h"
 
-extern "C"
-{
+extern "C" {
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -49,30 +48,36 @@ extern "C"
 #include "matrix.h"
 }
 
-static char vcid[] = 
-  "$Id: MRISwaveletsTransform.cpp,v 1.4 2011/03/02 00:04:55 nicks Exp $";
-#define VERTEX_EDGE(vec, v0, v1)   VECTOR_LOAD(vec,v1->x-v0->x,v1->y-v0->y, v1->z-v0->z)
-typedef struct _double_3d
-{
+static char vcid[] =
+    "$Id: MRISwaveletsTransform.cpp,v 1.4 2011/03/02 00:04:55 nicks Exp $";
+#define VERTEX_EDGE(vec, v0, v1)                                               \
+  VECTOR_LOAD(vec, v1->x - v0->x, v1->y - v0->y, v1->z - v0->z)
+typedef struct _double_3d {
   double x;
   double y;
   double z;
-}
-double3d ;
+} double3d;
 
 #define TINY 1.0e-20;
-#define ROTATE(a,i,j,k,l) g=a[i][j];h=a[k][l];a[i][j]=g-s*(h+g*tau);\
- a[k][l]=h+s*(g-h*tau);
+#define ROTATE(a, i, j, k, l)                                                  \
+  g = a[i][j];                                                                 \
+  h = a[k][l];                                                                 \
+  a[i][j] = g - s * (h + g * tau);                                             \
+  a[k][l] = h + s * (g - h * tau);
 
-int             main(int argc, char *argv[]) ;
-static int      get_option(int argc, char *argv[]) ;
-const char            *Progname ;
+int main(int argc, char *argv[]);
+static int get_option(int argc, char *argv[]);
+const char *Progname;
 static MRI_SURFACE *center_brain(MRI_SURFACE *mris_src, MRI_SURFACE *mris_dst);
-static MRI_SURFACE *sample_origposition(MRI_SURFACE *mris_src, MRI_SURFACE *mris_dst) ;
-static MRI_SURFACE *sample_origcurvature(MRI_SURFACE *mris_src, MRI_SURFACE *mris_dst) ;
-static double   v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number, int debug) ;
-static double   brain_volume(MRI_SURFACE *mris);
-//static int      sort(double **array, int order, int number, int total_number);
+static MRI_SURFACE *sample_origposition(MRI_SURFACE *mris_src,
+                                        MRI_SURFACE *mris_dst);
+static MRI_SURFACE *sample_origcurvature(MRI_SURFACE *mris_src,
+                                         MRI_SURFACE *mris_dst);
+static double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf,
+                              int face_number, int debug);
+static double brain_volume(MRI_SURFACE *mris);
+// static int      sort(double **array, int order, int number, int
+// total_number);
 /* ICP functions */
 #if 0
 #if 0
@@ -90,179 +95,162 @@ static void     lubksb(double** a,int n,int* indx,double* b);
 #endif
 #endif
 
-static MRI_SURFACE  *wavelet_analysis_curv(MRI_SURFACE *mris_out, int order) ;
-static MRI_SURFACE  *wavelet_analysis_vec(MRI_SURFACE *mris_out, int order);
-static MRI_SURFACE  *wavelet_synthesis_curv(MRI_SURFACE *mris_out, int order) ;
-static MRI_SURFACE  *wavelet_synthesis_vec(MRI_SURFACE *mris_out, int order);
+static MRI_SURFACE *wavelet_analysis_curv(MRI_SURFACE *mris_out, int order);
+static MRI_SURFACE *wavelet_analysis_vec(MRI_SURFACE *mris_out, int order);
+static MRI_SURFACE *wavelet_synthesis_curv(MRI_SURFACE *mris_out, int order);
+static MRI_SURFACE *wavelet_synthesis_vec(MRI_SURFACE *mris_out, int order);
 
-static int      ANALYSIS=0;
-static int      SYNTHESIS=0;
-static int      COMPARE=0;
-static int      CURV=0;
-static int      RADIUS=0;
-static char     *outs_fname;
-static char     *inc_fname;
-static int      SAMPLE_OUT=0;
-static float    threshold=0;
-static float    shrink = 0;
+static int ANALYSIS = 0;
+static int SYNTHESIS = 0;
+static int COMPARE = 0;
+static int CURV = 0;
+static int RADIUS = 0;
+static char *outs_fname;
+static char *inc_fname;
+static int SAMPLE_OUT = 0;
+static float threshold = 0;
+static float shrink = 0;
 
-int
-main(int argc, char *argv[])
-{
-  int           nargs, msec, order, i, number;
-  Timer then ;
-  MRIS          *mris_in, *mris_out;
-  double        volume; // T[5][5] the transformation matrx (using index 1-4)
+int main(int argc, char *argv[]) {
+  int nargs, msec, order, i, number;
+  Timer then;
+  MRIS *mris_in, *mris_out;
+  double volume; // T[5][5] the transformation matrx (using index 1-4)
 
-  Progname = argv[0] ;
-  DiagInit(NULL, NULL, NULL) ;
-  ErrorInit(NULL, NULL, NULL) ;
+  Progname = argv[0];
+  DiagInit(NULL, NULL, NULL);
+  ErrorInit(NULL, NULL, NULL);
 
-  for ( ; argc > 1 && ISOPTION(*argv[1]) ; argc--, argv++)
-  {
-    nargs = get_option(argc, argv) ;
-    argc -= nargs ;
-    argv += nargs ;
+  for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
+    nargs = get_option(argc, argv);
+    argc -= nargs;
+    argv += nargs;
   }
 
   if (argc < 2)
     ErrorExit(ERROR_BADPARM,
-              "usage: %s <input sphere> <input surface> <int which> <output wavelets> ", Progname);
+              "usage: %s <input sphere> <input surface> <int which> <output "
+              "wavelets> ",
+              Progname);
 
-  then.reset() ;
+  then.reset();
 
-  //order = atoi (argv[3]);
+  // order = atoi (argv[3]);
   order = 7;
-  //fprintf(stdout, "Set %s as the finest scale level\n", argv[3]);
+  // fprintf(stdout, "Set %s as the finest scale level\n", argv[3]);
   if (order > 8)
     ErrorExit(ERROR_BADPARM, "the highest order is 7\n");
 
-  if (atoi(argv[3])  == 0)
-  {
-    ANALYSIS=1;
-  }
-  else if (atoi(argv[3]) == 1)
-  {
+  if (atoi(argv[3]) == 0) {
     ANALYSIS = 1;
-    CURV=1;
-  }
-  else if (atoi(argv[3]) == 2)
-  {
+  } else if (atoi(argv[3]) == 1) {
+    ANALYSIS = 1;
+    CURV = 1;
+  } else if (atoi(argv[3]) == 2) {
     SYNTHESIS = 1;
     CURV = 0;
-  }
-  else if (atoi(argv[3]) == 3)
-  {
+  } else if (atoi(argv[3]) == 3) {
     SYNTHESIS = 1;
     CURV = 1;
-  }
-  else
-  {
+  } else {
     fprintf(stdout, "Set mode to 1\n");
-    ANALYSIS=1;
+    ANALYSIS = 1;
   }
 
   /*Spherical Wavelet Analysis*/
 
-  if ( ANALYSIS && !CURV && !RADIUS)
-  {
-    //MRI   *mri_out;
-    char  *cp=0, afname[STRLEN], meas[STRLEN], path[STRLEN], sname[STRLEN];
+  if (ANALYSIS && !CURV && !RADIUS) {
+    // MRI   *mri_out;
+    char *cp = 0, afname[STRLEN], meas[STRLEN], path[STRLEN], sname[STRLEN];
 
     /* using talairach transformation */
     fprintf(stdout, "Reading input spherical surface from %s\n", argv[1]);
-    mris_in = MRISread(argv[1]) ;
+    mris_in = MRISread(argv[1]);
     if (!mris_in)
-      ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s",
-                Progname, argv[1]) ;
-    MRISreadOriginalProperties(mris_in, argv[2]) ;
+      ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s", Progname,
+                argv[1]);
+    MRISreadOriginalProperties(mris_in, argv[2]);
     fprintf(stdout, "Reading original surface from %s\n", argv[2]);
     MRISsaveVertexPositions(mris_in, TMP_VERTICES);
     MRISrestoreVertexPositions(mris_in, ORIGINAL_VERTICES);
 
-    strcpy(afname,argv[2]);
-    cp=strchr(afname, '.');
-    strcpy(meas,cp-2);
-    FileNamePath(afname,path);
-    FileNamePath(path,afname);
-    cp=strrchr(afname, '/');
-    strcpy(sname,cp);
-    FileNamePath(afname,path);
+    strcpy(afname, argv[2]);
+    cp = strchr(afname, '.');
+    strcpy(meas, cp - 2);
+    FileNamePath(afname, path);
+    FileNamePath(path, afname);
+    cp = strrchr(afname, '/');
+    strcpy(sname, cp);
+    FileNamePath(afname, path);
 
-    if (0) //comment out this talairach transformation
+    if (0) // comment out this talairach transformation
     {
-      MRI          *mri = 0, *mri_dst = 0;
-      LTA          *lta=0;
-      int          transform_type;
+      MRI *mri = 0, *mri_dst = 0;
+      LTA *lta = 0;
+      int transform_type;
 
-      sprintf(afname, "%s/%s/mri/transforms/talairach.lta",path,sname);
+      sprintf(afname, "%s/%s/mri/transforms/talairach.lta", path, sname);
       printf("Apply the given LTA xfrom to align input surface\n ...");
       printf("Reading transform from %s\n", afname);
       // read transform
-      transform_type =  TransformFileNameType(afname);
+      transform_type = TransformFileNameType(afname);
 
       if (transform_type == MNI_TRANSFORM_TYPE ||
-          transform_type == TRANSFORM_ARRAY_TYPE || \
-          transform_type == REGISTER_DAT ||
-          transform_type == FSLREG_TYPE
-         )
-      {
-        lta = LTAreadEx(afname) ;
+          transform_type == TRANSFORM_ARRAY_TYPE ||
+          transform_type == REGISTER_DAT || transform_type == FSLREG_TYPE) {
+        lta = LTAreadEx(afname);
         if (!lta)
           ErrorExit(ERROR_NOFILE, "%s: could not read transform file %s",
-                    Progname, afname) ;
+                    Progname, afname);
 
-        if (transform_type == FSLREG_TYPE)
-        {
-          if (mri == 0 || mri_dst == 0)
-          {
-            fprintf(stderr, "ERROR: fslmat does not have information on the src and dst volumes\n");
-            fprintf(stderr, "ERROR: you must give options '-src' and '-dst' to specify the src and dst volume infos\n");
+        if (transform_type == FSLREG_TYPE) {
+          if (mri == 0 || mri_dst == 0) {
+            fprintf(stderr, "ERROR: fslmat does not have information on the "
+                            "src and dst volumes\n");
+            fprintf(stderr, "ERROR: you must give options '-src' and '-dst' to "
+                            "specify the src and dst volume infos\n");
           }
 
           LTAmodifySrcDstGeom(lta, mri, mri_dst); // add src and dst information
           LTAchangeType(lta, LINEAR_VOX_TO_VOX);
         }
 
-        if (lta->xforms[0].src.valid == 0)
-        {
-          if (mri == 0)
-          {
-            fprintf(stderr, "The transform does not have the valid src volume info.\n");
-            fprintf(stderr, "Either you give src volume info by option --src or\n");
+        if (lta->xforms[0].src.valid == 0) {
+          if (mri == 0) {
+            fprintf(stderr,
+                    "The transform does not have the valid src volume info.\n");
+            fprintf(stderr,
+                    "Either you give src volume info by option --src or\n");
             fprintf(stderr, "make the transform to have the valid src info.\n");
             ErrorExit(ERROR_BAD_PARM, "Bailing out...\n");
-          }
-          else
-          {
+          } else {
             LTAmodifySrcDstGeom(lta, mri, NULL); // add src information
             //   getVolGeom(mri, &lt->src);
           }
         }
-        if (lta->xforms[0].dst.valid == 0)
-        {
-          if (mri_dst == 0)
-          {
-            fprintf(stderr, "The transform does not have the valid dst volume info.\n");
-            fprintf(stderr, "Either you give src volume info by option --dst or\n");
+        if (lta->xforms[0].dst.valid == 0) {
+          if (mri_dst == 0) {
+            fprintf(stderr,
+                    "The transform does not have the valid dst volume info.\n");
+            fprintf(stderr,
+                    "Either you give src volume info by option --dst or\n");
             fprintf(stderr, "make the transform to have the valid dst info.\n");
             fprintf(stderr, "If the dst was average_305, then you can set\n");
             fprintf(stderr, "environmental variable USE_AVERAGE305 true\n");
-            fprintf(stderr, "without giving the dst volume for RAS-to-RAS transform.\n");
+            fprintf(
+                stderr,
+                "without giving the dst volume for RAS-to-RAS transform.\n");
             ErrorExit(ERROR_BAD_PARM, "Bailing out...\n");
-          }
-          else
-          {
+          } else {
             LTAmodifySrcDstGeom(lta, NULL, mri_dst); // add  dst information
           }
         }
-      }
-      else
-      {
-        ErrorExit(ERROR_BADPARM, "transform is not of MNI, nor Register.dat, nor FSLMAT type");
+      } else {
+        ErrorExit(ERROR_BADPARM,
+                  "transform is not of MNI, nor Register.dat, nor FSLMAT type");
       }
 
-      MRIStransform(mris_in, mri, lta, mri_dst) ;
+      MRIStransform(mris_in, mri, lta, mri_dst);
 
       if (mri)
         MRIfree(&mri);
@@ -271,7 +259,7 @@ main(int argc, char *argv[])
 
       if (lta)
         LTAfree(&lta);
-    }   /* if (xform_fname != NULL) */
+    } /* if (xform_fname != NULL) */
 
     /* save the transformed original coordinates */
     center_brain(mris_in, mris_in);
@@ -279,14 +267,14 @@ main(int argc, char *argv[])
     MRISrestoreVertexPositions(mris_in, TMP_VERTICES);
     /* sample the surface onto ic7 */
     mris_out = ReadIcoByOrder(order, 100);
-    sample_origposition(mris_in, mris_out) ;
-    //MRISsaveVertexPositions(mris_out, TMP_VERTICES) ;
-    //MRISrestoreVertexPositions(mris_out, ORIGINAL_VERTICES);
-    //if (SAMPLE_OUT)
+    sample_origposition(mris_in, mris_out);
+    // MRISsaveVertexPositions(mris_out, TMP_VERTICES) ;
+    // MRISrestoreVertexPositions(mris_out, ORIGINAL_VERTICES);
+    // if (SAMPLE_OUT)
     //  {MRISwrite(mris_out,outs_fname) ;
     //  fprintf(stdout,"Write sampled surface to %s\n",outs_fname);}
-    //MRISsaveVertexPositions(mris_out, ORIGINAL_VERTICES) ;
-    //MRISrestoreVertexPositions(mris_out, TMP_VERTICES) ;
+    // MRISsaveVertexPositions(mris_out, ORIGINAL_VERTICES) ;
+    // MRISrestoreVertexPositions(mris_out, TMP_VERTICES) ;
 
 #if 0
     /* method 1: ICP registration to an average surface*/
@@ -304,37 +292,37 @@ main(int argc, char *argv[])
     register2to1(mris_in, mris_out, T);  //rigid registration
 #endif
 
-    MRISsaveVertexPositions(mris_out, TMP_VERTICES) ;
-    MRISrestoreVertexPositions(mris_out, ORIGINAL_VERTICES) ;
+    MRISsaveVertexPositions(mris_out, TMP_VERTICES);
+    MRISrestoreVertexPositions(mris_out, ORIGINAL_VERTICES);
     center_brain(mris_out, mris_out);
-    volume=brain_volume(mris_out);
-    //MRISscaleBrain(mris_out, mris_out, cbrt(300000/volume)) ;
-    if (SAMPLE_OUT)
-    {
-      MRISwrite(mris_out,outs_fname) ;
-      fprintf(stdout,"Write sampled surface to %s\n",outs_fname);
+    volume = brain_volume(mris_out);
+    // MRISscaleBrain(mris_out, mris_out, cbrt(300000/volume)) ;
+    if (SAMPLE_OUT) {
+      MRISwrite(mris_out, outs_fname);
+      fprintf(stdout, "Write sampled surface to %s\n", outs_fname);
     }
 
-    volume=brain_volume(mris_out);
-    fprintf(stderr, "brain volume becomes %f\n", volume) ;
-    MRISsaveVertexPositions(mris_out, ORIGINAL_VERTICES) ;
-    MRISrestoreVertexPositions(mris_out, TMP_VERTICES) ;
-    for (i = 0; i<mris_out->nvertices; i++)
-      mris_out->vertices[i].nsize=1;
+    volume = brain_volume(mris_out);
+    fprintf(stderr, "brain volume becomes %f\n", volume);
+    MRISsaveVertexPositions(mris_out, ORIGINAL_VERTICES);
+    MRISrestoreVertexPositions(mris_out, TMP_VERTICES);
+    for (i = 0; i < mris_out->nvertices; i++)
+      mris_out->vertices[i].nsize = 1;
     MRISupdateSurface(mris_out);
 
     /* wavelet analysis of origx, origy, origz */
-    wavelet_analysis_vec(mris_out,order);
+    wavelet_analysis_vec(mris_out, order);
 
-    MRISsaveVertexPositions(mris_out, TMP_VERTICES) ;
-    MRISrestoreVertexPositions(mris_out, ORIGINAL_VERTICES) ;
+    MRISsaveVertexPositions(mris_out, TMP_VERTICES);
+    MRISrestoreVertexPositions(mris_out, ORIGINAL_VERTICES);
 #if 0
     for (i=0;i<mris_out->nvertices;i++)
       if (mris_out->vertices[i].z>6)
         fprintf(stdout, "%d %f %f %f\n", i,mris_out->vertices[i].x, mris_out->vertices[i].y, mris_out->vertices[i].z);
 #endif
-    fprintf(stdout, "Writing wavelets coefficient of original surface to %s\n", argv[4]);
-    MRISwrite(mris_out,argv[4] ) ;
+    fprintf(stdout, "Writing wavelets coefficient of original surface to %s\n",
+            argv[4]);
+    MRISwrite(mris_out, argv[4]);
 #if 0
     mri_out = MRIallocSequence(mris_out->nvertices,1,1,MRI_FLOAT,3);
     for ( i=0;i<mris_out->nvertices;i++)
@@ -346,35 +334,34 @@ main(int argc, char *argv[])
     MRIwrite(mri_out,argv[5]);
     MRIfree(&mri_out);
 #endif
-    MRISrestoreVertexPositions(mris_out, TMP_VERTICES) ;
-    MRISfree(&mris_in) ;
+    MRISrestoreVertexPositions(mris_out, TMP_VERTICES);
+    MRISfree(&mris_in);
     /*End of Analysis*/
-  }
-  else if ( ANALYSIS && CURV)
-  {
-    //MRI   *mri_out;
+  } else if (ANALYSIS && CURV) {
+    // MRI   *mri_out;
 
-    mris_in = MRISread(argv[1]) ;
+    mris_in = MRISread(argv[1]);
     if (!mris_in)
-      ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s",
-                Progname, argv[1]) ;
+      ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s", Progname,
+                argv[1]);
     fprintf(stdout, "Reading input spherical surface from %s\n", argv[1]);
 
-    MRISreadCurvatureFile(mris_in, argv[2]) ;
+    MRISreadCurvatureFile(mris_in, argv[2]);
     fprintf(stdout, "Reading input from %s\n", argv[2]);
 
     mris_out = ReadIcoByOrder(order, 100);
-    for (i = 0; i<mris_out->nvertices; i++)
-      mris_out->vertices[i].nsize=1;
-    sample_origcurvature(mris_in, mris_out) ;
+    for (i = 0; i < mris_out->nvertices; i++)
+      mris_out->vertices[i].nsize = 1;
+    sample_origcurvature(mris_in, mris_out);
     if (SAMPLE_OUT)
-      MRISwriteCurvature(mris_out,outs_fname);
+      MRISwriteCurvature(mris_out, outs_fname);
 
     /* wavelet analysis of origx, origy, origz */
-    wavelet_analysis_curv(mris_out,order);
+    wavelet_analysis_curv(mris_out, order);
 
-    //fprintf(stdout, "Writing wavelets coefficient of original surface to %s\n", argv[4]);
-    MRISwriteCurvature(mris_out,argv[4] ) ;
+    // fprintf(stdout, "Writing wavelets coefficient of original surface to
+    // %s\n", argv[4]);
+    MRISwriteCurvature(mris_out, argv[4]);
 #if 0
     mri_out = MRIallocSequence(mris_out->nvertices,1,1,MRI_FLOAT,1);
     for ( i=0;i<mris_out->nvertices;i++)
@@ -384,112 +371,111 @@ main(int argc, char *argv[])
     MRIwrite(mri_out,argv[5]);
     MRIfree(&mri_out);
 #endif
-    MRISfree(&mris_in) ;
+    MRISfree(&mris_in);
     /*End of Analysis*/
-  }
-  else if ( ANALYSIS && RADIUS )
-  {
-    MRI   *mri_out;
+  } else if (ANALYSIS && RADIUS) {
+    MRI *mri_out;
     float rad;
 
 #if 1
-    mris_in = MRISread(argv[1]) ;
+    mris_in = MRISread(argv[1]);
     if (!mris_in)
-      ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s",
-                Progname, argv[1]) ;
+      ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s", Progname,
+                argv[1]);
     fprintf(stdout, "Reading input spherical surface from %s\n", argv[1]);
 
-    MRISreadOriginalProperties(mris_in, argv[2]) ;
+    MRISreadOriginalProperties(mris_in, argv[2]);
     mris_out = ReadIcoByOrder(order, 100);
 
-    sample_origposition(mris_in, mris_out) ;
+    sample_origposition(mris_in, mris_out);
 
-    for (i = 0; i<mris_out->nvertices; i++)
-      mris_out->vertices[i].nsize=1;
-    MRISsaveVertexPositions(mris_out, TMP_VERTICES) ;
-    MRISrestoreVertexPositions(mris_out, ORIGINAL_VERTICES) ;
+    for (i = 0; i < mris_out->nvertices; i++)
+      mris_out->vertices[i].nsize = 1;
+    MRISsaveVertexPositions(mris_out, TMP_VERTICES);
+    MRISrestoreVertexPositions(mris_out, ORIGINAL_VERTICES);
     center_brain(mris_out, mris_out);
     volume = brain_volume(mris_out);
-    MRISscaleBrain(mris_out, mris_out, cbrt(300000/volume)) ;
+    MRISscaleBrain(mris_out, mris_out, cbrt(300000 / volume));
 #else
 
     MRIS *mris_high;
-    char  *cp, afname[STRLEN], meas[10];
+    char *cp, afname[STRLEN], meas[10];
 
     mris_high = ReadIcoByOrder(order, 100);
     fprintf(stdout, "Reading input surface from %s\n", argv[1]);
-    mris_out = MRISread(argv[1]) ;
+    mris_out = MRISread(argv[1]);
     if (!mris_out)
-      ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s",
-                Progname, argv[1]) ;
-    MRISreadOriginalProperties(mris_out, argv[2]) ;
-    sample_origposition(mris_out, mris_high) ;
+      ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s", Progname,
+                argv[1]);
+    MRISreadOriginalProperties(mris_out, argv[2]);
+    sample_origposition(mris_out, mris_high);
     MRISfree(&mris_out);
     mris_out = MRISclone(mris_high);
-    for (i = 0; i<mris_out->nvertices; i++)
-    {
-      mris_out->vertices[i].origx=mris_high->vertices[i].origx;
-      mris_out->vertices[i].origy=mris_high->vertices[i].origy;
-      mris_out->vertices[i].origz=mris_high->vertices[i].origz;
+    for (i = 0; i < mris_out->nvertices; i++) {
+      mris_out->vertices[i].origx = mris_high->vertices[i].origx;
+      mris_out->vertices[i].origy = mris_high->vertices[i].origy;
+      mris_out->vertices[i].origz = mris_high->vertices[i].origz;
     }
 
-    cp=strchr(argv[2], '.');
-    if (strstr(cp-2,"rh"))
-      mris_in = MRISread("/space/birn/42/users/pengyu/AD/average7/surf/rh.sphere.reg") ;
+    cp = strchr(argv[2], '.');
+    if (strstr(cp - 2, "rh"))
+      mris_in = MRISread(
+          "/space/birn/42/users/pengyu/AD/average7/surf/rh.sphere.reg");
     else
-      mris_in = MRISread("/space/birn/42/users/pengyu/AD/average7/surf/lh.sphere.reg") ;
-    strcpy(meas,cp-2);
-    sprintf(afname, "/space/birn/42/users/pengyu/AD/average7/surf/%s",meas);
-    //sprintf(afname, "/space/birn/42/users/pengyu/AD/average7/surf/lh.white");
-    MRISreadOriginalProperties(mris_in, afname) ;
-    sample_origposition(mris_in, mris_high) ;
+      mris_in = MRISread(
+          "/space/birn/42/users/pengyu/AD/average7/surf/lh.sphere.reg");
+    strcpy(meas, cp - 2);
+    sprintf(afname, "/space/birn/42/users/pengyu/AD/average7/surf/%s", meas);
+    // sprintf(afname, "/space/birn/42/users/pengyu/AD/average7/surf/lh.white");
+    MRISreadOriginalProperties(mris_in, afname);
+    sample_origposition(mris_in, mris_high);
     MRISfree(&mris_in);
     mris_in = MRISclone(mris_high);
-    for (i = 0; i<mris_out->nvertices; i++)
-    {
-      mris_in->vertices[i].origx=mris_high->vertices[i].origx;
-      mris_in->vertices[i].origy=mris_high->vertices[i].origy;
-      mris_in->vertices[i].origz=mris_high->vertices[i].origz;
+    for (i = 0; i < mris_out->nvertices; i++) {
+      mris_in->vertices[i].origx = mris_high->vertices[i].origx;
+      mris_in->vertices[i].origy = mris_high->vertices[i].origy;
+      mris_in->vertices[i].origz = mris_high->vertices[i].origz;
     }
     MRISfree(&mris_high);
 
-    MRISsaveVertexPositions(mris_in, TMP_VERTICES) ;
-    MRISrestoreVertexPositions(mris_in, ORIGINAL_VERTICES) ;
-    MRISsaveVertexPositions(mris_out, TMP_VERTICES) ;
-    MRISrestoreVertexPositions(mris_out, ORIGINAL_VERTICES) ;
+    MRISsaveVertexPositions(mris_in, TMP_VERTICES);
+    MRISrestoreVertexPositions(mris_in, ORIGINAL_VERTICES);
+    MRISsaveVertexPositions(mris_out, TMP_VERTICES);
+    MRISrestoreVertexPositions(mris_out, ORIGINAL_VERTICES);
 
     center_brain(mris_out, mris_out);
     center_brain(mris_in, mris_in);
-    fprintf(stdout, "Register %s to surface %s (rigid mapping using ICP)\n", argv[2],afname);
+    fprintf(stdout, "Register %s to surface %s (rigid mapping using ICP)\n",
+            argv[2], afname);
     register2to1(mris_in, mris_out, T);
     center_brain(mris_out, mris_out);
-    if (SAMPLE_OUT)
-    {
-      MRISwrite(mris_out,outs_fname) ;
-      fprintf(stdout,"Write sampled surface to %s\n",outs_fname);
+    if (SAMPLE_OUT) {
+      MRISwrite(mris_out, outs_fname);
+      fprintf(stdout, "Write sampled surface to %s\n", outs_fname);
     }
 #endif
-    for (i = 0; i<mris_out->nvertices; i++)
-      mris_out->vertices[i].nsize=1;
+    for (i = 0; i < mris_out->nvertices; i++)
+      mris_out->vertices[i].nsize = 1;
     MRISupdateSurface(mris_out);
-    volume=brain_volume(mris_out);
-    fprintf(stderr, "brain volume becomes %f\n", volume) ;
+    volume = brain_volume(mris_out);
+    fprintf(stderr, "brain volume becomes %f\n", volume);
 
-
-    for (i=0;i<mris_out->nvertices;i++)
-    {
-      rad = (mris_out->vertices[i].x*mris_out->vertices[i].x+mris_out->vertices[i].y*mris_out->vertices[i].y+mris_out->vertices[i].z*mris_out->vertices[i].z);
+    for (i = 0; i < mris_out->nvertices; i++) {
+      rad = (mris_out->vertices[i].x * mris_out->vertices[i].x +
+             mris_out->vertices[i].y * mris_out->vertices[i].y +
+             mris_out->vertices[i].z * mris_out->vertices[i].z);
       mris_out->vertices[i].curv = sqrt(rad);
     }
 
     if (SAMPLE_OUT)
-      MRISwriteCurvature(mris_out,outs_fname);
+      MRISwriteCurvature(mris_out, outs_fname);
 
     /* wavelet analysis of radius */
-    wavelet_analysis_curv(mris_out,order);
+    wavelet_analysis_curv(mris_out, order);
 
-    fprintf(stdout, "Writing wavelets coefficient of original surface to %s\n", argv[4]);
-    MRISwriteCurvature(mris_out,argv[4] ) ;
+    fprintf(stdout, "Writing wavelets coefficient of original surface to %s\n",
+            argv[4]);
+    MRISwriteCurvature(mris_out, argv[4]);
 #if 0
     mri_out = MRIallocSequence(mris_out->nvertices,1,1,MRI_FLOAT,1);
     for ( i=0;i<mris_out->nvertices;i++)
@@ -499,41 +485,41 @@ main(int argc, char *argv[])
     MRIwrite(mri_out,argv[5]);
 #endif
     MRIfree(&mri_out);
-    MRISfree(&mris_in) ;
+    MRISfree(&mris_in);
     /*End of Analysis*/
-  }
-  else if ( SYNTHESIS && !CURV && !RADIUS ) /*Spherical Wavelet Synthesis*/
+  } else if (SYNTHESIS && !CURV && !RADIUS) /*Spherical Wavelet Synthesis*/
   {
-    mris_out = ReadIcoByOrder(order, 100); //higher order surface
+    mris_out = ReadIcoByOrder(order, 100); // higher order surface
     fprintf(stdout, "Creating a %d order spherical surface\n", order);
 #if 0
     MRISreadOriginalProperties(mris_out, argv[1]) ;
 #else
     mris_in = MRISread(argv[1]);
-    for (i = 0; i<mris_out->nvertices; i++)
-    {
-      mris_out->vertices[i].origx = mris_in->vertices[i].x ;
-      mris_out->vertices[i].origy = mris_in->vertices[i].y ;
-      mris_out->vertices[i].origz = mris_in->vertices[i].z ;
+    for (i = 0; i < mris_out->nvertices; i++) {
+      mris_out->vertices[i].origx = mris_in->vertices[i].x;
+      mris_out->vertices[i].origy = mris_in->vertices[i].y;
+      mris_out->vertices[i].origz = mris_in->vertices[i].z;
     }
     MRISfree(&mris_in);
 #endif
     fprintf(stdout, "Reading wavelet coefficients from %s\n", argv[1]);
-    for (i = 0; i<mris_out->nvertices; i++)
-      mris_out->vertices[i].nsize=1;
-    MRISsetNeighborhoodSizeAndDist(mris_out, 3) ;
+    for (i = 0; i < mris_out->nvertices; i++)
+      mris_out->vertices[i].nsize = 1;
+    MRISsetNeighborhoodSizeAndDist(mris_out, 3);
 
-    fprintf(stdout, "Recover the surface using %s order coefficients\n",argv[2]);
-    if (atoi(argv[2])==-1) number = 0;
-    else  number = IcoNVtxsFromOrder(atoi(argv[2]));
-    for (i = number; i<mris_out->nvertices; i++)
-    {
+    fprintf(stdout, "Recover the surface using %s order coefficients\n",
+            argv[2]);
+    if (atoi(argv[2]) == -1)
+      number = 0;
+    else
+      number = IcoNVtxsFromOrder(atoi(argv[2]));
+    for (i = number; i < mris_out->nvertices; i++) {
       mris_out->vertices[i].origx = 0;
       mris_out->vertices[i].origy = 0;
       mris_out->vertices[i].origz = 0;
     }
 
-#if 0 //for SPHARM comparison
+#if 0 // for SPHARM comparison
     if (COMPARE)
     {
       int count = 0, k;
@@ -596,68 +582,66 @@ main(int argc, char *argv[])
       MRISfree(&mris_in);
     }
 #else
-    if (COMPARE)
-    {
+    if (COMPARE) {
       mris_in = MRISread(inc_fname);
-      for (i = 0; i<mris_out->nvertices; i++)
-      {
-        mris_out->vertices[i].origx += mris_in->vertices[i].x ;
-        mris_out->vertices[i].origy += mris_in->vertices[i].y ;
-        mris_out->vertices[i].origz += mris_in->vertices[i].z ;
+      for (i = 0; i < mris_out->nvertices; i++) {
+        mris_out->vertices[i].origx += mris_in->vertices[i].x;
+        mris_out->vertices[i].origy += mris_in->vertices[i].y;
+        mris_out->vertices[i].origz += mris_in->vertices[i].z;
       }
       MRISfree(&mris_in);
     }
 #endif
 
     /* wavelet synthesis of origx, origy, origz */
-    wavelet_synthesis_vec(mris_out,order);
+    wavelet_synthesis_vec(mris_out, order);
 #if 1
-    {   MRI_SURFACE *mris_high;
+    {
+      MRI_SURFACE *mris_high;
       mris_high = ReadIcoByOrder(1, 100);
-      for (i=0;i<mris_high->nvertices;i++)
-      {
-        mris_high->vertices[i].x=mris_out->vertices[i].origx;
-        mris_high->vertices[i].y=mris_out->vertices[i].origy;
-        mris_high->vertices[i].z=mris_out->vertices[i].origz;
+      for (i = 0; i < mris_high->nvertices; i++) {
+        mris_high->vertices[i].x = mris_out->vertices[i].origx;
+        mris_high->vertices[i].y = mris_out->vertices[i].origy;
+        mris_high->vertices[i].z = mris_out->vertices[i].origz;
       }
-      MRISwrite(mris_high, "/space/birn/42/users/pengyu/simulation/average/surf/lh.wavelet1") ;
+      MRISwrite(
+          mris_high,
+          "/space/birn/42/users/pengyu/simulation/average/surf/lh.wavelet1");
       MRISfree(&mris_high);
     }
 #endif
-    MRISsaveVertexPositions(mris_out, TMP_VERTICES) ;
-    MRISrestoreVertexPositions(mris_out, ORIGINAL_VERTICES) ;
+    MRISsaveVertexPositions(mris_out, TMP_VERTICES);
+    MRISrestoreVertexPositions(mris_out, ORIGINAL_VERTICES);
     fprintf(stdout, "Writing recovered surface to %s\n", argv[4]);
-    MRISwrite(mris_out, argv[4]) ;
+    MRISwrite(mris_out, argv[4]);
 
-    MRISrestoreVertexPositions(mris_out, TMP_VERTICES) ;
+    MRISrestoreVertexPositions(mris_out, TMP_VERTICES);
     /*End of Synthesis*/
-  }
-  else if ( SYNTHESIS && CURV ) /*Spherical Wavelet Synthesis*/
+  } else if (SYNTHESIS && CURV) /*Spherical Wavelet Synthesis*/
   {
 
-    mris_out = ReadIcoByOrder(order, 100); //higher order surface
+    mris_out = ReadIcoByOrder(order, 100); // higher order surface
     fprintf(stdout, "Creating a %d order spherical surface\n", order);
-    MRISreadCurvatureFile(mris_out, argv[1]) ;
+    MRISreadCurvatureFile(mris_out, argv[1]);
     fprintf(stdout, "Reading wavelet coefficients from %s\n", argv[1]);
-    for (i = 0; i<mris_out->nvertices; i++)
-      mris_out->vertices[i].nsize=1;
-    MRISsetNeighborhoodSizeAndDist(mris_out, 3) ;
+    for (i = 0; i < mris_out->nvertices; i++)
+      mris_out->vertices[i].nsize = 1;
+    MRISsetNeighborhoodSizeAndDist(mris_out, 3);
 
-
-    fprintf(stdout, "Recover the surface using %s order coefficients\n",argv[2]);
+    fprintf(stdout, "Recover the surface using %s order coefficients\n",
+            argv[2]);
     number = IcoNVtxsFromOrder(atoi(argv[2]));
-    for (i = number; i<mris_out->nvertices; i++)
-    {
+    for (i = number; i < mris_out->nvertices; i++) {
       mris_out->vertices[i].curv = 0;
     }
 
     /* wavelet analysis of curvature */
-    wavelet_synthesis_curv(mris_out,order);
+    wavelet_synthesis_curv(mris_out, order);
 
-    MRISsaveVertexPositions(mris_out, TMP_VERTICES) ;
-    MRISrestoreVertexPositions(mris_out, ORIGINAL_VERTICES) ;
+    MRISsaveVertexPositions(mris_out, TMP_VERTICES);
+    MRISrestoreVertexPositions(mris_out, ORIGINAL_VERTICES);
     fprintf(stdout, "Writing recovered curvature file to %s\n", argv[4]);
-    MRISwriteCurvature(mris_out,argv[4]) ;
+    MRISwriteCurvature(mris_out, argv[4]);
 #if 0
     {  MRI_SURFACE *mris_high;
       mris_high = ReadIcoByOrder(4, 100);
@@ -671,743 +655,739 @@ main(int argc, char *argv[])
       MRISfree(&mris_high);
     }
 #endif
-    MRISrestoreVertexPositions(mris_out, TMP_VERTICES) ;
+    MRISrestoreVertexPositions(mris_out, TMP_VERTICES);
     /*End of Synthesis*/
-  }
-  else if ( SYNTHESIS && RADIUS ) /*Spherical Wavelet Synthesis*/
+  } else if (SYNTHESIS && RADIUS) /*Spherical Wavelet Synthesis*/
   {
     char *cp, path[STRLEN], afname[STRLEN];
     float rad;
 
-    mris_out = ReadIcoByOrder(order, 100); //higher order surface
+    mris_out = ReadIcoByOrder(order, 100); // higher order surface
     fprintf(stdout, "Creating a %d order spherical surface\n", order);
-    MRISreadCurvatureFile(mris_out, argv[1]) ;
+    MRISreadCurvatureFile(mris_out, argv[1]);
     fprintf(stdout, "Reading wavelet coefficients from %s\n", argv[1]);
-    for (i = 0; i<mris_out->nvertices; i++)
-      mris_out->vertices[i].nsize=1;
-    MRISsetNeighborhoodSizeAndDist(mris_out, 3) ;
+    for (i = 0; i < mris_out->nvertices; i++)
+      mris_out->vertices[i].nsize = 1;
+    MRISsetNeighborhoodSizeAndDist(mris_out, 3);
 
-    fprintf(stdout, "Recover the surface using %s order coefficients\n",argv[2]);
+    fprintf(stdout, "Recover the surface using %s order coefficients\n",
+            argv[2]);
     number = IcoNVtxsFromOrder(atoi(argv[2]));
-    for (i = number; i<mris_out->nvertices; i++)
-    {
+    for (i = number; i < mris_out->nvertices; i++) {
       mris_out->vertices[i].curv = 0;
     }
 
     if (shrink > 0)
-      for (i = 0; i<mris_out->nvertices; i++)
-        if (fabs(mris_out->vertices[i].curv)<shrink)
+      for (i = 0; i < mris_out->nvertices; i++)
+        if (fabs(mris_out->vertices[i].curv) < shrink)
           mris_out->vertices[i].curv = 0;
 
-    if (COMPARE)
-    {
-      mris_in= ReadIcoByOrder(order, 100);
-      MRISreadCurvatureFile(mris_in, inc_fname ) ;
+    if (COMPARE) {
+      mris_in = ReadIcoByOrder(order, 100);
+      MRISreadCurvatureFile(mris_in, inc_fname);
 
-      for (i = 0; i<mris_out->nvertices; i++)
-        mris_out->vertices[i].curv += mris_in->vertices[i].curv ;
+      for (i = 0; i < mris_out->nvertices; i++)
+        mris_out->vertices[i].curv += mris_in->vertices[i].curv;
     }
 
     /* wavelet analysis of curvature */
-    wavelet_synthesis_curv(mris_out,order);
+    wavelet_synthesis_curv(mris_out, order);
 
     // Read in a template
-    FileNamePath(argv[1], path) ;
+    FileNamePath(argv[1], path);
 
-    cp=strchr(argv[1], '.');
-    if (strstr(cp-2,"rh"))
-    {
-      sprintf(afname, "%s/rh.sphere.reg",path);
-      mris_in = MRISread(afname) ;
+    cp = strchr(argv[1], '.');
+    if (strstr(cp - 2, "rh")) {
+      sprintf(afname, "%s/rh.sphere.reg", path);
+      mris_in = MRISread(afname);
+    } else {
+      sprintf(afname, "%s/lh.sphere.reg", path);
+      mris_in = MRISread(afname);
     }
-    else
-    {
-      sprintf(afname, "%s/lh.sphere.reg",path);
-      mris_in = MRISread(afname) ;
-    }
-    if (strstr(cp-2,"rh.white"))
-      sprintf(afname, "%s/rh.white",path);
-    else if (strstr(cp-2,"lh.white"))
-      sprintf(afname, "%s/lh.white",path);
-    else if (strstr(cp-2,"lh.pial"))
-      sprintf(afname, "%s/lh.pial",path);
-    else if (strstr(cp-2,"rh.pial"))
-      sprintf(afname, "%s/rh.pial",path);
-    else if (strstr(cp-2,"rh.smoothwm"))
-      sprintf(afname, "%s/rh.smoothwm",path);
-    else if (strstr(cp-2,"lh.smoothwm"))
-      sprintf(afname, "%s/lh.smoothwm",path);
-    else if (strstr(cp-2,"rh.inflated"))
-      sprintf(afname, "%s/rh.inflated",path);
-    else if (strstr(cp-2,"lh.inflated"))
-      sprintf(afname, "%s/lh.inflated",path);
+    if (strstr(cp - 2, "rh.white"))
+      sprintf(afname, "%s/rh.white", path);
+    else if (strstr(cp - 2, "lh.white"))
+      sprintf(afname, "%s/lh.white", path);
+    else if (strstr(cp - 2, "lh.pial"))
+      sprintf(afname, "%s/lh.pial", path);
+    else if (strstr(cp - 2, "rh.pial"))
+      sprintf(afname, "%s/rh.pial", path);
+    else if (strstr(cp - 2, "rh.smoothwm"))
+      sprintf(afname, "%s/rh.smoothwm", path);
+    else if (strstr(cp - 2, "lh.smoothwm"))
+      sprintf(afname, "%s/lh.smoothwm", path);
+    else if (strstr(cp - 2, "rh.inflated"))
+      sprintf(afname, "%s/rh.inflated", path);
+    else if (strstr(cp - 2, "lh.inflated"))
+      sprintf(afname, "%s/lh.inflated", path);
     else
       fprintf(stdout, "unrecognized file name %s\n", argv[1]);
 
     fprintf(stdout, "reading template from %s\n", afname);
-    MRISreadOriginalProperties(mris_in, afname) ;
-    sample_origposition(mris_in, mris_out) ;
+    MRISreadOriginalProperties(mris_in, afname);
+    sample_origposition(mris_in, mris_out);
 
-    MRISsaveVertexPositions(mris_out, TMP_VERTICES) ;
-    MRISrestoreVertexPositions(mris_out, ORIGINAL_VERTICES) ;
+    MRISsaveVertexPositions(mris_out, TMP_VERTICES);
+    MRISrestoreVertexPositions(mris_out, ORIGINAL_VERTICES);
     center_brain(mris_out, mris_out);
     volume = brain_volume(mris_out);
-    MRISscaleBrain(mris_out, mris_out, cbrt(300000/volume)) ;
+    MRISscaleBrain(mris_out, mris_out, cbrt(300000 / volume));
 
-    for (i=0;i<mris_out->nvertices;i++)
-    {
-      rad = (mris_out->vertices[i].x*mris_out->vertices[i].x+mris_out->vertices[i].y*mris_out->vertices[i].y+mris_out->vertices[i].z*mris_out->vertices[i].z);
-      rad=sqrt(rad);
+    for (i = 0; i < mris_out->nvertices; i++) {
+      rad = (mris_out->vertices[i].x * mris_out->vertices[i].x +
+             mris_out->vertices[i].y * mris_out->vertices[i].y +
+             mris_out->vertices[i].z * mris_out->vertices[i].z);
+      rad = sqrt(rad);
       fprintf(stdout, "%f %f\n", rad, mris_out->vertices[i].curv);
-      mris_out->vertices[i].x = mris_out->vertices[i].x*mris_out->vertices[i].curv/rad;
-      mris_out->vertices[i].y = mris_out->vertices[i].y*mris_out->vertices[i].curv/rad;
-      mris_out->vertices[i].z = mris_out->vertices[i].z*mris_out->vertices[i].curv/rad;
+      mris_out->vertices[i].x =
+          mris_out->vertices[i].x * mris_out->vertices[i].curv / rad;
+      mris_out->vertices[i].y =
+          mris_out->vertices[i].y * mris_out->vertices[i].curv / rad;
+      mris_out->vertices[i].z =
+          mris_out->vertices[i].z * mris_out->vertices[i].curv / rad;
     }
-
 
     /*write out*/
     volume = brain_volume(mris_out);
-    fprintf(stdout, "Writing recovered surface to %s volume %f\n", argv[4],volume);
-    MRISwrite(mris_out,argv[4]) ;
-    MRISsetNeighborhoodSizeAndDist(mris_out, 2) ;
-    MRIScomputeSecondFundamentalForm(mris_out) ;
-    MRISuseMeanCurvature(mris_out) ;
-    sprintf(afname,"%s.curv", argv[4]);
-    MRISwriteCurvature(mris_out, afname) ;
+    fprintf(stdout, "Writing recovered surface to %s volume %f\n", argv[4],
+            volume);
+    MRISwrite(mris_out, argv[4]);
+    MRISsetNeighborhoodSizeAndDist(mris_out, 2);
+    MRIScomputeSecondFundamentalForm(mris_out);
+    MRISuseMeanCurvature(mris_out);
+    sprintf(afname, "%s.curv", argv[4]);
+    MRISwriteCurvature(mris_out, afname);
 
-    MRISrestoreVertexPositions(mris_out, TMP_VERTICES) ;
+    MRISrestoreVertexPositions(mris_out, TMP_VERTICES);
     /*End of Synthesis*/
   }
 
   MRISfree(&mris_out);
-  msec = then.milliseconds() ;
-  fprintf(stdout, "spherical wavelet took %2.1f minutes\n", (float)msec/(1000.0f*60.0f));
-  exit(0) ;
-  return(0) ;
+  msec = then.milliseconds();
+  fprintf(stdout, "spherical wavelet took %2.1f minutes\n",
+          (float)msec / (1000.0f * 60.0f));
+  exit(0);
+  return (0);
 }
 
-static MRI_SURFACE *
-wavelet_analysis_curv(MRI_SURFACE *mris_out, int order)
-{
-  int           i, number, vno, nnum, m, k, b1=0, b2=0, cno, flag=0;
-  MRIS          *mris_high;
-  VERTEX        *vm_out, *vm_high, *v;
-  double         s_jkm;
+static MRI_SURFACE *wavelet_analysis_curv(MRI_SURFACE *mris_out, int order) {
+  int i, number, vno, nnum, m, k, b1 = 0, b2 = 0, cno, flag = 0;
+  MRIS *mris_high;
+  VERTEX *vm_out, *vm_high, *v;
+  double s_jkm;
 
   /* Initialize Ij,k*/
-  for (vno = 0 ; vno<mris_out->nvertices; vno++)
-  {
+  for (vno = 0; vno < mris_out->nvertices; vno++) {
     vm_out = &mris_out->vertices[vno];
     vm_out->val = 1;
   }
 
   /*Iteratively compute Ij,k*/
-  for (i=order;i>0;i--)
-  {
-    mris_high = ReadIcoByOrder(i, 100); //higher order surface
-    for (m = 0; m<mris_high->nvertices; m++)
-      mris_high->vertices[m].nsize=1;
-    MRISsetNeighborhoodSizeAndDist(mris_high, 3) ;
-    number = IcoNVtxsFromOrder(i-1); //the start of m vertices
-    for (m = number; m<mris_high->nvertices; m++)
-    {
+  for (i = order; i > 0; i--) {
+    mris_high = ReadIcoByOrder(i, 100); // higher order surface
+    for (m = 0; m < mris_high->nvertices; m++)
+      mris_high->vertices[m].nsize = 1;
+    MRISsetNeighborhoodSizeAndDist(mris_high, 3);
+    number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
+    for (m = number; m < mris_high->nvertices; m++) {
       vm_out = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
-      flag=0;
-      for (nnum=0; nnum<vm_high->vnum; nnum++)
-        if ( vm_high->v[nnum]<number ) //A(j,m)
+      flag = 0;
+      for (nnum = 0; nnum < vm_high->vnum; nnum++)
+        if (vm_high->v[nnum] < number) // A(j,m)
         {
           k = vm_high->v[nnum];
           v = &mris_out->vertices[k];
-          v->val += 0.5*vm_out->val ;
+          v->val += 0.5 * vm_out->val;
         }
-      for (; nnum<vm_high->v2num; nnum++)
-        if ( vm_high->v[nnum]<number ) //B(j,m)
+      for (; nnum < vm_high->v2num; nnum++)
+        if (vm_high->v[nnum] < number) // B(j,m)
         {
           k = vm_high->v[nnum];
-          if (flag==0) b1=k;
-          else b2=k;
+          if (flag == 0)
+            b1 = k;
+          else
+            b2 = k;
           flag++;
           v = &mris_out->vertices[k];
-          v->val += 0.125*vm_out->val ;
+          v->val += 0.125 * vm_out->val;
         }
-      for (; nnum<vm_high->v3num; nnum++)
-        if ( vm_high->v[nnum]<number ) //C(j,m)
+      for (; nnum < vm_high->v3num; nnum++)
+        if (vm_high->v[nnum] < number) // C(j,m)
         {
           k = vm_high->v[nnum];
-          flag=0; //C has to be a second-order neighbor of B
-          for (cno=mris_high->vertices[b1].vnum; cno<mris_high->vertices[b1].v2num;cno++)
-            if (mris_high->vertices[b1].v[cno]==k) flag=1;
-          for (cno=mris_high->vertices[b2].vnum; cno<mris_high->vertices[b2].v2num;cno++)
-            if (mris_high->vertices[b2].v[cno]==k) flag=1;
-          if (flag)
-          {
+          flag = 0; // C has to be a second-order neighbor of B
+          for (cno = mris_high->vertices[b1].vnum;
+               cno < mris_high->vertices[b1].v2num; cno++)
+            if (mris_high->vertices[b1].v[cno] == k)
+              flag = 1;
+          for (cno = mris_high->vertices[b2].vnum;
+               cno < mris_high->vertices[b2].v2num; cno++)
+            if (mris_high->vertices[b2].v[cno] == k)
+              flag = 1;
+          if (flag) {
             v = &mris_out->vertices[k];
-            v->val -= 0.0625*vm_out->val ;
+            v->val -= 0.0625 * vm_out->val;
           }
         }
     }
   }
 
   /*Analysis Stage I:*/
-  for (i=order;i>0;i--)
-  {
-    mris_high = ReadIcoByOrder(i, 100); //higher order surface
-    for (m = 0; m<mris_high->nvertices; m++)
-      mris_high->vertices[m].nsize=1;
-    MRISsetNeighborhoodSizeAndDist(mris_high, 3) ;
+  for (i = order; i > 0; i--) {
+    mris_high = ReadIcoByOrder(i, 100); // higher order surface
+    for (m = 0; m < mris_high->nvertices; m++)
+      mris_high->vertices[m].nsize = 1;
+    MRISsetNeighborhoodSizeAndDist(mris_high, 3);
 
-    number = IcoNVtxsFromOrder(i-1); //the start of m vertices
+    number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
     /* compute Yj,m for each m vertices */
-    for (m = number; m<mris_high->nvertices; m++)
-    {
+    for (m = number; m < mris_high->nvertices; m++) {
       vm_out = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
-      flag=0;
-      for (nnum=0; nnum<vm_high->vnum; nnum++)  //first order neighborhood
-        if ( vm_high->v[nnum]<number ) //neighbor A(j,m)
+      flag = 0;
+      for (nnum = 0; nnum < vm_high->vnum; nnum++) // first order neighborhood
+        if (vm_high->v[nnum] < number)             // neighbor A(j,m)
         {
-          k = vm_high->v[nnum] ;
+          k = vm_high->v[nnum];
           v = &mris_out->vertices[k];
-          vm_out->curv -= 0.5*v->curv;
-          //if(m==67770) fprintf(stdout, "%f, %d, %f\n", v->curv, k, vm_out->curv);
+          vm_out->curv -= 0.5 * v->curv;
+          // if(m==67770) fprintf(stdout, "%f, %d, %f\n", v->curv, k,
+          // vm_out->curv);
         }
-      for (; nnum<vm_high->v2num; nnum++) //second order neighborhood
-        if ( vm_high->v[nnum]<number ) //neighbor B(j,m)
+      for (; nnum < vm_high->v2num; nnum++) // second order neighborhood
+        if (vm_high->v[nnum] < number)      // neighbor B(j,m)
         {
-          k = vm_high->v[nnum] ;
-          if (flag==0) b1=k;
-          else b2=k;
+          k = vm_high->v[nnum];
+          if (flag == 0)
+            b1 = k;
+          else
+            b2 = k;
           flag++;
           v = &mris_out->vertices[k];
-          vm_out->curv -= 0.125*v->curv;
-          //if(m==67770) fprintf(stdout, "%f, %d, %f\n", v->curv, k, vm_out->curv);
+          vm_out->curv -= 0.125 * v->curv;
+          // if(m==67770) fprintf(stdout, "%f, %d, %f\n", v->curv, k,
+          // vm_out->curv);
         }
-      for (; nnum<vm_high->v3num; nnum++)
-        if ( vm_high->v[nnum]<number ) //neighbor C(j,m)
+      for (; nnum < vm_high->v3num; nnum++)
+        if (vm_high->v[nnum] < number) // neighbor C(j,m)
         {
-          k = vm_high->v[nnum] ;
-          flag=0; //C has to be a second-order neighbor of B
-          for (cno=mris_high->vertices[b1].vnum; cno<mris_high->vertices[b1].v2num;cno++)
-            if (mris_high->vertices[b1].v[cno]==k) flag=1;
-          for (cno=mris_high->vertices[b2].vnum; cno<mris_high->vertices[b2].v2num;cno++)
-            if (mris_high->vertices[b2].v[cno]==k) flag=1;
-          if (flag)
-          {
+          k = vm_high->v[nnum];
+          flag = 0; // C has to be a second-order neighbor of B
+          for (cno = mris_high->vertices[b1].vnum;
+               cno < mris_high->vertices[b1].v2num; cno++)
+            if (mris_high->vertices[b1].v[cno] == k)
+              flag = 1;
+          for (cno = mris_high->vertices[b2].vnum;
+               cno < mris_high->vertices[b2].v2num; cno++)
+            if (mris_high->vertices[b2].v[cno] == k)
+              flag = 1;
+          if (flag) {
             v = &mris_out->vertices[k];
-            vm_out->curv += 0.0625*v->curv;
-            //if(m==67770) fprintf(stdout, "%f, %d, %f\n", v->curv, k, vm_out->curv);
+            vm_out->curv += 0.0625 * v->curv;
+            // if(m==67770) fprintf(stdout, "%f, %d, %f\n", v->curv, k,
+            // vm_out->curv);
           }
         }
     }
 
-
     /*Analysis Stage II: */
     /*Compute Lamda(j,k) using the Yita(j,m)*/
-    for (m = number; m<mris_high->nvertices; m++)
-    {
+    for (m = number; m < mris_high->nvertices; m++) {
       vm_out = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
-      for (nnum=0; nnum<vm_high->vnum; nnum++)
-        if ( vm_high->v[nnum]<number ) //A(j,m)
+      for (nnum = 0; nnum < vm_high->vnum; nnum++)
+        if (vm_high->v[nnum] < number) // A(j,m)
         {
           k = vm_high->v[nnum];
           v = &mris_out->vertices[k];
-          s_jkm = vm_out->val/2/v->val;
-          //if(k==6642) fprintf(stdout, "%f, %f, %f, %f, %d\n", vm_out->val, v->val, s_jkm, vm_out->curv, m);
-          v->curv += s_jkm*vm_out->curv;
+          s_jkm = vm_out->val / 2 / v->val;
+          // if(k==6642) fprintf(stdout, "%f, %f, %f, %f, %d\n", vm_out->val,
+          // v->val, s_jkm, vm_out->curv, m);
+          v->curv += s_jkm * vm_out->curv;
         }
-
     }
   }
-  MRISfree(&mris_high) ;
-  return(mris_out);
+  MRISfree(&mris_high);
+  return (mris_out);
 }
 
-static MRI_SURFACE *
-wavelet_analysis_vec(MRI_SURFACE *mris_out, int order)
-{
-  int           i, number, vno, nnum, m, k, b1=0, b2=0, cno, flag=0;
-  MRIS          *mris_high;
-  VERTEX        *vm_out, *vm_high, *v;
-  double         s_jkm;
+static MRI_SURFACE *wavelet_analysis_vec(MRI_SURFACE *mris_out, int order) {
+  int i, number, vno, nnum, m, k, b1 = 0, b2 = 0, cno, flag = 0;
+  MRIS *mris_high;
+  VERTEX *vm_out, *vm_high, *v;
+  double s_jkm;
 
   /* Initialize Ij,k*/
-  for (vno = 0 ; vno<mris_out->nvertices; vno++)
-  {
+  for (vno = 0; vno < mris_out->nvertices; vno++) {
     vm_out = &mris_out->vertices[vno];
     vm_out->val = 1;
   }
 
   /*Iteratively compute Ij,k*/
-  for (i=order;i>0;i--)
-  {
-    mris_high = ReadIcoByOrder(i, 100); //higher order surface
-    for (m = 0; m<mris_high->nvertices; m++)
-      mris_high->vertices[m].nsize=1;
-    MRISsetNeighborhoodSizeAndDist(mris_high, 3) ;
-    number = IcoNVtxsFromOrder(i-1); //the start of m vertices
-    for (m = number; m<mris_high->nvertices; m++)
-    {
+  for (i = order; i > 0; i--) {
+    mris_high = ReadIcoByOrder(i, 100); // higher order surface
+    for (m = 0; m < mris_high->nvertices; m++)
+      mris_high->vertices[m].nsize = 1;
+    MRISsetNeighborhoodSizeAndDist(mris_high, 3);
+    number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
+    for (m = number; m < mris_high->nvertices; m++) {
       vm_out = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
-      flag=0;
-      for (nnum=0; nnum<vm_high->vnum; nnum++)
-        if ( vm_high->v[nnum]<number ) //A(j,m)
+      flag = 0;
+      for (nnum = 0; nnum < vm_high->vnum; nnum++)
+        if (vm_high->v[nnum] < number) // A(j,m)
         {
           k = vm_high->v[nnum];
           v = &mris_out->vertices[k];
-          v->val += 0.5*vm_out->val ;
+          v->val += 0.5 * vm_out->val;
         }
-      for (; nnum<vm_high->v2num; nnum++)
-        if ( vm_high->v[nnum]<number ) //B(j,m)
+      for (; nnum < vm_high->v2num; nnum++)
+        if (vm_high->v[nnum] < number) // B(j,m)
         {
           k = vm_high->v[nnum];
-          if (flag==0) b1=k;
-          else b2=k;
+          if (flag == 0)
+            b1 = k;
+          else
+            b2 = k;
           flag++;
           v = &mris_out->vertices[k];
-          v->val += 0.125*vm_out->val ;
+          v->val += 0.125 * vm_out->val;
         }
-      for (; nnum<vm_high->v3num; nnum++)
-        if ( vm_high->v[nnum]<number ) //C(j,m)
+      for (; nnum < vm_high->v3num; nnum++)
+        if (vm_high->v[nnum] < number) // C(j,m)
         {
           k = vm_high->v[nnum];
-          flag=0; //C has to be a second-order neighbor of B
-          for (cno=mris_high->vertices[b1].vnum; cno<mris_high->vertices[b1].v2num;cno++)
-            if (mris_high->vertices[b1].v[cno]==k) flag=1;
-          for (cno=mris_high->vertices[b2].vnum; cno<mris_high->vertices[b2].v2num;cno++)
-            if (mris_high->vertices[b2].v[cno]==k) flag=1;
-          if (flag)
-          {
+          flag = 0; // C has to be a second-order neighbor of B
+          for (cno = mris_high->vertices[b1].vnum;
+               cno < mris_high->vertices[b1].v2num; cno++)
+            if (mris_high->vertices[b1].v[cno] == k)
+              flag = 1;
+          for (cno = mris_high->vertices[b2].vnum;
+               cno < mris_high->vertices[b2].v2num; cno++)
+            if (mris_high->vertices[b2].v[cno] == k)
+              flag = 1;
+          if (flag) {
             v = &mris_out->vertices[k];
-            v->val -= 0.0625*vm_out->val ;
+            v->val -= 0.0625 * vm_out->val;
           }
         }
     }
   }
 
-
   /*Analysis Stage I:*/
-  for (i=order;i>0;i--)
-  {
-    mris_high = ReadIcoByOrder(i, 100); //higher order surface
-    for (m = 0; m<mris_high->nvertices; m++)
-      mris_high->vertices[m].nsize=1;
-    MRISsetNeighborhoodSizeAndDist(mris_high, 3) ;
+  for (i = order; i > 0; i--) {
+    mris_high = ReadIcoByOrder(i, 100); // higher order surface
+    for (m = 0; m < mris_high->nvertices; m++)
+      mris_high->vertices[m].nsize = 1;
+    MRISsetNeighborhoodSizeAndDist(mris_high, 3);
 
-    number = IcoNVtxsFromOrder(i-1); //the start of m vertices
+    number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
     /* compute Yj,m for each m vertices */
-    for (m = number; m<mris_high->nvertices; m++)
-    {
+    for (m = number; m < mris_high->nvertices; m++) {
       vm_out = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
-      flag=0;
-      for (nnum=0; nnum<vm_high->vnum; nnum++)  //first order neighborhood
-        if ( vm_high->v[nnum]<number ) //neighbor A(j,m)
+      flag = 0;
+      for (nnum = 0; nnum < vm_high->vnum; nnum++) // first order neighborhood
+        if (vm_high->v[nnum] < number)             // neighbor A(j,m)
         {
-          k = vm_high->v[nnum] ;
+          k = vm_high->v[nnum];
           v = &mris_out->vertices[k];
-          vm_out->origx -= 0.5*v->origx;
-          vm_out->origy -= 0.5*v->origy;
-          vm_out->origz -= 0.5*v->origz;
+          vm_out->origx -= 0.5 * v->origx;
+          vm_out->origy -= 0.5 * v->origy;
+          vm_out->origz -= 0.5 * v->origz;
         }
-      for (; nnum<vm_high->v2num; nnum++) //second order neighborhood
-        if ( vm_high->v[nnum]<number ) //neighbor B(j,m)
+      for (; nnum < vm_high->v2num; nnum++) // second order neighborhood
+        if (vm_high->v[nnum] < number)      // neighbor B(j,m)
         {
-          k = vm_high->v[nnum] ;
-          if (flag==0) b1=k;
-          else b2=k;
+          k = vm_high->v[nnum];
+          if (flag == 0)
+            b1 = k;
+          else
+            b2 = k;
           flag++;
           v = &mris_out->vertices[k];
-          vm_out->origx -= 0.125*v->origx;
-          vm_out->origy -= 0.125*v->origy;
-          vm_out->origz -= 0.125*v->origz;
+          vm_out->origx -= 0.125 * v->origx;
+          vm_out->origy -= 0.125 * v->origy;
+          vm_out->origz -= 0.125 * v->origz;
         }
-      for (; nnum<vm_high->v3num; nnum++)
-        if ( vm_high->v[nnum]<number ) //neighbor C(j,m)
+      for (; nnum < vm_high->v3num; nnum++)
+        if (vm_high->v[nnum] < number) // neighbor C(j,m)
         {
-          k = vm_high->v[nnum] ;
-          flag=0; //C has to be a second-order neighbor of B
-          for (cno=mris_high->vertices[b1].vnum; cno<mris_high->vertices[b1].v2num;cno++)
-            if (mris_high->vertices[b1].v[cno]==k) flag=1;
-          for (cno=mris_high->vertices[b2].vnum; cno<mris_high->vertices[b2].v2num;cno++)
-            if (mris_high->vertices[b2].v[cno]==k) flag=1;
-          if (flag)
-          {
+          k = vm_high->v[nnum];
+          flag = 0; // C has to be a second-order neighbor of B
+          for (cno = mris_high->vertices[b1].vnum;
+               cno < mris_high->vertices[b1].v2num; cno++)
+            if (mris_high->vertices[b1].v[cno] == k)
+              flag = 1;
+          for (cno = mris_high->vertices[b2].vnum;
+               cno < mris_high->vertices[b2].v2num; cno++)
+            if (mris_high->vertices[b2].v[cno] == k)
+              flag = 1;
+          if (flag) {
             v = &mris_out->vertices[k];
-            vm_out->origx += 0.0625*v->origx;
-            vm_out->origy += 0.0625*v->origy;
-            vm_out->origz += 0.0625*v->origz;
+            vm_out->origx += 0.0625 * v->origx;
+            vm_out->origy += 0.0625 * v->origy;
+            vm_out->origz += 0.0625 * v->origz;
           }
         }
     }
-
 
     /*Analysis Stage II: */
     /*Compute Lamda(j,k) using the Yita(j,m)*/
-    for (m = number; m<mris_high->nvertices; m++)
-    {
+    for (m = number; m < mris_high->nvertices; m++) {
       vm_out = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
-      for (nnum=0; nnum<vm_high->vnum; nnum++)
-        if ( vm_high->v[nnum]<number ) //A(j,m)
+      for (nnum = 0; nnum < vm_high->vnum; nnum++)
+        if (vm_high->v[nnum] < number) // A(j,m)
         {
           k = vm_high->v[nnum];
           v = &mris_out->vertices[k];
-          s_jkm = vm_out->val/2/v->val;
-          v->origx += s_jkm*vm_out->origx;
-          v->origy += s_jkm*vm_out->origy;
-          v->origz += s_jkm*vm_out->origz;
+          s_jkm = vm_out->val / 2 / v->val;
+          v->origx += s_jkm * vm_out->origx;
+          v->origy += s_jkm * vm_out->origy;
+          v->origz += s_jkm * vm_out->origz;
         }
-
     }
-
   }
-  MRISfree(&mris_high) ;
-  return(mris_out);
+  MRISfree(&mris_high);
+  return (mris_out);
 }
 
-static MRI_SURFACE *
-wavelet_synthesis_curv(MRI_SURFACE *mris_out, int order)
-{
-  int           i, number, vno, nnum, m, k, b1=0, b2=0, cno, flag=0;
-  MRIS          *mris_high;
-  VERTEX        *vm_out, *vm_high, *v;
-  double         s_jkm;
+static MRI_SURFACE *wavelet_synthesis_curv(MRI_SURFACE *mris_out, int order) {
+  int i, number, vno, nnum, m, k, b1 = 0, b2 = 0, cno, flag = 0;
+  MRIS *mris_high;
+  VERTEX *vm_out, *vm_high, *v;
+  double s_jkm;
 
   /*Initialize Ij,k*/
-  for (vno = 0; vno<mris_out->nvertices; vno++)
-  {
+  for (vno = 0; vno < mris_out->nvertices; vno++) {
     vm_out = &mris_out->vertices[vno];
     vm_out->val = 1;
   }
 
   /*Iteratively compute Ij,k*/
-  for (i=order;i>0;i--)
-  {
-    mris_high = ReadIcoByOrder(i, 100); //higher order surface
-    for (m = 0; m<mris_high->nvertices; m++)
-      mris_high->vertices[m].nsize=1;
-    MRISsetNeighborhoodSizeAndDist(mris_high, 3) ;
-    number = IcoNVtxsFromOrder(i-1); //the start of m vertices
-    for (m = number; m<mris_high->nvertices; m++)
-    {
+  for (i = order; i > 0; i--) {
+    mris_high = ReadIcoByOrder(i, 100); // higher order surface
+    for (m = 0; m < mris_high->nvertices; m++)
+      mris_high->vertices[m].nsize = 1;
+    MRISsetNeighborhoodSizeAndDist(mris_high, 3);
+    number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
+    for (m = number; m < mris_high->nvertices; m++) {
       vm_out = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
-      flag=0;
-      for (nnum=0; nnum<vm_high->vnum; nnum++)
-        if ( vm_high->v[nnum]<number ) //A(j,m)
+      flag = 0;
+      for (nnum = 0; nnum < vm_high->vnum; nnum++)
+        if (vm_high->v[nnum] < number) // A(j,m)
         {
           k = vm_high->v[nnum];
           v = &mris_out->vertices[k];
-          v->val += 0.5*vm_out->val ;
+          v->val += 0.5 * vm_out->val;
         }
-      for (; nnum<vm_high->v2num; nnum++)
-        if ( vm_high->v[nnum]<number ) //B(j,m)
+      for (; nnum < vm_high->v2num; nnum++)
+        if (vm_high->v[nnum] < number) // B(j,m)
         {
           k = vm_high->v[nnum];
-          if (flag==0) b1=k;
-          else b2=k;
+          if (flag == 0)
+            b1 = k;
+          else
+            b2 = k;
           flag++;
           v = &mris_out->vertices[k];
-          v->val += 0.125*vm_out->val ;
+          v->val += 0.125 * vm_out->val;
         }
-      for (; nnum<vm_high->v3num; nnum++)
-        if ( vm_high->v[nnum]<number ) //C(j,m)
+      for (; nnum < vm_high->v3num; nnum++)
+        if (vm_high->v[nnum] < number) // C(j,m)
         {
           k = vm_high->v[nnum];
-          flag=0; //C has to be a second-order neighbor of B
-          for (cno=mris_high->vertices[b1].vnum; cno<mris_high->vertices[b1].v2num;cno++)
-            if (mris_high->vertices[b1].v[cno]==k) flag=1;
-          for (cno=mris_high->vertices[b2].vnum; cno<mris_high->vertices[b2].v2num;cno++)
-            if (mris_high->vertices[b2].v[cno]==k) flag=1;
-          if (flag)
-          {
+          flag = 0; // C has to be a second-order neighbor of B
+          for (cno = mris_high->vertices[b1].vnum;
+               cno < mris_high->vertices[b1].v2num; cno++)
+            if (mris_high->vertices[b1].v[cno] == k)
+              flag = 1;
+          for (cno = mris_high->vertices[b2].vnum;
+               cno < mris_high->vertices[b2].v2num; cno++)
+            if (mris_high->vertices[b2].v[cno] == k)
+              flag = 1;
+          if (flag) {
             v = &mris_out->vertices[k];
-            v->val -= 0.0625*vm_out->val ;
+            v->val -= 0.0625 * vm_out->val;
           }
         }
     }
   }
 
-
-  for (i=1;i<=order;i++)
-  {
-    mris_high = ReadIcoByOrder(i, 100); //higher order surface
-    for (m = 0; m<mris_high->nvertices; m++)
-      mris_high->vertices[m].nsize=1;
-    MRISsetNeighborhoodSizeAndDist(mris_high, 3) ;
-    number = IcoNVtxsFromOrder(i-1); //the start of m vertices
+  for (i = 1; i <= order; i++) {
+    mris_high = ReadIcoByOrder(i, 100); // higher order surface
+    for (m = 0; m < mris_high->nvertices; m++)
+      mris_high->vertices[m].nsize = 1;
+    MRISsetNeighborhoodSizeAndDist(mris_high, 3);
+    number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
 
     /* Synthesis Stage I */
     /* Compute Lamda(j+1,k) using the Yita(j,m) */
-    for (m = number; m<mris_high->nvertices; m++)
-    {
+    for (m = number; m < mris_high->nvertices; m++) {
       vm_out = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
-      for (nnum=0; nnum<vm_high->vnum; nnum++)
-        if ( vm_high->v[nnum]<number ) //A(j,m)
+      for (nnum = 0; nnum < vm_high->vnum; nnum++)
+        if (vm_high->v[nnum] < number) // A(j,m)
         {
           k = vm_high->v[nnum];
           v = &mris_out->vertices[k];
-          s_jkm = vm_out->val/2/v->val;
-          v->curv -= s_jkm*vm_out->curv;
+          s_jkm = vm_out->val / 2 / v->val;
+          v->curv -= s_jkm * vm_out->curv;
         }
     }
 
     /* compute Lamda(j+1,m) for each m vertices */
-    for (m = number; m<mris_high->nvertices; m++)
-    {
+    for (m = number; m < mris_high->nvertices; m++) {
       vm_out = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
-      flag=0;
-      for (nnum=0; nnum<vm_high->vnum; nnum++)  //first order neighborhood
-        if ( vm_high->v[nnum]<number ) //neighbor A(j,m)
+      flag = 0;
+      for (nnum = 0; nnum < vm_high->vnum; nnum++) // first order neighborhood
+        if (vm_high->v[nnum] < number)             // neighbor A(j,m)
         {
-          k = vm_high->v[nnum] ;
+          k = vm_high->v[nnum];
           v = &mris_out->vertices[k];
-          vm_out->curv += 0.5*v->curv;
+          vm_out->curv += 0.5 * v->curv;
         }
-      for (; nnum<vm_high->v2num; nnum++) //second order neighborhood
-        if ( vm_high->v[nnum]<number ) //neighbor B(j,m)
+      for (; nnum < vm_high->v2num; nnum++) // second order neighborhood
+        if (vm_high->v[nnum] < number)      // neighbor B(j,m)
         {
-          k = vm_high->v[nnum] ;
-          if (flag==0) b1=k;
-          else b2=k;
+          k = vm_high->v[nnum];
+          if (flag == 0)
+            b1 = k;
+          else
+            b2 = k;
           flag++;
           v = &mris_out->vertices[k];
-          vm_out->curv += 0.125*v->curv;
+          vm_out->curv += 0.125 * v->curv;
         }
-      for (; nnum<vm_high->v3num; nnum++) //third order neighborhood
-        if ( vm_high->v[nnum]<number ) //neighbor C(j,m)
+      for (; nnum < vm_high->v3num; nnum++) // third order neighborhood
+        if (vm_high->v[nnum] < number)      // neighbor C(j,m)
         {
-          k = vm_high->v[nnum] ;
-          flag=0; //C has to be a second-order neighbor of B
-          for (cno=mris_high->vertices[b1].vnum; cno<mris_high->vertices[b1].v2num;cno++)
-            if (mris_high->vertices[b1].v[cno]==k) flag=1;
-          for (cno=mris_high->vertices[b2].vnum; cno<mris_high->vertices[b2].v2num;cno++)
-            if (mris_high->vertices[b2].v[cno]==k) flag=1;
-          if (flag)
-          {
+          k = vm_high->v[nnum];
+          flag = 0; // C has to be a second-order neighbor of B
+          for (cno = mris_high->vertices[b1].vnum;
+               cno < mris_high->vertices[b1].v2num; cno++)
+            if (mris_high->vertices[b1].v[cno] == k)
+              flag = 1;
+          for (cno = mris_high->vertices[b2].vnum;
+               cno < mris_high->vertices[b2].v2num; cno++)
+            if (mris_high->vertices[b2].v[cno] == k)
+              flag = 1;
+          if (flag) {
             v = &mris_out->vertices[k];
-            vm_out->curv -= 0.0625*v->curv;
+            vm_out->curv -= 0.0625 * v->curv;
           }
         }
     }
   }
-  MRISfree(&mris_high) ;
-  return(mris_out);
+  MRISfree(&mris_high);
+  return (mris_out);
 }
 
-static MRI_SURFACE *
-wavelet_synthesis_vec(MRI_SURFACE *mris_out, int order)
-{
-  int           i, number, vno, nnum, m, k, b1=0, b2=0, cno, flag=0;
-  MRIS          *mris_high;
-  VERTEX        *vm_out, *vm_high, *v;
-  double         s_jkm;
-
+static MRI_SURFACE *wavelet_synthesis_vec(MRI_SURFACE *mris_out, int order) {
+  int i, number, vno, nnum, m, k, b1 = 0, b2 = 0, cno, flag = 0;
+  MRIS *mris_high;
+  VERTEX *vm_out, *vm_high, *v;
+  double s_jkm;
 
   /*Initialize Ij,k*/
-  for (vno = 0; vno<mris_out->nvertices; vno++)
-  {
+  for (vno = 0; vno < mris_out->nvertices; vno++) {
     vm_out = &mris_out->vertices[vno];
     vm_out->val = 1;
   }
 
   /*Iteratively compute Ij,k*/
-  for (i=order;i>0;i--)
-  {
-    mris_high = ReadIcoByOrder(i, 100); //higher order surface
-    for (m = 0; m<mris_high->nvertices; m++)
-      mris_high->vertices[m].nsize=1;
-    MRISsetNeighborhoodSizeAndDist(mris_high, 3) ;
-    number = IcoNVtxsFromOrder(i-1); //the start of m vertices
-    for (m = number; m<mris_high->nvertices; m++)
-    {
+  for (i = order; i > 0; i--) {
+    mris_high = ReadIcoByOrder(i, 100); // higher order surface
+    for (m = 0; m < mris_high->nvertices; m++)
+      mris_high->vertices[m].nsize = 1;
+    MRISsetNeighborhoodSizeAndDist(mris_high, 3);
+    number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
+    for (m = number; m < mris_high->nvertices; m++) {
       vm_out = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
-      flag=0;
-      for (nnum=0; nnum<vm_high->vnum; nnum++)
-        if ( vm_high->v[nnum]<number ) //A(j,m)
+      flag = 0;
+      for (nnum = 0; nnum < vm_high->vnum; nnum++)
+        if (vm_high->v[nnum] < number) // A(j,m)
         {
           k = vm_high->v[nnum];
           v = &mris_out->vertices[k];
-          v->val += 0.5*vm_out->val ;
+          v->val += 0.5 * vm_out->val;
         }
-      for (; nnum<vm_high->v2num; nnum++)
-        if ( vm_high->v[nnum]<number ) //B(j,m)
+      for (; nnum < vm_high->v2num; nnum++)
+        if (vm_high->v[nnum] < number) // B(j,m)
         {
           k = vm_high->v[nnum];
-          if (flag==0) b1=k;
-          else b2=k;
+          if (flag == 0)
+            b1 = k;
+          else
+            b2 = k;
           flag++;
           v = &mris_out->vertices[k];
-          v->val += 0.125*vm_out->val ;
+          v->val += 0.125 * vm_out->val;
         }
-      for (; nnum<vm_high->v3num; nnum++)
-        if ( vm_high->v[nnum]<number ) //C(j,m)
+      for (; nnum < vm_high->v3num; nnum++)
+        if (vm_high->v[nnum] < number) // C(j,m)
         {
           k = vm_high->v[nnum];
-          flag=0; //C has to be a second-order neighbor of B
-          for (cno=mris_high->vertices[b1].vnum; cno<mris_high->vertices[b1].v2num;cno++)
-            if (mris_high->vertices[b1].v[cno]==k) flag=1;
-          for (cno=mris_high->vertices[b2].vnum; cno<mris_high->vertices[b2].v2num;cno++)
-            if (mris_high->vertices[b2].v[cno]==k) flag=1;
-          if (flag)
-          {
+          flag = 0; // C has to be a second-order neighbor of B
+          for (cno = mris_high->vertices[b1].vnum;
+               cno < mris_high->vertices[b1].v2num; cno++)
+            if (mris_high->vertices[b1].v[cno] == k)
+              flag = 1;
+          for (cno = mris_high->vertices[b2].vnum;
+               cno < mris_high->vertices[b2].v2num; cno++)
+            if (mris_high->vertices[b2].v[cno] == k)
+              flag = 1;
+          if (flag) {
             v = &mris_out->vertices[k];
-            v->val -= 0.0625*vm_out->val ;
+            v->val -= 0.0625 * vm_out->val;
           }
         }
     }
   }
 
-
-  for (i=1;i<=order;i++)
-  {
-    mris_high = ReadIcoByOrder(i, 100); //higher order surface
-    for (m = 0; m<mris_high->nvertices; m++)
-      mris_high->vertices[m].nsize=1;
-    MRISsetNeighborhoodSizeAndDist(mris_high, 3) ;
-    number = IcoNVtxsFromOrder(i-1); //the start of m vertices
+  for (i = 1; i <= order; i++) {
+    mris_high = ReadIcoByOrder(i, 100); // higher order surface
+    for (m = 0; m < mris_high->nvertices; m++)
+      mris_high->vertices[m].nsize = 1;
+    MRISsetNeighborhoodSizeAndDist(mris_high, 3);
+    number = IcoNVtxsFromOrder(i - 1); // the start of m vertices
 
     /* Synthesis Stage I */
     /* Compute Lamda(j+1,k) using the Yita(j,m) */
-    for (m = number; m<mris_high->nvertices; m++)
-    {
+    for (m = number; m < mris_high->nvertices; m++) {
       vm_out = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
-      for (nnum=0; nnum<vm_high->vnum; nnum++)
-        if ( vm_high->v[nnum]<number ) //A(j,m)
+      for (nnum = 0; nnum < vm_high->vnum; nnum++)
+        if (vm_high->v[nnum] < number) // A(j,m)
         {
           k = vm_high->v[nnum];
           v = &mris_out->vertices[k];
-          s_jkm = vm_out->val/2/v->val;
-          v->origx -= s_jkm*vm_out->origx;
-          v->origy -= s_jkm*vm_out->origy;
-          v->origz -= s_jkm*vm_out->origz;
+          s_jkm = vm_out->val / 2 / v->val;
+          v->origx -= s_jkm * vm_out->origx;
+          v->origy -= s_jkm * vm_out->origy;
+          v->origz -= s_jkm * vm_out->origz;
         }
     }
 
     /* compute Lamda(j+1,m) for each m vertices */
-    for (m = number; m<mris_high->nvertices; m++)
-    {
+    for (m = number; m < mris_high->nvertices; m++) {
       vm_out = &mris_out->vertices[m];
       vm_high = &mris_high->vertices[m];
-      flag=0;
-      for (nnum=0; nnum<vm_high->vnum; nnum++)  //first order neighborhood
-        if ( vm_high->v[nnum]<number ) //neighbor A(j,m)
+      flag = 0;
+      for (nnum = 0; nnum < vm_high->vnum; nnum++) // first order neighborhood
+        if (vm_high->v[nnum] < number)             // neighbor A(j,m)
         {
-          k = vm_high->v[nnum] ;
+          k = vm_high->v[nnum];
           v = &mris_out->vertices[k];
-          vm_out->origx += 0.5*v->origx;
-          vm_out->origy += 0.5*v->origy;
-          vm_out->origz += 0.5*v->origz;
+          vm_out->origx += 0.5 * v->origx;
+          vm_out->origy += 0.5 * v->origy;
+          vm_out->origz += 0.5 * v->origz;
         }
-      for (; nnum<vm_high->v2num; nnum++) //second order neighborhood
-        if ( vm_high->v[nnum]<number ) //neighbor B(j,m)
+      for (; nnum < vm_high->v2num; nnum++) // second order neighborhood
+        if (vm_high->v[nnum] < number)      // neighbor B(j,m)
         {
-          k = vm_high->v[nnum] ;
-          if (flag==0) b1=k;
-          else b2=k;
+          k = vm_high->v[nnum];
+          if (flag == 0)
+            b1 = k;
+          else
+            b2 = k;
           flag++;
           v = &mris_out->vertices[k];
-          vm_out->origx += 0.125*v->origx;
-          vm_out->origy += 0.125*v->origy;
-          vm_out->origz += 0.125*v->origz;
+          vm_out->origx += 0.125 * v->origx;
+          vm_out->origy += 0.125 * v->origy;
+          vm_out->origz += 0.125 * v->origz;
         }
-      for (; nnum<vm_high->v3num; nnum++) //third order neighborhood
-        if ( vm_high->v[nnum]<number ) //neighbor C(j,m)
+      for (; nnum < vm_high->v3num; nnum++) // third order neighborhood
+        if (vm_high->v[nnum] < number)      // neighbor C(j,m)
         {
-          k = vm_high->v[nnum] ;
-          flag=0; //C has to be a second-order neighbor of B
-          for (cno=mris_high->vertices[b1].vnum; cno<mris_high->vertices[b1].v2num;cno++)
-            if (mris_high->vertices[b1].v[cno]==k) flag=1;
-          for (cno=mris_high->vertices[b2].vnum; cno<mris_high->vertices[b2].v2num;cno++)
-            if (mris_high->vertices[b2].v[cno]==k) flag=1;
-          if (flag)
-          {
+          k = vm_high->v[nnum];
+          flag = 0; // C has to be a second-order neighbor of B
+          for (cno = mris_high->vertices[b1].vnum;
+               cno < mris_high->vertices[b1].v2num; cno++)
+            if (mris_high->vertices[b1].v[cno] == k)
+              flag = 1;
+          for (cno = mris_high->vertices[b2].vnum;
+               cno < mris_high->vertices[b2].v2num; cno++)
+            if (mris_high->vertices[b2].v[cno] == k)
+              flag = 1;
+          if (flag) {
             v = &mris_out->vertices[k];
-            vm_out->origx -= 0.0625*v->origx;
-            vm_out->origy -= 0.0625*v->origy;
-            vm_out->origz -= 0.0625*v->origz;
+            vm_out->origx -= 0.0625 * v->origx;
+            vm_out->origy -= 0.0625 * v->origy;
+            vm_out->origz -= 0.0625 * v->origz;
           }
         }
     }
   }
-  MRISfree(&mris_high) ;
-  return(mris_out);
+  MRISfree(&mris_high);
+  return (mris_out);
 }
 
-double
-brain_volume(MRI_SURFACE *mris)
-{
+double brain_volume(MRI_SURFACE *mris) {
   int fno;
   FACE *face;
   double total_volume, face_area;
   VECTOR *v_a, *v_b, *v_n, *v_cen;
-  VERTEX  *v0, *v1, *v2;
+  VERTEX *v0, *v1, *v2;
 
-  v_a = VectorAlloc(3, MATRIX_REAL) ;
-  v_b = VectorAlloc(3, MATRIX_REAL) ;
-  v_n = VectorAlloc(3, MATRIX_REAL) ;       /* normal vector */
-  v_cen = VectorAlloc(3, MATRIX_REAL) ;     /* centroid vector */
+  v_a = VectorAlloc(3, MATRIX_REAL);
+  v_b = VectorAlloc(3, MATRIX_REAL);
+  v_n = VectorAlloc(3, MATRIX_REAL);   /* normal vector */
+  v_cen = VectorAlloc(3, MATRIX_REAL); /* centroid vector */
 
   total_volume = 0;
-  for (fno = 0 ; fno < mris->nfaces ; fno++)
-  {
-    face = &mris->faces[fno] ;
+  for (fno = 0; fno < mris->nfaces; fno++) {
+    face = &mris->faces[fno];
     if (face->ripflag)
-      continue ;
+      continue;
 
-    v0 = &mris->vertices[face->v[0]] ;
-    v1 = &mris->vertices[face->v[1]] ;
-    v2 = &mris->vertices[face->v[2]] ;
+    v0 = &mris->vertices[face->v[0]];
+    v1 = &mris->vertices[face->v[1]];
+    v2 = &mris->vertices[face->v[2]];
 
-    VERTEX_EDGE(v_a, v0, v1) ;
-    VERTEX_EDGE(v_b, v0, v2) ;
+    VERTEX_EDGE(v_a, v0, v1);
+    VERTEX_EDGE(v_b, v0, v2);
 
     /* face normal vector */
-    V3_CROSS_PRODUCT(v_a, v_b, v_n) ;
-    face_area = V3_LEN(v_n) * 0.5f ;
+    V3_CROSS_PRODUCT(v_a, v_b, v_n);
+    face_area = V3_LEN(v_n) * 0.5f;
 
-    V3_NORMALIZE(v_n, v_n) ;             /* make it a unit vector */
+    V3_NORMALIZE(v_n, v_n); /* make it a unit vector */
 
     /* compute face centroid */
-    V3_X(v_cen) = (v0->x + v1->x + v2->x)/3.0;
-    V3_Y(v_cen) = (v0->y + v1->y + v2->y)/3.0;
-    V3_Z(v_cen) = (v0->z + v1->z + v2->z)/3.0;
+    V3_X(v_cen) = (v0->x + v1->x + v2->x) / 3.0;
+    V3_Y(v_cen) = (v0->y + v1->y + v2->y) / 3.0;
+    V3_Z(v_cen) = (v0->z + v1->z + v2->z) / 3.0;
 
-    total_volume += V3_DOT(v_cen, v_n)*face_area;
+    total_volume += V3_DOT(v_cen, v_n) * face_area;
   }
 
   total_volume /= 3.0;
 
-  return(total_volume);
+  return (total_volume);
 }
 
-
-static MRI_SURFACE *
-center_brain(MRI_SURFACE *mris_src, MRI_SURFACE *mris_dst)
-{
-  int         fno, vno ;
-  FACE        *face ;
-  VERTEX      *vdst;
-  double       x, y, z, x0, y0, z0 ;
+static MRI_SURFACE *center_brain(MRI_SURFACE *mris_src, MRI_SURFACE *mris_dst) {
+  int fno, vno;
+  FACE *face;
+  VERTEX *vdst;
+  double x, y, z, x0, y0, z0;
 
   if (!mris_dst)
-    mris_dst = MRISclone(mris_src) ;
+    mris_dst = MRISclone(mris_src);
 
-  x0 = y0 = z0 = 0 ;   /* silly compiler warning */
-  //MRISupdateSurface(mris_dst);
-#if 1 //area weighting
-  for (fno = 0 ; fno < mris_src->nfaces ; fno++)
-  {
-    face = &mris_dst->faces[fno] ;
+  x0 = y0 = z0 = 0; /* silly compiler warning */
+  // MRISupdateSurface(mris_dst);
+#if 1 // area weighting
+  for (fno = 0; fno < mris_src->nfaces; fno++) {
+    face = &mris_dst->faces[fno];
     if (face->ripflag)
-      continue ;
+      continue;
     x = mris_dst->vertices[face->v[0]].x;
     y = mris_dst->vertices[face->v[0]].y;
     z = mris_dst->vertices[face->v[0]].z;
@@ -1417,53 +1397,49 @@ center_brain(MRI_SURFACE *mris_src, MRI_SURFACE *mris_dst)
     x += mris_dst->vertices[face->v[2]].x;
     y += mris_dst->vertices[face->v[2]].y;
     z += mris_dst->vertices[face->v[2]].z;
-    x = x*face->area/3;
-    y = y*face->area/3;
-    z = z*face->area/3;
-    x0 += x/mris_dst->total_area;
-    y0 += y/mris_dst->total_area;
-    z0 += z/mris_dst->total_area;
-    if (face->area == 0) fprintf(stdout, "%d %f\n", fno, face->area);
+    x = x * face->area / 3;
+    y = y * face->area / 3;
+    z = z * face->area / 3;
+    x0 += x / mris_dst->total_area;
+    y0 += y / mris_dst->total_area;
+    z0 += z / mris_dst->total_area;
+    if (face->area == 0)
+      fprintf(stdout, "%d %f\n", fno, face->area);
   }
 #else
-  for (vno = 0 ; vno < mris_src->nvertices ; vno++)
-  {
+  for (vno = 0; vno < mris_src->nvertices; vno++) {
     vdst = &mris_dst->vertices[vno];
     x = vdst->x;
     y = vdst->y;
     z = vdst->z;
-    x0 += x/mris_dst->nvertices;
-    y0 += y/mris_dst->nvertices;
-    z0 += z/mris_dst->nvertices;
+    x0 += x / mris_dst->nvertices;
+    y0 += y / mris_dst->nvertices;
+    z0 += z / mris_dst->nvertices;
   }
 #endif
   fprintf(stdout, "brain center is found at %f %f %f\n", x0, y0, z0);
-  for (vno = 0 ; vno < mris_src->nvertices ; vno++)
-  {
-    vdst = &mris_dst->vertices[vno] ;
+  for (vno = 0; vno < mris_src->nvertices; vno++) {
+    vdst = &mris_dst->vertices[vno];
     if (vdst->ripflag)
-      continue ;
-    vdst->x -= x0 ;
-    vdst->y -= y0 ;
-    vdst->z -= z0 ;
+      continue;
+    vdst->x -= x0;
+    vdst->y -= y0;
+    vdst->z -= z0;
   }
 
-  mris_dst->xctr = mris_dst->yctr = mris_dst->zctr = 0 ;
-  return(mris_dst) ;
+  mris_dst->xctr = mris_dst->yctr = mris_dst->zctr = 0;
+  return (mris_dst);
 }
 
-
-static MRI_SURFACE *
-sample_origposition(MRI_SURFACE *mris_src, MRI_SURFACE *mris_dst)
-{
-  int index, fno, fnum=0, i;
+static MRI_SURFACE *sample_origposition(MRI_SURFACE *mris_src,
+                                        MRI_SURFACE *mris_dst) {
+  int index, fno, fnum = 0, i;
   VERTEX *vertex;
   double nearest, dist, r, s, t;
   double a, b, c, p;
   ANNpointArray pa = annAllocPts(mris_src->nvertices, 3);
 
-  for (index = 0; index < mris_src->nvertices; index++)
-  {
+  for (index = 0; index < mris_src->nvertices; index++) {
     pa[index][0] = mris_src->vertices[index].x;
     pa[index][1] = mris_src->vertices[index].y;
     pa[index][2] = mris_src->vertices[index].z;
@@ -1475,83 +1451,144 @@ sample_origposition(MRI_SURFACE *mris_src, MRI_SURFACE *mris_dst)
   //  ANNpoint query_pt = annAllocPt(3);
   ANNpointArray QueryPt;
 
-  //if(mris_dst == NULL)
+  // if(mris_dst == NULL)
   // mris_dst = MRIScopy(mris_src, NULL);
 
-  QueryPt = annAllocPts(1,3);
+  QueryPt = annAllocPts(1, 3);
 
-  for (index = 0; index < mris_dst->nvertices; index++)
-  {
-    if (mris_dst->vertices[index].border == 1) continue;
+  for (index = 0; index < mris_dst->nvertices; index++) {
+    if (mris_dst->vertices[index].border == 1)
+      continue;
 
     QueryPt[0][0] = mris_dst->vertices[index].x;
     QueryPt[0][1] = mris_dst->vertices[index].y;
     QueryPt[0][2] = mris_dst->vertices[index].z;
 
     annkdTree->annkSearch( // search
-      QueryPt[0],       // query point
-      1,   // number of near neighbors
-      annIndex,  // nearest neighbors (returned)
-      annDist,  // distance (returned)
-      0);   // error bound
+        QueryPt[0],        // query point
+        1,                 // number of near neighbors
+        annIndex,          // nearest neighbors (returned)
+        annDist,           // distance (returned)
+        0);                // error bound
 
 #if 1
     vertex = &mris_src->vertices[annIndex[0]];
     nearest = 100000;
-    for (i=0; i<vertex->num; i++)
-    {
+    for (i = 0; i < vertex->num; i++) {
       fno = vertex->f[i];
       dist = v_to_f_distance(&mris_dst->vertices[index], mris_src, fno, 0);
-      if (dist<nearest)
-      {
+      if (dist < nearest) {
         nearest = dist;
         fnum = fno;
       }
     }
 
-    a = sqrt( pow((mris_src->vertices[mris_src->faces[fnum].v[1]].x - mris_dst->vertices[index].x),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[1]].y - mris_dst->vertices[index].y),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[1]].z - mris_dst->vertices[index].z),2));
-    b = sqrt( pow((mris_src->vertices[mris_src->faces[fnum].v[2]].x - mris_dst->vertices[index].x),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[2]].y - mris_dst->vertices[index].y),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[2]].z - mris_dst->vertices[index].z),2));
-    c = sqrt( pow((mris_src->vertices[mris_src->faces[fnum].v[2]].x - mris_src->vertices[mris_src->faces[fnum].v[1]].x),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[2]].y - mris_src->vertices[mris_src->faces[fnum].v[1]].y),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[2]].z - mris_src->vertices[mris_src->faces[fnum].v[1]].z),2));
-    p = (a+b+c)/2;
-    r = sqrt(fabs(p*(p-a)*(p-b)*(p-c)));
+    a = sqrt(pow((mris_src->vertices[mris_src->faces[fnum].v[1]].x -
+                  mris_dst->vertices[index].x),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[1]].y -
+                  mris_dst->vertices[index].y),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[1]].z -
+                  mris_dst->vertices[index].z),
+                 2));
+    b = sqrt(pow((mris_src->vertices[mris_src->faces[fnum].v[2]].x -
+                  mris_dst->vertices[index].x),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[2]].y -
+                  mris_dst->vertices[index].y),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[2]].z -
+                  mris_dst->vertices[index].z),
+                 2));
+    c = sqrt(pow((mris_src->vertices[mris_src->faces[fnum].v[2]].x -
+                  mris_src->vertices[mris_src->faces[fnum].v[1]].x),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[2]].y -
+                  mris_src->vertices[mris_src->faces[fnum].v[1]].y),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[2]].z -
+                  mris_src->vertices[mris_src->faces[fnum].v[1]].z),
+                 2));
+    p = (a + b + c) / 2;
+    r = sqrt(fabs(p * (p - a) * (p - b) * (p - c)));
 
-    a = sqrt( pow((mris_src->vertices[mris_src->faces[fnum].v[0]].x - mris_dst->vertices[index].x),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[0]].y - mris_dst->vertices[index].y),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[0]].z - mris_dst->vertices[index].z),2));
-    b = sqrt( pow((mris_src->vertices[mris_src->faces[fnum].v[2]].x - mris_dst->vertices[index].x),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[2]].y - mris_dst->vertices[index].y),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[2]].z - mris_dst->vertices[index].z),2));
-    c = sqrt( pow((mris_src->vertices[mris_src->faces[fnum].v[2]].x - mris_src->vertices[mris_src->faces[fnum].v[0]].x),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[2]].y - mris_src->vertices[mris_src->faces[fnum].v[0]].y),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[2]].z - mris_src->vertices[mris_src->faces[fnum].v[0]].z),2));
-    p = (a+b+c)/2;
-    s = sqrt(fabs(p*(p-a)*(p-b)*(p-c)));
+    a = sqrt(pow((mris_src->vertices[mris_src->faces[fnum].v[0]].x -
+                  mris_dst->vertices[index].x),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[0]].y -
+                  mris_dst->vertices[index].y),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[0]].z -
+                  mris_dst->vertices[index].z),
+                 2));
+    b = sqrt(pow((mris_src->vertices[mris_src->faces[fnum].v[2]].x -
+                  mris_dst->vertices[index].x),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[2]].y -
+                  mris_dst->vertices[index].y),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[2]].z -
+                  mris_dst->vertices[index].z),
+                 2));
+    c = sqrt(pow((mris_src->vertices[mris_src->faces[fnum].v[2]].x -
+                  mris_src->vertices[mris_src->faces[fnum].v[0]].x),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[2]].y -
+                  mris_src->vertices[mris_src->faces[fnum].v[0]].y),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[2]].z -
+                  mris_src->vertices[mris_src->faces[fnum].v[0]].z),
+                 2));
+    p = (a + b + c) / 2;
+    s = sqrt(fabs(p * (p - a) * (p - b) * (p - c)));
 
-    a = sqrt( pow((mris_src->vertices[mris_src->faces[fnum].v[1]].x - mris_dst->vertices[index].x),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[1]].y - mris_dst->vertices[index].y),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[1]].z - mris_dst->vertices[index].z),2));
-    b = sqrt( pow((mris_src->vertices[mris_src->faces[fnum].v[0]].x - mris_dst->vertices[index].x),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[0]].y - mris_dst->vertices[index].y),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[0]].z - mris_dst->vertices[index].z),2));
-    c = sqrt( pow((mris_src->vertices[mris_src->faces[fnum].v[0]].x - mris_src->vertices[mris_src->faces[fnum].v[1]].x),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[0]].y - mris_src->vertices[mris_src->faces[fnum].v[1]].y),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[0]].z - mris_src->vertices[mris_src->faces[fnum].v[1]].z),2));
-    p = (a+b+c)/2;
-    t = sqrt(fabs(p*(p-a)*(p-b)*(p-c)));
-    p= (r+s+t);
-    r = r/p;
-    s = s/p;
-    t = t/p;
+    a = sqrt(pow((mris_src->vertices[mris_src->faces[fnum].v[1]].x -
+                  mris_dst->vertices[index].x),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[1]].y -
+                  mris_dst->vertices[index].y),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[1]].z -
+                  mris_dst->vertices[index].z),
+                 2));
+    b = sqrt(pow((mris_src->vertices[mris_src->faces[fnum].v[0]].x -
+                  mris_dst->vertices[index].x),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[0]].y -
+                  mris_dst->vertices[index].y),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[0]].z -
+                  mris_dst->vertices[index].z),
+                 2));
+    c = sqrt(pow((mris_src->vertices[mris_src->faces[fnum].v[0]].x -
+                  mris_src->vertices[mris_src->faces[fnum].v[1]].x),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[0]].y -
+                  mris_src->vertices[mris_src->faces[fnum].v[1]].y),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[0]].z -
+                  mris_src->vertices[mris_src->faces[fnum].v[1]].z),
+                 2));
+    p = (a + b + c) / 2;
+    t = sqrt(fabs(p * (p - a) * (p - b) * (p - c)));
+    p = (r + s + t);
+    r = r / p;
+    s = s / p;
+    t = t / p;
 
-    mris_dst->vertices[index].origx = r*mris_src->vertices[mris_src->faces[fnum].v[0]].origx + s*mris_src->vertices[mris_src->faces[fnum].v[1]].origx + t*mris_src->vertices[mris_src->faces[fnum].v[2]].origx;
-    mris_dst->vertices[index].origy = r*mris_src->vertices[mris_src->faces[fnum].v[0]].origy + s*mris_src->vertices[mris_src->faces[fnum].v[1]].origy + t*mris_src->vertices[mris_src->faces[fnum].v[2]].origy;
-    mris_dst->vertices[index].origz = r*mris_src->vertices[mris_src->faces[fnum].v[0]].origz + s*mris_src->vertices[mris_src->faces[fnum].v[1]].origz + t*mris_src->vertices[mris_src->faces[fnum].v[2]].origz;
+    mris_dst->vertices[index].origx =
+        r * mris_src->vertices[mris_src->faces[fnum].v[0]].origx +
+        s * mris_src->vertices[mris_src->faces[fnum].v[1]].origx +
+        t * mris_src->vertices[mris_src->faces[fnum].v[2]].origx;
+    mris_dst->vertices[index].origy =
+        r * mris_src->vertices[mris_src->faces[fnum].v[0]].origy +
+        s * mris_src->vertices[mris_src->faces[fnum].v[1]].origy +
+        t * mris_src->vertices[mris_src->faces[fnum].v[2]].origy;
+    mris_dst->vertices[index].origz =
+        r * mris_src->vertices[mris_src->faces[fnum].v[0]].origz +
+        s * mris_src->vertices[mris_src->faces[fnum].v[1]].origz +
+        t * mris_src->vertices[mris_src->faces[fnum].v[2]].origz;
 
 #else
     mris_dst->vertices[index].origx = mris_src->vertices[annIndex[0]].origx;
@@ -1559,22 +1596,21 @@ sample_origposition(MRI_SURFACE *mris_src, MRI_SURFACE *mris_dst)
     mris_dst->vertices[index].origz = mris_src->vertices[annIndex[0]].origz;
 #endif
     if (annIndex[0] == 81426)
-      printf("src index %d dst index %d face %d r %f s %f t %f\n", index, annIndex[0], fnum, r, s, t);
+      printf("src index %d dst index %d face %d r %f s %f t %f\n", index,
+             annIndex[0], fnum, r, s, t);
   }
-  return(mris_dst) ;
+  return (mris_dst);
 }
 
-static MRI_SURFACE *
-sample_origcurvature(MRI_SURFACE *mris_src, MRI_SURFACE *mris_dst)
-{
-  int index, fno, fnum=0, i;
+static MRI_SURFACE *sample_origcurvature(MRI_SURFACE *mris_src,
+                                         MRI_SURFACE *mris_dst) {
+  int index, fno, fnum = 0, i;
   VERTEX *vertex;
   double nearest, dist, r, s, t;
   double a, b, c, p;
   ANNpointArray pa = annAllocPts(mris_src->nvertices, 3);
 
-  for (index = 0; index < mris_src->nvertices; index++)
-  {
+  for (index = 0; index < mris_src->nvertices; index++) {
     pa[index][0] = mris_src->vertices[index].x;
     pa[index][1] = mris_src->vertices[index].y;
     pa[index][2] = mris_src->vertices[index].z;
@@ -1586,91 +1622,146 @@ sample_origcurvature(MRI_SURFACE *mris_src, MRI_SURFACE *mris_dst)
   //  ANNpoint query_pt = annAllocPt(3);
   ANNpointArray QueryPt;
 
-  //if(mris_dst == NULL)
+  // if(mris_dst == NULL)
   // mris_dst = MRIScopy(mris_src, NULL);
 
-  QueryPt = annAllocPts(1,3);
+  QueryPt = annAllocPts(1, 3);
 
-  for (index = 0; index < mris_dst->nvertices; index++)
-  {
-    if (mris_dst->vertices[index].border == 1) continue;
+  for (index = 0; index < mris_dst->nvertices; index++) {
+    if (mris_dst->vertices[index].border == 1)
+      continue;
 
     QueryPt[0][0] = mris_dst->vertices[index].x;
     QueryPt[0][1] = mris_dst->vertices[index].y;
     QueryPt[0][2] = mris_dst->vertices[index].z;
 
     annkdTree->annkSearch( // search
-      QueryPt[0],       // query point
-      1,   // number of near neighbors
-      annIndex,  // nearest neighbors (returned)
-      annDist,  // distance (returned)
-      0);   // error bound
+        QueryPt[0],        // query point
+        1,                 // number of near neighbors
+        annIndex,          // nearest neighbors (returned)
+        annDist,           // distance (returned)
+        0);                // error bound
 
 #if 1
     vertex = &mris_src->vertices[annIndex[0]];
     nearest = 100000;
-    for (i=0; i<vertex->num; i++)
-    {
+    for (i = 0; i < vertex->num; i++) {
       fno = vertex->f[i];
       dist = v_to_f_distance(&mris_dst->vertices[index], mris_src, fno, 0);
-      if (dist<nearest)
-      {
+      if (dist < nearest) {
         nearest = dist;
         fnum = fno;
       }
     }
 
-    a = sqrt( pow((mris_src->vertices[mris_src->faces[fnum].v[1]].x - mris_dst->vertices[index].x),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[1]].y - mris_dst->vertices[index].y),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[1]].z - mris_dst->vertices[index].z),2));
-    b = sqrt( pow((mris_src->vertices[mris_src->faces[fnum].v[2]].x - mris_dst->vertices[index].x),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[2]].y - mris_dst->vertices[index].y),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[2]].z - mris_dst->vertices[index].z),2));
-    c = sqrt( pow((mris_src->vertices[mris_src->faces[fnum].v[2]].x - mris_src->vertices[mris_src->faces[fnum].v[1]].x),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[2]].y - mris_src->vertices[mris_src->faces[fnum].v[1]].y),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[2]].z - mris_src->vertices[mris_src->faces[fnum].v[1]].z),2));
-    p = (a+b+c)/2;
-    r = sqrt(fabs(p*(p-a)*(p-b)*(p-c)));
+    a = sqrt(pow((mris_src->vertices[mris_src->faces[fnum].v[1]].x -
+                  mris_dst->vertices[index].x),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[1]].y -
+                  mris_dst->vertices[index].y),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[1]].z -
+                  mris_dst->vertices[index].z),
+                 2));
+    b = sqrt(pow((mris_src->vertices[mris_src->faces[fnum].v[2]].x -
+                  mris_dst->vertices[index].x),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[2]].y -
+                  mris_dst->vertices[index].y),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[2]].z -
+                  mris_dst->vertices[index].z),
+                 2));
+    c = sqrt(pow((mris_src->vertices[mris_src->faces[fnum].v[2]].x -
+                  mris_src->vertices[mris_src->faces[fnum].v[1]].x),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[2]].y -
+                  mris_src->vertices[mris_src->faces[fnum].v[1]].y),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[2]].z -
+                  mris_src->vertices[mris_src->faces[fnum].v[1]].z),
+                 2));
+    p = (a + b + c) / 2;
+    r = sqrt(fabs(p * (p - a) * (p - b) * (p - c)));
 
-    a = sqrt( pow((mris_src->vertices[mris_src->faces[fnum].v[0]].x - mris_dst->vertices[index].x),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[0]].y - mris_dst->vertices[index].y),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[0]].z - mris_dst->vertices[index].z),2));
-    b = sqrt( pow((mris_src->vertices[mris_src->faces[fnum].v[2]].x - mris_dst->vertices[index].x),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[2]].y - mris_dst->vertices[index].y),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[2]].z - mris_dst->vertices[index].z),2));
-    c = sqrt( pow((mris_src->vertices[mris_src->faces[fnum].v[2]].x - mris_src->vertices[mris_src->faces[fnum].v[0]].x),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[2]].y - mris_src->vertices[mris_src->faces[fnum].v[0]].y),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[2]].z - mris_src->vertices[mris_src->faces[fnum].v[0]].z),2));
-    p = (a+b+c)/2;
-    s = sqrt(fabs(p*(p-a)*(p-b)*(p-c)));
+    a = sqrt(pow((mris_src->vertices[mris_src->faces[fnum].v[0]].x -
+                  mris_dst->vertices[index].x),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[0]].y -
+                  mris_dst->vertices[index].y),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[0]].z -
+                  mris_dst->vertices[index].z),
+                 2));
+    b = sqrt(pow((mris_src->vertices[mris_src->faces[fnum].v[2]].x -
+                  mris_dst->vertices[index].x),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[2]].y -
+                  mris_dst->vertices[index].y),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[2]].z -
+                  mris_dst->vertices[index].z),
+                 2));
+    c = sqrt(pow((mris_src->vertices[mris_src->faces[fnum].v[2]].x -
+                  mris_src->vertices[mris_src->faces[fnum].v[0]].x),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[2]].y -
+                  mris_src->vertices[mris_src->faces[fnum].v[0]].y),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[2]].z -
+                  mris_src->vertices[mris_src->faces[fnum].v[0]].z),
+                 2));
+    p = (a + b + c) / 2;
+    s = sqrt(fabs(p * (p - a) * (p - b) * (p - c)));
 
-    a = sqrt( pow((mris_src->vertices[mris_src->faces[fnum].v[1]].x - mris_dst->vertices[index].x),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[1]].y - mris_dst->vertices[index].y),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[1]].z - mris_dst->vertices[index].z),2));
-    b = sqrt( pow((mris_src->vertices[mris_src->faces[fnum].v[0]].x - mris_dst->vertices[index].x),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[0]].y - mris_dst->vertices[index].y),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[0]].z - mris_dst->vertices[index].z),2));
-    c = sqrt( pow((mris_src->vertices[mris_src->faces[fnum].v[0]].x - mris_src->vertices[mris_src->faces[fnum].v[1]].x),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[0]].y - mris_src->vertices[mris_src->faces[fnum].v[1]].y),2)+
-              pow((mris_src->vertices[mris_src->faces[fnum].v[0]].z - mris_src->vertices[mris_src->faces[fnum].v[1]].z),2));
-    p = (a+b+c)/2;
-    t = sqrt(fabs(p*(p-a)*(p-b)*(p-c)));
+    a = sqrt(pow((mris_src->vertices[mris_src->faces[fnum].v[1]].x -
+                  mris_dst->vertices[index].x),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[1]].y -
+                  mris_dst->vertices[index].y),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[1]].z -
+                  mris_dst->vertices[index].z),
+                 2));
+    b = sqrt(pow((mris_src->vertices[mris_src->faces[fnum].v[0]].x -
+                  mris_dst->vertices[index].x),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[0]].y -
+                  mris_dst->vertices[index].y),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[0]].z -
+                  mris_dst->vertices[index].z),
+                 2));
+    c = sqrt(pow((mris_src->vertices[mris_src->faces[fnum].v[0]].x -
+                  mris_src->vertices[mris_src->faces[fnum].v[1]].x),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[0]].y -
+                  mris_src->vertices[mris_src->faces[fnum].v[1]].y),
+                 2) +
+             pow((mris_src->vertices[mris_src->faces[fnum].v[0]].z -
+                  mris_src->vertices[mris_src->faces[fnum].v[1]].z),
+                 2));
+    p = (a + b + c) / 2;
+    t = sqrt(fabs(p * (p - a) * (p - b) * (p - c)));
 
-    p= (r+s+t);
-    r = r/p;
-    s = s/p;
-    t = t/p;
+    p = (r + s + t);
+    r = r / p;
+    s = s / p;
+    t = t / p;
 
-    mris_dst->vertices[index].curv = r*mris_src->vertices[mris_src->faces[fnum].v[0]].curv + s*mris_src->vertices[mris_src->faces[fnum].v[1]].curv + t*mris_src->vertices[mris_src->faces[fnum].v[2]].curv;
+    mris_dst->vertices[index].curv =
+        r * mris_src->vertices[mris_src->faces[fnum].v[0]].curv +
+        s * mris_src->vertices[mris_src->faces[fnum].v[1]].curv +
+        t * mris_src->vertices[mris_src->faces[fnum].v[2]].curv;
 #else
 
     mris_dst->vertices[index].curv = mris_src->vertices[annIndex[0]].curv;
     if (index == 67770)
-      printf("src index %d dst index %d face %d r %f s %f t %f\n", index, annIndex[0], fnum, r, s, t);
+      printf("src index %d dst index %d face %d r %f s %f t %f\n", index,
+             annIndex[0], fnum, r, s, t);
 #endif
-
   }
-  return(mris_dst) ;
+  return (mris_dst);
 }
 #if 0
 #if 0
@@ -2494,9 +2585,8 @@ lubksb(double** a,int n,int* indx,double* b)
 
 #endif
 #endif
-static double
-v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number, int debug)
-{
+static double v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf,
+                              int face_number, int debug) {
   double a, b, c, d, e, f, det, s, t, invDet;
   double numer, denom, tmp0, tmp1;
   VERTEX *V1, *V2, *V3;
@@ -2519,138 +2609,113 @@ v_to_f_distance(VERTEX *P0, MRI_SURFACE *mri_surf, int face_number, int debug)
   D.y = V1->y - P0->y;
   D.z = V1->z - P0->z;
 
-  a = E0.x *E0.x + E0.y * E0.y + E0.z *E0.z;
-  b = E0.x *E1.x + E0.y * E1.y + E0.z *E1.z;
-  c = E1.x *E1.x + E1.y * E1.y + E1.z *E1.z;
-  d = E0.x *D.x + E0.y * D.y + E0.z *D.z;
-  e = E1.x *D.x + E1.y * D.y + E1.z *D.z;
-  f = D.x *D.x + D.y * D.y + D.z *D.z;
+  a = E0.x * E0.x + E0.y * E0.y + E0.z * E0.z;
+  b = E0.x * E1.x + E0.y * E1.y + E0.z * E1.z;
+  c = E1.x * E1.x + E1.y * E1.y + E1.z * E1.z;
+  d = E0.x * D.x + E0.y * D.y + E0.z * D.z;
+  e = E1.x * D.x + E1.y * D.y + E1.z * D.z;
+  f = D.x * D.x + D.y * D.y + D.z * D.z;
 
-  det = a*c - b*b;
-  s = b*e - c*d;
-  t = b*d - a*e;
+  det = a * c - b * b;
+  s = b * e - c * d;
+  t = b * d - a * e;
 
-  if (debug) printf("det = %g\n", det);
-  if (s + t <= det)
-  {
-    if (s < 0)
-    {
-      if (t<0)
-      {
+  if (debug)
+    printf("det = %g\n", det);
+  if (s + t <= det) {
+    if (s < 0) {
+      if (t < 0) {
         /* Region 4 */
         tmp0 = b + d;
         tmp1 = c + e;
-        if (tmp1 > tmp0)
-        {
+        if (tmp1 > tmp0) {
           numer = tmp1 - tmp0;
-          denom = a - b - b +c;
-          s = (numer >= denom ? 1 : numer/denom);
-          t = 1-s;
+          denom = a - b - b + c;
+          s = (numer >= denom ? 1 : numer / denom);
+          t = 1 - s;
 
-        }
-        else
-        {
+        } else {
           s = 0;
           /* t = (e >= 0 ? 0 : (-e >= c ? 0 > = c + e = tmp1) */
-          t = (tmp1 <= 0 ? 1 : (e >= 0 ? 0 : -e/c));
+          t = (tmp1 <= 0 ? 1 : (e >= 0 ? 0 : -e / c));
         }
-        if (debug) printf("region 4, s =%g, t =%g\n", s, t);
-      }
-      else
-      {
+        if (debug)
+          printf("region 4, s =%g, t =%g\n", s, t);
+      } else {
         /* Region 3 */
         s = 0;
-        t = ( e >= 0 ? 0 : (-e >= c ? 1 : (-e/c)));
-        if (debug) printf("region 3, s =%g, t =%g\n", s, t);
+        t = (e >= 0 ? 0 : (-e >= c ? 1 : (-e / c)));
+        if (debug)
+          printf("region 3, s =%g, t =%g\n", s, t);
       }
-    }
-    else if (t < 0)
-    {
+    } else if (t < 0) {
       /* Region 5 */
       t = 0;
-      s = (d >= 0 ? 0 :(-d >= a ? 1 : (-d/a)));
-      if (debug) printf("region 5, s =%g, t =%g\n", s, t);
-    }
-    else
-    {
+      s = (d >= 0 ? 0 : (-d >= a ? 1 : (-d / a)));
+      if (debug)
+        printf("region 5, s =%g, t =%g\n", s, t);
+    } else {
       /* Region 0 */
-      invDet = 1/det;
+      invDet = 1 / det;
       s *= invDet;
       t *= invDet;
-      if (debug) printf("region 0, s =%g, t =%g\n", s, t);
+      if (debug)
+        printf("region 0, s =%g, t =%g\n", s, t);
     }
 
-  }
-  else
-  {
-    if ( s < 0 )
-    {
+  } else {
+    if (s < 0) {
       /* Region 2 */
-      if ( d < 0)
-      { /* Minimum on edge t = 0 */
-        s = (-d >= a ? 1 : -d/a);
+      if (d < 0) { /* Minimum on edge t = 0 */
+        s = (-d >= a ? 1 : -d / a);
         t = 0;
-      }
-      else if (e < 0)
-      { /* Minimum on edge s = 0 */
-        t = (-e >= c ? 1 : -e/c);
+      } else if (e < 0) { /* Minimum on edge s = 0 */
+        t = (-e >= c ? 1 : -e / c);
         s = 0;
-      }
-      else
-      {
+      } else {
         s = 0;
         t = 0;
       }
-      if (debug) printf("region 2, s =%g, t =%g\n", s, t);
-    }
-    else if ( t < 0)
-    {
+      if (debug)
+        printf("region 2, s =%g, t =%g\n", s, t);
+    } else if (t < 0) {
       /* Region 6 */
       tmp0 = b + e;
       tmp1 = a + d;
-      if (tmp1 > tmp0)
-      { /* Minimum at line s + t = 1 */
+      if (tmp1 > tmp0) {     /* Minimum at line s + t = 1 */
         numer = tmp1 - tmp0; /* Positive */
-        denom = a + c - b -b;
-        t = (numer >= denom ? 1 : (numer/denom));
+        denom = a + c - b - b;
+        t = (numer >= denom ? 1 : (numer / denom));
         s = 1 - t;
-      }
-      else
-      { /* Minimum at line t = 0 */
-        s = (tmp1 <= 0 ? 1 : (d >= 0 ? 0 : -d/a));
+      } else { /* Minimum at line t = 0 */
+        s = (tmp1 <= 0 ? 1 : (d >= 0 ? 0 : -d / a));
         t = 0;
       }
-      if (debug) printf("region 6, s =%g, t =%g\n", s, t);
-    }
-    else
-    {
+      if (debug)
+        printf("region 6, s =%g, t =%g\n", s, t);
+    } else {
       /* Region 1 */
       numer = c + e - b - d;
-      if (numer <= 0)
-      {
+      if (numer <= 0) {
         s = 0;
-      }
-      else
-      {
+      } else {
         denom = a + c - b - b; /* denom is positive */
-        s = (numer >= denom ? 1 : (numer/denom));
+        s = (numer >= denom ? 1 : (numer / denom));
       }
-      t = 1-s;
-      if (debug) printf("region 1, s =%g, t =%g\n", s, t);
+      t = 1 - s;
+      if (debug)
+        printf("region 1, s =%g, t =%g\n", s, t);
     }
   }
 
-  if ( s < 0  || s > 1 || t < 0 || t > 1)
-  {
+  if (s < 0 || s > 1 || t < 0 || t > 1) {
     printf("Error in computing s and t \n");
   }
 
-
   /* return (sqrt(a*s*s + 2*b*s*t + c*t*t + 2*d*s + 2*e*t + f)); */
   /* The square-root will be taken later to save time */
-  return (a*s*s + 2*b*s*t + c*t*t + 2*d*s + 2*e*t + f);
+  return (a * s * s + 2 * b * s * t + c * t * t + 2 * d * s + 2 * e * t + f);
 }
-
 
 #if 0
 static int
@@ -2697,82 +2762,68 @@ sort(double **array, int order, int number, int total_number)
  Description:
  ----------------------------------------------------------------------*/
 
-static int
-get_option(int argc, char *argv[])
-{
-  int  nargs = 0 ;
-  char *option ;
+static int get_option(int argc, char *argv[]) {
+  int nargs = 0;
+  char *option;
 
-  option = argv[1] + 1 ;            /* past '-' */
+  option = argv[1] + 1; /* past '-' */
 
-  if (!stricmp(option, "A"))
-  {
-    ANALYSIS = 1 ;
-    fprintf(stdout,"spherical wavelet analysis\n");
-  }
-  else if (!stricmp(option, "S"))
-  {
-    SYNTHESIS = 1 ;
-    fprintf(stdout,"Spherical wavelet synthesis\n");
-  }
-  else if (!stricmp(option, "C"))
-  {
+  if (!stricmp(option, "A")) {
+    ANALYSIS = 1;
+    fprintf(stdout, "spherical wavelet analysis\n");
+  } else if (!stricmp(option, "S")) {
+    SYNTHESIS = 1;
+    fprintf(stdout, "Spherical wavelet synthesis\n");
+  } else if (!stricmp(option, "C")) {
     COMPARE = 1;
-    inc_fname = argv[2] ;
+    inc_fname = argv[2];
     threshold = atof(argv[3]);
-    fprintf(stdout,"Reconstruct the surface using only coefs changes %f\n", threshold);
+    fprintf(stdout, "Reconstruct the surface using only coefs changes %f\n",
+            threshold);
     nargs = 2;
-  }
-  else if (!stricmp(option, "sampled"))
-  {
+  } else if (!stricmp(option, "sampled")) {
     SAMPLE_OUT = 1;
-    outs_fname = argv[2] ;
-    fprintf(stdout,"Write sampled surface to %s\n",outs_fname);
+    outs_fname = argv[2];
+    fprintf(stdout, "Write sampled surface to %s\n", outs_fname);
     nargs = 1;
-  }
-  else if (!stricmp(option, "CURV"))
-  {
+  } else if (!stricmp(option, "CURV")) {
     CURV = 1;
-    fprintf(stdout,"Read in the curvature file and decompose it\n");
-  }
-  else if (!stricmp(option, "RADIUS"))
-  {
+    fprintf(stdout, "Read in the curvature file and decompose it\n");
+  } else if (!stricmp(option, "RADIUS")) {
     RADIUS = 1;
-    fprintf(stdout,"Decompose the radius\n");
-  }
-  else if (!stricmp(option, "WS"))
-  {
+    fprintf(stdout, "Decompose the radius\n");
+  } else if (!stricmp(option, "WS")) {
     shrink = atof(argv[2]);
     fprintf(stdout, "Wavelet shrinkage using threshold %f\n", shrink);
     nargs = 1;
-  }
-  else switch (toupper(*option))
-    {
+  } else
+    switch (toupper(*option)) {
     case '?':
     case 'U':
       fprintf(stdout,
-              "usage: %s <input surface> <orig surface> <finest order> <output surface> <output volume for glm>\n",
-              Progname) ;
+              "usage: %s <input surface> <orig surface> <finest order> <output "
+              "surface> <output volume for glm>\n",
+              Progname);
       fprintf(stdout, "-Option you must have: \n");
       fprintf(stdout, "        -S (synthesis) or -A (Analysis) \n");
       fprintf(stdout, "-Other options: \n");
-      fprintf(stdout, "        -CURV   Handle the orig surface file as a curv file) \n");
-      fprintf(stdout, "        -C surface_name threshold  Compare orig surface with another surface \
+      fprintf(
+          stdout,
+          "        -CURV   Handle the orig surface file as a curv file) \n");
+      fprintf(
+          stdout,
+          "        -C surface_name threshold  Compare orig surface with another surface \
               and synthesize a new surface using part of the new coefficients\n");
-      fprintf(stdout, "        -sampled   Write out a sampled version of orig surface \n");
-      exit(1) ;
-      break ;
+      fprintf(
+          stdout,
+          "        -sampled   Write out a sampled version of orig surface \n");
+      exit(1);
+      break;
     default:
-      fprintf(stdout, "unknown option %s\n", argv[1]) ;
-      exit(1) ;
-      break ;
+      fprintf(stdout, "unknown option %s\n", argv[1]);
+      exit(1);
+      break;
     }
 
-  return(nargs) ;
+  return (nargs);
 }
-
-
-
-
-
-

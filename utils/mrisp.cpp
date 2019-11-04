@@ -26,8 +26,8 @@
  *
  */
 
-#include <math.h>
-#include <stdio.h>
+#include <cmath>
+#include <cstdio>
 
 #include "diag.h"
 #include "error.h"
@@ -58,10 +58,11 @@
 #define DEBUG_U 255
 #define DEBUG_V 410
 #endif
- int DEBUG_U = -1;
- int DEBUG_V = -1;
+int DEBUG_U = -1;
+int DEBUG_V = -1;
 
-static int spherical_coordinate(double x, double y, double z, double *pphi, double *ptheta);
+static int spherical_coordinate(double x, double y, double z, double *pphi,
+                                double *ptheta);
 
 /*-----------------------------------------------------
         Parameters:
@@ -393,13 +394,14 @@ MRIStoParameterization(MRIS *mris, MRI_SP *mrisp, float scale,int fno)
   return(mrisp) ;
 }
 #else
-MRI_SP *MRIStoParameterization(MRIS *mris, MRI_SP *mrisp, float scale, int fno)
-{
+MRI_SP *MRIStoParameterization(MRIS *mris, MRI_SP *mrisp, float scale,
+                               int fno) {
   float a, b, c, phi, theta, x, y, z, uf, vf, d, total_d, **distances, *fp;
   int vno, u, v, unfilled, **filled, npasses, nfilled;
   VERTEX *vertex;
 
-  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) fprintf(stderr, "computing parameterization...");
+  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
+    fprintf(stderr, "computing parameterization...");
 
   if (!mrisp)
     mrisp = MRISPalloc(scale, 1);
@@ -421,7 +423,8 @@ MRI_SP *MRIStoParameterization(MRIS *mris, MRI_SP *mrisp, float scale, int fno)
     filled[u] = (int *)calloc(V_DIM(mrisp), sizeof(int));
     distances[u] = (float *)calloc(V_DIM(mrisp), sizeof(float));
 
-    for (v = 0; v <= V_MAX_INDEX(mrisp); v++) filled[u][v] = UNFILLED_ELT;
+    for (v = 0; v <= V_MAX_INDEX(mrisp); v++)
+      filled[u][v] = UNFILLED_ELT;
   }
 
   fp = IMAGEFseq_pix(mrisp->Ip, DEBUG_U, DEBUG_V, fno);
@@ -431,14 +434,19 @@ MRI_SP *MRIStoParameterization(MRIS *mris, MRI_SP *mrisp, float scale, int fno)
     x = vertex->x;
     y = vertex->y;
     z = vertex->z;
-    if (vno == Gdiag_no) DiagBreak();
+    if (vno == Gdiag_no)
+      DiagBreak();
     theta = atan2(y / b, x / a);
-    if (theta < 0.0f) theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
+    if (theta < 0.0f)
+      theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
     d = c * c - z * z;
-    if (d < 0.0) d = 0;
+    if (d < 0.0)
+      d = 0;
     phi = atan2(sqrt(d), z);
-    if (phi < RADIANS(1)) DiagBreak();
-    if (vno == DEBUG_VNO) DiagBreak();
+    if (phi < RADIANS(1))
+      DiagBreak();
+    if (vno == DEBUG_VNO)
+      DiagBreak();
     vertex->phi = phi;
     vertex->theta = theta;
     uf = PHI_DIM(mrisp) * phi / PHI_MAX;
@@ -447,14 +455,17 @@ MRI_SP *MRIStoParameterization(MRIS *mris, MRI_SP *mrisp, float scale, int fno)
     v = nint(vf);
     if (u < 0) /* enforce spherical topology  */
       u = -u;
-    if (u >= U_DIM(mrisp)) u = U_DIM(mrisp) - (u - U_DIM(mrisp) + 1);
+    if (u >= U_DIM(mrisp))
+      u = U_DIM(mrisp) - (u - U_DIM(mrisp) + 1);
     if (v < 0) /* enforce spherical topology  */
       v += V_DIM(mrisp);
-    if (v >= V_DIM(mrisp)) v -= V_DIM(mrisp);
+    if (v >= V_DIM(mrisp))
+      v -= V_DIM(mrisp);
 
-    if (u == 0 && v == 56) DiagBreak();
-    if ((((u == DEBUG_U) && (v == DEBUG_V)) || (vno == Gdiag_no)) && (fno==0))
-    {
+    if (u == 0 && v == 56)
+      DiagBreak();
+    if ((((u == DEBUG_U) && (v == DEBUG_V)) || (vno == Gdiag_no)) &&
+        (fno == 0)) {
       printf("v %d --> [%d, %d] (%2.1f, %2.1f)\n", vno, u, v, theta, phi);
       DiagBreak();
     }
@@ -465,15 +476,12 @@ MRI_SP *MRIStoParameterization(MRIS *mris, MRI_SP *mrisp, float scale, int fno)
       fprintf(stderr,
               "v = %6.6d (%2.1f, %2.1f, %2.1f), d = %2.3f, "
               "curv = %2.3f\n",
-              vno,
-              x,
-              y,
-              z,
-              d,
-              vertex->curv);
+              vno, x, y, z, d, vertex->curv);
   }
 
-  if (DEBUG_U >= 0) fprintf(stderr, "\ndistance[%d][%d] = %2.3f\n\n", DEBUG_U, DEBUG_V, distances[DEBUG_U][DEBUG_V]);
+  if (DEBUG_U >= 0)
+    fprintf(stderr, "\ndistance[%d][%d] = %2.3f\n\n", DEBUG_U, DEBUG_V,
+            distances[DEBUG_U][DEBUG_V]);
 
   /* now add in curvatures proportional to their distance from the point */
   for (vno = 0; vno < mris->nvertices; vno++) {
@@ -482,9 +490,11 @@ MRI_SP *MRIStoParameterization(MRIS *mris, MRI_SP *mrisp, float scale, int fno)
     y = vertex->y;
     z = vertex->z;
     theta = atan2(y / b, x / a);
-    if (theta < 0.0f) theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
+    if (theta < 0.0f)
+      theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
     d = c * c - z * z;
-    if (d < 0.0) d = 0.0;
+    if (d < 0.0)
+      d = 0.0;
     phi = atan2(sqrt(d), z);
     uf = PHI_DIM(mrisp) * phi / PHI_MAX;
     vf = THETA_DIM(mrisp) * theta / THETA_MAX;
@@ -492,34 +502,34 @@ MRI_SP *MRIStoParameterization(MRIS *mris, MRI_SP *mrisp, float scale, int fno)
     v = nint(vf);
     if (u < 0) /* enforce spherical topology  */
       u = -u;
-    if (u >= U_DIM(mrisp)) u = U_DIM(mrisp) - (u - U_DIM(mrisp) + 1);
+    if (u >= U_DIM(mrisp))
+      u = U_DIM(mrisp) - (u - U_DIM(mrisp) + 1);
     if (v < 0) /* enforce spherical topology  */
       v += V_DIM(mrisp);
-    if (v >= V_DIM(mrisp)) v -= V_DIM(mrisp);
+    if (v >= V_DIM(mrisp))
+      v -= V_DIM(mrisp);
 
-    if (u == 0 && v == 56) DiagBreak();
+    if (u == 0 && v == 56)
+      DiagBreak();
 
     /* 0,0 */
     total_d = distances[u][v];
-    if ((total_d > 10000.0) || (vertex->curv > 1000.0)) DiagBreak();
-    if (total_d > 0.0) 
+    if ((total_d > 10000.0) || (vertex->curv > 1000.0))
+      DiagBreak();
+    if (total_d > 0.0)
       *IMAGEFseq_pix(mrisp->Ip, u, v, fno) += vertex->curv / total_d;
     if (devFinite(*IMAGEFseq_pix(mrisp->Ip, u, v, fno)) == 0)
-      DiagBreak() ;
+      DiagBreak();
     if ((u == DEBUG_U) && (v == DEBUG_V))
       fprintf(stderr,
               "v = %6.6d (%2.1f, %2.1f, %2.1f), curv = %2.3f, "
               "proportion = %2.3f\n",
-              vno,
-              x,
-              y,
-              z,
-              vertex->curv,
-              d);
+              vno, x, y, z, vertex->curv, d);
   }
 
   if (DEBUG_U >= 0)
-    fprintf(stderr, "curv[%d][%d] = %2.3f\n\n", DEBUG_U, DEBUG_V, *IMAGEFseq_pix(mrisp->Ip, DEBUG_U, DEBUG_V, fno));
+    fprintf(stderr, "curv[%d][%d] = %2.3f\n\n", DEBUG_U, DEBUG_V,
+            *IMAGEFseq_pix(mrisp->Ip, DEBUG_U, DEBUG_V, fno));
 
 #if 0
   /* fill in values which were unmapped by sampling back onto surface */
@@ -578,10 +588,10 @@ MRI_SP *MRIStoParameterization(MRIS *mris, MRI_SP *mrisp, float scale, int fno)
     ;
     for (u = 0; u <= U_MAX_INDEX(mrisp); u++) {
       for (v = 0; v <= V_MAX_INDEX(mrisp); v++) {
-        if ((u == DEBUG_U) && (v == DEBUG_V)) 
-	  DiagBreak();
-	if (devFinite(*IMAGEFseq_pix(mrisp->Ip, u, v, fno)) == 0)
-	  DiagBreak() ;
+        if ((u == DEBUG_U) && (v == DEBUG_V))
+          DiagBreak();
+        if (devFinite(*IMAGEFseq_pix(mrisp->Ip, u, v, fno)) == 0)
+          DiagBreak();
         if (filled[u][v] == UNFILLED_ELT) {
           for (total = 0.0f, n = 0, uk = -1; uk <= 1; uk++) {
             u1 = u + uk;
@@ -597,8 +607,8 @@ MRI_SP *MRIStoParameterization(MRIS *mris, MRI_SP *mrisp, float scale, int fno)
                 v1 -= V_DIM(mrisp);
 
               if (filled[u1][v1] >= 0) {
-		if (devFinite(*IMAGEFseq_pix(mrisp->Ip, u1, v1, fno)) == 0)
-		  DiagBreak() ;
+                if (devFinite(*IMAGEFseq_pix(mrisp->Ip, u1, v1, fno)) == 0)
+                  DiagBreak();
                 total += *IMAGEFseq_pix(Ip, u1, v1, fno);
                 n++;
               }
@@ -606,32 +616,31 @@ MRI_SP *MRIStoParameterization(MRIS *mris, MRI_SP *mrisp, float scale, int fno)
           }
           if (n > 0) {
             total /= (float)n;
-	    if (devFinite(*IMAGEFseq_pix(Itmp, u, v, fno)) == 0)
-	      DiagBreak() ;
+            if (devFinite(*IMAGEFseq_pix(Itmp, u, v, fno)) == 0)
+              DiagBreak();
             *IMAGEFseq_pix(Itmp, u, v, fno) = total;
             filled[u][v] = FILLING_ELT;
             nfilled++;
-          }
-          else
+          } else
             unfilled++;
-        }
-        else
+        } else
           *IMAGEFseq_pix(Itmp, u, v, fno) = *IMAGEFseq_pix(Ip, u, v, fno);
       }
     }
     for (u = 0; u <= U_MAX_INDEX(mrisp); u++) {
       for (v = 0; v <= V_MAX_INDEX(mrisp); v++) {
-        if (filled[u][v] == FILLING_ELT) filled[u][v] = FILLED_ELT;
+        if (filled[u][v] == FILLING_ELT)
+          filled[u][v] = FILLED_ELT;
       }
     }
     mrisp->Ip = Itmp;
     ImageFree(&Ip);
     if (npasses++ > 1000)
-      ErrorExit(ERROR_BADFILE,
-                "MRISPtoParameterization: could not fill "
-                "parameterization");
+      ErrorExit(ERROR_BADFILE, "MRISPtoParameterization: could not fill "
+                               "parameterization");
   } while (unfilled > 0);
-  if ((Gdiag & DIAG_SHOW) && DIAG_VERBOSE_ON) fprintf(stderr, "filling %d elements took %d passes\n", nfilled, npasses);
+  if ((Gdiag & DIAG_SHOW) && DIAG_VERBOSE_ON)
+    fprintf(stderr, "filling %d elements took %d passes\n", nfilled, npasses);
 #endif
 
   for (u = 0; u <= U_MAX_INDEX(mrisp); u++) {
@@ -641,24 +650,27 @@ MRI_SP *MRIStoParameterization(MRIS *mris, MRI_SP *mrisp, float scale, int fno)
   free(filled);
   free(distances);
 
-  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) fprintf(stderr, "done.\n");
+  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
+    fprintf(stderr, "done.\n");
 
-  if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) ImageWrite(mrisp->Ip, "sphere.hipl");
+  if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
+    ImageWrite(mrisp->Ip, "sphere.hipl");
 
   return (mrisp);
 }
 #endif
 
-MRI_SP *
-MRIStoParameterizationBarycentric(MRIS *mris, MRI_SP *mrisp, float scale, int frameno)
+MRI_SP *MRIStoParameterizationBarycentric(MRIS *mris, MRI_SP *mrisp,
+                                          float scale, int frameno)
 
 {
   float a, b, c, phi, theta, x, y, z, uf, vf, d, total_d, **distances, *fp;
   int vno, u, v, unfilled, **filled, nfilled;
   VERTEX *vertex;
-  MHT  *mht ;
+  MHT *mht;
 
-  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) fprintf(stderr, "computing parameterization...");
+  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
+    fprintf(stderr, "computing parameterization...");
 
   if (!mrisp)
     mrisp = MRISPalloc(scale, 1);
@@ -673,7 +685,8 @@ MRIStoParameterizationBarycentric(MRIS *mris, MRI_SP *mrisp, float scale, int fr
     filled[u] = (int *)calloc(V_DIM(mrisp), sizeof(int));
     distances[u] = (float *)calloc(V_DIM(mrisp), sizeof(float));
 
-    for (v = 0; v <= V_MAX_INDEX(mrisp); v++) filled[u][v] = UNFILLED_ELT;
+    for (v = 0; v <= V_MAX_INDEX(mrisp); v++)
+      filled[u][v] = UNFILLED_ELT;
   }
 
   fp = IMAGEFseq_pix(mrisp->Ip, DEBUG_U, DEBUG_V, frameno);
@@ -683,14 +696,19 @@ MRIStoParameterizationBarycentric(MRIS *mris, MRI_SP *mrisp, float scale, int fr
     x = vertex->x;
     y = vertex->y;
     z = vertex->z;
-    if (vno == Gdiag_no) DiagBreak();
+    if (vno == Gdiag_no)
+      DiagBreak();
     theta = atan2(y / b, x / a);
-    if (theta < 0.0f) theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
+    if (theta < 0.0f)
+      theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
     d = c * c - z * z;
-    if (d < 0.0) d = 0;
+    if (d < 0.0)
+      d = 0;
     phi = atan2(sqrt(d), z);
-    if (phi < RADIANS(1)) DiagBreak();
-    if (vno == DEBUG_VNO) DiagBreak();
+    if (phi < RADIANS(1))
+      DiagBreak();
+    if (vno == DEBUG_VNO)
+      DiagBreak();
     vertex->phi = phi;
     vertex->theta = theta;
     uf = PHI_DIM(mrisp) * phi / PHI_MAX;
@@ -699,13 +717,14 @@ MRIStoParameterizationBarycentric(MRIS *mris, MRI_SP *mrisp, float scale, int fr
     v = nint(vf);
     if (u < 0) /* enforce spherical topology  */
       u = -u;
-    if (u >= U_DIM(mrisp)) u = U_DIM(mrisp) - (u - U_DIM(mrisp) + 1);
+    if (u >= U_DIM(mrisp))
+      u = U_DIM(mrisp) - (u - U_DIM(mrisp) + 1);
     if (v < 0) /* enforce spherical topology  */
       v += V_DIM(mrisp);
-    if (v >= V_DIM(mrisp)) v -= V_DIM(mrisp);
+    if (v >= V_DIM(mrisp))
+      v -= V_DIM(mrisp);
 
-    if ((u == DEBUG_U) && (v == DEBUG_V)) 
-    {
+    if ((u == DEBUG_U) && (v == DEBUG_V)) {
       printf("v %d --> [%d, %d] (%2.1f, %2.1f)\n", vno, u, v, theta, phi);
       DiagBreak();
     }
@@ -716,15 +735,12 @@ MRIStoParameterizationBarycentric(MRIS *mris, MRI_SP *mrisp, float scale, int fr
       fprintf(stderr,
               "v = %6.6d (%2.1f, %2.1f, %2.1f), d = %2.3f, "
               "curv = %2.3f\n",
-              vno,
-              x,
-              y,
-              z,
-              d,
-              vertex->curv);
+              vno, x, y, z, d, vertex->curv);
   }
 
-  if (DEBUG_U >= 0) fprintf(stderr, "\ndistance[%d][%d] = %2.3f\n\n", DEBUG_U, DEBUG_V, distances[DEBUG_U][DEBUG_V]);
+  if (DEBUG_U >= 0)
+    fprintf(stderr, "\ndistance[%d][%d] = %2.3f\n\n", DEBUG_U, DEBUG_V,
+            distances[DEBUG_U][DEBUG_V]);
 
   /* now add in curvatures proportional to their distance from the point */
   for (vno = 0; vno < mris->nvertices; vno++) {
@@ -733,9 +749,11 @@ MRIStoParameterizationBarycentric(MRIS *mris, MRI_SP *mrisp, float scale, int fr
     y = vertex->y;
     z = vertex->z;
     theta = atan2(y / b, x / a);
-    if (theta < 0.0f) theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
+    if (theta < 0.0f)
+      theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
     d = c * c - z * z;
-    if (d < 0.0) d = 0.0;
+    if (d < 0.0)
+      d = 0.0;
     phi = atan2(sqrt(d), z);
     uf = PHI_DIM(mrisp) * phi / PHI_MAX;
     vf = THETA_DIM(mrisp) * theta / THETA_MAX;
@@ -743,84 +761,85 @@ MRIStoParameterizationBarycentric(MRIS *mris, MRI_SP *mrisp, float scale, int fr
     v = nint(vf);
     if (u < 0) /* enforce spherical topology  */
       u = -u;
-    if (u >= U_DIM(mrisp)) u = U_DIM(mrisp) - (u - U_DIM(mrisp) + 1);
+    if (u >= U_DIM(mrisp))
+      u = U_DIM(mrisp) - (u - U_DIM(mrisp) + 1);
     if (v < 0) /* enforce spherical topology  */
       v += V_DIM(mrisp);
-    if (v >= V_DIM(mrisp)) v -= V_DIM(mrisp);
+    if (v >= V_DIM(mrisp))
+      v -= V_DIM(mrisp);
 
-    if (u == 0 && v == 56) DiagBreak();
+    if (u == 0 && v == 56)
+      DiagBreak();
 
     /* 0,0 */
     total_d = distances[u][v];
-    if ((total_d > 10000.0) || (vertex->curv > 1000.0)) DiagBreak();
-    if (total_d > 0.0) 
+    if ((total_d > 10000.0) || (vertex->curv > 1000.0))
+      DiagBreak();
+    if (total_d > 0.0)
       *IMAGEFseq_pix(mrisp->Ip, u, v, frameno) += vertex->curv / total_d;
     if (devFinite(*IMAGEFseq_pix(mrisp->Ip, u, v, frameno)) == 0)
-      DiagBreak() ;
+      DiagBreak();
     if ((u == DEBUG_U) && (v == DEBUG_V))
       fprintf(stderr,
               "v = %6.6d (%2.1f, %2.1f, %2.1f), curv = %2.3f, "
               "proportion = %2.3f\n",
-              vno,
-              x,
-              y,
-              z,
-              vertex->curv,
-              d);
+              vno, x, y, z, vertex->curv, d);
   }
 
   if (DEBUG_U >= 0)
-    fprintf(stderr, "curv[%d][%d] = %2.3f\n\n", DEBUG_U, DEBUG_V, *IMAGEFseq_pix(mrisp->Ip, DEBUG_U, DEBUG_V, frameno));
+    fprintf(stderr, "curv[%d][%d] = %2.3f\n\n", DEBUG_U, DEBUG_V,
+            *IMAGEFseq_pix(mrisp->Ip, DEBUG_U, DEBUG_V, frameno));
 
-  mht = MHTcreateFaceTable_Resolution(mris, CANONICAL_VERTICES, mris->avg_vertex_dist/2);  // to lookup closest face
+  mht = MHTcreateFaceTable_Resolution(mris, CANONICAL_VERTICES,
+                                      mris->avg_vertex_dist /
+                                          2); // to lookup closest face
   // do backwards sampling to fill in missing pixels
   nfilled = 0;
   {
     IMAGE *Ip;
     double fdist, x, y, z, theta, phi;
-    FACE  *face ;
-    int   fno ;
+    FACE *face;
+    int fno;
 
     Ip = mrisp->Ip;
     unfilled = 0;
 
-    for (u = 0; u <= U_MAX_INDEX(mrisp); u++) 
-    {
-      for (v = 0; v <= V_MAX_INDEX(mrisp); v++) 
-      {
-        if ((u == DEBUG_U) && (v == DEBUG_V)) 
-	  DiagBreak();
-	if (devFinite(*IMAGEFseq_pix(mrisp->Ip, u, v, frameno)) == 0)
-	  DiagBreak() ;
-        if (filled[u][v] == UNFILLED_ELT) 
-	{
-	  phi = u * PHI_MAX / PHI_DIM(mrisp) ;
-	  theta = v * THETA_MAX / THETA_DIM(mrisp) ;
-	  x = a * sin(phi) * cos(theta) ;
-	  y = a * sin(phi) * sin(theta) ;
-	  z = a*cos(phi) ;
+    for (u = 0; u <= U_MAX_INDEX(mrisp); u++) {
+      for (v = 0; v <= V_MAX_INDEX(mrisp); v++) {
+        if ((u == DEBUG_U) && (v == DEBUG_V))
+          DiagBreak();
+        if (devFinite(*IMAGEFseq_pix(mrisp->Ip, u, v, frameno)) == 0)
+          DiagBreak();
+        if (filled[u][v] == UNFILLED_ELT) {
+          phi = u * PHI_MAX / PHI_DIM(mrisp);
+          theta = v * THETA_MAX / THETA_DIM(mrisp);
+          x = a * sin(phi) * cos(theta);
+          y = a * sin(phi) * sin(theta);
+          z = a * cos(phi);
 
-	  MHTfindClosestFaceGeneric(mht, mris, x, y, z, 1000, -1, -1, &face, &fno, &fdist);
-	  if (face)
-	  {
-	    float val ;
-	    VERTEX *v0, *v1, *v2 ;
-	    
-	    v0 = &mris->vertices[face->v[0]] ;
-	    v1 = &mris->vertices[face->v[1]] ;
-	    v2 = &mris->vertices[face->v[2]] ;
-	    
-	    val = MRISsampleFace(mris, fno, CANONICAL_VERTICES, x, y, z, v0->curv, v1->curv, v2->curv) ;
-	    filled[u][v] = 1 ;
-	    *IMAGEFseq_pix(Ip, u, v, frameno) = val ;
-	    nfilled++ ;
-	  }
-	}
+          MHTfindClosestFaceGeneric(mht, mris, x, y, z, 1000, -1, -1, &face,
+                                    &fno, &fdist);
+          if (face) {
+            float val;
+            VERTEX *v0, *v1, *v2;
+
+            v0 = &mris->vertices[face->v[0]];
+            v1 = &mris->vertices[face->v[1]];
+            v2 = &mris->vertices[face->v[2]];
+
+            val = MRISsampleFace(mris, fno, CANONICAL_VERTICES, x, y, z,
+                                 v0->curv, v1->curv, v2->curv);
+            filled[u][v] = 1;
+            *IMAGEFseq_pix(Ip, u, v, frameno) = val;
+            nfilled++;
+          }
+        }
       }
     }
   }
-  MHTfree(&mht) ;
-  if ((Gdiag & DIAG_SHOW) && DIAG_VERBOSE_ON) fprintf(stderr, "backsampling filled %d elements \n", nfilled);
+  MHTfree(&mht);
+  if ((Gdiag & DIAG_SHOW) && DIAG_VERBOSE_ON)
+    fprintf(stderr, "backsampling filled %d elements \n", nfilled);
 
   for (u = 0; u <= U_MAX_INDEX(mrisp); u++) {
     free(filled[u]);
@@ -829,22 +848,25 @@ MRIStoParameterizationBarycentric(MRIS *mris, MRI_SP *mrisp, float scale, int fr
   free(filled);
   free(distances);
 
-  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) fprintf(stderr, "done.\n");
+  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
+    fprintf(stderr, "done.\n");
 
-  if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) ImageWrite(mrisp->Ip, "sphere.hipl");
+  if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
+    ImageWrite(mrisp->Ip, "sphere.hipl");
 
   return (mrisp);
 }
 
-
-MRI_SP* MRIStoParameterizationBarycentric(MRIS *mris, MRI_SP *mrisp, const float *overlay, float scale, int frameno)
-{
+MRI_SP *MRIStoParameterizationBarycentric(MRIS *mris, MRI_SP *mrisp,
+                                          const float *overlay, float scale,
+                                          int frameno) {
   float a, b, c, phi, theta, x, y, z, uf, vf, d, total_d, **distances, *fp;
   int vno, u, v, unfilled, **filled, nfilled;
   VERTEX *vertex;
-  MHT  *mht ;
+  MHT *mht;
 
-  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) fprintf(stderr, "computing parameterization...");
+  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
+    fprintf(stderr, "computing parameterization...");
 
   if (!mrisp)
     mrisp = MRISPalloc(scale, 1);
@@ -859,7 +881,8 @@ MRI_SP* MRIStoParameterizationBarycentric(MRIS *mris, MRI_SP *mrisp, const float
     filled[u] = (int *)calloc(V_DIM(mrisp), sizeof(int));
     distances[u] = (float *)calloc(V_DIM(mrisp), sizeof(float));
 
-    for (v = 0; v <= V_MAX_INDEX(mrisp); v++) filled[u][v] = UNFILLED_ELT;
+    for (v = 0; v <= V_MAX_INDEX(mrisp); v++)
+      filled[u][v] = UNFILLED_ELT;
   }
 
   fp = IMAGEFseq_pix(mrisp->Ip, DEBUG_U, DEBUG_V, frameno);
@@ -869,14 +892,19 @@ MRI_SP* MRIStoParameterizationBarycentric(MRIS *mris, MRI_SP *mrisp, const float
     x = vertex->x;
     y = vertex->y;
     z = vertex->z;
-    if (vno == Gdiag_no) DiagBreak();
+    if (vno == Gdiag_no)
+      DiagBreak();
     theta = atan2(y / b, x / a);
-    if (theta < 0.0f) theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
+    if (theta < 0.0f)
+      theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
     d = c * c - z * z;
-    if (d < 0.0) d = 0;
+    if (d < 0.0)
+      d = 0;
     phi = atan2(sqrt(d), z);
-    if (phi < RADIANS(1)) DiagBreak();
-    if (vno == DEBUG_VNO) DiagBreak();
+    if (phi < RADIANS(1))
+      DiagBreak();
+    if (vno == DEBUG_VNO)
+      DiagBreak();
     vertex->phi = phi;
     vertex->theta = theta;
     uf = PHI_DIM(mrisp) * phi / PHI_MAX;
@@ -885,13 +913,14 @@ MRI_SP* MRIStoParameterizationBarycentric(MRIS *mris, MRI_SP *mrisp, const float
     v = nint(vf);
     if (u < 0) /* enforce spherical topology  */
       u = -u;
-    if (u >= U_DIM(mrisp)) u = U_DIM(mrisp) - (u - U_DIM(mrisp) + 1);
+    if (u >= U_DIM(mrisp))
+      u = U_DIM(mrisp) - (u - U_DIM(mrisp) + 1);
     if (v < 0) /* enforce spherical topology  */
       v += V_DIM(mrisp);
-    if (v >= V_DIM(mrisp)) v -= V_DIM(mrisp);
+    if (v >= V_DIM(mrisp))
+      v -= V_DIM(mrisp);
 
-    if ((u == DEBUG_U) && (v == DEBUG_V)) 
-    {
+    if ((u == DEBUG_U) && (v == DEBUG_V)) {
       printf("v %d --> [%d, %d] (%2.1f, %2.1f)\n", vno, u, v, theta, phi);
       DiagBreak();
     }
@@ -900,7 +929,9 @@ MRI_SP* MRIStoParameterizationBarycentric(MRIS *mris, MRI_SP *mrisp, const float
     distances[u][v] += 1; /* keep track of total # of nodes */
   }
 
-  if (DEBUG_U >= 0) fprintf(stderr, "\ndistance[%d][%d] = %2.3f\n\n", DEBUG_U, DEBUG_V, distances[DEBUG_U][DEBUG_V]);
+  if (DEBUG_U >= 0)
+    fprintf(stderr, "\ndistance[%d][%d] = %2.3f\n\n", DEBUG_U, DEBUG_V,
+            distances[DEBUG_U][DEBUG_V]);
 
   /* now add in curvatures proportional to their distance from the point */
   for (vno = 0; vno < mris->nvertices; vno++) {
@@ -909,9 +940,11 @@ MRI_SP* MRIStoParameterizationBarycentric(MRIS *mris, MRI_SP *mrisp, const float
     y = vertex->y;
     z = vertex->z;
     theta = atan2(y / b, x / a);
-    if (theta < 0.0f) theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
+    if (theta < 0.0f)
+      theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
     d = c * c - z * z;
-    if (d < 0.0) d = 0.0;
+    if (d < 0.0)
+      d = 0.0;
     phi = atan2(sqrt(d), z);
     uf = PHI_DIM(mrisp) * phi / PHI_MAX;
     vf = THETA_DIM(mrisp) * theta / THETA_MAX;
@@ -919,82 +952,83 @@ MRI_SP* MRIStoParameterizationBarycentric(MRIS *mris, MRI_SP *mrisp, const float
     v = nint(vf);
     if (u < 0) /* enforce spherical topology  */
       u = -u;
-    if (u >= U_DIM(mrisp)) u = U_DIM(mrisp) - (u - U_DIM(mrisp) + 1);
+    if (u >= U_DIM(mrisp))
+      u = U_DIM(mrisp) - (u - U_DIM(mrisp) + 1);
     if (v < 0) /* enforce spherical topology  */
       v += V_DIM(mrisp);
-    if (v >= V_DIM(mrisp)) v -= V_DIM(mrisp);
+    if (v >= V_DIM(mrisp))
+      v -= V_DIM(mrisp);
 
-    if (u == 0 && v == 56) DiagBreak();
+    if (u == 0 && v == 56)
+      DiagBreak();
 
     /* 0,0 */
     total_d = distances[u][v];
-    if ((total_d > 10000.0) || (overlay[vno] > 1000.0)) DiagBreak();
-    if (total_d > 0.0) 
+    if ((total_d > 10000.0) || (overlay[vno] > 1000.0))
+      DiagBreak();
+    if (total_d > 0.0)
       *IMAGEFseq_pix(mrisp->Ip, u, v, frameno) += overlay[vno] / total_d;
     if (devFinite(*IMAGEFseq_pix(mrisp->Ip, u, v, frameno)) == 0)
-      DiagBreak() ;
+      DiagBreak();
     if ((u == DEBUG_U) && (v == DEBUG_V))
       fprintf(stderr,
               "v = %6.6d (%2.1f, %2.1f, %2.1f), curv = %2.3f, "
               "proportion = %2.3f\n",
-              vno,
-              x,
-              y,
-              z,
-              overlay[vno],
-              d);
+              vno, x, y, z, overlay[vno], d);
   }
 
   if (DEBUG_U >= 0)
-    fprintf(stderr, "curv[%d][%d] = %2.3f\n\n", DEBUG_U, DEBUG_V, *IMAGEFseq_pix(mrisp->Ip, DEBUG_U, DEBUG_V, frameno));
+    fprintf(stderr, "curv[%d][%d] = %2.3f\n\n", DEBUG_U, DEBUG_V,
+            *IMAGEFseq_pix(mrisp->Ip, DEBUG_U, DEBUG_V, frameno));
 
-  mht = MHTcreateFaceTable_Resolution(mris, CANONICAL_VERTICES, mris->avg_vertex_dist/2);  // to lookup closest face
+  mht = MHTcreateFaceTable_Resolution(mris, CANONICAL_VERTICES,
+                                      mris->avg_vertex_dist /
+                                          2); // to lookup closest face
   // do backwards sampling to fill in missing pixels
   nfilled = 0;
   {
     IMAGE *Ip;
     double fdist, x, y, z, theta, phi;
-    FACE  *face ;
-    int   fno ;
+    FACE *face;
+    int fno;
 
     Ip = mrisp->Ip;
     unfilled = 0;
 
-    for (u = 0; u <= U_MAX_INDEX(mrisp); u++) 
-    {
-      for (v = 0; v <= V_MAX_INDEX(mrisp); v++) 
-      {
-        if ((u == DEBUG_U) && (v == DEBUG_V)) 
-    DiagBreak();
-  if (devFinite(*IMAGEFseq_pix(mrisp->Ip, u, v, frameno)) == 0)
-    DiagBreak() ;
-        if (filled[u][v] == UNFILLED_ELT) 
-  {
-    phi = u * PHI_MAX / PHI_DIM(mrisp) ;
-    theta = v * THETA_MAX / THETA_DIM(mrisp) ;
-    x = a * sin(phi) * cos(theta) ;
-    y = a * sin(phi) * sin(theta) ;
-    z = a*cos(phi) ;
+    for (u = 0; u <= U_MAX_INDEX(mrisp); u++) {
+      for (v = 0; v <= V_MAX_INDEX(mrisp); v++) {
+        if ((u == DEBUG_U) && (v == DEBUG_V))
+          DiagBreak();
+        if (devFinite(*IMAGEFseq_pix(mrisp->Ip, u, v, frameno)) == 0)
+          DiagBreak();
+        if (filled[u][v] == UNFILLED_ELT) {
+          phi = u * PHI_MAX / PHI_DIM(mrisp);
+          theta = v * THETA_MAX / THETA_DIM(mrisp);
+          x = a * sin(phi) * cos(theta);
+          y = a * sin(phi) * sin(theta);
+          z = a * cos(phi);
 
-    MHTfindClosestFaceGeneric(mht, mris, x, y, z, 1000, -1, -1, &face, &fno, &fdist);
-    if (face)
-    {
-      float val ;
-      float v0 = overlay[face->v[0]];
-      float v1 = overlay[face->v[1]];
-      float v2 = overlay[face->v[2]];
-      
-      val = MRISsampleFace(mris, fno, CANONICAL_VERTICES, x, y, z, v0, v1, v2) ;
-      filled[u][v] = 1 ;
-      *IMAGEFseq_pix(Ip, u, v, frameno) = val ;
-      nfilled++ ;
-    }
-  }
+          MHTfindClosestFaceGeneric(mht, mris, x, y, z, 1000, -1, -1, &face,
+                                    &fno, &fdist);
+          if (face) {
+            float val;
+            float v0 = overlay[face->v[0]];
+            float v1 = overlay[face->v[1]];
+            float v2 = overlay[face->v[2]];
+
+            val = MRISsampleFace(mris, fno, CANONICAL_VERTICES, x, y, z, v0, v1,
+                                 v2);
+            filled[u][v] = 1;
+            *IMAGEFseq_pix(Ip, u, v, frameno) = val;
+            nfilled++;
+          }
+        }
       }
     }
   }
-  MHTfree(&mht) ;
-  if ((Gdiag & DIAG_SHOW) && DIAG_VERBOSE_ON) fprintf(stderr, "backsampling filled %d elements \n", nfilled);
+  MHTfree(&mht);
+  if ((Gdiag & DIAG_SHOW) && DIAG_VERBOSE_ON)
+    fprintf(stderr, "backsampling filled %d elements \n", nfilled);
 
   for (u = 0; u <= U_MAX_INDEX(mrisp); u++) {
     free(filled[u]);
@@ -1003,23 +1037,24 @@ MRI_SP* MRIStoParameterizationBarycentric(MRIS *mris, MRI_SP *mrisp, const float
   free(filled);
   free(distances);
 
-  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) fprintf(stderr, "done.\n");
+  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
+    fprintf(stderr, "done.\n");
 
-  if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) ImageWrite(mrisp->Ip, "sphere.hipl");
+  if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
+    ImageWrite(mrisp->Ip, "sphere.hipl");
 
   return (mrisp);
 }
 
-
-MRIS  *
-MRISfromParameterizationBarycentric(MRI_SP *mrisp, MRIS *mris,int fno)
+MRIS *MRISfromParameterizationBarycentric(MRI_SP *mrisp, MRIS *mris, int fno)
 
 {
   float a, b, c, phi, theta, x, y, z, uf, vf, du, dv, curv, d;
   int vno, u0, v0, u1, v1;
   VERTEX *vertex;
 
-  if (!mris) mris = MRISclone(mrisp->mris);
+  if (!mris)
+    mris = MRISclone(mrisp->mris);
 
   a = b = c = MRISaverageRadius(mris);
 
@@ -1029,13 +1064,18 @@ MRISfromParameterizationBarycentric(MRI_SP *mrisp, MRIS *mris,int fno)
     y = vertex->y;
     z = vertex->z;
     theta = atan2(vertex->y / b, vertex->x / a);
-    if (theta < 0.0f) theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
+    if (theta < 0.0f)
+      theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
     d = c * c - z * z;
-    if (d < 0.0) d = 0.0;
+    if (d < 0.0)
+      d = 0.0;
     phi = atan2(sqrt(d), z);
-    if (phi < RADIANS(1)) DiagBreak();
-    if (phi > M_PI) DiagBreak();
-    if (vno == 60935) DiagBreak();
+    if (phi < RADIANS(1))
+      DiagBreak();
+    if (phi > M_PI)
+      DiagBreak();
+    if (vno == 60935)
+      DiagBreak();
 
     uf = PHI_DIM(mrisp) * phi / PHI_MAX;
     vf = THETA_DIM(mrisp) * theta / THETA_MAX;
@@ -1049,16 +1089,24 @@ MRISfromParameterizationBarycentric(MRI_SP *mrisp, MRIS *mris,int fno)
     /* enforce spherical topology  */
     if (u0 < 0) /* enforce spherical topology  */
       u0 = -u0;
-    if (u0 >= U_DIM(mrisp)) u0 = U_DIM(mrisp) - (u0 - U_DIM(mrisp) + 1);
+    if (u0 >= U_DIM(mrisp))
+      u0 = U_DIM(mrisp) - (u0 - U_DIM(mrisp) + 1);
     if (u1 < 0) /* enforce spherical topology  */
       u1 = -u1;
-    if (u1 >= U_DIM(mrisp)) u1 = U_DIM(mrisp) - (u1 - U_DIM(mrisp) + 1);
-    if (v0 < 0) v0 += V_DIM(mrisp);
-    if (v0 >= V_DIM(mrisp)) v0 -= V_DIM(mrisp);
-    if (v1 < 0) v1 += V_DIM(mrisp);
-    if (v1 >= V_DIM(mrisp)) v1 -= V_DIM(mrisp);
+    if (u1 >= U_DIM(mrisp))
+      u1 = U_DIM(mrisp) - (u1 - U_DIM(mrisp) + 1);
+    if (v0 < 0)
+      v0 += V_DIM(mrisp);
+    if (v0 >= V_DIM(mrisp))
+      v0 -= V_DIM(mrisp);
+    if (v1 < 0)
+      v1 += V_DIM(mrisp);
+    if (v1 >= V_DIM(mrisp))
+      v1 -= V_DIM(mrisp);
 
-    if (((u0 == DEBUG_U) || (u1 == DEBUG_U)) && ((v0 == DEBUG_V) || (v1 == DEBUG_V))) DiagBreak();
+    if (((u0 == DEBUG_U) || (u1 == DEBUG_U)) &&
+        ((v0 == DEBUG_V) || (v1 == DEBUG_V)))
+      DiagBreak();
     /* do bilinear interpolation */
     curv = du * dv * *IMAGEFseq_pix(mrisp->Ip, u1, v1, fno) +
            (1.0f - du) * dv * *IMAGEFseq_pix(mrisp->Ip, u0, v1, fno) +
@@ -1071,45 +1119,50 @@ MRISfromParameterizationBarycentric(MRI_SP *mrisp, MRIS *mris,int fno)
   return (mris);
 }
 
-int
-MRIScoordsFromParameterizationBarycentric(MRIS *mris, MRI_SP *mrisp, int which_vertices)
-{
-  float    *curvs ;
-  int      vno ;
+int MRIScoordsFromParameterizationBarycentric(MRIS *mris, MRI_SP *mrisp,
+                                              int which_vertices) {
+  float *curvs;
+  int vno;
 
   if (which_vertices != WHITE_VERTICES)
-    ErrorExit(ERROR_UNSUPPORTED, "MRIScoordsToParameterizationBarycentric: unsupported which_vertices %d", which_vertices) ;
+    ErrorExit(ERROR_UNSUPPORTED,
+              "MRIScoordsToParameterizationBarycentric: unsupported "
+              "which_vertices %d",
+              which_vertices);
 
   curvs = (float *)calloc(mris->nvertices, sizeof(float));
-  if (curvs == NULL)
-    ErrorExit(ERROR_NOMEMORY, "MRIScoordsToParameterizationBarycentric: could not allocate %d-len curvature vector", mris->nvertices) ;
+  if (curvs == nullptr)
+    ErrorExit(ERROR_NOMEMORY,
+              "MRIScoordsToParameterizationBarycentric: could not allocate "
+              "%d-len curvature vector",
+              mris->nvertices);
 
-  MRISextractCurvatureVector(mris, curvs) ;
-  MRISfromParameterizationBarycentric(mrisp, mris, 0) ;
-  for (vno = 0 ; vno < mris->nvertices ; vno++)
-    mris->vertices[vno].whitex = mris->vertices[vno].curv ;
-  MRISfromParameterization(mrisp, mris, 1) ;
-  for (vno = 0 ; vno < mris->nvertices ; vno++)
-    mris->vertices[vno].whitey = mris->vertices[vno].curv ;
-  MRISfromParameterization(mrisp, mris, 2) ;
-  for (vno = 0 ; vno < mris->nvertices ; vno++)
-    mris->vertices[vno].whitez = mris->vertices[vno].curv ;
-  MRISrestoreVertexPositions(mris, WHITE_VERTICES) ;
-  MRISimportCurvatureVector(mris, curvs) ;
-  free(curvs) ;
-  return(NO_ERROR) ;
+  MRISextractCurvatureVector(mris, curvs);
+  MRISfromParameterizationBarycentric(mrisp, mris, 0);
+  for (vno = 0; vno < mris->nvertices; vno++)
+    mris->vertices[vno].whitex = mris->vertices[vno].curv;
+  MRISfromParameterization(mrisp, mris, 1);
+  for (vno = 0; vno < mris->nvertices; vno++)
+    mris->vertices[vno].whitey = mris->vertices[vno].curv;
+  MRISfromParameterization(mrisp, mris, 2);
+  for (vno = 0; vno < mris->nvertices; vno++)
+    mris->vertices[vno].whitez = mris->vertices[vno].curv;
+  MRISrestoreVertexPositions(mris, WHITE_VERTICES);
+  MRISimportCurvatureVector(mris, curvs);
+  free(curvs);
+  return (NO_ERROR);
 }
-
 
 static double UF = 254.8, VF = 409.5;
 
-MRI_SP *MRIScoordsToParameterization(MRIS *mris, MRI_SP *mrisp, float scale, int which_vertices)
-{
+MRI_SP *MRIScoordsToParameterization(MRIS *mris, MRI_SP *mrisp, float scale,
+                                     int which_vertices) {
   float a, b, c, phi, theta, x, y, z, uf, vf, d, total_d, **distances;
   int vno, u, v, unfilled, **filled, npasses, nfilled;
   VERTEX *vertex;
 
-  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) fprintf(stderr, "computing parameterization...");
+  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
+    fprintf(stderr, "computing parameterization...");
 
   if (!mrisp)
     mrisp = MRISPalloc(scale, 3);
@@ -1127,7 +1180,8 @@ MRI_SP *MRIScoordsToParameterization(MRIS *mris, MRI_SP *mrisp, float scale, int
     filled[u] = (int *)calloc(V_DIM(mrisp), sizeof(int));
     distances[u] = (float *)calloc(V_DIM(mrisp), sizeof(float));
 
-    for (v = 0; v <= V_MAX_INDEX(mrisp); v++) filled[u][v] = UNFILLED_ELT;
+    for (v = 0; v <= V_MAX_INDEX(mrisp); v++)
+      filled[u][v] = UNFILLED_ELT;
   }
 
   /* first calculate total distances to a point in parameter space */
@@ -1136,124 +1190,136 @@ MRI_SP *MRIScoordsToParameterization(MRIS *mris, MRI_SP *mrisp, float scale, int
     x = vertex->x;
     y = vertex->y;
     z = vertex->z;
-    if (vno == Gdiag_no) DiagBreak();
+    if (vno == Gdiag_no)
+      DiagBreak();
     theta = atan2(vertex->y / b, vertex->x / a);
-    if (theta < 0.0f) theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
+    if (theta < 0.0f)
+      theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
     d = c * c - z * z;
-    if (d < 0.0) d = 0;
+    if (d < 0.0)
+      d = 0;
     phi = atan2(sqrt(d), z);
-    if (phi < RADIANS(1)) DiagBreak();
-    if (phi > M_PI) DiagBreak();
-    if (vno == DEBUG_VNO) DiagBreak();
+    if (phi < RADIANS(1))
+      DiagBreak();
+    if (phi > M_PI)
+      DiagBreak();
+    if (vno == DEBUG_VNO)
+      DiagBreak();
     vertex->phi = phi;
     vertex->theta = theta;
     uf = PHI_DIM(mrisp) * phi / PHI_MAX;
     vf = THETA_DIM(mrisp) * theta / THETA_MAX;
-    if (fabs(uf - UF) < 1 && fabs(vf - VF) < 1) DiagBreak();
+    if (fabs(uf - UF) < 1 && fabs(vf - VF) < 1)
+      DiagBreak();
     u = nint(uf);
     v = nint(vf);
     if (u < 0) /* enforce spherical topology  */
       u = -u;
-    if (u >= U_DIM(mrisp)) u = U_DIM(mrisp) - (u - U_DIM(mrisp) + 1);
+    if (u >= U_DIM(mrisp))
+      u = U_DIM(mrisp) - (u - U_DIM(mrisp) + 1);
     if (v < 0) /* enforce spherical topology  */
       v += V_DIM(mrisp);
-    if (v >= V_DIM(mrisp)) v -= V_DIM(mrisp);
+    if (v >= V_DIM(mrisp))
+      v -= V_DIM(mrisp);
 
     if (vno == Gdiag_no) {
       DEBUG_U = u;
       DEBUG_V = v;
       DiagBreak();
     }
-    if ((u == DEBUG_U) && (v == DEBUG_V)) 
-    {
+    if ((u == DEBUG_U) && (v == DEBUG_V)) {
       printf("v %d --> [%d, %d] (%2.1f, %2.1f)\n", vno, u, v, theta, phi);
       DiagBreak();
     }
 
     filled[u][v] = vno;
     distances[u][v] += 1; /* keep track of total # of nodes */
-    if ((((u == DEBUG_U) && (v == DEBUG_V)) || (Gdiag_no == vno)) && DIAG_VERBOSE_ON)
+    if ((((u == DEBUG_U) && (v == DEBUG_V)) || (Gdiag_no == vno)) &&
+        DIAG_VERBOSE_ON)
       fprintf(stderr,
               "v = %d (%2.1f, %2.1f, %2.1f), d = %2.3f, "
               "x = (%2.3f,%2.3f,%2.3f)\n",
-              vno,
-              x,
-              y,
-              z,
-              d,
-              vertex->origx,
-              vertex->origy,
-              vertex->origz);
+              vno, x, y, z, d, vertex->origx, vertex->origy, vertex->origz);
   }
 
-  if (DEBUG_U >= 0) fprintf(stderr, "\ndistance[%d][%d] = %2.3f\n\n", DEBUG_U, DEBUG_V, distances[DEBUG_U][DEBUG_V]);
+  if (DEBUG_U >= 0)
+    fprintf(stderr, "\ndistance[%d][%d] = %2.3f\n\n", DEBUG_U, DEBUG_V,
+            distances[DEBUG_U][DEBUG_V]);
 
   /* now add in coords proportional to their distance from the point */
   for (vno = 0; vno < mris->nvertices; vno++) {
     vertex = &mris->vertices[vno];
-    if (vno == Gdiag_no) DiagBreak();
+    if (vno == Gdiag_no)
+      DiagBreak();
     x = vertex->x;
     y = vertex->y;
     z = vertex->z;
     theta = atan2(y / b, x / a);
-    if (theta < 0.0f) theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
+    if (theta < 0.0f)
+      theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
     d = c * c - z * z;
-    if (d < 0.0) d = 0.0;
+    if (d < 0.0)
+      d = 0.0;
     phi = atan2(sqrt(d), z);
-    if (phi > M_PI) DiagBreak();
+    if (phi > M_PI)
+      DiagBreak();
     uf = PHI_DIM(mrisp) * phi / PHI_MAX;
     vf = THETA_DIM(mrisp) * theta / THETA_MAX;
     u = nint(uf);
     v = nint(vf);
     if (u < 0) /* enforce spherical topology  */
       u = -u;
-    if (u >= U_DIM(mrisp)) u = U_DIM(mrisp) - (u - U_DIM(mrisp) + 1);
+    if (u >= U_DIM(mrisp))
+      u = U_DIM(mrisp) - (u - U_DIM(mrisp) + 1);
     if (v < 0) /* enforce spherical topology  */
       v += V_DIM(mrisp);
-    if (v >= V_DIM(mrisp)) v -= V_DIM(mrisp);
+    if (v >= V_DIM(mrisp))
+      v -= V_DIM(mrisp);
 
-    if (u == 0 && v == 56) DiagBreak();
+    if (u == 0 && v == 56)
+      DiagBreak();
 
     /* 0,0 */
     total_d = distances[u][v];
-    if ((total_d > 10000.0) || (vertex->curv > 1000.0)) DiagBreak();
+    if ((total_d > 10000.0) || (vertex->curv > 1000.0))
+      DiagBreak();
     switch (which_vertices) {
-      case ORIGINAL_VERTICES:
-        x = vertex->origx;
-        y = vertex->origy;
-        z = vertex->origz;
-        break;
-      case CURRENT_VERTICES:
-        x = vertex->x;
-        y = vertex->y;
-        z = vertex->z;
-        break;
-      case PIAL_VERTICES:
-        x = vertex->pialx;
-        y = vertex->pialy;
-        z = vertex->pialz;
-        break;
-      case WHITE_VERTICES:
-        x = vertex->whitex;
-        y = vertex->whitey;
-        z = vertex->whitez;
-        break;
+    case ORIGINAL_VERTICES:
+      x = vertex->origx;
+      y = vertex->origy;
+      z = vertex->origz;
+      break;
+    case CURRENT_VERTICES:
+      x = vertex->x;
+      y = vertex->y;
+      z = vertex->z;
+      break;
+    case PIAL_VERTICES:
+      x = vertex->pialx;
+      y = vertex->pialy;
+      z = vertex->pialz;
+      break;
+    case WHITE_VERTICES:
+      x = vertex->whitex;
+      y = vertex->whitey;
+      z = vertex->whitez;
+      break;
     default:
-      ErrorExit(ERROR_UNSUPPORTED, "MRIScoordsToParameterization: unsupported vertex set %d", which_vertices) ;
+      ErrorExit(ERROR_UNSUPPORTED,
+                "MRIScoordsToParameterization: unsupported vertex set %d",
+                which_vertices);
     }
     if (total_d > 0.0) {
       *IMAGEFseq_pix(mrisp->Ip, u, v, 0) += x / total_d;
       *IMAGEFseq_pix(mrisp->Ip, u, v, 1) += y / total_d;
       *IMAGEFseq_pix(mrisp->Ip, u, v, 2) += z / total_d;
     }
-    if ((u == DEBUG_U) && (v == DEBUG_V)) fprintf(stderr, "v = %6.6d, x = (%2.3f,%2.3f,%2.3f)\n", vno, x, y, z);
+    if ((u == DEBUG_U) && (v == DEBUG_V))
+      fprintf(stderr, "v = %6.6d, x = (%2.3f,%2.3f,%2.3f)\n", vno, x, y, z);
   }
 
   if ((DEBUG_U >= 0 || (vno == Gdiag_no)))
-    fprintf(stderr,
-            "x[%d][%d] = (%2.3f,%2.3f,%2.3f)\n\n",
-            DEBUG_U,
-            DEBUG_V,
+    fprintf(stderr, "x[%d][%d] = (%2.3f,%2.3f,%2.3f)\n\n", DEBUG_U, DEBUG_V,
             *IMAGEFseq_pix(mrisp->Ip, DEBUG_U, DEBUG_V, 0),
             *IMAGEFseq_pix(mrisp->Ip, DEBUG_U, DEBUG_V, 1),
             *IMAGEFseq_pix(mrisp->Ip, DEBUG_U, DEBUG_V, 2));
@@ -1272,7 +1338,8 @@ MRI_SP *MRIScoordsToParameterization(MRIS *mris, MRI_SP *mrisp, float scale, int
     ;
     for (u = 0; u <= U_MAX_INDEX(mrisp); u++) {
       for (v = 0; v <= V_MAX_INDEX(mrisp); v++) {
-        if ((u == DEBUG_U) && (v == DEBUG_V)) DiagBreak();
+        if ((u == DEBUG_U) && (v == DEBUG_V))
+          DiagBreak();
         if (filled[u][v] == UNFILLED_ELT) {
           totalx = totaly = totalz = 0.0f;
           for (n = 0, uk = -1; uk <= 1; uk++) {
@@ -1294,7 +1361,8 @@ MRI_SP *MRIScoordsToParameterization(MRIS *mris, MRI_SP *mrisp, float scale, int
                 x = *IMAGEFseq_pix(Ip, u1, v1, 0);
                 y = *IMAGEFseq_pix(Ip, u1, v1, 1);
                 z = *IMAGEFseq_pix(Ip, u1, v1, 2);
-                if (u == 255 && v == 410) DiagBreak();
+                if (u == 255 && v == 410)
+                  DiagBreak();
                 totalx += x;
                 totaly += y;
                 totalz += z;
@@ -1303,7 +1371,8 @@ MRI_SP *MRIScoordsToParameterization(MRIS *mris, MRI_SP *mrisp, float scale, int
             }
           }
           if (n > 0) {
-            if (u == 1 && v == 3) DiagBreak();
+            if (u == 1 && v == 3)
+              DiagBreak();
             totalx /= (float)n;
             totaly /= (float)n;
             totalz /= (float)n;
@@ -1312,11 +1381,9 @@ MRI_SP *MRIScoordsToParameterization(MRIS *mris, MRI_SP *mrisp, float scale, int
             *IMAGEFseq_pix(Itmp, u, v, 2) = totalz;
             filled[u][v] = FILLING_ELT;
             nfilled++;
-          }
-          else
+          } else
             unfilled++;
-        }
-        else {
+        } else {
           *IMAGEFseq_pix(Itmp, u, v, 0) = *IMAGEFseq_pix(Ip, u, v, 0);
           *IMAGEFseq_pix(Itmp, u, v, 1) = *IMAGEFseq_pix(Ip, u, v, 1);
           *IMAGEFseq_pix(Itmp, u, v, 2) = *IMAGEFseq_pix(Ip, u, v, 2);
@@ -1325,17 +1392,18 @@ MRI_SP *MRIScoordsToParameterization(MRIS *mris, MRI_SP *mrisp, float scale, int
     }
     for (u = 0; u <= U_MAX_INDEX(mrisp); u++) {
       for (v = 0; v <= V_MAX_INDEX(mrisp); v++) {
-        if (filled[u][v] == FILLING_ELT) filled[u][v] = FILLED_ELT;
+        if (filled[u][v] == FILLING_ELT)
+          filled[u][v] = FILLED_ELT;
       }
     }
     mrisp->Ip = Itmp;
     ImageFree(&Ip);
     if (npasses++ > 1000)
-      ErrorExit(ERROR_BADFILE,
-                "MRISPtoParameterization: could not fill "
-                "parameterization");
+      ErrorExit(ERROR_BADFILE, "MRISPtoParameterization: could not fill "
+                               "parameterization");
   } while (unfilled > 0);
-  if ((Gdiag & DIAG_SHOW) && DIAG_VERBOSE_ON) fprintf(stderr, "filling %d elements took %d passes\n", nfilled, npasses);
+  if ((Gdiag & DIAG_SHOW) && DIAG_VERBOSE_ON)
+    fprintf(stderr, "filling %d elements took %d passes\n", nfilled, npasses);
 
   for (u = 0; u <= U_MAX_INDEX(mrisp); u++) {
     free(filled[u]);
@@ -1344,9 +1412,11 @@ MRI_SP *MRIScoordsToParameterization(MRIS *mris, MRI_SP *mrisp, float scale, int
   free(filled);
   free(distances);
 
-  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) fprintf(stderr, "done.\n");
+  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
+    fprintf(stderr, "done.\n");
 
-  if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) ImageWrite(mrisp->Ip, "sphere.hipl");
+  if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
+    ImageWrite(mrisp->Ip, "sphere.hipl");
 
   return (mrisp);
 }
@@ -1357,13 +1427,13 @@ MRI_SP *MRIScoordsToParameterization(MRIS *mris, MRI_SP *mrisp, float scale, int
 
         Description
 ------------------------------------------------------*/
-MRIS *MRISfromParameterization(MRI_SP *mrisp, MRIS *mris, int fno)
-{
+MRIS *MRISfromParameterization(MRI_SP *mrisp, MRIS *mris, int fno) {
   float a, b, c, phi, theta, x, y, z, uf, vf, du, dv, curv, d;
   int vno, u0, v0, u1, v1;
   VERTEX *vertex;
 
-  if (!mris) mris = MRISclone(mrisp->mris);
+  if (!mris)
+    mris = MRISclone(mrisp->mris);
 
 #if 0
   if (FZERO(mris->radius))
@@ -1380,13 +1450,18 @@ MRIS *MRISfromParameterization(MRI_SP *mrisp, MRIS *mris, int fno)
     y = vertex->y;
     z = vertex->z;
     theta = atan2(vertex->y / b, vertex->x / a);
-    if (theta < 0.0f) theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
+    if (theta < 0.0f)
+      theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
     d = c * c - z * z;
-    if (d < 0.0) d = 0.0;
+    if (d < 0.0)
+      d = 0.0;
     phi = atan2(sqrt(d), z);
-    if (phi < RADIANS(1)) DiagBreak();
-    if (phi > M_PI) DiagBreak();
-    if (vno == 60935) DiagBreak();
+    if (phi < RADIANS(1))
+      DiagBreak();
+    if (phi > M_PI)
+      DiagBreak();
+    if (vno == 60935)
+      DiagBreak();
 
     uf = PHI_DIM(mrisp) * phi / PHI_MAX;
     vf = THETA_DIM(mrisp) * theta / THETA_MAX;
@@ -1409,16 +1484,24 @@ MRIS *MRISfromParameterization(MRI_SP *mrisp, MRIS *mris, int fno)
     /* enforce spherical topology  */
     if (u0 < 0) /* enforce spherical topology  */
       u0 = -u0;
-    if (u0 >= U_DIM(mrisp)) u0 = U_DIM(mrisp) - (u0 - U_DIM(mrisp) + 1);
+    if (u0 >= U_DIM(mrisp))
+      u0 = U_DIM(mrisp) - (u0 - U_DIM(mrisp) + 1);
     if (u1 < 0) /* enforce spherical topology  */
       u1 = -u1;
-    if (u1 >= U_DIM(mrisp)) u1 = U_DIM(mrisp) - (u1 - U_DIM(mrisp) + 1);
-    if (v0 < 0) v0 += V_DIM(mrisp);
-    if (v0 >= V_DIM(mrisp)) v0 -= V_DIM(mrisp);
-    if (v1 < 0) v1 += V_DIM(mrisp);
-    if (v1 >= V_DIM(mrisp)) v1 -= V_DIM(mrisp);
+    if (u1 >= U_DIM(mrisp))
+      u1 = U_DIM(mrisp) - (u1 - U_DIM(mrisp) + 1);
+    if (v0 < 0)
+      v0 += V_DIM(mrisp);
+    if (v0 >= V_DIM(mrisp))
+      v0 -= V_DIM(mrisp);
+    if (v1 < 0)
+      v1 += V_DIM(mrisp);
+    if (v1 >= V_DIM(mrisp))
+      v1 -= V_DIM(mrisp);
 
-    if (((u0 == DEBUG_U) || (u1 == DEBUG_U)) && ((v0 == DEBUG_V) || (v1 == DEBUG_V))) DiagBreak();
+    if (((u0 == DEBUG_U) || (u1 == DEBUG_U)) &&
+        ((v0 == DEBUG_V) || (v1 == DEBUG_V)))
+      DiagBreak();
     /* do bilinear interpolation */
     curv = du * dv * *IMAGEFseq_pix(mrisp->Ip, u1, v1, fno) +
            (1.0f - du) * dv * *IMAGEFseq_pix(mrisp->Ip, u0, v1, fno) +
@@ -1437,34 +1520,41 @@ MRIS *MRISfromParameterization(MRI_SP *mrisp, MRIS *mris, int fno)
 
         Description
 ------------------------------------------------------*/
-MRIS *MRIScoordsFromParameterization(MRI_SP *mrisp, MRIS *mrisInit, int which_vertices)
-{
-  float rad, phi, theta, uf, vf, du, dv, origx, origy, origz, d, val1, val2, val3, val4;
+MRIS *MRIScoordsFromParameterization(MRI_SP *mrisp, MRIS *mrisInit,
+                                     int which_vertices) {
+  float rad, phi, theta, uf, vf, du, dv, origx, origy, origz, d, val1, val2,
+      val3, val4;
   int vno, u0, v0, u1, v1;
 
-  MRIS * const mris = (!mrisInit) ? MRISclone(mrisp->mris) : mrisInit;
+  MRIS *const mris = (!mrisInit) ? MRISclone(mrisp->mris) : mrisInit;
 
   if (which_vertices == ORIGINAL_VERTICES)
     cheapAssert(mris->origxyz_status == mrisInit->origxyz_status);
-  
+
   for (vno = 0; vno < mris->nvertices; vno++) {
-    VERTEX * const vertex = &mris->vertices[vno];
-    if (vno == Gdiag_no) DiagBreak();
+    VERTEX *const vertex = &mris->vertices[vno];
+    if (vno == Gdiag_no)
+      DiagBreak();
     float x = vertex->x;
     float y = vertex->y;
     float z = vertex->z;
-    // DNG 7/19/18: changed to use a vertex specific radius rather than the mean radius
-    rad = sqrt(x*x + y*y + z*z);
+    // DNG 7/19/18: changed to use a vertex specific radius rather than the mean
+    // radius
+    rad = sqrt(x * x + y * y + z * z);
     theta = atan2(vertex->y / rad, vertex->x / rad);
-    if (theta < 0.0f) theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
+    if (theta < 0.0f)
+      theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
     d = rad * rad - z * z;
-    if (d < 0.0) d = 0.0;
+    if (d < 0.0)
+      d = 0.0;
     phi = atan2(sqrt(d), z);
-    if (phi < RADIANS(1)) DiagBreak();
+    if (phi < RADIANS(1))
+      DiagBreak();
     if (phi > M_PI) {
       DiagBreak();
     }
-    if (vno == 60935) DiagBreak();
+    if (vno == 60935)
+      DiagBreak();
 
     uf = PHI_DIM(mrisp) * phi / PHI_MAX;
     vf = THETA_DIM(mrisp) * theta / THETA_MAX;
@@ -1487,20 +1577,28 @@ MRIS *MRIScoordsFromParameterization(MRI_SP *mrisp, MRIS *mrisInit, int which_ve
     /* enforce spherical topology  */
     if (u0 < 0) /* enforce spherical topology  */
       u0 = -u0;
-    if (u0 >= U_DIM(mrisp)) u0 = U_DIM(mrisp) - (u0 - U_DIM(mrisp) + 1);
+    if (u0 >= U_DIM(mrisp))
+      u0 = U_DIM(mrisp) - (u0 - U_DIM(mrisp) + 1);
     if (u1 < 0) /* enforce spherical topology  */
       u1 = -u1;
-    if (u1 >= U_DIM(mrisp)) u1 = U_DIM(mrisp) - (u1 - U_DIM(mrisp) + 1);
-    if (v0 < 0) v0 += V_DIM(mrisp);
-    if (v0 >= V_DIM(mrisp)) v0 -= V_DIM(mrisp);
-    if (v1 < 0) v1 += V_DIM(mrisp);
-    if (v1 >= V_DIM(mrisp)) v1 -= V_DIM(mrisp);
+    if (u1 >= U_DIM(mrisp))
+      u1 = U_DIM(mrisp) - (u1 - U_DIM(mrisp) + 1);
+    if (v0 < 0)
+      v0 += V_DIM(mrisp);
+    if (v0 >= V_DIM(mrisp))
+      v0 -= V_DIM(mrisp);
+    if (v1 < 0)
+      v1 += V_DIM(mrisp);
+    if (v1 >= V_DIM(mrisp))
+      v1 -= V_DIM(mrisp);
 
-    if (((u0 == DEBUG_U) || (u1 == DEBUG_U)) && ((v0 == DEBUG_V) || (v1 == DEBUG_V))) {
+    if (((u0 == DEBUG_U) || (u1 == DEBUG_U)) &&
+        ((v0 == DEBUG_V) || (v1 == DEBUG_V))) {
       printf(" u,v (%d, %d) --> v %d\n", u0, v0, vno);
       DiagBreak();
     }
-    if ((u0 == Gx && v0 == Gy) || (u0 == Gy && v0 == Gx)) DiagBreak();
+    if ((u0 == Gx && v0 == Gy) || (u0 == Gy && v0 == Gx))
+      DiagBreak();
 
     /* do bilinear interpolation */
 
@@ -1509,45 +1607,50 @@ MRIS *MRIScoordsFromParameterization(MRI_SP *mrisp, MRIS *mrisInit, int which_ve
     val3 = *IMAGEFseq_pix(mrisp->Ip, u0, v0, 0);
     val4 = *IMAGEFseq_pix(mrisp->Ip, u1, v0, 0);
 
-    origx = du * dv * *IMAGEFseq_pix(mrisp->Ip, u1, v1, 0) + (1.0f - du) * dv * *IMAGEFseq_pix(mrisp->Ip, u0, v1, 0) +
+    origx = du * dv * *IMAGEFseq_pix(mrisp->Ip, u1, v1, 0) +
+            (1.0f - du) * dv * *IMAGEFseq_pix(mrisp->Ip, u0, v1, 0) +
             (1.0f - du) * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u0, v0, 0) +
             du * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u1, v0, 0);
     val1 = *IMAGEFseq_pix(mrisp->Ip, u1, v1, 1);
     val2 = *IMAGEFseq_pix(mrisp->Ip, u0, v1, 1);
     val3 = *IMAGEFseq_pix(mrisp->Ip, u0, v0, 1);
     val4 = *IMAGEFseq_pix(mrisp->Ip, u1, v0, 1);
-    origy = du * dv * *IMAGEFseq_pix(mrisp->Ip, u1, v1, 1) + (1.0f - du) * dv * *IMAGEFseq_pix(mrisp->Ip, u0, v1, 1) +
+    origy = du * dv * *IMAGEFseq_pix(mrisp->Ip, u1, v1, 1) +
+            (1.0f - du) * dv * *IMAGEFseq_pix(mrisp->Ip, u0, v1, 1) +
             (1.0f - du) * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u0, v0, 1) +
             du * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u1, v0, 1);
     val1 = *IMAGEFseq_pix(mrisp->Ip, u1, v1, 2);
     val2 = *IMAGEFseq_pix(mrisp->Ip, u0, v1, 2);
     val3 = *IMAGEFseq_pix(mrisp->Ip, u0, v0, 2);
     val4 = *IMAGEFseq_pix(mrisp->Ip, u1, v0, 2);
-    origz = du * dv * *IMAGEFseq_pix(mrisp->Ip, u1, v1, 2) + (1.0f - du) * dv * *IMAGEFseq_pix(mrisp->Ip, u0, v1, 2) +
+    origz = du * dv * *IMAGEFseq_pix(mrisp->Ip, u1, v1, 2) +
+            (1.0f - du) * dv * *IMAGEFseq_pix(mrisp->Ip, u0, v1, 2) +
             (1.0f - du) * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u0, v0, 2) +
             du * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u1, v0, 2);
 
     switch (which_vertices) {
-      case WHITE_VERTICES:
-	vertex->whitex = origx ;
-	vertex->whitey = origy ;
-	vertex->whitez = origz ;
-        break;
-      case CURRENT_VERTICES:
-	vertex->x = origx ;
-	vertex->y = origy ;
-	vertex->z = origz ;
-        break;
-      case ORIGINAL_VERTICES:
-        MRISsetOriginalXYZ(mris, vno, origx, origy, origz);
-        break;
-      case TMP_VERTICES:
-        vertex->tx = origx;
-        vertex->ty = origy;
-        vertex->tz = origz;
-        break;
-      default:
-        ErrorExit(ERROR_UNSUPPORTED, "MRIScoordsFromParameterization: which = %d not supported", which_vertices);
+    case WHITE_VERTICES:
+      vertex->whitex = origx;
+      vertex->whitey = origy;
+      vertex->whitez = origz;
+      break;
+    case CURRENT_VERTICES:
+      vertex->x = origx;
+      vertex->y = origy;
+      vertex->z = origz;
+      break;
+    case ORIGINAL_VERTICES:
+      MRISsetOriginalXYZ(mris, vno, origx, origy, origz);
+      break;
+    case TMP_VERTICES:
+      vertex->tx = origx;
+      vertex->ty = origy;
+      vertex->tz = origz;
+      break;
+    default:
+      ErrorExit(ERROR_UNSUPPORTED,
+                "MRIScoordsFromParameterization: which = %d not supported",
+                which_vertices);
     }
   }
 
@@ -1560,13 +1663,13 @@ MRIS *MRIScoordsFromParameterization(MRI_SP *mrisp, MRIS *mrisInit, int which_ve
 
         Description
 ------------------------------------------------------*/
-MRIS *MRISnormalizeFromParameterization(MRI_SP *mrisp, MRIS *mris, int fno)
-{
+MRIS *MRISnormalizeFromParameterization(MRI_SP *mrisp, MRIS *mris, int fno) {
   float a, b, c, phi, theta, x, y, z, uf, vf, du, dv, curv, d, var;
   int vno, u0, v0, u1, v1;
   VERTEX *vertex;
 
-  if (!mris) mris = MRISclone(mrisp->mris);
+  if (!mris)
+    mris = MRISclone(mrisp->mris);
 
 #if 0
   if (FZERO(mris->radius))
@@ -1583,12 +1686,16 @@ MRIS *MRISnormalizeFromParameterization(MRI_SP *mrisp, MRIS *mris, int fno)
     y = vertex->y;
     z = vertex->z;
     theta = atan2(vertex->y / b, vertex->x / a);
-    if (theta < 0.0f) theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
+    if (theta < 0.0f)
+      theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
     d = c * c - z * z;
-    if (d < 0.0) d = 0.0;
+    if (d < 0.0)
+      d = 0.0;
     phi = atan2(sqrt(d), z);
-    if (phi < RADIANS(1)) DiagBreak();
-    if (vno == 60935) DiagBreak();
+    if (phi < RADIANS(1))
+      DiagBreak();
+    if (vno == 60935)
+      DiagBreak();
 
     uf = PHI_DIM(mrisp) * phi / PHI_MAX;
     vf = THETA_DIM(mrisp) * theta / THETA_MAX;
@@ -1602,28 +1709,38 @@ MRIS *MRISnormalizeFromParameterization(MRI_SP *mrisp, MRIS *mris, int fno)
     /* enforce spherical topology  */
     if (u0 < 0) /* enforce spherical topology  */
       u0 = -u0;
-    if (u0 >= U_DIM(mrisp)) u0 = U_DIM(mrisp) - (u0 - U_DIM(mrisp) + 1);
+    if (u0 >= U_DIM(mrisp))
+      u0 = U_DIM(mrisp) - (u0 - U_DIM(mrisp) + 1);
     if (u1 < 0) /* enforce spherical topology  */
       u1 = -u1;
-    if (u1 >= U_DIM(mrisp)) u1 = U_DIM(mrisp) - (u1 - U_DIM(mrisp) + 1);
-    if (v0 < 0) v0 += V_DIM(mrisp);
-    if (v0 >= V_DIM(mrisp)) v0 -= V_DIM(mrisp);
-    if (v1 < 0) v1 += V_DIM(mrisp);
-    if (v1 >= V_DIM(mrisp)) v1 -= V_DIM(mrisp);
+    if (u1 >= U_DIM(mrisp))
+      u1 = U_DIM(mrisp) - (u1 - U_DIM(mrisp) + 1);
+    if (v0 < 0)
+      v0 += V_DIM(mrisp);
+    if (v0 >= V_DIM(mrisp))
+      v0 -= V_DIM(mrisp);
+    if (v1 < 0)
+      v1 += V_DIM(mrisp);
+    if (v1 >= V_DIM(mrisp))
+      v1 -= V_DIM(mrisp);
 
-    if (((u0 == DEBUG_U) || (u1 == DEBUG_U)) && ((v0 == DEBUG_V) || (v1 == DEBUG_V))) DiagBreak();
+    if (((u0 == DEBUG_U) || (u1 == DEBUG_U)) &&
+        ((v0 == DEBUG_V) || (v1 == DEBUG_V)))
+      DiagBreak();
     /* do bilinear interpolation */
     curv = du * dv * *IMAGEFseq_pix(mrisp->Ip, u1, v1, fno) +
            (1.0f - du) * dv * *IMAGEFseq_pix(mrisp->Ip, u0, v1, fno) +
            (1.0f - du) * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u0, v0, fno) +
            du * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u1, v0, fno);
 
-    var = du * dv * *IMAGEFseq_pix(mrisp->Ip, u1, v1, fno + 1) +
-          (1.0f - du) * dv * *IMAGEFseq_pix(mrisp->Ip, u0, v1, fno + 1) +
-          (1.0f - du) * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u0, v0, fno + 1) +
-          du * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u1, v0, fno + 1);
+    var =
+        du * dv * *IMAGEFseq_pix(mrisp->Ip, u1, v1, fno + 1) +
+        (1.0f - du) * dv * *IMAGEFseq_pix(mrisp->Ip, u0, v1, fno + 1) +
+        (1.0f - du) * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u0, v0, fno + 1) +
+        du * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u1, v0, fno + 1);
 
-    if (FZERO(var)) var = FSMALL;
+    if (FZERO(var))
+      var = FSMALL;
     vertex->curv = curv / (sqrt(var));
   }
 
@@ -1636,13 +1753,14 @@ MRIS *MRISnormalizeFromParameterization(MRI_SP *mrisp, MRIS *mris, int fno)
 
         Description
 ------------------------------------------------------*/
-MRI_SP *MRISgradientToParameterization(MRIS *mris, MRI_SP *mrisp, float scale)
-{
-  float a, b, c, phi, theta, x, y, z, uf, vf, d, total_d, **distances, sigma, two_sigma_sq;
+MRI_SP *MRISgradientToParameterization(MRIS *mris, MRI_SP *mrisp, float scale) {
+  float a, b, c, phi, theta, x, y, z, uf, vf, d, total_d, **distances, sigma,
+      two_sigma_sq;
   int vno, u, v, unfilled, **filled;
   VERTEX *vertex;
 
-  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) fprintf(stderr, "computing parameterization...");
+  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
+    fprintf(stderr, "computing parameterization...");
 
   if (!mrisp)
     mrisp = MRISPalloc(scale, 3);
@@ -1664,7 +1782,8 @@ MRI_SP *MRISgradientToParameterization(MRIS *mris, MRI_SP *mrisp, float scale)
     filled[u] = (int *)calloc(V_DIM(mrisp), sizeof(int));
     distances[u] = (float *)calloc(V_DIM(mrisp), sizeof(float));
 
-    for (v = 0; v <= V_MAX_INDEX(mrisp); v++) filled[u][v] = UNFILLED_ELT;
+    for (v = 0; v <= V_MAX_INDEX(mrisp); v++)
+      filled[u][v] = UNFILLED_ELT;
   }
 
   sigma = scale / 4.0f;
@@ -1677,12 +1796,16 @@ MRI_SP *MRISgradientToParameterization(MRIS *mris, MRI_SP *mrisp, float scale)
     y = vertex->y;
     z = vertex->z;
     theta = atan2(y / b, x / a);
-    if (theta < 0.0f) theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
+    if (theta < 0.0f)
+      theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
     d = c * c - z * z;
-    if (d < 0.0) d = 0;
+    if (d < 0.0)
+      d = 0;
     phi = atan2(sqrt(d), z);
-    if (phi < RADIANS(1)) DiagBreak();
-    if (vno == DEBUG_VNO) DiagBreak();
+    if (phi < RADIANS(1))
+      DiagBreak();
+    if (vno == DEBUG_VNO)
+      DiagBreak();
     vertex->phi = phi;
     vertex->theta = theta;
     uf = PHI_DIM(mrisp) * phi / PHI_MAX;
@@ -1691,19 +1814,25 @@ MRI_SP *MRISgradientToParameterization(MRIS *mris, MRI_SP *mrisp, float scale)
     v = nint(vf);
     if (u < 0) /* enforce spherical topology  */
       u = -u;
-    if (u >= U_DIM(mrisp)) u = U_DIM(mrisp) - (u - U_DIM(mrisp) + 1);
+    if (u >= U_DIM(mrisp))
+      u = U_DIM(mrisp) - (u - U_DIM(mrisp) + 1);
     if (v < 0) /* enforce spherical topology  */
       v += V_DIM(mrisp);
-    if (v >= V_DIM(mrisp)) v -= V_DIM(mrisp);
+    if (v >= V_DIM(mrisp))
+      v -= V_DIM(mrisp);
 
-    if (u == 0 && v == 56) DiagBreak();
-    if ((u == DEBUG_U) && (v == DEBUG_V)) DiagBreak();
+    if (u == 0 && v == 56)
+      DiagBreak();
+    if ((u == DEBUG_U) && (v == DEBUG_V))
+      DiagBreak();
 
     filled[u][v] = vno;
     distances[u][v] += 1; /* keep track of total # of nodes */
   }
 
-  if (DEBUG_U >= 0) fprintf(stderr, "\ndistance[%d][%d] = %2.3f\n\n", DEBUG_U, DEBUG_V, distances[DEBUG_U][DEBUG_V]);
+  if (DEBUG_U >= 0)
+    fprintf(stderr, "\ndistance[%d][%d] = %2.3f\n\n", DEBUG_U, DEBUG_V,
+            distances[DEBUG_U][DEBUG_V]);
 
   /* now add in gradients proportional to their distance from the point */
   for (vno = 0; vno < mris->nvertices; vno++) {
@@ -1712,9 +1841,11 @@ MRI_SP *MRISgradientToParameterization(MRIS *mris, MRI_SP *mrisp, float scale)
     y = vertex->y;
     z = vertex->z;
     theta = atan2(y / b, x / a);
-    if (theta < 0.0f) theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
+    if (theta < 0.0f)
+      theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
     d = c * c - z * z;
-    if (d < 0.0) d = 0.0;
+    if (d < 0.0)
+      d = 0.0;
     phi = atan2(sqrt(d), z);
     uf = PHI_DIM(mrisp) * phi / PHI_MAX;
     vf = THETA_DIM(mrisp) * theta / THETA_MAX;
@@ -1722,12 +1853,15 @@ MRI_SP *MRISgradientToParameterization(MRIS *mris, MRI_SP *mrisp, float scale)
     v = nint(vf);
     if (u < 0) /* enforce spherical topology  */
       u = -u;
-    if (u >= U_DIM(mrisp)) u = U_DIM(mrisp) - (u - U_DIM(mrisp) + 1);
+    if (u >= U_DIM(mrisp))
+      u = U_DIM(mrisp) - (u - U_DIM(mrisp) + 1);
     if (v < 0) /* enforce spherical topology  */
       v += V_DIM(mrisp);
-    if (v >= V_DIM(mrisp)) v -= V_DIM(mrisp);
+    if (v >= V_DIM(mrisp))
+      v -= V_DIM(mrisp);
 
-    if (u == 0 && v == 56) DiagBreak();
+    if (u == 0 && v == 56)
+      DiagBreak();
 
     /* 0,0 */
     total_d = distances[u][v];
@@ -1740,12 +1874,7 @@ MRI_SP *MRISgradientToParameterization(MRIS *mris, MRI_SP *mrisp, float scale)
       fprintf(stderr,
               "v = %6.6d (%2.1f, %2.1f, %2.1f), curv = %2.3f, "
               "proportion = %2.3f\n",
-              vno,
-              x,
-              y,
-              z,
-              vertex->curv,
-              d);
+              vno, x, y, z, vertex->curv, d);
   }
 
   /* fill in values which were unmapped by sampling back onto surface */
@@ -1753,11 +1882,13 @@ MRI_SP *MRISgradientToParameterization(MRIS *mris, MRI_SP *mrisp, float scale)
     double min_d, radius = mris->radius, xd, yd, zd;
     int min_v = -1;
 
-    if (FZERO(radius)) radius = MRISaverageRadius(mris);
+    if (FZERO(radius))
+      radius = MRISaverageRadius(mris);
 
     for (v = 0; v <= V_MAX_INDEX(mrisp); v++) {
       if (filled[u][v] == UNFILLED_ELT) {
-        if (u == 0 && v == 56) DiagBreak();
+        if (u == 0 && v == 56)
+          DiagBreak();
         unfilled++;
         phi = (double)u * PHI_MAX / PHI_DIM(mrisp);
         theta = (double)v * THETA_MAX / THETA_DIM(mrisp);
@@ -1766,7 +1897,8 @@ MRI_SP *MRISgradientToParameterization(MRIS *mris, MRI_SP *mrisp, float scale)
         z = radius * cos(phi);
         for (min_d = 1000.0f, vno = 0; vno < mris->nvertices; vno++) {
           vertex = &mris->vertices[vno];
-          if (vertex->ripflag) continue;
+          if (vertex->ripflag)
+            continue;
           xd = vertex->x - x;
           yd = vertex->y - y;
           zd = vertex->z - z;
@@ -1783,7 +1915,8 @@ MRI_SP *MRISgradientToParameterization(MRIS *mris, MRI_SP *mrisp, float scale)
       }
     }
   }
-  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) fprintf(stderr, "%d holes in parameterization filled\n", unfilled);
+  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
+    fprintf(stderr, "%d holes in parameterization filled\n", unfilled);
 
   for (u = 0; u <= U_MAX_INDEX(mrisp); u++) {
     free(filled[u]);
@@ -1792,9 +1925,11 @@ MRI_SP *MRISgradientToParameterization(MRIS *mris, MRI_SP *mrisp, float scale)
   free(filled);
   free(distances);
 
-  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) fprintf(stderr, "done.\n");
+  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
+    fprintf(stderr, "done.\n");
 
-  if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) ImageWrite(mrisp->Ip, "sphere.hipl");
+  if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
+    ImageWrite(mrisp->Ip, "sphere.hipl");
 
   return (mrisp);
 }
@@ -1805,13 +1940,13 @@ MRI_SP *MRISgradientToParameterization(MRIS *mris, MRI_SP *mrisp, float scale)
 
         Description
 ------------------------------------------------------*/
-MRIS *MRISgradientFromParameterization(MRI_SP *mrisp, MRIS *mris)
-{
+MRIS *MRISgradientFromParameterization(MRI_SP *mrisp, MRIS *mris) {
   float a, b, c, phi, theta, x, y, z, uf, vf, du, dv, d;
   int vno, u0, v0, u1, v1;
   VERTEX *vertex;
 
-  if (!mris) mris = MRISclone(mrisp->mris);
+  if (!mris)
+    mris = MRISclone(mrisp->mris);
 
 #if 0
   if (FZERO(mris->radius))
@@ -1828,12 +1963,16 @@ MRIS *MRISgradientFromParameterization(MRI_SP *mrisp, MRIS *mris)
     y = vertex->y;
     z = vertex->z;
     theta = atan2(vertex->y / b, vertex->x / a);
-    if (theta < 0.0f) theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
+    if (theta < 0.0f)
+      theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
     d = c * c - z * z;
-    if (d < 0.0) d = 0.0;
+    if (d < 0.0)
+      d = 0.0;
     phi = atan2(sqrt(d), z);
-    if (phi < RADIANS(1)) DiagBreak();
-    if (vno == 60935) DiagBreak();
+    if (phi < RADIANS(1))
+      DiagBreak();
+    if (vno == 60935)
+      DiagBreak();
 
     uf = PHI_DIM(mrisp) * phi / PHI_MAX;
     vf = THETA_DIM(mrisp) * theta / THETA_MAX;
@@ -1856,32 +1995,43 @@ MRIS *MRISgradientFromParameterization(MRI_SP *mrisp, MRIS *mris)
     /* enforce spherical topology  */
     if (u0 < 0) /* enforce spherical topology  */
       u0 = -u0;
-    if (u0 >= U_DIM(mrisp)) u0 = U_DIM(mrisp) - (u0 - U_DIM(mrisp) + 1);
+    if (u0 >= U_DIM(mrisp))
+      u0 = U_DIM(mrisp) - (u0 - U_DIM(mrisp) + 1);
     if (u1 < 0) /* enforce spherical topology  */
       u1 = -u1;
-    if (u1 >= U_DIM(mrisp)) u1 = U_DIM(mrisp) - (u1 - U_DIM(mrisp) + 1);
-    if (v0 < 0) v0 += V_DIM(mrisp);
-    if (v0 >= V_DIM(mrisp)) v0 -= V_DIM(mrisp);
-    if (v1 < 0) v1 += V_DIM(mrisp);
-    if (v1 >= V_DIM(mrisp)) v1 -= V_DIM(mrisp);
+    if (u1 >= U_DIM(mrisp))
+      u1 = U_DIM(mrisp) - (u1 - U_DIM(mrisp) + 1);
+    if (v0 < 0)
+      v0 += V_DIM(mrisp);
+    if (v0 >= V_DIM(mrisp))
+      v0 -= V_DIM(mrisp);
+    if (v1 < 0)
+      v1 += V_DIM(mrisp);
+    if (v1 >= V_DIM(mrisp))
+      v1 -= V_DIM(mrisp);
 
-    if (((u0 == DEBUG_U) || (u1 == DEBUG_U)) && ((v0 == DEBUG_V) || (v1 == DEBUG_V))) DiagBreak();
+    if (((u0 == DEBUG_U) || (u1 == DEBUG_U)) &&
+        ((v0 == DEBUG_V) || (v1 == DEBUG_V)))
+      DiagBreak();
 
     /* do bilinear interpolation */
-    vertex->dx = du * dv * *IMAGEFseq_pix(mrisp->Ip, u1, v1, 0) +
-                 (1.0f - du) * dv * *IMAGEFseq_pix(mrisp->Ip, u0, v1, 0) +
-                 (1.0f - du) * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u0, v0, 0) +
-                 du * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u1, v0, 0);
+    vertex->dx =
+        du * dv * *IMAGEFseq_pix(mrisp->Ip, u1, v1, 0) +
+        (1.0f - du) * dv * *IMAGEFseq_pix(mrisp->Ip, u0, v1, 0) +
+        (1.0f - du) * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u0, v0, 0) +
+        du * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u1, v0, 0);
 
-    vertex->dy = du * dv * *IMAGEFseq_pix(mrisp->Ip, u1, v1, 1) +
-                 (1.0f - du) * dv * *IMAGEFseq_pix(mrisp->Ip, u0, v1, 1) +
-                 (1.0f - du) * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u0, v0, 1) +
-                 du * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u1, v0, 1);
+    vertex->dy =
+        du * dv * *IMAGEFseq_pix(mrisp->Ip, u1, v1, 1) +
+        (1.0f - du) * dv * *IMAGEFseq_pix(mrisp->Ip, u0, v1, 1) +
+        (1.0f - du) * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u0, v0, 1) +
+        du * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u1, v0, 1);
 
-    vertex->dz = du * dv * *IMAGEFseq_pix(mrisp->Ip, u1, v1, 2) +
-                 (1.0f - du) * dv * *IMAGEFseq_pix(mrisp->Ip, u0, v1, 2) +
-                 (1.0f - du) * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u0, v0, 2) +
-                 du * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u1, v0, 2);
+    vertex->dz =
+        du * dv * *IMAGEFseq_pix(mrisp->Ip, u1, v1, 2) +
+        (1.0f - du) * dv * *IMAGEFseq_pix(mrisp->Ip, u0, v1, 2) +
+        (1.0f - du) * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u0, v0, 2) +
+        du * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u1, v0, 2);
   }
 
   return (mris);
@@ -1893,24 +2043,33 @@ MRIS *MRISgradientFromParameterization(MRI_SP *mrisp, MRIS *mris)
 
         Description
 ------------------------------------------------------*/
-void MRISPfunctionVal_radiusR(                                                      // returns the value that would be stored in resultsForEachFno[0] for fnoLo
-                              MRI_SURFACE_PARAMETERIZATION *mrisp,  
-                              MRISPfunctionValResultForAlpha* resultsForEachAlpha,  // must be numAlphas elements
-                              float r, float x, float y, float z, 
-                              int fnoLo, bool getNextAlso,                          // always fills in resultsForEachAlpha.curr for fno, optionally fills in .next for fno+1
-                              float const * alphas, float numAlphas,                // rotate x,y,z by these alphas (radians) and get the values
-                              bool trace)                                           // note: this rotation is around the z axis, hence z does not change
+void MRISPfunctionVal_radiusR( // returns the value that would be stored in
+                               // resultsForEachFno[0] for fnoLo
+    MRI_SURFACE_PARAMETERIZATION *mrisp,
+    MRISPfunctionValResultForAlpha
+        *resultsForEachAlpha, // must be numAlphas elements
+    float r, float x, float y, float z, int fnoLo,
+    bool getNextAlso, // always fills in resultsForEachAlpha.curr for fno,
+                      // optionally fills in .next for fno+1
+    float const *alphas,
+    float
+        numAlphas, // rotate x,y,z by these alphas (radians) and get the values
+    bool trace)    // note: this rotation is around the z axis, hence z does not
+                   // change
 {
   float phi;
-  { float d = r * r - z * z;
-    if (d < 0.0) d = 0.0;
+  {
+    float d = r * r - z * z;
+    if (d < 0.0)
+      d = 0.0;
     phi = atan2f(sqrt(d), z);
-    if (phi < RADIANS(1)) DiagBreak();
+    if (phi < RADIANS(1))
+      DiagBreak();
   }
-  
+
   float uf = PHI_DIM(mrisp) * phi / PHI_MAX;
-  int   u0 = floor(uf);
-  int   u1 = ceil(uf);
+  int u0 = floor(uf);
+  int u1 = ceil(uf);
 
   float du = uf - (float)u0;
 
@@ -1921,23 +2080,19 @@ void MRISPfunctionVal_radiusR(                                                  
   {
     u0_voff = V_DIM(mrisp) / 2;
     u0 = -u0;
-  }
-  else if (u0 >= U_DIM(mrisp)) {
+  } else if (u0 >= U_DIM(mrisp)) {
     u0_voff = V_DIM(mrisp) / 2;
     u0 = U_DIM(mrisp) - (u0 - U_DIM(mrisp) + 1);
-  }
-  else
+  } else
     u0_voff = 0;
   if (u1 < 0) /* enforce spherical topology  */
   {
     u1_voff = V_DIM(mrisp) / 2;
     u1 = -u1;
-  }
-  else if (u1 >= U_DIM(mrisp)) {
+  } else if (u1 >= U_DIM(mrisp)) {
     u1_voff = V_DIM(mrisp) / 2;
     u1 = U_DIM(mrisp) - (u1 - U_DIM(mrisp) + 1);
-  }
-  else
+  } else
     u1_voff = 0;
 
   // This is the rotation around the z axis
@@ -1947,59 +2102,80 @@ void MRISPfunctionVal_radiusR(                                                  
   int alphaIndex;
   for (alphaIndex = 0; alphaIndex < numAlphas; alphaIndex++) {
     float theta = baseTheta - alphas[alphaIndex];
-    while (theta <  0.0f  ) theta += 2*M_PI; /* make it 0 --> 2*PI */
-    while (theta >= 2*M_PI) theta -= 2*M_PI; /* make it 0 --> 2*PI */
+    while (theta < 0.0f)
+      theta += 2 * M_PI; /* make it 0 --> 2*PI */
+    while (theta >= 2 * M_PI)
+      theta -= 2 * M_PI; /* make it 0 --> 2*PI */
 
     float vf = THETA_DIM(mrisp) * theta / THETA_MAX;
-    int   v0 = floor(vf);
-    int   v1 = ceil(vf);
+    int v0 = floor(vf);
+    int v1 = ceil(vf);
 
     float dv = vf - (float)v0;
 
-    if (v0 < 0            ) v0 += V_DIM(mrisp);
-    if (v0 >= V_DIM(mrisp)) v0 -= V_DIM(mrisp);
-    if (v1 < 0            ) v1 += V_DIM(mrisp);
-    if (v1 >= V_DIM(mrisp)) v1 -= V_DIM(mrisp);
+    if (v0 < 0)
+      v0 += V_DIM(mrisp);
+    if (v0 >= V_DIM(mrisp))
+      v0 -= V_DIM(mrisp);
+    if (v1 < 0)
+      v1 += V_DIM(mrisp);
+    if (v1 >= V_DIM(mrisp))
+      v1 -= V_DIM(mrisp);
 
-    int u0_v1 = v1 + u0_voff; while (u0_v1 >= V_DIM(mrisp)) u0_v1 -= V_DIM(mrisp);
-    int u0_v0 = v0 + u0_voff; while (u0_v0 >= V_DIM(mrisp)) u0_v0 -= V_DIM(mrisp);
-    int u1_v1 = v1 + u1_voff; while (u1_v1 >= V_DIM(mrisp)) u1_v1 -= V_DIM(mrisp);
-    int u1_v0 = v0 + u1_voff; while (u1_v0 >= V_DIM(mrisp)) u1_v0 -= V_DIM(mrisp);
+    int u0_v1 = v1 + u0_voff;
+    while (u0_v1 >= V_DIM(mrisp))
+      u0_v1 -= V_DIM(mrisp);
+    int u0_v0 = v0 + u0_voff;
+    while (u0_v0 >= V_DIM(mrisp))
+      u0_v0 -= V_DIM(mrisp);
+    int u1_v1 = v1 + u1_voff;
+    while (u1_v1 >= V_DIM(mrisp))
+      u1_v1 -= V_DIM(mrisp);
+    int u1_v0 = v0 + u1_voff;
+    while (u1_v0 >= V_DIM(mrisp))
+      u1_v0 -= V_DIM(mrisp);
 
-    if (0) {
+    if (false) {
       static long statsCount, statsLimit = 1, statsV_DIMSum;
 
       statsV_DIMSum += V_DIM(mrisp);
       statsCount++;
       if (statsCount == statsLimit) {
-        if (statsLimit < 10000000) statsLimit *= 2; else statsLimit += 10000000;
-        fprintf(stdout, "%s:%d statsCount:%g V_DIM avg:%g\n", __FILE__, __LINE__,
-          (float)statsCount, (double)statsV_DIMSum/(double)statsCount);
+        if (statsLimit < 10000000)
+          statsLimit *= 2;
+        else
+          statsLimit += 10000000;
+        fprintf(stdout, "%s:%d statsCount:%g V_DIM avg:%g\n", __FILE__,
+                __LINE__, (float)statsCount,
+                (double)statsV_DIMSum / (double)statsCount);
       }
     }
 
     int i;
-    for (i = 0; i < (getNextAlso?2:1); i++) {
+    for (i = 0; i < (getNextAlso ? 2 : 1); i++) {
       int fno = fnoLo + i;
       /* do bilinear interpolation */
-      double val = 
-                    du  *         dv  * *IMAGEFseq_pix(mrisp->Ip, u1, u1_v1, fno) +
-            (1.0f - du) *         dv  * *IMAGEFseq_pix(mrisp->Ip, u0, u0_v1, fno) +
-            (1.0f - du) * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u0, u0_v0, fno) +
-                    du  * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u1, u1_v0, fno);
+      double val =
+          du * dv * *IMAGEFseq_pix(mrisp->Ip, u1, u1_v1, fno) +
+          (1.0f - du) * dv * *IMAGEFseq_pix(mrisp->Ip, u0, u0_v1, fno) +
+          (1.0f - du) * (1.0f - dv) *
+              *IMAGEFseq_pix(mrisp->Ip, u0, u0_v0, fno) +
+          du * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u1, u1_v0, fno);
       if (trace) {
-        fprintf(stdout, "%s:%d x:%g y:%g z:%g returns %g for fno:%d phi:%g alphaIndex:%d theta:%g\n", 
-            __FILE__, __LINE__, 
-            x,y,z,val,fno,phi,alphaIndex,theta);
+        fprintf(stdout,
+                "%s:%d x:%g y:%g z:%g returns %g for fno:%d phi:%g "
+                "alphaIndex:%d theta:%g\n",
+                __FILE__, __LINE__, x, y, z, val, fno, phi, alphaIndex, theta);
       }
-      *(i ? &resultsForEachAlpha[alphaIndex].next : &resultsForEachAlpha[alphaIndex].curr) = val;
+      *(i ? &resultsForEachAlpha[alphaIndex].next
+          : &resultsForEachAlpha[alphaIndex].curr) = val;
     }
   }
 }
 
-
-double MRISPfunctionValTraceable(MRI_SURFACE_PARAMETERIZATION *mrisp, float desired_radius, float x, float y, float z, int fno, bool trace)
-{
+double MRISPfunctionValTraceable(MRI_SURFACE_PARAMETERIZATION *mrisp,
+                                 float desired_radius, float x, float y,
+                                 float z, int fno, bool trace) {
   double r = sqrt(x * x + y * y + z * z);
 
   if (!FEQUAL(r, desired_radius)) /* project it onto sphere */
@@ -2011,10 +2187,10 @@ double MRISPfunctionValTraceable(MRI_SURFACE_PARAMETERIZATION *mrisp, float desi
     double x2 = x * x;
     double y2 = y * y;
     double z2 = z * z;
-    double f  = x2 / r6 + y2 / r6 + z2 / r6;
-    double g  = 2 * (x2 / r4 + y2 / r4 + z2 / r4);
-    double h  = x2 / r2 + y2 / r2 + z2 / r2 - 1;
-    double d  = (-g + (float)sqrt((double)(g * g - 4 * f * h))) / (2 * f);
+    double f = x2 / r6 + y2 / r6 + z2 / r6;
+    double g = 2 * (x2 / r4 + y2 / r4 + z2 / r4);
+    double h = x2 / r2 + y2 / r2 + z2 / r2 - 1;
+    double d = (-g + (float)sqrt((double)(g * g - 4 * f * h))) / (2 * f);
     double dx = d * x / r2;
     double dy = d * y / r2;
     double dz = d * z / r2;
@@ -2025,12 +2201,15 @@ double MRISPfunctionValTraceable(MRI_SURFACE_PARAMETERIZATION *mrisp, float desi
 
   float zero = 0.0f;
   MRISPfunctionValResultForAlpha result;
-  MRISPfunctionVal_radiusR(mrisp, &result, r, x, y, z, fno, false, &zero, 1, trace);
+  MRISPfunctionVal_radiusR(mrisp, &result, r, x, y, z, fno, false, &zero, 1,
+                           trace);
   return result.curr;
 }
 
-double MRISPfunctionVal(MRI_SURFACE_PARAMETERIZATION *mrisp, float desired_radius, float x, float y, float z, int fno) {
-    return MRISPfunctionValTraceable(mrisp, desired_radius, x, y, z, fno, false);
+double MRISPfunctionVal(MRI_SURFACE_PARAMETERIZATION *mrisp,
+                        float desired_radius, float x, float y, float z,
+                        int fno) {
+  return MRISPfunctionValTraceable(mrisp, desired_radius, x, y, z, fno, false);
 }
 
 /*-----------------------------------------------------
@@ -2040,14 +2219,13 @@ double MRISPfunctionVal(MRI_SURFACE_PARAMETERIZATION *mrisp, float desired_radiu
 
         Description
 ------------------------------------------------------*/
-MRI_SP *MRISPclone(MRI_SP *mrisp_src)
-{
+MRI_SP *MRISPclone(MRI_SP *mrisp_src) {
   MRI_SP *mrisp_dst;
 
   mrisp_dst = (MRI_SP *)calloc(1, sizeof(MRI_SP));
   mrisp_dst->mris = mrisp_src->mris;
-  mrisp_dst->scale = mrisp_src->scale ;
-  mrisp_dst->Ip = ImageCopy(mrisp_src->Ip, NULL);
+  mrisp_dst->scale = mrisp_src->scale;
+  mrisp_dst->Ip = ImageCopy(mrisp_src->Ip, nullptr);
 
   return (mrisp_dst);
 }
@@ -2062,18 +2240,21 @@ MRI_SP *MRISPclone(MRI_SP *mrisp_src)
 #define MAX_LEN 4
 #define MAX_KLEN 50
 
-MRI_SP *MRISPconvolveGaussian(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma, float radius, int fno)
-{
+MRI_SP *MRISPconvolveGaussian(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma,
+                              float radius, int fno) {
   int u, v, cart_klen, klen, khalf, uk, vk, u1, v1, voff, f0, f1;
-  double d, k, total, ktotal, sigma_sq_inv, theta, phi, theta1, phi1, sin_phi, cos_phi, sin_phi1, cos_phi1;
-  float x0, y0, z0, x1, y1, z1, circumference = 0.0f, angle, max_len = 0.0f, min_len = 10000.0f;
+  double d, k, total, ktotal, sigma_sq_inv, theta, phi, theta1, phi1, sin_phi,
+      cos_phi, sin_phi1, cos_phi1;
+  float x0, y0, z0, x1, y1, z1, circumference = 0.0f, angle, max_len = 0.0f,
+                                min_len = 10000.0f;
   IMAGE *Ip_src, *Ip_dst;
   VECTOR *vec1, *vec2;
 
   vec1 = VectorAlloc(3, MATRIX_REAL);
   vec2 = VectorAlloc(3, MATRIX_REAL);
 
-  if (!mrisp_dst) mrisp_dst = MRISPclone(mrisp_src);
+  if (!mrisp_dst)
+    mrisp_dst = MRISPclone(mrisp_src);
   mrisp_dst->sigma = sigma;
 
   /* determine the size of the kernel */
@@ -2082,7 +2263,8 @@ MRI_SP *MRISPconvolveGaussian(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma,
     cart_klen++;
 
   if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
-    fprintf(stderr, "blurring surface, sigma = %2.3f, cartesian klen = %d\n", sigma, cart_klen);
+    fprintf(stderr, "blurring surface, sigma = %2.3f, cartesian klen = %d\n",
+            sigma, cart_klen);
 
   if (FZERO(sigma))
     sigma_sq_inv = BIG;
@@ -2094,15 +2276,15 @@ MRI_SP *MRISPconvolveGaussian(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma,
   if (fno < 0) {
     f0 = 0;
     f1 = Ip_src->num_frame - 1;
-  }
-  else {
+  } else {
     f0 = f1 = fno;
   }
 
   for (fno = f0; fno <= f1; fno++) /* for each frame */
   {
     for (u = 0; u < U_DIM(mrisp_src); u++) {
-      if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) fprintf(stderr, "\r%3.3d of %d     ", u, U_DIM(mrisp_src) - 1);
+      if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
+        fprintf(stderr, "\r%3.3d of %d     ", u, U_DIM(mrisp_src) - 1);
       phi = (double)u * PHI_MAX / PHI_DIM(mrisp_src);
       sin_phi = sin(phi);
       cos_phi = cos(phi);
@@ -2128,7 +2310,8 @@ MRI_SP *MRISPconvolveGaussian(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma,
         VECTOR_LOAD(vec1, x0, y0, z0); /* radius vector */
         if (FZERO(circumference))      /* only calculate once */
           circumference = M_PI * 2.0 * V3_LEN(vec1);
-        if (u == DEBUG_U && v == DEBUG_V) DiagBreak();
+        if (u == DEBUG_U && v == DEBUG_V)
+          DiagBreak();
 
         /* compute the distance between adjacent spherical matrix
            elements at this point on the surface (probably easier
@@ -2136,9 +2319,11 @@ MRI_SP *MRISPconvolveGaussian(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma,
            Cartesian space for now.
            */
         u1 = u + 1;
-        if (u1 >= U_DIM(mrisp_src)) u1 = U_DIM(mrisp_src) - (u1 - U_DIM(mrisp_src) + 2);
+        if (u1 >= U_DIM(mrisp_src))
+          u1 = U_DIM(mrisp_src) - (u1 - U_DIM(mrisp_src) + 2);
         v1 = v + 1;
-        if (v1 >= V_DIM(mrisp_src)) v1 = V_DIM(mrisp_src) - (v1 - V_DIM(mrisp_src) + 2);
+        if (v1 >= V_DIM(mrisp_src))
+          v1 = V_DIM(mrisp_src) - (v1 - V_DIM(mrisp_src) + 2);
 
         phi1 = (double)u1 * PHI_MAX / PHI_DIM(mrisp_src);
         theta1 = (double)v1 * THETA_MAX / THETA_DIM(mrisp_src);
@@ -2148,16 +2333,22 @@ MRI_SP *MRISPconvolveGaussian(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma,
         VECTOR_LOAD(vec2, x1, y1, z1); /* radius vector */
         angle = fabs(Vector3Angle(vec1, vec2));
         d = circumference * angle / (2.0 * M_PI); /* geodesic distance */
-        if (d > max_len) max_len = d;
-        if (d < min_len) min_len = d;
+        if (d > max_len)
+          max_len = d;
+        if (d < min_len)
+          min_len = d;
 
         /* d is now the distance between adjacent cells - compute kernel size*/
         klen = nint(6.0f * sigma / d) + 1;
-        if (klen > MAX_KLEN) klen = MAX_KLEN;
+        if (klen > MAX_KLEN)
+          klen = MAX_KLEN;
 
-        if (ISEVEN(klen)) klen++;
-        if (klen >= U_DIM(mrisp_src)) klen = U_DIM(mrisp_src) - 1;
-        if (klen >= V_DIM(mrisp_src)) klen = V_DIM(mrisp_src) - 1;
+        if (ISEVEN(klen))
+          klen++;
+        if (klen >= U_DIM(mrisp_src))
+          klen = U_DIM(mrisp_src) - 1;
+        if (klen >= V_DIM(mrisp_src))
+          klen = V_DIM(mrisp_src) - 1;
         khalf = klen / 2;
 
         total = ktotal = 0.0;
@@ -2167,12 +2358,10 @@ MRI_SP *MRISPconvolveGaussian(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma,
           {
             voff = V_DIM(mrisp_src) / 2;
             u1 = -u1;
-          }
-          else if (u1 >= U_DIM(mrisp_src)) {
+          } else if (u1 >= U_DIM(mrisp_src)) {
             u1 = U_DIM(mrisp_src) - (u1 - U_DIM(mrisp_src) + 1);
             voff = V_DIM(mrisp_src) / 2;
-          }
-          else
+          } else
             voff = 0;
 
           phi1 = (double)u1 * PHI_MAX / PHI_DIM(mrisp_src);
@@ -2191,20 +2380,25 @@ MRI_SP *MRISPconvolveGaussian(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma,
             v1 = v + vk + voff;
             while (v1 < 0) /* enforce spherical topology */
               v1 += V_DIM(mrisp_src);
-            while (v1 >= V_DIM(mrisp_src)) v1 -= V_DIM(mrisp_src);
+            while (v1 >= V_DIM(mrisp_src))
+              v1 -= V_DIM(mrisp_src);
             ktotal += k;
             total += k * *IMAGEFseq_pix(Ip_src, u1, v1, fno);
           }
         }
-        if (u == DEBUG_U && v == DEBUG_V) DiagBreak();
+        if (u == DEBUG_U && v == DEBUG_V)
+          DiagBreak();
         total /= ktotal; /* normalize weights to 1 */
         *IMAGEFseq_pix(mrisp_dst->Ip, u, v, fno) = total;
       }
     }
   }
 
-  if (Gdiag & DIAG_SHOW) fprintf(stderr, "min_len = %2.3f mm, max_len = %2.3f mm\n", min_len, max_len);
-  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) fprintf(stderr, "done.\n");
+  if (Gdiag & DIAG_SHOW)
+    fprintf(stderr, "min_len = %2.3f mm, max_len = %2.3f mm\n", min_len,
+            max_len);
+  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
+    fprintf(stderr, "done.\n");
 
   VectorFree(&vec1);
   VectorFree(&vec2);
@@ -2217,29 +2411,35 @@ MRI_SP *MRISPconvolveGaussian(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma,
 
         Description
 ------------------------------------------------------*/
-static MRI_SP *MRISPblur_new(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma, int fno);
-static MRI_SP *MRISPblur_old(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma, int fno);
+static MRI_SP *MRISPblur_new(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma,
+                             int fno);
+static MRI_SP *MRISPblur_old(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma,
+                             int fno);
 
 MRI_SP *MRISPblur(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma, int fno) {
-    static bool once, do_old;
-    if (!once) { once = true;
-        do_old = getenv("FREESUREFER_MRISPblur_old");
-    }
-    return 
-        (do_old ? MRISPblur_old : MRISPblur_new)(mrisp_src, mrisp_dst, sigma, fno);
+  static bool once, do_old;
+  if (!once) {
+    once = true;
+    do_old = getenv("FREESUREFER_MRISPblur_old");
+  }
+  return (do_old ? MRISPblur_old : MRISPblur_new)(mrisp_src, mrisp_dst, sigma,
+                                                  fno);
 }
 
-static MRI_SP *MRISPblur_new(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma, int fno) {
+static MRI_SP *MRISPblur_new(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma,
+                             int fno) {
   int fnoLo_init, fnoHi_init;
   int no_sphere_init;
   int cart_klen_init;
   double sigma_sq_inv_init;
   IMAGE *Ip_src_init;
   {
-    no_sphere_init = getenv("NO_SPHERE") != NULL;
-    if (no_sphere_init) fprintf(stderr, "disabling spherical geometry\n");
+    no_sphere_init = getenv("NO_SPHERE") != nullptr;
+    if (no_sphere_init)
+      fprintf(stderr, "disabling spherical geometry\n");
 
-    if (!mrisp_dst) mrisp_dst = MRISPclone(mrisp_src);
+    if (!mrisp_dst)
+      mrisp_dst = MRISPclone(mrisp_src);
     mrisp_dst->sigma = sigma;
 
     /* determine the size of the kernel */
@@ -2248,52 +2448,51 @@ static MRI_SP *MRISPblur_new(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma, 
       cart_klen_init++;
 
     if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
-      fprintf(stderr, "blurring surface, sigma = %2.3f, cartesian klen = %d\n", sigma, cart_klen_init);
+      fprintf(stderr, "blurring surface, sigma = %2.3f, cartesian klen = %d\n",
+              sigma, cart_klen_init);
 
     if (FZERO(sigma))
       sigma_sq_inv_init = BIG;
     else
       sigma_sq_inv_init = 1.0f / (sigma * sigma);
 
-    Ip_src_init = mrisp_src->Ip ;
+    Ip_src_init = mrisp_src->Ip;
 
     if (fno < 0) {
       fnoLo_init = 0;
-      fnoHi_init =  Ip_src_init->num_frame;
+      fnoHi_init = Ip_src_init->num_frame;
     } else {
       fnoLo_init = fno;
       fnoHi_init = fno + 1;
     }
   }
 
-  int const          fnoLo        = fnoLo_init;
-  int const          fnoHi        = fnoHi_init;
-  int const          cart_klen    = cart_klen_init;
-  int const          no_sphere    = no_sphere_init;
-  double const       sigma_sq_inv = sigma_sq_inv_init;
-  const IMAGE *const Ip_src       = Ip_src_init;
+  int const fnoLo = fnoLo_init;
+  int const fnoHi = fnoHi_init;
+  int const cart_klen = cart_klen_init;
+  int const no_sphere = no_sphere_init;
+  double const sigma_sq_inv = sigma_sq_inv_init;
+  const IMAGE *const Ip_src = Ip_src_init;
 
-  static int  uMax                    = 0;
-  static int  uToKHalfCache_PHI_DIM   = 0;
-  static int  uToKHalfCache_cart_klen = 0;
-  static int* uToKHalfCache           = NULL;
-  
-  static int     kHalfHi              = 0;
-  static double* uukvkToExpResult     = NULL;
-  
-  if (uMax                    != U_DIM  (mrisp_src) 
-  ||  uToKHalfCache_PHI_DIM   != PHI_DIM(mrisp_src)
-  ||  uToKHalfCache_cart_klen != cart_klen
-  ) {
-    uMax                    = U_DIM  (mrisp_src);
-    uToKHalfCache_PHI_DIM   = PHI_DIM(mrisp_src);
+  static int uMax = 0;
+  static int uToKHalfCache_PHI_DIM = 0;
+  static int uToKHalfCache_cart_klen = 0;
+  static int *uToKHalfCache = nullptr;
+
+  static int kHalfHi = 0;
+  static double *uukvkToExpResult = nullptr;
+
+  if (uMax != U_DIM(mrisp_src) || uToKHalfCache_PHI_DIM != PHI_DIM(mrisp_src) ||
+      uToKHalfCache_cart_klen != cart_klen) {
+    uMax = U_DIM(mrisp_src);
+    uToKHalfCache_PHI_DIM = PHI_DIM(mrisp_src);
     uToKHalfCache_cart_klen = cart_klen;
-    
-    uToKHalfCache = (int*)realloc(uToKHalfCache, uMax*sizeof(int));
-    
+
+    uToKHalfCache = (int *)realloc(uToKHalfCache, uMax * sizeof(int));
+
     int u;
     for (u = 0; u < U_DIM(mrisp_src); u++) {
-      double const phi      = (double)u * PHI_MAX / PHI_DIM(mrisp_src);
+      double const phi = (double)u * PHI_MAX / PHI_DIM(mrisp_src);
       double const sin_sq_u = no_sphere ? 1.0 : squared(sin(phi));
 
       int klen;
@@ -2304,61 +2503,67 @@ static MRI_SP *MRISPblur_new(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma, 
       } else if (!FZERO(sin_sq_u)) {
         int k = cart_klen * cart_klen;
         klen = sqrt(k + k / sin_sq_u);
-        if (klen > MAX_LEN * cart_klen) klen = MAX_LEN * cart_klen;
+        if (klen > MAX_LEN * cart_klen)
+          klen = MAX_LEN * cart_klen;
 
       } else {
-        klen = MAX_LEN * cart_klen; /* arbitrary max length */          // happens when u is 0
+        klen = MAX_LEN * cart_klen;
+        /* arbitrary max length */ // happens when u is 0
       }
 
-      if (klen >= U_DIM(mrisp_src)) klen = U_DIM(mrisp_src) - 1;
-      if (klen >= V_DIM(mrisp_src)) klen = V_DIM(mrisp_src) - 1;
+      if (klen >= U_DIM(mrisp_src))
+        klen = U_DIM(mrisp_src) - 1;
+      if (klen >= V_DIM(mrisp_src))
+        klen = V_DIM(mrisp_src) - 1;
 
       uToKHalfCache[u] = klen / 2;
-      
+
       if (u > 0 && uToKHalfCache[u] > uToKHalfCache[0]) {
         fprintf(stdout, "%s:%d uMax[0] not max\n", __FILE__, __LINE__);
         exit(1);
       }
     }
-    
-    kHalfHi          = uToKHalfCache[0] + 1;
-    uukvkToExpResult = (double*)realloc(uukvkToExpResult, uMax*kHalfHi*kHalfHi*sizeof(double));
-    
-    for (u = 0; u < U_DIM(mrisp_src); u++) {
-      double* ukvkToExpResult = uukvkToExpResult + u*kHalfHi*kHalfHi;
 
-      double const phi      = (double)u * PHI_MAX / PHI_DIM(mrisp_src);
+    kHalfHi = uToKHalfCache[0] + 1;
+    uukvkToExpResult = (double *)realloc(
+        uukvkToExpResult, uMax * kHalfHi * kHalfHi * sizeof(double));
+
+    for (u = 0; u < U_DIM(mrisp_src); u++) {
+      double *ukvkToExpResult = uukvkToExpResult + u * kHalfHi * kHalfHi;
+
+      double const phi = (double)u * PHI_MAX / PHI_DIM(mrisp_src);
       double const sin_sq_u = no_sphere ? 1.0 : squared(sin(phi));
-       
-      int uk,vk;
-      for (uk = 0; uk < kHalfHi; uk++) 
-      for (vk = 0; vk < kHalfHi; vk++) {
-        double const udiff = (double)(uk * uk); /* distance squared in u */
-        double const vdiff = (double)(vk * vk); /* distance squared in v */
-        double neg_exp_input = (udiff + sin_sq_u * vdiff) * sigma_sq_inv;
-        double k             = exp(-neg_exp_input);
-        ukvkToExpResult[uk*kHalfHi + vk] = k;
-      }
+
+      int uk, vk;
+      for (uk = 0; uk < kHalfHi; uk++)
+        for (vk = 0; vk < kHalfHi; vk++) {
+          double const udiff = (double)(uk * uk); /* distance squared in u */
+          double const vdiff = (double)(vk * vk); /* distance squared in v */
+          double neg_exp_input = (udiff + sin_sq_u * vdiff) * sigma_sq_inv;
+          double k = exp(-neg_exp_input);
+          ukvkToExpResult[uk * kHalfHi + vk] = k;
+        }
     }
   }
-  
+
   int u;
 
   ROMP_PF_begin
-#if HAVE_OPENMP  
-  #pragma omp parallel for if_ROMP(assume_reproducible) collapse(2)
+#if HAVE_OPENMP
+#pragma omp parallel for if_ROMP(assume_reproducible) collapse(2)
 #endif
-  for (fno = fnoLo; fno < fnoHi; fno++) /* for each frame */
+      for (fno = fnoLo; fno < fnoHi; fno++) /* for each frame */
   {
     for (u = 0; u < U_DIM(mrisp_src); u++) {
-      ROMP_PFLB_begin
-      double const * const ukvkToExpResult = uukvkToExpResult + u*kHalfHi*kHalfHi;
-      
-      if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) fprintf(stderr, "\r%3.3d of %d     ", u, U_DIM(mrisp_src) - 1);
-      
-      double const phi      = (double)u * PHI_MAX / PHI_DIM(mrisp_src);
+      ROMP_PFLB_begin double const *const ukvkToExpResult =
+          uukvkToExpResult + u * kHalfHi * kHalfHi;
+
+      if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
+        fprintf(stderr, "\r%3.3d of %d     ", u, U_DIM(mrisp_src) - 1);
+
+      double const phi = (double)u * PHI_MAX / PHI_DIM(mrisp_src);
       double const sin_sq_u = no_sphere ? 1.0 : squared(sin(phi));
-      
+
       // khalf is independent of fno and of v.
       //
       int khalf_init;
@@ -2371,24 +2576,28 @@ static MRI_SP *MRISPblur_new(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma, 
         } else if (!FZERO(sin_sq_u)) {
           int k = cart_klen * cart_klen;
           klen = sqrt(k + k / sin_sq_u);
-          if (klen > MAX_LEN * cart_klen) klen = MAX_LEN * cart_klen;
-        
+          if (klen > MAX_LEN * cart_klen)
+            klen = MAX_LEN * cart_klen;
+
         } else {
           klen = MAX_LEN * cart_klen; /* arbitrary max length */
         }
 
-        if (klen >= U_DIM(mrisp_src)) klen = U_DIM(mrisp_src) - 1;
-        if (klen >= V_DIM(mrisp_src)) klen = V_DIM(mrisp_src) - 1;
-        
+        if (klen >= U_DIM(mrisp_src))
+          klen = U_DIM(mrisp_src) - 1;
+        if (klen >= V_DIM(mrisp_src))
+          klen = V_DIM(mrisp_src) - 1;
+
         khalf_init = klen / 2;
       }
       int const khalf = khalf_init;
 
       if (khalf != uToKHalfCache[u]) {
-        fprintf(stdout, "%s:%d khalf != uToKHalfCache[u]\n",__FILE__, __LINE__);
+        fprintf(stdout, "%s:%d khalf != uToKHalfCache[u]\n", __FILE__,
+                __LINE__);
         exit(1);
       }
-      
+
       int v;
       for (v = 0; v < V_DIM(mrisp_src); v++) {
         /*      theta = (double)v*THETA_MAX / THETA_DIM(mrisp_src) ;*/
@@ -2398,7 +2607,7 @@ static MRI_SP *MRISPblur_new(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma, 
 
         int uk;
         for (uk = -khalf; uk <= khalf; uk++) {
-          int const absUk = (uk < 0) ? -uk : uk; 
+          int const absUk = (uk < 0) ? -uk : uk;
 #ifdef CHECK_TABLE
           double const udiff = (double)(uk * uk); /* distance squared in u */
 #endif
@@ -2410,47 +2619,49 @@ static MRI_SP *MRISPblur_new(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma, 
           {
             voff = V_DIM(mrisp_src) / 2;
             u1 = -u1;
-          }
-          else if (u1 >= U_DIM(mrisp_src)) {
+          } else if (u1 >= U_DIM(mrisp_src)) {
             u1 = U_DIM(mrisp_src) - (u1 - U_DIM(mrisp_src) + 1);
             voff = V_DIM(mrisp_src) / 2;
           } else {
             voff = 0;
           }
-          
+
           int vk;
           for (vk = -khalf; vk <= khalf; vk++) {
-            int const absVk = (vk < 0) ? -vk : vk; 
-            double kFromTable = ukvkToExpResult[absUk*kHalfHi + absVk];
+            int const absVk = (vk < 0) ? -vk : vk;
+            double kFromTable = ukvkToExpResult[absUk * kHalfHi + absVk];
 
 #ifndef CHECK_TABLE
             double k = kFromTable;
 #else
             double vdiff = (double)(vk * vk);
-            
+
             double neg_exp_input = (udiff + sin_sq_u * vdiff) * sigma_sq_inv;
-                //
-                // udiff is v invariant
-                // 
-                
+            //
+            // udiff is v invariant
+            //
+
             double k = exp(-neg_exp_input);
 
             if (k != kFromTable) {
-              fprintf(stdout, "%s:%d k:%f != kFromTable:%f uk:%d vk:%d\n", __FILE__, __LINE__, k, kFromTable, uk, vk);
+              fprintf(stdout, "%s:%d k:%f != kFromTable:%f uk:%d vk:%d\n",
+                      __FILE__, __LINE__, k, kFromTable, uk, vk);
               exit(1);
             }
 #endif
-            
+
             int v1 = v + vk + voff;
             while (v1 < 0) /* enforce spherical topology */
               v1 += V_DIM(mrisp_src);
-            while (v1 >= V_DIM(mrisp_src)) v1 -= V_DIM(mrisp_src);
-            
+            while (v1 >= V_DIM(mrisp_src))
+              v1 -= V_DIM(mrisp_src);
+
             ktotal += k;
-            total  += k * *IMAGEFseq_pix(Ip_src, u1, v1, fno);
+            total += k * *IMAGEFseq_pix(Ip_src, u1, v1, fno);
           }
         }
-        if (u == DEBUG_U && v == DEBUG_V) DiagBreak();
+        if (u == DEBUG_U && v == DEBUG_V)
+          DiagBreak();
         total /= ktotal; /* normalize weights to 1 */
         *IMAGEFseq_pix(mrisp_dst->Ip, u, v, fno) = total;
       }
@@ -2459,13 +2670,13 @@ static MRI_SP *MRISPblur_new(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma, 
   }
   ROMP_PF_end
 
-  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) fprintf(stderr, "done.\n");
+      if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) fprintf(stderr, "done.\n");
 
   return (mrisp_dst);
 }
 
-static MRI_SP *MRISPblur_old(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma, int fno)
-{
+static MRI_SP *MRISPblur_old(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma,
+                             int fno) {
   int f0, f1;
   int no_sphere_init;
   int cart_klen_init;
@@ -2476,10 +2687,12 @@ static MRI_SP *MRISPblur_old(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma, 
     double sigma_sq_inv;
     IMAGE *Ip_src, *Ip_dst;
 
-    no_sphere = getenv("NO_SPHERE") != NULL;
-    if (no_sphere) fprintf(stderr, "disabling spherical geometry\n");
+    no_sphere = getenv("NO_SPHERE") != nullptr;
+    if (no_sphere)
+      fprintf(stderr, "disabling spherical geometry\n");
 
-    if (!mrisp_dst) mrisp_dst = MRISPclone(mrisp_src);
+    if (!mrisp_dst)
+      mrisp_dst = MRISPclone(mrisp_src);
     mrisp_dst->sigma = sigma;
 
     /* determine the size of the kernel */
@@ -2488,7 +2701,8 @@ static MRI_SP *MRISPblur_old(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma, 
       cart_klen++;
 
     if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
-      fprintf(stderr, "blurring surface, sigma = %2.3f, cartesian klen = %d\n", sigma, cart_klen);
+      fprintf(stderr, "blurring surface, sigma = %2.3f, cartesian klen = %d\n",
+              sigma, cart_klen);
 
     if (FZERO(sigma))
       sigma_sq_inv = BIG;
@@ -2500,8 +2714,7 @@ static MRI_SP *MRISPblur_old(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma, 
     if (fno < 0) {
       f0 = 0;
       f1 = Ip_src->num_frame - 1;
-    }
-    else {
+    } else {
       f0 = f1 = fno;
     }
 
@@ -2518,35 +2731,39 @@ static MRI_SP *MRISPblur_old(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma, 
   int u;
 
   ROMP_PF_begin
-#if HAVE_OPENMP  
-  #pragma omp parallel for if_ROMP(assume_reproducible) collapse(2)
+#if HAVE_OPENMP
+#pragma omp parallel for if_ROMP(assume_reproducible) collapse(2)
 #endif
-  for (fno = f0; fno <= f1; fno++) /* for each frame */
+      for (fno = f0; fno <= f1; fno++) /* for each frame */
   {
     for (u = 0; u < U_DIM(mrisp_src); u++) {
-      ROMP_PFLB_begin
-      int k, klen, khalf;
+      ROMP_PFLB_begin int k, klen, khalf;
       double phi, sin_sq_u;
 
-      if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) fprintf(stderr, "\r%3.3d of %d     ", u, U_DIM(mrisp_src) - 1);
+      if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
+        fprintf(stderr, "\r%3.3d of %d     ", u, U_DIM(mrisp_src) - 1);
       phi = (double)u * PHI_MAX / PHI_DIM(mrisp_src);
       sin_sq_u = sin(phi);
       sin_sq_u *= sin_sq_u;
       if (!FZERO(sin_sq_u)) {
         k = cart_klen * cart_klen;
         klen = sqrt(k + k / sin_sq_u);
-        if (klen > MAX_LEN * cart_klen) klen = MAX_LEN * cart_klen;
-      }
-      else
+        if (klen > MAX_LEN * cart_klen)
+          klen = MAX_LEN * cart_klen;
+      } else
         klen = MAX_LEN * cart_klen; /* arbitrary max length */
-      if (no_sphere) sin_sq_u = 1.0f, klen = cart_klen;
-      if (klen >= U_DIM(mrisp_src)) klen = U_DIM(mrisp_src) - 1;
-      if (klen >= V_DIM(mrisp_src)) klen = V_DIM(mrisp_src) - 1;
+      if (no_sphere)
+        sin_sq_u = 1.0f, klen = cart_klen;
+      if (klen >= U_DIM(mrisp_src))
+        klen = U_DIM(mrisp_src) - 1;
+      if (klen >= V_DIM(mrisp_src))
+        klen = V_DIM(mrisp_src) - 1;
       khalf = klen / 2;
       int v;
       for (v = 0; v < V_DIM(mrisp_src); v++) {
         /*      theta = (double)v*THETA_MAX / THETA_DIM(mrisp_src) ;*/
-        if (u == DEBUG_U && v == DEBUG_V) DiagBreak();
+        if (u == DEBUG_U && v == DEBUG_V)
+          DiagBreak();
 
         double total, ktotal;
         int uk;
@@ -2561,12 +2778,10 @@ static MRI_SP *MRISPblur_old(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma, 
           {
             voff = V_DIM(mrisp_src) / 2;
             u1 = -u1;
-          }
-          else if (u1 >= U_DIM(mrisp_src)) {
+          } else if (u1 >= U_DIM(mrisp_src)) {
             u1 = U_DIM(mrisp_src) - (u1 - U_DIM(mrisp_src) + 1);
             voff = V_DIM(mrisp_src) / 2;
-          }
-          else
+          } else
             voff = 0;
 
 #if 0
@@ -2586,12 +2801,14 @@ static MRI_SP *MRISPblur_old(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma, 
             v1 = v + vk + voff;
             while (v1 < 0) /* enforce spherical topology */
               v1 += V_DIM(mrisp_src);
-            while (v1 >= V_DIM(mrisp_src)) v1 -= V_DIM(mrisp_src);
+            while (v1 >= V_DIM(mrisp_src))
+              v1 -= V_DIM(mrisp_src);
             ktotal += k;
             total += k * *IMAGEFseq_pix(Ip_src, u1, v1, fno);
           }
         }
-        if (u == DEBUG_U && v == DEBUG_V) DiagBreak();
+        if (u == DEBUG_U && v == DEBUG_V)
+          DiagBreak();
         total /= ktotal; /* normalize weights to 1 */
         *IMAGEFseq_pix(mrisp_dst->Ip, u, v, fno) = total;
       }
@@ -2600,7 +2817,7 @@ static MRI_SP *MRISPblur_old(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma, 
   }
   ROMP_PF_end
 
-  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) fprintf(stderr, "done.\n");
+      if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) fprintf(stderr, "done.\n");
 
   return (mrisp_dst);
 }
@@ -2611,22 +2828,27 @@ static MRI_SP *MRISPblur_old(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma, 
 
         Description
 ------------------------------------------------------*/
-MRI_SP *MRISPalloc(float scale, int nfuncs)
-{
+MRI_SP *MRISPalloc(float scale, int nfuncs) {
   MRI_SP *mrisp;
   int u_dim, v_dim;
 
-  if (FZERO(scale)) scale = 1.0f;
+  if (FZERO(scale))
+    scale = 1.0f;
 
   u_dim = nint(scale * DEFAULT_UDIM); /* for fft */
   v_dim = 2 * u_dim;
-  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) fprintf(stderr, "allocating %d by %d parameterization\n", u_dim, v_dim);
+  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
+    fprintf(stderr, "allocating %d by %d parameterization\n", u_dim, v_dim);
   mrisp = (MRI_SP *)calloc(1, sizeof(MRI_SP));
-  if (!mrisp) ErrorExit(ERROR_NOMEMORY, "MRISPalloc(%d, %d): allocation failed", u_dim, v_dim);
+  if (!mrisp)
+    ErrorExit(ERROR_NOMEMORY, "MRISPalloc(%d, %d): allocation failed", u_dim,
+              v_dim);
   mrisp->Ip = ImageAlloc(v_dim, u_dim, PFFLOAT, nfuncs);
-  if (!mrisp->Ip) ErrorExit(ERROR_NOMEMORY, "MRISPalloc(%d, %d): allocation failed", u_dim, v_dim);
+  if (!mrisp->Ip)
+    ErrorExit(ERROR_NOMEMORY, "MRISPalloc(%d, %d): allocation failed", u_dim,
+              v_dim);
 
-  mrisp->scale = scale ;
+  mrisp->scale = scale;
   return (mrisp);
 }
 /*-----------------------------------------------------
@@ -2636,12 +2858,11 @@ MRI_SP *MRISPalloc(float scale, int nfuncs)
 
         Description
 ------------------------------------------------------*/
-int MRISPfree(MRI_SP **pmrisp)
-{
+int MRISPfree(MRI_SP **pmrisp) {
   MRI_SP *mrisp;
 
   mrisp = *pmrisp;
-  *pmrisp = NULL;
+  *pmrisp = nullptr;
   ImageFree(&mrisp->Ip);
   free(mrisp);
   return (NO_ERROR);
@@ -2653,8 +2874,8 @@ int MRISPfree(MRI_SP **pmrisp)
 
         Description
 ------------------------------------------------------*/
-MRI_SP *MRISPalign(MRI_SP *mrisp_orig, MRI_SP *mrisp_src, MRI_SP *mrisp_tmp, MRI_SP *mrisp_dst)
-{
+MRI_SP *MRISPalign(MRI_SP *mrisp_orig, MRI_SP *mrisp_src, MRI_SP *mrisp_tmp,
+                   MRI_SP *mrisp_dst) {
 #if 0
   IMAGE  *Icorr = NULL ;
   int    u_peak, v_peak ;
@@ -2692,11 +2913,11 @@ MRI_SP *MRISPalign(MRI_SP *mrisp_orig, MRI_SP *mrisp_src, MRI_SP *mrisp_tmp, MRI
 
         Description
 ------------------------------------------------------*/
-MRI_SP *MRISPtranslate(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, int du, int dv)
-{
+MRI_SP *MRISPtranslate(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, int du, int dv) {
   int u, v, udst, vdst, voff;
 
-  if (!mrisp_dst) mrisp_dst = MRISPclone(mrisp_src);
+  if (!mrisp_dst)
+    mrisp_dst = MRISPclone(mrisp_src);
 
   /* now form the destination as a translated copy of the source */
   for (u = 0; u <= U_MAX_INDEX(mrisp_src); u++) {
@@ -2705,18 +2926,17 @@ MRI_SP *MRISPtranslate(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, int du, int dv)
     {
       voff = V_DIM(mrisp_src) / 2;
       udst = -udst;
-    }
-    else if (udst >= U_DIM(mrisp_src)) {
+    } else if (udst >= U_DIM(mrisp_src)) {
       voff = V_DIM(mrisp_src) / 2;
       udst = U_DIM(mrisp_src) - (udst - U_DIM(mrisp_src) + 1);
-    }
-    else
+    } else
       voff = 0;
     for (v = 0; v <= V_MAX_INDEX(mrisp_src); v++) {
       vdst = v + dv + voff;
       while (vdst < 0) /* enforce spherical topology  */
         vdst += V_DIM(mrisp_src);
-      while (vdst >= V_DIM(mrisp_src)) vdst -= V_DIM(mrisp_src);
+      while (vdst >= V_DIM(mrisp_src))
+        vdst -= V_DIM(mrisp_src);
       *IMAGEFpix(mrisp_dst->Ip, udst, vdst) = *IMAGEFpix(mrisp_src->Ip, u, v);
     }
   }
@@ -2735,24 +2955,20 @@ MRI_SP *MRISPtranslate(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, int du, int dv)
           The 1st surface in this case represents a single surface,
           while the second is an average of some (unknown) number.
 ------------------------------------------------------*/
-MRI_SP *MRISPcombine(MRI_SP *mrisp, MRI_SP *mrisp_template, int fno)
-{
+MRI_SP *MRISPcombine(MRI_SP *mrisp, MRI_SP *mrisp_template, int fno) {
   int u, v, nframes;
   float dof, mean, vart, var, val;
   IMAGE *Ip, *Ipt;
 
-  if (!mrisp_template) mrisp_template = MRISPclone(mrisp);
+  if (!mrisp_template)
+    mrisp_template = MRISPclone(mrisp);
 
   Ip = mrisp->Ip;
   Ipt = mrisp_template->Ip;
   if ((Ip->rows != Ipt->rows) || (Ip->cols != Ipt->cols))
-    ErrorReturn(NULL,
-                (ERROR_BADPARM,
-                 "MRISPcombine: size mismatch (%d x %d) vs (%d x %d)",
-                 Ip->rows,
-                 Ip->cols,
-                 Ipt->rows,
-                 Ipt->cols));
+    ErrorReturn(NULL, (ERROR_BADPARM,
+                       "MRISPcombine: size mismatch (%d x %d) vs (%d x %d)",
+                       Ip->rows, Ip->cols, Ipt->rows, Ipt->cols));
 
   nframes = mrisp_template->Ip->num_frame;
   dof = *IMAGEFseq_pix(Ipt, 0, 0, fno + 2);
@@ -2782,25 +2998,23 @@ MRI_SP *MRISPcombine(MRI_SP *mrisp, MRI_SP *mrisp_template, int fno)
 
         Description
 ------------------------------------------------------*/
-int MRISPwrite(MRI_SP *mrisp, const char *fname)
-{
-  char ext[STRLEN] ;
-  
-  if (!strcmp(FileNameExtension(fname, ext), "mgz"))
-  {
-    MRI *mri ;
-    int r, c, f ;
+int MRISPwrite(MRI_SP *mrisp, const char *fname) {
+  char ext[STRLEN];
 
-    printf("writing MRISP to mgh file\n") ;
-    mri = MRIalloc(mrisp->Ip->cols, mrisp->Ip->rows, mrisp->Ip->num_frame, MRI_FLOAT) ;
-    for (f = 0 ; f < mrisp->Ip->num_frame ; f++)
-      for (r = 0 ; r < mrisp->Ip->rows ; r++)
-	for (c = 0 ; c < mrisp->Ip->cols ; c++)
-	  MRIsetVoxVal(mri, c, r, f, 0, *IMAGEFseq_pix(mrisp->Ip, c, r, f)) ;
-    MRIwrite(mri, fname) ;
-    MRIfree(&mri) ;
-  }
-  else
+  if (!strcmp(FileNameExtension(fname, ext), "mgz")) {
+    MRI *mri;
+    int r, c, f;
+
+    printf("writing MRISP to mgh file\n");
+    mri = MRIalloc(mrisp->Ip->cols, mrisp->Ip->rows, mrisp->Ip->num_frame,
+                   MRI_FLOAT);
+    for (f = 0; f < mrisp->Ip->num_frame; f++)
+      for (r = 0; r < mrisp->Ip->rows; r++)
+        for (c = 0; c < mrisp->Ip->cols; c++)
+          MRIsetVoxVal(mri, c, r, f, 0, *IMAGEFseq_pix(mrisp->Ip, c, r, f));
+    MRIwrite(mri, fname);
+    MRIfree(&mri);
+  } else
     ImageWrite(mrisp->Ip, fname);
   return (NO_ERROR);
 }
@@ -2811,45 +3025,45 @@ int MRISPwrite(MRI_SP *mrisp, const char *fname)
 
         Description
 ------------------------------------------------------*/
-MRI_SP *MRISPread(char *fname)
-{
+MRI_SP *MRISPread(char *fname) {
   MRI_SP *mrisp;
-  int    type ;
+  int type;
 
   mrisp = (MRI_SP *)calloc(1, sizeof(MRI_SP));
-  if (!mrisp) ErrorExit(ERROR_NOMEMORY, "MRISPread(%s): allocation failed", fname);
+  if (!mrisp)
+    ErrorExit(ERROR_NOMEMORY, "MRISPread(%s): allocation failed", fname);
 
-  type = mri_identify(fname) ;
-  if (type == MRI_MGH_FILE)
-  {
-    MRI *mri ;
-    int r, c, f ;
+  type = mri_identify(fname);
+  if (type == MRI_MGH_FILE) {
+    MRI *mri;
+    int r, c, f;
 
-    printf("reading MRISP from mgh file\n") ;
-    mri = MRIread(fname) ;
-    if (mri == NULL)
-      ErrorReturn(NULL, (ERROR_NOFILE, "MRISPread(%s): could not read MGH file",fname));
+    printf("reading MRISP from mgh file\n");
+    mri = MRIread(fname);
+    if (mri == nullptr)
+      ErrorReturn(NULL, (ERROR_NOFILE, "MRISPread(%s): could not read MGH file",
+                         fname));
     mrisp->Ip = ImageAlloc(mri->height, mri->width, PFFLOAT, mri->depth);
-    mrisp->scale = (float)mri->width/DEFAULT_UDIM ;
-    for (f = 0 ; f < mrisp->Ip->num_frame ; f++)
-      for (r = 0 ; r < mrisp->Ip->rows ; r++)
-	for (c = 0 ; c < mrisp->Ip->cols ; c++)
-	{
-	  float val ;
-	  if (c == Gx && r == Gy)
-	    DiagBreak() ;
-	  val = MRIgetVoxVal(mri, c, r, f, 0) ;
-	  if (devFinite(val) == 0)
-	    val = 0 ;
-	  if (val > 0)
-	    DiagBreak() ;
-	  *IMAGEFseq_pix(mrisp->Ip, c, r, f) = val ;
-	}
-    MRIfree(&mri) ;
-  }
-  else
+    mrisp->scale = (float)mri->width / DEFAULT_UDIM;
+    for (f = 0; f < mrisp->Ip->num_frame; f++)
+      for (r = 0; r < mrisp->Ip->rows; r++)
+        for (c = 0; c < mrisp->Ip->cols; c++) {
+          float val;
+          if (c == Gx && r == Gy)
+            DiagBreak();
+          val = MRIgetVoxVal(mri, c, r, f, 0);
+          if (devFinite(val) == 0)
+            val = 0;
+          if (val > 0)
+            DiagBreak();
+          *IMAGEFseq_pix(mrisp->Ip, c, r, f) = val;
+        }
+    MRIfree(&mri);
+  } else
     mrisp->Ip = ImageRead(fname);
-  if (!mrisp->Ip) ErrorReturn(NULL, (ERROR_NOFILE, "MRISPread(%s): could not open file", fname));
+  if (!mrisp->Ip)
+    ErrorReturn(NULL,
+                (ERROR_NOFILE, "MRISPread(%s): could not open file", fname));
 
   return (mrisp);
 }
@@ -2860,9 +3074,9 @@ MRI_SP *MRISPread(char *fname)
 
         Description
 ------------------------------------------------------*/
-double MRISParea(MRI_SP *mrisp)
-{
-  double total_area = 0.0, phi0, theta0, phi1, theta1, radius, l1, l2, x0, y0, z0, x1, y1, z1, x2, y2, z2;
+double MRISParea(MRI_SP *mrisp) {
+  double total_area = 0.0, phi0, theta0, phi1, theta1, radius, l1, l2, x0, y0,
+         z0, x1, y1, z1, x2, y2, z2;
   float val, max_len = 0.0;
   int u, v;
 
@@ -2870,7 +3084,8 @@ double MRISParea(MRI_SP *mrisp)
   for (u = 0; u <= U_MAX_INDEX(mrisp); u++) {
     for (v = 0; v <= V_MAX_INDEX(mrisp); v++) {
       val = *IMAGEFpix(mrisp->Ip, u, v);
-      if (FZERO(val)) continue;
+      if (FZERO(val))
+        continue;
 
       phi0 = (double)u * PHI_MAX / PHI_DIM(mrisp);
       theta0 = (double)v * THETA_MAX / THETA_DIM(mrisp);
@@ -2887,12 +3102,15 @@ double MRISParea(MRI_SP *mrisp)
       z2 = radius * cos(phi1);
       l1 = sqrt(SQR(x1 - x0) + SQR(y1 - y0) + SQR(z1 - z0));
       l2 = sqrt(SQR(x2 - x1) + SQR(y2 - y1) + SQR(z2 - z1));
-      if (max_len < l1) max_len = l1;
-      if (max_len < l2) max_len = l2;
+      if (max_len < l1)
+        max_len = l1;
+      if (max_len < l2)
+        max_len = l2;
       total_area += l1 * l2;
     }
   }
-  if (Gdiag & DIAG_SHOW) fprintf(stderr, "max parameterization len = %2.3f\n", max_len);
+  if (Gdiag & DIAG_SHOW)
+    fprintf(stderr, "max parameterization len = %2.3f\n", max_len);
   return (total_area);
 }
 /*-----------------------------------------------------
@@ -2902,12 +3120,12 @@ double MRISParea(MRI_SP *mrisp)
 
         Description
 ------------------------------------------------------*/
-MRI_SP *MRISPorLabel(MRI_SP *mrisp, MRIS *mris, LABEL *area)
-{
+MRI_SP *MRISPorLabel(MRI_SP *mrisp, MRIS *mris, LABEL *area) {
   int n, vno, u, v;
   float r, x, y, z, phi, theta, d, rsq;
 
-  if (!mrisp) mrisp = MRISPalloc(1, 1);
+  if (!mrisp)
+    mrisp = MRISPalloc(1, 1);
 
   r = mris->radius;
   rsq = r * r;
@@ -2917,7 +3135,8 @@ MRI_SP *MRISPorLabel(MRI_SP *mrisp, MRIS *mris, LABEL *area)
     y = area->lv[n].y;
     z = area->lv[n].z;
     d = rsq - z * z;
-    if (d < 0.0) d = 0;
+    if (d < 0.0)
+      d = 0;
     phi = atan2(sqrt(d), z);
     theta = atan2(y / r, x / r);
     u = nint(PHI_DIM(mrisp) * phi / PHI_MAX);
@@ -2933,8 +3152,7 @@ MRI_SP *MRISPorLabel(MRI_SP *mrisp, MRIS *mris, LABEL *area)
 
         Description
 ------------------------------------------------------*/
-MRI_SP *MRISPandLabel(MRI_SP *mrisp, MRIS *mris, LABEL *area)
-{
+MRI_SP *MRISPandLabel(MRI_SP *mrisp, MRIS *mris, LABEL *area) {
   int n, vno, u, v;
   float r, x, y, z, phi, theta, d, rsq;
 
@@ -2951,7 +3169,8 @@ MRI_SP *MRISPandLabel(MRI_SP *mrisp, MRIS *mris, LABEL *area)
     y = area->lv[n].y;
     z = area->lv[n].z;
     d = rsq - z * z;
-    if (d < 0.0) d = 0;
+    if (d < 0.0)
+      d = 0;
     phi = atan2(sqrt(d), z);
     theta = atan2(y / r, x / r);
     u = nint(PHI_DIM(mrisp) * phi / PHI_MAX);
@@ -2969,8 +3188,8 @@ MRI_SP *MRISPandLabel(MRI_SP *mrisp, MRIS *mris, LABEL *area)
   return (mrisp);
 }
 
-int MRISPcoordinate(MRI_SP *mrisp, float x, float y, float z, int *pu, int *pv)
-{
+int MRISPcoordinate(MRI_SP *mrisp, float x, float y, float z, int *pu,
+                    int *pv) {
   double phi, theta, uf, vf;
   int u, v;
 
@@ -2981,25 +3200,29 @@ int MRISPcoordinate(MRI_SP *mrisp, float x, float y, float z, int *pu, int *pv)
   v = nint(vf);
   if (u < 0) /* enforce spherical topology  */
     u = -u;
-  if (u >= U_DIM(mrisp)) u = U_DIM(mrisp) - (u - U_DIM(mrisp) + 1);
+  if (u >= U_DIM(mrisp))
+    u = U_DIM(mrisp) - (u - U_DIM(mrisp) + 1);
   if (v < 0) /* enforce spherical topology  */
     v += V_DIM(mrisp);
-  if (v >= V_DIM(mrisp)) v -= V_DIM(mrisp);
+  if (v >= V_DIM(mrisp))
+    v -= V_DIM(mrisp);
   *pu = u;
   *pv = v;
   return (NO_ERROR);
 }
-static int spherical_coordinate(double x, double y, double z, double *pphi, double *ptheta)
-{
+static int spherical_coordinate(double x, double y, double z, double *pphi,
+                                double *ptheta) {
   double r, d;
 
   r = sqrt(x * x + y * y + z * z);
   d = r * r - z * z;
-  if (d < 0.0) d = 0.0;
+  if (d < 0.0)
+    d = 0.0;
 
   *pphi = atan2(sqrt(d), z);
   *ptheta = atan2(y / r, x / r);
-  if (*ptheta < 0.0f) *ptheta = 2 * M_PI + *ptheta; /* make it 0 --> 2*PI */
+  if (*ptheta < 0.0f)
+    *ptheta = 2 * M_PI + *ptheta; /* make it 0 --> 2*PI */
   return (NO_ERROR);
 }
 
@@ -3016,45 +3239,36 @@ static int spherical_coordinate(double x, double y, double z, double *pphi, doub
           The 1st surface in this case represents a single surface,
           while the second is an average of some (unknown) number.
 ------------------------------------------------------*/
-MRI_SP *MRISPaccumulate(MRI_SP *mrisp, MRI_SP *mrisp_template, int fno)
-{
+MRI_SP *MRISPaccumulate(MRI_SP *mrisp, MRI_SP *mrisp_template, int fno) {
   int u, v, nframes;
   IMAGE *Ip, *Ipt;
 
-  if (!mrisp_template) mrisp_template = MRISPclone(mrisp);
+  if (!mrisp_template)
+    mrisp_template = MRISPclone(mrisp);
 
   Ip = mrisp->Ip;
   Ipt = mrisp_template->Ip;
   if ((Ip->rows != Ipt->rows) || (Ip->cols != Ipt->cols))
-    ErrorReturn(NULL,
-                (ERROR_BADPARM,
-                 "MRISPcombine: size mismatch (%d x %d) vs (%d x %d)",
-                 Ip->rows,
-                 Ip->cols,
-                 Ipt->rows,
-                 Ipt->cols));
+    ErrorReturn(NULL, (ERROR_BADPARM,
+                       "MRISPcombine: size mismatch (%d x %d) vs (%d x %d)",
+                       Ip->rows, Ip->cols, Ipt->rows, Ipt->cols));
 
   nframes = mrisp_template->Ip->num_frame;
   for (u = 0; u <= U_MAX_INDEX(mrisp); u++) {
     for (v = 0; v <= V_MAX_INDEX(mrisp); v++) {
       *IMAGEFseq_pix(Ipt, u, v, fno) += *IMAGEFseq_pix(Ip, u, v, fno);
       if (u == DEBUG_U && v == DEBUG_V)
-        fprintf(stderr, "x[%d][%d][%d] = %2.3f\n", DEBUG_U, DEBUG_V, fno, *IMAGEFseq_pix(Ipt, DEBUG_U, DEBUG_V, fno));
+        fprintf(stderr, "x[%d][%d][%d] = %2.3f\n", DEBUG_U, DEBUG_V, fno,
+                *IMAGEFseq_pix(Ipt, DEBUG_U, DEBUG_V, fno));
     }
   }
 
   return (mrisp_template);
 }
 
-int MRISPfunctionVectorVals(MRI_SURFACE_PARAMETERIZATION *mrisp,
-                            MRIS *mris,
-                            float x,
-                            float y,
-                            float z,
-                            int *frames,
-                            int nframes,
-                            double *vals)
-{
+int MRISPfunctionVectorVals(MRI_SURFACE_PARAMETERIZATION *mrisp, MRIS *mris,
+                            float x, float y, float z, int *frames, int nframes,
+                            double *vals) {
   double r, r2, r4, r6, val, d, x2, y2, z2, g, h, f, dx, dy, dz;
   float phi, theta, uf, vf, du, dv;
   int n, fno, u0, v0, u1, v1, u0_voff, u1_voff, u1_v0, u1_v1, u0_v0, u0_v1;
@@ -3082,11 +3296,14 @@ int MRISPfunctionVectorVals(MRI_SURFACE_PARAMETERIZATION *mrisp,
   }
 
   theta = atan2(y / r, x / r);
-  if (theta < 0.0f) theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
+  if (theta < 0.0f)
+    theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
   d = r * r - z * z;
-  if (d < 0.0) d = 0.0;
+  if (d < 0.0)
+    d = 0.0;
   phi = atan2(sqrt(d), z);
-  if (phi < RADIANS(1)) DiagBreak();
+  if (phi < RADIANS(1))
+    DiagBreak();
 
   uf = PHI_DIM(mrisp) * phi / PHI_MAX;
   vf = THETA_DIM(mrisp) * theta / THETA_MAX;
@@ -3102,59 +3319,65 @@ int MRISPfunctionVectorVals(MRI_SURFACE_PARAMETERIZATION *mrisp,
   {
     u0_voff = V_DIM(mrisp) / 2;
     u0 = -u0;
-  }
-  else if (u0 >= U_DIM(mrisp)) {
+  } else if (u0 >= U_DIM(mrisp)) {
     u0_voff = V_DIM(mrisp) / 2;
     u0 = U_DIM(mrisp) - (u0 - U_DIM(mrisp) + 1);
-  }
-  else
+  } else
     u0_voff = 0;
   if (u1 < 0) /* enforce spherical topology  */
   {
     u1_voff = V_DIM(mrisp) / 2;
     u1 = -u1;
-  }
-  else if (u1 >= U_DIM(mrisp)) {
+  } else if (u1 >= U_DIM(mrisp)) {
     u1_voff = V_DIM(mrisp) / 2;
     u1 = U_DIM(mrisp) - (u1 - U_DIM(mrisp) + 1);
-  }
-  else
+  } else
     u1_voff = 0;
-  if (v0 < 0) v0 += V_DIM(mrisp);
-  if (v0 >= V_DIM(mrisp)) v0 -= V_DIM(mrisp);
-  if (v1 < 0) v1 += V_DIM(mrisp);
-  if (v1 >= V_DIM(mrisp)) v1 -= V_DIM(mrisp);
+  if (v0 < 0)
+    v0 += V_DIM(mrisp);
+  if (v0 >= V_DIM(mrisp))
+    v0 -= V_DIM(mrisp);
+  if (v1 < 0)
+    v1 += V_DIM(mrisp);
+  if (v1 >= V_DIM(mrisp))
+    v1 -= V_DIM(mrisp);
 
   u0_v1 = v1 + u0_voff;
-  while (u0_v1 >= V_DIM(mrisp)) u0_v1 -= V_DIM(mrisp);
+  while (u0_v1 >= V_DIM(mrisp))
+    u0_v1 -= V_DIM(mrisp);
   u0_v0 = v0 + u0_voff;
-  while (u0_v0 >= V_DIM(mrisp)) u0_v0 -= V_DIM(mrisp);
+  while (u0_v0 >= V_DIM(mrisp))
+    u0_v0 -= V_DIM(mrisp);
   u1_v1 = v1 + u1_voff;
-  while (u1_v1 >= V_DIM(mrisp)) u1_v1 -= V_DIM(mrisp);
+  while (u1_v1 >= V_DIM(mrisp))
+    u1_v1 -= V_DIM(mrisp);
   u1_v0 = v0 + u1_voff;
-  while (u1_v0 >= V_DIM(mrisp)) u1_v0 -= V_DIM(mrisp);
+  while (u1_v0 >= V_DIM(mrisp))
+    u1_v0 -= V_DIM(mrisp);
 
   /* do bilinear interpolation */
   for (n = 0; n < nframes; n++) {
     fno = frames[n];
-    val = du * dv * *IMAGEFseq_pix(mrisp->Ip, u1, u1_v1, fno) +
-          (1.0f - du) * dv * *IMAGEFseq_pix(mrisp->Ip, u0, u0_v1, fno) +
-          (1.0f - du) * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u0, u0_v0, fno) +
-          du * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u1, u1_v0, fno);
+    val =
+        du * dv * *IMAGEFseq_pix(mrisp->Ip, u1, u1_v1, fno) +
+        (1.0f - du) * dv * *IMAGEFseq_pix(mrisp->Ip, u0, u0_v1, fno) +
+        (1.0f - du) * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u0, u0_v0, fno) +
+        du * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u1, u1_v0, fno);
     vals[n] = val;
   }
 
   return (NO_ERROR);
 }
 
-MRIS *MRISfromParameterizations(MRI_SP *mrisp, MRIS *mris, int *frames, int *indices, int nframes)
-{
+MRIS *MRISfromParameterizations(MRI_SP *mrisp, MRIS *mris, int *frames,
+                                int *indices, int nframes) {
   float a, b, c, phi, theta, x, y, z, uf, vf, du, dv, curv, d;
   int n, fno, vno, u0, v0, u1, v1;
   VALS_VP *vp;
   VERTEX *vertex;
 
-  if (!mris) mris = MRISclone(mrisp->mris);
+  if (!mris)
+    mris = MRISclone(mrisp->mris);
 
 #if 0
   if (FZERO(mris->radius))
@@ -3171,12 +3394,16 @@ MRIS *MRISfromParameterizations(MRI_SP *mrisp, MRIS *mris, int *frames, int *ind
     y = vertex->y;
     z = vertex->z;
     theta = atan2(vertex->y / b, vertex->x / a);
-    if (theta < 0.0f) theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
+    if (theta < 0.0f)
+      theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
     d = c * c - z * z;
-    if (d < 0.0) d = 0.0;
+    if (d < 0.0)
+      d = 0.0;
     phi = atan2(sqrt(d), z);
-    if (phi < RADIANS(1)) DiagBreak();
-    if (vno == 60935) DiagBreak();
+    if (phi < RADIANS(1))
+      DiagBreak();
+    if (vno == 60935)
+      DiagBreak();
 
     uf = PHI_DIM(mrisp) * phi / PHI_MAX;
     vf = THETA_DIM(mrisp) * theta / THETA_MAX;
@@ -3190,24 +3417,33 @@ MRIS *MRISfromParameterizations(MRI_SP *mrisp, MRIS *mris, int *frames, int *ind
     /* enforce spherical topology  */
     if (u0 < 0) /* enforce spherical topology  */
       u0 = -u0;
-    if (u0 >= U_DIM(mrisp)) u0 = U_DIM(mrisp) - (u0 - U_DIM(mrisp) + 1);
+    if (u0 >= U_DIM(mrisp))
+      u0 = U_DIM(mrisp) - (u0 - U_DIM(mrisp) + 1);
     if (u1 < 0) /* enforce spherical topology  */
       u1 = -u1;
-    if (u1 >= U_DIM(mrisp)) u1 = U_DIM(mrisp) - (u1 - U_DIM(mrisp) + 1);
-    if (v0 < 0) v0 += V_DIM(mrisp);
-    if (v0 >= V_DIM(mrisp)) v0 -= V_DIM(mrisp);
-    if (v1 < 0) v1 += V_DIM(mrisp);
-    if (v1 >= V_DIM(mrisp)) v1 -= V_DIM(mrisp);
+    if (u1 >= U_DIM(mrisp))
+      u1 = U_DIM(mrisp) - (u1 - U_DIM(mrisp) + 1);
+    if (v0 < 0)
+      v0 += V_DIM(mrisp);
+    if (v0 >= V_DIM(mrisp))
+      v0 -= V_DIM(mrisp);
+    if (v1 < 0)
+      v1 += V_DIM(mrisp);
+    if (v1 >= V_DIM(mrisp))
+      v1 -= V_DIM(mrisp);
 
-    if (((u0 == DEBUG_U) || (u1 == DEBUG_U)) && ((v0 == DEBUG_V) || (v1 == DEBUG_V))) DiagBreak();
+    if (((u0 == DEBUG_U) || (u1 == DEBUG_U)) &&
+        ((v0 == DEBUG_V) || (v1 == DEBUG_V)))
+      DiagBreak();
     vp = (VALS_VP *)vertex->vp;
     /* do bilinear interpolation */
     for (n = 0; n < nframes; n++) {
       fno = frames[n];
-      curv = du * dv * *IMAGEFseq_pix(mrisp->Ip, u1, v1, fno) +
-             (1.0f - du) * dv * *IMAGEFseq_pix(mrisp->Ip, u0, v1, fno) +
-             (1.0f - du) * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u0, v0, fno) +
-             du * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u1, v0, fno);
+      curv =
+          du * dv * *IMAGEFseq_pix(mrisp->Ip, u1, v1, fno) +
+          (1.0f - du) * dv * *IMAGEFseq_pix(mrisp->Ip, u0, v1, fno) +
+          (1.0f - du) * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u0, v0, fno) +
+          du * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u1, v0, fno);
       vp->vals[indices[n]] = curv;
     }
   }
@@ -3215,8 +3451,8 @@ MRIS *MRISfromParameterizations(MRI_SP *mrisp, MRIS *mris, int *frames, int *ind
   return (mris);
 }
 
-MRI_SP *MRIStoParameterizations(MRIS *mris, MRI_SP *mrisp, float scale, int *frames, int *indices, int nframes)
-{
+MRI_SP *MRIStoParameterizations(MRIS *mris, MRI_SP *mrisp, float scale,
+                                int *frames, int *indices, int nframes) {
   float a, b, c, phi, theta, x, y, z, uf, vf, d, total_d, **distances, *total;
   int m, vno, u, v, unfilled, **filled, npasses, nfilled;
   VERTEX *vertex;
@@ -3224,13 +3460,14 @@ MRI_SP *MRIStoParameterizations(MRIS *mris, MRI_SP *mrisp, float scale, int *fra
 
   total = (float *)malloc(nframes * sizeof(float));
 
-  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) fprintf(stderr, "computing parameterization...");
+  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
+    fprintf(stderr, "computing parameterization...");
 
   if (!mrisp) {
     ErrorExit(0, "MRIStoParameterizations: NULL mrisp\n");
-  }
-  else
-    for (m = 0; m < nframes; m++) ImageClearArea(mrisp->Ip, -1, -1, -1, -1, 0, frames[m]);
+  } else
+    for (m = 0; m < nframes; m++)
+      ImageClearArea(mrisp->Ip, -1, -1, -1, -1, 0, frames[m]);
 
   a = b = c = MRISaverageRadius(mris);
 
@@ -3240,7 +3477,8 @@ MRI_SP *MRIStoParameterizations(MRIS *mris, MRI_SP *mrisp, float scale, int *fra
     filled[u] = (int *)calloc(V_DIM(mrisp), sizeof(int));
     distances[u] = (float *)calloc(V_DIM(mrisp), sizeof(float));
 
-    for (v = 0; v <= V_MAX_INDEX(mrisp); v++) filled[u][v] = UNFILLED_ELT;
+    for (v = 0; v <= V_MAX_INDEX(mrisp); v++)
+      filled[u][v] = UNFILLED_ELT;
   }
 
   //  fp = IMAGEFseq_pix(mrisp->Ip, DEBUG_U, DEBUG_V,fno) ;
@@ -3250,14 +3488,19 @@ MRI_SP *MRIStoParameterizations(MRIS *mris, MRI_SP *mrisp, float scale, int *fra
     x = vertex->x;
     y = vertex->y;
     z = vertex->z;
-    if (vno == Gdiag_no || vno == 1126) DiagBreak();
+    if (vno == Gdiag_no || vno == 1126)
+      DiagBreak();
     theta = atan2(y / b, x / a);
-    if (theta < 0.0f) theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
+    if (theta < 0.0f)
+      theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
     d = c * c - z * z;
-    if (d < 0.0) d = 0;
+    if (d < 0.0)
+      d = 0;
     phi = atan2(sqrt(d), z);
-    if (phi < RADIANS(1)) DiagBreak();
-    if (vno == DEBUG_VNO) DiagBreak();
+    if (phi < RADIANS(1))
+      DiagBreak();
+    if (vno == DEBUG_VNO)
+      DiagBreak();
     vertex->phi = phi;
     vertex->theta = theta;
     uf = PHI_DIM(mrisp) * phi / PHI_MAX;
@@ -3266,13 +3509,17 @@ MRI_SP *MRIStoParameterizations(MRIS *mris, MRI_SP *mrisp, float scale, int *fra
     v = nint(vf);
     if (u < 0) /* enforce spherical topology  */
       u = -u;
-    if (u >= U_DIM(mrisp)) u = U_DIM(mrisp) - (u - U_DIM(mrisp) + 1);
+    if (u >= U_DIM(mrisp))
+      u = U_DIM(mrisp) - (u - U_DIM(mrisp) + 1);
     if (v < 0) /* enforce spherical topology  */
       v += V_DIM(mrisp);
-    if (v >= V_DIM(mrisp)) v -= V_DIM(mrisp);
+    if (v >= V_DIM(mrisp))
+      v -= V_DIM(mrisp);
 
-    if (u == 0 && v == 56) DiagBreak();
-    if ((u == DEBUG_U) && (v == DEBUG_V)) DiagBreak();
+    if (u == 0 && v == 56)
+      DiagBreak();
+    if ((u == DEBUG_U) && (v == DEBUG_V))
+      DiagBreak();
 
     filled[u][v] = vno;
     distances[u][v] += 1; /* keep track of total # of nodes */
@@ -3280,15 +3527,12 @@ MRI_SP *MRIStoParameterizations(MRIS *mris, MRI_SP *mrisp, float scale, int *fra
       fprintf(stderr,
               "v = %6.6d (%2.1f, %2.1f, %2.1f), d = %2.3f, "
               "curv = %2.3f\n",
-              vno,
-              x,
-              y,
-              z,
-              d,
-              vertex->curv);
+              vno, x, y, z, d, vertex->curv);
   }
 
-  if (DEBUG_U >= 0) fprintf(stderr, "\ndistance[%d][%d] = %2.3f\n\n", DEBUG_U, DEBUG_V, distances[DEBUG_U][DEBUG_V]);
+  if (DEBUG_U >= 0)
+    fprintf(stderr, "\ndistance[%d][%d] = %2.3f\n\n", DEBUG_U, DEBUG_V,
+            distances[DEBUG_U][DEBUG_V]);
 
   /* now add in curvatures proportional to their distance from the point */
   for (vno = 0; vno < mris->nvertices; vno++) {
@@ -3297,9 +3541,11 @@ MRI_SP *MRIStoParameterizations(MRIS *mris, MRI_SP *mrisp, float scale, int *fra
     y = vertex->y;
     z = vertex->z;
     theta = atan2(y / b, x / a);
-    if (theta < 0.0f) theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
+    if (theta < 0.0f)
+      theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
     d = c * c - z * z;
-    if (d < 0.0) d = 0.0;
+    if (d < 0.0)
+      d = 0.0;
     phi = atan2(sqrt(d), z);
     uf = PHI_DIM(mrisp) * phi / PHI_MAX;
     vf = THETA_DIM(mrisp) * theta / THETA_MAX;
@@ -3307,19 +3553,23 @@ MRI_SP *MRIStoParameterizations(MRIS *mris, MRI_SP *mrisp, float scale, int *fra
     v = nint(vf);
     if (u < 0) /* enforce spherical topology  */
       u = -u;
-    if (u >= U_DIM(mrisp)) u = U_DIM(mrisp) - (u - U_DIM(mrisp) + 1);
+    if (u >= U_DIM(mrisp))
+      u = U_DIM(mrisp) - (u - U_DIM(mrisp) + 1);
     if (v < 0) /* enforce spherical topology  */
       v += V_DIM(mrisp);
-    if (v >= V_DIM(mrisp)) v -= V_DIM(mrisp);
+    if (v >= V_DIM(mrisp))
+      v -= V_DIM(mrisp);
 
-    if (u == 0 && v == 56) DiagBreak();
+    if (u == 0 && v == 56)
+      DiagBreak();
 
     /* 0,0 */
     total_d = distances[u][v];
     vp = (VALS_VP *)vertex->vp;
     if (total_d > 0.0) {
       for (m = 0; m < nframes; m++) {
-        *IMAGEFseq_pix(mrisp->Ip, u, v, frames[m]) += vp->vals[indices[m]] / total_d;
+        *IMAGEFseq_pix(mrisp->Ip, u, v, frames[m]) +=
+            vp->vals[indices[m]] / total_d;
       }
     }
   }
@@ -3337,7 +3587,8 @@ MRI_SP *MRIStoParameterizations(MRIS *mris, MRI_SP *mrisp, float scale, int *fra
     ;
     for (u = 0; u <= U_MAX_INDEX(mrisp); u++) {
       for (v = 0; v <= V_MAX_INDEX(mrisp); v++) {
-        if ((u == DEBUG_U) && (v == DEBUG_V)) DiagBreak();
+        if ((u == DEBUG_U) && (v == DEBUG_V))
+          DiagBreak();
         if (filled[u][v] == UNFILLED_ELT) {
           memset(total, 0, nframes * sizeof(float));
           for (n = 0, uk = -1; uk <= 1; uk++) {
@@ -3354,7 +3605,8 @@ MRI_SP *MRIStoParameterizations(MRIS *mris, MRI_SP *mrisp, float scale, int *fra
                 v1 -= V_DIM(mrisp);
 
               if (filled[u1][v1] >= 0) {
-                for (m = 0; m < nframes; m++) total[m] += *IMAGEFseq_pix(Ip, u1, v1, frames[m]);
+                for (m = 0; m < nframes; m++)
+                  total[m] += *IMAGEFseq_pix(Ip, u1, v1, frames[m]);
                 n++;
               }
             }
@@ -3366,28 +3618,29 @@ MRI_SP *MRIStoParameterizations(MRIS *mris, MRI_SP *mrisp, float scale, int *fra
             }
             filled[u][v] = FILLING_ELT;
             nfilled++;
-          }
-          else
+          } else
             unfilled++;
-        }
-        else {
-          for (m = 0; m < nframes; m++) *IMAGEFseq_pix(Itmp, u, v, frames[m]) = *IMAGEFseq_pix(Ip, u, v, frames[m]);
+        } else {
+          for (m = 0; m < nframes; m++)
+            *IMAGEFseq_pix(Itmp, u, v, frames[m]) =
+                *IMAGEFseq_pix(Ip, u, v, frames[m]);
         }
       }
     }
     for (u = 0; u <= U_MAX_INDEX(mrisp); u++) {
       for (v = 0; v <= V_MAX_INDEX(mrisp); v++) {
-        if (filled[u][v] == FILLING_ELT) filled[u][v] = FILLED_ELT;
+        if (filled[u][v] == FILLING_ELT)
+          filled[u][v] = FILLED_ELT;
       }
     }
     mrisp->Ip = Itmp;
     ImageFree(&Ip);
     if (npasses++ > 1000)
-      ErrorExit(ERROR_BADFILE,
-                "MRISPtoParameterization: could not fill "
-                "parameterization");
+      ErrorExit(ERROR_BADFILE, "MRISPtoParameterization: could not fill "
+                               "parameterization");
   } while (unfilled > 0);
-  if ((Gdiag & DIAG_SHOW) && DIAG_VERBOSE_ON) fprintf(stderr, "filling %d elements took %d passes\n", nfilled, npasses);
+  if ((Gdiag & DIAG_SHOW) && DIAG_VERBOSE_ON)
+    fprintf(stderr, "filling %d elements took %d passes\n", nfilled, npasses);
 
   for (u = 0; u <= U_MAX_INDEX(mrisp); u++) {
     free(filled[u]);
@@ -3396,25 +3649,28 @@ MRI_SP *MRIStoParameterizations(MRIS *mris, MRI_SP *mrisp, float scale, int *fra
   free(filled);
   free(distances);
 
-  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) fprintf(stderr, "done.\n");
+  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
+    fprintf(stderr, "done.\n");
 
   free(total);
 
   return (mrisp);
 }
 
-MRI_SP *MRISPblurFrames(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma, int *frames, int nframes)
-{
+MRI_SP *MRISPblurFrames(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma,
+                        int *frames, int nframes) {
   int n, u, v, cart_klen, klen, khalf, uk, vk, u1, v1, no_sphere, voff;
   double k, *total, ktotal, sigma_sq_inv, udiff, vdiff, sin_sq_u, phi;
   IMAGE *Ip_src, *Ip_dst;
 
   total = (double *)malloc(nframes * sizeof(double));
 
-  no_sphere = getenv("NO_SPHERE") != NULL;
-  if (no_sphere) fprintf(stderr, "disabling spherical geometry\n");
+  no_sphere = getenv("NO_SPHERE") != nullptr;
+  if (no_sphere)
+    fprintf(stderr, "disabling spherical geometry\n");
 
-  if (!mrisp_dst) mrisp_dst = MRISPclone(mrisp_src);
+  if (!mrisp_dst)
+    mrisp_dst = MRISPclone(mrisp_src);
   mrisp_dst->sigma = sigma;
 
   /* determine the size of the kernel */
@@ -3423,7 +3679,8 @@ MRI_SP *MRISPblurFrames(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma, int *
     cart_klen++;
 
   if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
-    fprintf(stderr, "blurring surface, sigma = %2.3f, cartesian klen = %d\n", sigma, cart_klen);
+    fprintf(stderr, "blurring surface, sigma = %2.3f, cartesian klen = %d\n",
+            sigma, cart_klen);
 
   if (FZERO(sigma))
     sigma_sq_inv = BIG;
@@ -3434,24 +3691,29 @@ MRI_SP *MRISPblurFrames(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma, int *
   Ip_dst = mrisp_dst->Ip;
 
   for (u = 0; u < U_DIM(mrisp_src); u++) {
-    if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) fprintf(stderr, "\r%3.3d of %d     ", u, U_DIM(mrisp_src) - 1);
+    if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
+      fprintf(stderr, "\r%3.3d of %d     ", u, U_DIM(mrisp_src) - 1);
     phi = (double)u * PHI_MAX / PHI_DIM(mrisp_src);
     sin_sq_u = sin(phi);
     sin_sq_u *= sin_sq_u;
     if (!FZERO(sin_sq_u)) {
       k = cart_klen * cart_klen;
       klen = sqrt(k + k / sin_sq_u);
-      if (klen > MAX_LEN * cart_klen) klen = MAX_LEN * cart_klen;
-    }
-    else
+      if (klen > MAX_LEN * cart_klen)
+        klen = MAX_LEN * cart_klen;
+    } else
       klen = MAX_LEN * cart_klen; /* arbitrary max length */
-    if (no_sphere) sin_sq_u = 1.0f, klen = cart_klen;
-    if (klen >= U_DIM(mrisp_src)) klen = U_DIM(mrisp_src) - 1;
-    if (klen >= V_DIM(mrisp_src)) klen = V_DIM(mrisp_src) - 1;
+    if (no_sphere)
+      sin_sq_u = 1.0f, klen = cart_klen;
+    if (klen >= U_DIM(mrisp_src))
+      klen = U_DIM(mrisp_src) - 1;
+    if (klen >= V_DIM(mrisp_src))
+      klen = V_DIM(mrisp_src) - 1;
     khalf = klen / 2;
     for (v = 0; v < V_DIM(mrisp_src); v++) {
       /*      theta = (double)v*THETA_MAX / THETA_DIM(mrisp_src) ;*/
-      if (u == DEBUG_U && v == DEBUG_V) DiagBreak();
+      if (u == DEBUG_U && v == DEBUG_V)
+        DiagBreak();
 
       memset(total, 0, nframes * sizeof(double));
       ktotal = 0.0;
@@ -3463,12 +3725,10 @@ MRI_SP *MRISPblurFrames(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma, int *
         {
           voff = V_DIM(mrisp_src) / 2;
           u1 = -u1;
-        }
-        else if (u1 >= U_DIM(mrisp_src)) {
+        } else if (u1 >= U_DIM(mrisp_src)) {
           u1 = U_DIM(mrisp_src) - (u1 - U_DIM(mrisp_src) + 1);
           voff = V_DIM(mrisp_src) / 2;
-        }
-        else
+        } else
           voff = 0;
 
         for (vk = -khalf; vk <= khalf; vk++) {
@@ -3477,12 +3737,15 @@ MRI_SP *MRISPblurFrames(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma, int *
           v1 = v + vk + voff;
           while (v1 < 0) /* enforce spherical topology */
             v1 += V_DIM(mrisp_src);
-          while (v1 >= V_DIM(mrisp_src)) v1 -= V_DIM(mrisp_src);
+          while (v1 >= V_DIM(mrisp_src))
+            v1 -= V_DIM(mrisp_src);
           ktotal += k;
-          for (n = 0; n < nframes; n++) total[n] += k * *IMAGEFseq_pix(Ip_src, u1, v1, frames[n]);
+          for (n = 0; n < nframes; n++)
+            total[n] += k * *IMAGEFseq_pix(Ip_src, u1, v1, frames[n]);
         }
       }
-      if (u == DEBUG_U && v == DEBUG_V) DiagBreak();
+      if (u == DEBUG_U && v == DEBUG_V)
+        DiagBreak();
       for (n = 0; n < nframes; n++) {
         total[n] /= ktotal; /* normalize weights to 1 */
         *IMAGEFseq_pix(mrisp_dst->Ip, u, v, frames[n]) = total[n];
@@ -3490,15 +3753,15 @@ MRI_SP *MRISPblurFrames(MRI_SP *mrisp_src, MRI_SP *mrisp_dst, float sigma, int *
     }
   }
 
-  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) fprintf(stderr, "done.\n");
+  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
+    fprintf(stderr, "done.\n");
 
   free(total);
 
   return (mrisp_dst);
 }
 
-int MRISPsetFrameVal(MRI_SP *mrisp, int frame, float val)
-{
+int MRISPsetFrameVal(MRI_SP *mrisp, int frame, float val) {
   int u, v;
 
   for (u = 0; u <= U_MAX_INDEX(mrisp); u++) {
@@ -3508,19 +3771,22 @@ int MRISPsetFrameVal(MRI_SP *mrisp, int frame, float val)
   }
   return (NO_ERROR);
 }
-float MRISPsample(MRI_SP *mrisp, float x, float y, float z, int fno)
-{
+float MRISPsample(MRI_SP *mrisp, float x, float y, float z, int fno) {
   float retval, theta, phi, radius, d, du, dv, uf, vf;
   int u0, u1, v0, v1;
 
   radius = mrisp->radius;
   theta = atan2(y / mrisp->radius, x / mrisp->radius);
-  if (theta < 0.0f) theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
+  if (theta < 0.0f)
+    theta = 2 * M_PI + theta; /* make it 0 --> 2*PI */
   d = radius * radius - z * z;
-  if (d < 0.0) d = 0.0;
+  if (d < 0.0)
+    d = 0.0;
   phi = atan2(sqrt(d), z);
-  if (phi < RADIANS(1)) DiagBreak();
-  if (phi > M_PI) DiagBreak();
+  if (phi < RADIANS(1))
+    DiagBreak();
+  if (phi > M_PI)
+    DiagBreak();
 
   uf = PHI_DIM(mrisp) * phi / PHI_MAX;
   vf = THETA_DIM(mrisp) * theta / THETA_MAX;
@@ -3534,14 +3800,20 @@ float MRISPsample(MRI_SP *mrisp, float x, float y, float z, int fno)
   /* enforce spherical topology  */
   if (u0 < 0) /* enforce spherical topology  */
     u0 = -u0;
-  if (u0 >= U_DIM(mrisp)) u0 = U_DIM(mrisp) - (u0 - U_DIM(mrisp) + 1);
+  if (u0 >= U_DIM(mrisp))
+    u0 = U_DIM(mrisp) - (u0 - U_DIM(mrisp) + 1);
   if (u1 < 0) /* enforce spherical topology  */
     u1 = -u1;
-  if (u1 >= U_DIM(mrisp)) u1 = U_DIM(mrisp) - (u1 - U_DIM(mrisp) + 1);
-  if (v0 < 0) v0 += V_DIM(mrisp);
-  if (v0 >= V_DIM(mrisp)) v0 -= V_DIM(mrisp);
-  if (v1 < 0) v1 += V_DIM(mrisp);
-  if (v1 >= V_DIM(mrisp)) v1 -= V_DIM(mrisp);
+  if (u1 >= U_DIM(mrisp))
+    u1 = U_DIM(mrisp) - (u1 - U_DIM(mrisp) + 1);
+  if (v0 < 0)
+    v0 += V_DIM(mrisp);
+  if (v0 >= V_DIM(mrisp))
+    v0 -= V_DIM(mrisp);
+  if (v1 < 0)
+    v1 += V_DIM(mrisp);
+  if (v1 >= V_DIM(mrisp))
+    v1 -= V_DIM(mrisp);
 
   retval = du * dv * *IMAGEFseq_pix(mrisp->Ip, u1, v1, fno) +
            (1.0f - du) * dv * *IMAGEFseq_pix(mrisp->Ip, u0, v1, fno) +

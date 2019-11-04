@@ -27,13 +27,11 @@
 #include <QWidget>
 #include <QTimer>
 
-namespace Ui
-{
+namespace Ui {
 class FloatingStatusBar;
 }
 
-class FloatingStatusBar : public QWidget
-{
+class FloatingStatusBar : public QWidget {
   Q_OBJECT
 
 public:
@@ -41,27 +39,20 @@ public:
   ~FloatingStatusBar();
 
 public slots:
-  void SetProgress( int nProgress );
+  void SetProgress(int nProgress);
   void ShowProgress();
   void HideProgress();
   void Reposition();
-  void StartTimer()
-  {
-    m_timer->start();
-  }
+  void StartTimer() { m_timer->start(); }
 
-  void StopTimer()
-  {
-    m_timer->stop();
-  }
+  void StopTimer() { m_timer->stop(); }
 
 private slots:
   void OnProgressTimer();
 
 private:
   Ui::FloatingStatusBar *ui;
-  QTimer*       m_timer;
-
+  QTimer *m_timer;
 };
 
 #endif // FLOATINGSTATUSBAR_H

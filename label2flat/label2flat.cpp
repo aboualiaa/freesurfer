@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: zkaufman $
  *    $Date: 2016/12/11 15:13:53 $
@@ -23,11 +23,10 @@
  *
  */
 
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+#include <cctype>
 
 #include "mri.h"
 #include "macros.h"
@@ -40,35 +39,35 @@
 #include "label.h"
 #include "version.h"
 
-int main(int argc, char *argv[]) ;
-static int get_option(int argc, char *argv[]) ;
+int main(int argc, char *argv[]);
+static int get_option(int argc, char *argv[]);
 
 static Transform *load_transform(char *subject_name, General_transform *xform);
 
-static void print_usage(void) ;
-void print_help(void) ;
+static void print_usage();
+void print_help();
 
-const char *Progname ;
+const char *Progname;
 
-static int verbose = 0 ;
+static int verbose = 0;
 
-static int no_talairach = 0 ;  /* use talairach coords by default */
-static int ndilate = 0 ;
-static int nerode = 0 ;
-static int nclose = 0 ;
+static int no_talairach = 0; /* use talairach coords by default */
+static int ndilate = 0;
+static int nerode = 0;
+static int nclose = 0;
 
-#define MAX_AREAS     100
-#define MAX_SUBJECTS  1000
-#define NAME_LEN      100
+#define MAX_AREAS 100
+#define MAX_SUBJECTS 1000
+#define NAME_LEN 100
 
-static char subjects_dir[NAME_LEN] = "" ;
+static char subjects_dir[NAME_LEN] = "";
 
-static General_transform    transform ;
-static Transform            *linear_transform ;
+static General_transform transform;
+static Transform *linear_transform;
 
-static char *output_subject = NULL ;
+static char *output_subject = nullptr;
 
-static char *canon_name = NULL ;
+static char *canon_name = nullptr;
 
 #if 0
 typedef struct {
@@ -92,118 +91,119 @@ int LabelFromCanonical(LABEL *area, MRI_SURFACE *mris) ;
 int LabelToFlat(LABEL *area, MRI_SURFACE *mris) ;
 #endif
 
-int
-main(int argc, char *argv[]) {
-  char         **av ;
-  int          ac, nargs ;
-  char         *cp, label_fname[100], *subject_name, *label_name,
-  *out_fname, *patch_name, surf_fname[100], hemi[10] ;
-  LABEL        *area ;
-  MRI_SURFACE  *mris ;
+int main(int argc, char *argv[]) {
+  char **av;
+  int ac, nargs;
+  char *cp, label_fname[100], *subject_name, *label_name, *out_fname,
+      *patch_name, surf_fname[100], hemi[10];
+  LABEL *area;
+  MRI_SURFACE *mris;
 
   /* rkt: check for and handle version tag */
-  nargs = handle_version_option (argc, argv, "$Id: label2flat.c,v 1.9 2016/12/11 15:13:53 zkaufman Exp $", "$Name:  $");
+  nargs = handle_version_option(
+      argc, argv, "$Id: label2flat.c,v 1.9 2016/12/11 15:13:53 zkaufman Exp $",
+      "$Name:  $");
   if (nargs && argc - nargs == 1)
-    exit (0);
+    exit(0);
   argc -= nargs;
 
-  Progname = argv[0] ;
-  ErrorInit(NULL, NULL, NULL) ;
-  DiagInit(NULL, NULL, NULL) ;
+  Progname = argv[0];
+  ErrorInit(NULL, NULL, NULL);
+  DiagInit(nullptr, nullptr, nullptr);
 
   /* read in command-line options */
-  ac = argc ;
-  av = argv ;
-  for ( ; argc > 1 && ISOPTION(*argv[1]) ; argc--, argv++) {
-    nargs = get_option(argc, argv) ;
-    argc -= nargs ;
-    argv += nargs ;
+  ac = argc;
+  av = argv;
+  for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
+    nargs = get_option(argc, argv);
+    argc -= nargs;
+    argv += nargs;
   }
 
   if (argc < 5)
-    print_usage() ;
+    print_usage();
 
-  subject_name = argv[1] ;
-  label_name = argv[2] ;
-  patch_name = argv[3] ;
-  out_fname = argv[4] ;
-  cp = getenv("SUBJECTS_DIR") ;
+  subject_name = argv[1];
+  label_name = argv[2];
+  patch_name = argv[3];
+  out_fname = argv[4];
+  cp = getenv("SUBJECTS_DIR");
   if (!cp)
-    ErrorExit(ERROR_BADPARM, "no subjects directory in environment.\n") ;
-  strcpy(subjects_dir, cp) ;
+    ErrorExit(ERROR_BADPARM, "no subjects directory in environment.\n");
+  strcpy(subjects_dir, cp);
 
-  sprintf(label_fname, "%s/%s/label/%s.label",
-          subjects_dir, subject_name, label_name) ;
+  sprintf(label_fname, "%s/%s/label/%s.label", subjects_dir, subject_name,
+          label_name);
 
-  linear_transform = load_transform(subject_name, &transform) ;
+  linear_transform = load_transform(subject_name, &transform);
 
-  cp = strrchr(patch_name, '.') ;
+  cp = strrchr(patch_name, '.');
   if (!cp)
-    strcpy(hemi, "lh") ;
+    strcpy(hemi, "lh");
   else
-    strncpy(hemi, cp-2, 2) ;
-  hemi[2] = 0 ;
+    strncpy(hemi, cp - 2, 2);
+  hemi[2] = 0;
   sprintf(surf_fname, "%s/%s/surf/%s.orig", subjects_dir, subject_name, hemi);
-  fprintf(stderr, "reading surface %s...\n", surf_fname) ;
-  mris = MRISread(surf_fname) ;
+  fprintf(stderr, "reading surface %s...\n", surf_fname);
+  mris = MRISread(surf_fname);
   if (!mris)
-    ErrorExit(ERROR_BADFILE, "%s: could not read surface file %s.",
-              Progname, surf_fname) ;
+    ErrorExit(ERROR_BADFILE, "%s: could not read surface file %s.", Progname,
+              surf_fname);
   if (MRISreadPatch(mris, patch_name) != NO_ERROR)
-    exit(Gerror) ;
+    exit(Gerror);
 
-  area = LabelRead(subject_name, label_name) ;
-  if (canon_name)   /* put it onto a canonical surface */
+  area = LabelRead(subject_name, label_name);
+  if (canon_name) /* put it onto a canonical surface */
   {
-    cp = strrchr(canon_name, '.') ;
-    if (cp)   /* hemisphere specified explicitly */
+    cp = strrchr(canon_name, '.');
+    if (cp) /* hemisphere specified explicitly */
       sprintf(surf_fname, "%s/%s/surf/%s", subjects_dir, subject_name,
-              canon_name) ;
+              canon_name);
     else
-      sprintf(surf_fname, "%s/%s/surf/%s.%s", subjects_dir, subject_name,
-              hemi, canon_name) ;
-    MRISreadCanonicalCoordinates(mris, surf_fname) ;
-    LabelToCanonical(area, mris) ;
+      sprintf(surf_fname, "%s/%s/surf/%s.%s", subjects_dir, subject_name, hemi,
+              canon_name);
+    MRISreadCanonicalCoordinates(mris, surf_fname);
+    LabelToCanonical(area, mris);
   }
   if (ndilate > 0)
-    LabelDilate(area, mris, ndilate, CURRENT_VERTICES) ;
+    LabelDilate(area, mris, ndilate, CURRENT_VERTICES);
   if (nerode > 0)
-    LabelErode(area, mris, nerode) ;
-  if (output_subject)   /* write onto a different subject's flat map */
+    LabelErode(area, mris, nerode);
+  if (output_subject) /* write onto a different subject's flat map */
   {
-    MRISfree(&mris) ;
-    sprintf(surf_fname, "%s/%s/surf/%s.orig", subjects_dir, subject_name,hemi);
-    fprintf(stderr, "reading surface %s...\n", surf_fname) ;
-    mris = MRISread(surf_fname) ;
+    MRISfree(&mris);
+    sprintf(surf_fname, "%s/%s/surf/%s.orig", subjects_dir, subject_name, hemi);
+    fprintf(stderr, "reading surface %s...\n", surf_fname);
+    mris = MRISread(surf_fname);
     if (!mris)
-      ErrorExit(ERROR_BADFILE, "%s: could not read surface file %s.",
-                Progname, surf_fname) ;
+      ErrorExit(ERROR_BADFILE, "%s: could not read surface file %s.", Progname,
+                surf_fname);
     if (MRISreadPatch(mris, patch_name) != NO_ERROR)
-      exit(Gerror) ;
-    if (canon_name)   /* put it onto a canonical surface */
+      exit(Gerror);
+    if (canon_name) /* put it onto a canonical surface */
     {
-      cp = strrchr(canon_name, '.') ;
-      if (cp)   /* hemisphere specified explicitly */
+      cp = strrchr(canon_name, '.');
+      if (cp) /* hemisphere specified explicitly */
         sprintf(surf_fname, "%s/%s/surf/%s", subjects_dir, subject_name,
-                canon_name) ;
+                canon_name);
       else
         sprintf(surf_fname, "%s/%s/surf/%s.%s", subjects_dir, subject_name,
-                hemi, canon_name) ;
-      MRISreadCanonicalCoordinates(mris, surf_fname) ;
+                hemi, canon_name);
+      MRISreadCanonicalCoordinates(mris, surf_fname);
     } else
-      MRISsaveVertexPositions(mris, CANONICAL_VERTICES) ;
+      MRISsaveVertexPositions(mris, CANONICAL_VERTICES);
 
-    LabelFromCanonical(area, mris) ;
+    LabelFromCanonical(area, mris);
   }
-  LabelToFlat(area, mris) ;
+  LabelToFlat(area, mris);
   /*  LabelDump(stdout, area) ;*/
-  LabelWrite(area, out_fname) ;
-  LabelFree(&area) ;
-  MRISfree(&mris) ;
+  LabelWrite(area, out_fname);
+  LabelFree(&area);
+  MRISfree(&mris);
   if (verbose)
-    fprintf(stderr, "done.\n") ;
-  exit(0) ;
-  return(0) ;
+    fprintf(stderr, "done.\n");
+  exit(0);
+  return (0);
 }
 
 /*----------------------------------------------------------------------
@@ -211,94 +211,86 @@ main(int argc, char *argv[]) {
 
            Description:
 ----------------------------------------------------------------------*/
-static int
-get_option(int argc, char *argv[]) {
-  int  nargs = 0 ;
-  char *option ;
+static int get_option(int argc, char *argv[]) {
+  int nargs = 0;
+  char *option;
 
-  option = argv[1] + 1 ;            /* past '-' */
-  if (!stricmp(option, "dilate"))
-  {
-    ndilate = atoi(argv[2]) ;
-    printf("dilating label %d times before generating patch\n", ndilate) ;
-    nargs = 1 ;
-  }
-  else if (!stricmp(option, "erode"))
-  {
-    nerode = atoi(argv[2]) ;
-    printf("eroding label %d times before generating patch\n", nerode) ;
-    nargs = 1 ;
-  }
-  else if (!stricmp(option, "close"))
-  {
-    nclose = atoi(argv[2]) ;
-    printf("closing label %d times before generating patch\n", nclose) ;
-    ndilate = nclose ;
-    nerode = nclose ;
-    nargs = 1 ;
-  }
-  else switch (toupper(*option)) {
-  case 'C':
-    canon_name = argv[2] ;
-    fprintf(stderr, "using surface %s as canonical coordinate system.\n",
-            canon_name) ;
-    nargs = 1 ;
-    no_talairach = 1 ;
-    break ;
-  case 'V':
-    verbose = !verbose ;
-    break ;
-  case 'N':
-    no_talairach = 1 ;
-    break ;
-  case 'O':
-    output_subject = argv[2] ;
-    fprintf(stderr, "generating map on subject %s\n", output_subject) ;
-    nargs = 1 ;
-    break ;
-  case '?':
-  case 'U':
-    print_usage() ;
-    exit(1) ;
-    break ;
-  default:
-    fprintf(stderr, "unknown option %s\n", argv[1]) ;
-    exit(1) ;
-    break ;
-  }
+  option = argv[1] + 1; /* past '-' */
+  if (!stricmp(option, "dilate")) {
+    ndilate = atoi(argv[2]);
+    printf("dilating label %d times before generating patch\n", ndilate);
+    nargs = 1;
+  } else if (!stricmp(option, "erode")) {
+    nerode = atoi(argv[2]);
+    printf("eroding label %d times before generating patch\n", nerode);
+    nargs = 1;
+  } else if (!stricmp(option, "close")) {
+    nclose = atoi(argv[2]);
+    printf("closing label %d times before generating patch\n", nclose);
+    ndilate = nclose;
+    nerode = nclose;
+    nargs = 1;
+  } else
+    switch (toupper(*option)) {
+    case 'C':
+      canon_name = argv[2];
+      fprintf(stderr, "using surface %s as canonical coordinate system.\n",
+              canon_name);
+      nargs = 1;
+      no_talairach = 1;
+      break;
+    case 'V':
+      verbose = !verbose;
+      break;
+    case 'N':
+      no_talairach = 1;
+      break;
+    case 'O':
+      output_subject = argv[2];
+      fprintf(stderr, "generating map on subject %s\n", output_subject);
+      nargs = 1;
+      break;
+    case '?':
+    case 'U':
+      print_usage();
+      exit(1);
+      break;
+    default:
+      fprintf(stderr, "unknown option %s\n", argv[1]);
+      exit(1);
+      break;
+    }
 
-  return(nargs) ;
+  return (nargs);
 }
 
-static Transform *
-load_transform(char *subject_name, General_transform *transform) {
-  char xform_fname[100] ;
+static Transform *load_transform(char *subject_name,
+                                 General_transform *transform) {
+  char xform_fname[100];
 
-  sprintf(xform_fname, "%s/%s/mri/transforms/talairach.xfm",
-          subjects_dir, subject_name) ;
+  sprintf(xform_fname, "%s/%s/mri/transforms/talairach.xfm", subjects_dir,
+          subject_name);
   if (input_transform_file(xform_fname, transform) != OK)
-    ErrorExit(ERROR_NOFILE, "%s: could not load transform file '%s'",
-              Progname, xform_fname) ;
+    ErrorExit(ERROR_NOFILE, "%s: could not load transform file '%s'", Progname,
+              xform_fname);
 
   if (verbose == 2)
-    fprintf(stderr, "transform read successfully from %s\n", xform_fname) ;
-  return(get_linear_transform_ptr(transform)) ;
+    fprintf(stderr, "transform read successfully from %s\n", xform_fname);
+  return (get_linear_transform_ptr(transform));
 }
 
-static void
-print_usage(void) {
+static void print_usage() {
   printf("usage: %s [options] <subject name> <label file> <patch file> "
          "<output file>\n",
-         Progname) ;
-  exit(1) ;
+         Progname);
+  exit(1);
 }
 
-
-void
-print_help(void) {
+void print_help() {
   printf("usage: %s [options] <subject name> <label file> <patch file>"
-         " <output file>\n", Progname) ;
-  exit(1) ;
+         " <output file>\n",
+         Progname);
+  exit(1);
 }
 
 #if 0

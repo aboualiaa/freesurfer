@@ -34,140 +34,116 @@
 #include "CursorFactory.h"
 #include <vtkRenderer.h>
 
-Interactor2DPointSetEdit::Interactor2DPointSetEdit(QObject* parent) :
-  Interactor2D(parent),
-  m_bEditing( false ),
-  m_nCurrentIndex( -1 )
-{}
+Interactor2DPointSetEdit::Interactor2DPointSetEdit(QObject *parent)
+    : Interactor2D(parent), m_bEditing(false), m_nCurrentIndex(-1) {}
 
-Interactor2DPointSetEdit::~Interactor2DPointSetEdit()
-{}
+Interactor2DPointSetEdit::~Interactor2DPointSetEdit() {}
 
-bool Interactor2DPointSetEdit::ProcessMouseDownEvent( QMouseEvent* event, RenderView* renderview )
-{
-  RenderView2D* view = ( RenderView2D* )renderview;
+bool Interactor2DPointSetEdit::ProcessMouseDownEvent(QMouseEvent *event,
+                                                     RenderView *renderview) {
+  RenderView2D *view = (RenderView2D *)renderview;
 
-  if ( event->button() == Qt::LeftButton )
-  {
-    if ( event->modifiers() & CONTROL_MODIFIER && event->modifiers() & Qt::ShiftModifier )
-    {
-      view->UpdateCursorRASPosition( event->x(), event->y());
+  if (event->button() == Qt::LeftButton) {
+    if (event->modifiers() & CONTROL_MODIFIER &&
+        event->modifiers() & Qt::ShiftModifier) {
+      view->UpdateCursorRASPosition(event->x(), event->y());
       view->RequestRedraw();
       return false;
       //  return Interactor2D::ProcessMouseDownEvent( event, renderview );
     }
 
-    LayerCollection* lc = MainWindow::GetMainWindow()->GetLayerCollection( "PointSet" );
-    LayerPointSet* wp = ( LayerPointSet* )lc->GetActiveLayer();
-    if ( !wp || !wp->IsVisible() )
-    {
-      emit Error( "PointSetNotVisible", wp );
-    }
-    else
-    {
+    LayerCollection *lc =
+        MainWindow::GetMainWindow()->GetLayerCollection("PointSet");
+    LayerPointSet *wp = (LayerPointSet *)lc->GetActiveLayer();
+    if (!wp || !wp->IsVisible()) {
+      emit Error("PointSetNotVisible", wp);
+    } else {
       wp->SaveForUndo();
       m_nMousePosX = event->x();
       m_nMousePosY = event->y();
       m_bEditing = true;
 
       double ras[3];
-      view->MousePositionToRAS( m_nMousePosX, m_nMousePosY, ras );
-      if ( !(event->modifiers() & Qt::ShiftModifier) )
-      {
-        m_nCurrentIndex = wp->FindPoint( ras );
-        if ( m_nCurrentIndex < 0 )
-        {
-          m_nCurrentIndex = wp->AddPoint( ras );
+      view->MousePositionToRAS(m_nMousePosX, m_nMousePosY, ras);
+      if (!(event->modifiers() & Qt::ShiftModifier)) {
+        m_nCurrentIndex = wp->FindPoint(ras);
+        if (m_nCurrentIndex < 0) {
+          m_nCurrentIndex = wp->AddPoint(ras);
         }
-      }
-      else
-      {
-        wp->RemovePoint( ras );
+      } else {
+        wp->RemovePoint(ras);
       }
     }
 
     return false;
-  }
-  else
-  {
-    return Interactor2D::ProcessMouseDownEvent( event, renderview );  // pass down the event
+  } else {
+    return Interactor2D::ProcessMouseDownEvent(
+        event, renderview); // pass down the event
   }
 }
 
-bool Interactor2DPointSetEdit::ProcessMouseUpEvent( QMouseEvent* event, RenderView* renderview )
-{
+bool Interactor2DPointSetEdit::ProcessMouseUpEvent(QMouseEvent *event,
+                                                   RenderView *renderview) {
   // RenderView2D* view = ( RenderView2D* )renderview;
-  UpdateCursor( event, renderview );
+  UpdateCursor(event, renderview);
 
   m_bEditing = false;
   //  m_nCurrentIndex = -1;
 
-  return Interactor2D::ProcessMouseUpEvent( event, renderview );
+  return Interactor2D::ProcessMouseUpEvent(event, renderview);
 }
 
-bool Interactor2DPointSetEdit::ProcessMouseMoveEvent( QMouseEvent* event, RenderView* renderview )
-{
-  RenderView2D* view = ( RenderView2D* )renderview;
-  if ( m_bEditing )
-  {
-    UpdateCursor( event, view );
+bool Interactor2DPointSetEdit::ProcessMouseMoveEvent(QMouseEvent *event,
+                                                     RenderView *renderview) {
+  RenderView2D *view = (RenderView2D *)renderview;
+  if (m_bEditing) {
+    UpdateCursor(event, view);
     int posX = event->x();
     int posY = event->y();
     m_nMousePosX = posX;
     m_nMousePosY = posY;
-    if ( m_nCurrentIndex >= 0 )
-    {
+    if (m_nCurrentIndex >= 0) {
       double ras[3];
-      view->MousePositionToRAS( m_nMousePosX, m_nMousePosY, ras );
-      LayerPointSet* wp = ( LayerPointSet* )MainWindow::GetMainWindow()->GetActiveLayer( "PointSet" );
-      wp->UpdatePoint( m_nCurrentIndex, ras );
+      view->MousePositionToRAS(m_nMousePosX, m_nMousePosY, ras);
+      LayerPointSet *wp =
+          (LayerPointSet *)MainWindow::GetMainWindow()->GetActiveLayer(
+              "PointSet");
+      wp->UpdatePoint(m_nCurrentIndex, ras);
     }
 
     return false;
-  }
-  else
-  {
-    return Interactor2D::ProcessMouseMoveEvent( event, renderview );
+  } else {
+    return Interactor2D::ProcessMouseMoveEvent(event, renderview);
   }
 }
 
-bool Interactor2DPointSetEdit::ProcessKeyDownEvent( QKeyEvent* event, RenderView* renderview )
-{
-  UpdateCursor( event, renderview );
+bool Interactor2DPointSetEdit::ProcessKeyDownEvent(QKeyEvent *event,
+                                                   RenderView *renderview) {
+  UpdateCursor(event, renderview);
 
-  if ( !m_bEditing )
-  {
-    return Interactor2D::ProcessKeyDownEvent( event, renderview );
-  }
-  else
-  {
+  if (!m_bEditing) {
+    return Interactor2D::ProcessKeyDownEvent(event, renderview);
+  } else {
     return false;
   }
 }
 
-void Interactor2DPointSetEdit::UpdateCursor( QEvent* event, QWidget* wnd )
-{
-  if ( wnd->hasFocus() )
-  {
-    if ( event->type() == QEvent::MouseButtonPress ||
-         event->type() == QEvent::MouseButtonRelease ||
-         event->type() == QEvent::MouseMove)
-    {
-      QMouseEvent* e = ( QMouseEvent* )event;
-      if ( e->button() == Qt::MidButton || e->button() == Qt::RightButton ||
-           ( ( e->modifiers() & CONTROL_MODIFIER) && (e->modifiers() & Qt::ShiftModifier) ) )
-      {
-        Interactor2D::UpdateCursor( event, wnd );
-      }
-      else
-      {
+void Interactor2DPointSetEdit::UpdateCursor(QEvent *event, QWidget *wnd) {
+  if (wnd->hasFocus()) {
+    if (event->type() == QEvent::MouseButtonPress ||
+        event->type() == QEvent::MouseButtonRelease ||
+        event->type() == QEvent::MouseMove) {
+      QMouseEvent *e = (QMouseEvent *)event;
+      if (e->button() == Qt::MidButton || e->button() == Qt::RightButton ||
+          ((e->modifiers() & CONTROL_MODIFIER) &&
+           (e->modifiers() & Qt::ShiftModifier))) {
+        Interactor2D::UpdateCursor(event, wnd);
+      } else {
         // set own cursor
-        wnd->setCursor( QCursor() );
+        wnd->setCursor(QCursor());
       }
     }
-  }
-  else
-  {
-    Interactor2D::UpdateCursor( event, wnd );
+  } else {
+    Interactor2D::UpdateCursor(event, wnd);
   }
 }

@@ -19,8 +19,13 @@
 #include "mrishash.h"
 #include "mrisurf_SurfaceFromMRISPV_generated.h"
 
-MRIS_HASH_TABLE* MHTcreateFaceTable             (SurfaceFromMRISPV::XYZPositionConsequences::Surface surface);
-MRIS_HASH_TABLE* MHTcreateFaceTable_Resolution  (SurfaceFromMRISPV::XYZPositionConsequences::Surface surface, int which, float res);
-MRIS_HASH_TABLE* MHTcreateVertexTable           (SurfaceFromMRISPV::XYZPositionConsequences::Surface surface, int which);
-MRIS_HASH_TABLE* MHTcreateVertexTable_Resolution(SurfaceFromMRISPV::XYZPositionConsequences::Surface surface, int which, float res);
-
+MRIS_HASH_TABLE *
+MHTcreateFaceTable(SurfaceFromMRISPV::XYZPositionConsequences::Surface surface);
+MRIS_HASH_TABLE *MHTcreateFaceTable_Resolution(
+    SurfaceFromMRISPV::XYZPositionConsequences::Surface surface, int which,
+    float res);
+MRIS_HASH_TABLE *MHTcreateVertexTable(
+    SurfaceFromMRISPV::XYZPositionConsequences::Surface surface, int which);
+MRIS_HASH_TABLE *MHTcreateVertexTable_Resolution(
+    SurfaceFromMRISPV::XYZPositionConsequences::Surface surface, int which,
+    float res);

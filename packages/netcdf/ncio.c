@@ -3,7 +3,7 @@
  */
 
 #if defined(_CRAY)
-#   include "ffio.c"
+#include "ffio.c"
 #else
-#   include "posixio.c"
+#include "posixio.c"
 #endif

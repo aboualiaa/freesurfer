@@ -12,11 +12,11 @@
 /*-----------------------------------------------------
   INCLUDE FILES
   -------------------------------------------------------*/
-#include <math.h>
+#include <cmath>
 #include <memory.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include "diag.h"
 #include "error.h"
@@ -40,22 +40,19 @@ static float flmax(float a, float b) { return (a > b) ? a : b; }
 
   Description
   ------------------------------------------------------*/
-int JHISTOfree(JOINT_HISTOGRAM **pjhisto)
-{
+int JHISTOfree(JOINT_HISTOGRAM **pjhisto) {
   JOINT_HISTOGRAM *jhisto;
 
   jhisto = *pjhisto;
-  *pjhisto = NULL;
+  *pjhisto = nullptr;
   if (jhisto) {
     if (jhisto->counts) {
       free(jhisto->counts);
-      jhisto->counts = NULL;
-    }
-    else
+      jhisto->counts = nullptr;
+    } else
       DiagBreak();
     free(jhisto);
-  }
-  else
+  } else
     DiagBreak();
 
   return (NO_ERROR);
@@ -68,25 +65,24 @@ int JHISTOfree(JOINT_HISTOGRAM **pjhisto)
 
   Description
   ------------------------------------------------------*/
-int JHISTOdump(JOINT_HISTOGRAM *jhisto, FILE *fp)
-{
+int JHISTOdump(JOINT_HISTOGRAM *jhisto, FILE *fp) {
   int bin_no_1, bin_no_2;
 
   if (!jhisto)
     fprintf(stderr, "NULL joint histogram");
   else {
-    fprintf(
-        fp, "nbins_1 = %d, nbins_2 = %d, sample_count = %d\n", jhisto->nbins_1, jhisto->nbins_2, jhisto->sample_count);
+    fprintf(fp, "nbins_1 = %d, nbins_2 = %d, sample_count = %d\n",
+            jhisto->nbins_1, jhisto->nbins_2, jhisto->sample_count);
     for (bin_no_1 = 0; bin_no_1 < jhisto->nbins_1; bin_no_1++)
       for (bin_no_2 = 0; bin_no_2 < jhisto->nbins_2; bin_no_2++)
-        fprintf(fp, "%f ", jhisto->counts[bin_no_1 * jhisto->nbins_2 + bin_no_2]);
+        fprintf(fp, "%f ",
+                jhisto->counts[bin_no_1 * jhisto->nbins_2 + bin_no_2]);
     fprintf(fp, "\n");
   }
   return (NO_ERROR);
 }
 
-int JHISTOwriteInto(JOINT_HISTOGRAM *h, FILE *fp)
-{
+int JHISTOwriteInto(JOINT_HISTOGRAM *h, FILE *fp) {
   int b1, b2;
 
   fwriteInt(h->nbins_1, fp);
@@ -96,14 +92,14 @@ int JHISTOwriteInto(JOINT_HISTOGRAM *h, FILE *fp)
   fwriteInt(h->sample_count, fp);
 
   for (b1 = 0; b1 < h->nbins_1; b1++)
-    for (b2 = 0; b2 < h->nbins_2; b2++) fwriteInt(h->counts[b1 * h->nbins_2 + b2], fp);
+    for (b2 = 0; b2 < h->nbins_2; b2++)
+      fwriteInt(h->counts[b1 * h->nbins_2 + b2], fp);
 
   return (NO_ERROR);
 }
 
-JOINT_HISTOGRAM *JHISTOreadFrom(FILE *fp)
-{
-  int b1, b2, nbins_1, nbins_2;  //, sample_count;
+JOINT_HISTOGRAM *JHISTOreadFrom(FILE *fp) {
+  int b1, b2, nbins_1, nbins_2; //, sample_count;
   JOINT_HISTOGRAM *jh;
 
   nbins_1 = freadInt(fp);
@@ -115,17 +111,19 @@ JOINT_HISTOGRAM *JHISTOreadFrom(FILE *fp)
   freadInt(fp);
 
   for (b1 = 0; b1 < jh->nbins_1; b1++)
-    for (b2 = 0; b2 < jh->nbins_2; b2++) jh->counts[b1 * jh->nbins_2 + b2] = freadInt(fp);
+    for (b2 = 0; b2 < jh->nbins_2; b2++)
+      jh->counts[b1 * jh->nbins_2 + b2] = freadInt(fp);
 
   return (jh);
 }
 
-JOINT_HISTOGRAM *JHISTOalloc(int nbins_1, int nbins_2)
-{
+JOINT_HISTOGRAM *JHISTOalloc(int nbins_1, int nbins_2) {
   JOINT_HISTOGRAM *jhisto;
 
   jhisto = (JOINT_HISTOGRAM *)calloc(1, sizeof(JOINT_HISTOGRAM));
-  if (!jhisto) ErrorExit(ERROR_NO_MEMORY, "JHISTOalloc(%d, %d): allocation failed", nbins_1, nbins_2);
+  if (!jhisto)
+    ErrorExit(ERROR_NO_MEMORY, "JHISTOalloc(%d, %d): allocation failed",
+              nbins_1, nbins_2);
 
   // histo->bins = (float *)calloc(nbins, sizeof(float)) ;
 
@@ -138,11 +136,13 @@ JOINT_HISTOGRAM *JHISTOalloc(int nbins_1, int nbins_2)
   return (jhisto);
 }
 
-JOINT_HISTOGRAM *JHISTOrealloc(JOINT_HISTOGRAM *jhisto, int nbins_1, int nbins_2)
-{
-  if (jhisto == NULL) return (JHISTOalloc(nbins_1, nbins_2));
+JOINT_HISTOGRAM *JHISTOrealloc(JOINT_HISTOGRAM *jhisto, int nbins_1,
+                               int nbins_2) {
+  if (jhisto == nullptr)
+    return (JHISTOalloc(nbins_1, nbins_2));
 
-  if (jhisto->counts) free(jhisto->counts);
+  if (jhisto->counts)
+    free(jhisto->counts);
   jhisto->counts = (float *)calloc(nbins_1 * nbins_2, sizeof(float));
 
   jhisto->nbins_1 = nbins_1;
@@ -154,8 +154,7 @@ JOINT_HISTOGRAM *JHISTOrealloc(JOINT_HISTOGRAM *jhisto, int nbins_1, int nbins_2
 //////////////////
 //////////////////
 
-int JHISTOfindBin(JOINT_HISTOGRAM *jhisto, double val1, double val2)
-{
+int JHISTOfindBin(JOINT_HISTOGRAM *jhisto, double val1, double val2) {
   int bins1 = jhisto->nbins_1;
   int bins2 = jhisto->nbins_2;
 
@@ -168,8 +167,7 @@ int JHISTOfindBin(JOINT_HISTOGRAM *jhisto, double val1, double val2)
   return (i * bins2 + j);
 }
 
-void JHISTOfill(MRI *mri1, MRI *mri2, JOINT_HISTOGRAM *jhisto)
-{
+void JHISTOfill(MRI *mri1, MRI *mri2, JOINT_HISTOGRAM *jhisto) {
   // MRIcheckVolDims(mri1, mri2);
 
   int width = mri1->width;
@@ -186,7 +184,8 @@ void JHISTOfill(MRI *mri1, MRI *mri2, JOINT_HISTOGRAM *jhisto)
   MRIvalRange(mri2, &min2, &max2);
   jhisto->min = flmin(min1, min2);
   jhisto->max = flmax(max1, max2);
-  // printf("Min max of the joint histogram: (%f, %f)\n", jhisto->min, jhisto->max);
+  // printf("Min max of the joint histogram: (%f, %f)\n", jhisto->min,
+  // jhisto->max);
   //
 
   for (f = 0; f < frame; f++)
@@ -208,8 +207,7 @@ void JHISTOfill(MRI *mri1, MRI *mri2, JOINT_HISTOGRAM *jhisto)
   fclose(fp);
 }
 
-double JHISTOgetEntropy(JOINT_HISTOGRAM *jhisto)
-{
+double JHISTOgetEntropy(JOINT_HISTOGRAM *jhisto) {
   double result = 0, p;
   int i, count;
   int total_bucket_count = jhisto->nbins_1 * jhisto->nbins_2;
@@ -233,7 +231,8 @@ MRIcomputeMi(MRI *mri1, MRI *mri2, int bins1, int bins2)
   MRIvalRange(mri2, &min2, &max2) ;
 
   JOINT_HISTOGRAM* jhisto = JHISTOalloc(bins1, bins2);
-  JHISTOfill(mri1, mri2, jhisto); // TODO: want to make histo and jhisto be closer?
+  JHISTOfill(mri1, mri2, jhisto); // TODO: want to make histo and jhisto be
+closer?
 
   //HISTOGRAM* histo1 = HISTOalloc(bins1);
   HISTOGRAM* histo1 = HISTObins(bins1, min1, max1);

@@ -142,9 +142,9 @@
 
 /* Martin Hoerrmann. */
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -155,10 +155,11 @@
 
 #include "Bruker.h"
 
-#define V4_LOAD(v, x, y, z, r) (VECTOR_ELT(v, 1) = x, VECTOR_ELT(v, 2) = y, VECTOR_ELT(v, 3) = z, VECTOR_ELT(v, 4) = r);
+#define V4_LOAD(v, x, y, z, r)                                                 \
+  (VECTOR_ELT(v, 1) = x, VECTOR_ELT(v, 2) = y, VECTOR_ELT(v, 3) = z,           \
+   VECTOR_ELT(v, 4) = r);
 
-MRI *brukerRead(char *fname, int read_volume)
-{
+MRI *brukerRead(char *fname, int read_volume) {
   char methodFile[1024];
   char acqpFile[1024];
   char dataFile[1024];
@@ -168,15 +169,16 @@ MRI *brukerRead(char *fname, int read_volume)
   double TR, TE, TI, flip_angle;
 
   int succeed = 0;
-  MRI *mri = 0;
+  MRI *mri = nullptr;
 
   int width, height, depth;
   int nframes;
   int type;
 
   // use stat to do this.
-  if ((succeed = checkBrukerFiles(fname, methodFile, acqpFile, dataFile, d3procFile, recoFile, 1)) == 0)
-    return (MRI *)0;
+  if ((succeed = checkBrukerFiles(fname, methodFile, acqpFile, dataFile,
+                                  d3procFile, recoFile, 1)) == 0)
+    return (MRI *)nullptr;
 
   ///////////////////////////////////////////////////////////////////////////
   // Bruker pdata/1/reco
@@ -184,12 +186,17 @@ MRI *brukerRead(char *fname, int read_volume)
   // contain the 2dseq bshort or bfloat data information
   ///////////////////////////////////////////////////////////////////////////
   // read reco to get reconstruction info
-  if ((succeed = readBrukerReco(recoFile, &bTran)) == 0) return (MRI *)0;
+  if ((succeed = readBrukerReco(recoFile, &bTran)) == 0)
+    return (MRI *)nullptr;
   // read reco width, height depth, type, and nframes
-  if ((succeed = readBrukerD3proc(d3procFile, &width, &height, &depth, &type, &nframes)) == 0) return (MRI *)0;
+  if ((succeed = readBrukerD3proc(d3procFile, &width, &height, &depth, &type,
+                                  &nframes)) == 0)
+    return (MRI *)nullptr;
 
   // read acqp to get actual acquisition information
-  if ((succeed = readBrukerAcqp(acqpFile, &TR, &TE, &TI, &flip_angle, &bTran)) == 0) return (MRI *)0;
+  if ((succeed =
+           readBrukerAcqp(acqpFile, &TR, &TE, &TI, &flip_angle, &bTran)) == 0)
+    return (MRI *)nullptr;
 
   // now allocate MRI
   type = bTran.type;
@@ -205,86 +212,101 @@ MRI *brukerRead(char *fname, int read_volume)
   // now ready to read volume
   if (read_volume) {
     if ((succeed = readBrukerVolume(mri, dataFile)) == 0) {
-      if (mri) MRIfree(&mri);
-      return (MRI *)0;
+      if (mri)
+        MRIfree(&mri);
+      return (MRI *)nullptr;
     }
   }
   return mri;
 }
 
-int checkBrukerFiles(
-    char *fname, char *methodFile, char *acqpFile, char *dataFile, char *d3procFile, char *recoFile, int flag)
-{
+int checkBrukerFiles(char *fname, char *methodFile, char *acqpFile,
+                     char *dataFile, char *d3procFile, char *recoFile,
+                     int flag) {
   struct stat stat_buf;
 
   if (stat(fname, &stat_buf) < 0) {
-    if (flag) fprintf(stderr, "ERROR: could not stat %s.\n", fname);
+    if (flag)
+      fprintf(stderr, "ERROR: could not stat %s.\n", fname);
     return 0;
   }
   // first check fname is a directory
   if (S_ISDIR(stat_buf.st_mode) == 0) {
-    if (flag) fprintf(stderr, "ERROR: %s is not a directory.\n", fname);
+    if (flag)
+      fprintf(stderr, "ERROR: %s is not a directory.\n", fname);
     return 0;
   }
-  if (flag) printf("INFO: directory %s \n", fname);
+  if (flag)
+    printf("INFO: directory %s \n", fname);
   // build up methodFile name
   strcpy(methodFile, fname);
   strcat(methodFile, "/method");
   if (stat(methodFile, &stat_buf) < 0) {
-    if (flag) fprintf(stderr, "ERROR: could not stat %s.\n", methodFile);
+    if (flag)
+      fprintf(stderr, "ERROR: could not stat %s.\n", methodFile);
     return 0;
   }
-  if (flag) printf("INFO:    method %s\n", methodFile);
+  if (flag)
+    printf("INFO:    method %s\n", methodFile);
   // build up acqpFile name
   strcpy(acqpFile, fname);
   strcat(acqpFile, "/acqp");
   if (stat(acqpFile, &stat_buf) < 0) {
-    if (flag) fprintf(stderr, "ERROR: could not stat %s.\n", acqpFile);
+    if (flag)
+      fprintf(stderr, "ERROR: could not stat %s.\n", acqpFile);
     return 0;
   }
-  if (flag) printf("INFO:      acqp %s\n", acqpFile);
+  if (flag)
+    printf("INFO:      acqp %s\n", acqpFile);
   // build up dataFile name
 
   strcpy(dataFile, fname);
   strcat(dataFile, "/pdata/1/2dseq");
   if (stat(dataFile, &stat_buf) < 0) {
-    if (flag) fprintf(stderr, "ERROR: could not stat %s.\n", dataFile);
+    if (flag)
+      fprintf(stderr, "ERROR: could not stat %s.\n", dataFile);
     return 0;
   }
-  if (flag) printf("INFO:     2dseq %s \n", dataFile);
+  if (flag)
+    printf("INFO:     2dseq %s \n", dataFile);
   // build up d3proc file
   strcpy(d3procFile, fname);
   strcat(d3procFile, "/pdata/1/d3proc");
   if (stat(d3procFile, &stat_buf) < 0) {
-    if (flag) fprintf(stderr, "ERROR: could not stat %s.\n", d3procFile);
+    if (flag)
+      fprintf(stderr, "ERROR: could not stat %s.\n", d3procFile);
     return 0;
   }
-  if (flag) printf("INFO:    d3proc %s \n", d3procFile);
+  if (flag)
+    printf("INFO:    d3proc %s \n", d3procFile);
   // build up reco file
   strcpy(recoFile, fname);
   strcat(recoFile, "/pdata/1/reco");
   if (stat(recoFile, &stat_buf) < 0) {
-    if (flag) fprintf(stderr, "ERROR: could not stat %s.\n", recoFile);
+    if (flag)
+      fprintf(stderr, "ERROR: could not stat %s.\n", recoFile);
     return 0;
   }
-  if (flag) printf("INFO:    d3proc %s \n", recoFile);
+  if (flag)
+    printf("INFO:    d3proc %s \n", recoFile);
 
   return 1;
 }
 
-int splitParameterValue(char *sWholeLine, char *sParameter, char *sValue)
-{
+int splitParameterValue(char *sWholeLine, char *sParameter, char *sValue) {
   char *p0, *p1;
 
   // check to make sure that ## is at the beginning
   p0 = strstr(sWholeLine, "##");
-  if (!p0) return (0); /* ignore line */
+  if (!p0)
+    return (0); /* ignore line */
   //
   p0 += 2; /* advance past ## */
   // locate '='
   p1 = strchr(p0, '=');
-  if (!p1) return (0);
-  *p1 = '\0';  // mark end of Parameter
+  if (!p1)
+    return (0);
+  *p1 = '\0'; // mark end of Parameter
   // copy parameter
   strcpy(sParameter, p0);
   // now points to Value
@@ -301,45 +323,45 @@ int splitParameterValue(char *sWholeLine, char *sParameter, char *sValue)
   return 1;
 }
 
-int readBrukerD3proc(char *d3procFile, int *px, int *py, int *pz, int *ptype, int *pnframes)
-{
-  FILE *fp = 0;
+int readBrukerD3proc(char *d3procFile, int *px, int *py, int *pz, int *ptype,
+                     int *pnframes) {
+  FILE *fp = nullptr;
   char line[512];
   char Value[128];
   char Parameter[256];
   // int lRead;
 
   fp = fopen(d3procFile, "r");
-  if (fp == 0) {
+  if (fp == nullptr) {
     fprintf(stderr, "ERROR: could not open d3proc %s", d3procFile);
     return 0;
   }
   while (fgets(line, sizeof(line), fp)) {
-    if (!splitParameterValue(line, Parameter, Value)) continue;
+    if (!splitParameterValue(line, Parameter, Value))
+      continue;
 
     // now gets the values
-    if (!strcmp(Parameter, "END")) break;
+    if (!strcmp(Parameter, "END"))
+      break;
     // get volume size
     else if (!strcmp(Parameter, "$IM_SIX"))
-      // lRead = 
+      // lRead =
       sscanf(Value, "%d", px);
     else if (!strcmp(Parameter, "$IM_SIY"))
-      // lRead = 
+      // lRead =
       sscanf(Value, "%d", py);
     else if (!strcmp(Parameter, "$IM_SIZ"))
-      // lRead = 
+      // lRead =
       sscanf(Value, "%d", pz);
     else if (!strcmp(Parameter, "$IM_SIT")) {
       sscanf(Value, "%d", pz);
-    }
-    else if (!strcmp(Parameter, "$IM_SIT")) {
+    } else if (!strcmp(Parameter, "$IM_SIT")) {
       sscanf(Value, "%d", pnframes);
       if (*pnframes > 1) {
         fprintf(stderr, "ERROR: nframes %d but one is supported.\n", *pnframes);
         return 0;
       }
-    }
-    else if (!strcmp(Parameter, "$DATTYPE")) {
+    } else if (!strcmp(Parameter, "$DATTYPE")) {
       if (strcmp(Value, "ip_short") == 0)
         *ptype = MRI_SHORT;
       else if (strcmp(Value, "ip_int") == 0)
@@ -357,8 +379,7 @@ int readBrukerD3proc(char *d3procFile, int *px, int *py, int *pz, int *ptype, in
   return 1;
 }
 
-int buildVoxToRASTransform(MRI *mri, BrukerTransform *pTran)
-{
+int buildVoxToRASTransform(MRI *mri, BrukerTransform *pTran) {
   MATRIX *transposMatrix;
   MATRIX *voxmmMatrix;
   MATRIX *swapMatrix;
@@ -377,65 +398,28 @@ int buildVoxToRASTransform(MRI *mri, BrukerTransform *pTran)
   voxInvMatrix = MatrixAlloc(4, 4, MATRIX_REAL);
   //
   if (pTran->transposition)
-    stuff_four_by_four(transposMatrix, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    stuff_four_by_four(transposMatrix, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+                       0, 1);
   else
-    stuff_four_by_four(transposMatrix, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    stuff_four_by_four(transposMatrix, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0,
+                       0, 1);
   //
-  stuff_four_by_four(voxmmMatrix,
-                     pTran->vox_size[0],
-                     0,
-                     0,
-                     pTran->offset[0],
-                     0,
-                     pTran->vox_size[1],
-                     0,
-                     pTran->offset[1],
-                     0,
-                     0,
-                     pTran->vox_size[2],
-                     pTran->offset[2],
-                     0,
-                     0,
-                     0,
+  stuff_four_by_four(voxmmMatrix, pTran->vox_size[0], 0, 0, pTran->offset[0], 0,
+                     pTran->vox_size[1], 0, pTran->offset[1], 0, 0,
+                     pTran->vox_size[2], pTran->offset[2], 0, 0, 0, 1);
+  //
+  stuff_four_by_four(swapMatrix, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0, 0,
                      1);
   //
-  stuff_four_by_four(swapMatrix, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+  stuff_four_by_four(translationMatrix, 1, 0, 0, pTran->read_offset, 0, 1, 0,
+                     pTran->phase1_offset, 0, 0, 1, pTran->slice_offset, 0, 0,
+                     0, 1);
   //
-  stuff_four_by_four(translationMatrix,
-                     1,
-                     0,
-                     0,
-                     pTran->read_offset,
-                     0,
-                     1,
-                     0,
-                     pTran->phase1_offset,
-                     0,
-                     0,
-                     1,
-                     pTran->slice_offset,
-                     0,
-                     0,
-                     0,
-                     1);
-  //
-  stuff_four_by_four(rotationMatrix,
-                     pTran->grad_matrix[0],
-                     pTran->grad_matrix[3],
-                     pTran->grad_matrix[6],
-                     0,
-                     pTran->grad_matrix[1],
-                     pTran->grad_matrix[4],
-                     pTran->grad_matrix[7],
-                     0,
-                     pTran->grad_matrix[2],
-                     pTran->grad_matrix[5],
-                     pTran->grad_matrix[8],
-                     0,
-                     0,
-                     0,
-                     0,
-                     1);
+  stuff_four_by_four(
+      rotationMatrix, pTran->grad_matrix[0], pTran->grad_matrix[3],
+      pTran->grad_matrix[6], 0, pTran->grad_matrix[1], pTran->grad_matrix[4],
+      pTran->grad_matrix[7], 0, pTran->grad_matrix[2], pTran->grad_matrix[5],
+      pTran->grad_matrix[8], 0, 0, 0, 0, 1);
 
   tmp = MatrixMultiply(voxmmMatrix, transposMatrix, NULL);
   MatrixMultiply(swapMatrix, tmp, tmp);
@@ -443,7 +427,8 @@ int buildVoxToRASTransform(MRI *mri, BrukerTransform *pTran)
   MatrixMultiply(rotationMatrix, tmp, tmp);
   //
   ctr = VectorAlloc(4, MATRIX_REAL);
-  V4_LOAD(ctr, (double)mri->width / 2.0, (double)mri->height / 2.0, (double)mri->depth / 2.0, 1.);
+  V4_LOAD(ctr, (double)mri->width / 2.0, (double)mri->height / 2.0,
+          (double)mri->depth / 2.0, 1.);
   rcs = MatrixMultiply(tmp, ctr, NULL);
 
   mri->c_r = V3_X(rcs);
@@ -452,41 +437,13 @@ int buildVoxToRASTransform(MRI *mri, BrukerTransform *pTran)
 
   //
   if (pTran->transposition)
-    stuff_four_by_four(voxInvMatrix,
-                       1. / pTran->vox_size[1],
-                       0,
-                       0,
-                       0,
-                       0,
-                       1. / pTran->vox_size[0],
-                       0,
-                       0,
-                       0,
-                       0,
-                       1. / pTran->vox_size[2],
-                       0,
-                       0,
-                       0,
-                       0,
-                       1);
+    stuff_four_by_four(voxInvMatrix, 1. / pTran->vox_size[1], 0, 0, 0, 0,
+                       1. / pTran->vox_size[0], 0, 0, 0, 0,
+                       1. / pTran->vox_size[2], 0, 0, 0, 0, 1);
   else
-    stuff_four_by_four(voxInvMatrix,
-                       1. / pTran->vox_size[0],
-                       0,
-                       0,
-                       0,
-                       0,
-                       1. / pTran->vox_size[1],
-                       0,
-                       0,
-                       0,
-                       0,
-                       1. / pTran->vox_size[2],
-                       0,
-                       0,
-                       0,
-                       0,
-                       1);
+    stuff_four_by_four(voxInvMatrix, 1. / pTran->vox_size[0], 0, 0, 0, 0,
+                       1. / pTran->vox_size[1], 0, 0, 0, 0,
+                       1. / pTran->vox_size[2], 0, 0, 0, 0, 1);
 
   // now obtain only the rotation and the translation part in MGH way
   rottranMatrix = MatrixMultiply(voxInvMatrix, tmp, NULL);
@@ -502,8 +459,7 @@ int buildVoxToRASTransform(MRI *mri, BrukerTransform *pTran)
     mri->z_r = *MATRIX_RELT(rottranMatrix, 1, 3);
     mri->z_a = *MATRIX_RELT(rottranMatrix, 2, 3);
     mri->z_s = *MATRIX_RELT(rottranMatrix, 3, 3);
-  }
-  else  // 2d case just fake
+  } else // 2d case just fake
   {
     mri->x_r = -1;
     mri->x_a = 0;
@@ -520,8 +476,7 @@ int buildVoxToRASTransform(MRI *mri, BrukerTransform *pTran)
     mri->xsize = pTran->vox_size[1];
     mri->ysize = pTran->vox_size[0];
     mri->zsize = pTran->vox_size[2];
-  }
-  else {
+  } else {
     mri->xsize = pTran->vox_size[0];
     mri->ysize = pTran->vox_size[1];
     mri->zsize = pTran->vox_size[2];
@@ -543,9 +498,9 @@ int buildVoxToRASTransform(MRI *mri, BrukerTransform *pTran)
   return 1;
 }
 
-int readBrukerAcqp(char *acqpFile, double *pTR, double *pTE, double *pTI, double *pflip_angle, BrukerTransform *bTran)
-{
-  FILE *fp = 0;
+int readBrukerAcqp(char *acqpFile, double *pTR, double *pTE, double *pTI,
+                   double *pflip_angle, BrukerTransform *bTran) {
+  FILE *fp = nullptr;
   char line[512];
   char Parameter[256];
   char Value[128];
@@ -553,12 +508,13 @@ int readBrukerAcqp(char *acqpFile, double *pTR, double *pTE, double *pTI, double
   int dim = 0;
 
   fp = fopen(acqpFile, "r");
-  if (fp == 0) {
+  if (fp == nullptr) {
     fprintf(stderr, "ERROR: could not open acqpFile %s", acqpFile);
     return 0;
   }
   while (fgets(line, sizeof(line), fp)) {
-    if (!splitParameterValue(line, Parameter, Value)) continue;
+    if (!splitParameterValue(line, Parameter, Value))
+      continue;
 
     // now gets the values
     if (!strcmp(Parameter, "END"))
@@ -625,24 +581,21 @@ int readBrukerAcqp(char *acqpFile, double *pTR, double *pTE, double *pTI, double
         return 0;
       }
       sscanf(line, "%lf", &bTran->read_offset);
-    }
-    else if (!strcmp(Parameter, "$ACQ_phase1_offset")) {
+    } else if (!strcmp(Parameter, "$ACQ_phase1_offset")) {
       if (!fgets(line, sizeof(line), fp)) {
         fprintf(stderr, "ERROR: float value must follow ACQ_phase1_offset");
         fclose(fp);
         return 0;
       }
       sscanf(line, "%lf", &bTran->phase1_offset);
-    }
-    else if (!strcmp(Parameter, "$ACQ_slice_offset")) {
+    } else if (!strcmp(Parameter, "$ACQ_slice_offset")) {
       if (!fgets(line, sizeof(line), fp)) {
         fprintf(stderr, "ERROR: float value must follow ACQ_slice_offset");
         fclose(fp);
         return 0;
       }
       sscanf(line, "%lf", &bTran->slice_offset);
-    }
-    else if (!strcmp(Parameter, "$ACQ_grad_matrix")) {
+    } else if (!strcmp(Parameter, "$ACQ_grad_matrix")) {
       if (!fgets(line, sizeof(line), fp)) {
         fprintf(stderr, "ERROR: float value must follow ACQ_slice_offset");
         fclose(fp);
@@ -650,16 +603,11 @@ int readBrukerAcqp(char *acqpFile, double *pTR, double *pTE, double *pTI, double
       }
       // for 2d image it may contain many 9 element arrays
       // for 3d image it is just one.
-      sscanf(line,
-             "%lf %lf %lf %lf %lf %lf %lf %lf %lf ",
-             &bTran->grad_matrix[0],
-             &bTran->grad_matrix[1],
-             &bTran->grad_matrix[2],
-             &bTran->grad_matrix[3],
-             &bTran->grad_matrix[4],
-             &bTran->grad_matrix[5],
-             &bTran->grad_matrix[6],
-             &bTran->grad_matrix[7],
+      sscanf(line, "%lf %lf %lf %lf %lf %lf %lf %lf %lf ",
+             &bTran->grad_matrix[0], &bTran->grad_matrix[1],
+             &bTran->grad_matrix[2], &bTran->grad_matrix[3],
+             &bTran->grad_matrix[4], &bTran->grad_matrix[5],
+             &bTran->grad_matrix[6], &bTran->grad_matrix[7],
              &bTran->grad_matrix[8]);
     }
   }
@@ -668,9 +616,8 @@ int readBrukerAcqp(char *acqpFile, double *pTR, double *pTE, double *pTI, double
   return 1;
 }
 
-int readBrukerReco(char *recoFile, BrukerTransform *pTran)
-{
-  FILE *fp = 0;
+int readBrukerReco(char *recoFile, BrukerTransform *pTran) {
+  FILE *fp = nullptr;
   char line[512];
   char Parameter[256];
   char Value[128];
@@ -679,15 +626,17 @@ int readBrukerReco(char *recoFile, BrukerTransform *pTran)
   int i;
 
   fp = fopen(recoFile, "r");
-  if (fp == 0) {
+  if (fp == nullptr) {
     fprintf(stderr, "ERROR: could not open recoFile %s", recoFile);
     return 0;
   }
   while (fgets(line, sizeof(line), fp)) {
-    if (!splitParameterValue(line, Parameter, Value)) continue;
+    if (!splitParameterValue(line, Parameter, Value))
+      continue;
 
     // now gets the values
-    if (!strcmp(Parameter, "END")) break;
+    if (!strcmp(Parameter, "END"))
+      break;
 
     // get volume size
     else if (!strcmp(Parameter, "$RECO_transposition")) {
@@ -698,14 +647,15 @@ int readBrukerReco(char *recoFile, BrukerTransform *pTran)
       }
 
       sscanf(line, "%d", &pTran->transposition);
-    }
-    else if (!strcmp(Parameter, "$RECO_fov")) {
+    } else if (!strcmp(Parameter, "$RECO_fov")) {
       // lRead =
       sscanf(Value, "%d", &dim);
       pTran->dim = dim;
 
       if (dim != 3) {
-        fprintf(stderr, "INFO: fov dimension is %d. The data is not a 3D volume.\n", dim);
+        fprintf(stderr,
+                "INFO: fov dimension is %d. The data is not a 3D volume.\n",
+                dim);
       }
 
       if (!fgets(line, sizeof(line), fp)) {
@@ -715,18 +665,20 @@ int readBrukerReco(char *recoFile, BrukerTransform *pTran)
       }
 
       if (dim == 3) {
-        sscanf(line, "%lf %lf %lf", &pTran->fov[0], &pTran->fov[1], &pTran->fov[2]);
-      }
-      else if (dim == 2) {
+        sscanf(line, "%lf %lf %lf", &pTran->fov[0], &pTran->fov[1],
+               &pTran->fov[2]);
+      } else if (dim == 2) {
         sscanf(line, "%lf %lf", &pTran->fov[0], &pTran->fov[1]);
 
         pTran->fov[2] = pTran->fov[0];
       }
-    }
-    else if (!strcmp(Parameter, "$RECO_size")) {
+    } else if (!strcmp(Parameter, "$RECO_size")) {
       // lRead =
       sscanf(Value, "%d", &dim);
-      if (dim != 3) fprintf(stderr, "INFO: size dimension is %d. The data is not a 3D volume.\n", dim);
+      if (dim != 3)
+        fprintf(stderr,
+                "INFO: size dimension is %d. The data is not a 3D volume.\n",
+                dim);
 
       if (!fgets(line, sizeof(line), fp)) {
         fprintf(stderr, "ERROR: value must follow RECO_size");
@@ -734,16 +686,19 @@ int readBrukerReco(char *recoFile, BrukerTransform *pTran)
         return 0;
       }
       if (dim == 3)
-        sscanf(line, "%d %d %d", &pTran->size[0], &pTran->size[1], &pTran->size[2]);
+        sscanf(line, "%d %d %d", &pTran->size[0], &pTran->size[1],
+               &pTran->size[2]);
       else if (dim == 2) {
         sscanf(line, "%d %d", &pTran->size[0], &pTran->size[1]);
-        pTran->size[2] = pTran->size[0];  // just fake
+        pTran->size[2] = pTran->size[0]; // just fake
       }
-    }
-    else if (!strcmp(Parameter, "$RECO_ft_size")) {
+    } else if (!strcmp(Parameter, "$RECO_ft_size")) {
       // lRead =
       sscanf(Value, "%d", &dim);
-      if (dim != 3) fprintf(stderr, "INFO: ft_size dimension is %d. The data is not a 3D volume.\n", dim);
+      if (dim != 3)
+        fprintf(stderr,
+                "INFO: ft_size dimension is %d. The data is not a 3D volume.\n",
+                dim);
 
       if (!fgets(line, sizeof(line), fp)) {
         fprintf(stderr, "ERROR: value must follow RECO_size");
@@ -751,13 +706,13 @@ int readBrukerReco(char *recoFile, BrukerTransform *pTran)
         return 0;
       }
       if (dim == 3)
-        sscanf(line, "%d %d %d", &pTran->ft_size[0], &pTran->ft_size[1], &pTran->ft_size[2]);
+        sscanf(line, "%d %d %d", &pTran->ft_size[0], &pTran->ft_size[1],
+               &pTran->ft_size[2]);
       else if (dim == 2) {
         sscanf(line, "%d %d", &pTran->ft_size[0], &pTran->ft_size[1]);
-        pTran->ft_size[2] = pTran->ft_size[0];  // just fake
+        pTran->ft_size[2] = pTran->ft_size[0]; // just fake
       }
-    }
-    else if (!strcmp(Parameter, "$RECO_wordtype")) {
+    } else if (!strcmp(Parameter, "$RECO_wordtype")) {
       if ((strncmp(Value, "_16BIT_SGN_INT", 13) == 0))
         pTran->type = MRI_SHORT;
       else if ((strncmp(Value, "_32BIT_SGN_INT", 13) == 0))
@@ -766,11 +721,9 @@ int readBrukerReco(char *recoFile, BrukerTransform *pTran)
         fprintf(stderr, "INFO: unsupported data type %s\n", Value);
         return 0;
       }
-    }
-    else if (!strcmp(Parameter, "$RECO_mode")) {
+    } else if (!strcmp(Parameter, "$RECO_mode")) {
       printf("INFO: reconstruction mode was %s\n", Value);
-    }
-    else if (!strcmp(Parameter, "ORIGIN")) {
+    } else if (!strcmp(Parameter, "ORIGIN")) {
       printf("INFO: software by %s\n", Value);
     }
   }
@@ -782,44 +735,44 @@ int readBrukerReco(char *recoFile, BrukerTransform *pTran)
   return 1;
 }
 
-int readBrukerVolume(MRI *mri, char *dataFile)
-{
-  FILE *fp = 0;
+int readBrukerVolume(MRI *mri, char *dataFile) {
+  FILE *fp = nullptr;
   int k, j;
   int nread;
   int swap_bytes_flag = 0;
   //  int size;
 
   if (!mri) {
-    fprintf(stderr, "ERROR: readBrukerMethod() must be called before readBrukerVolume");
+    fprintf(stderr,
+            "ERROR: readBrukerMethod() must be called before readBrukerVolume");
     return 0;
   }
   // save the data filename
   strcpy(mri->fname, dataFile);
   fp = fopen(dataFile, "r");
-  if (fp == 0) {
+  if (fp == nullptr) {
     fprintf(stderr, "ERROR: could not open dataFile %s", dataFile);
     return 0;
   }
   switch (mri->type) {
-    case MRI_UCHAR:
-      //  size = sizeof(unsigned char);
-      break;
-    case MRI_SHORT:
-      //   size = sizeof(short);
-      break;
-    case MRI_FLOAT:
-      //   size = sizeof(float);
-      break;
-    case MRI_INT:
-      //   size = sizeof(int);
-      break;
-    case MRI_LONG:
-      //   size = sizeof(long);
-      break;
-    default:
-      fprintf(stderr, "INFO: unknown size.  bail out\n");
-      return (0);
+  case MRI_UCHAR:
+    //  size = sizeof(unsigned char);
+    break;
+  case MRI_SHORT:
+    //   size = sizeof(short);
+    break;
+  case MRI_FLOAT:
+    //   size = sizeof(float);
+    break;
+  case MRI_INT:
+    //   size = sizeof(int);
+    break;
+  case MRI_LONG:
+    //   size = sizeof(long);
+    break;
+  default:
+    fprintf(stderr, "INFO: unknown size.  bail out\n");
+    return (0);
   }
 
   for (k = 0; k < mri->depth; ++k) {
@@ -828,7 +781,7 @@ int readBrukerVolume(MRI *mri, char *dataFile)
       if (nread != mri->width) {
         fclose(fp);
         MRIfree(&mri);
-        mri = 0;
+        mri = nullptr;
         return 0;
       }
       // this was not needed
@@ -843,8 +796,7 @@ int readBrukerVolume(MRI *mri, char *dataFile)
   return 1;
 }
 
-int is_bruker(char *fname)
-{
+int is_bruker(char *fname) {
   struct stat stat_buf;
   char methodFile[512];
   char acqpFile[512];
@@ -852,10 +804,13 @@ int is_bruker(char *fname)
   char d3procFile[512];
   char recoFile[512];
 
-  if (stat(fname, &stat_buf) < 0) return (0);
+  if (stat(fname, &stat_buf) < 0)
+    return (0);
 
   /* if it's a directory, it's a COR dir. */
-  if (!S_ISDIR(stat_buf.st_mode)) return 0;
+  if (!S_ISDIR(stat_buf.st_mode))
+    return 0;
   // must check all these files exist or not
-  return checkBrukerFiles(fname, methodFile, acqpFile, dataFile, d3procFile, recoFile, 0);
+  return checkBrukerFiles(fname, methodFile, acqpFile, dataFile, d3procFile,
+                          recoFile, 0);
 }

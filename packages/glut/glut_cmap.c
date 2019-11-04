@@ -11,11 +11,11 @@
 #if !defined(_WIN32)
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include <X11/Xatom.h>  /* for XA_RGB_DEFAULT_MAP atom */
+#include <X11/Xatom.h> /* for XA_RGB_DEFAULT_MAP atom */
 #if defined(__vms)
-#include <Xmu/StdCmap.h>  /* for XmuLookupStandardColormap */
+#include <Xmu/StdCmap.h> /* for XmuLookupStandardColormap */
 #else
-#include <X11/Xmu/StdCmap.h>  /* for XmuLookupStandardColormap */
+#include <X11/Xmu/StdCmap.h> /* for XmuLookupStandardColormap */
 #endif
 #endif
 
@@ -24,7 +24,8 @@
 #if defined(_SGI_EXTRA_PREDEFINES) && !defined(NO_FAST_ATOMS)
 #include <X11/SGIFastAtom.h>
 #else
-#define XSGIFastInternAtom(dpy,string,fast_name,how) XInternAtom(dpy,string,how)
+#define XSGIFastInternAtom(dpy, string, fast_name, how)                        \
+  XInternAtom(dpy, string, how)
 #endif
 
 #include "glutint.h"
@@ -32,39 +33,34 @@
 
 GLUTcolormap *__glutColormapList = NULL;
 
-GLUTcolormap *
-__glutAssociateNewColormap(XVisualInfo * vis)
-{
+GLUTcolormap *__glutAssociateNewColormap(XVisualInfo *vis) {
   GLUTcolormap *cmap;
   int transparentPixel, i;
   unsigned long pixels[255];
 
-  cmap = (GLUTcolormap *) malloc(sizeof(GLUTcolormap));
+  cmap = (GLUTcolormap *)malloc(sizeof(GLUTcolormap));
   if (!cmap)
     __glutFatalError("out of memory.");
 #if defined(_WIN32)
-  pixels[0] = 0;        /* avoid compilation warnings on win32 */
+  pixels[0] = 0; /* avoid compilation warnings on win32 */
   cmap->visual = 0;
-  cmap->size = 256;     /* always assume 256 on Win32 */
+  cmap->size = 256; /* always assume 256 on Win32 */
 #else
   cmap->visual = vis->visual;
   cmap->size = vis->visual->map_entries;
 #endif
   cmap->refcnt = 1;
-  cmap->cells = (GLUTcolorcell *)
-                malloc(sizeof(GLUTcolorcell) * cmap->size);
+  cmap->cells = (GLUTcolorcell *)malloc(sizeof(GLUTcolorcell) * cmap->size);
   if (!cmap->cells)
     __glutFatalError("out of memory.");
   /* make all color cell entries be invalid */
-  for (i = cmap->size - 1; i >= 0; i--)
-  {
+  for (i = cmap->size - 1; i >= 0; i--) {
     cmap->cells[i].component[GLUT_RED] = -1.0;
     cmap->cells[i].component[GLUT_GREEN] = -1.0;
     cmap->cells[i].component[GLUT_BLUE] = -1.0;
   }
   transparentPixel = __glutGetTransparentPixel(__glutDisplay, vis);
-  if (transparentPixel == -1 || transparentPixel >= cmap->size)
-  {
+  if (transparentPixel == -1 || transparentPixel >= cmap->size) {
 
     /* If there is no transparent pixel or if the transparent
        pixel is outside the range of valid colormap cells (HP
@@ -72,11 +68,9 @@ __glutAssociateNewColormap(XVisualInfo * vis)
        transparent pixel is 255), we can AllocAll the colormap.
        See note below.  */
 
-    cmap->cmap = XCreateColormap(__glutDisplay,
-                                 __glutRoot, cmap->visual, AllocAll);
-  }
-  else
-  {
+    cmap->cmap =
+        XCreateColormap(__glutDisplay, __glutRoot, cmap->visual, AllocAll);
+  } else {
 
     /* On machines where zero (or some other value in the range
        of 0 through map_entries-1), BadAlloc may be generated
@@ -88,13 +82,12 @@ __glutAssociateNewColormap(XVisualInfo * vis)
        pixel.  */
 
 #if defined(_WIN32)
-    cmap->cmap = XCreateColormap(__glutDisplay,
-                                 __glutRoot, 0, AllocNone);
+    cmap->cmap = XCreateColormap(__glutDisplay, __glutRoot, 0, AllocNone);
 #else
-    cmap->cmap = XCreateColormap(__glutDisplay,
-                                 __glutRoot, vis->visual, AllocNone);
-    XAllocColorCells(__glutDisplay, cmap->cmap, False, 0, 0,
-                     pixels, cmap->size - 1);
+    cmap->cmap =
+        XCreateColormap(__glutDisplay, __glutRoot, vis->visual, AllocNone);
+    XAllocColorCells(__glutDisplay, cmap->cmap, False, 0, 0, pixels,
+                     cmap->size - 1);
 #endif
   }
   cmap->next = __glutColormapList;
@@ -102,17 +95,13 @@ __glutAssociateNewColormap(XVisualInfo * vis)
   return cmap;
 }
 
-static GLUTcolormap *
-associateColormap(XVisualInfo * vis)
-{
+static GLUTcolormap *associateColormap(XVisualInfo *vis) {
 #if !defined(_WIN32)
   GLUTcolormap *cmap = __glutColormapList;
 
-  while (cmap != NULL)
-  {
+  while (cmap != NULL) {
     /* Play safe: compare visual IDs, not Visual*'s. */
-    if (cmap->visual->visualid == vis->visual->visualid)
-    {
+    if (cmap->visual->visualid == vis->visual->visualid) {
       /* Already have created colormap for the visual. */
       cmap->refcnt++;
       return cmap;
@@ -123,17 +112,13 @@ associateColormap(XVisualInfo * vis)
   return __glutAssociateNewColormap(vis);
 }
 
-void
-__glutSetupColormap(XVisualInfo * vi, GLUTcolormap ** colormap, Colormap * cmap)
-{
+void __glutSetupColormap(XVisualInfo *vi, GLUTcolormap **colormap,
+                         Colormap *cmap) {
 #if defined(_WIN32)
-  if (vi->dwFlags & PFD_NEED_PALETTE || vi->iPixelType == PFD_TYPE_COLORINDEX)
-  {
+  if (vi->dwFlags & PFD_NEED_PALETTE || vi->iPixelType == PFD_TYPE_COLORINDEX) {
     *colormap = associateColormap(vi);
     *cmap = (*colormap)->cmap;
-  }
-  else
-  {
+  } else {
     *colormap = NULL;
     *cmap = 0;
   }
@@ -149,41 +134,31 @@ __glutSetupColormap(XVisualInfo * vi, GLUTcolormap ** colormap, Colormap * cmap)
 #else
   visualClass = vi->class;
 #endif
-  switch (visualClass)
-  {
+  switch (visualClass) {
   case PseudoColor:
     /* Mesa might return a PseudoColor visual for RGB mode. */
     rc = glXGetConfig(__glutDisplay, vi, GLX_RGBA, &isRGB);
-    if (rc == 0 && isRGB)
-    {
+    if (rc == 0 && isRGB) {
       /* Must be Mesa. */
       *colormap = NULL;
-      if (MaxCmapsOfScreen(DefaultScreenOfDisplay(__glutDisplay)) == 1
-          && vi->visual == DefaultVisual(__glutDisplay, __glutScreen))
-      {
+      if (MaxCmapsOfScreen(DefaultScreenOfDisplay(__glutDisplay)) == 1 &&
+          vi->visual == DefaultVisual(__glutDisplay, __glutScreen)) {
         char *privateCmap = getenv("MESA_PRIVATE_CMAP");
 
-        if (privateCmap)
-        {
+        if (privateCmap) {
           /* User doesn't want to share colormaps. */
-          *cmap = XCreateColormap(__glutDisplay, __glutRoot,
-                                  vi->visual, AllocNone);
-        }
-        else
-        {
+          *cmap =
+              XCreateColormap(__glutDisplay, __glutRoot, vi->visual, AllocNone);
+        } else {
           /* Share the root colormap. */
           *cmap = DefaultColormap(__glutDisplay, __glutScreen);
         }
-      }
-      else
-      {
+      } else {
         /* Get our own PseudoColor colormap. */
-        *cmap = XCreateColormap(__glutDisplay, __glutRoot,
-                                vi->visual, AllocNone);
+        *cmap =
+            XCreateColormap(__glutDisplay, __glutRoot, vi->visual, AllocNone);
       }
-    }
-    else
-    {
+    } else {
       /* CI mode, real GLX never returns a PseudoColor visual
       for RGB mode. */
       *colormap = associateColormap(vi);
@@ -192,7 +167,7 @@ __glutSetupColormap(XVisualInfo * vi, GLUTcolormap ** colormap, Colormap * cmap)
     break;
   case TrueColor:
   case DirectColor:
-    *colormap = NULL;   /* NULL if RGBA */
+    *colormap = NULL; /* NULL if RGBA */
 
     /* Hewlett-Packard supports a feature called "HP Color
     Recovery". Mesa has code to use HP Color Recovery.  For
@@ -202,8 +177,7 @@ __glutSetupColormap(XVisualInfo * vi, GLUTcolormap ** colormap, Colormap * cmap)
     for that atom must be set on the window.  If that
     colormap is not set, the output will look stripy. */
 
-    if (hpColorRecoveryAtom == -1)
-    {
+    if (hpColorRecoveryAtom == -1) {
       char *xvendor;
 
 #define VENDOR_HP "Hewlett-Packard"
@@ -211,25 +185,19 @@ __glutSetupColormap(XVisualInfo * vi, GLUTcolormap ** colormap, Colormap * cmap)
       /* Only makes sense to make XInternAtom round-trip if we
       know that we are connected to an HP X server. */
       xvendor = ServerVendor(__glutDisplay);
-      if (!strncmp(xvendor, VENDOR_HP, sizeof(VENDOR_HP) - 1))
-      {
-        hpColorRecoveryAtom = XInternAtom(__glutDisplay, "_HP_RGB_SMOOTH_MAP_LIST", True);
-      }
-      else
-      {
+      if (!strncmp(xvendor, VENDOR_HP, sizeof(VENDOR_HP) - 1)) {
+        hpColorRecoveryAtom =
+            XInternAtom(__glutDisplay, "_HP_RGB_SMOOTH_MAP_LIST", True);
+      } else {
         hpColorRecoveryAtom = None;
       }
     }
-    if (hpColorRecoveryAtom != None)
-    {
-      status = XGetRGBColormaps(__glutDisplay, __glutRoot,
-                                &standardCmaps, &numCmaps, hpColorRecoveryAtom);
-      if (status == 1)
-      {
-        for (i = 0; i < numCmaps; i++)
-        {
-          if (standardCmaps[i].visualid == vi->visualid)
-          {
+    if (hpColorRecoveryAtom != None) {
+      status = XGetRGBColormaps(__glutDisplay, __glutRoot, &standardCmaps,
+                                &numCmaps, hpColorRecoveryAtom);
+      if (status == 1) {
+        for (i = 0; i < numCmaps; i++) {
+          if (standardCmaps[i].visualid == vi->visualid) {
             *cmap = standardCmaps[i].colormap;
             XFree(standardCmaps);
             return;
@@ -250,19 +218,15 @@ __glutSetupColormap(XVisualInfo * vi, GLUTcolormap ** colormap, Colormap * cmap)
     sharing between applications, perhaps leading
     unnecessary colormap installations or colormap flashing.
     Sun fixed this bug in Solaris 2.6. */
-    status = XmuLookupStandardColormap(__glutDisplay,
-                                       vi->screen, vi->visualid, vi->depth, XA_RGB_DEFAULT_MAP,
+    status = XmuLookupStandardColormap(__glutDisplay, vi->screen, vi->visualid,
+                                       vi->depth, XA_RGB_DEFAULT_MAP,
                                        /* replace */ False, /* retain */ True);
-    if (status == 1)
-    {
-      status = XGetRGBColormaps(__glutDisplay, __glutRoot,
-                                &standardCmaps, &numCmaps, XA_RGB_DEFAULT_MAP);
-      if (status == 1)
-      {
-        for (i = 0; i < numCmaps; i++)
-        {
-          if (standardCmaps[i].visualid == vi->visualid)
-          {
+    if (status == 1) {
+      status = XGetRGBColormaps(__glutDisplay, __glutRoot, &standardCmaps,
+                                &numCmaps, XA_RGB_DEFAULT_MAP);
+      if (status == 1) {
+        for (i = 0; i < numCmaps; i++) {
+          if (standardCmaps[i].visualid == vi->visualid) {
             *cmap = standardCmaps[i].colormap;
             XFree(standardCmaps);
             return;
@@ -277,31 +241,26 @@ __glutSetupColormap(XVisualInfo * vi, GLUTcolormap ** colormap, Colormap * cmap)
     /* XXX Should do a better job of internal sharing for
     privately allocated TrueColor colormaps. */
     /* XXX DirectColor probably needs ramps hand initialized! */
-    *cmap = XCreateColormap(__glutDisplay, __glutRoot,
-                            vi->visual, AllocNone);
+    *cmap = XCreateColormap(__glutDisplay, __glutRoot, vi->visual, AllocNone);
     break;
   case StaticColor:
   case StaticGray:
   case GrayScale:
     /* Mesa supports these visuals */
     *colormap = NULL;
-    *cmap = XCreateColormap(__glutDisplay, __glutRoot,
-                            vi->visual, AllocNone);
+    *cmap = XCreateColormap(__glutDisplay, __glutRoot, vi->visual, AllocNone);
     break;
   default:
-    __glutFatalError(
-      "could not allocate colormap for visual type: %d.",
-      visualClass);
+    __glutFatalError("could not allocate colormap for visual type: %d.",
+                     visualClass);
   }
   return;
 #endif
 }
 
 #if !defined(_WIN32)
-static int
-findColormaps(GLUTwindow * window,
-              Window * winlist, Colormap * cmaplist, int num, int max)
-{
+static int findColormaps(GLUTwindow *window, Window *winlist,
+                         Colormap *cmaplist, int num, int max) {
   GLUTwindow *child;
   int i;
 
@@ -310,8 +269,7 @@ findColormaps(GLUTwindow * window,
   if (num >= max)
     return num;
   /* Is cmap for this window already on the list? */
-  for (i = 0; i < num; i++)
-  {
+  for (i = 0; i < num; i++) {
     if (cmaplist[i] == window->cmap)
       goto normalColormapAlreadyListed;
   }
@@ -323,12 +281,10 @@ findColormaps(GLUTwindow * window,
 normalColormapAlreadyListed:
 
   /* Repeat above but for the overlay colormap if there one. */
-  if (window->overlay)
-  {
+  if (window->overlay) {
     if (num >= max)
       return num;
-    for (i = 0; i < num; i++)
-    {
+    for (i = 0; i < num; i++) {
       if (cmaplist[i] == window->overlay->cmap)
         goto overlayColormapAlreadyListed;
     }
@@ -340,17 +296,14 @@ overlayColormapAlreadyListed:
 
   /* Recursively search children. */
   child = window->children;
-  while (child)
-  {
+  while (child) {
     num = findColormaps(child, winlist, cmaplist, num, max);
     child = child->siblings;
   }
   return num;
 }
 
-void
-__glutEstablishColormapsProperty(GLUTwindow * window)
-{
+void __glutEstablishColormapsProperty(GLUTwindow *window) {
   /* this routine is strictly X.  Win32 doesn't need to do
      anything of this sort (but has to do other wacky stuff
      later). */
@@ -361,29 +314,23 @@ __glutEstablishColormapsProperty(GLUTwindow * window)
   int maxcmaps, num;
 
   assert(!window->parent);
-  maxcmaps = MaxCmapsOfScreen(ScreenOfDisplay(__glutDisplay,
-                              __glutScreen));
+  maxcmaps = MaxCmapsOfScreen(ScreenOfDisplay(__glutDisplay, __glutScreen));
   /* For portability reasons we don't use alloca for winlist
      and cmaplist, but we could. */
-  winlist = (Window *) malloc(maxcmaps * sizeof(Window));
-  cmaplist = (Colormap *) malloc(maxcmaps * sizeof(Colormap));
+  winlist = (Window *)malloc(maxcmaps * sizeof(Window));
+  cmaplist = (Colormap *)malloc(maxcmaps * sizeof(Colormap));
   num = findColormaps(window, winlist, cmaplist, 0, maxcmaps);
-  if (num < 2)
-  {
+  if (num < 2) {
     /* Property no longer needed; remove it. */
-    wmColormapWindows = XSGIFastInternAtom(__glutDisplay,
-                                           "WM_COLORMAP_WINDOWS", SGI_XA_WM_COLORMAP_WINDOWS, False);
-    if (wmColormapWindows == None)
-    {
+    wmColormapWindows = XSGIFastInternAtom(__glutDisplay, "WM_COLORMAP_WINDOWS",
+                                           SGI_XA_WM_COLORMAP_WINDOWS, False);
+    if (wmColormapWindows == None) {
       __glutWarning("Could not intern X atom for WM_COLORMAP_WINDOWS.");
       return;
     }
     XDeleteProperty(__glutDisplay, window->win, wmColormapWindows);
-  }
-  else
-  {
-    status = XSetWMColormapWindows(__glutDisplay, window->win,
-                                   winlist, num);
+  } else {
+    status = XSetWMColormapWindows(__glutDisplay, window->win, winlist, num);
     /* XSetWMColormapWindows should always work unless the
        WM_COLORMAP_WINDOWS property cannot be intern'ed.  We
        check to be safe. */
@@ -396,32 +343,24 @@ __glutEstablishColormapsProperty(GLUTwindow * window)
   free(cmaplist);
 }
 
-GLUTwindow *
-__glutToplevelOf(GLUTwindow * window)
-{
-  while (window->parent)
-  {
+GLUTwindow *__glutToplevelOf(GLUTwindow *window) {
+  while (window->parent) {
     window = window->parent;
   }
   return window;
 }
 #endif
 
-void
-__glutFreeColormap(GLUTcolormap * cmap)
-{
+void __glutFreeColormap(GLUTcolormap *cmap) {
   GLUTcolormap *cur, **prev;
 
   cmap->refcnt--;
-  if (cmap->refcnt == 0)
-  {
+  if (cmap->refcnt == 0) {
     /* remove from colormap list */
     cur = __glutColormapList;
     prev = &__glutColormapList;
-    while (cur)
-    {
-      if (cur == cmap)
-      {
+    while (cur) {
+      if (cur == cmap) {
         *prev = cmap->next;
         break;
       }
@@ -434,4 +373,3 @@ __glutFreeColormap(GLUTcolormap * cmap)
     free(cmap);
   }
 }
-

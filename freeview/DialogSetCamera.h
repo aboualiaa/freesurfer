@@ -7,8 +7,7 @@ namespace Ui {
 class DialogSetCamera;
 }
 
-class DialogSetCamera : public QDialog
-{
+class DialogSetCamera : public QDialog {
   Q_OBJECT
 
 public:

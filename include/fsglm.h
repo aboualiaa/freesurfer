@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: greve $
  *    $Date: 2015/03/31 22:12:23 $
@@ -23,7 +23,6 @@
  *
  */
 
-
 // fsglm.h - include file for fsglm.c
 // $Id: fsglm.h,v 1.17 2015/03/31 22:12:23 greve Exp $
 
@@ -32,51 +31,51 @@
 
 #include "matrix.h"
 
-const char * GLMSrcVersion(void);
+const char *GLMSrcVersion();
 #undef X
 
 #define GLMMAT_NCONTRASTS_MAX 100
 typedef struct {
-  MATRIX *y;   // input: nframes-by-1 (can only be 1)
-  MATRIX *X;   // Design matrix: nframes-by-ncols
+  MATRIX *y; // input: nframes-by-1 (can only be 1)
+  MATRIX *X; // Design matrix: nframes-by-ncols
   // Note: weighted GLM not included here. To do weighted,
   // weight y and X prior to analysis.
-  double dof;  // nrows of X - ncols
-  int AllowZeroDOF; 
+  double dof; // nrows of X - ncols
+  int AllowZeroDOF;
   int ill_cond_flag;
 
   MATRIX *beta;
   MATRIX *yhat;
   MATRIX *eres;
-  double rvar;  // Residual error variance
+  double rvar; // Residual error variance
 
   MATRIX *yffxvar; // fixed-effects variance of each y
   int ffxdof;
 
-  int ncontrasts;    // Number of contrasts
-  MATRIX *C[GLMMAT_NCONTRASTS_MAX];    // Contrast matrices
+  int ncontrasts;                        // Number of contrasts
+  MATRIX *C[GLMMAT_NCONTRASTS_MAX];      // Contrast matrices
   char *Cname[GLMMAT_NCONTRASTS_MAX];    // Contrast names
-  double Ccond[GLMMAT_NCONTRASTS_MAX];    // C condition number
+  double Ccond[GLMMAT_NCONTRASTS_MAX];   // C condition number
   int UseGamma0[GLMMAT_NCONTRASTS_MAX];  // Flag
-  MATRIX *gamma0[GLMMAT_NCONTRASTS_MAX];  // Expected value of gamma
+  MATRIX *gamma0[GLMMAT_NCONTRASTS_MAX]; // Expected value of gamma
 
-  int ypmfflag[GLMMAT_NCONTRASTS_MAX];    // flag to compute PMF
-  MATRIX *Mpmf[GLMMAT_NCONTRASTS_MAX];    // Contrast PMF matrices
+  int ypmfflag[GLMMAT_NCONTRASTS_MAX]; // flag to compute PMF
+  MATRIX *Mpmf[GLMMAT_NCONTRASTS_MAX]; // Contrast PMF matrices
   MATRIX *ypmf[GLMMAT_NCONTRASTS_MAX];
 
   MATRIX *gamma[GLMMAT_NCONTRASTS_MAX];
   double F[GLMMAT_NCONTRASTS_MAX];
   double p[GLMMAT_NCONTRASTS_MAX];
-  double z[GLMMAT_NCONTRASTS_MAX]; // z derived from p
+  double z[GLMMAT_NCONTRASTS_MAX];   // z derived from p
   double pcc[GLMMAT_NCONTRASTS_MAX]; // partial correlation coef
 
-  /* When ReScaleX=1, rescale cols of X before computing inv(X'*X), 
+  /* When ReScaleX=1, rescale cols of X before computing inv(X'*X),
      then rescale X'*X and inv(X'*X) so that it is transparent.*/
-  int ReScaleX; 
+  int ReScaleX;
 
   // These are matrices to hold intermediate values
-  MATRIX *Ct[GLMMAT_NCONTRASTS_MAX];   // transposes of contrast matrices
-  MATRIX *Xt,*XtX,*iXtX,*Xty;
+  MATRIX *Ct[GLMMAT_NCONTRASTS_MAX]; // transposes of contrast matrices
+  MATRIX *Xt, *XtX, *iXtX, *Xty;
   MATRIX *CiXtX[GLMMAT_NCONTRASTS_MAX];
   MATRIX *CiXtXCt[GLMMAT_NCONTRASTS_MAX];
 
@@ -87,22 +86,21 @@ typedef struct {
 
   // These are elements used to compute pcc
   int DoPCC;
-  MATRIX *XCt[GLMMAT_NCONTRASTS_MAX]; // X*C'
-  MATRIX *Dt[GLMMAT_NCONTRASTS_MAX]; // Null space of C
-  MATRIX *XDt[GLMMAT_NCONTRASTS_MAX]; // X*D'
-  MATRIX *RD[GLMMAT_NCONTRASTS_MAX]; // Residual forming matrix of XDt
-  MATRIX *Xcd[GLMMAT_NCONTRASTS_MAX]; // RD * XCt
-  MATRIX *Xcdt[GLMMAT_NCONTRASTS_MAX]; // Xcd'
-  MATRIX *sumXcd[GLMMAT_NCONTRASTS_MAX]; // sum of columns of Xcd
-  MATRIX *sumXcd2[GLMMAT_NCONTRASTS_MAX]; // sum of columns squared of Xcd
-  MATRIX *yhatd[GLMMAT_NCONTRASTS_MAX]; // RD*yhat
-  MATRIX *Xcdyhatd[GLMMAT_NCONTRASTS_MAX]; // Xcd*yhatd
-  MATRIX *sumyhatd[GLMMAT_NCONTRASTS_MAX]; // sum(yhatd)
+  MATRIX *XCt[GLMMAT_NCONTRASTS_MAX];       // X*C'
+  MATRIX *Dt[GLMMAT_NCONTRASTS_MAX];        // Null space of C
+  MATRIX *XDt[GLMMAT_NCONTRASTS_MAX];       // X*D'
+  MATRIX *RD[GLMMAT_NCONTRASTS_MAX];        // Residual forming matrix of XDt
+  MATRIX *Xcd[GLMMAT_NCONTRASTS_MAX];       // RD * XCt
+  MATRIX *Xcdt[GLMMAT_NCONTRASTS_MAX];      // Xcd'
+  MATRIX *sumXcd[GLMMAT_NCONTRASTS_MAX];    // sum of columns of Xcd
+  MATRIX *sumXcd2[GLMMAT_NCONTRASTS_MAX];   // sum of columns squared of Xcd
+  MATRIX *yhatd[GLMMAT_NCONTRASTS_MAX];     // RD*yhat
+  MATRIX *Xcdyhatd[GLMMAT_NCONTRASTS_MAX];  // Xcd*yhatd
+  MATRIX *sumyhatd[GLMMAT_NCONTRASTS_MAX];  // sum(yhatd)
   MATRIX *sumyhatd2[GLMMAT_NCONTRASTS_MAX]; // sum(yhatd.^2)
-}
-GLMMAT;
+} GLMMAT;
 
-GLMMAT *GLMalloc(void);
+GLMMAT *GLMalloc();
 int GLMfree(GLMMAT **pgm);
 int GLMallocX(GLMMAT *glm, int nrows, int ncols);
 int GLMallocY(GLMMAT *glm);
@@ -117,15 +115,10 @@ int GLManalyze(GLMMAT *glm);
 
 int GLMprofile(int nrows, int ncols, int ncon, int niters);
 
-GLMMAT *GLMsynth(void);
+GLMMAT *GLMsynth();
 int GLMdump(char *dumpdir, GLMMAT *glm);
 int GLMresynthTest(int niters, double *prvar);
 MATRIX *GLMpmfMatrix(MATRIX *C, double *cond, MATRIX *P);
 int GLMdof(GLMMAT *glm);
 
-
-
 #endif
-
-
-

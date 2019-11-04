@@ -4,7 +4,7 @@
  *
  */
 /*
- * Original Author: 
+ * Original Author:
  * CVS Revision Info:
  *    $Author: zkaufman $
  *    $Date: 2015/01/13 21:00:09 $
@@ -25,8 +25,8 @@
 #ifndef CHKLC_H
 #define CHKLC_H
 
-void chklc(void) ;
-int  chklc2(char* msg);
-void cmp_glib_version(void);
+void chklc();
+int chklc2(char *msg);
+void cmp_glib_version();
 
 #endif

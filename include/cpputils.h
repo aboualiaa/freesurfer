@@ -26,7 +26,8 @@
 #ifndef cpputils_h
 #define cpputils_h
 
-MRI* MRISsignedFixedDistanceTransform(MRI_SURFACE *mris, MRI *mri_dist, double distance);
-MRI* MRISfillInterior2(MRI_SURFACE *mris, MRI* mri_interior);
+MRI *MRISsignedFixedDistanceTransform(MRI_SURFACE *mris, MRI *mri_dist,
+                                      double distance);
+MRI *MRISfillInterior2(MRI_SURFACE *mris, MRI *mri_interior);
 
-#endif 
+#endif

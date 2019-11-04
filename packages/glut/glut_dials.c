@@ -7,20 +7,14 @@
 
 #include "glutint.h"
 
-void APIENTRY
-glutButtonBoxFunc(GLUTbuttonBoxCB buttonBoxFunc)
-{
+void APIENTRY glutButtonBoxFunc(GLUTbuttonBoxCB buttonBoxFunc) {
   __glutCurrentWindow->buttonBox = buttonBoxFunc;
   __glutUpdateInputDeviceMaskFunc = __glutUpdateInputDeviceMask;
-  __glutPutOnWorkList(__glutCurrentWindow,
-                      GLUT_DEVICE_MASK_WORK);
+  __glutPutOnWorkList(__glutCurrentWindow, GLUT_DEVICE_MASK_WORK);
 }
 
-void APIENTRY
-glutDialsFunc(GLUTdialsCB dialsFunc)
-{
+void APIENTRY glutDialsFunc(GLUTdialsCB dialsFunc) {
   __glutCurrentWindow->dials = dialsFunc;
   __glutUpdateInputDeviceMaskFunc = __glutUpdateInputDeviceMask;
-  __glutPutOnWorkList(__glutCurrentWindow,
-                      GLUT_DEVICE_MASK_WORK);
+  __glutPutOnWorkList(__glutCurrentWindow, GLUT_DEVICE_MASK_WORK);
 }

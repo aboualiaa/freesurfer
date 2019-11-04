@@ -31,43 +31,39 @@
 #include "vtkMatrix4x4.h"
 #include <QList>
 
-
-
 #include "label.h"
-#undef uchar  // conflicts with Qt
+#undef uchar // conflicts with Qt
 #include "mrisutils.h"
-
 
 class FSVolume;
 class FSSurface;
 
-class FSLabel : public QObject
-{
+class FSLabel : public QObject {
   Q_OBJECT
 public:
-  FSLabel( QObject* parent, FSVolume* mri_template );
+  FSLabel(QObject *parent, FSVolume *mri_template);
   virtual ~FSLabel();
 
-  bool LabelRead( const QString& filename );
-  bool LabelWrite( const QString& filename );
+  bool LabelRead(const QString &filename);
+  bool LabelWrite(const QString &filename);
 
-  void Initialize(FSVolume* ref_vol, FSSurface* surf, int coords);
+  void Initialize(FSVolume *ref_vol, FSSurface *surf, int coords);
 
-  void UpdateLabelFromImage( vtkImageData* rasImage_in, FSVolume* ref_vol );
-  void UpdateRASImage( vtkImageData* rasImage_out, FSVolume* ref_vol, double threshold = -1e10 );
-  void FillUnassignedVertices(FSSurface* surf, FSVolume* mri_template, int coords);
-  void EditVoxel(int nx, int ny, int nz, int coords, bool bAdd, int* vertices = NULL, int* pnum = NULL);
+  void UpdateLabelFromImage(vtkImageData *rasImage_in, FSVolume *ref_vol);
+  void UpdateRASImage(vtkImageData *rasImage_out, FSVolume *ref_vol,
+                      double threshold = -1e10);
+  void FillUnassignedVertices(FSSurface *surf, FSVolume *mri_template,
+                              int coords);
+  void EditVoxel(int nx, int ny, int nz, int coords, bool bAdd,
+                 int *vertices = NULL, int *pnum = NULL);
 
-  bool GetCentroidRASPosition(double* pos, FSVolume* ref_vol);
+  bool GetCentroidRASPosition(double *pos, FSVolume *ref_vol);
 
-  void GetStatsRange(double* range);
+  void GetStatsRange(double *range);
 
   bool UpdateStatsRange(double val);
 
-  LABEL* GetRawLabel()
-  {
-    return m_label;
-  }
+  LABEL *GetRawLabel() { return m_label; }
 
   bool HasUndo();
   bool HasRedo();
@@ -78,14 +74,12 @@ public:
   void Clear();
 
 protected:
-  LABEL*   m_label;
-  QList<LABEL*> m_undoBuffer;
-  QList<LABEL*> m_redoBuffer;
-  double   m_dStatsRange[2];
-  LABEL2SURF* m_l2s;
-  FSVolume*   m_mri_template;
+  LABEL *m_label;
+  QList<LABEL *> m_undoBuffer;
+  QList<LABEL *> m_redoBuffer;
+  double m_dStatsRange[2];
+  LABEL2SURF *m_l2s;
+  FSVolume *m_mri_template;
 };
 
 #endif
-
-

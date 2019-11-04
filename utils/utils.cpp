@@ -31,16 +31,16 @@
   HEADERS
   ------------------------------------------------------------------------*/
 
-#include <ctype.h>
-#include <errno.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cctype>
+#include <cerrno>
+#include <cmath>
+
+#include <cstdio>
+#include <cstdlib>
 #include <sys/param.h>
 #include <sys/resource.h>
 #include <sys/types.h>
-#include <time.h> /* msvc (dng) */
+#include <ctime> /* msvc (dng) */
 #include <unistd.h>
 
 /* This should be in ctype.h, but the compiler complains */
@@ -72,20 +72,19 @@ static bool seedHasBeenSet = false;
 
 static long idum = 0L, nrgcalls = 0L;
 
-int setRandomSeed(long seed)
-{
+int setRandomSeed(long seed) {
   // also seed the 'standard' random number generators: rand() and random()
   srand(seed);
   srandom(seed);
 
   // seed vnl_random thingy
   if (idum == seed) {
-    /* If you want to reseed it to the same seed you had before, you have to run OpenRan1()
-       with a different seed, then run it again with the same seed as before, otherwise
-       it does not restart the generator.  This change was made by DNG on March 21, 2014.
-       It might break automatic tests that try to test with the same seed. This code
-       is called by MRIScomputeNormals() when there is a degenerate vertex where the
-       average normal is 0.*/
+    /* If you want to reseed it to the same seed you had before, you have to run
+       OpenRan1() with a different seed, then run it again with the same seed as
+       before, otherwise it does not restart the generator.  This change was
+       made by DNG on March 21, 2014. It might break automatic tests that try to
+       test with the same seed. This code is called by MRIScomputeNormals() when
+       there is a degenerate vertex where the average normal is 0.*/
     long idummy = seed - 1;
     OpenRan1(&idummy);
   }
@@ -94,15 +93,14 @@ int setRandomSeed(long seed)
   nrgcalls = 1;
 
   seedHasBeenSet = true;
-  
+
   return (NO_ERROR);
 }
 
-long getRandomSeed(void) { return (idum); }
-long getRandomCalls(void) { return (nrgcalls); }
+long getRandomSeed() { return (idum); }
+long getRandomCalls() { return (nrgcalls); }
 
-double randomNumber(double low, double hi)
-{
+double randomNumber(double low, double hi) {
   double val, range;
 
   if (low > hi) {
@@ -113,36 +111,39 @@ double randomNumber(double low, double hi)
 
   if (idum == 0L) /* change seed from run to run */
   {
-    if (1) {
+    if (true) {
       static int laterTime = 0;
       if (!laterTime) {
-        laterTime = 1; 
+        laterTime = 1;
         char commBuffer[1024];
-        FILE* commFile = fopen("/proc/self/comm", "r");
+        FILE *commFile = fopen("/proc/self/comm", "r");
         int commSize = 0;
         if (commFile) {
-            commSize = fread(commBuffer, 1, 1023, commFile);
-	    if (commSize > 0) commSize-=1; // drop the \n
-	    int i = 0;
-	    for (i = 0; i < commSize; i++) {
-	        if (commBuffer[i] == '/') commBuffer[i] = '@';
-	    }
-            fclose(commFile);
+          commSize = fread(commBuffer, 1, 1023, commFile);
+          if (commSize > 0)
+            commSize -= 1; // drop the \n
+          int i = 0;
+          for (i = 0; i < commSize; i++) {
+            if (commBuffer[i] == '/')
+              commBuffer[i] = '@';
+          }
+          fclose(commFile);
         }
         commBuffer[commSize] = 0;
         fprintf(stderr, "%s supposed to be reproducible but seed not set\n",
-            commBuffer);
+                commBuffer);
       }
     }
-    idum = -1L * (long)(abs((int)time(NULL)));
+    idum = -1L * (long)(abs((int)time(nullptr)));
   }
-  
+
   range = hi - low;
   val = OpenRan1(&idum) * range + low;
   // printf("randomcall %3ld %12.10lf\n",nrgcalls,val);
   nrgcalls++;
   if ((val < low) || (val > hi))
-    ErrorPrintf(ERROR_BADPARM, "randomNumber(%2.1f, %2.1f) - %2.1f\n", (float)low, (float)hi, (float)val);
+    ErrorPrintf(ERROR_BADPARM, "randomNumber(%2.1f, %2.1f) - %2.1f\n",
+                (float)low, (float)hi, (float)val);
 
   return (val);
 }
@@ -155,11 +156,12 @@ double randomNumber(double low, double hi)
   Return Values:
   nothing.
   ------------------------------------------------------------------------*/
-double normAngle(double angle)
-{
-  while (angle > PI) angle -= 2.0 * PI;
+double normAngle(double angle) {
+  while (angle > PI)
+    angle -= 2.0 * PI;
 
-  while (angle < -PI) angle += 2.0 * PI;
+  while (angle < -PI)
+    angle += 2.0 * PI;
 
   return (angle);
 }
@@ -172,8 +174,7 @@ double normAngle(double angle)
   Return Values:
   nothing.
   ------------------------------------------------------------------------*/
-double calcDeltaPhi(double phi1, double phi2)
-{
+double calcDeltaPhi(double phi1, double phi2) {
   double delta_phi;
 
   if (phi1 < 0.0)
@@ -188,9 +189,11 @@ double calcDeltaPhi(double phi1, double phi2)
 
   delta_phi = (phi1 - phi2);
 
-  while (delta_phi > PI) delta_phi -= 2.0 * PI;
+  while (delta_phi > PI)
+    delta_phi -= 2.0 * PI;
 
-  while (delta_phi < -PI) delta_phi += 2.0 * PI;
+  while (delta_phi < -PI)
+    delta_phi += 2.0 * PI;
 
   return (delta_phi);
 }
@@ -203,8 +206,7 @@ double calcDeltaPhi(double phi1, double phi2)
   Return Values:
   nothing.
   ------------------------------------------------------------------------*/
-double latan2(double y, double x)
-{
+double latan2(double y, double x) {
   int oerr;
   double val;
 
@@ -213,10 +215,14 @@ double latan2(double y, double x)
     val = 0.0;
   else
     val = atan2(y, x);
-  if (val < -PI) val += 2.0 * PI;
-  if (val > PI) val -= 2.0 * PI;
+  if (val < -PI)
+    val += 2.0 * PI;
+  if (val > PI)
+    val -= 2.0 * PI;
 
-  if (oerr != errno) ErrorPrintf(ERROR_BADPARM, "error %d, y %f, x %f\n", errno, (float)y, (float)x);
+  if (oerr != errno)
+    ErrorPrintf(ERROR_BADPARM, "error %d, y %f, x %f\n", errno, (float)y,
+                (float)x);
   return (val);
 }
 
@@ -228,8 +234,7 @@ double latan2(double y, double x)
   Return Values:
   nothing.
   ------------------------------------------------------------------------*/
-int QuadEqual(double a1, double a2)
-{
+int QuadEqual(double a1, double a2) {
   a1 = normAngle(a1);
   a2 = normAngle(a2);
   if (fabs(a1 - a2) < RADIANS(90.0))
@@ -246,8 +251,7 @@ int QuadEqual(double a1, double a2)
   Return Values:
   nothing.
   ------------------------------------------------------------------------*/
-void fComplementCode(double *pdIn, double *pdOut, int iLen)
-{
+void fComplementCode(double *pdIn, double *pdOut, int iLen) {
   int i;
   double d;
 
@@ -268,21 +272,23 @@ void fComplementCode(double *pdIn, double *pdOut, int iLen)
   Return Values:
   nothing.
   ------------------------------------------------------------------------*/
-char *fgetl(char *s, int n, FILE *fp)
-{
+char *fgetl(char *s, int n, FILE *fp) {
   char *cp, *cp2;
   int len;
 
   do {
     cp = fgets(s, n, fp);
-    if (!cp) return (NULL);
+    if (!cp)
+      return (nullptr);
 
-    while (isspace((int)*cp)) cp++;
+    while (isspace((int)*cp))
+      cp++;
 
   } while (((*cp) == '#') || ((*cp) == '\n') || ((*cp) == 0));
 
   for (cp2 = cp; *cp2; cp2++)
-    if (*cp2 == '#') *cp2 = 0;
+    if (*cp2 == '#')
+      *cp2 = 0;
 
   len = strlen(cp);
   if (cp[len - 1] == '\n') /* strip newline */
@@ -296,13 +302,14 @@ char *fgetl(char *s, int n, FILE *fp)
  *
  * Algorithm due to Isaac Newton, takes log(n)/2 iterations.
  */
-int IntSqrt(int n)
-{
+int IntSqrt(int n) {
   int approx, prev;
 
-  if (n == 0) return 0;
+  if (n == 0)
+    return 0;
 
-  if (n < 4) return 1;
+  if (n < 4)
+    return 1;
 
   approx = n / 2; /* 1st approx */
 
@@ -331,11 +338,11 @@ int IntSqrt(int n)
   Return Values:
   nothing.
   ------------------------------------------------------------------------*/
-char *StrUpper(char *str)
-{
+char *StrUpper(char *str) {
   char *cp;
 
-  for (cp = str; *cp; cp++) *cp = (char)toupper(*cp);
+  for (cp = str; *cp; cp++)
+    *cp = (char)toupper(*cp);
 
   return (str);
 }
@@ -348,11 +355,11 @@ char *StrUpper(char *str)
   Return Values:
   nothing.
   ------------------------------------------------------------------------*/
-char *StrLower(char *str)
-{
+char *StrLower(char *str) {
   char *cp;
 
-  for (cp = str; *cp; cp++) *cp = (char)tolower(*cp);
+  for (cp = str; *cp; cp++)
+    *cp = (char)tolower(*cp);
 
   return (str);
 }
@@ -367,8 +374,7 @@ char *StrLower(char *str)
   Return Values:
 
   ------------------------------------------------------------------------*/
-char *StrReplace(const char *src, char *dst, char csrc, int cdst)
-{
+char *StrReplace(const char *src, char *dst, char csrc, int cdst) {
   const char *cp_src;
   char *cp_dst;
 
@@ -391,8 +397,7 @@ char *StrReplace(const char *src, char *dst, char csrc, int cdst)
   Return Values:
   nothing.
   ------------------------------------------------------------------------*/
-char *FileNameOnly(const char *full_name, char *fname)
-{
+char *FileNameOnly(const char *full_name, char *fname) {
   const char *slash;
   char *number, *at;
 
@@ -403,8 +408,7 @@ char *FileNameOnly(const char *full_name, char *fname)
       strcpy(fname, full_name);
     else
       strcpy(fname, slash + 1);
-  }
-  else {
+  } else {
     // cannot process in place due to con
     //
     // best solution: copy full_name to fname
@@ -413,9 +417,11 @@ char *FileNameOnly(const char *full_name, char *fname)
   }
 
   number = strrchr(fname, '#');
-  if (number) *number = 0;
+  if (number)
+    *number = 0;
   at = strrchr(fname, '@');
-  if (at) *at = 0;
+  if (at)
+    *at = 0;
 
   return (fname);
 }
@@ -429,8 +435,7 @@ char *FileNameOnly(const char *full_name, char *fname)
   Return Values:
   1 if the file exists, 0 otherwise
   ------------------------------------------------------------------------*/
-int FileExists(const char *fname)
-{
+int FileExists(const char *fname) {
   FILE *fp;
   int old_errno;
 
@@ -442,7 +447,7 @@ int FileExists(const char *fname)
   else
     errno = old_errno;
 
-  return (fp != NULL);
+  return (fp != nullptr);
 }
 
 /*------------------------------------------------------------------------
@@ -454,8 +459,7 @@ int FileExists(const char *fname)
   Return Values:
   nothing.
   ------------------------------------------------------------------------*/
-char *FileName(char *full_name)
-{
+char *FileName(char *full_name) {
   char *fname, *number, *at;
 
   fname = strrchr(full_name, '/');
@@ -464,12 +468,15 @@ char *FileName(char *full_name)
   else
     fname++; /* skip '/' */
 
-  if (*fname == '@') fname++;
+  if (*fname == '@')
+    fname++;
 
   number = strrchr(fname, '#');
-  if (number) *number = 0;
+  if (number)
+    *number = 0;
   at = strrchr(fname, '@');
-  if (at) *at = 0;
+  if (at)
+    *at = 0;
 
   return (fname);
 }
@@ -483,24 +490,27 @@ char *FileName(char *full_name)
   Return Values:
 
   ------------------------------------------------------------------------*/
-int FileType(const char *fname)
-{
+int FileType(const char *fname) {
   char *dot, buf[STR_LEN], *number;
 
-  if (*fname == '@') return (LIST_FILE);
+  if (*fname == '@')
+    return (LIST_FILE);
 
   strcpy(buf, fname);
   dot = strrchr(buf, '@');
   number = strchr(buf, '#');
-  if (number) *number = 0; /* don't consider : part of extension */
-  if (!dot) dot = strrchr(buf, '.');
+  if (number)
+    *number = 0; /* don't consider : part of extension */
+  if (!dot)
+    dot = strrchr(buf, '.');
 
   if (dot) {
     dot++;
     StrUpper(buf);
     if (!strcmp(dot, "MAT"))
       return (MATLAB_FILE);
-    else if (!strcmp(dot, "HIPL") || !strcmp(dot, "HIPS") || !strcmp(dot, "HIP"))
+    else if (!strcmp(dot, "HIPL") || !strcmp(dot, "HIPS") ||
+             !strcmp(dot, "HIP"))
       return (HIPS_FILE);
     else if (!strcmp(dot, "LST"))
       return (LIST_FILE);
@@ -519,8 +529,7 @@ int FileType(const char *fname)
   Return Values:
 
   ------------------------------------------------------------------------*/
-int FileNumber(const char *fname)
-{
+int FileNumber(const char *fname) {
   char buf[STR_LEN], *number;
   int num;
 
@@ -542,8 +551,7 @@ int FileNumber(const char *fname)
   Return Values:
 
   ------------------------------------------------------------------------*/
-int FileNumberOfEntries(const char *fname)
-{
+int FileNumberOfEntries(const char *fname) {
   int type, num, nentries;
   FILE *fp;
   char buf[STR_LEN], line[2 * STR_LEN], *cp;
@@ -554,42 +562,46 @@ int FileNumberOfEntries(const char *fname)
   if (num == -1) {
     type = FileType(buf);
     switch (type) {
-      case LIST_FILE:
-        fp = fopen(FileName(buf), "rb");
-        if (!fp) ErrorReturn(-1, (ERROR_NO_FILE, "FileNumberOfEntries: could not open %s", FileName(buf)));
+    case LIST_FILE:
+      fp = fopen(FileName(buf), "rb");
+      if (!fp)
+        ErrorReturn(-1,
+                    (ERROR_NO_FILE, "FileNumberOfEntries: could not open %s",
+                     FileName(buf)));
+      cp = fgetl(line, 199, fp);
+      nentries = 0;
+      while (cp) {
+        sscanf(cp, "%s", buf);
+        num = FileNumberOfEntries(buf);
+        nentries += num;
         cp = fgetl(line, 199, fp);
-        nentries = 0;
-        while (cp) {
-          sscanf(cp, "%s", buf);
-          num = FileNumberOfEntries(buf);
-          nentries += num;
-          cp = fgetl(line, 199, fp);
-        }
-        fclose(fp);
+      }
+      fclose(fp);
 
-        break;
-      case UNKNOWN_FILE:  // assume it is text if it has no extension or modifieer
-      case TEXT_FILE:
-        fp = fopen(buf, "rb");
-        if (!fp) ErrorReturn(-1, (ERROR_NO_FILE, "FileNumberOfEntries: could not open %s", buf));
+      break;
+    case UNKNOWN_FILE: // assume it is text if it has no extension or modifieer
+    case TEXT_FILE:
+      fp = fopen(buf, "rb");
+      if (!fp)
+        ErrorReturn(
+            -1, (ERROR_NO_FILE, "FileNumberOfEntries: could not open %s", buf));
+      cp = fgetl(line, 199, fp);
+      nentries = 0;
+      while (cp) {
+        nentries++;
         cp = fgetl(line, 199, fp);
-        nentries = 0;
-        while (cp) {
-          nentries++;
-          cp = fgetl(line, 199, fp);
-        }
-        fclose(fp);
-        break;
-      case HIPS_FILE:
-        nentries = ImageNumFrames(buf);
-        break;
-      case MATLAB_FILE:
-      default:
-        nentries = -1;
-        break;
+      }
+      fclose(fp);
+      break;
+    case HIPS_FILE:
+      nentries = ImageNumFrames(buf);
+      break;
+    case MATLAB_FILE:
+    default:
+      nentries = -1;
+      break;
     }
-  }
-  else
+  } else
     nentries = 1;
 
   return (nentries);
@@ -605,17 +617,19 @@ int FileNumberOfEntries(const char *fname)
   Return Values:
   nothing.
   ------------------------------------------------------------------------*/
-char *FileFullName(char *full_name)
-{
+char *FileFullName(char *full_name) {
   char *fname, *number, *at;
 
   fname = full_name;
-  if (*fname == '@') fname++;
+  if (*fname == '@')
+    fname++;
 
   number = strrchr(fname, '#');
-  if (number) *number = 0;
+  if (number)
+    *number = 0;
   at = strrchr(fname, '@');
-  if (at) *at = 0;
+  if (at)
+    *at = 0;
 
   return (fname);
 }
@@ -629,8 +643,7 @@ char *FileFullName(char *full_name)
   Return Values:
   pointer to the filename
   ------------------------------------------------------------------------*/
-char *FileTmpName(const char *basename)
-{
+char *FileTmpName(const char *basename) {
   static char fname[STR_LEN];
   int i;
   FILE *fp;
@@ -646,7 +659,8 @@ char *FileTmpName(const char *basename)
   do {
     sprintf(fname, "%s%d", realname, i++);
     fp = fopen(fname, "r");
-    if (fp) fclose(fp);
+    if (fp)
+      fclose(fp);
   } while (fp);
 
   return (fname);
@@ -661,8 +675,7 @@ char *FileTmpName(const char *basename)
   Return Values:
   pointer to the filename
   ------------------------------------------------------------------------*/
-void FileRename(const char *inName, const char *outName)
-{
+void FileRename(const char *inName, const char *outName) {
 #ifndef _MSDOS
   char cmd_string[200];
   sprintf(cmd_string, "mv %s %s", inName, outName);
@@ -684,19 +697,18 @@ void FileRename(const char *inName, const char *outName)
   Return Values:
   the distance.
   ------------------------------------------------------------------------*/
-float angleDistance(float theta1, float theta2)
-{
+float angleDistance(float theta1, float theta2) {
   float adist;
 
   adist = (float)fabs(theta1 - theta2);
-  if (adist >= PI) adist = (float)fabs(adist - 2 * PI);
+  if (adist >= PI)
+    adist = (float)fabs(adist - 2 * PI);
 
   return (adist);
 }
 /*#ifndef SunOS*/
 #ifndef Windows_NT
-int stricmp(const char *str1, const char *str2)
-{
+int stricmp(const char *str1, const char *str2) {
   char buf1[STR_LEN], buf2[STR_LEN];
 
   strcpy(buf1, str1);
@@ -717,9 +729,9 @@ int stricmp(const char *str1, const char *str2)
   Return Values:
   remove leading spaces from a string
   ------------------------------------------------------------------------*/
-char *StrRemoveSpaces(char *str)
-{
-  while (isspace((int)*str)) str++;
+char *StrRemoveSpaces(char *str) {
+  while (isspace((int)*str))
+    str++;
 
   return (str);
 }
@@ -735,19 +747,19 @@ char *StrRemoveSpaces(char *str)
 extern char *getcwd(char *pathname, size_t size);
 #endif
 
-char *FileNameAbsolute(const char *fname, char *absFname)
-{
+char *FileNameAbsolute(const char *fname, char *absFname) {
   char pathname[MAXPATHLEN];
   int len;
 
   if (*fname == '/') {
-    if (absFname != fname) strcpy(absFname, fname);
-  }
-  else /* not already absolute */
+    if (absFname != fname)
+      strcpy(absFname, fname);
+  } else /* not already absolute */
   {
     len = strlen(fname);
     char *fn = strcpyalloc(fname);
-    if (fn[len - 1] == '/') fn[len - 1] = 0;
+    if (fn[len - 1] == '/')
+      fn[len - 1] = 0;
 #ifndef Linux
     getcwd(pathname, MAXPATHLEN - 1);
 #else
@@ -772,8 +784,7 @@ char *FileNameAbsolute(const char *fname, char *absFname)
 
   Return Values:
   ------------------------------------------------------------------------*/
-char *FileNamePath(const char *fname, char *pathName)
-{
+char *FileNamePath(const char *fname, char *pathName) {
   char *slash;
 
   strcpy(pathName, fname);
@@ -802,15 +813,17 @@ char *FileNamePath(const char *fname, char *pathName)
 
   Return Values:
   ------------------------------------------------------------------------*/
-char *StrSkipNumber(char *str)
-{
-  while (*str && isdigit((int)*str)) str++;
+char *StrSkipNumber(char *str) {
+  while (*str && isdigit((int)*str))
+    str++;
   if (*str == '.') /* check for floating point # */
   {
     str++;
-    while (*str && isdigit((int)*str)) str++;
+    while (*str && isdigit((int)*str))
+      str++;
   }
-  while (*str && isspace((int)*str)) str++;
+  while (*str && isspace((int)*str))
+    str++;
 
   return (str);
 }
@@ -822,8 +835,7 @@ char *StrSkipNumber(char *str)
 
   Description
   ------------------------------------------------------*/
-float deltaAngle(float angle1, float angle2)
-{
+float deltaAngle(float angle1, float angle2) {
   float delta;
 
   delta = angle1 - angle2;
@@ -847,12 +859,12 @@ float deltaAngle(float angle1, float angle2)
    3. if src cannot be reallocated, then the function
    forces an exit.
    ---------------------------------------------------------*/
-char *AppendString(char *src, char *app)
-{
+char *AppendString(char *src, char *app) {
   int sz1 = 0, sz2 = 0;
   char *tmp;
 
-  if (!app) return src;
+  if (!app)
+    return src;
   sz2 = strlen(app);
 
   if (src)
@@ -893,20 +905,18 @@ union ieee754_float {
   float f;
 
   /* This is the IEEE 754 single-precision format.  */
-  struct
-  {
+  struct {
     unsigned int negative : 1;
     unsigned int exponent : 8;
     unsigned int mantissa : 23;
   } ieee;
 };
-#else  // little endian
+#else // little endian
 union ieee754_float {
   float f;
 
   /* This is the IEEE 754 single-precision format.  */
-  struct
-  {
+  struct {
     unsigned int mantissa : 23;
     unsigned int exponent : 8;
     unsigned int negative : 1;
@@ -914,8 +924,7 @@ union ieee754_float {
 };
 #endif
 
-int devIsinf(float value)
-{
+int devIsinf(float value) {
   unsigned int s, e, f;
 
   union ieee754_float v;
@@ -924,16 +933,17 @@ int devIsinf(float value)
   e = v.ieee.exponent;
   f = v.ieee.mantissa;
 
-  if (e == 255 && s == 0 && f == 0) return (1);
+  if (e == 255 && s == 0 && f == 0)
+    return (1);
 
-  if (e == 255 && s == 1 && f == 0) return (-1);
+  if (e == 255 && s == 1 && f == 0)
+    return (-1);
 
   return (0);
 } /* end devIsinf() */
 
 /* isnan non-zero if NaN, 0 otherwise */
-int devIsnan(float value)
-{
+int devIsnan(float value) {
   unsigned int e, f;
   //  unsigned int s;
 
@@ -943,60 +953,61 @@ int devIsnan(float value)
   e = v.ieee.exponent;
   f = v.ieee.mantissa;
 
-  if (e == 255 && f != 0) return (1);
+  if (e == 255 && f != 0)
+    return (1);
 
   return (0);
 } /* end devIsnan() */
 
 /* non-zero if neither infinite nor NaN, 0 otherwise */
-int devFinite(float value)
-{
-  if (!devIsinf(value) && !devIsnan(value)) 
+int devFinite(float value) {
+  if (!devIsinf(value) && !devIsnan(value))
     return (1);
 
   return (0);
 } /* end devFinite() */
 
-char *FileNameRemoveExtension(const char *in_fname, char *out_fname)
-{
+char *FileNameRemoveExtension(const char *in_fname, char *out_fname) {
   char *dot;
 
-  if (out_fname != in_fname) strcpy(out_fname, in_fname);
+  if (out_fname != in_fname)
+    strcpy(out_fname, in_fname);
   dot = strrchr(out_fname, '.');
-  if (dot) *dot = 0;
+  if (dot)
+    *dot = 0;
   return (out_fname);
 }
-char *FileNameExtension(const char *fname, char *ext)
-{
+char *FileNameExtension(const char *fname, char *ext) {
   char *dot, buf[STR_LEN];
 
   ext[0] = 0;
   strcpy(buf, fname);
   dot = strrchr(buf, '.');
-  if (dot) strcpy(ext, dot + 1);
+  if (dot)
+    strcpy(ext, dot + 1);
 
   return (ext);
 }
 
 #include <glob.h>
 
-char *FileNameFromWildcard(const char *inStr, char *outStr)
-{
+char *FileNameFromWildcard(const char *inStr, char *outStr) {
   const char *cp;
   glob_t gbuf;
 
-  if (inStr != outStr) strcpy(outStr, inStr);
+  if (inStr != outStr)
+    strcpy(outStr, inStr);
   cp = strchr(inStr, '*');
-  if (NULL != cp) {
-    if (glob(inStr, 0, NULL, &gbuf) == 0 && gbuf.gl_pathc > 0) strcpy(outStr, gbuf.gl_pathv[0]);
+  if (nullptr != cp) {
+    if (glob(inStr, 0, nullptr, &gbuf) == 0 && gbuf.gl_pathc > 0)
+      strcpy(outStr, gbuf.gl_pathv[0]);
   }
 
   return (outStr);
 }
 
 // return Kbytes memory used
-int getMemoryUsed()
-{
+int getMemoryUsed() {
 #ifdef Linux
   FILE *fp = 0;
   char buf[256];
@@ -1020,8 +1031,7 @@ int getMemoryUsed()
     if (numassigned == 1) {
       pclose(fp);
       return memused;
-    }
-    else {
+    } else {
       pclose(fp);
       errno = 0;
       fprintf(stderr, "getting memoryused failed");
@@ -1033,7 +1043,7 @@ int getMemoryUsed()
     fprintf(stderr, "getting memoryused failed");
     return -1;
   }
-  return -1;  // this should never happen
+  return -1; // this should never happen
 #else
   static int used = 0;
   if (!used) {
@@ -1047,8 +1057,7 @@ int getMemoryUsed()
 void printMemoryUsed() { printf("heap used: %d Kbytes.\n", getMemoryUsed()); }
 
 // String copy will allocation.
-char *strcpyalloc(const char *str)
-{
+char *strcpyalloc(const char *str) {
   char *cpstr;
   cpstr = (char *)calloc(strlen(str) + 1, sizeof(char));
   strcpy(cpstr, str);
@@ -1061,12 +1070,12 @@ char *strcpyalloc(const char *str)
   are separated by white space as determined by isspace(). These
   include \f, \n, \r, \t and \v as well as the simple space.
   *-----------------------------------------------------------*/
-int ItemsInString(const char *str)
-{
+int ItemsInString(const char *str) {
   int items, nthchar, len;
 
   len = strlen(str);
-  if (len == 0) return (-1);
+  if (len == 0)
+    return (-1);
 
   items = 0;
   nthchar = 0;
@@ -1074,33 +1083,35 @@ int ItemsInString(const char *str)
   // Scroll through any white space at the beginning
   while (isspace(str[nthchar])) {
     nthchar++;
-    if (nthchar == len) return (0);  // only whitespace
+    if (nthchar == len)
+      return (0); // only whitespace
   }
 
   // Scroll through the rest of the string
-  while (1) {
+  while (true) {
     items++;
     while (!isspace(str[nthchar])) {
       // scroll thru chars in the item = nonwhitespace
       nthchar++;
-      if (nthchar == len) return (items);
+      if (nthchar == len)
+        return (items);
     }
     while (isspace(str[nthchar])) {
       // scroll thru whitespace after the item
       nthchar++;
-      if (nthchar == len) return (items);
+      if (nthchar == len)
+        return (items);
     }
   }
 
-  return (items);  // should never get here
+  return (items); // should never get here
 }
 
 /*!
   \fn char *deblank(char *str)
   \brief removes blanks from a string.
 */
-char *deblank(const char *str)
-{
+char *deblank(const char *str) {
   char *dbstr;
   int m;
 
@@ -1109,7 +1120,8 @@ char *deblank(const char *str)
   m = 0;
   for (unsigned int n = 0; n < strlen(str); n++) {
     // printf("%d %c %d\n",n,str[n],isspace(str[n]));
-    if (isspace(str[n])) continue;
+    if (isspace(str[n]))
+      continue;
     dbstr[m] = str[n];
     // printf("   %d %c\n",m,dbstr[m]);
     m++;
@@ -1122,10 +1134,10 @@ char *deblank(const char *str)
   \fn int str_toupper(char *str)
   \brief Converts each char in str to upper case. Done in place.
 */
-char *str_toupper(char *str)
-{
-  for (unsigned int n = 0; n < strlen(str); n++) str[n] = toupper(str[n]);
-  return (0);
+char *str_toupper(char *str) {
+  for (unsigned int n = 0; n < strlen(str); n++)
+    str[n] = toupper(str[n]);
+  return (nullptr);
 }
 
 /*
@@ -1134,13 +1146,11 @@ char *str_toupper(char *str)
  * routines are declared here (instead of trying to guess how long to quad
  * should be implemented)...
  */
-void __ltoq(void)
-{
+void __ltoq() {
   printf("ERROR: Attempting usage of '__ltoq' routine!\n");
   exit(1);
 }
-void __qtol(void)
-{
+void __qtol() {
   printf("ERROR: Attempting usage of '__qtol' routine!\n");
   exit(1);
 }
@@ -1153,8 +1163,7 @@ void __qtol(void)
   and the number in the list (nx). This allows the computation of the
   stddev with only one trip through the list.
 */
-double sum2stddev(double xsum, double xsum2, int nx)
-{
+double sum2stddev(double xsum, double xsum2, int nx) {
   double xmean, xstd;
   xmean = xsum / nx;
   xstd = sqrt((xsum2 - 2 * xmean * xsum + nx * xmean * xmean) / (nx - 1));
@@ -1167,28 +1176,30 @@ double sum2stddev(double xsum, double xsum2, int nx)
   \fn int compare_ints(const void *v1,const void *v2)
   \brief Int comparison function suitable for qsort.
 */
-int compare_ints(const void *v1, const void *v2)
-{
+int compare_ints(const void *v1, const void *v2) {
   int i1, i2;
   i1 = *((int *)v1);
   i2 = *((int *)v2);
-  if (i1 < i2) return (-1);
-  if (i1 > i2) return (+1);
-  return (0);  // equal
+  if (i1 < i2)
+    return (-1);
+  if (i1 > i2)
+    return (+1);
+  return (0); // equal
 }
 /* --------------------------------------------- */
 /*!
   \fn int compare_ints(const void *v1,const void *v2)
   \brief Float comparison function suitable for qsort.
 */
-int compare_floats(const void *v1, const void *v2)
-{
+int compare_floats(const void *v1, const void *v2) {
   float i1, i2;
   i1 = *((float *)v1);
   i2 = *((float *)v2);
-  if (i1 < i2) return (-1);
-  if (i1 > i2) return (+1);
-  return (0);  // equal
+  if (i1 < i2)
+    return (-1);
+  if (i1 > i2)
+    return (+1);
+  return (0); // equal
 }
 /* ---------------------------------------------------*/
 /*!
@@ -1196,8 +1207,7 @@ int compare_floats(const void *v1, const void *v2)
   \brief Returns/counts the number of unique items in a
   list of integers. The list will be sorted.
 */
-int nunqiue_int_list(int *idlist, int nlist)
-{
+int nunqiue_int_list(int *idlist, int nlist) {
   int idprev, nunique, n;
 
   qsort(idlist, nlist, sizeof(int), compare_ints);
@@ -1217,8 +1227,7 @@ int nunqiue_int_list(int *idlist, int nlist)
   \brief Returns the unique items in a list of integers.
   The list will be sorted.
 */
-int *unqiue_int_list(int *idlist, int nlist, int *nunique)
-{
+int *unqiue_int_list(int *idlist, int nlist, int *nunique) {
   int n, *ulist, nthu;
 
   /* count number of unique elements in the list,
@@ -1245,15 +1254,15 @@ int *unqiue_int_list(int *idlist, int nlist, int *nunique)
   If there is a tie, it returns the first sorted. The list will be
   sorted.
 */
-int most_frequent_int_list(int *idlist, int nlist, int *nmax)
-{
+int most_frequent_int_list(int *idlist, int nlist, int *nmax) {
   int n, *ulist, nthu, nthumax, nunique, *nper, mostfreq;
 
   ulist = unqiue_int_list(idlist, nlist, &nunique);
   nper = (int *)calloc(sizeof(int), nunique);
   for (nthu = 0; nthu < nunique; nthu++) {
     for (n = 0; n < nlist; n++)
-      if (idlist[n] == ulist[nthu]) nper[nthu]++;
+      if (idlist[n] == ulist[nthu])
+        nper[nthu]++;
   }
 
   nthumax = 0;
@@ -1276,17 +1285,20 @@ int most_frequent_int_list(int *idlist, int nlist, int *nmax)
   one or more contiguous non-blank characters. Same
   as gdfCountItemsInString().
   --------------------------------------------------*/
-int CountItemsInString(const char *str)
-{
+int CountItemsInString(const char *str) {
   int len, n, nhits;
   len = strlen(str);
   nhits = 0;
   n = 0;
   while (n < len) {
-    while (n < len && isblank(str[n])) n++;
-    if (n >= len) break;
-    if (str[n] == '\0' || str[n] == '\n' || str[n] == '\r') break;
-    while (n < len && !isblank(str[n])) n++;
+    while (n < len && isblank(str[n]))
+      n++;
+    if (n >= len)
+      break;
+    if (str[n] == '\0' || str[n] == '\n' || str[n] == '\r')
+      break;
+    while (n < len && !isblank(str[n]))
+      n++;
     nhits++;
   }
   return (nhits);
@@ -1298,8 +1310,7 @@ int CountItemsInString(const char *str)
   is -1, then it returns the last item. item is a string that
   must be freed by the caller. Same as gdfGetNthItemFromString().
   ------------------------------------------------------------------*/
-char *GetNthItemFromString(const char *str, int nth)
-{
+char *GetNthItemFromString(const char *str, int nth) {
   char *item;
   int nitems, n;
   static char fmt[2000], tmpstr[2000];
@@ -1308,14 +1319,16 @@ char *GetNthItemFromString(const char *str, int nth)
   memset(tmpstr, '\0', 2000);
 
   nitems = CountItemsInString(str);
-  if (nth < 0) nth = nitems - 1;
+  if (nth < 0)
+    nth = nitems - 1;
   if (nth >= nitems) {
     printf("ERROR: asking for item %d, only %d items in string\n", nth, nitems);
     printf("%s\n", str);
-    return (NULL);
+    return (nullptr);
   }
 
-  for (n = 0; n < nth; n++) sprintf(fmt, "%s %%*s", fmt);
+  for (n = 0; n < nth; n++)
+    sprintf(fmt, "%s %%*s", fmt);
   sprintf(fmt, "%s %%s", fmt);
   // printf("fmt %s\n",fmt);
   sscanf(str, fmt, tmpstr);
@@ -1339,13 +1352,12 @@ char *GetNthItemFromString(const char *str, int nth)
                   Series: Prentice-Hall Series in Automatic Computation
 
 
-                                                                        reorders a[] (of length n)
-                  returns k_th smallest in array
-                  can be used to compute the median
+                                                                        reorders
+ a[] (of length n) returns k_th smallest in array can be used to compute the
+ median
 
  ---------------------------------------------------------------------------*/
-float kth_smallest(float a[], int n, int k)
-{
+float kth_smallest(float a[], int n, int k) {
   int i, j, l, m;
   float x, t;
   int kk = k - 1;
@@ -1357,8 +1369,10 @@ float kth_smallest(float a[], int n, int k)
     i = l;
     j = m;
     do {
-      while (a[i] < x) i++;
-      while (x < a[j]) j--;
+      while (a[i] < x)
+        i++;
+      while (x < a[j])
+        j--;
       if (i <= j) {
         t = a[i];
         a[i] = a[j];
@@ -1367,8 +1381,10 @@ float kth_smallest(float a[], int n, int k)
         j--;
       }
     } while (i <= j);
-    if (j < kk) l = i;
-    if (kk < i) m = j;
+    if (j < kk)
+      l = i;
+    if (kk < i)
+      m = j;
   }
   return a[kk];
 }
@@ -1378,8 +1394,7 @@ float kth_smallest(float a[], int n, int k)
   * "Numerical recipes in C", Second Edition,
   * Cambridge University Press, 1992, Section 8.5, ISBN 0-521-43108-5
  ---------------------------------------------------------------------------*/
-float quick_select(float arr[], int n, int k)
-{
+float quick_select(float arr[], int n, int k) {
   int low, high;
   int median;
   int middle, ll, hh;
@@ -1433,7 +1448,8 @@ float quick_select(float arr[], int n, int k)
       do
         hh--;
       while (arr[hh] > arr[low]);
-      if (hh < ll) break;
+      if (hh < ll)
+        break;
       t = arr[ll];
       arr[ll] = arr[hh];
       arr[hh] = t;
@@ -1443,8 +1459,10 @@ float quick_select(float arr[], int n, int k)
     arr[low] = arr[hh];
     arr[hh] = t;
     /* Re-set active partition */
-    if (hh <= median) low = ll;
-    if (hh >= median) high = hh - 1;
+    if (hh <= median)
+      low = ll;
+    if (hh >= median)
+      high = hh - 1;
   }
 }
 
@@ -1454,10 +1472,9 @@ float quick_select(float arr[], int n, int k)
 //       Input float array t[] of length n
 //       computation in situ, t will be reordered
  ---------------------------------------------------------------------------*/
-float median(float t[], int n)
-{
+float median(float t[], int n) {
   float q, q2;
-  if (n % 2 == 1)  // odd
+  if (n % 2 == 1) // odd
   {
     q = kth_smallest(t, n, (n + 1) / 2);
     return q;
@@ -1484,8 +1501,7 @@ float median(float t[], int n)
 //       computation in situ, a will be reordered
 //
  ---------------------------------------------------------------------------*/
-float mad(float a[], int n)
-{
+float mad(float a[], int n) {
   float d, mm, medi;
   int i;
   float *t = (float *)calloc(n, sizeof(float));
@@ -1494,7 +1510,9 @@ float mad(float a[], int n)
 
   medi = median(a, n);
 
-  if (t == NULL) ErrorExit(ERROR_NO_MEMORY, "utils.c mad(...) could not allocate memory for t");
+  if (t == nullptr)
+    ErrorExit(ERROR_NO_MEMORY,
+              "utils.c mad(...) could not allocate memory for t");
 
   for (i = 0; i < n; i++) {
     t[i] = fabs(a[i] - medi);
@@ -1513,10 +1531,14 @@ float mad(float a[], int n)
    all 0s because nint() never allowed a legal index (was always -1 or
    +1 and never 0).
  */
-int nint(const double f)  { return (f < 0 ? ((int)(f - 0.5)) : ((int)(f + 0.5))); }
-int nint2(const double f) { return (f < 0 ? ((int)(f - 0.5)) : ((int)(f + 0.49999999))); }
+int nint(const double f) {
+  return (f < 0 ? ((int)(f - 0.5)) : ((int)(f + 0.5)));
+}
+int nint2(const double f) {
+  return (f < 0 ? ((int)(f - 0.5)) : ((int)(f + 0.49999999)));
+}
 
-void (*progress_callback)(int) = 0;
+void (*progress_callback)(int) = nullptr;
 int global_progress_range[2] = {0, 100};
 
 /*---------------------------------------------------------------------------
@@ -1527,8 +1549,7 @@ int global_progress_range[2] = {0, 100};
 //       default is 0 and 100
 //
  ---------------------------------------------------------------------------*/
-void SetProgressCallback(void (*callback)(int), int start, int end)
-{
+void SetProgressCallback(void (*callback)(int), int start, int end) {
   progress_callback = callback;
   global_progress_range[0] = start;
   global_progress_range[1] = end;
@@ -1543,20 +1564,24 @@ void SetProgressCallback(void (*callback)(int), int start, int end)
 //       total_frames to 1
 //
  ---------------------------------------------------------------------------*/
-void exec_progress_callback(int slice, int total_slices, int frame, int total_frames)
-{
+void exec_progress_callback(int slice, int total_slices, int frame,
+                            int total_frames) {
   if (progress_callback)
-    progress_callback(global_progress_range[0] + (global_progress_range[1] - global_progress_range[0]) *
-                                                     (slice + total_slices * frame) / (total_slices * total_frames));
+    progress_callback(global_progress_range[0] +
+                      (global_progress_range[1] - global_progress_range[0]) *
+                          (slice + total_slices * frame) /
+                          (total_slices * total_frames));
 }
-int *compute_permutation(int num, int *vec)
-{
+int *compute_permutation(int num, int *vec) {
   int n, index, tmp;
 
-  if (vec == NULL) vec = (int *)calloc(num, sizeof(vec[0]));
-  if (vec == NULL) ErrorExit(ERROR_NOMEMORY, "compute_permutation(%d): calloc failed", num);
+  if (vec == nullptr)
+    vec = (int *)calloc(num, sizeof(vec[0]));
+  if (vec == nullptr)
+    ErrorExit(ERROR_NOMEMORY, "compute_permutation(%d): calloc failed", num);
 
-  for (n = 0; n < num; n++) vec[n] = n;
+  for (n = 0; n < num; n++)
+    vec[n] = n;
 
   for (n = 0; n < num; n++) {
     index = (int)randomNumber(0.0, (double)(num - 0.0001));
@@ -1572,13 +1597,12 @@ int *compute_permutation(int num, int *vec)
   \brief returns Vm Peak by reading
   /proc/self/status. Note that it is only as accurate as
   /proc/self/status which is a file that needs to be updated by the
-  OS; not sure how often that happens. 
+  OS; not sure how often that happens.
 */
-int GetVmPeak(void)
-{
+int GetVmPeak() {
   static int u[5];
   GetMemUsage(u);
-  return(u[1]);
+  return (u[1]);
 }
 
 /*!
@@ -1587,11 +1611,10 @@ int GetVmPeak(void)
   only as accurate as /proc/self/status which is a file that needs to
   be updated by the OS; not sure how often that happens.
 */
-int GetVmSize(void)
-{
+int GetVmSize() {
   static int u[5];
   GetMemUsage(u);
-  return(u[0]);
+  return (u[0]);
 }
 
 /*!
@@ -1602,24 +1625,31 @@ int GetVmSize(void)
   OS; not sure how often that happens. Better to use this than
   getrusage() below.
 */
-int *GetMemUsage(int *u)
-{
+int *GetMemUsage(int *u) {
   FILE *fp;
   static char tag[500];
   int r;
 
-  if (u == NULL) u = (int *)calloc(sizeof(int), 5);
+  if (u == nullptr)
+    u = (int *)calloc(sizeof(int), 5);
   fp = fopen("/proc/self/status", "r");
-  if (fp == NULL) return (u);  // not there on MAC
+  if (fp == nullptr)
+    return (u); // not there on MAC
 
-  while (1) {
+  while (true) {
     r = fscanf(fp, "%s", tag);
-    if (r == EOF) break;
-    if (!strcasecmp(tag, "VmSize:")) fscanf(fp, "%d", &u[0]);
-    if (!strcasecmp(tag, "VmPeak:")) fscanf(fp, "%d", &u[1]);
-    if (!strcasecmp(tag, "VmRSS:")) fscanf(fp, "%d", &u[2]);
-    if (!strcasecmp(tag, "VmData:")) fscanf(fp, "%d", &u[3]);
-    if (!strcasecmp(tag, "VmStk:")) fscanf(fp, "%d", &u[4]);
+    if (r == EOF)
+      break;
+    if (!strcasecmp(tag, "VmSize:"))
+      fscanf(fp, "%d", &u[0]);
+    if (!strcasecmp(tag, "VmPeak:"))
+      fscanf(fp, "%d", &u[1]);
+    if (!strcasecmp(tag, "VmRSS:"))
+      fscanf(fp, "%d", &u[2]);
+    if (!strcasecmp(tag, "VmData:"))
+      fscanf(fp, "%d", &u[3]);
+    if (!strcasecmp(tag, "VmStk:"))
+      fscanf(fp, "%d", &u[4]);
     fgets(tag, 499, fp);
   }
   fclose(fp);
@@ -1631,11 +1661,11 @@ int *GetMemUsage(int *u)
   return (u);
 }
 
-int PrintMemUsage(FILE *fp)
-{
+int PrintMemUsage(FILE *fp) {
   static int u[5];
   GetMemUsage(u);
-  fprintf(fp, "MEM: Size %d  Peak: %d   RSS: %d  Data: %d  Stk: %d\n", u[0], u[1], u[2], u[3], u[4]);
+  fprintf(fp, "MEM: Size %d  Peak: %d   RSS: %d  Data: %d  Stk: %d\n", u[0],
+          u[1], u[2], u[3], u[4]);
   fflush(fp);
   return (0);
 }
@@ -1648,29 +1678,39 @@ int PrintMemUsage(FILE *fp)
   each line. It appears that this will underestimate the actual
   memory usage. GetMemUsage() is probably better.
 */
-int PrintRUsage(int who, const char *pre, FILE *fp)
-{
+int PrintRUsage(int who, const char *pre, FILE *fp) {
   int err;
   struct rusage u;
   err = getrusage(who, &u);
-  if (err) return (err);
+  if (err)
+    return (err);
   // user and system usage time in seconds
-  fprintf(fp, "%sutimesec    %lf\n", pre, u.ru_utime.tv_sec + u.ru_utime.tv_usec / 1000000.0);
-  fprintf(fp, "%sstimesec    %lf\n", pre, u.ru_stime.tv_sec + u.ru_stime.tv_usec / 1000000.0);
-  fprintf(fp, "%sru_maxrss   %ld\n", pre, u.ru_maxrss);   /* maximum resident set size */
-  fprintf(fp, "%sru_ixrss    %ld\n", pre, u.ru_ixrss);    /* integral shared memory size */
-  fprintf(fp, "%sru_idrss    %ld\n", pre, u.ru_idrss);    /* integral unshared data size */
-  fprintf(fp, "%sru_isrss    %ld\n", pre, u.ru_isrss);    /* integral unshared stack size */
-  fprintf(fp, "%sru_minflt   %ld\n", pre, u.ru_minflt);   /* page reclaims */
-  fprintf(fp, "%sru_majflt   %ld\n", pre, u.ru_majflt);   /* page faults */
-  fprintf(fp, "%sru_nswap    %ld\n", pre, u.ru_nswap);    /* swaps */
-  fprintf(fp, "%sru_inblock  %ld\n", pre, u.ru_inblock);  /* block input operations */
-  fprintf(fp, "%sru_oublock  %ld\n", pre, u.ru_oublock);  /* block output operations */
-  fprintf(fp, "%sru_msgsnd   %ld\n", pre, u.ru_msgsnd);   /* messages sent */
-  fprintf(fp, "%sru_msgrcv   %ld\n", pre, u.ru_msgrcv);   /* messages received */
+  fprintf(fp, "%sutimesec    %lf\n", pre,
+          u.ru_utime.tv_sec + u.ru_utime.tv_usec / 1000000.0);
+  fprintf(fp, "%sstimesec    %lf\n", pre,
+          u.ru_stime.tv_sec + u.ru_stime.tv_usec / 1000000.0);
+  fprintf(fp, "%sru_maxrss   %ld\n", pre,
+          u.ru_maxrss); /* maximum resident set size */
+  fprintf(fp, "%sru_ixrss    %ld\n", pre,
+          u.ru_ixrss); /* integral shared memory size */
+  fprintf(fp, "%sru_idrss    %ld\n", pre,
+          u.ru_idrss); /* integral unshared data size */
+  fprintf(fp, "%sru_isrss    %ld\n", pre,
+          u.ru_isrss); /* integral unshared stack size */
+  fprintf(fp, "%sru_minflt   %ld\n", pre, u.ru_minflt); /* page reclaims */
+  fprintf(fp, "%sru_majflt   %ld\n", pre, u.ru_majflt); /* page faults */
+  fprintf(fp, "%sru_nswap    %ld\n", pre, u.ru_nswap);  /* swaps */
+  fprintf(fp, "%sru_inblock  %ld\n", pre,
+          u.ru_inblock); /* block input operations */
+  fprintf(fp, "%sru_oublock  %ld\n", pre,
+          u.ru_oublock); /* block output operations */
+  fprintf(fp, "%sru_msgsnd   %ld\n", pre, u.ru_msgsnd); /* messages sent */
+  fprintf(fp, "%sru_msgrcv   %ld\n", pre, u.ru_msgrcv); /* messages received */
   fprintf(fp, "%sru_nsignals %ld\n", pre, u.ru_nsignals); /* signals received */
-  fprintf(fp, "%sru_nvcsw    %ld\n", pre, u.ru_nvcsw);    /* voluntary context switches */
-  fprintf(fp, "%sru_nivcsw   %ld\n", pre, u.ru_nivcsw);   /* involuntary context switches */
+  fprintf(fp, "%sru_nvcsw    %ld\n", pre,
+          u.ru_nvcsw); /* voluntary context switches */
+  fprintf(fp, "%sru_nivcsw   %ld\n", pre,
+          u.ru_nivcsw); /* involuntary context switches */
   return (0);
 }
 /* ---------------------------------------------------*/
@@ -1680,136 +1720,150 @@ int PrintRUsage(int who, const char *pre, FILE *fp)
   probably want: who = RUSAGE_SELF;
   pre is a string that will start each line.
 */
-int WriteRUsage(int who, const char *pre, char *fname)
-{
+int WriteRUsage(int who, const char *pre, char *fname) {
   int err;
   FILE *fp;
   fp = fopen(fname, "w");
-  if (fp == NULL) return (1);
+  if (fp == nullptr)
+    return (1);
   err = PrintRUsage(who, pre, fp);
   return (err);
 }
 
+static const float Pi = PI;
+static const float halfPi = PI / 2;
 
-static const float     Pi = PI;
-static const float halfPi = PI/2;
+static float fastApproxAtan2fWkr(float ay, float ax) { // ax >= ay
 
-static float fastApproxAtan2fWkr(float ay, float ax) {     // ax >= ay
-
-    #define tableLast 100000
-    static volatile float table[tableLast + 1];
-    static volatile int   tableInited;
-    if (!tableInited) {
-        int index;
-        for (index = 0; index <= tableLast; index++) {
-            table[index] = atan2(index,tableLast);
-        }
-        tableInited = 1;
+#define tableLast 100000
+  static volatile float table[tableLast + 1];
+  static volatile int tableInited;
+  if (!tableInited) {
+    int index;
+    for (index = 0; index <= tableLast; index++) {
+      table[index] = atan2(index, tableLast);
     }
-    
-    int index = (ax==0) ? 0 : (tableLast*ay)/ax;
-        
-    return table[index];
+    tableInited = 1;
+  }
+
+  int index = (ax == 0) ? 0 : (tableLast * ay) / ax;
+
+  return table[index];
 }
 
 float fastApproxAtan2f(float y, float x) {
-    static bool volatile once;
-    static bool volatile use_atanf2;
-    if (!once) {
-        use_atanf2 = !!getenv("FREESURFER_fastApproxAtan2f_use_atanf2");
-        once = true;
-        if (use_atanf2)
-            fprintf(stdout, "%s:%d %s\n", __FILE__, __LINE__,
-                use_atanf2?"using slow atan2f":"using table lookup for fast but slightly inaccurate atan");
-    }
-    if (use_atanf2) return atan2f(y,x);
-    
-    float  ax = fabsf(x), ay = fabsf(y);
-    double r;
-    if (ax >= ay) { 
-        r =          fastApproxAtan2fWkr(ay,ax);
-    } else {
-        r = halfPi - fastApproxAtan2fWkr(ax,ay);
-    }
-    if (ax == x && ay == y)          ; else
-    if (ax == x && ay != y) r =    -r; else
-    if (ax != x && ay == y) r =  Pi-r; else
-    if (ax != x && ay != y) r = -Pi+r;
-    return r; 
-}
+  static bool volatile once;
+  static bool volatile use_atanf2;
+  if (!once) {
+    use_atanf2 = !!getenv("FREESURFER_fastApproxAtan2f_use_atanf2");
+    once = true;
+    if (use_atanf2)
+      fprintf(stdout, "%s:%d %s\n", __FILE__, __LINE__,
+              use_atanf2
+                  ? "using slow atan2f"
+                  : "using table lookup for fast but slightly inaccurate atan");
+  }
+  if (use_atanf2)
+    return atan2f(y, x);
 
+  float ax = fabsf(x), ay = fabsf(y);
+  double r;
+  if (ax >= ay) {
+    r = fastApproxAtan2fWkr(ay, ax);
+  } else {
+    r = halfPi - fastApproxAtan2fWkr(ax, ay);
+  }
+  if (ax == x && ay == y)
+    ;
+  else if (ax == x && ay != y)
+    r = -r;
+  else if (ax != x && ay == y)
+    r = Pi - r;
+  else if (ax != x && ay != y)
+    r = -Pi + r;
+  return r;
+}
 
 // Support for reporting logic problems and other phenomona
 //
-typedef struct ReportEntry { 
-    struct ReportEntry* next;           // list for this line
-    const char*         file;           // key
-    int                 check_count; 
-    int                 check_elideUntil; 
-    int                 report_count; 
-    int                 report_elideUntil; 
-    } ReportEntry;
+typedef struct ReportEntry {
+  struct ReportEntry *next; // list for this line
+  const char *file;         // key
+  int check_count;
+  int check_elideUntil;
+  int report_count;
+  int report_elideUntil;
+} ReportEntry;
 
-static ReportEntry* reportEntry(const char* file, int line) {
-  static ReportEntry* entries[1000000];
-  cheapAssert(line <          1000000);
-  ReportEntry** ep = &entries[line];
-  while (*ep && strcmp((*ep)->file,file)) ep = &(*ep)->next;
-  ReportEntry* e = *ep;
+static ReportEntry *reportEntry(const char *file, int line) {
+  static ReportEntry *entries[1000000];
+  cheapAssert(line < 1000000);
+  ReportEntry **ep = &entries[line];
+  while (*ep && strcmp((*ep)->file, file))
+    ep = &(*ep)->next;
+  ReportEntry *e = *ep;
   if (!e) {
-    e = (ReportEntry*)calloc(1,sizeof(ReportEntry)); 
-    e->file              = file;
-    e->check_elideUntil  = 1;
+    e = (ReportEntry *)calloc(1, sizeof(ReportEntry));
+    e->file = file;
+    e->check_elideUntil = 1;
     e->report_elideUntil = 1;
     *ep = e;
   }
   return e;
 }
 
-bool spendTimeCheckingForLogicProblem(const char* file, int line) {
-  ReportEntry* e = reportEntry(file, line);
-  if (!e) return false;
+bool spendTimeCheckingForLogicProblem(const char *file, int line) {
+  ReportEntry *e = reportEntry(file, line);
+  if (!e)
+    return false;
   e->check_count++;
-  if (e->check_count < e->check_elideUntil) return false;
-  e->check_elideUntil = (e->check_elideUntil < 32) ? e->check_elideUntil + 1 : e->check_elideUntil*2;
+  if (e->check_count < e->check_elideUntil)
+    return false;
+  e->check_elideUntil = (e->check_elideUntil < 32) ? e->check_elideUntil + 1
+                                                   : e->check_elideUntil * 2;
   return true;
 }
 
-LogicProblemResponse copeWithLogicProblem2(
-    bool* wasReported, 
-    const char* envvarFixer,
-    const char* msg, 
-    const char* file, int line, const char* function)
-{
+LogicProblemResponse copeWithLogicProblem2(bool *wasReported,
+                                           const char *envvarFixer,
+                                           const char *msg, const char *file,
+                                           int line, const char *function) {
   static bool emitReport, getenvDone;
-  if (!getenvDone) { getenvDone = true;
+  if (!getenvDone) {
+    getenvDone = true;
     emitReport = !!getenv("FREESURFER_reportLogicErrors");
   }
 
   LogicProblemResponse response = LogicProblemResponse_old;
-  if (envvarFixer && !!getenv(envvarFixer)) response = LogicProblemResponse_fix;
-  
-  if (wasReported) *wasReported = false;
-  
-  if (!emitReport) return response;
-  
-  ReportEntry* e = reportEntry(file, line);
-  if (!e) return response;
+  if (envvarFixer && !!getenv(envvarFixer))
+    response = LogicProblemResponse_fix;
+
+  if (wasReported)
+    *wasReported = false;
+
+  if (!emitReport)
+    return response;
+
+  ReportEntry *e = reportEntry(file, line);
+  if (!e)
+    return response;
 
   e->report_count++;
-  if (e->report_count < e->report_elideUntil) return response;
+  if (e->report_count < e->report_elideUntil)
+    return response;
 
-  e->report_elideUntil = (e->report_elideUntil < 32) ? e->report_elideUntil + 1 : e->report_elideUntil*2;
+  e->report_elideUntil = (e->report_elideUntil < 32) ? e->report_elideUntil + 1
+                                                     : e->report_elideUntil * 2;
 
-  fprintf(stdout,
-    "%s:%d %s - probable logic error: %s%s\n%s%s%s",
-    file,line,function, msg, 
-    (response == LogicProblemResponse_fix) ? ", fixing it" : ", not fixing it",
-    envvarFixer?".  Set ":"",
-    envvarFixer?envvarFixer:"",
-    envvarFixer?" to fix it\n":"");
+  fprintf(stdout, "%s:%d %s - probable logic error: %s%s\n%s%s%s", file, line,
+          function, msg,
+          (response == LogicProblemResponse_fix) ? ", fixing it"
+                                                 : ", not fixing it",
+          envvarFixer ? ".  Set " : "", envvarFixer ? envvarFixer : "",
+          envvarFixer ? " to fix it\n" : "");
 
-  if (wasReported) *wasReported = true;
+  if (wasReported)
+    *wasReported = true;
 
   return response;
 }
@@ -1824,37 +1878,39 @@ LogicProblemResponse copeWithLogicProblem2(
   stats[3] = min;
   stats[4] = max;
  */
-double *DListStats(double *dlist, int nlist, double *stats)
-{
+double *DListStats(double *dlist, int nlist, double *stats) {
   int n;
   long double sum, sum2;
-  double mean,min,max,stddev;
-  if(nlist <= 0){
-    printf("ERROR: DListStats() nlist = %d\n",nlist);
-    return(NULL);
+  double mean, min, max, stddev;
+  if (nlist <= 0) {
+    printf("ERROR: DListStats() nlist = %d\n", nlist);
+    return (nullptr);
   }
-  if(dlist == NULL){
+  if (dlist == nullptr) {
     printf("ERROR: DListStats() dlist is NULL\n");
-    return(NULL);
+    return (nullptr);
   }
 
-  if(stats==NULL) stats = (double*)calloc(sizeof(double),5);
+  if (stats == nullptr)
+    stats = (double *)calloc(sizeof(double), 5);
   sum = 0;
   sum2 = 0;
   min = dlist[0];
   max = dlist[0];
-  for(n=0; n < nlist; n++){
-    sum  += dlist[n];
-    sum2 += (dlist[n]*dlist[n]);
-    if(min > dlist[n]) min = dlist[n];
-    if(max < dlist[n]) max = dlist[n];
+  for (n = 0; n < nlist; n++) {
+    sum += dlist[n];
+    sum2 += (dlist[n] * dlist[n]);
+    if (min > dlist[n])
+      min = dlist[n];
+    if (max < dlist[n])
+      max = dlist[n];
   }
-  mean = sum/nlist;
-  stddev = sqrt(sum2/nlist - mean*mean);
+  mean = sum / nlist;
+  stddev = sqrt(sum2 / nlist - mean * mean);
   stats[0] = nlist;
   stats[1] = mean;
   stats[2] = stddev;
   stats[3] = min;
   stats[4] = max;
-  return(stats);
+  return (stats);
 }

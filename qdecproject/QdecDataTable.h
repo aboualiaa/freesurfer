@@ -35,16 +35,14 @@
 
 using namespace std;
 
-class QdecDataTable
-{
+class QdecDataTable {
 public:
-
   // Constructors/Destructors
   //
 
-  QdecDataTable ( );
+  QdecDataTable();
 
-  virtual ~QdecDataTable ( );
+  virtual ~QdecDataTable();
 
   /**
    * Load white-space delimited file containing subject ids and their
@@ -54,101 +52,90 @@ public:
    * @param  osNewSubjDir
    * @param  isFsIdColName
    */
-  int Load (const char* isFileName, 
-            char* osNewSubjDir=NULL,
-            const char* isFsIdColName=NULL);
-
+  int Load(const char *isFileName, char *osNewSubjDir = nullptr,
+           const char *isFsIdColName = nullptr);
 
   /**
    * @return int
    * @param  isFileName
    */
-  int Save (const char* isFileName );
-
+  int Save(const char *isFileName);
 
   /**
    * @return string
    */
-  string GetFileName ( );
-
+  string GetFileName();
 
   /**
    * @return vector< string >
    */
-  vector< string > GetSubjectIDs ( );
-
+  vector<string> GetSubjectIDs();
 
   /**
    * @return vector< QdecSubject* >
    */
-  vector< QdecSubject* > GetSubjects ( );
-
+  vector<QdecSubject *> GetSubjects();
 
   /**
    * @return QdecFactor*
    * @param isFactorName
    */
-  QdecFactor* GetFactor ( const char* isFactorName );
-
+  QdecFactor *GetFactor(const char *isFactorName);
 
   /**
    * @return QdecFactor*
    * @param isSubjectName
    * @param isFactorName
    */
-  QdecFactor* GetFactor ( const char* isSubjectName,
-                          const char* isFactorName );
-
+  QdecFactor *GetFactor(const char *isSubjectName, const char *isFactorName);
 
   /**
    * @return vector< string >
    */
-  vector< string > GetDiscreteFactorNames ( );
-
+  vector<string> GetDiscreteFactorNames();
 
   /**
    * @return vector< string >
    */
-  vector< string > GetContinuousFactorNames ( );
-
+  vector<string> GetContinuousFactorNames();
 
   /**
    * GetNumberOfClasses( ) - returns the number of subjects in the table
    */
-  int GetNumberOfSubjects ( );
+  int GetNumberOfSubjects();
 
   /**
    * GetNumberOfClasses( ) - returns the number of classes for the design.
    * The number of classes is just all the combinations of all
    * the levels for the discrete factors.
    */
-  int GetNumberOfClasses ( );
+  int GetNumberOfClasses();
 
   /**
    * GetNumberOfRegressors() - returns the number of regressors for the
    * given design.
    */
-  int GetNumberOfRegressors ( );
+  int GetNumberOfRegressors();
 
   /**
    * dumps factors and inputs to filepointer (stdout, or file)
    * @param  iFilePointer
    */
-  void Dump (  FILE* iFilePointer );
+  void Dump(FILE *iFilePointer);
 
   /**
    * GetMeanAndStdDev() - computes the average and stddev of continuous factor
    * @return vector< double > - first element is mean, second is the stddev
    * @param isFactorName
    */
-  vector< double > GetMeanAndStdDev ( const char* isFactorName );
+  vector<double> GetMeanAndStdDev(const char *isFactorName);
 
   /**
    * deletes all continuous factors that have a zero mean and zero stddev.
    * those are useless factors (probably originating from a stats table).
    * @return number of factors purged
    */
-  int PurgeNullFactors ( );
+  int PurgeNullFactors();
 
   /**
    * merge a factor from a given data table into this data table
@@ -157,7 +144,7 @@ public:
    * @param  isFactorName
    * @param  iDataTable
    */
-  int MergeFactor ( const char* isFactorName, QdecDataTable* iDataTable);
+  int MergeFactor(const char *isFactorName, QdecDataTable *iDataTable);
 
   /**
    * delete a factor from this data table
@@ -165,10 +152,9 @@ public:
    * @return int
    * @param  isFactorName
    */
-  int DeleteFactor ( const char* isFactorName );
+  int DeleteFactor(const char *isFactorName);
 
 private:
-
   // private attributes
   //
 
@@ -176,11 +162,10 @@ private:
   string mfnFileName;
 
   // discrete and continuous factors as found on first line of data table
-  vector < QdecFactor* > mFactors;
+  vector<QdecFactor *> mFactors;
 
   // Stores subject data (id and factors) as read from table.dat input file.
-  vector < QdecSubject* > mSubjects;
-
+  vector<QdecSubject *> mSubjects;
 };
 
 #endif // QDECDATATABLE_H

@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2016/06/11 20:50:54 $
@@ -23,7 +23,6 @@
  *
  */
 
-
 ////SVM-LIB////////////////////////////////////////////////////////////////
 //
 // Name: Vector
@@ -35,16 +34,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-
-
 #ifndef __SVM_VECTOR_H__
 #define __SVM_VECTOR_H__
 
-#include <stdio.h>
+#include <cstdio>
 #include <iostream>
 
-template <class E>
-class Vector {
+template <class E> class Vector {
   int _size;
   E *_ptr;
 
@@ -53,9 +49,9 @@ class Vector {
   // but rather use the public init function.
 
   void deallocate() {
-    if ( _size > 0 ) {
+    if (_size > 0) {
       _size = 0;
-      delete [] _ptr;
+      delete[] _ptr;
     }
   }
 
@@ -64,95 +60,69 @@ class Vector {
     _ptr = new E[_size];
   }
 
-
 public:
-
   // Constructors and destructors
-  Vector() :
-      _size(0), _ptr(NULL) {}
+  Vector() : _size(0), _ptr(NULL) {}
 
-  Vector ( int size ) {
-    allocate(size);
-  }
+  Vector(int size) { allocate(size); }
 
-  Vector(int size, const E *ptr) {
-    init(size,ptr);
-  }
+  Vector(int size, const E *ptr) { init(size, ptr); }
 
-  ~Vector() {
-    deallocate();
-  }
-
-
+  ~Vector() { deallocate(); }
 
   // Public memory allocation function
   void init(int size) {
-    if ( _size != size ) {
+    if (_size != size) {
       deallocate();
       allocate(size);
     }
   }
-  void init(int size, const E* ptr) {
+  void init(int size, const E *ptr) {
     init(size);
-    for ( int i = 0; i < _size; i++ )
+    for (int i = 0; i < _size; i++)
       _ptr[i] = ptr[i];
   }
 
-
   // Assignment
-  Vector& operator = ( const Vector& v) {
-    if ( _ptr == v._ptr )
+  Vector &operator=(const Vector &v) {
+    if (_ptr == v._ptr)
       return *this;
 
     init(v.size());
-    for ( int i = 0; i < _size; i++ )
+    for (int i = 0; i < _size; i++)
       _ptr[i] = v._ptr[i];
     return *this;
   }
 
-
   // Accessors
-  int size() const {
-    return _size;
-  };
-  E* data() const {
-    return _ptr;
-  };
+  int size() const { return _size; };
+  E *data() const { return _ptr; };
 
   // Element accessors
-  E& operator [] (int i) {
-    return _ptr[i];
-  };
-  const E& operator [] (int i) const {
-    return _ptr[i];
-  };
-
+  E &operator[](int i) { return _ptr[i]; };
+  const E &operator[](int i) const { return _ptr[i]; };
 
   // I/O
 
   bool read(FILE *f, bool binary = false) {
-    if ( binary )
-      return ( fread(_ptr,sizeof(E),_size,f) - _size == 0 );
+    if (binary)
+      return (fread(_ptr, sizeof(E), _size, f) - _size == 0);
 
-    for ( int i = 0; i < _size; i++ )
-      if ( fscanf(f, readFormat(E(0)), &(_ptr[i])) != 1 )
+    for (int i = 0; i < _size; i++)
+      if (fscanf(f, readFormat(E(0)), &(_ptr[i])) != 1)
         return false;
     return true;
   }
 
-  bool write (FILE *f, bool binary = false) const {
-    if ( binary )
-      return ( fwrite(_ptr,sizeof(E),_size,f) - _size == 0 );
+  bool write(FILE *f, bool binary = false) const {
+    if (binary)
+      return (fwrite(_ptr, sizeof(E), _size, f) - _size == 0);
 
-    for ( int i = 0; i < _size; i++ )
+    for (int i = 0; i < _size; i++)
       fprintf(f, writeFormat(E(0)), _ptr[i]);
-    fprintf(f,"\n");
+    fprintf(f, "\n");
     return true;
   }
-
 };
 
-
 #endif //  __SVM_VECTOR_H__
-
-

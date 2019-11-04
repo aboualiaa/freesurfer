@@ -1,6 +1,7 @@
 /**
  * @file  romp_support.h
- * @brief prototypes and structures for getting reprodiucible results from and for timing omp loops.
+ * @brief prototypes and structures for getting reprodiucible results from and
+ * for timing omp loops.
  *
  */
 /*
@@ -22,16 +23,15 @@
  *
  */
 
+ROMP_PFLB_end
+} // serial loop
 
-                ROMP_PFLB_end
-	    }           // serial loop
-        
-            ROMP_PF_end
-        }               // parallel loop
-        ROMP_PF_end
-        
-    } // poison ROMP_SUMREDUCTION0 etc.
-    
+ROMP_PF_end
+} // parallel loop
+ROMP_PF_end
+
+} // poison ROMP_SUMREDUCTION0 etc.
+
 #undef ROMP_FOR_PRAGMA
 #undef ROMP_VARIABLE
 #undef ROMP_LO
@@ -53,5 +53,5 @@
 #undef ROMP_SUMREDUCTION2
 #endif
 
-       ROMP_Distributor_end(&ROMP_distributor);
-    }
+ROMP_Distributor_end(&ROMP_distributor);
+}

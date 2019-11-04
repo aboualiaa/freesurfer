@@ -22,7 +22,6 @@
  *
  */
 
-
 #ifndef QDEC_INC
 #define QDEC_INC
 
@@ -35,69 +34,57 @@
 #define QDEC_NLEVELS_MAX 10
 
 #define QDEC_FACTOR_TYPE_CONTINUOUS 1
-#define QDEC_FACTOR_TYPE_DISCRETE   2
+#define QDEC_FACTOR_TYPE_DISCRETE 2
 
 /*---------------------------------------------------------*/
-typedef struct
-{
+typedef struct {
   char *name;
   int type;
   int nLevels;
   char LevelNames[QDEC_NLEVELS_MAX][100];
   int nInputs;
-  double  *cValues; // continuous value for each input
-  char   **dValues; // or discrete value for each input
-}
-QDEC_FACTOR, QDECF;
+  double *cValues; // continuous value for each input
+  char **dValues;  // or discrete value for each input
+} QDEC_FACTOR, QDECF;
 /*---------------------------------------------------------*/
 
-
 /*---------------------------------------------------------*/
-typedef struct
-{
+typedef struct {
   int nContrasts;
   char **ContrastNames;
   char **ContrastQuestions;
   MATRIX **C;
-}
-QDEC_CONTRAST, QDECC;
+} QDEC_CONTRAST, QDECC;
 /*---------------------------------------------------------*/
 
-
 /*---------------------------------------------------------*/
-typedef struct
-{
+typedef struct {
   char *name;
   int nInputs;        // Number of subjects
   char **InputIdList; // Subject Ids
   int nFactors;
   char *measure;
   QDEC_FACTOR *Factors;
-}
-QDEC_DESIGN, QDECD;
+} QDEC_DESIGN, QDECD;
 /*---------------------------------------------------------*/
 
-
 /*---------------------------------------------------------*/
-typedef struct
-{
-  char *name;         // Design name
-  char *measure;      // thickness, sulc, curv
-  char *hemi;         // lh or rh
-  char *df1;          // name of discrete factor 1
-  char *df2;          // name of discrete factor 2
-  char *cf1;          // name of continuous factor 1
-  char *cf2;          // name of continuous factor 2
-  double fwhm;        // approx fwhm
-  int  nsmooth;       // number of smooth steps
-}
-QDEC_DESIGN_GUI, QDECDGUI;
+typedef struct {
+  char *name;    // Design name
+  char *measure; // thickness, sulc, curv
+  char *hemi;    // lh or rh
+  char *df1;     // name of discrete factor 1
+  char *df2;     // name of discrete factor 2
+  char *cf1;     // name of continuous factor 1
+  char *cf2;     // name of continuous factor 2
+  double fwhm;   // approx fwhm
+  int nsmooth;   // number of smooth steps
+} QDEC_DESIGN_GUI, QDECDGUI;
 /*---------------------------------------------------------*/
-
 
 int QDECnSubjects(QDECD *D);
 const char *QDECfileName(QDECD *D);
-const char *QDECsrcVersion(void);
+const char *QDECsrcVersion();
 int QDECisContinuousFactor(QDECF *F);
 int QDECisDiscreteFactor(QDECF *F);
 int QDECallocFactor(QDECF *F);
@@ -112,7 +99,7 @@ int QDECnRegressors(QDECD *D);
 int QDECfsgdFile(char *fsgdf, QDECD *D);
 char *QDEClevels2ClassName(QDECD *D, int *nthlevels);
 char *QDECinputClassName(QDECD *D, int nthInput);
-//const char *QDECcheckDesign(QDECD *D);
+// const char *QDECcheckDesign(QDECD *D);
 QDECD *QDECloadTable(char *tablebase);
 char **QDECdiscreteFactorNames(QDECD *D, int *ndf);
 char **QDECcontinuousFactorNames(QDECD *D, int *ncf);

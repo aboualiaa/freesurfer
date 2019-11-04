@@ -30,36 +30,33 @@
 
 class Layer;
 
-class Interactor2DVolumeEdit : public Interactor2D
-{
+class Interactor2DVolumeEdit : public Interactor2D {
   Q_OBJECT
 public:
-  Interactor2DVolumeEdit( const QString& layerTypeName, QObject* parent );
+  Interactor2DVolumeEdit(const QString &layerTypeName, QObject *parent);
   virtual ~Interactor2DVolumeEdit();
 
   // return true if to have parent Interactor2D continue processing the event
   // return false to stop event from further processing
-  virtual bool ProcessMouseDownEvent( QMouseEvent* event, RenderView* view );
-  virtual bool ProcessMouseUpEvent( QMouseEvent* event, RenderView* view );
-  virtual bool ProcessMouseMoveEvent( QMouseEvent* event, RenderView* view );
-  virtual bool ProcessKeyDownEvent( QKeyEvent* event, RenderView* view );
-  virtual bool ProcessKeyUpEvent( QKeyEvent* event, RenderView* view );
+  virtual bool ProcessMouseDownEvent(QMouseEvent *event, RenderView *view);
+  virtual bool ProcessMouseUpEvent(QMouseEvent *event, RenderView *view);
+  virtual bool ProcessMouseMoveEvent(QMouseEvent *event, RenderView *view);
+  virtual bool ProcessKeyDownEvent(QKeyEvent *event, RenderView *view);
+  virtual bool ProcessKeyUpEvent(QKeyEvent *event, RenderView *view);
 
 protected:
-  void UpdateCursor( QEvent* event, QWidget* wnd );
-  void ProcessContextMenu( QMouseEvent* event );
+  void UpdateCursor(QEvent *event, QWidget *wnd);
+  void ProcessContextMenu(QMouseEvent *event);
 
-  void PreprocessMouseEvent(QMouseEvent* event);
+  void PreprocessMouseEvent(QMouseEvent *event);
 
   bool m_bEditing;
 
   QString m_strLayerTypeName;
 
-  QList<double>  m_dPolylinePoints;
+  QList<double> m_dPolylinePoints;
 
-  bool          m_bColorPicking;
+  bool m_bColorPicking;
 };
 
 #endif
-
-

@@ -25,8 +25,7 @@
 #include <iostream>
 #include <iomanip>
 
-extern "C"
-{
+extern "C" {
 #include "error.h"
 #include "mri.h"
 #include "mrisurf.h"
@@ -36,49 +35,48 @@ const char *Progname = "mris_gethires";
 
 using namespace std;
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   MRI *src = 0;
-  if (argc < 2)
-  {
-    cerr << "Usage: mris_gethighres <surface> <highresvol> <outsurf> [<lowresvol>]" << endl;
-    cerr << "   where lowresvol is only used when surface does not contain the volume info" << endl;
+  if (argc < 2) {
+    cerr << "Usage: mris_gethighres <surface> <highresvol> <outsurf> "
+            "[<lowresvol>]"
+         << endl;
+    cerr << "   where lowresvol is only used when surface does not contain the "
+            "volume info"
+         << endl;
     return 0;
   }
   MRIS *mris = MRISread(argv[1]);
-  if (!mris)
-  {
+  if (!mris) {
     cerr << "could not load surface: " << argv[1] << endl;
     return 0;
   }
-  if (mris->vg.valid == 0)
-  {
+  if (mris->vg.valid == 0) {
     cerr << "Trying to read lowres volume to get info" << endl;
     src = MRIreadHeader(argv[4], MRI_VOLUME_TYPE_UNKNOWN);
-    if (!src)
-    {
+    if (!src) {
       cerr << "could not read lowres volume : " << argv[2] << endl;
       return 0;
     }
     getVolGeom(src, &mris->vg);
   }
   MRI *mri_hires = MRIread(argv[2]);
-  if (!mri_hires)
-  {
+  if (!mri_hires) {
     cerr << "could not highres volume : " << argv[2] << endl;
     return 0;
   }
   LINEAR_TRANSFORM *lt = 0;
   MATRIX *m_L = 0;
-  fprintf(stderr, "allocating identity RAS-to-RAS xform...\n") ;
+  fprintf(stderr, "allocating identity RAS-to-RAS xform...\n");
   // allocate hires_xform->xform
   TRANSFORM *hires_xform = TransformAlloc(MNI_TRANSFORM_TYPE, NULL);
   if (!hires_xform)
-    ErrorExit(ERROR_NOFILE, "%s: could not allocate hires xform %s", Progname, argv[3]) ;
-  LTA *hires_lta = (LTA *) (hires_xform->xform);
+    ErrorExit(ERROR_NOFILE, "%s: could not allocate hires xform %s", Progname,
+              argv[3]);
+  LTA *hires_lta = (LTA *)(hires_xform->xform);
   lt = &hires_lta->xforms[0];
-  lt->sigma = 1.0f ;
-  lt->x0 = lt->y0 = lt->z0 = 0 ;
+  lt->sigma = 1.0f;
+  lt->x0 = lt->y0 = lt->z0 = 0;
   hires_lta->type = LINEAR_RAS_TO_RAS;
   m_L = lt->m_L;
   MatrixIdentity(4, m_L);

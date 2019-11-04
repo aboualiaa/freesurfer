@@ -1,6 +1,6 @@
 /**
  * @file  gcut.h
- * @brief 
+ * @brief
  *
  */
 /*
@@ -23,42 +23,40 @@
  *
  */
 
-typedef struct
-{
+typedef struct {
   int x;
   int y;
   int z;
-}
-gc_POS;
+} gc_POS;
 
 typedef struct {
-	int x;
-	int y;
-	int z;
-	int current_child;
-}lc_Component;
+  int x;
+  int y;
+  int z;
+  int current_child;
+} lc_Component;
 
-class CCubeNode
-{
+class CCubeNode {
 public:
   CCubeNode();
   CCubeNode(int subX, int subY, int subZ, int index, double mean);
-  CCubeNode(int subX, int subY, int subZ, int index, double mean, double variance, double variance8V);
+  CCubeNode(int subX, int subY, int subZ, int index, double mean,
+            double variance, double variance8V);
   ~CCubeNode();
 
   void SetMean(double mean);
   void SetVariance(double variance);
   void SetVariance8V(double variance8V);
-  void SetNextNode(CCubeNode* ptrNextNode);
+  void SetNextNode(CCubeNode *ptrNextNode);
 
-  int GetSubX(void);
-  int GetSubY(void);
-  int GetSubZ(void);
-  int GetIndex(void);
-  double GetMean(void);
-  double GetVariance(void);
-  double GetVariance8V(void);
-  CCubeNode* GetNextNode(void);
+  int GetSubX();
+  int GetSubY();
+  int GetSubZ();
+  int GetIndex();
+  double GetMean();
+  double GetVariance();
+  double GetVariance8V();
+  CCubeNode *GetNextNode();
 
 private:
   int thisSubX;
@@ -73,19 +71,17 @@ private:
   CCubeNode *thisPtrNextNode;
 };
 
-class CQueue3D
-{
+class CQueue3D {
 public:
   CQueue3D();
   ~CQueue3D();
 
-  void Enqueue(CCubeNode* ptrNewNode);
-  CCubeNode* Dequeue(void);
-  CCubeNode* GetHead(void);
-  CCubeNode* GetTail(void);
+  void Enqueue(CCubeNode *ptrNewNode);
+  CCubeNode *Dequeue();
+  CCubeNode *GetHead();
+  CCubeNode *GetTail();
 
 private:
-  CCubeNode* thisHead;
-  CCubeNode* thisTail;
+  CCubeNode *thisHead;
+  CCubeNode *thisTail;
 };
-

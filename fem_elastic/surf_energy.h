@@ -15,13 +15,11 @@ used by Powell
 #include "surf_powell.h"
 
 // the contents of the container will not be cleared
-void add_to_container(const MRI_SURFACE* mris_x,
-                      const MRI_SURFACE* mris_fx,
-                      PointsContainerType& container);
+void add_to_container(const MRI_SURFACE *mris_x, const MRI_SURFACE *mris_fx,
+                      PointsContainerType &container);
 
-float energy(const PointsContainerType& container,
-             float *transform);
+float energy(const PointsContainerType &container, float *transform);
 
-void apply_lin_transform(MRI_SURFACE* mris, float* transform);
+void apply_lin_transform(MRI_SURFACE *mris, float *transform);
 
 #endif

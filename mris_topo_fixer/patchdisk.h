@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:11 $
@@ -23,35 +23,32 @@
  *
  */
 
-
 #ifndef TOPOLOGY_PATCHDISK_H
 #define TOPOLOGY_PATCHDISK_H
 
-#define MAX_EXTRA_VERTICES 100 //66
-#define MAX_EXTRA_FACES 150 //128
-
+#define MAX_EXTRA_VERTICES 100 // 66
+#define MAX_EXTRA_FACES 150    // 128
 
 #include "surface.h"
 
-class PatchDisk
-{
+class PatchDisk {
   void _Init();
   void _Alloc(int which_patch);
+
 public:
   Surface disk;
-  Loop ring,init_ring;
-  int *vtrans ;
-  int *ftrans ;
+  Loop ring, init_ring;
+  int *vtrans;
+  int *ftrans;
 
   PatchDisk();
   PatchDisk(int which_patch);
-  PatchDisk(const string s):disk(s),init_ring(10)
-  {
+  PatchDisk(const string s) : disk(s), init_ring(10) {
     vtrans = new int[disk.nvertices];
     ftrans = new int[disk.nfaces];
     _Init();
   };
-  ~PatchDisk(void);
+  ~PatchDisk();
 
   void Init();
   void Create(int which_patch);

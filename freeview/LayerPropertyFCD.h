@@ -6,40 +6,27 @@
 
 class vtkRGBAColorTransferFunction;
 
-class LayerPropertyFCD : public LayerProperty
-{
+class LayerPropertyFCD : public LayerProperty {
   Q_OBJECT
 public:
   explicit LayerPropertyFCD(QObject *parent = 0);
 
-  vtkRGBAColorTransferFunction* GetLookupTable() const;
+  vtkRGBAColorTransferFunction *GetLookupTable() const;
 
-  double GetOpacity()
-  {
-    return mOpacity;
-  }
+  double GetOpacity() { return mOpacity; }
 
-  double GetThicknessThreshold()
-  {
-    return m_dThreshold;
-  }
+  double GetThicknessThreshold() { return m_dThreshold; }
 
-  double GetSigma()
-  {
-    return m_dSigma;
-  }
+  double GetSigma() { return m_dSigma; }
 
-  int GetMinArea()
-  {
-    return m_nMinArea;
-  }
+  int GetMinArea() { return m_nMinArea; }
 
-  void SetLookupTable(vtkRGBAColorTransferFunction* lut);
+  void SetLookupTable(vtkRGBAColorTransferFunction *lut);
 
 signals:
   void ThicknessThresholdChanged(double);
   void SigmaChanged(double);
-  void OpacityChanged( double opacity );
+  void OpacityChanged(double opacity);
   void MinAreaChanged(int);
   void ColorMapChanged();
 

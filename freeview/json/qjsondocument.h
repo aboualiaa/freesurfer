@@ -49,103 +49,102 @@ QT_BEGIN_NAMESPACE
 class QDebug;
 
 namespace QJsonPrivate {
-    class Parser;
+class Parser;
 }
 
-struct Q_JSONRPC_EXPORT QJsonParseError
-{
-    enum ParseError {
-        NoError = 0,
-        UnterminatedObject,
-        MissingNameSeparator,
-        UnterminatedArray,
-        MissingValueSeparator,
-        IllegalValue,
-        TerminationByNumber,
-        IllegalNumber,
-        IllegalEscapeSequence,
-        IllegalUTF8String,
-        UnterminatedString,
-        MissingObject,
-        DeepNesting,
-        DocumentTooLarge
-    };
+struct Q_JSONRPC_EXPORT QJsonParseError {
+  enum ParseError {
+    NoError = 0,
+    UnterminatedObject,
+    MissingNameSeparator,
+    UnterminatedArray,
+    MissingValueSeparator,
+    IllegalValue,
+    TerminationByNumber,
+    IllegalNumber,
+    IllegalEscapeSequence,
+    IllegalUTF8String,
+    UnterminatedString,
+    MissingObject,
+    DeepNesting,
+    DocumentTooLarge
+  };
 
-    QString    errorString() const;
+  QString errorString() const;
 
-    int        offset;
-    ParseError error;
+  int offset;
+  ParseError error;
 };
 
-class Q_JSONRPC_EXPORT QJsonDocument
-{
+class Q_JSONRPC_EXPORT QJsonDocument {
 public:
 #ifdef Q_LITTLE_ENDIAN
-    static const uint BinaryFormatTag = ('q') | ('b' << 8) | ('j' << 16) | ('s' << 24);
+  static const uint BinaryFormatTag =
+      ('q') | ('b' << 8) | ('j' << 16) | ('s' << 24);
 #else
-    static const uint BinaryFormatTag = ('q' << 24) | ('b' << 16) | ('j' << 8) | ('s');
+  static const uint BinaryFormatTag =
+      ('q' << 24) | ('b' << 16) | ('j' << 8) | ('s');
 #endif
 
-    QJsonDocument();
-    explicit QJsonDocument(const QJsonObject &object);
-    explicit QJsonDocument(const QJsonArray &array);
-    ~QJsonDocument();
+  QJsonDocument();
+  explicit QJsonDocument(const QJsonObject &object);
+  explicit QJsonDocument(const QJsonArray &array);
+  ~QJsonDocument();
 
-    QJsonDocument(const QJsonDocument &other);
-    QJsonDocument &operator =(const QJsonDocument &other);
+  QJsonDocument(const QJsonDocument &other);
+  QJsonDocument &operator=(const QJsonDocument &other);
 
-    enum DataValidation {
-        Validate,
-        BypassValidation
-    };
+  enum DataValidation { Validate, BypassValidation };
 
-    static QJsonDocument fromRawData(const char *data, int size, DataValidation validation = Validate);
-    const char *rawData(int *size) const;
+  static QJsonDocument fromRawData(const char *data, int size,
+                                   DataValidation validation = Validate);
+  const char *rawData(int *size) const;
 
-    static QJsonDocument fromBinaryData(const QByteArray &data, DataValidation validation  = Validate);
-    QByteArray toBinaryData() const;
+  static QJsonDocument fromBinaryData(const QByteArray &data,
+                                      DataValidation validation = Validate);
+  QByteArray toBinaryData() const;
 
-    static QJsonDocument fromVariant(const QVariant &variant);
-    QVariant toVariant() const;
+  static QJsonDocument fromVariant(const QVariant &variant);
+  QVariant toVariant() const;
 
-    enum JsonFormat {
-        Indented,
-        Compact
-    };
+  enum JsonFormat { Indented, Compact };
 
-    static QJsonDocument fromJson(const QByteArray &json, QJsonParseError *error = 0);
+  static QJsonDocument fromJson(const QByteArray &json,
+                                QJsonParseError *error = 0);
 
 #ifdef Q_QDOC
-    QByteArray toJson(JsonFormat format = Indented) const;
+  QByteArray toJson(JsonFormat format = Indented) const;
 #elif !defined(QT_JSON_READONLY)
-    QByteArray toJson() const; //### Merge in Qt6
-    QByteArray toJson(JsonFormat format) const;
+  QByteArray toJson() const; //### Merge in Qt6
+  QByteArray toJson(JsonFormat format) const;
 #endif
 
-    bool isEmpty() const;
-    bool isArray() const;
-    bool isObject() const;
+  bool isEmpty() const;
+  bool isArray() const;
+  bool isObject() const;
 
-    QJsonObject object() const;
-    QJsonArray array() const;
+  QJsonObject object() const;
+  QJsonArray array() const;
 
-    void setObject(const QJsonObject &object);
-    void setArray(const QJsonArray &array);
+  void setObject(const QJsonObject &object);
+  void setArray(const QJsonArray &array);
 
-    bool operator==(const QJsonDocument &other) const;
-    bool operator!=(const QJsonDocument &other) const { return !(*this == other); }
+  bool operator==(const QJsonDocument &other) const;
+  bool operator!=(const QJsonDocument &other) const {
+    return !(*this == other);
+  }
 
-    bool isNull() const;
+  bool isNull() const;
 
 private:
-    friend class QJsonValue;
-    friend class QJsonPrivate::Data;
-    friend class QJsonPrivate::Parser;
-    friend Q_JSONRPC_EXPORT QDebug operator<<(QDebug, const QJsonDocument &);
+  friend class QJsonValue;
+  friend class QJsonPrivate::Data;
+  friend class QJsonPrivate::Parser;
+  friend Q_JSONRPC_EXPORT QDebug operator<<(QDebug, const QJsonDocument &);
 
-    QJsonDocument(QJsonPrivate::Data *data);
+  QJsonDocument(QJsonPrivate::Data *data);
 
-    QJsonPrivate::Data *d;
+  QJsonPrivate::Data *d;
 };
 
 #if !defined(QT_NO_DEBUG_STREAM) && !defined(QT_JSON_READONLY)

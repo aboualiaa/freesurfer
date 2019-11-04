@@ -3,51 +3,40 @@
 
 #include "kvlAtlasMeshCollection.h"
 
+namespace kvl {
 
-namespace kvl
-{
-
-
-class AtlasMeshCollectionValidator: public itk::Object
-{
-public :
-  
+class AtlasMeshCollectionValidator : public itk::Object {
+public:
   /** Standard class typedefs */
-  typedef AtlasMeshCollectionValidator  Self;
-  typedef itk::Object  Superclass;
-  typedef itk::SmartPointer< Self >  Pointer;
-  typedef itk::SmartPointer< const Self >  ConstPointer;
+  using Self = AtlasMeshCollectionValidator;
+  using Superclass = itk::Object;
+  using Pointer = itk::SmartPointer<Self>;
+  using ConstPointer = itk::SmartPointer<const Self>;
 
   /** Method for creation through the object factory. */
-  itkNewMacro( Self );
+  itkNewMacro(Self);
 
   /** Run-time type information (and related methods). */
-  itkTypeMacro( AtlasMeshCollectionValidator, itk::Object );
-  
-  //
-  bool Validate( const AtlasMeshCollection* meshCollection );
+  itkTypeMacro(AtlasMeshCollectionValidator, itk::Object);
 
-protected :
+  //
+  bool Validate(const AtlasMeshCollection *meshCollection);
+
+protected:
   // Constructor
   AtlasMeshCollectionValidator();
-  
+
   // Destructor
   virtual ~AtlasMeshCollectionValidator();
-  
+
   // Print
-  void PrintSelf( std::ostream& os, itk::Indent indent ) const;
+  void PrintSelf(std::ostream &os, itk::Indent indent) const;
 
-
-    
-private :
-  AtlasMeshCollectionValidator(const Self&); //purposely not implemented
-  void operator=(const Self&); //purposely not implemented
-
+private:
+  AtlasMeshCollectionValidator(const Self &); // purposely not implemented
+  void operator=(const Self &);               // purposely not implemented
 };
 
-
-
 } // end namespace kvl
-
 
 #endif

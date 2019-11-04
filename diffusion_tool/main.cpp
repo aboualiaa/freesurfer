@@ -1,13 +1,11 @@
 #include <QApplication>
 #include "configurationfileform.h"
 
+int main(int argc, char **argv) {
+  QApplication app(argc, argv);
 
-int main(int argc, char **argv)
-{
-    QApplication app (argc, argv);
+  ConfigurationFileForm mainWin;
+  mainWin.show();
 
-    ConfigurationFileForm mainWin;
-    mainWin.show();
-
-    return app.exec();
+  return app.exec();
 }

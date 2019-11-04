@@ -3,19 +3,14 @@
 #include <QMenu>
 #include <QDebug>
 
-LabelTreeWidget::LabelTreeWidget(QWidget *parent) :
-  QTreeWidget(parent), draggedItem(NULL)
-{
+LabelTreeWidget::LabelTreeWidget(QWidget *parent)
+    : QTreeWidget(parent), draggedItem(NULL) {}
 
-}
-
-void LabelTreeWidget::contextMenuEvent(QContextMenuEvent *e)
-{
-  QTreeWidgetItem* item = currentItem();
-  if (item)
-  {
-    QMenu* menu = new QMenu(this);
-    QAction* act = new QAction("Go To Centroid", this);
+void LabelTreeWidget::contextMenuEvent(QContextMenuEvent *e) {
+  QTreeWidgetItem *item = currentItem();
+  if (item) {
+    QMenu *menu = new QMenu(this);
+    QAction *act = new QAction("Go To Centroid", this);
     connect(act, SIGNAL(triggered()), this, SIGNAL(MenuGoToCentroid()));
     menu->addAction(act);
     act = new QAction("Resample", this);
@@ -35,24 +30,20 @@ void LabelTreeWidget::contextMenuEvent(QContextMenuEvent *e)
   }
 }
 
-void LabelTreeWidget::dragEnterEvent(QDragEnterEvent *event)
-{
+void LabelTreeWidget::dragEnterEvent(QDragEnterEvent *event) {
   draggedItem = currentItem();
   QTreeWidget::dragEnterEvent(event);
 }
 
-void LabelTreeWidget::dropEvent(QDropEvent *event)
-{
+void LabelTreeWidget::dropEvent(QDropEvent *event) {
   QModelIndex droppedIndex = indexAt(event->pos());
-  if ( !droppedIndex.isValid() )
+  if (!droppedIndex.isValid())
     return;
 
   qDebug() << draggedItem << droppedIndex;
-  if (draggedItem)
-  {
-    QTreeWidgetItem* dParent = draggedItem->parent();
-    if (dParent)
-    {
+  if (draggedItem) {
+    QTreeWidgetItem *dParent = draggedItem->parent();
+    if (dParent) {
       if (itemFromIndex(droppedIndex.parent()) != dParent)
         return;
       dParent->removeChild(draggedItem);

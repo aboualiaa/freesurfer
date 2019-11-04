@@ -44,18 +44,14 @@
 ** The "unknown" format is intended as a template for writing new formats.
 */
 
-int
-_nrrdFormatUnknown_available(void)
-{
+int _nrrdFormatUnknown_available(void) {
 
   /* insert code here */
 
   return AIR_FALSE;
 }
 
-int
-_nrrdFormatUnknown_nameLooksLike(const char *filename)
-{
+int _nrrdFormatUnknown_nameLooksLike(const char *filename) {
 
   /* insert code here */
   AIR_UNUSED(filename);
@@ -63,16 +59,13 @@ _nrrdFormatUnknown_nameLooksLike(const char *filename)
   return AIR_FALSE;
 }
 
-int
-_nrrdFormatUnknown_fitsInto(const Nrrd *nrrd, const NrrdEncoding *encoding,
-                            int useBiff)
-{
-  char me[]="_nrrdFormatUnknown_fitsInto", err[BIFF_STRLEN];
+int _nrrdFormatUnknown_fitsInto(const Nrrd *nrrd, const NrrdEncoding *encoding,
+                                int useBiff) {
+  char me[] = "_nrrdFormatUnknown_fitsInto", err[BIFF_STRLEN];
 
-  if (!(nrrd && encoding))
-  {
-    sprintf(err, "%s: got NULL nrrd (%p) or encoding (%p)",
-            me, AIR_CAST(void*, nrrd), AIR_CAST(void*, encoding));
+  if (!(nrrd && encoding)) {
+    sprintf(err, "%s: got NULL nrrd (%p) or encoding (%p)", me,
+            AIR_CAST(void *, nrrd), AIR_CAST(void *, encoding));
     biffMaybeAdd(NRRD, err, useBiff);
     return AIR_FALSE;
   }
@@ -82,9 +75,7 @@ _nrrdFormatUnknown_fitsInto(const Nrrd *nrrd, const NrrdEncoding *encoding,
   return AIR_FALSE;
 }
 
-int
-_nrrdFormatUnknown_contentStartsLike(NrrdIoState *nio)
-{
+int _nrrdFormatUnknown_contentStartsLike(NrrdIoState *nio) {
 
   /* insert code here */
   AIR_UNUSED(nio);
@@ -92,11 +83,8 @@ _nrrdFormatUnknown_contentStartsLike(NrrdIoState *nio)
   return AIR_FALSE;
 }
 
-int
-_nrrdFormatUnknown_read(FILE *file, Nrrd *nrrd,
-                        NrrdIoState *nio)
-{
-  char me[]="_nrrdFormatUnknown_read", err[BIFF_STRLEN];
+int _nrrdFormatUnknown_read(FILE *file, Nrrd *nrrd, NrrdIoState *nio) {
+  char me[] = "_nrrdFormatUnknown_read", err[BIFF_STRLEN];
 
   /* insert code here, and remove error handling below */
   AIR_UNUSED(file);
@@ -108,11 +96,8 @@ _nrrdFormatUnknown_read(FILE *file, Nrrd *nrrd,
   return 1;
 }
 
-int
-_nrrdFormatUnknown_write(FILE *file, const Nrrd *nrrd,
-                         NrrdIoState *nio)
-{
-  char me[]="_nrrdFormatUnknown_write", err[BIFF_STRLEN];
+int _nrrdFormatUnknown_write(FILE *file, const Nrrd *nrrd, NrrdIoState *nio) {
+  char me[] = "_nrrdFormatUnknown_write", err[BIFF_STRLEN];
 
   /* insert code here, and remove error handling below */
   AIR_UNUSED(file);
@@ -124,32 +109,19 @@ _nrrdFormatUnknown_write(FILE *file, const Nrrd *nrrd,
   return 1;
 }
 
-const NrrdFormat
-_nrrdFormatUnknown =
-  {
-    "unknown",
-    AIR_FALSE,  /* isImage */
-    AIR_TRUE,   /* readable */
-    AIR_FALSE,  /* usesDIO */
-    _nrrdFormatUnknown_available,
-    _nrrdFormatUnknown_nameLooksLike,
-    _nrrdFormatUnknown_fitsInto,
-    _nrrdFormatUnknown_contentStartsLike,
-    _nrrdFormatUnknown_read,
-    _nrrdFormatUnknown_write
-  };
+const NrrdFormat _nrrdFormatUnknown = {"unknown",
+                                       AIR_FALSE, /* isImage */
+                                       AIR_TRUE,  /* readable */
+                                       AIR_FALSE, /* usesDIO */
+                                       _nrrdFormatUnknown_available,
+                                       _nrrdFormatUnknown_nameLooksLike,
+                                       _nrrdFormatUnknown_fitsInto,
+                                       _nrrdFormatUnknown_contentStartsLike,
+                                       _nrrdFormatUnknown_read,
+                                       _nrrdFormatUnknown_write};
 
-const NrrdFormat *const
-nrrdFormatUnknown = &_nrrdFormatUnknown;
+const NrrdFormat *const nrrdFormatUnknown = &_nrrdFormatUnknown;
 
-const NrrdFormat *const
-nrrdFormatArray[NRRD_FORMAT_TYPE_MAX+1] =
-  {
-    &_nrrdFormatUnknown,
-    &_nrrdFormatNRRD,
-    &_nrrdFormatPNM,
-    &_nrrdFormatPNG,
-    &_nrrdFormatVTK,
-    &_nrrdFormatText,
-    &_nrrdFormatEPS
-  };
+const NrrdFormat *const nrrdFormatArray[NRRD_FORMAT_TYPE_MAX + 1] = {
+    &_nrrdFormatUnknown, &_nrrdFormatNRRD, &_nrrdFormatPNM, &_nrrdFormatPNG,
+    &_nrrdFormatVTK,     &_nrrdFormatText, &_nrrdFormatEPS};

@@ -5,55 +5,52 @@
 
 #include <vnl/vnl_matrix.h>
 
-class FieldLineInitPathStrategy : public InitializePath
-{
+class FieldLineInitPathStrategy : public InitializePath {
 public:
-
-  FieldLineInitPathStrategy( PoistatsModel* model );
-  ~FieldLineInitPathStrategy();  
+  FieldLineInitPathStrategy(PoistatsModel *model);
+  ~FieldLineInitPathStrategy();
 
   /**
    * This does the work of finding the initial path.
    */
   void CalculateInitialPath();
-  
-protected:
 
+protected:
   /**
    * From the first and last seed point, calculate a look at vector and return
    * it.
    */
-  void GetLookAtVector( double *lookAtVector, const int *startPoint, const int *endPoint );
-  
+  void GetLookAtVector(double *lookAtVector, const int *startPoint,
+                       const int *endPoint);
+
   /**
    * Normalizes the vector and returns it.
    */
-  void NormalizeVector( double *v, const int size );
-  
+  void NormalizeVector(double *v, const int size);
+
   /**
    * Returns the up vector for an angle and look at vector.
    */
-  void GetUpVector( double *up, const double *lookAt, const double angle );
-  
+  void GetUpVector(double *up, const double *lookAt, const double angle);
+
   /**
    * Get the cross producet of 3 x 3 vectors.
    */
-  void GetCrossProduct( double *product, const double *v1, const double *v2 );
-  
+  void GetCrossProduct(double *product, const double *v1, const double *v2);
+
   /**
    * From these vectors return the rotation matrix.
    */
-  vnl_matrix< double > GetRotationMatrix( const double *lookAt, const double *up, 
-    const double *right );
+  vnl_matrix<double> GetRotationMatrix(const double *lookAt, const double *up,
+                                       const double *right);
 
   /**
    * Gets a new random end and start point from the regions.
    */
-  void GetNewStartAndEndPoints( int *startPoint, int *endPoint );
+  void GetNewStartAndEndPoints(int *startPoint, int *endPoint);
 
-  PoistatsModel::MatrixType GetInitialPoints( const int *startPoint, const int *endPoint );
-
+  PoistatsModel::MatrixType GetInitialPoints(const int *startPoint,
+                                             const int *endPoint);
 };
 
-#endif 
-
+#endif

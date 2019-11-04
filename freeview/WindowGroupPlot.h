@@ -36,15 +36,14 @@ class WindowGroupPlot;
 class FSGroupDescriptor;
 class QListWidgetItem;
 
-class WindowGroupPlot : public QWidget
-{
+class WindowGroupPlot : public QWidget {
   Q_OBJECT
 
 public:
   explicit WindowGroupPlot(QWidget *parent = 0);
   ~WindowGroupPlot();
 
-  void SetFsgdData(FSGroupDescriptor* fsgd);
+  void SetFsgdData(FSGroupDescriptor *fsgd);
 
   void resizeEvent(QResizeEvent *e);
 
@@ -52,18 +51,18 @@ public slots:
   void SetCurrentVertex(int nVertex);
   void OnComboViewBy(int nIndex);
   void OnComboConfigClass(int nIndex);
-  void OnComboConfigShape(const QString& strg);
-  void OnConfigColor(const QColor& c);
-  void OnCurrentItemChanged(QListWidgetItem* item);
+  void OnComboConfigShape(const QString &strg);
+  void OnConfigColor(const QColor &c);
+  void OnCurrentItemChanged(QListWidgetItem *item);
   void OnCurrentDataIndexChanged(int nIndex);
 
 private:
   void UpdateStockPixmaps();
-  void UpdateCurrentConfig(const QString& shape, const QColor& c);
+  void UpdateCurrentConfig(const QString &shape, const QColor &c);
 
   Ui::WindowGroupPlot *ui;
-  FSGroupDescriptor*  m_fsgd;
-  QList<QPixmap>    m_listMarkerPixmaps;
+  FSGroupDescriptor *m_fsgd;
+  QList<QPixmap> m_listMarkerPixmaps;
 };
 
 #endif // WINDOWGROUPPLOT_H

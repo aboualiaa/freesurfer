@@ -25,7 +25,7 @@
  */
 
 #include <limits>
-#include <assert.h>
+#include <cassert>
 
 #include "vtkArrowPipeline.h"
 
@@ -39,17 +39,16 @@
 #include "vtkPolyDataNormals.h"
 #include "vtkTransformPolyDataFilter.h"
 
+vtkStandardNewMacro(vtkArrowPipeline);
+// vtkCxxRevisionMacro( vtkArrowPipeline, "$Revision: 1.7 $" );
 
-vtkStandardNewMacro( vtkArrowPipeline );
-//vtkCxxRevisionMacro( vtkArrowPipeline, "$Revision: 1.7 $" );
-
-vtkArrowPipeline::vtkArrowPipeline () {
+vtkArrowPipeline::vtkArrowPipeline() {
 
   // Arrow source object.
   vtkSmartPointer<vtkArrowSource> arrowSource =
-    vtkSmartPointer<vtkArrowSource>::New();
-  arrowSource->SetShaftResolution( 20 );
-  arrowSource->SetTipResolution( 20 );
+      vtkSmartPointer<vtkArrowSource>::New();
+  arrowSource->SetShaftResolution(20);
+  arrowSource->SetTipResolution(20);
 
   // Initial points.
   mStartPoint[0] = mStartPoint[1] = mStartPoint[2] = 0;
@@ -61,57 +60,50 @@ vtkArrowPipeline::vtkArrowPipeline () {
   // 1,0,0 at the source (the dimensions of the raw arrows source) to
   // our start and end point at the destination.
   mTransform = vtkSmartPointer<vtkLandmarkTransform>::New();
-  vtkSmartPointer<vtkPoints> sourcePoints =
-    vtkSmartPointer<vtkPoints>::New();
-  sourcePoints->SetNumberOfPoints( 2 );
-  sourcePoints->SetPoint( 0, 0, 0, 0 );
-  sourcePoints->SetPoint( 1, 1, 0, 0 );
-  mTransform->SetSourceLandmarks( sourcePoints );
-  vtkSmartPointer<vtkPoints> destPoints =
-    vtkSmartPointer<vtkPoints>::New();
-  destPoints->SetNumberOfPoints( 2 );
-  destPoints->SetPoint( 0, mStartPoint );
-  destPoints->SetPoint( 1, mEndPoint );
-  mTransform->SetTargetLandmarks( destPoints );
+  vtkSmartPointer<vtkPoints> sourcePoints = vtkSmartPointer<vtkPoints>::New();
+  sourcePoints->SetNumberOfPoints(2);
+  sourcePoints->SetPoint(0, 0, 0, 0);
+  sourcePoints->SetPoint(1, 1, 0, 0);
+  mTransform->SetSourceLandmarks(sourcePoints);
+  vtkSmartPointer<vtkPoints> destPoints = vtkSmartPointer<vtkPoints>::New();
+  destPoints->SetNumberOfPoints(2);
+  destPoints->SetPoint(0, mStartPoint);
+  destPoints->SetPoint(1, mEndPoint);
+  mTransform->SetTargetLandmarks(destPoints);
 
   // Landmark transform goes into a general transform.
   vtkSmartPointer<vtkGeneralTransform> arrowTransform =
-    vtkSmartPointer<vtkGeneralTransform>::New();
-  arrowTransform->SetInput( mTransform );
+      vtkSmartPointer<vtkGeneralTransform>::New();
+  arrowTransform->SetInput(mTransform);
 
   // General transform goes into a TPDF.
   vtkSmartPointer<vtkTransformPolyDataFilter> arrowTPDF =
-    vtkSmartPointer<vtkTransformPolyDataFilter>::New();
-  arrowTPDF->SetTransform( arrowTransform );
-  arrowTPDF->SetInputConnection( arrowSource->GetOutputPort() );
+      vtkSmartPointer<vtkTransformPolyDataFilter>::New();
+  arrowTPDF->SetTransform(arrowTransform);
+  arrowTPDF->SetInputConnection(arrowSource->GetOutputPort());
 
   // Now generate normals.
   vtkSmartPointer<vtkPolyDataNormals> arrowNormals =
-    vtkSmartPointer<vtkPolyDataNormals>::New();
-  arrowNormals->SetInputConnection( arrowTPDF->GetOutputPort() );
-  
+      vtkSmartPointer<vtkPolyDataNormals>::New();
+  arrowNormals->SetInputConnection(arrowTPDF->GetOutputPort());
+
   // Mapper.
-  vtkSmartPointer<vtkPolyDataMapper> arrowMapper = 
-    vtkSmartPointer<vtkPolyDataMapper>::New();
-  arrowMapper->SetInputConnection( arrowNormals->GetOutputPort() );
+  vtkSmartPointer<vtkPolyDataMapper> arrowMapper =
+      vtkSmartPointer<vtkPolyDataMapper>::New();
+  arrowMapper->SetInputConnection(arrowNormals->GetOutputPort());
 
   // Actor.
-  mActor =  vtkSmartPointer<vtkActor>::New();
-  mActor->SetMapper( arrowMapper );
-
+  mActor = vtkSmartPointer<vtkActor>::New();
+  mActor->SetMapper(arrowMapper);
 }
 
-vtkArrowPipeline::~vtkArrowPipeline () {
+vtkArrowPipeline::~vtkArrowPipeline() {}
 
-}
+void vtkArrowPipeline::SetStartPoint(double const *iPoint) {
 
-
-void 
-vtkArrowPipeline::SetStartPoint ( double const* iPoint ) {
-
-  assert( iPoint );
-  assert( mTransform.GetPointer() );
-  assert( mActor );
+  assert(iPoint);
+  assert(mTransform.GetPointer());
+  assert(mActor);
 
   // Set the first dest landmark point.
   mStartPoint[0] = iPoint[0];
@@ -119,34 +111,32 @@ vtkArrowPipeline::SetStartPoint ( double const* iPoint ) {
   mStartPoint[2] = iPoint[2];
 
   // Copy the new points in. We do it this way to force an update.
-  vtkSmartPointer<vtkPoints> destPoints =
-    vtkSmartPointer<vtkPoints>::New();
-  destPoints->SetNumberOfPoints( 2 );
-  destPoints->SetPoint( 0, mStartPoint );
-  destPoints->SetPoint( 1, mEndPoint );
-  mTransform->SetTargetLandmarks( destPoints );
+  vtkSmartPointer<vtkPoints> destPoints = vtkSmartPointer<vtkPoints>::New();
+  destPoints->SetNumberOfPoints(2);
+  destPoints->SetPoint(0, mStartPoint);
+  destPoints->SetPoint(1, mEndPoint);
+  mTransform->SetTargetLandmarks(destPoints);
 
   // If the points are the same, set visibility off. This is to
   // prevent a case on 64 bit machines where the landmark transform
   // will be way crazy and make the arrow infinitely large.
-  if( fabs(mStartPoint[0] - mEndPoint[0]) < 
-      std::numeric_limits<double>::epsilon() &&
-      fabs(mStartPoint[1] - mEndPoint[2]) < 
-      std::numeric_limits<double>::epsilon() &&
-      fabs(mStartPoint[2] - mEndPoint[1]) < 
-      std::numeric_limits<double>::epsilon() ) {
+  if (fabs(mStartPoint[0] - mEndPoint[0]) <
+          std::numeric_limits<double>::epsilon() &&
+      fabs(mStartPoint[1] - mEndPoint[2]) <
+          std::numeric_limits<double>::epsilon() &&
+      fabs(mStartPoint[2] - mEndPoint[1]) <
+          std::numeric_limits<double>::epsilon()) {
     mActor->VisibilityOff();
   } else {
     mActor->VisibilityOn();
   }
 }
 
-void 
-vtkArrowPipeline::SetEndPoint ( double const* iPoint ) {
+void vtkArrowPipeline::SetEndPoint(double const *iPoint) {
 
-  assert( iPoint );
-  assert( mTransform.GetPointer() );
-  assert( mActor );
+  assert(iPoint);
+  assert(mTransform.GetPointer());
+  assert(mActor);
 
   // Set the first dest landmark point.
   mEndPoint[0] = iPoint[0];
@@ -154,42 +144,35 @@ vtkArrowPipeline::SetEndPoint ( double const* iPoint ) {
   mEndPoint[2] = iPoint[2];
 
   // Copy the new points in. We do it this way to force an update.
-  vtkSmartPointer<vtkPoints> destPoints =
-    vtkSmartPointer<vtkPoints>::New();
-  destPoints->SetNumberOfPoints( 2 );
-  destPoints->SetPoint( 0, mStartPoint );
-  destPoints->SetPoint( 1, mEndPoint );
-  mTransform->SetTargetLandmarks( destPoints );
+  vtkSmartPointer<vtkPoints> destPoints = vtkSmartPointer<vtkPoints>::New();
+  destPoints->SetNumberOfPoints(2);
+  destPoints->SetPoint(0, mStartPoint);
+  destPoints->SetPoint(1, mEndPoint);
+  mTransform->SetTargetLandmarks(destPoints);
 
   // If the points are the same, set visibility off. This is to
   // prevent a case on 64 bit machines where the landmark transform
   // will be way crazy and make the arrow infinitely large.
-  if( fabs(mStartPoint[0] - mEndPoint[0]) < 
-      std::numeric_limits<double>::epsilon() &&
-      fabs(mStartPoint[1] - mEndPoint[2]) < 
-      std::numeric_limits<double>::epsilon() &&
-      fabs(mStartPoint[2] - mEndPoint[1]) < 
-      std::numeric_limits<double>::epsilon() ) {
+  if (fabs(mStartPoint[0] - mEndPoint[0]) <
+          std::numeric_limits<double>::epsilon() &&
+      fabs(mStartPoint[1] - mEndPoint[2]) <
+          std::numeric_limits<double>::epsilon() &&
+      fabs(mStartPoint[2] - mEndPoint[1]) <
+          std::numeric_limits<double>::epsilon()) {
     mActor->VisibilityOff();
   } else {
     mActor->VisibilityOn();
   }
 }
 
-void 
-vtkArrowPipeline::SetStartAndEndPoint ( double const* iStartPoint, 
-					double const* iEndPoint ) {
-  
-  assert( iStartPoint );
-  assert( iEndPoint );
+void vtkArrowPipeline::SetStartAndEndPoint(double const *iStartPoint,
+                                           double const *iEndPoint) {
 
-  this->SetStartPoint( iStartPoint );
-  this->SetEndPoint( iEndPoint );
+  assert(iStartPoint);
+  assert(iEndPoint);
+
+  this->SetStartPoint(iStartPoint);
+  this->SetEndPoint(iEndPoint);
 }
 
-vtkActor* 
-vtkArrowPipeline::GetActor () const {
-
-  return mActor.GetPointer();
-}
-
+vtkActor *vtkArrowPipeline::GetActor() const { return mActor.GetPointer(); }

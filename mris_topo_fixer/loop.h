@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:11 $
@@ -23,24 +23,24 @@
  *
  */
 
-
 #ifndef TOPOLOGY_LOOP_H
 #define TOPOLOGY_LOOP_H
 
 #include "globals.h"
 
-class Loop
-{
+class Loop {
 private:
-  void _ReAlloc(int maxpts=-1);
+  void _ReAlloc(int maxpts = -1);
+
 public:
-  int npoints,maxpoints;
+  int npoints, maxpoints;
   int *points;
+
 public:
-  //constructor/destructor
-  Loop(void);
+  // constructor/destructor
+  Loop();
   Loop(int maxpts);
-  ~Loop(void);
+  ~Loop();
 
   void Alloc(int maxpts);
   void AddPoint(int pt);
@@ -48,12 +48,11 @@ public:
   int End();
   void Pop();
   int Replace(int pt, int new_pt);
-  int operator[](int n)
-  {
-    ASSERT((n >= 0 ) && (n < npoints));
+  int operator[](int n) {
+    ASSERT((n >= 0) && (n < npoints));
     return points[n];
   }
-  const Loop & operator=(const Loop& loop);
+  const Loop &operator=(const Loop &loop);
 };
 
 #endif

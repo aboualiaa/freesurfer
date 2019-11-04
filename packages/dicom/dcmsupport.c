@@ -92,62 +92,56 @@
 typedef struct {
   void *reserved[2];
   char *s;
-}
-GENERIC;
+} GENERIC;
 
 CONDITION
-DCM_ListToString(LST_HEAD * list, long offset, char **string) {
+DCM_ListToString(LST_HEAD *list, long offset, char **string) {
   GENERIC
-  * g;
-  char
-  *c,
-  *p;
-  long
-  length;
+  *g;
+  char *c, *p;
+  long length;
 
   *string = NULL;
   if (list == NULL)
     return DCM_NORMAL;
 
-  g = (GENERIC*)LST_Head(&list);
+  g = (GENERIC *)LST_Head(&list);
   if (g == NULL)
     return DCM_NORMAL;
 
-  (void) LST_Position(&list, g);
+  (void)LST_Position(&list, g);
 
   length = 0;
   while (g != NULL) {
-    c = ((char *) g) + offset;
+    c = ((char *)g) + offset;
     length += strlen(c) + 1;
-    g = (GENERIC*)LST_Next(&list);
+    g = (GENERIC *)LST_Next(&list);
   }
 
-  p = (char*)CTN_MALLOC(length);
+  p = (char *)CTN_MALLOC(length);
   if (p == NULL)
-    return COND_PushCondition(DCM_MALLOCFAILURE,
-                              DCM_Message(DCM_MALLOCFAILURE), 
+    return COND_PushCondition(DCM_MALLOCFAILURE, DCM_Message(DCM_MALLOCFAILURE),
                               length, "DCM_ListToString");
 
   *string = p;
-  g = (GENERIC*)LST_Head(&list);
+  g = (GENERIC *)LST_Head(&list);
   if (g == NULL)
     return COND_PushCondition(DCM_LISTFAILURE, DCM_Message(DCM_LISTFAILURE),
                               "DCM_ListToString");
-  (void) LST_Position(&list, g);
+  (void)LST_Position(&list, g);
 
   length = 0;
   while (g != NULL) {
-    c = ((char *) g) + offset;
+    c = ((char *)g) + offset;
     length = strlen(c);
-    (void) memcpy(p, c, length);
+    (void)memcpy(p, c, length);
     p += length;
     *p++ = '\\';
-    g = (GENERIC*)LST_Next(&list);
+    g = (GENERIC *)LST_Next(&list);
   }
   *--p = '\0';
   return DCM_NORMAL;
 }
-
 
 /* DCM_IsString
 **
@@ -173,54 +167,54 @@ DCM_IsString(DCM_VALUEREPRESENTATION representation) {
   flag = FALSE;
 
   switch (representation) {
-  case DCM_AE:  /* Application Entity */
-  case DCM_AS:  /* Age string */
+  case DCM_AE: /* Application Entity */
+  case DCM_AS: /* Age string */
     flag = TRUE;
     break;
-  case DCM_AT:  /* Attribute tag */
+  case DCM_AT: /* Attribute tag */
     break;
-  case DCM_CS:  /* Control string */
-  case DCM_DA:  /* Date */
+  case DCM_CS: /* Control string */
+  case DCM_DA: /* Date */
     flag = TRUE;
     break;
-  case DCM_DD:  /* Data set */
+  case DCM_DD: /* Data set */
     break;
-  case DCM_DS:  /* Decimal string */
-  case DCM_DT:  /* Old date/time */
+  case DCM_DS: /* Decimal string */
+  case DCM_DT: /* Old date/time */
     flag = TRUE;
     break;
-  case DCM_FD:  /* Floating double */
-  case DCM_FL:  /* Float */
+  case DCM_FD: /* Floating double */
+  case DCM_FL: /* Float */
     break;
-  case DCM_IS:  /* Integer string */
-  case DCM_LO:  /* Long string */
-  case DCM_LT:  /* Long text */
+  case DCM_IS: /* Integer string */
+  case DCM_LO: /* Long string */
+  case DCM_LT: /* Long text */
     flag = TRUE;
     break;
-  case DCM_OB:  /* Other binary value (byte) */
-  case DCM_OT:  /* Other binary value */
-  case DCM_OW:  /* Other binary value (word) */
+  case DCM_OB: /* Other binary value (byte) */
+  case DCM_OT: /* Other binary value */
+  case DCM_OW: /* Other binary value (word) */
     break;
-  case DCM_SH:  /* Short string */
+  case DCM_SH: /* Short string */
     flag = TRUE;
     break;
-  case DCM_SL:  /* Signed long */
-  case DCM_SQ:  /* Sequence of items */
-  case DCM_SS:  /* Signed short */
+  case DCM_SL: /* Signed long */
+  case DCM_SQ: /* Sequence of items */
+  case DCM_SS: /* Signed short */
     break;
-  case DCM_ST:  /* Short text */
-  case DCM_TM:  /* Time */
+  case DCM_ST: /* Short text */
+  case DCM_TM: /* Time */
     flag = TRUE;
     break;
-  case DCM_UL:  /* Unsigned long */
-  case DCM_US:  /* Unsigned short */
+  case DCM_UL:            /* Unsigned long */
+  case DCM_US:            /* Unsigned short */
     /*case DCM_UNKNOWN:*/ /* Unknown/unspecified */
-  case DCM_RET:  /* Retired */
-  case DCM_CTX:  /* Context sensitive */
+  case DCM_RET:           /* Retired */
+  case DCM_CTX:           /* Context sensitive */
     break;
-  case DCM_PN:  /* Person Name */
-  case DCM_UI:  /* Unique identifier (UID) */
-  case DCM_UT:  /* Unlimited Text */
+  case DCM_PN: /* Person Name */
+  case DCM_UI: /* Unique identifier (UID) */
+  case DCM_UT: /* Unlimited Text */
     flag = TRUE;
     break;
   default: // DCM_UN and DCM_DLM are not handled  added by tosa

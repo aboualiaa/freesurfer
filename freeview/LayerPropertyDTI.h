@@ -34,26 +34,22 @@
 
 class vtkLookupTable;
 
-class LayerPropertyDTI : public LayerPropertyMRI
-{
+class LayerPropertyDTI : public LayerPropertyMRI {
   Q_OBJECT
 public:
-  LayerPropertyDTI ( QObject* parent = NULL );
-  ~LayerPropertyDTI ();
+  LayerPropertyDTI(QObject *parent = NULL);
+  ~LayerPropertyDTI();
 
   enum DirectionCode { RGB = 0, RBG, GRB, GBR, BRG, BGR };
 
-  vtkLookupTable* GetDirectionCodedTable () const;
+  vtkLookupTable *GetDirectionCodedTable() const;
 
-  int GetDirectionCode()
-  {
-    return m_nDirectionCode;
-  }
+  int GetDirectionCode() { return m_nDirectionCode; }
 
   void OnColorMapChanged();
 
 public slots:
-  void SetDirectionCode( int nCode );
+  void SetDirectionCode(int nCode);
 
 private:
   int m_nDirectionCode;

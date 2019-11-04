@@ -7,16 +7,16 @@
 using namespace sbl;
 namespace hb {
 
-
 /*! \file VarCorres3D.cc
-    \brief The VarCorres3D module provides an algorithm for estimating a 3D mapping 
-	(analogous to optical flow) from one image volume to another image volume.
+    \brief The VarCorres3D module provides an algorithm for estimating a 3D
+   mapping (analogous to optical flow) from one image volume to another image
+   volume.
 */
 
-
-/// estimate a 3D mapping (analogous to optical flow) from one image volume to another image volume
-void varCorres3D( const Array<ImageGrayU> &src, const Array<ImageGrayU> &dest, Array<CorresField3D> &cfSeq, int scaleFactor );
-
+/// estimate a 3D mapping (analogous to optical flow) from one image volume to
+/// another image volume
+void varCorres3D(const Array<ImageGrayU> &src, const Array<ImageGrayU> &dest,
+                 Array<CorresField3D> &cfSeq, int scaleFactor);
 
 } // end namespace hb
 #endif // _VAR_CORRES_3D_H_

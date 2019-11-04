@@ -5,15 +5,14 @@
 #include <QList>
 
 namespace Ui {
-    class PanelAllLayers;
+class PanelAllLayers;
 }
 
 class Layer;
 class QTreeWidgetItem;
 class PanelLayer;
 
-class PanelAllLayers : public QScrollArea
-{
+class PanelAllLayers : public QScrollArea {
   Q_OBJECT
 
 public:
@@ -22,36 +21,38 @@ public:
 
   QString GetCurrentLayerType();
 
-  QList<Layer*> GetSelectedLayers(const QString& layerType);
+  QList<Layer *> GetSelectedLayers(const QString &layerType);
 
 signals:
-  void LayerTypeTriggered(const QString& type);
-  void ToReorderLayers(const QList<Layer*>& layers);
-  void CurrentLayerSelected(Layer* layer);
+  void LayerTypeTriggered(const QString &type);
+  void ToReorderLayers(const QList<Layer *> &layers);
+  void CurrentLayerSelected(Layer *layer);
 
 public slots:
-  void OnActiveLayerChanged(Layer* curLayer);
-  void OnLayerRemoved(Layer* added_layer);
-  void OnLayerAdded(Layer* removed_layer);
-  void RefreshLayerList(const QList<Layer*>& selectedLayers = QList<Layer*>(), Layer* curLayer = NULL);
-  void OnCurrentItemChanged(QTreeWidgetItem* item);
-  void OnItemDoubleClicked(QTreeWidgetItem* item);
-  void OnItemChanged(QTreeWidgetItem* item);
+  void OnActiveLayerChanged(Layer *curLayer);
+  void OnLayerRemoved(Layer *added_layer);
+  void OnLayerAdded(Layer *removed_layer);
+  void RefreshLayerList(const QList<Layer *> &selectedLayers = QList<Layer *>(),
+                        Layer *curLayer = NULL);
+  void OnCurrentItemChanged(QTreeWidgetItem *item);
+  void OnItemDoubleClicked(QTreeWidgetItem *item);
+  void OnItemChanged(QTreeWidgetItem *item);
   void OnItemSelectionChanged();
   void OnLayerChanged();
 
   void UpdateWidgets();
   void SelectAllLayers();
   void DeselectAllLayers();
-  void SetSelectedLayers(const QList<int>& layer_ids);
+  void SetSelectedLayers(const QList<int> &layer_ids);
 
-  PanelLayer* GetPanel(const QString& layer_type);
+  PanelLayer *GetPanel(const QString &layer_type);
 
 private:
-  void AddLayers(QList<Layer*> layers, const QString& cat_name, Layer* activeLayer,
-                 const QList<Layer *>& selectedLayers, Layer* curLayer = NULL);
-  PanelLayer* SetCurrentPanel(const QString& layerType);
-  void SetItemColor(QTreeWidgetItem* item, double* rgb);
+  void AddLayers(QList<Layer *> layers, const QString &cat_name,
+                 Layer *activeLayer, const QList<Layer *> &selectedLayers,
+                 Layer *curLayer = NULL);
+  PanelLayer *SetCurrentPanel(const QString &layerType);
+  void SetItemColor(QTreeWidgetItem *item, double *rgb);
 
   Ui::PanelAllLayers *ui;
 };

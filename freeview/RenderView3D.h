@@ -47,13 +47,12 @@ class Interactor3DPathEdit;
 class RenderView3D;
 class vtkInteractorStyleMyTrackballCamera;
 
-class RenderView3D : public RenderView
-{
+class RenderView3D : public RenderView {
   friend class PropPickingThread;
 
   Q_OBJECT
 public:
-  RenderView3D( QWidget* parent );
+  RenderView3D(QWidget *parent);
 
   void SetInteractionMode(int nMode);
 
@@ -61,92 +60,73 @@ public:
 
   bool GetShowSliceFrames();
 
-  void CancelUpdateMouseRASPosition()
-  {
-    m_bToUpdateRASPosition = false;
-  }
+  void CancelUpdateMouseRASPosition() { m_bToUpdateRASPosition = false; }
 
-  inline int GetHighlightedSlice()
-  {
-    return m_nSliceHighlighted;
-  }
+  inline int GetHighlightedSlice() { return m_nSliceHighlighted; }
 
-  void UpdateConnectivityDisplay()
-  {
-    m_bToUpdateConnectivity = true;
-  }
+  void UpdateConnectivityDisplay() { m_bToUpdateConnectivity = true; }
 
-  void MoveSliceToScreenCoord( int x, int y );
+  void MoveSliceToScreenCoord(int x, int y);
 
-  void UpdateCursorRASPosition( int posX, int posY );
-  void UpdateMouseRASPosition( int posX, int posY, bool bSlicePickOnly = false );
-  bool InitializeSelectRegion( int posX, int poboolsY );
+  void UpdateCursorRASPosition(int posX, int posY);
+  void UpdateMouseRASPosition(int posX, int posY, bool bSlicePickOnly = false);
+  bool InitializeSelectRegion(int posX, int poboolsY);
 
-  void AddSelectRegionLoopPoint( int posX, int posY );
+  void AddSelectRegionLoopPoint(int posX, int posY);
 
   void CloseSelectRegion();
 
   void DeleteCurrentSelectRegion();
 
-  bool PickSelectRegion( int nId );
+  bool PickSelectRegion(int nId);
 
-  bool PickCroppingBound( int nX, int nY );
-  void MoveCroppingBound( int nX, int nY );
+  bool PickCroppingBound(int nX, int nY);
+  void MoveCroppingBound(int nX, int nY);
 
-  Cursor3D* GetCursor3D()
-  {
-    return m_cursor3D;
+  Cursor3D *GetCursor3D() { return m_cursor3D; }
+
+  Cursor3D *GetInflatedSurfCursor() { return m_cursorInflatedSurf; }
+
+  void TriggerContextMenu(QMouseEvent *event);
+
+  bool GetShowSlices() {
+    return m_bSliceVisibility[0] || m_bSliceVisibility[1] ||
+           m_bSliceVisibility[2];
   }
 
-  Cursor3D* GetInflatedSurfCursor()
-  {
-    return m_cursorInflatedSurf;
-  }
+  SurfaceROI *InitializeSurfaceROI(int posX, int posY);
 
-  void TriggerContextMenu( QMouseEvent* event );
+  void AddSurfaceROIPoint(int posX, int posY);
 
-  bool GetShowSlices()
-  {
-    return m_bSliceVisibility[0] || m_bSliceVisibility[1] || m_bSliceVisibility[2];
-  }
-
-  SurfaceROI* InitializeSurfaceROI( int posX, int posY );
-
-  void AddSurfaceROIPoint( int posX, int posY );
-
-  int PickCurrentSurfaceVertex(int posX, int posY, LayerSurface* curSurf = NULL);
+  int PickCurrentSurfaceVertex(int posX, int posY,
+                               LayerSurface *curSurf = NULL);
 
   void ShowSlice(int nPlane, bool bshow);
 
   QVariantMap GetCamera();
 
-  void SetCamera(const QVariantMap& cam);
+  void SetCamera(const QVariantMap &cam);
 
   void ZoomAtCursor(int x, int y, double factor);
 
-  bool MapInflatedCoords(LayerSurface* surf, double* pos_in, double* pos_out, bool AutoOrient, bool bCursor = true);
+  bool MapInflatedCoords(LayerSurface *surf, double *pos_in, double *pos_out,
+                         bool AutoOrient, bool bCursor = true);
 
-  void MapToInflatedCoords(double* pos_in);
+  void MapToInflatedCoords(double *pos_in);
 
-  bool GetFocalPointAtCursor()
-  {
-    return m_bFocalPointAtCursor;
-  }
+  bool GetFocalPointAtCursor() { return m_bFocalPointAtCursor; }
 
-  bool GetShowAxes()
-  {
-    return m_bShowAxes;
-  }
+  bool GetShowAxes() { return m_bShowAxes; }
 
 signals:
-  void SurfaceVertexClicked(LayerSurface* surf);
-  void SurfaceRegionSelected(SurfaceRegion*);
-  void SurfaceRegionRemoved(SurfaceRegion*);
-  void VolumeTrackMouseOver(Layer* layer, const QVariantMap& info);
+  void SurfaceVertexClicked(LayerSurface *surf);
+  void SurfaceRegionSelected(SurfaceRegion *);
+  void SurfaceRegionRemoved(SurfaceRegion *);
+  void VolumeTrackMouseOver(Layer *layer, const QVariantMap &info);
 
 public slots:
   void RefreshAllActors(bool bForScreenShot = false);
-  void SetShowSliceFrames( bool bShow );
+  void SetShowSliceFrames(bool bShow);
   void UpdateSliceFrames();
   bool UpdateBounds();
   void SnapToNearestAxis();
@@ -174,50 +154,51 @@ public slots:
   void SetShowAxes(bool b);
 
 protected:
-  void DoUpdateRASPosition( int posX, int posY, bool bCursor = false, bool bSlicePickOnly = false );
+  void DoUpdateRASPosition(int posX, int posY, bool bCursor = false,
+                           bool bSlicePickOnly = false);
   void DoUpdateConnectivityDisplay();
 
-  void HighlightSliceFrame( int n );
+  void HighlightSliceFrame(int n);
 
   virtual void OnSlicePositionChanged(bool bCenterView = false);
   virtual void OnIdle();
 
-  vtkProp* PickProp( int posX, int posY, double* pos_out = NULL );
+  vtkProp *PickProp(int posX, int posY, double *pos_out = NULL);
 
 private:
-  int  m_nPickCoord[2];
-  int  m_nCursorCoord[2];
+  int m_nPickCoord[2];
+  int m_nCursorCoord[2];
   bool m_bToUpdateRASPosition;
   bool m_bToUpdateCursorPosition;
   bool m_bToUpdateConnectivity;
   bool m_bSlicePickOnly;
 
-  Cursor3D* m_cursor3D;
-  Cursor3D* m_cursorInflatedSurf;
+  Cursor3D *m_cursor3D;
+  Cursor3D *m_cursorInflatedSurf;
   bool m_bSliceVisibility[3];
   vtkSmartPointer<vtkActor> m_actorSliceFrames[3];
   vtkSmartPointer<vtkActor> m_actorSliceBoundingBox[3];
-  vtkSmartPointer<vtkCubeSource>  m_cubeSliceBoundingBox[3];
+  vtkSmartPointer<vtkCubeSource> m_cubeSliceBoundingBox[3];
   vtkSmartPointer<vtkAnnotatedCubeActor> m_actorAnnotatedCube;
-  vtkSmartPointer<vtkCubeAxesActor>          m_actorAxesActor;
+  vtkSmartPointer<vtkCubeAxesActor> m_actorAxesActor;
 
-  double  m_dBounds[6];
-  double  m_dBoundingTolerance;
-  int     m_nSliceHighlighted;
+  double m_dBounds[6];
+  double m_dBoundingTolerance;
+  int m_nSliceHighlighted;
 
-  bool    m_bShowSliceFrames;
-  bool    m_bShowAxes;
-  bool    m_bShowCursor;
-  bool    m_bFocalPointAtCursor;
+  bool m_bShowSliceFrames;
+  bool m_bShowAxes;
+  bool m_bShowCursor;
+  bool m_bFocalPointAtCursor;
 
-  double  m_dIntersectPoint[3];
-  Interactor3DNavigate*   m_interactorNavigate;
-  Interactor3DMeasure*    m_interactorMeasure;
-  Interactor3DVolumeCrop* m_interactorVolumeCrop;
-  Interactor3DROIEdit*    m_interactorROIEdit;
-  Interactor3DPathEdit*   m_interactorPathEdit;
+  double m_dIntersectPoint[3];
+  Interactor3DNavigate *m_interactorNavigate;
+  Interactor3DMeasure *m_interactorMeasure;
+  Interactor3DVolumeCrop *m_interactorVolumeCrop;
+  Interactor3DROIEdit *m_interactorROIEdit;
+  Interactor3DPathEdit *m_interactorPathEdit;
 
-  vtkSmartPointer<vtkInteractorStyleMyTrackballCamera>  m_interactorStyle;
+  vtkSmartPointer<vtkInteractorStyleMyTrackballCamera> m_interactorStyle;
 };
 
 #endif // RENDERVIEW3D_H

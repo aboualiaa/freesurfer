@@ -7,8 +7,7 @@ namespace Ui {
 class DialogSurfaceLabelOperations;
 }
 
-class DialogSurfaceLabelOperations : public QDialog
-{
+class DialogSurfaceLabelOperations : public QDialog {
   Q_OBJECT
 
 public:
@@ -16,7 +15,7 @@ public:
   ~DialogSurfaceLabelOperations();
 
 signals:
-  void OperationTriggered(const QVariantMap& op);
+  void OperationTriggered(const QVariantMap &op);
 
 public slots:
   void OnButtonClicked();

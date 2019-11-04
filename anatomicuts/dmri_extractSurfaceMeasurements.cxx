@@ -4,12 +4,15 @@
  * Name: dmri_extractSurfaceMeasurements.cxx
  *
  * Description:
- * This program is designed to take in a surface, two overlay files, one or multiple volume files, one or multiple streamline files, and an output directory.
- * Based on the streamlines, output metrics will be placed into a CSV file with the name of the original file and include metrics such as curvature, thickness, and FA values.
+ * This program is designed to take in a surface, two overlay files, one or
+ * multiple volume files, one or multiple streamline files, and an output
+ * directory. Based on the streamlines, output metrics will be placed into a CSV
+ * file with the name of the original file and include metrics such as
+ * curvature, thickness, and FA values.
  *
  */
 
-//Libraries
+// Libraries
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -49,8 +52,8 @@
 #include "itkSmoothingQuadEdgeMeshFilter.h"
 #include "vtkCellData.h"
 #include "vtkPointData.h"
-	
-#include "vtkFillHolesFilter.h" 
+
+#include "vtkFillHolesFilter.h"
 #include "vtkPolyDataNormals.h"
 #include "vtkCellArray.h"
 #include "vtkTriangle.h"
@@ -73,320 +76,338 @@ float calculate_mean(vector<float> n);
 float calculate_stde(vector<float> n, float mean);
 string makeCSV(string dir, string file);
 vtkIdType which_ID(double n1, double n2, vtkIdType ID1, vtkIdType ID2);
-vtkSmartPointer<vtkPolyData> FSToVTK(MRIS* surf);
+vtkSmartPointer<vtkPolyData> FSToVTK(MRIS *surf);
 
-int main(int narg, char* arg[])
-{
-	GetPot num1(narg, const_cast<char**>(arg));
-	
-	// Checking for correct parameters
-	if ((num1.size() <= 8) or (num1.search(2, "--help", "-h")))
-	{
-		cerr << "Usage: " << endl
-		     << arg[0] << " -i streamlineFile.trk -sl surfaceFile_lh.orig -tl overlayFile_lh.thickness -cl overlayFile_lh.curv" << endl
-		     << "-sr surfaceFile_rh.orig -tr overlayFile_rh.thickness -cr overlayFile_rh.curv -o outputDirectory" << endl 
-		     << "-ri reference_image (NOTE: only use reference image when FA is not used" << endl
-		     << "OPTION: -fa <numFiles> <Filename> FA_file.nii.gz ... <Filename> <fileAddress>" << endl;
+int main(int narg, char *arg[]) {
+  GetPot num1(narg, const_cast<char **>(arg));
 
-		return EXIT_FAILURE;
-	}
+  // Checking for correct parameters
+  if ((num1.size() <= 8) or (num1.search(2, "--help", "-h"))) {
+    cerr << "Usage: " << endl
+         << arg[0]
+         << " -i streamlineFile.trk -sl surfaceFile_lh.orig -tl "
+            "overlayFile_lh.thickness -cl overlayFile_lh.curv"
+         << endl
+         << "-sr surfaceFile_rh.orig -tr overlayFile_rh.thickness -cr "
+            "overlayFile_rh.curv -o outputDirectory"
+         << endl
+         << "-ri reference_image (NOTE: only use reference image when FA is "
+            "not used"
+         << endl
+         << "OPTION: -fa <numFiles> <Filename> FA_file.nii.gz ... <Filename> "
+            "<fileAddress>"
+         << endl;
 
-	// Declaration of Variables for Program to Function
-	// TRK file Definitions
-	enum {Dimension = 3};
-	typedef int PixelType;
-	const unsigned int PointDimension = 3;
-	typedef vector<int> PointDataType;
-	const unsigned int MaxTopologicalDimension = 3;
-	typedef double CoordinateType;
-	typedef double InterpolationWeightType;
-	typedef itk::DefaultStaticMeshTraits<
-		PointDataType, PointDimension, MaxTopologicalDimension,
-		CoordinateType, InterpolationWeightType, PointDataType > MeshTraits;
-	typedef itk::Mesh< PixelType, PointDimension, MeshTraits > HistogramMeshType;
+    return EXIT_FAILURE;
+  }
 
-	typedef itk::Image<float, 3> ImageType;
-	
-	typedef itk::Mesh< PixelType, PointDimension > ColorMeshType;
-	typedef ColorMeshType::PointType PointType;
-	typedef ColorMeshType::CellType CellType;
-	typedef itk::PolylineCell<CellType> PolylineCellType;
-	typedef ColorMeshType::CellAutoPointer CellAutoPointer;
-	typedef ClusterTools<ColorMeshType, ImageType, HistogramMeshType> ClusterToolsType;
-	
-	// Surface Defintions
-	typedef float CoordType;
-	typedef fs::Surface< CoordType, Dimension> SurfType;
+  // Declaration of Variables for Program to Function
+  // TRK file Definitions
+  enum { Dimension = 3 };
+  using PixelType = int;
+  const unsigned int PointDimension = 3;
+  using PointDataType = vector<int>;
+  const unsigned int MaxTopologicalDimension = 3;
+  using CoordinateType = double;
+  using InterpolationWeightType = double;
+  using MeshTraits =
+      itk::DefaultStaticMeshTraits<PointDataType, PointDimension,
+                                   MaxTopologicalDimension, CoordinateType,
+                                   InterpolationWeightType, PointDataType>;
+  using HistogramMeshType = itk::Mesh<PixelType, PointDimension, MeshTraits>;
 
-	// Input Parsing
-	vector<string> TRKFiles;	
-	for (string inputName = string(num1.follow("", 2, "-i", "-I")); access(inputName.c_str(), 0) == 0; inputName = string(num1.next("")))
-		TRKFiles.push_back(inputName);
+  using ImageType = itk::Image<float, 3>;
 
-	// Left Hemisphere
-	const char *surfaceFileL = num1.follow("Left Surface File Not Found", "-sl");
-	const char *thickFileL   = num1.follow("Left Thickness File Not Found", "-tl");
-	const char *curvFileL    = num1.follow("Left Curvature File Not Found", "-cl");
-	
-	// Right Hemisphere
-	const char *surfaceFileR = num1.follow("Right Surface File Not Found", "-sr");
-	const char *thickFileR   = num1.follow("Right Thickness File Not Found", "-tr");
-	const char *curvFileR    = num1.follow("Right Curvature File Not Found", "-cr");
-	
-	const char *outputDir    = num1.follow("Output Directory Not Found", "-o");
-	
-	const char *refImage     = num1.follow("Reference Image Not Found", "-ri");
+  using ColorMeshType = itk::Mesh<PixelType, PointDimension>;
+  using PointType = ColorMeshType::PointType;
+  using CellType = ColorMeshType::CellType;
+  using PolylineCellType = itk::PolylineCell<CellType>;
+  using CellAutoPointer = ColorMeshType::CellAutoPointer;
+  using ClusterToolsType =
+      ClusterTools<ColorMeshType, ImageType, HistogramMeshType>;
 
-	// Reading in FA file
-	vector<ImageType::Pointer> volumes;
-	vector<string> image_fileNames;
-	vector<ImageType::Pointer> ref_Image;
-	MRI *image;
-	
-	typedef itk::ImageFileReader<ImageType> ImageReaderType;
-	ImageReaderType::Pointer readerS = ImageReaderType::New();
-	readerS->SetFileName(refImage);
-	readerS->Update();
-	ref_Image.push_back(readerS->GetOutput());
+  // Surface Defintions
+  using CoordType = float;
+  using SurfType = fs::Surface<CoordType, Dimension>;
 
-	image = MRIread(refImage);
-	
-	int numFiles = num1.follow(0, "-fa");
-	bool FA_FOUND = num1.search("-fa");
-	num1.next("");
-	
-	if (FA_FOUND and numFiles > 0) 
-	{
-		for (int i = 0; i < numFiles; i++)
-		{
-			image_fileNames.push_back(string(num1.next("")));
-			const char *inFile = num1.next("");
-			typedef itk::ImageFileReader<ImageType> ImageReaderType;
-			ImageReaderType::Pointer readerS = ImageReaderType::New();
-			readerS->SetFileName(inFile);
-			readerS->Update();
-			ImageType::Pointer image  = readerS->GetOutput();
-			volumes.push_back(image);	
-		}
-	} 
-	
-	//Outputting the Files to Ensure the correct files were input
-	cerr << endl;
-	for (int i = 0; i < TRKFiles.size(); i++)
-		cerr << "TRK File " << i + 1 << ":      " << TRKFiles.at(i) << endl;
+  // Input Parsing
+  vector<string> TRKFiles;
+  for (string inputName = string(num1.follow("", 2, "-i", "-I"));
+       access(inputName.c_str(), 0) == 0; inputName = string(num1.next("")))
+    TRKFiles.push_back(inputName);
 
-	cerr << "Left Surface:    " << surfaceFileL << endl << "Left Thickness:  " << thickFileL << endl << "Left Curvature:  " << curvFileL << endl 
-	     << "Right Surface:   " << surfaceFileR << endl << "Right Thickness: " << thickFileR << endl << "Right Curvature: " << curvFileR << endl
-	     << "Output:          " << outputDir << endl << "Reference Image: " << refImage << endl;
-	
-	if (FA_FOUND)
-	{	
-		for (int i = 0; i < image_fileNames.size(); i++)
-			cerr << "Image " << i + 1 << ":         " << image_fileNames.at(i) << endl;	
-	} 
+  // Left Hemisphere
+  const char *surfaceFileL = num1.follow("Left Surface File Not Found", "-sl");
+  const char *thickFileL = num1.follow("Left Thickness File Not Found", "-tl");
+  const char *curvFileL = num1.follow("Left Curvature File Not Found", "-cl");
 
-	// Loading the TRK files into a mesh
-	vector<ColorMeshType::Pointer>* meshes;
-	vector<vtkSmartPointer<vtkPolyData>> polydatas;
-	
-	ClusterToolsType::Pointer clusterTools = ClusterToolsType::New();
-	clusterTools->GetPolyDatas(TRKFiles, &polydatas, ref_Image.at(0));
-	meshes = clusterTools->PolydataToMesh(polydatas);
-	
-	//Loading the surface for each hemisphere and metric
-	//Left Curvature
-	MRI_SURFACE *surfCL;
-        surfCL = MRISread(surfaceFileL);
-	
-	SurfType::Pointer surfaceCL = SurfType::New();
-	surfaceCL->Load(&*surfCL);
-	
-	surfCL = surfaceCL->GetFSSurface(&*surfCL);
+  // Right Hemisphere
+  const char *surfaceFileR = num1.follow("Right Surface File Not Found", "-sr");
+  const char *thickFileR = num1.follow("Right Thickness File Not Found", "-tr");
+  const char *curvFileR = num1.follow("Right Curvature File Not Found", "-cr");
 
-	MRISreadCurvature(surfCL, curvFileL);	
+  const char *outputDir = num1.follow("Output Directory Not Found", "-o");
 
-	//Left Thickness
-	MRI_SURFACE *surfTL;
-	surfTL = MRISread(surfaceFileL);
+  const char *refImage = num1.follow("Reference Image Not Found", "-ri");
 
-	SurfType::Pointer surfaceTL = SurfType::New();
-	surfaceTL->Load(&*surfTL);
+  // Reading in FA file
+  vector<ImageType::Pointer> volumes;
+  vector<string> image_fileNames;
+  vector<ImageType::Pointer> ref_Image;
+  MRI *image;
 
-	surfTL = surfaceTL->GetFSSurface(&*surfTL);
+  using ImageReaderType = itk::ImageFileReader<ImageType>;
+  ImageReaderType::Pointer readerS = ImageReaderType::New();
+  readerS->SetFileName(refImage);
+  readerS->Update();
+  ref_Image.push_back(readerS->GetOutput());
 
-	MRISreadCurvature(surfTL, thickFileL);
+  image = MRIread(refImage);
 
-	//Right Curvature
-	MRI_SURFACE *surfCR;
-	surfCR = MRISread(surfaceFileR);
+  int numFiles = num1.follow(0, "-fa");
+  bool FA_FOUND = num1.search("-fa");
+  num1.next("");
 
-	SurfType::Pointer surfaceCR = SurfType::New();
-	surfaceCR->Load(&*surfCR);
+  if (FA_FOUND and numFiles > 0) {
+    for (int i = 0; i < numFiles; i++) {
+      image_fileNames.push_back(string(num1.next("")));
+      const char *inFile = num1.next("");
+      using ImageReaderType = itk::ImageFileReader<ImageType>;
+      ImageReaderType::Pointer readerS = ImageReaderType::New();
+      readerS->SetFileName(inFile);
+      readerS->Update();
+      ImageType::Pointer image = readerS->GetOutput();
+      volumes.push_back(image);
+    }
+  }
 
-	surfCR = surfaceCR->GetFSSurface(&*surfCR);
+  // Outputting the Files to Ensure the correct files were input
+  cerr << endl;
+  for (int i = 0; i < TRKFiles.size(); i++)
+    cerr << "TRK File " << i + 1 << ":      " << TRKFiles.at(i) << endl;
 
-	MRISreadCurvature(surfCR, curvFileR);
+  cerr << "Left Surface:    " << surfaceFileL << endl
+       << "Left Thickness:  " << thickFileL << endl
+       << "Left Curvature:  " << curvFileL << endl
+       << "Right Surface:   " << surfaceFileR << endl
+       << "Right Thickness: " << thickFileR << endl
+       << "Right Curvature: " << curvFileR << endl
+       << "Output:          " << outputDir << endl
+       << "Reference Image: " << refImage << endl;
 
-	//Right Thickness
-	MRI_SURFACE *surfTR;
-	surfTR = MRISread(surfaceFileR);
+  if (FA_FOUND) {
+    for (int i = 0; i < image_fileNames.size(); i++)
+      cerr << "Image " << i + 1 << ":         " << image_fileNames.at(i)
+           << endl;
+  }
 
-	SurfType::Pointer surfaceTR = SurfType::New();
-	surfaceTR->Load(&*surfTR);
+  // Loading the TRK files into a mesh
+  vector<ColorMeshType::Pointer> *meshes;
+  vector<vtkSmartPointer<vtkPolyData>> polydatas;
 
-	surfTR = surfaceTR->GetFSSurface(&*surfTR);
+  ClusterToolsType::Pointer clusterTools = ClusterToolsType::New();
+  clusterTools->GetPolyDatas(TRKFiles, &polydatas, ref_Image.at(0));
+  meshes = clusterTools->PolydataToMesh(polydatas);
 
-	MRISreadCurvature(surfTR, thickFileR);
+  // Loading the surface for each hemisphere and metric
+  // Left Curvature
+  MRI_SURFACE *surfCL;
+  surfCL = MRISread(surfaceFileL);
 
-	// Loading the surface into a KdTree - one for each hemisphere
-	// LEFT
-	vtkSmartPointer<vtkPolyData> surfVTK_L = FSToVTK(surfCL);
-	
-	vtkSmartPointer<vtkKdTreePointLocator> surfTreeL = vtkSmartPointer<vtkKdTreePointLocator>::New();
-	surfTreeL->SetDataSet(surfVTK_L);
-	surfTreeL->BuildLocator();	
-	
-	// RIGHT
-	vtkSmartPointer<vtkPolyData> surfVTK_R = FSToVTK(surfCR);
+  SurfType::Pointer surfaceCL = SurfType::New();
+  surfaceCL->Load(&*surfCL);
 
-	vtkSmartPointer<vtkKdTreePointLocator> surfTreeR = vtkSmartPointer<vtkKdTreePointLocator>::New();
-	surfTreeR->SetDataSet(surfVTK_R);
-	surfTreeR->BuildLocator();	
+  surfCL = surfaceCL->GetFSSurface(&*surfCL);
 
-	// The first and last points in both PointType and an array
-	PointType firstPt, lastPt;
-	firstPt.Fill(0);
-	lastPt.Fill(0);
-	double firstPt_array[3];	
-	double lastPt_array[3];
+  MRISreadCurvature(surfCL, curvFileL);
 
-	ofstream oFile;
+  // Left Thickness
+  MRI_SURFACE *surfTL;
+  surfTL = MRISread(surfaceFileL);
 
-	// Cycling through the TRK files
-	for(int i = 0; i < meshes->size(); i++)
-	{ 
-		// Opening output file with a different name for every TRK File
-		oFile.open(makeCSV(outputDir, TRKFiles.at(i)));
+  SurfType::Pointer surfaceTL = SurfType::New();
+  surfaceTL->Load(&*surfTL);
 
-		if (not oFile.is_open()) 
-		{
-			cerr << "Could not open output file" << endl;
-			return -1;
-		}
+  surfTL = surfaceTL->GetFSSurface(&*surfTL);
 
-		// Adds the headers to the files and has option for finding FA values
-		oFile << "Streamline Name , Curvature of Start Point , Curvature of Last Point , Thickness of Start Point , Thickness of Last Point";
-		if (FA_FOUND)
-		{
-			for (int a = 0; a < image_fileNames.size(); a++)
-				oFile << ", mean" << image_fileNames.at(a) << ", stde" << image_fileNames.at(a);
-		} 
-		oFile << endl;
+  MRISreadCurvature(surfTL, thickFileL);
 
-		// Initialization of a new stream for every TRK files
-		ColorMeshType::Pointer input = (*meshes)[i];
-		ColorMeshType::CellsContainer::Iterator  inputCellIt = input->GetCells()->Begin();
-		
-		// Cycling through the streams
-		int counter = 1;
-		for (; inputCellIt != input->GetCells()->End(); ++inputCellIt, ++counter)
-		{
-			vector<float> meanFA;
-			vector<float> stdeFA;
-		
-			// If there are image files, then find the mean and stde of FA	
-			if (FA_FOUND)
-			{
-				for (int p = 0; p < volumes.size(); p++)
-				{
-					// Creating streamline variable and finding first point
-					CellType::PointIdIterator it = inputCellIt.Value()->PointIdsBegin();
-					input->GetPoint(*it, &firstPt);
+  // Right Curvature
+  MRI_SURFACE *surfCR;
+  surfCR = MRISread(surfaceFileR);
 
-					// Getting the FA value at all points
-					vector<float> FA_values;
-					ImageType::IndexType index;
-					if (volumes.at(p)->TransformPhysicalPointToIndex(firstPt, index))
-						FA_values.push_back(volumes.at(p)->GetPixel(index));
-				
-					// Cycling through the points in the stream
-					for (; it != inputCellIt.Value()->PointIdsEnd(); it++)
-					{	 
-						input->GetPoint(*it, &lastPt);
+  SurfType::Pointer surfaceCR = SurfType::New();
+  surfaceCR->Load(&*surfCR);
 
-						// If FA options is used, then add the FA values to the vector	
-						if (volumes.at(p)->TransformPhysicalPointToIndex(lastPt, index))
-							FA_values.push_back(volumes.at(p)->GetPixel(index));	
-					}
-			
-					// Calculating the MeanFA and stdeFA
-					meanFA.push_back(calculate_mean(FA_values));
-					stdeFA.push_back(calculate_stde(FA_values, meanFA.at(p)));
-				}
-			// Otherwise find first and last point of a streamline
-			} else {
-				CellType::PointIdIterator it = inputCellIt.Value()->PointIdsBegin();
-				input->GetPoint(*it, &firstPt);
+  surfCR = surfaceCR->GetFSSurface(&*surfCR);
 
-				for (; it != inputCellIt.Value()->PointIdsEnd(); it++)
-					input->GetPoint(*it, &lastPt);
-			}
+  MRISreadCurvature(surfCR, curvFileR);
 
-			// Changing the point to an index, then the index to the surface
-			ImageType::IndexType first_index, last_index;
-                	ref_Image.at(0)->TransformPhysicalPointToIndex(firstPt, first_index);
-			ref_Image.at(0)->TransformPhysicalPointToIndex(lastPt, last_index);
-                	MRIvoxelToSurfaceRAS(image, first_index[0], first_index[1], first_index[2], &firstPt_array[0], &firstPt_array[1], &firstPt_array[2]);
-                	MRIvoxelToSurfaceRAS(image, last_index[0], last_index[1], last_index[2], &lastPt_array[0], &lastPt_array[1], &lastPt_array[2]);
+  // Right Thickness
+  MRI_SURFACE *surfTR;
+  surfTR = MRISread(surfaceFileR);
 
-			// Finding the vertice number
-			double distL, distR;
-			vtkIdType Left_ID1  = surfTreeL->FindClosestPointWithinRadius(1000, firstPt_array, distL);
-			vtkIdType Right_ID1 = surfTreeR->FindClosestPointWithinRadius(1000, firstPt_array, distR);		
-			vtkIdType ID1 = which_ID(distL, distR, Left_ID1, Right_ID1);
+  SurfType::Pointer surfaceTR = SurfType::New();
+  surfaceTR->Load(&*surfTR);
 
-			vtkIdType Left_ID2  = surfTreeL->FindClosestPointWithinRadius(1000, lastPt_array, distL);
-			vtkIdType Right_ID2 = surfTreeR->FindClosestPointWithinRadius(1000, lastPt_array, distR);			
-			vtkIdType ID2 = which_ID(distL, distR, Left_ID2, Right_ID2);
+  surfTR = surfaceTR->GetFSSurface(&*surfTR);
 
-			// Outputting values to the file
-			oFile << "StreamLine " << counter << ",";
+  MRISreadCurvature(surfTR, thickFileR);
 
-			if (ID1 == Left_ID1)
-				oFile << surfCL->vertices[ID1].curv << ",";
-			else
-				oFile << surfCR->vertices[ID1].curv << ",";
+  // Loading the surface into a KdTree - one for each hemisphere
+  // LEFT
+  vtkSmartPointer<vtkPolyData> surfVTK_L = FSToVTK(surfCL);
 
-			if (ID2 == Left_ID2)
-				oFile << surfCL->vertices[ID2].curv << ",";
-			else
-				oFile << surfCR->vertices[ID2].curv << ",";
-			      
-			if (ID1 == Left_ID1)
-				oFile << surfTL->vertices[ID1].curv << ","; 
-			else
-				oFile << surfTR->vertices[ID1].curv << ",";
+  vtkSmartPointer<vtkKdTreePointLocator> surfTreeL =
+      vtkSmartPointer<vtkKdTreePointLocator>::New();
+  surfTreeL->SetDataSet(surfVTK_L);
+  surfTreeL->BuildLocator();
 
-			if (ID2 == Left_ID2)
-				oFile << surfTL->vertices[ID2].curv;
-			else
-				oFile << surfTR->vertices[ID2].curv;
-			
-			if (FA_FOUND)
-			{
-				for (int m = 0; m < stdeFA.size(); m++)
-					oFile << "," << meanFA.at(m) << "," << stdeFA.at(m);
-			}
+  // RIGHT
+  vtkSmartPointer<vtkPolyData> surfVTK_R = FSToVTK(surfCR);
 
-			oFile << endl;
-		}
+  vtkSmartPointer<vtkKdTreePointLocator> surfTreeR =
+      vtkSmartPointer<vtkKdTreePointLocator>::New();
+  surfTreeR->SetDataSet(surfVTK_R);
+  surfTreeR->BuildLocator();
 
-		oFile.close();
-	}
-		
-	oFile.close();
+  // The first and last points in both PointType and an array
+  PointType firstPt, lastPt;
+  firstPt.Fill(0);
+  lastPt.Fill(0);
+  double firstPt_array[3];
+  double lastPt_array[3];
 
-	return EXIT_SUCCESS;
+  ofstream oFile;
+
+  // Cycling through the TRK files
+  for (int i = 0; i < meshes->size(); i++) {
+    // Opening output file with a different name for every TRK File
+    oFile.open(makeCSV(outputDir, TRKFiles.at(i)));
+
+    if (not oFile.is_open()) {
+      cerr << "Could not open output file" << endl;
+      return -1;
+    }
+
+    // Adds the headers to the files and has option for finding FA values
+    oFile << "Streamline Name , Curvature of Start Point , Curvature of Last "
+             "Point , Thickness of Start Point , Thickness of Last Point";
+    if (FA_FOUND) {
+      for (int a = 0; a < image_fileNames.size(); a++)
+        oFile << ", mean" << image_fileNames.at(a) << ", stde"
+              << image_fileNames.at(a);
+    }
+    oFile << endl;
+
+    // Initialization of a new stream for every TRK files
+    ColorMeshType::Pointer input = (*meshes)[i];
+    ColorMeshType::CellsContainer::Iterator inputCellIt =
+        input->GetCells()->Begin();
+
+    // Cycling through the streams
+    int counter = 1;
+    for (; inputCellIt != input->GetCells()->End(); ++inputCellIt, ++counter) {
+      vector<float> meanFA;
+      vector<float> stdeFA;
+
+      // If there are image files, then find the mean and stde of FA
+      if (FA_FOUND) {
+        for (int p = 0; p < volumes.size(); p++) {
+          // Creating streamline variable and finding first point
+          CellType::PointIdIterator it = inputCellIt.Value()->PointIdsBegin();
+          input->GetPoint(*it, &firstPt);
+
+          // Getting the FA value at all points
+          vector<float> FA_values;
+          ImageType::IndexType index;
+          if (volumes.at(p)->TransformPhysicalPointToIndex(firstPt, index))
+            FA_values.push_back(volumes.at(p)->GetPixel(index));
+
+          // Cycling through the points in the stream
+          for (; it != inputCellIt.Value()->PointIdsEnd(); it++) {
+            input->GetPoint(*it, &lastPt);
+
+            // If FA options is used, then add the FA values to the vector
+            if (volumes.at(p)->TransformPhysicalPointToIndex(lastPt, index))
+              FA_values.push_back(volumes.at(p)->GetPixel(index));
+          }
+
+          // Calculating the MeanFA and stdeFA
+          meanFA.push_back(calculate_mean(FA_values));
+          stdeFA.push_back(calculate_stde(FA_values, meanFA.at(p)));
+        }
+        // Otherwise find first and last point of a streamline
+      } else {
+        CellType::PointIdIterator it = inputCellIt.Value()->PointIdsBegin();
+        input->GetPoint(*it, &firstPt);
+
+        for (; it != inputCellIt.Value()->PointIdsEnd(); it++)
+          input->GetPoint(*it, &lastPt);
+      }
+
+      // Changing the point to an index, then the index to the surface
+      ImageType::IndexType first_index, last_index;
+      ref_Image.at(0)->TransformPhysicalPointToIndex(firstPt, first_index);
+      ref_Image.at(0)->TransformPhysicalPointToIndex(lastPt, last_index);
+      MRIvoxelToSurfaceRAS(image, first_index[0], first_index[1],
+                           first_index[2], &firstPt_array[0], &firstPt_array[1],
+                           &firstPt_array[2]);
+      MRIvoxelToSurfaceRAS(image, last_index[0], last_index[1], last_index[2],
+                           &lastPt_array[0], &lastPt_array[1],
+                           &lastPt_array[2]);
+
+      // Finding the vertice number
+      double distL, distR;
+      vtkIdType Left_ID1 =
+          surfTreeL->FindClosestPointWithinRadius(1000, firstPt_array, distL);
+      vtkIdType Right_ID1 =
+          surfTreeR->FindClosestPointWithinRadius(1000, firstPt_array, distR);
+      vtkIdType ID1 = which_ID(distL, distR, Left_ID1, Right_ID1);
+
+      vtkIdType Left_ID2 =
+          surfTreeL->FindClosestPointWithinRadius(1000, lastPt_array, distL);
+      vtkIdType Right_ID2 =
+          surfTreeR->FindClosestPointWithinRadius(1000, lastPt_array, distR);
+      vtkIdType ID2 = which_ID(distL, distR, Left_ID2, Right_ID2);
+
+      // Outputting values to the file
+      oFile << "StreamLine " << counter << ",";
+
+      if (ID1 == Left_ID1)
+        oFile << surfCL->vertices[ID1].curv << ",";
+      else
+        oFile << surfCR->vertices[ID1].curv << ",";
+
+      if (ID2 == Left_ID2)
+        oFile << surfCL->vertices[ID2].curv << ",";
+      else
+        oFile << surfCR->vertices[ID2].curv << ",";
+
+      if (ID1 == Left_ID1)
+        oFile << surfTL->vertices[ID1].curv << ",";
+      else
+        oFile << surfTR->vertices[ID1].curv << ",";
+
+      if (ID2 == Left_ID2)
+        oFile << surfTL->vertices[ID2].curv;
+      else
+        oFile << surfTR->vertices[ID2].curv;
+
+      if (FA_FOUND) {
+        for (int m = 0; m < stdeFA.size(); m++)
+          oFile << "," << meanFA.at(m) << "," << stdeFA.at(m);
+      }
+
+      oFile << endl;
+    }
+
+    oFile.close();
+  }
+
+  oFile.close();
+
+  return EXIT_SUCCESS;
 }
 
 /* Function: makeCSV
@@ -396,16 +417,15 @@ int main(int narg, char* arg[])
  * 	 of the file
  * NOTE: used in conjunction with the creating new CSV files and opening them
  */
-string makeCSV(string dir, string file)
-{
-	int front = file.find_last_of("/");
-	int back  = file.find_last_of(".");	
-	
-	dir.append("/");
-	dir.append(file.substr(front + 1, back - front - 1));
-	dir.append(".csv");
+string makeCSV(string dir, string file) {
+  int front = file.find_last_of("/");
+  int back = file.find_last_of(".");
 
-	return dir;
+  dir.append("/");
+  dir.append(file.substr(front + 1, back - front - 1));
+  dir.append(".csv");
+
+  return dir;
 }
 
 /* Function: calculate_mean
@@ -413,14 +433,13 @@ string makeCSV(string dir, string file)
  * Return: the mean
  * Does: takes all the values and calculates the mean
  */
-float calculate_mean(vector<float> n)
-{
-	float mean = 0;
+float calculate_mean(vector<float> n) {
+  float mean = 0;
 
-	for (int i = 0; i < n.size(); i++)
-		mean += n.at(i);
+  for (int i = 0; i < n.size(); i++)
+    mean += n.at(i);
 
-	return mean / n.size();
+  return mean / n.size();
 }
 
 /* Function: calculate_stde
@@ -428,52 +447,52 @@ float calculate_mean(vector<float> n)
  * Return: the standard deviation
  * Does: takes all the values and calculates the standard deviation
  */
-float calculate_stde(vector<float> n, float mean)
-{
-	float SD = 0;
+float calculate_stde(vector<float> n, float mean) {
+  float SD = 0;
 
-	for (int i = 0; i < n.size(); i++)
-		SD += pow(n.at(i) - mean, 2);
+  for (int i = 0; i < n.size(); i++)
+    SD += pow(n.at(i) - mean, 2);
 
-	return sqrt(SD / n.size());
+  return sqrt(SD / n.size());
 }
 
 /* Function: which_ID
  * Input: the two distances and the two vertice IDs
  * Return: whichever vertice is closer to the point
- * Does: Compares the two distances and returns the vertice of the shorter distance
+ * Does: Compares the two distances and returns the vertice of the shorter
+ * distance
  */
-vtkIdType which_ID(double n1, double n2, vtkIdType ID1, vtkIdType ID2)
-{
-	if (n1 < n2)
-		return ID1;
+vtkIdType which_ID(double n1, double n2, vtkIdType ID1, vtkIdType ID2) {
+  if (n1 < n2)
+    return ID1;
 
-	return ID2;	
+  return ID2;
 }
 
 //
 // Converts a surface to a VTK
 //
-vtkSmartPointer<vtkPolyData> FSToVTK(MRIS* surf)
-{
-	vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
-	vtkSmartPointer<vtkCellArray> triangles = vtkSmartPointer<vtkCellArray>::New();
+vtkSmartPointer<vtkPolyData> FSToVTK(MRIS *surf) {
+  vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+  vtkSmartPointer<vtkCellArray> triangles =
+      vtkSmartPointer<vtkCellArray>::New();
 
-	for(int i = 0; i < surf->nvertices; i++)
-		points->InsertNextPoint(surf->vertices[i].x, surf->vertices[i].y, surf->vertices[i].z);
+  for (int i = 0; i < surf->nvertices; i++)
+    points->InsertNextPoint(surf->vertices[i].x, surf->vertices[i].y,
+                            surf->vertices[i].z);
 
-	for( int i = 0; i < surf->nfaces; i++ ) {
-		vtkSmartPointer<vtkTriangle> triangle = vtkSmartPointer<vtkTriangle>::New();
-		
-		for(int j = 0;j < 3; j++)
-			triangle->GetPointIds()->SetId(j, surf->faces[i].v[j]);
+  for (int i = 0; i < surf->nfaces; i++) {
+    vtkSmartPointer<vtkTriangle> triangle = vtkSmartPointer<vtkTriangle>::New();
 
-		triangles->InsertNextCell(triangle);
-	}	
+    for (int j = 0; j < 3; j++)
+      triangle->GetPointIds()->SetId(j, surf->faces[i].v[j]);
 
-	vtkSmartPointer<vtkPolyData> vtkSurface = vtkSmartPointer<vtkPolyData>::New();
-	vtkSurface->SetPoints(points);
-	vtkSurface->SetPolys(triangles);
+    triangles->InsertNextCell(triangle);
+  }
 
-	return vtkSurface;
+  vtkSmartPointer<vtkPolyData> vtkSurface = vtkSmartPointer<vtkPolyData>::New();
+  vtkSurface->SetPoints(points);
+  vtkSurface->SetPolys(triangles);
+
+  return vtkSurface;
 }

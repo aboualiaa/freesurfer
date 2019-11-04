@@ -1,72 +1,66 @@
 #ifndef __kvlAtlasMeshViewingConsole_h
 #define __kvlAtlasMeshViewingConsole_h
 
-#include "kvlAtlasMeshViewingConsoleGUI.h"
 #include "kvlAtlasMeshCollection.h"
+#include "kvlAtlasMeshViewingConsoleGUI.h"
 #include "kvlCompressionLookupTable.h"
 
+namespace kvl {
 
-namespace kvl
-{
+class AtlasMeshViewingConsole : public kvlAtlasMeshViewingConsoleGUI {
 
-class AtlasMeshViewingConsole : public kvlAtlasMeshViewingConsoleGUI
-{
-
-public: 
-
+public:
   //
   AtlasMeshViewingConsole();
-  
-  //
-  virtual ~AtlasMeshViewingConsole();
 
   //
-  void LoadMeshCollection( const char* fileName,
-                           const int* templateSize = 0,
-                           const std::string& backgroundImageFileName = std::string() );
-  
-  // 
+  //  virtual ~AtlasMeshViewingConsole();
+
+  //
+  void LoadMeshCollection(
+      const char *fileName, const int *templateSize = 0,
+      const std::string &backgroundImageFileName = std::string());
+
+  //
   void Show();
-  
-  //
-  void ShowSelectedView();
 
   //
-  void  GetScreenShot();
+  void ShowSelectedView() override;
 
   //
-  void  GetScreenShotSeries();
+  void GetScreenShot() override;
 
   //
-  void  DumpImage();
+  void GetScreenShotSeries() override;
 
   //
-  void  GetScreenShotSeries( int directionNumber );
+  void DumpImage() override;
+
+  //
+  void GetScreenShotSeries(int directionNumber) override;
 
 protected:
+  //
+  void Draw() override;
+
+  void SelectTriangleContainingPoint(float, float) override {};
+
+  void SetSliceLocation(unsigned int sagittalSliceNumber,
+                        unsigned int coronalSliceNumber,
+                        unsigned int axialSliceNumber) override;
 
   //
-  void Draw();
-  
-  //
-  void SetSliceLocation( unsigned int  sagittalSliceNumber,
-                         unsigned int  coronalSliceNumber,
-                         unsigned int  axialSliceNumber );
+  typedef kvl::ImageViewer::ImageType ImageType;
+  static ImageType::Pointer
+  ReadBackgroundImage(const std::string &backgroundImageFileName);
 
-  //
-  typedef kvl::ImageViewer::ImageType  ImageType;
-  static ImageType::Pointer  ReadBackgroundImage( const std::string&  backgroundImageFileName );
-  
-private:  
-  
-  AtlasMeshCollection::Pointer  m_MeshCollection;
-  //AtlasMesh::CellIdentifier  m_EdgeIdToHighlight;
-  ImageType::Pointer  m_BackgroundImage;
+private:
+  AtlasMeshCollection::Pointer m_MeshCollection;
+  // AtlasMesh::CellIdentifier  m_EdgeIdToHighlight;
+  ImageType::Pointer m_BackgroundImage;
 
-  CompressionLookupTable::Pointer  m_Compressor;
+  CompressionLookupTable::Pointer m_Compressor;
 };
-
-
 
 } // end namespace kvl
 

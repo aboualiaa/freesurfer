@@ -69,4 +69,3 @@ int nrrdStateKindNoop = AIR_FALSE;
 
 /* Are there other assumptions currently built into nrrd which could
    stand to be user-controllable? */
-

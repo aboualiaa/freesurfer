@@ -28,8 +28,7 @@
 
 #include <QCursor>
 
-class CursorFactory
-{
+class CursorFactory {
 public:
   CursorFactory();
 
@@ -52,5 +51,3 @@ public:
 };
 
 #endif
-
-

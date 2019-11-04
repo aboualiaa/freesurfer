@@ -25,21 +25,15 @@
 
 /* CENTRY */
 /* DEPRICATED, use glutMenuStatusFunc instead. */
-void APIENTRY
-glutMenuStateFunc(GLUTmenuStateCB menuStateFunc)
-{
-  __glutMenuStatusFunc = (GLUTmenuStatusCB) menuStateFunc;
+void APIENTRY glutMenuStateFunc(GLUTmenuStateCB menuStateFunc) {
+  __glutMenuStatusFunc = (GLUTmenuStatusCB)menuStateFunc;
 }
 
-void APIENTRY
-glutMenuStatusFunc(GLUTmenuStatusCB menuStatusFunc)
-{
+void APIENTRY glutMenuStatusFunc(GLUTmenuStatusCB menuStatusFunc) {
   __glutMenuStatusFunc = menuStatusFunc;
 }
 
-void APIENTRY
-glutDestroyMenu(int menunum)
-{
+void APIENTRY glutDestroyMenu(int menunum) {
   GLUTmenu *menu = __glutGetMenuByNum(menunum);
   GLUTmenuItem *item, *next;
 
@@ -51,24 +45,20 @@ glutDestroyMenu(int menunum)
   __glutMenuList[menunum - 1] = NULL;
   /* free all menu entries */
   item = menu->list;
-  while (item)
-  {
+  while (item) {
     assert(item->menu == menu);
     next = item->next;
     free(item->label);
     free(item);
     item = next;
   }
-  if (__glutCurrentMenu == menu)
-  {
+  if (__glutCurrentMenu == menu) {
     __glutCurrentMenu = NULL;
   }
   free(menu);
 }
 
-void APIENTRY
-glutChangeToMenuEntry(int num, const char *label, int value)
-{
+void APIENTRY glutChangeToMenuEntry(int num, const char *label, int value) {
   GLUTmenuItem *item;
   int i;
 
@@ -76,12 +66,9 @@ glutChangeToMenuEntry(int num, const char *label, int value)
     __glutMenuModificationError();
   i = __glutCurrentMenu->num;
   item = __glutCurrentMenu->list;
-  while (item)
-  {
-    if (i == num)
-    {
-      if (item->isTrigger)
-      {
+  while (item) {
+    if (i == num) {
+      if (item->isTrigger) {
         /* If changing a submenu trigger to a menu entry, we
            need to account for submenus.  */
         item->menu->submenus--;
@@ -96,9 +83,7 @@ glutChangeToMenuEntry(int num, const char *label, int value)
   __glutWarning("Current menu has no %d item.", num);
 }
 
-void APIENTRY
-glutChangeToSubMenu(int num, const char *label, int menu)
-{
+void APIENTRY glutChangeToSubMenu(int num, const char *label, int menu) {
   GLUTmenuItem *item;
   int i;
 
@@ -106,12 +91,9 @@ glutChangeToSubMenu(int num, const char *label, int menu)
     __glutMenuModificationError();
   i = __glutCurrentMenu->num;
   item = __glutCurrentMenu->list;
-  while (item)
-  {
-    if (i == num)
-    {
-      if (!item->isTrigger)
-      {
+  while (item) {
+    if (i == num) {
+      if (!item->isTrigger) {
         /* If changing a menu entry to as submenu trigger, we
            need to account for submenus.  */
         item->menu->submenus++;
@@ -126,9 +108,7 @@ glutChangeToSubMenu(int num, const char *label, int menu)
   __glutWarning("Current menu has no %d item.", num);
 }
 
-void APIENTRY
-glutRemoveMenuItem(int num)
-{
+void APIENTRY glutRemoveMenuItem(int num) {
   GLUTmenuItem *item, **prev, *remaining;
   int pixwidth, i;
 
@@ -140,22 +120,17 @@ glutRemoveMenuItem(int num)
   /* If menu item is removed, the menu's pixwidth may need to
      be recomputed. */
   pixwidth = 1;
-  while (item)
-  {
-    if (i == num)
-    {
+  while (item) {
+    if (i == num) {
       /* If this menu item's pixwidth is as wide as the menu's
          pixwidth, removing this menu item will necessitate
          shrinking the menu's pixwidth. */
-      if (item->pixwidth >= __glutCurrentMenu->pixwidth)
-      {
+      if (item->pixwidth >= __glutCurrentMenu->pixwidth) {
         /* Continue recalculating menu pixwidth, first skipping
            the removed item. */
         remaining = item->next;
-        while (remaining)
-        {
-          if (remaining->pixwidth > pixwidth)
-          {
+        while (remaining) {
+          if (remaining->pixwidth > pixwidth) {
             pixwidth = remaining->pixwidth;
           }
           remaining = remaining->next;
@@ -172,8 +147,7 @@ glutRemoveMenuItem(int num)
       free(item);
       return;
     }
-    if (item->pixwidth > pixwidth)
-    {
+    if (item->pixwidth > pixwidth) {
       pixwidth = item->pixwidth;
     }
     i--;
@@ -183,13 +157,10 @@ glutRemoveMenuItem(int num)
   __glutWarning("Current menu has no %d item.", num);
 }
 
-void APIENTRY
-glutDetachMenu(int button)
-{
+void APIENTRY glutDetachMenu(int button) {
   if (__glutMappedMenu)
     __glutMenuModificationError();
-  if (__glutCurrentWindow->menu[button] > 0)
-  {
+  if (__glutCurrentWindow->menu[button] > 0) {
     __glutCurrentWindow->buttonUses--;
     __glutChangeWindowEventMask(ButtonPressMask | ButtonReleaseMask,
                                 __glutCurrentWindow->buttonUses > 0);

@@ -12,8 +12,7 @@ typedef QList<int> IntList;
 
 class LayerMRI;
 
-class LayerMRIWorkerThread : public QThread
-{
+class LayerMRIWorkerThread : public QThread {
   Q_OBJECT
 public:
   explicit LayerMRIWorkerThread(LayerMRI *mri);

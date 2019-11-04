@@ -38,21 +38,17 @@ class QModelIndex;
 class Layer;
 class LayerCollection;
 
-class PanelLayer : public QScrollArea, public UIUpdateHelper
-{
+class PanelLayer : public QScrollArea, public UIUpdateHelper {
   Q_OBJECT
 public:
-  explicit PanelLayer(const QString& layerType, QWidget *parent = 0);
+  explicit PanelLayer(const QString &layerType, QWidget *parent = 0);
 
-  void InitializeLayerTreeWidget( QTreeWidget* treeWidget);
-  void SetCurrentLayer(Layer* layer);
+  void InitializeLayerTreeWidget(QTreeWidget *treeWidget);
+  void SetCurrentLayer(Layer *layer);
   virtual void DisconnectAllLayers();
-  virtual void ConnectLayer( Layer* layer );
+  virtual void ConnectLayer(Layer *layer);
 
-  QString GetLayerType()
-  {
-    return m_layerType;
-  }
+  QString GetLayerType() { return m_layerType; }
 
 signals:
 
@@ -62,37 +58,32 @@ public slots:
 protected:
   virtual void DoIdle() = 0;
   virtual void DoUpdateWidgets() = 0;
-  void BlockAllSignals( bool bBlock );
-  template<typename T> inline T GetCurrentLayer();
-  template<typename T> inline QList<T> GetSelectedLayers();
+  void BlockAllSignals(bool bBlock);
+  template <typename T> inline T GetCurrentLayer();
+  template <typename T> inline QList<T> GetSelectedLayers();
 
 protected slots:
   void OnIdle();
   void OnUpdate();
-//  void OnLayerMoved( Layer* layer );
-//  void OnActiveLayerChanged( Layer* layer );
+  //  void OnLayerMoved( Layer* layer );
+  //  void OnActiveLayerChanged( Layer* layer );
 
-  void ResetLayerCollection()
-  {
-    m_layerCollection = NULL;
-  }
+  void ResetLayerCollection() { m_layerCollection = NULL; }
 
 protected:
-  QList<QWidget*>     allWidgets;
-  QList<QAction*>     allActions;
-  QTreeWidget*        treeWidgetLayers;
-  LayerCollection*    m_layerCollection;
+  QList<QWidget *> allWidgets;
+  QList<QAction *> allActions;
+  QTreeWidget *treeWidgetLayers;
+  LayerCollection *m_layerCollection;
 
 private:
   bool m_bToUpdate;
-  Layer*              m_currentLayer;
-  QString             m_layerType;
+  Layer *m_currentLayer;
+  QString m_layerType;
 };
 
-template<typename T> T PanelLayer::GetCurrentLayer()
-{
-  if ( !treeWidgetLayers || !m_layerCollection)
-  {
+template <typename T> T PanelLayer::GetCurrentLayer() {
+  if (!treeWidgetLayers || !m_layerCollection) {
     return NULL;
   }
 
@@ -102,19 +93,18 @@ template<typename T> T PanelLayer::GetCurrentLayer()
     return NULL;
 }
 
-template<typename T> QList<T> PanelLayer::GetSelectedLayers()
-{
+template <typename T> QList<T> PanelLayer::GetSelectedLayers() {
   QList<T> list;
-  if ( !treeWidgetLayers )
-  {
+  if (!treeWidgetLayers) {
     return list;
   }
 
-  QList<QTreeWidgetItem*> items = treeWidgetLayers->selectedItems();
-  foreach (QTreeWidgetItem* item, items)
-  {
-//    T t = qobject_cast<T>( item->data(0, Qt::UserRole).template value<QObject*>() );
-    T t = reinterpret_cast<T>( item->data( 0, Qt::UserRole ).template value<quintptr>() );
+  QList<QTreeWidgetItem *> items = treeWidgetLayers->selectedItems();
+  foreach (QTreeWidgetItem *item, items) {
+    //    T t = qobject_cast<T>( item->data(0, Qt::UserRole).template
+    //    value<QObject*>() );
+    T t = reinterpret_cast<T>(
+        item->data(0, Qt::UserRole).template value<quintptr>());
     if (t)
       list << t;
   }

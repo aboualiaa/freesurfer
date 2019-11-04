@@ -24,26 +24,16 @@
 #include <stdio.h>
 #include "svm-pr-loqo.h"
 
-
 #define PREDICTOR 1
 #define CORRECTOR 2
 
+double max(double a, double b) { return ((a > b) ? a : b); }
 
-double max(double a, double b) {
-  return ((a>b)?a:b);
-}
+double min(double a, double b) { return ((a < b) ? a : b); }
 
-double min(double a, double b) {
-  return ((a<b)?a:b);
-}
+double sqr(double a) { return a * a; }
 
-double sqr(double a) {
-  return a*a;
-}
-
-double ABS(double a) {
-  return ((a>0)?a:-a);
-}
+double ABS(double a) { return ((a > 0) ? a : -a); }
 
 /*
 #define max(A, B) ((A) > (B) ? (A) : (B))
@@ -51,7 +41,6 @@ double ABS(double a) {
 #define sqr(A)          ((A) * (A))
 #define ABS(A)   ((A) > 0 ? (A) : (-(A)))
 */
-
 
 /*****************************************************************
   replace this by any other function that will exit gracefully
@@ -77,20 +66,19 @@ void nrerror(char error_text[]) {
   */
 void choldc(double a[], int n, double p[]) {
   ErrorExit(
-    ERROR_BADPARM,
-    "ERROR: NRC routine choldc has been removed from the source.\n"
-    "This program is not usable until a suitable replacement is found!\n");
+      ERROR_BADPARM,
+      "ERROR: NRC routine choldc has been removed from the source.\n"
+      "This program is not usable until a suitable replacement is found!\n");
   return;
 }
 
 void cholsb(double a[], int n, double p[], double b[], double x[]) {
   ErrorExit(
-    ERROR_BADPARM,
-    "ERROR: NRC routine cholsb has been removed from the source.\n"
-    "This program is not usable until a suitable replacement is found!\n");
+      ERROR_BADPARM,
+      "ERROR: NRC routine cholsb has been removed from the source.\n"
+      "This program is not usable until a suitable replacement is found!\n");
   return;
 }
-
 
 /*****************************************************************
   sometimes we only need the forward or backward pass of the
@@ -101,10 +89,11 @@ void chol_forward(double a[], int n, double p[], double b[], double x[]) {
   int i, k;
   double sum;
 
-  for (i=0; i<n; i++) {
-    sum=b[i];
-    for (k=i-1; k>=0; k--) sum -= a[n*i + k]*x[k];
-    x[i]=sum/p[i];
+  for (i = 0; i < n; i++) {
+    sum = b[i];
+    for (k = i - 1; k >= 0; k--)
+      sum -= a[n * i + k] * x[k];
+    x[i] = sum / p[i];
   }
 }
 
@@ -112,10 +101,11 @@ void chol_backward(double a[], int n, double p[], double b[], double x[]) {
   int i, k;
   double sum;
 
-  for (i=n-1; i>=0; i--) {
-    sum=b[i];
-    for (k=i+1; k<n; k++) sum -= a[n*k + i]*x[k];
-    x[i]=sum/p[i];
+  for (i = n - 1; i >= 0; i--) {
+    sum = b[i];
+    for (k = i + 1; k < n; k++)
+      sum -= a[n * k + i] * x[k];
+    x[i] = sum / p[i];
   }
 }
 
@@ -144,11 +134,10 @@ void chol_backward(double a[], int n, double p[], double b[], double x[]) {
   in our case)
   ***************************************************************/
 
-void solve_reduced(int n, int m, double h_x[], double h_y[],
-                   double a[], double x_x[], double x_y[],
-                   double c_x[], double c_y[],
+void solve_reduced(int n, int m, double h_x[], double h_y[], double a[],
+                   double x_x[], double x_y[], double c_x[], double c_y[],
                    double workspace[], int step) {
-  int i,j,k;
+  int i, j, k;
 
   double *p_x;
   double *p_y;
@@ -156,22 +145,22 @@ void solve_reduced(int n, int m, double h_x[], double h_y[],
   double *t_c;
   double *t_y;
 
-  p_x = workspace;  /* together n + m + n*m + n + m = n*(m+2)+2*m */
+  p_x = workspace; /* together n + m + n*m + n + m = n*(m+2)+2*m */
   p_y = p_x + n;
   t_a = p_y + m;
-  t_c = t_a + n*m;
+  t_c = t_a + n * m;
   t_y = t_c + n;
 
   if (step == PREDICTOR) {
     choldc(h_x, n, p_x); /* do cholesky decomposition */
 
-    for (i=0; i<m; i++)         /* forward pass for A' */
-      chol_forward(h_x, n, p_x, a+i*n, t_a+i*n);
+    for (i = 0; i < m; i++) /* forward pass for A' */
+      chol_forward(h_x, n, p_x, a + i * n, t_a + i * n);
 
-    for (i=0; i<m; i++)         /* compute (h_y + a h_x^-1A') */
-      for (j=i; j<m; j++)
-        for (k=0; k<n; k++)
-          h_y[m*i + j] += t_a[n*j + k] * t_a[n*i + k];
+    for (i = 0; i < m; i++) /* compute (h_y + a h_x^-1A') */
+      for (j = i; j < m; j++)
+        for (k = 0; k < n; k++)
+          h_y[m * i + j] += t_a[n * j + k] * t_a[n * i + k];
 
     choldc(h_y, m, p_y); /* and cholesky decomposition */
   }
@@ -179,18 +168,18 @@ void solve_reduced(int n, int m, double h_x[], double h_y[],
   chol_forward(h_x, n, p_x, c_x, t_c);
   /* forward pass for c */
 
-  for (i=0; i<m; i++) {  /* and solve for x_y */
+  for (i = 0; i < m; i++) { /* and solve for x_y */
     t_y[i] = c_y[i];
-    for (j=0; j<n; j++)
-      t_y[i] += t_a[i*n + j] * t_c[j];
+    for (j = 0; j < n; j++)
+      t_y[i] += t_a[i * n + j] * t_c[j];
   }
 
   cholsb(h_y, m, p_y, t_y, x_y);
 
-  for (i=0; i<n; i++) {  /* finally solve for x_x */
+  for (i = 0; i < n; i++) { /* finally solve for x_x */
     t_c[i] = -t_c[i];
-    for (j=0; j<m; j++)
-      t_c[i] += t_a[j*n + i] * x_y[j];
+    for (j = 0; j < m; j++)
+      t_c[i] += t_a[j * n + i] * x_y[j];
   }
 
   chol_backward(h_x, n, p_x, t_c, x_x);
@@ -207,14 +196,14 @@ void solve_reduced(int n, int m, double h_x[], double h_y[],
 void matrix_vector(int n, double m[], double x[], double y[]) {
   int i, j;
 
-  for (i=0; i<n; i++) {
-    y[i] = m[(n+1) * i] * x[i];
+  for (i = 0; i < n; i++) {
+    y[i] = m[(n + 1) * i] * x[i];
 
-    for (j=0; j<i; j++)
-      y[i] += m[i + n*j] * x[j];
+    for (j = 0; j < i; j++)
+      y[i] += m[i + n * j] * x[j];
 
-    for (j=i+1; j<n; j++)
-      y[i] += m[n*i + j] * x[j];
+    for (j = i + 1; j < n; j++)
+      y[i] += m[n * i + j] * x[j];
   }
 }
 
@@ -231,9 +220,9 @@ void matrix_vector(int n, double m[], double x[], double y[]) {
   ***************************************************************/
 
 int pr_loqo(int n, int m, double c[], double h_x[], double a[], double b[],
-            double l[], double u[], double primal[], double dual[],
-            int verb, double sigfig_max, int counter_max,
-            double margin, double bound, int restart) {
+            double l[], double u[], double primal[], double dual[], int verb,
+            double sigfig_max, int counter_max, double margin, double bound,
+            int restart) {
   /* the knobs to be tuned ... */
   /* double margin = -0.95;    we will go up to 95% of the
        distance between old variables and zero */
@@ -291,71 +280,72 @@ int pr_loqo(int n, int m, double c[], double h_x[], double a[], double b[],
   int counter = 0;
 
   int status = STILL_RUNNING;
-  int i,j;
+  int i, j;
 
   /* memory allocation */
-  workspace = malloc((n*(m+2)+2*m)*sizeof(double));
-  diag_h_x  = malloc(n*sizeof(double));
-  h_y       = malloc(m*m*sizeof(double));
-  c_x       = malloc(n*sizeof(double));
-  c_y       = malloc(m*sizeof(double));
-  h_dot_x   = malloc(n*sizeof(double));
+  workspace = malloc((n * (m + 2) + 2 * m) * sizeof(double));
+  diag_h_x = malloc(n * sizeof(double));
+  h_y = malloc(m * m * sizeof(double));
+  c_x = malloc(n * sizeof(double));
+  c_y = malloc(m * sizeof(double));
+  h_dot_x = malloc(n * sizeof(double));
 
-  rho       = malloc(m*sizeof(double));
-  nu        = malloc(n*sizeof(double));
-  tau       = malloc(n*sizeof(double));
-  sigma     = malloc(n*sizeof(double));
+  rho = malloc(m * sizeof(double));
+  nu = malloc(n * sizeof(double));
+  tau = malloc(n * sizeof(double));
+  sigma = malloc(n * sizeof(double));
 
-  gamma_z   = malloc(n*sizeof(double));
-  gamma_s   = malloc(n*sizeof(double));
+  gamma_z = malloc(n * sizeof(double));
+  gamma_s = malloc(n * sizeof(double));
 
-  hat_nu    = malloc(n*sizeof(double));
-  hat_tau   = malloc(n*sizeof(double));
+  hat_nu = malloc(n * sizeof(double));
+  hat_tau = malloc(n * sizeof(double));
 
-  delta_x   = malloc(n*sizeof(double));
-  delta_y   = malloc(m*sizeof(double));
-  delta_s   = malloc(n*sizeof(double));
-  delta_z   = malloc(n*sizeof(double));
-  delta_g   = malloc(n*sizeof(double));
-  delta_t   = malloc(n*sizeof(double));
+  delta_x = malloc(n * sizeof(double));
+  delta_y = malloc(m * sizeof(double));
+  delta_s = malloc(n * sizeof(double));
+  delta_z = malloc(n * sizeof(double));
+  delta_g = malloc(n * sizeof(double));
+  delta_t = malloc(n * sizeof(double));
 
-  d         = malloc(n*sizeof(double));
+  d = malloc(n * sizeof(double));
 
   /* pointers into the external variables */
-  x = primal;   /* n */
-  g = x + n;   /* n */
-  t = g + n;   /* n */
+  x = primal; /* n */
+  g = x + n;  /* n */
+  t = g + n;  /* n */
 
-  y = dual;   /* m */
-  z = y + m;   /* n */
-  s = z + n;   /* n */
+  y = dual;  /* m */
+  z = y + m; /* n */
+  s = z + n; /* n */
 
   /* initial settings */
   b_plus_1 = 1;
 
   /* Polina. Changed it to be according to the paper */
   c_plus_1 = 0;
-  for (i=0; i<n; i++) c_plus_1 += sqr(c[i]);
+  for (i = 0; i < n; i++)
+    c_plus_1 += sqr(c[i]);
   c_plus_1 = 1 + sqrt(c_plus_1);
 
-
   /* get diagonal terms */
-  for (i=0; i<n; i++) diag_h_x[i] = h_x[(n+1)*i];
+  for (i = 0; i < n; i++)
+    diag_h_x[i] = h_x[(n + 1) * i];
 
   /* starting point */
   if (restart == 1) {
     /* x, y already preset */
-    for (i=0; i<n; i++) { /* compute g, t for primal feasibility */
+    for (i = 0; i < n; i++) { /* compute g, t for primal feasibility */
       g[i] = max(ABS(x[i] - l[i]), bound);
       t[i] = max(ABS(u[i] - x[i]), bound);
     }
 
     matrix_vector(n, h_x, x, h_dot_x); /* h_dot_x = h_x * x */
 
-    for (i=0; i<n; i++) { /* sigma is a dummy variable to calculate z, s */
+    for (i = 0; i < n; i++) { /* sigma is a dummy variable to calculate z, s */
       sigma[i] = c[i] + h_dot_x[i];
-      for (j=0; j<m; j++)
-        sigma[i] -= a[n*j + i] * y[j];
+      for (j = 0; j < m; j++)
+        sigma[i] -= a[n * j + i] * y[j];
 
       if (sigma[i] > 0) {
         s[i] = bound;
@@ -365,25 +355,24 @@ int pr_loqo(int n, int m, double c[], double h_x[], double a[], double b[],
         z[i] = bound;
       }
     }
-  } else {   /* use default start settings */
-    for (i=0; i<m; i++)
-      for (j=i; j<m; j++)
-        h_y[i*m + j] = (i==j) ? 1 : 0;
+  } else { /* use default start settings */
+    for (i = 0; i < m; i++)
+      for (j = i; j < m; j++)
+        h_y[i * m + j] = (i == j) ? 1 : 0;
 
-    for (i=0; i<n; i++) {
+    for (i = 0; i < n; i++) {
       c_x[i] = c[i];
-      h_x[(n+1)*i] += 1;
+      h_x[(n + 1) * i] += 1;
     }
 
-    for (i=0; i<m; i++)
+    for (i = 0; i < m; i++)
       c_y[i] = b[i];
 
     /* and solve the system [-H_x A'; A H_y] [x, y] = [c_x; c_y] */
-    solve_reduced(n, m, h_x, h_y, a, x, y, c_x, c_y, workspace,
-                  PREDICTOR);
+    solve_reduced(n, m, h_x, h_y, a, x, y, c_x, c_y, workspace, PREDICTOR);
 
     /* initialize the other variables */
-    for (i=0; i<n; i++) {
+    for (i = 0; i < n; i++) {
       g[i] = max(ABS(x[i] - l[i]), bound);
       z[i] = max(ABS(x[i]), bound);
       t[i] = max(ABS(u[i] - x[i]), bound);
@@ -391,9 +380,9 @@ int pr_loqo(int n, int m, double c[], double h_x[], double a[], double b[],
     }
   }
 
-  for (i=0, mu=0; i<n; i++)
+  for (i = 0, mu = 0; i < n; i++)
     mu += z[i] * g[i] + s[i] * t[i];
-  mu = mu / (2*n);
+  mu = mu / (2 * n);
 
   /* the main loop */
   if (verb >= STATUS) {
@@ -407,27 +396,27 @@ int pr_loqo(int n, int m, double c[], double h_x[], double a[], double b[],
     /* predictor */
 
     /* put back original diagonal values */
-    for (i=0; i<n; i++)
-      h_x[(n+1) * i] = diag_h_x[i];
+    for (i = 0; i < n; i++)
+      h_x[(n + 1) * i] = diag_h_x[i];
 
     matrix_vector(n, h_x, x, h_dot_x); /* compute h_dot_x = h_x * x */
 
-    for (i=0; i<m; i++) {
+    for (i = 0; i < m; i++) {
       rho[i] = b[i];
-      for (j=0; j<n; j++)
-        rho[i] -= a[n*i + j] * x[j];
+      for (j = 0; j < n; j++)
+        rho[i] -= a[n * i + j] * x[j];
     }
 
-    for (i=0; i<n; i++) {
+    for (i = 0; i < n; i++) {
       nu[i] = l[i] - x[i] + g[i];
       tau[i] = u[i] - x[i] - t[i];
 
       sigma[i] = c[i] - z[i] + s[i] + h_dot_x[i];
-      for (j=0; j<m; j++)
-        sigma[i] -= a[n*j + i] * y[j];
+      for (j = 0; j < m; j++)
+        sigma[i] -= a[n * j + i] * y[j];
 
-      gamma_z[i] = - z[i];
-      gamma_s[i] = - s[i];
+      gamma_z[i] = -z[i];
+      gamma_s[i] = -s[i];
     }
 
     /* instrumentation */
@@ -435,7 +424,7 @@ int pr_loqo(int n, int m, double c[], double h_x[], double a[], double b[],
     primal_inf = 0;
     dual_inf = 0;
 
-    for (i=0; i<n; i++) {
+    for (i = 0; i < n; i++) {
       x_h_x += h_dot_x[i] * x[i];
       primal_inf += sqr(tau[i]);
       primal_inf += sqr(nu[i]);
@@ -445,35 +434,40 @@ int pr_loqo(int n, int m, double c[], double h_x[], double a[], double b[],
     }
     /* printf("%g \n", dual_inf); */
 
-
-    for (i=0; i<m; i++)
+    for (i = 0; i < m; i++)
       primal_inf += sqr(rho[i]);
-    primal_inf = sqrt(primal_inf)/b_plus_1;
-    dual_inf = sqrt(dual_inf)/c_plus_1;
+    primal_inf = sqrt(primal_inf) / b_plus_1;
+    dual_inf = sqrt(dual_inf) / c_plus_1;
 
     primal_obj = 0.5 * x_h_x;
     dual_obj = -0.5 * x_h_x;
-    for (i=0; i<n; i++) {
+    for (i = 0; i < n; i++) {
       primal_obj += c[i] * x[i];
       dual_obj += l[i] * z[i] - u[i] * s[i];
     }
-    for (i=0; i<m; i++)
+    for (i = 0; i < m; i++)
       dual_obj += b[i] * y[i];
 
-    sigfig = log10(ABS(primal_obj) + 1) -
-             log10(ABS(primal_obj - dual_obj));
+    sigfig = log10(ABS(primal_obj) + 1) - log10(ABS(primal_obj - dual_obj));
     sigfig = max(sigfig, 0);
 
     /* the diagnostics - after we computed our results we will
        analyze them */
 
-    if (counter > counter_max) status = ITERATION_LIMIT;
-    if (sigfig  > sigfig_max)  status = OPTIMAL_SOLUTION;
-    if (primal_inf > 10e100)   status = PRIMAL_INFEASIBLE;
-    if (dual_inf > 10e100)     status = DUAL_INFEASIBLE;
-    if ((primal_inf > 10e100) & (dual_inf > 10e100)) status = PRIMAL_AND_DUAL_INFEASIBLE;
-    if (ABS(primal_obj) > 10e100) status = PRIMAL_UNBOUNDED;
-    if (ABS(dual_obj) > 10e100) status = DUAL_UNBOUNDED;
+    if (counter > counter_max)
+      status = ITERATION_LIMIT;
+    if (sigfig > sigfig_max)
+      status = OPTIMAL_SOLUTION;
+    if (primal_inf > 10e100)
+      status = PRIMAL_INFEASIBLE;
+    if (dual_inf > 10e100)
+      status = DUAL_INFEASIBLE;
+    if ((primal_inf > 10e100) & (dual_inf > 10e100))
+      status = PRIMAL_AND_DUAL_INFEASIBLE;
+    if (ABS(primal_obj) > 10e100)
+      status = PRIMAL_UNBOUNDED;
+    if (ABS(dual_obj) > 10e100)
+      status = DUAL_UNBOUNDED;
 
     /* write some nice routine to enforce the time limit if you
        _really_ want, however it's quite useless as you can compute
@@ -484,18 +478,18 @@ int pr_loqo(int n, int m, double c[], double h_x[], double a[], double b[],
     /* generate report */
     if ((verb >= FLOOD) | ((verb == STATUS) & (status != 0))) {
       printf("%7i | %.2e | %.2e | % .2e | % .2e | %6.3f | %.4f | %.2e | %d\n",
-             counter, primal_inf, dual_inf, primal_obj, dual_obj,
-             sigfig, alfa, mu, status);
+             counter, primal_inf, dual_inf, primal_obj, dual_obj, sigfig, alfa,
+             mu, status);
       fflush(stdout);
     }
 
     counter++;
 
-    if (status == 0) {  /* we may keep on going, otherwise
-                               it'll cost one loop extra plus a
-                               messed up main diagonal of h_x */
+    if (status == 0) { /* we may keep on going, otherwise
+                              it'll cost one loop extra plus a
+                              messed up main diagonal of h_x */
       /* intermediate variables (the ones with hat) */
-      for (i=0; i<n; i++) {
+      for (i = 0; i < n; i++) {
         hat_nu[i] = nu[i] + g[i] * gamma_z[i] / z[i];
         hat_tau[i] = tau[i] - t[i] * gamma_s[i] / s[i];
         /* diagonal terms */
@@ -503,22 +497,21 @@ int pr_loqo(int n, int m, double c[], double h_x[], double a[], double b[],
       }
 
       /* initialization before the cholesky solver */
-      for (i=0; i<n; i++) {
-        h_x[(n+1)*i] = diag_h_x[i] + d[i];
-        c_x[i] = sigma[i] - z[i] * hat_nu[i] / g[i] -
-                 s[i] * hat_tau[i] / t[i];
+      for (i = 0; i < n; i++) {
+        h_x[(n + 1) * i] = diag_h_x[i] + d[i];
+        c_x[i] = sigma[i] - z[i] * hat_nu[i] / g[i] - s[i] * hat_tau[i] / t[i];
       }
-      for (i=0; i<m; i++) {
+      for (i = 0; i < m; i++) {
         c_y[i] = rho[i];
-        for (j=i; j<m; j++)
-          h_y[m*i + j] = 0;
+        for (j = i; j < m; j++)
+          h_y[m * i + j] = 0;
       }
 
       /* and do it */
       solve_reduced(n, m, h_x, h_y, a, delta_x, delta_y, c_x, c_y, workspace,
                     PREDICTOR);
 
-      for (i=0; i<n; i++) {
+      for (i = 0; i < n; i++) {
         /* backsubstitution */
         delta_s[i] = s[i] * (delta_x[i] - hat_tau[i]) / t[i];
         delta_z[i] = z[i] * (hat_nu[i] - delta_x[i]) / g[i];
@@ -538,17 +531,17 @@ int pr_loqo(int n, int m, double c[], double h_x[], double a[], double b[],
         c_x[i] = sigma[i] - z[i] * hat_nu[i] / g[i] - s[i] * hat_tau[i] / t[i];
       }
 
-      for (i=0; i<m; i++) { /* comput c_y and rho */
+      for (i = 0; i < m; i++) { /* comput c_y and rho */
         c_y[i] = rho[i];
-        for (j=i; j<m; j++)
-          h_y[m*i + j] = 0;
+        for (j = i; j < m; j++)
+          h_y[m * i + j] = 0;
       }
 
       /* and do it */
       solve_reduced(n, m, h_x, h_y, a, delta_x, delta_y, c_x, c_y, workspace,
                     CORRECTOR);
 
-      for (i=0; i<n; i++) {
+      for (i = 0; i < n; i++) {
         /* backsubstitution */
         delta_s[i] = s[i] * (delta_x[i] - hat_tau[i]) / t[i];
         delta_z[i] = z[i] * (hat_nu[i] - delta_x[i]) / g[i];
@@ -558,21 +551,21 @@ int pr_loqo(int n, int m, double c[], double h_x[], double a[], double b[],
       }
 
       alfa = -1;
-      for (i=0; i<n; i++) {
-        alfa = min(alfa, delta_g[i]/g[i]);
-        alfa = min(alfa, delta_t[i]/t[i]);
-        alfa = min(alfa, delta_s[i]/s[i]);
-        alfa = min(alfa, delta_z[i]/z[i]);
+      for (i = 0; i < n; i++) {
+        alfa = min(alfa, delta_g[i] / g[i]);
+        alfa = min(alfa, delta_t[i] / t[i]);
+        alfa = min(alfa, delta_s[i] / s[i]);
+        alfa = min(alfa, delta_z[i] / z[i]);
       }
       alfa = (margin - 1) / alfa;
 
       /* compute mu */
-      for (i=0, mu=0; i<n; i++)
+      for (i = 0, mu = 0; i < n; i++)
         mu += z[i] * g[i] + s[i] * t[i];
-      mu = mu / (2*n);
+      mu = mu / (2 * n);
       mu = mu * sqr((alfa - 1) / (alfa + 10));
 
-      for (i=0; i<n; i++) {
+      for (i = 0; i < n; i++) {
         x[i] += alfa * delta_x[i];
         g[i] += alfa * delta_g[i];
         t[i] += alfa * delta_t[i];
@@ -580,12 +573,13 @@ int pr_loqo(int n, int m, double c[], double h_x[], double a[], double b[],
         s[i] += alfa * delta_s[i];
       }
 
-      for (i=0; i<m; i++)
+      for (i = 0; i < m; i++)
         y[i] += alfa * delta_y[i];
     }
   }
   if ((status == 1) && (verb >= STATUS)) {
-    printf("----------------------------------------------------------------------------------\n");
+    printf("-------------------------------------------------------------------"
+           "---------------\n");
     printf("optimization converged\n");
   }
 
@@ -619,5 +613,3 @@ int pr_loqo(int n, int m, double c[], double h_x[], double a[], double b[],
   /* and return to sender */
   return status;
 }
-
-

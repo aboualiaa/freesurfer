@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:16 $
@@ -23,13 +23,12 @@
  *
  */
 
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+#include <cctype>
 #include <unistd.h>
-#include <string.h>
+#include <cstring>
 #include <sys/stat.h>
 
 #include "mri.h"
@@ -42,20 +41,20 @@
 #include "mri_identify.h"
 #include "version.h"
 
-#define ACTION_NONE  0
-#define ACTION_USAGE  1
-#define ACTION_IDENTIFY  2
-#define ACTION_READ  3
+#define ACTION_NONE 0
+#define ACTION_USAGE 1
+#define ACTION_IDENTIFY 2
+#define ACTION_READ 3
 
 void get_options(int argc, char *argv[]);
 void usage(int exit_val);
-void dummy_identify(void);
-void dummy_read(void);
+void dummy_identify();
+void dummy_read();
 
 const char *Progname;
 
 static char *prog_name, *short_prog_name;
-static char *fname = NULL;
+static char *fname = nullptr;
 
 static int action = ACTION_NONE;
 
@@ -63,14 +62,17 @@ int main(int argc, char *argv[]) {
   int nargs;
 
   /* rkt: check for and handle version tag */
-  nargs = handle_version_option (argc, argv, "$Id: mri_head.c,v 1.7 2011/03/02 00:04:16 nicks Exp $", "$Name:  $");
+  nargs = handle_version_option(
+      argc, argv, "$Id: mri_head.c,v 1.7 2011/03/02 00:04:16 nicks Exp $",
+      "$Name:  $");
   if (nargs && argc - nargs == 1)
-    exit (0);
+    exit(0);
   argc -= nargs;
 
   prog_name = argv[0];
   short_prog_name = strrchr(prog_name, '/');
-  short_prog_name = (short_prog_name == NULL ? prog_name : short_prog_name + 1);
+  short_prog_name =
+      (short_prog_name == nullptr ? prog_name : short_prog_name + 1);
   Progname = short_prog_name;
 
   get_options(argc, argv);
@@ -86,14 +88,15 @@ int main(int argc, char *argv[]) {
 
   exit(0);
 
-}  /*  end main()  */
+} /*  end main()  */
 
 void get_options(int argc, char *argv[]) {
 
   int i;
 
-  for (i = 1;i < argc;i++) {
-    if (strcmp(argv[i], "-u") == 0 || strcmp(argv[i], "-?") == 0 || strcmp(argv[i], "-h") == 0)
+  for (i = 1; i < argc; i++) {
+    if (strcmp(argv[i], "-u") == 0 || strcmp(argv[i], "-?") == 0 ||
+        strcmp(argv[i], "-h") == 0)
       action = ACTION_USAGE;
     else if (strcmp(argv[i], "-identify") == 0)
       action = ACTION_IDENTIFY;
@@ -103,7 +106,7 @@ void get_options(int argc, char *argv[]) {
       fname = argv[i];
   }
 
-}  /*  end get_options()  */
+} /*  end get_options()  */
 
 void usage(int exit_val) {
 
@@ -117,19 +120,19 @@ void usage(int exit_val) {
 
   exit(exit_val);
 
-}  /*  end usage()  */
+} /*  end usage()  */
 
-void dummy_identify(void) {
+void dummy_identify() {
 
   int type;
   struct stat stat_buf;
 
-  if (fname == NULL)
+  if (fname == nullptr)
     usage(1);
 
   if (stat(fname, &stat_buf) < 0) {
     printf("fail\n");
-    printf("can't stat file %s\n",fname);
+    printf("can't stat file %s\n", fname);
     exit(1);
   }
 
@@ -160,25 +163,27 @@ void dummy_identify(void) {
     printf("succeed\nsdt\n");
   else {
     printf("fail\n");
-    printf("%s: positive file type, but unknown to this program\n", short_prog_name);
-    printf("%s: yell at your friendly neighborhood programmer\n", short_prog_name);
+    printf("%s: positive file type, but unknown to this program\n",
+           short_prog_name);
+    printf("%s: yell at your friendly neighborhood programmer\n",
+           short_prog_name);
     exit(1);
   }
 
-}  /*  end dummy_identify()  */
+} /*  end dummy_identify()  */
 
-void dummy_read(void) {
+void dummy_read() {
 
   MRI *mri;
 
-  if (fname == NULL)
+  if (fname == nullptr)
     usage(1);
 
   freopen("/dev/null", "w", stderr);
 
   mri = MRIreadInfo(fname);
 
-  if (mri == NULL) {
+  if (mri == nullptr) {
     printf("fail\n");
     printf("couldn't open or determine file type of %s\n", fname);
     exit(1);
@@ -189,6 +194,6 @@ void dummy_read(void) {
 
   MRIfree(&mri);
 
-}  /*  end dummy_read()  */
+} /*  end dummy_read()  */
 
 /*  EOF  */

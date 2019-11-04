@@ -32,43 +32,31 @@
 #include "version.h"
 #include "gw_utils.h"
 
-char * Progname;
+char *Progname;
 
 #define VERTEXCOUNT 6
 
-GWUTILS_VERTEX vertices[VERTEXCOUNT] = {
-  { 15,   0,   0 },
-  {-20,   0,   0 },
-  {  0,  25,   0 },
-  {  0, -30,   0 },
-  {  0,   0,  35 },
-  {  0,   0, -40 }
-};
+GWUTILS_VERTEX vertices[VERTEXCOUNT] = {{15, 0, 0},  {-20, 0, 0}, {0, 25, 0},
+                                        {0, -30, 0}, {0, 0, 35},  {0, 0, -40}};
 
 #define FACECOUNT 8
 
-GWUTILS_FACE faces[FACECOUNT] = {
-  {{ 0, 5, 2 }},
-  {{ 0, 2, 4 }},
-  {{ 4, 2, 1 }},
-  {{ 1, 2, 5 }},
-  {{ 0, 3, 5 }},
-  {{ 5, 3, 1 }},
-  {{ 1, 3, 4 }},
-  {{ 4, 0, 3 }}
-};
+GWUTILS_FACE faces[FACECOUNT] = {{{0, 5, 2}}, {{0, 2, 4}}, {{4, 2, 1}},
+                                 {{1, 2, 5}}, {{0, 3, 5}}, {{5, 3, 1}},
+                                 {{1, 3, 4}}, {{4, 0, 3}}};
 
 //-----------------------------------
 int main(int argc, char *argv[]) {
-//-----------------------------------
+  //-----------------------------------
   char msg[1000];
-  char * cp;
-  MRI_SURFACE * mris;
-  MHT * mht;
-  MRI * mri;
+  char *cp;
+  MRI_SURFACE *mris;
+  MHT *mht;
+  MRI *mri;
   int rslt;
 
-  if (getenv("SKIP_MRISHASH_TEST")) exit(77); // bypass
+  if (getenv("SKIP_MRISHASH_TEST"))
+    exit(77); // bypass
 
   Progname = argv[0];
   printf("------------------------------\n");
@@ -107,4 +95,3 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
-

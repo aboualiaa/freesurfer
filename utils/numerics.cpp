@@ -21,8 +21,8 @@
  *
  */
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <iostream>
 
 #ifdef HAVE_OPENMP
@@ -69,48 +69,44 @@ static double normal_01_cdf(double x);
 static double d_min(double x, double y);
 
 // this is needed by mrimorph to essentially subclass
-void (*user_call_func)(float[]) = NULL;
+void (*user_call_func)(float[]) = nullptr;
 
 static void ConvertFromFloatToVNLDouble(const float *iaSource,
-                                        vnl_vector< double > &oDestination,
-                                        const int icSourceAndDestination)
-{
+                                        vnl_vector<double> &oDestination,
+                                        const int icSourceAndDestination) {
   // indexing p at 1 because of NR legacy
   for (int nDest = 0; nDest < icSourceAndDestination; nDest++) {
-    oDestination(nDest) = static_cast< double >(iaSource[nDest + 1]);
+    oDestination(nDest) = static_cast<double>(iaSource[nDest + 1]);
   }
 }
 
-static void ConvertFromVNLDoubleToFloat(const vnl_vector< double > iSource,
+static void ConvertFromVNLDoubleToFloat(const vnl_vector<double> iSource,
                                         float *oaDestination,
-                                        const int icSourceAndDestination)
-{
+                                        const int icSourceAndDestination) {
   // indexing p at 1 because of NR legacy
   for (int i = 0; i < icSourceAndDestination; i++) {
-    oaDestination[i + 1] = static_cast< float >(iSource(i));
+    oaDestination[i + 1] = static_cast<float>(iSource(i));
   }
 }
 
 static void ConvertFromFloatToVNLDouble(float **iaSource,
-                                        vnl_matrix< double > &oDestination,
-                                        const int icSourceAndDestination)
-{
+                                        vnl_matrix<double> &oDestination,
+                                        const int icSourceAndDestination) {
   // indexing p at 1 because of NR legacy
   for (int row = 0; row < icSourceAndDestination; row++) {
     for (int col = 0; col < icSourceAndDestination; col++) {
-      oDestination(row, col) = static_cast< double >(iaSource[row + 1][col + 1]);
+      oDestination(row, col) = static_cast<double>(iaSource[row + 1][col + 1]);
     }
   }
 }
 
-static void ConvertFromVNLDoubleToFloat(const vnl_matrix< double > iSource,
+static void ConvertFromVNLDoubleToFloat(const vnl_matrix<double> iSource,
                                         float **oaDestination,
-                                        const int icSourceAndDestination)
-{
+                                        const int icSourceAndDestination) {
   // indexing p at 1 because of NR legacy
   for (int row = 0; row < icSourceAndDestination; row++) {
     for (int col = 0; col < icSourceAndDestination; col++) {
-      oaDestination[row + 1][col + 1] = static_cast< float >(iSource(row, col));
+      oaDestination[row + 1][col + 1] = static_cast<float>(iSource(row, col));
     }
   }
 }
@@ -145,8 +141,7 @@ static double d_huge() { return HUGE_VAL; }
  *
  * @return floating point round-off unit.
  */
-static double d_epsilon()
-{
+static double d_epsilon() {
   double r;
 
   r = 1.0;
@@ -232,8 +227,7 @@ static double d_epsilon()
  *   If X <= 0.0, or if overflow would occur, the program returns the
  *   value XINF, the largest representable floating point number.
  */
-static double gamma_log(double x)
-{
+static double gamma_log(double x) {
   double c[7] = {-1.910444077728E-03,
                  8.4171387781295E-04,
                  -5.952379913043012E-04,
@@ -247,55 +241,37 @@ static double gamma_log(double x)
   double d4 = 1.791759469228055000094023;
   double frtbig = 1.42E+09;
   int i;
-  double p1[8] = {4.945235359296727046734888,
-                  2.018112620856775083915565E+02,
-                  2.290838373831346393026739E+03,
-                  1.131967205903380828685045E+04,
-                  2.855724635671635335736389E+04,
-                  3.848496228443793359990269E+04,
-                  2.637748787624195437963534E+04,
-                  7.225813979700288197698961E+03};
-  double p2[8] = {4.974607845568932035012064,
-                  5.424138599891070494101986E+02,
-                  1.550693864978364947665077E+04,
-                  1.847932904445632425417223E+05,
-                  1.088204769468828767498470E+06,
-                  3.338152967987029735917223E+06,
-                  5.106661678927352456275255E+06,
-                  3.074109054850539556250927E+06};
-  double p4[8] = {1.474502166059939948905062E+04,
-                  2.426813369486704502836312E+06,
-                  1.214755574045093227939592E+08,
-                  2.663432449630976949898078E+09,
-                  2.940378956634553899906876E+010,
-                  1.702665737765398868392998E+011,
-                  4.926125793377430887588120E+011,
-                  5.606251856223951465078242E+011};
+  double p1[8] = {
+      4.945235359296727046734888,     2.018112620856775083915565E+02,
+      2.290838373831346393026739E+03, 1.131967205903380828685045E+04,
+      2.855724635671635335736389E+04, 3.848496228443793359990269E+04,
+      2.637748787624195437963534E+04, 7.225813979700288197698961E+03};
+  double p2[8] = {
+      4.974607845568932035012064,     5.424138599891070494101986E+02,
+      1.550693864978364947665077E+04, 1.847932904445632425417223E+05,
+      1.088204769468828767498470E+06, 3.338152967987029735917223E+06,
+      5.106661678927352456275255E+06, 3.074109054850539556250927E+06};
+  double p4[8] = {
+      1.474502166059939948905062E+04,  2.426813369486704502836312E+06,
+      1.214755574045093227939592E+08,  2.663432449630976949898078E+09,
+      2.940378956634553899906876E+010, 1.702665737765398868392998E+011,
+      4.926125793377430887588120E+011, 5.606251856223951465078242E+011};
   double pnt68 = 0.6796875;
-  double q1[8] = {6.748212550303777196073036E+01,
-                  1.113332393857199323513008E+03,
-                  7.738757056935398733233834E+03,
-                  2.763987074403340708898585E+04,
-                  5.499310206226157329794414E+04,
-                  6.161122180066002127833352E+04,
-                  3.635127591501940507276287E+04,
-                  8.785536302431013170870835E+03};
-  double q2[8] = {1.830328399370592604055942E+02,
-                  7.765049321445005871323047E+03,
-                  1.331903827966074194402448E+05,
-                  1.136705821321969608938755E+06,
-                  5.267964117437946917577538E+06,
-                  1.346701454311101692290052E+07,
-                  1.782736530353274213975932E+07,
-                  9.533095591844353613395747E+06};
-  double q4[8] = {2.690530175870899333379843E+03,
-                  6.393885654300092398984238E+05,
-                  4.135599930241388052042842E+07,
-                  1.120872109616147941376570E+09,
-                  1.488613728678813811542398E+010,
-                  1.016803586272438228077304E+011,
-                  3.417476345507377132798597E+011,
-                  4.463158187419713286462081E+011};
+  double q1[8] = {
+      6.748212550303777196073036E+01, 1.113332393857199323513008E+03,
+      7.738757056935398733233834E+03, 2.763987074403340708898585E+04,
+      5.499310206226157329794414E+04, 6.161122180066002127833352E+04,
+      3.635127591501940507276287E+04, 8.785536302431013170870835E+03};
+  double q2[8] = {
+      1.830328399370592604055942E+02, 7.765049321445005871323047E+03,
+      1.331903827966074194402448E+05, 1.136705821321969608938755E+06,
+      5.267964117437946917577538E+06, 1.346701454311101692290052E+07,
+      1.782736530353274213975932E+07, 9.533095591844353613395747E+06};
+  double q4[8] = {
+      2.690530175870899333379843E+03,  6.393885654300092398984238E+05,
+      4.135599930241388052042842E+07,  1.120872109616147941376570E+09,
+      1.488613728678813811542398E+010, 1.016803586272438228077304E+011,
+      3.417476345507377132798597E+011, 4.463158187419713286462081E+011};
   double res;
   double sqrtpi = 0.9189385332046727417803297;
   double xbig = 4.08E+36;
@@ -314,13 +290,11 @@ static double gamma_log(double x)
 
   if (x <= d_epsilon()) {
     res = -log(x);
-  }
-  else if (x <= 1.5) {
+  } else if (x <= 1.5) {
     if (x < pnt68) {
       corr = -log(x);
       xm1 = x;
-    }
-    else {
+    } else {
       corr = 0.0;
       xm1 = (x - 0.5) - 0.5;
     }
@@ -335,8 +309,7 @@ static double gamma_log(double x)
       }
 
       res = corr + (xm1 * (d1 + xm1 * (xnum / xden)));
-    }
-    else {
+    } else {
       xm2 = (x - 0.5) - 0.5;
       xden = 1.0;
       xnum = 0.0;
@@ -347,8 +320,7 @@ static double gamma_log(double x)
 
       res = corr + xm2 * (d2 + xm2 * (xnum / xden));
     }
-  }
-  else if (x <= 4.0) {
+  } else if (x <= 4.0) {
     xm2 = x - 2.0;
     xden = 1.0;
     xnum = 0.0;
@@ -358,8 +330,7 @@ static double gamma_log(double x)
     }
 
     res = xm2 * (d2 + xm2 * (xnum / xden));
-  }
-  else if (x <= 12.0) {
+  } else if (x <= 12.0) {
     xm4 = x - 4.0;
     xden = -1.0;
     xnum = 0.0;
@@ -369,8 +340,7 @@ static double gamma_log(double x)
     }
 
     res = d4 + xm4 * (xnum / xden);
-  }
-  else {
+  } else {
     res = 0.0;
 
     if (x <= frtbig) {
@@ -415,8 +385,7 @@ static double gamma_log(double x)
  * @param y Parameter that define the Beta function.  Must be greater than 0.
  * @return Value of the Beta function.
  */
-static double beta(double x, double y)
-{
+static double beta(double x, double y) {
   if (x <= 0.0 || y <= 0.0) {
     std::cout << "\n";
     std::cout << "BETA - Fatal error!\n";
@@ -462,8 +431,7 @@ static double beta(double x, double y)
  * @param x Argument of the function.  Normally, 0.0 <= x <= 1.0.
  * @return Value of the function.
  */
-float OpenBetaIncomplete(float a, float b, float x)
-{
+float OpenBetaIncomplete(float a, float b, float x) {
   double cx;
   int i;
   int it;
@@ -497,8 +465,7 @@ float OpenBetaIncomplete(float a, float b, float x)
   if (x <= 0.0) {
     value = 0.0;
     return value;
-  }
-  else if (1.0 <= x) {
+  } else if (1.0 <= x) {
     value = 1.0;
     return value;
   }
@@ -513,8 +480,7 @@ float OpenBetaIncomplete(float a, float b, float x)
     pp = b;
     qq = a;
     indx = true;
-  }
-  else {
+  } else {
     xx = x;
     cx = 1.0 - x;
     pp = a;
@@ -570,8 +536,7 @@ float OpenBetaIncomplete(float a, float b, float x)
       if (ns == 0) {
         rx = xx;
       }
-    }
-    else {
+    } else {
       temp = psq;
       psq = psq + 1.0;
     }
@@ -598,12 +563,10 @@ float OpenBetaIncomplete(float a, float b, float x)
  * @param y Quantity to compare.
  * @return Minimum of x and y.
  */
-static double d_min(double x, double y)
-{
+static double d_min(double x, double y) {
   if (y < x) {
     return y;
-  }
-  else {
+  } else {
     return x;
   }
 }
@@ -624,8 +587,7 @@ static double d_min(double x, double y)
  * @param X The argument of the CDF.
  * @return The value of the CDF.
  */
-double normal_01_cdf(double x)
-{
+double normal_01_cdf(double x) {
   double a1 = 0.398942280444;
   double a2 = 0.399903438504;
   double a3 = 5.75885480458;
@@ -654,22 +616,24 @@ double normal_01_cdf(double x)
   if (fabs(x) <= 1.28) {
     y = 0.5 * x * x;
 
-    q = 0.5 - fabs(x) * (a1 - a2 * y / (y + a3 - a4 / (y + a5 + a6 / (y + a7))));
+    q = 0.5 -
+        fabs(x) * (a1 - a2 * y / (y + a3 - a4 / (y + a5 + a6 / (y + a7))));
     //
     //  1.28 < |X| <= 12.7
     //
-  }
-  else if (fabs(x) <= 12.7) {
+  } else if (fabs(x) <= 12.7) {
     y = 0.5 * x * x;
 
     q = exp(-y) * b0 /
         (fabs(x) - b1 +
-         b2 / (fabs(x) + b3 + b4 / (fabs(x) - b5 + b6 / (fabs(x) + b7 - b8 / (fabs(x) + b9 + b10 / (fabs(x) + b11))))));
+         b2 / (fabs(x) + b3 +
+               b4 / (fabs(x) - b5 +
+                     b6 / (fabs(x) + b7 -
+                           b8 / (fabs(x) + b9 + b10 / (fabs(x) + b11))))));
     //
     //  12.7 < |X|
     //
-  }
-  else {
+  } else {
     q = 0.0;
   }
   //
@@ -677,8 +641,7 @@ double normal_01_cdf(double x)
   //
   if (x < 0.0) {
     cdf = q;
-  }
-  else {
+  } else {
     cdf = 1.0 - q;
   }
 
@@ -714,8 +677,7 @@ double normal_01_cdf(double x)
  * GAMMA_INC is returned as 0.
  * @return The value of the function.
  */
-float OpenGammaIncomplete(float p, float x)
-{
+float OpenGammaIncomplete(float p, float x) {
   double a;
   double arg;
   double b;
@@ -786,8 +748,7 @@ float OpenGammaIncomplete(float p, float x)
 
     if (exp_arg_min <= arg) {
       value = exp(arg);
-    }
-    else {
+    } else {
       value = 0.0;
     }
   }
@@ -820,8 +781,7 @@ float OpenGammaIncomplete(float p, float x)
 
           if (exp_arg_min <= arg) {
             value = 1.0 - exp(arg);
-          }
-          else {
+          } else {
             value = 1.0;
           }
 
@@ -848,21 +808,16 @@ float OpenGammaIncomplete(float p, float x)
   return value;
 }
 
-int OpenDFPMin(float p[],
-                          int n,
-                          float iTolerance,
-                          int *oIterations,
-                          float *oFinalFunctionReturn,
-                          float (*iFunction)(float[]),
-                          void (*iDerivativeFunction)(float[], float[]),
-                          void (*iStepFunction)(int, float, void *, float *),
-                          void *iStepFunctionParams,
-                          void (*iUserCallBackFunction)(float[]))
-{
+int OpenDFPMin(float p[], int n, float iTolerance, int *oIterations,
+               float *oFinalFunctionReturn, float (*iFunction)(float[]),
+               void (*iDerivativeFunction)(float[], float[]),
+               void (*iStepFunction)(int, float, void *, float *),
+               void *iStepFunctionParams,
+               void (*iUserCallBackFunction)(float[])) {
   int returnCode;
   fs_cost_function costFunction(iFunction, iDerivativeFunction, n);
 
-  vnl_vector< double > finalParameters(n);
+  vnl_vector<double> finalParameters(n);
   ConvertFromFloatToVNLDouble(p, finalParameters, n);
 
   fs_lbfgs minimizer(costFunction);
@@ -885,7 +840,7 @@ int OpenDFPMin(float p[],
   // I had to set the gradient convergence tolerance or else
   //       it refused to converge on the second test -- this  impacts the
   //       convergence!
-  minimizer.set_g_tolerance(static_cast< double >(iTolerance));
+  minimizer.set_g_tolerance(static_cast<double>(iTolerance));
 
   // keep iterating if the error isn't significantly better
   bool isSuccess = true;
@@ -906,8 +861,7 @@ int OpenDFPMin(float p[],
     *oFinalFunctionReturn = minimizer.get_end_error();
     ConvertFromVNLDoubleToFloat(finalParameters, p, n);
     returnCode = 0;
-  }
-  else {
+  } else {
     returnCode = minimizer.get_failure_code();
 
     if (returnCode == vnl_nonlinear_minimizer::ERROR_FAILURE) {
@@ -915,15 +869,15 @@ int OpenDFPMin(float p[],
       *oFinalFunctionReturn = minimizer.get_end_error();
 
       ConvertFromVNLDoubleToFloat(finalParameters, p, n);
-    }
-    else if (returnCode == vnl_nonlinear_minimizer::ERROR_DODGY_INPUT) {
+    } else if (returnCode == vnl_nonlinear_minimizer::ERROR_DODGY_INPUT) {
       ErrorExit(ERROR_BADPARM, "quasi-Newton minimization (lbfsg) dodgy input");
-    }
-    else if (returnCode == vnl_nonlinear_minimizer::FAILED_TOO_MANY_ITERATIONS ||
-             returnCode == vnl_nonlinear_minimizer::FAILED_FTOL_TOO_SMALL ||
-             returnCode == vnl_nonlinear_minimizer::FAILED_XTOL_TOO_SMALL ||
-             returnCode == vnl_nonlinear_minimizer::FAILED_GTOL_TOO_SMALL) {
-      ErrorExit(ERROR_BADPARM, "quasi-Newton minimization (lbfsg) tolerances too small");
+    } else if (returnCode ==
+                   vnl_nonlinear_minimizer::FAILED_TOO_MANY_ITERATIONS ||
+               returnCode == vnl_nonlinear_minimizer::FAILED_FTOL_TOO_SMALL ||
+               returnCode == vnl_nonlinear_minimizer::FAILED_XTOL_TOO_SMALL ||
+               returnCode == vnl_nonlinear_minimizer::FAILED_GTOL_TOO_SMALL) {
+      ErrorExit(ERROR_BADPARM,
+                "quasi-Newton minimization (lbfsg) tolerances too small");
     }
   }
   return (returnCode);
@@ -932,11 +886,11 @@ int OpenDFPMin(float p[],
 /**
  * Provides the eigen values and vectors for symmetric matrices.
  */
-int OpenEigenSystem(float *iaData, int icData, float *oEigenValues, float *oEigenVectors)
-{
-  vnl_matrix< float > vnlMatrix(iaData, icData, icData);
+int OpenEigenSystem(float *iaData, int icData, float *oEigenValues,
+                    float *oEigenVectors) {
+  vnl_matrix<float> vnlMatrix(iaData, icData, icData);
 
-  vnl_symmetric_eigensystem< float > eigenSystem(vnlMatrix);
+  vnl_symmetric_eigensystem<float> eigenSystem(vnlMatrix);
 
   eigenSystem.V.copy_out(oEigenVectors);
   for (int i = 0; i < icData; i++) {
@@ -950,8 +904,8 @@ int OpenEigenSystem(float *iaData, int icData, float *oEigenValues, float *oEige
 /**
  * Provides the eigen values and vectors for symmetric matrices.
  */
-int OpenNonSymmetricEigenSystem(float *iaData, int icData, float *oEigenValues, float *oEigenVectors)
-{
+int OpenNonSymmetricEigenSystem(float *iaData, int icData, float *oEigenValues,
+                                float *oEigenVectors) {
   // convert the data into a double
   double data[icData * icData];
   for (int row = 0; row < icData; row++) {
@@ -961,7 +915,7 @@ int OpenNonSymmetricEigenSystem(float *iaData, int icData, float *oEigenValues, 
     }
   }
 
-  vnl_matrix< double > vnlMatrix(data, icData, icData);
+  vnl_matrix<double> vnlMatrix(data, icData, icData);
 
   // this does the actual eigensystem calculation
   vnl_real_eigensystem eigenSystem(vnlMatrix);
@@ -982,25 +936,20 @@ int OpenNonSymmetricEigenSystem(float *iaData, int icData, float *oEigenValues, 
   return NO_ERROR;
 }
 
-void OpenPowell(float iaParams[],
-                           float **ioInitialDirection,
-                           int icParams,
-                           float iTolerance,
-                           int *oIterations,
-                           float *oFinalFunctionReturn,
-                           float (*iFunction)(float[]))
-{
+void OpenPowell(float iaParams[], float **ioInitialDirection, int icParams,
+                float iTolerance, int *oIterations, float *oFinalFunctionReturn,
+                float (*iFunction)(float[])) {
   fs_cost_function costFunction(iFunction);
   fs_powell minimizer(&costFunction);
 
-  minimizer.set_x_tolerance(static_cast< double >(iTolerance));
+  minimizer.set_x_tolerance(static_cast<double>(iTolerance));
 
-  vnl_vector< double > finalParameters(icParams);
+  vnl_vector<double> finalParameters(icParams);
   ConvertFromFloatToVNLDouble(iaParams, finalParameters, icParams);
 
-  vnl_matrix< double > initialDirection(icParams, icParams, vnl_matrix_identity);
+  vnl_matrix<double> initialDirection(icParams, icParams, vnl_matrix_identity);
 
-  if (ioInitialDirection != NULL) {
+  if (ioInitialDirection != nullptr) {
     ConvertFromFloatToVNLDouble(ioInitialDirection, initialDirection, icParams);
   }
 
@@ -1009,13 +958,13 @@ void OpenPowell(float iaParams[],
   // exit if failure
   if (returnCode == vnl_nonlinear_minimizer::FAILED_TOO_MANY_ITERATIONS) {
     ErrorExit(ERROR_BADPARM, "powell exceeding maximum iterations.");
-  }
-  else if (returnCode == fs_powell::ERROR_FAILURE || returnCode == fs_powell::ERROR_DODGY_INPUT ||
-           returnCode == fs_powell::FAILED_FTOL_TOO_SMALL || returnCode == fs_powell::FAILED_XTOL_TOO_SMALL ||
-           returnCode == fs_powell::FAILED_GTOL_TOO_SMALL) {
+  } else if (returnCode == fs_powell::ERROR_FAILURE ||
+             returnCode == fs_powell::ERROR_DODGY_INPUT ||
+             returnCode == fs_powell::FAILED_FTOL_TOO_SMALL ||
+             returnCode == fs_powell::FAILED_XTOL_TOO_SMALL ||
+             returnCode == fs_powell::FAILED_GTOL_TOO_SMALL) {
     ErrorExit(ERROR_BADPARM, "powell error.");
-  }
-  else {
+  } else {
     // success
     *oIterations = minimizer.get_num_iterations();
     *oFinalFunctionReturn = minimizer.get_end_error();
@@ -1039,31 +988,25 @@ void OpenPowell(float iaParams[],
   It would be better to have more options on this function.
   Note: each "iteration" is a loop thru a 1D min for each parameter.
   ------------------------------------------------------------------------*/
-int OpenPowell2(float iaParams[],
-                           float **ioInitialDirection,
-                           int icParams,
-                           float iTolerance,
-                           float iLinMinTol,
-                           int MaxIterations,
-                           int *oIterations,
-                           float *oFinalFunctionReturn,
-                           float (*iFunction)(float[]))
-{
+int OpenPowell2(float iaParams[], float **ioInitialDirection, int icParams,
+                float iTolerance, float iLinMinTol, int MaxIterations,
+                int *oIterations, float *oFinalFunctionReturn,
+                float (*iFunction)(float[])) {
   fs_cost_function costFunction(iFunction);
   fs_powell minimizer(&costFunction);
 
-  vnl_vector< double > finalParameters(icParams);
+  vnl_vector<double> finalParameters(icParams);
   ConvertFromFloatToVNLDouble(iaParams, finalParameters, icParams);
 
-  vnl_matrix< double > initialDirection(icParams, icParams, vnl_matrix_identity);
+  vnl_matrix<double> initialDirection(icParams, icParams, vnl_matrix_identity);
 
-  if (ioInitialDirection != NULL) {
+  if (ioInitialDirection != nullptr) {
     ConvertFromFloatToVNLDouble(ioInitialDirection, initialDirection, icParams);
   }
 
   if (Gdiag_no > 0) {
-    minimizer.set_trace(1);
-    minimizer.set_verbose(1);
+    minimizer.set_trace(true);
+    minimizer.set_verbose(true);
   }
   minimizer.set_linmin_xtol(iLinMinTol);
   // minimizer.set_x_tolerance(iLinMinTol);
@@ -1081,10 +1024,11 @@ int OpenPowell2(float iaParams[],
   if (returnCode == vnl_nonlinear_minimizer::FAILED_TOO_MANY_ITERATIONS) {
     printf("powell exceeded maximum iterations\n");
     return (1);
-  }
-  else if (returnCode == fs_powell::ERROR_FAILURE || returnCode == fs_powell::ERROR_DODGY_INPUT ||
-           returnCode == fs_powell::FAILED_FTOL_TOO_SMALL || returnCode == fs_powell::FAILED_XTOL_TOO_SMALL ||
-           returnCode == fs_powell::FAILED_GTOL_TOO_SMALL) {
+  } else if (returnCode == fs_powell::ERROR_FAILURE ||
+             returnCode == fs_powell::ERROR_DODGY_INPUT ||
+             returnCode == fs_powell::FAILED_FTOL_TOO_SMALL ||
+             returnCode == fs_powell::FAILED_XTOL_TOO_SMALL ||
+             returnCode == fs_powell::FAILED_GTOL_TOO_SMALL) {
     printf("powell error %d\n", returnCode);
     return (1);
   }
@@ -1093,12 +1037,11 @@ int OpenPowell2(float iaParams[],
   return (0);
 }
 
-int OpenLUMatrixInverse(MATRIX *iMatrix, MATRIX *oInverse)
-{
+int OpenLUMatrixInverse(MATRIX *iMatrix, MATRIX *oInverse) {
   // NO_ERROR from error.h
   int errorCode = NO_ERROR;
 
-  vnl_matrix< float > vnlMatrix(iMatrix->data, iMatrix->rows, iMatrix->cols);
+  vnl_matrix<float> vnlMatrix(iMatrix->data, iMatrix->rows, iMatrix->cols);
 
   unsigned int r = vnlMatrix.rows();
   if (r <= 4 && r == vnlMatrix.cols()) {
@@ -1107,23 +1050,20 @@ int OpenLUMatrixInverse(MATRIX *iMatrix, MATRIX *oInverse)
         errorCode = ERROR_BADPARM;
       else
         oInverse->data[0] = 1.0 / vnlMatrix(0, 0);
-    }
-    else if (r == 2) {
-      vnl_matrix_fixed< float, 2, 2 > m(vnlMatrix);
+    } else if (r == 2) {
+      vnl_matrix_fixed<float, 2, 2> m(vnlMatrix);
       if (vnl_det(m) == 0.0)
         errorCode = ERROR_BADPARM;
       else
         vnl_inverse(m).copy_out(oInverse->data);
-    }
-    else if (r == 3) {
-      vnl_matrix_fixed< float, 3, 3 > m(vnlMatrix);
+    } else if (r == 3) {
+      vnl_matrix_fixed<float, 3, 3> m(vnlMatrix);
       if (vnl_det(m) == 0.0)
         errorCode = ERROR_BADPARM;
       else
         vnl_inverse(m).copy_out(oInverse->data);
-    }
-    else {
-      vnl_matrix_fixed< float, 4, 4 > m(vnlMatrix);
+    } else {
+      vnl_matrix_fixed<float, 4, 4> m(vnlMatrix);
       if (vnl_det(m) == 0.0)
         errorCode = ERROR_BADPARM;
       else
@@ -1131,18 +1071,17 @@ int OpenLUMatrixInverse(MATRIX *iMatrix, MATRIX *oInverse)
     }
   }
 
-  else  // > 4x4 matrices
+  else // > 4x4 matrices
   {
     // the svd matrix inversion failed a test case, whereas qr passes, so we're
     // going to use the qr generated inverse
-    vnl_qr< float > vnlMatrixInverter(vnlMatrix);
+    vnl_qr<float> vnlMatrixInverter(vnlMatrix);
 
     // determinant of 0 means that it's singular
     if (vnlMatrixInverter.determinant() != 0.0) {
-      vnl_matrix< float > inverse = vnlMatrixInverter.inverse();
+      vnl_matrix<float> inverse = vnlMatrixInverter.inverse();
       inverse.copy_out(oInverse->data);
-    }
-    else {
+    } else {
       errorCode = ERROR_BADPARM;
     }
   }
@@ -1155,22 +1094,21 @@ int OpenLUMatrixInverse(MATRIX *iMatrix, MATRIX *oInverse)
  * @param iMatrix
  * @return Returns 0 if the matrix is non-square.
  */
-float OpenMatrixDeterminant(MATRIX *iMatrix)
-{
+float OpenMatrixDeterminant(MATRIX *iMatrix) {
   float determinant = 0.0;
 
   if (iMatrix->rows == iMatrix->cols) {
-    vnl_matrix< float > vnlMatrix(iMatrix->data, iMatrix->rows, iMatrix->cols);
+    vnl_matrix<float> vnlMatrix(iMatrix->data, iMatrix->rows, iMatrix->cols);
     if (vnlMatrix.rows() == 1)
       determinant = vnlMatrix(0, 0);
     else if (vnlMatrix.rows() == 2)
-      determinant = vnl_det(vnl_matrix_fixed< float, 2, 2 >(vnlMatrix));
+      determinant = vnl_det(vnl_matrix_fixed<float, 2, 2>(vnlMatrix));
     else if (vnlMatrix.rows() == 3)
-      determinant = vnl_det(vnl_matrix_fixed< float, 3, 3 >(vnlMatrix));
+      determinant = vnl_det(vnl_matrix_fixed<float, 3, 3>(vnlMatrix));
     else if (vnlMatrix.rows() == 4)
-      determinant = vnl_det(vnl_matrix_fixed< float, 4, 4 >(vnlMatrix));
+      determinant = vnl_det(vnl_matrix_fixed<float, 4, 4>(vnlMatrix));
     else
-      determinant = vnl_determinant< float >(vnlMatrix);
+      determinant = vnl_determinant<float>(vnlMatrix);
   }
 
   return determinant;
@@ -1182,24 +1120,21 @@ float OpenMatrixDeterminant(MATRIX *iMatrix)
  * @param oW Ouput diagonal vector.
  * @param oV Ouput V matrix.
  */
-int OpenSvdcmp(MATRIX *ioA, VECTOR *oW, MATRIX *oV)
-{
+int OpenSvdcmp(MATRIX *ioA, VECTOR *oW, MATRIX *oV) {
   int errorCode = NO_ERROR;
 
   if (ioA->rows >= ioA->cols) {
-    vnl_matrix< float > vnlX(ioA->data, ioA->rows, ioA->cols);
-    vnl_svd< float > svdMatrix(vnlX);
+    vnl_matrix<float> vnlX(ioA->data, ioA->rows, ioA->cols);
+    vnl_svd<float> svdMatrix(vnlX);
 
     if (svdMatrix.valid()) {
       svdMatrix.U().copy_out(ioA->data);
       svdMatrix.W().diagonal().copy_out(oW->data);
       svdMatrix.V().copy_out(oV->data);
-    }
-    else {
+    } else {
       errorCode = ERROR_BADPARM;
     }
-  }
-  else {
+  } else {
     errorCode = ERROR_BADPARM;
   }
 
@@ -1213,16 +1148,18 @@ int OpenSvdcmp(MATRIX *ioA, VECTOR *oW, MATRIX *oV)
  * different seed.  The behaviour of this function is meant to mimic that of
  * the ran1 algorithm in numerical recipes.
  */
-float OpenRan1(long *iSeed)
-{
+float OpenRan1(long *iSeed) {
 
 #ifdef HAVE_OPENMP
   if (omp_get_thread_num() != 0) {
-    fprintf(stderr, "%s:%d OpenRan1 called from non-0 thread but this is not conducive to reproducible behavior, nor is this code thread-safe\n", __FILE__, __LINE__);
+    fprintf(stderr,
+            "%s:%d OpenRan1 called from non-0 thread but this is not conducive "
+            "to reproducible behavior, nor is this code thread-safe\n",
+            __FILE__, __LINE__);
     exit(1);
   }
 #endif
-  
+
   static const double MIN = 0.0;
   static const double MAX = 1.0;
 
@@ -1244,11 +1181,11 @@ float OpenRan1(long *iSeed)
  * @param iYStartDerivative The derivative at the beginning of the function.
  * @param iYEndDerivative The derivative at the last point of the function.
  */
-void OpenSpline(
-    float iaX[], float iaY[], int icXY, float iYStartDerivative, float iYEndDerivative, float oaYSecondDerivatives[])
-{
+void OpenSpline(float iaX[], float iaY[], int icXY, float iYStartDerivative,
+                float iYEndDerivative, float oaYSecondDerivatives[]) {
   float *secondDerivatives = SplineCubicSet(
-      icXY, iaX, iaY, SPLINE_USE_FIRST_DERIVATIVE, iYStartDerivative, SPLINE_USE_FIRST_DERIVATIVE, iYEndDerivative);
+      icXY, iaX, iaY, SPLINE_USE_FIRST_DERIVATIVE, iYStartDerivative,
+      SPLINE_USE_FIRST_DERIVATIVE, iYEndDerivative);
 
   for (int i = 0; i < icXY; i++) {
     oaYSecondDerivatives[i] = secondDerivatives[i];
@@ -1262,13 +1199,14 @@ void OpenSpline(
  * interpolated as the closest edge point, rather than the usual extrapolated
  * point.
  */
-void OpenSplint(
-    float iaX[], float iaY[], float iaYSecondDerivatives[], int icYSecondDerivatives, float iX, float *oY)
-{
+void OpenSplint(float iaX[], float iaY[], float iaYSecondDerivatives[],
+                int icYSecondDerivatives, float iX, float *oY) {
   float firstDerivative = 0.0;
   float secondDerivative = 0.0;
 
-  *oY = SplineCubicValue(icYSecondDerivatives, iaX, iX, iaY, iaYSecondDerivatives, &firstDerivative, &secondDerivative);
+  *oY =
+      SplineCubicValue(icYSecondDerivatives, iaX, iX, iaY, iaYSecondDerivatives,
+                       &firstDerivative, &secondDerivative);
 }
 
 /**
@@ -1374,8 +1312,8 @@ void OpenSplint(
  *
  * @return The second derivatives of the cubic spline, size n.
  */
-float *SplineCubicSet(int n, float t[], float y[], int ibcbeg, float ybcbeg, int ibcend, float ybcend)
-{
+float *SplineCubicSet(int n, float t[], float y[], int ibcbeg, float ybcbeg,
+                      int ibcend, float ybcend) {
   float *a;
   float *b;
   int i;
@@ -1411,18 +1349,15 @@ float *SplineCubicSet(int n, float t[], float y[], int ibcbeg, float ybcbeg, int
     b[0] = 0.0;
     a[1 + 0 * 3] = 1.0;
     a[0 + 1 * 3] = -1.0;
-  }
-  else if (ibcbeg == SPLINE_USE_FIRST_DERIVATIVE) {
+  } else if (ibcbeg == SPLINE_USE_FIRST_DERIVATIVE) {
     b[0] = (y[1] - y[0]) / (t[1] - t[0]) - ybcbeg;
     a[1 + 0 * 3] = (t[1] - t[0]) / 3.0;
     a[0 + 1 * 3] = (t[1] - t[0]) / 6.0;
-  }
-  else if (ibcbeg == SPLINE_USE_SECOND_DERIVATIVE) {
+  } else if (ibcbeg == SPLINE_USE_SECOND_DERIVATIVE) {
     b[0] = ybcbeg;
     a[1 + 0 * 3] = 1.0;
     a[0 + 1 * 3] = 0.0;
-  }
-  else {
+  } else {
     std::cout << "\n";
     std::cout << "SPLINE_CUBIC_SET - Fatal error!\n";
     std::cout << "  IBCBEG must be 0, 1 or 2.\n";
@@ -1435,7 +1370,8 @@ float *SplineCubicSet(int n, float t[], float y[], int ibcbeg, float ybcbeg, int
   //  Set up the intermediate equations.
   //
   for (i = 1; i < n - 1; i++) {
-    b[i] = (y[i + 1] - y[i]) / (t[i + 1] - t[i]) - (y[i] - y[i - 1]) / (t[i] - t[i - 1]);
+    b[i] = (y[i + 1] - y[i]) / (t[i + 1] - t[i]) -
+           (y[i] - y[i - 1]) / (t[i] - t[i - 1]);
     a[2 + (i - 1) * 3] = (t[i] - t[i - 1]) / 6.0;
     a[1 + i * 3] = (t[i + 1] - t[i - 1]) / 3.0;
     a[0 + (i + 1) * 3] = (t[i + 1] - t[i]) / 6.0;
@@ -1447,18 +1383,15 @@ float *SplineCubicSet(int n, float t[], float y[], int ibcbeg, float ybcbeg, int
     b[n - 1] = 0.0;
     a[2 + (n - 2) * 3] = -1.0;
     a[1 + (n - 1) * 3] = 1.0;
-  }
-  else if (ibcend == SPLINE_USE_FIRST_DERIVATIVE) {
+  } else if (ibcend == SPLINE_USE_FIRST_DERIVATIVE) {
     b[n - 1] = ybcend - (y[n - 1] - y[n - 2]) / (t[n - 1] - t[n - 2]);
     a[2 + (n - 2) * 3] = (t[n - 1] - t[n - 2]) / 6.0;
     a[1 + (n - 1) * 3] = (t[n - 1] - t[n - 2]) / 3.0;
-  }
-  else if (ibcend == SPLINE_USE_SECOND_DERIVATIVE) {
+  } else if (ibcend == SPLINE_USE_SECOND_DERIVATIVE) {
     b[n - 1] = ybcend;
     a[2 + (n - 2) * 3] = 0.0;
     a[1 + (n - 1) * 3] = 1.0;
-  }
-  else {
+  } else {
     std::cout << "\n";
     std::cout << "SPLINE_CUBIC_SET - Fatal error!\n";
     std::cout << "  IBCEND must be 0, 1 or 2.\n";
@@ -1475,8 +1408,7 @@ float *SplineCubicSet(int n, float t[], float y[], int ibcbeg, float ybcbeg, int
 
     ypp[0] = 0.0;
     ypp[1] = 0.0;
-  }
-  else {
+  } else {
     ypp = d3_np_fs(n, a, b);
 
     if (!ypp) {
@@ -1529,22 +1461,20 @@ float *SplineCubicSet(int n, float t[], float y[], int ibcbeg, float ybcbeg, int
  * @param yppval The second derivative of the spline at TVAL.
  * @return The value of the spline at TVAL.
  */
-float SplineCubicValue(int n, float t[], float tval, float y[], float ypp[], float *ypval, float *yppval)
-{
+float SplineCubicValue(int n, float t[], float tval, float y[], float ypp[],
+                       float *ypval, float *yppval) {
   float yval;
   int ival = n - 2;
 
   if (tval <= t[0]) {
     // enforce constant function outside of domain
     yval = y[0];
-  }
-  else if (tval >= t[n - 1]) {
+  } else if (tval >= t[n - 1]) {
     // enforce constant function outside of domain
     yval = y[n - 1];
     *ypval = 0.0;
     *ypval = 0.0;
-  }
-  else {
+  } else {
     // we're not outside of the range, so interpolate
     for (int i = 0; i < n - 1; i++) {
       if (tval < t[i + 1]) {
@@ -1558,10 +1488,14 @@ float SplineCubicValue(int n, float t[], float tval, float y[], float ypp[], flo
     float dt = tval - t[ival];
     float h = t[ival + 1] - t[ival];
 
-    yval = y[ival] + dt * ((y[ival + 1] - y[ival]) / h - (ypp[ival + 1] / 6.0 + ypp[ival] / 3.0) * h +
-                           dt * (0.5 * ypp[ival] + dt * ((ypp[ival + 1] - ypp[ival]) / (6.0 * h))));
+    yval =
+        y[ival] + dt * ((y[ival + 1] - y[ival]) / h -
+                        (ypp[ival + 1] / 6.0 + ypp[ival] / 3.0) * h +
+                        dt * (0.5 * ypp[ival] +
+                              dt * ((ypp[ival + 1] - ypp[ival]) / (6.0 * h))));
 
-    *ypval = (y[ival + 1] - y[ival]) / h - (ypp[ival + 1] / 6.0 + ypp[ival] / 3.0) * h +
+    *ypval = (y[ival + 1] - y[ival]) / h -
+             (ypp[ival + 1] / 6.0 + ypp[ival] / 3.0) * h +
              dt * (ypp[ival] + dt * (0.5 * (ypp[ival + 1] - ypp[ival]) / h));
 
     *yppval = ypp[ival] + dt * (ypp[ival + 1] - ypp[ival]) / h;
@@ -1605,8 +1539,7 @@ float SplineCubicValue(int n, float t[], float tval, float y[], float ypp[], flo
  * This is NULL if there was an error
  * because one of the diagonal entries was zero.  Size n.
  */
-float *d3_np_fs(int n, float a[], float b[])
-{
+float *d3_np_fs(int n, float a[], float b[]) {
   int i;
   float *x;
   float xmult;
@@ -1615,7 +1548,7 @@ float *d3_np_fs(int n, float a[], float b[])
   //
   for (i = 0; i < n; i++) {
     if (a[1 + i * 3] == 0.0) {
-      return NULL;
+      return nullptr;
     }
   }
 
@@ -1648,7 +1581,8 @@ float *vector(long nl, long nh)
   float *v;
 
   v = (float *)malloc((size_t)((nh - nl + 1 + NR_END) * sizeof(float)));
-  if (!v) ErrorExit(ERROR_NOMEMORY, "could not allocate vector(%ld, %ld)", nl, nh);
+  if (!v)
+    ErrorExit(ERROR_NOMEMORY, "could not allocate vector(%ld, %ld)", nl, nh);
   return v - nl + NR_END;
 }
 
@@ -1660,24 +1594,31 @@ float **matrix(long nrl, long nrh, long ncl, long nch)
 
   /* allocate pointers to rows */
   m = (float **)malloc((size_t)((nrow + NR_END) * sizeof(float *)));
-  if (!m) ErrorExit(ERROR_NOMEMORY, "could not allocate matrix(%ld, %ld)", nrow, ncol);
+  if (!m)
+    ErrorExit(ERROR_NOMEMORY, "could not allocate matrix(%ld, %ld)", nrow,
+              ncol);
   m += NR_END;
   m -= nrl;
 
   /* allocate rows and set pointers to them */
   m[nrl] = (float *)malloc((size_t)((nrow * ncol + NR_END) * sizeof(float)));
-  if (!m[nrl]) ErrorExit(ERROR_NOMEMORY, "could not allocate matrix(%ld, %ld) array", nrow, ncol);
+  if (!m[nrl])
+    ErrorExit(ERROR_NOMEMORY, "could not allocate matrix(%ld, %ld) array", nrow,
+              ncol);
   m[nrl] += NR_END;
   m[nrl] -= ncl;
 
-  for (i = nrl + 1; i <= nrh; i++) m[i] = m[i - 1] + ncol;
+  for (i = nrl + 1; i <= nrh; i++)
+    m[i] = m[i - 1] + ncol;
 
   /* return pointer to array of pointers to rows */
   return m;
 }
 
 void free_vector(float *v, long nl, long nh)
-/* free a float vector allocated with vector() */ { free((FREE_ARG)(v + nl - NR_END)); }
+/* free a float vector allocated with vector() */ {
+  free((FREE_ARG)(v + nl - NR_END));
+}
 
 void free_matrix(float **m, long nrl, long nrh, long ncl, long nch)
 /* free a float matrix allocated by matrix() */
@@ -1688,17 +1629,18 @@ void free_matrix(float **m, long nrl, long nrh, long ncl, long nch)
 
 /*  AUTHOR : Martin Reuter
     CREATED: 12/28/2009
-    Computes Denman and Beavers square root iteration up to an epsilon in imax steps
+    Computes Denman and Beavers square root iteration up to an epsilon in imax
+   steps
 
     Input: 4x4 affine transformation matrix M
     Algorithm computes sqrt of 3x3 part and then adjusts the translation part
     Output: 4x4 sqrt of M
 */
-vnl_matrix_fixed< double, 4, 4 > MatrixSqrt(const vnl_matrix_fixed< double, 4, 4 > &m)
-{
+vnl_matrix_fixed<double, 4, 4>
+MatrixSqrt(const vnl_matrix_fixed<double, 4, 4> &m) {
   // assert(m.rows() == 4 && m.cols() == 4);
 
-  vnl_matrix_fixed< double, 3, 3 > R;  // = m.extract(3,3,0,0);
+  vnl_matrix_fixed<double, 3, 3> R; // = m.extract(3,3,0,0);
   for (int rr = 0; rr < 3; rr++)
     for (int cc = 0; cc < 3; cc++) {
       R[rr][cc] = m[rr][cc];
@@ -1707,15 +1649,16 @@ vnl_matrix_fixed< double, 4, 4 > MatrixSqrt(const vnl_matrix_fixed< double, 4, 4
   // Denman and Beavers square root iteration
 
   int imax = 100;
-  double eps = 0.00001;  // important to be small to guarantee symmetry,
-                         // but even adding two zeros did not show differences in tests
+  double eps =
+      0.00001; // important to be small to guarantee symmetry,
+               // but even adding two zeros did not show differences in tests
   double err = 1000;
   // cout << "using square root iteartion (" << imax << ")"<< endl;
-  vnl_matrix_fixed< double, 3, 3 > Yn(R);
-  vnl_matrix_fixed< double, 3, 3 > Zn;
+  vnl_matrix_fixed<double, 3, 3> Yn(R);
+  vnl_matrix_fixed<double, 3, 3> Zn;
   Zn.set_identity();
-  vnl_matrix_fixed< double, 3, 3 > Yni, Zni;
-  vnl_matrix_fixed< double, 3, 3 > Ysq;
+  vnl_matrix_fixed<double, 3, 3> Yni, Zni;
+  vnl_matrix_fixed<double, 3, 3> Ysq;
 
   int count = 0;
   while (count < imax && err > eps) {
@@ -1739,7 +1682,8 @@ vnl_matrix_fixed< double, 4, 4 > MatrixSqrt(const vnl_matrix_fixed< double, 4, 4
   }
 
   if (count > imax) {
-    std::cerr << "Matrix Sqrt did not converge in " << imax << " steps!" << std::endl;
+    std::cerr << "Matrix Sqrt did not converge in " << imax << " steps!"
+              << std::endl;
     std::cerr << "   ERROR: " << err << std::endl;
     // std::assert(err <= eps);
     exit(1);
@@ -1747,21 +1691,22 @@ vnl_matrix_fixed< double, 4, 4 > MatrixSqrt(const vnl_matrix_fixed< double, 4, 4
 
   // compute new T
   // Rh1 = R + I
-  vnl_matrix_fixed< double, 3, 3 > Rh1(Yn);
+  vnl_matrix_fixed<double, 3, 3> Rh1(Yn);
   Rh1[0][0] += 1;
   Rh1[1][1] += 1;
   Rh1[2][2] += 1;
 
-  vnl_vector_fixed< double, 3 > T;
+  vnl_vector_fixed<double, 3> T;
   T[0] = m[0][3];
   T[1] = m[1][3];
   T[2] = m[2][3];
 
   // solve T = Rh1 * Th   <=>   Th = Rh1^-1 * T
-  vnl_vector_fixed< double, 3 > Th = vnl_inverse(Rh1) * T;  // vnl_svd<double>(Rh1).solve(T);
+  vnl_vector_fixed<double, 3> Th =
+      vnl_inverse(Rh1) * T; // vnl_svd<double>(Rh1).solve(T);
 
   // put everything together:
-  vnl_matrix_fixed< double, 4, 4 > msqrt;
+  vnl_matrix_fixed<double, 4, 4> msqrt;
   msqrt[0][3] = Th[0];
   msqrt[1][3] = Th[1];
   msqrt[2][3] = Th[2];
@@ -1770,7 +1715,8 @@ vnl_matrix_fixed< double, 4, 4 > MatrixSqrt(const vnl_matrix_fixed< double, 4, 4
   msqrt[3][2] = 0.0;
   msqrt[3][3] = 1.0;
   for (int c = 0; c < 3; c++)
-    for (int r = 0; r < 3; r++) msqrt[r][c] = Yn[r][c];
+    for (int r = 0; r < 3; r++)
+      msqrt[r][c] = Yn[r][c];
 
   //    bool test = true;
   //    if (test)
@@ -1790,10 +1736,9 @@ vnl_matrix_fixed< double, 4, 4 > MatrixSqrt(const vnl_matrix_fixed< double, 4, 4
   return msqrt;
 }
 
-MATRIX *MatrixSqrt(MATRIX *m, MATRIX *sqrtm)
-{
+MATRIX *MatrixSqrt(MATRIX *m, MATRIX *sqrtm) {
   int i, j;
-  vnl_matrix_fixed< double, 4, 4 > vnl_m;
+  vnl_matrix_fixed<double, 4, 4> vnl_m;
 
   if (m->rows != 4 || m->cols != 4) {
     std::cerr << " Numerics MatrixSqrt m must be 4x4 " << std::endl;
@@ -1801,14 +1746,17 @@ MATRIX *MatrixSqrt(MATRIX *m, MATRIX *sqrtm)
   }
 
   for (i = 0; i < 4; i++)
-    for (j = 0; j < 4; j++) vnl_m[i][j] = m->rptr[i + 1][j + 1];
+    for (j = 0; j < 4; j++)
+      vnl_m[i][j] = m->rptr[i + 1][j + 1];
 
-  vnl_matrix_fixed< double, 4, 4 > vnl_msqrt = MatrixSqrt(vnl_m);
+  vnl_matrix_fixed<double, 4, 4> vnl_msqrt = MatrixSqrt(vnl_m);
 
-  if (sqrtm == NULL) sqrtm = MatrixAlloc(4, 4, MATRIX_REAL);
+  if (sqrtm == nullptr)
+    sqrtm = MatrixAlloc(4, 4, MATRIX_REAL);
 
   for (i = 0; i < 4; i++)
-    for (j = 0; j < 4; j++) sqrtm->rptr[i + 1][j + 1] = vnl_msqrt[i][j];
+    for (j = 0; j < 4; j++)
+      sqrtm->rptr[i + 1][j + 1] = vnl_msqrt[i][j];
 
   return sqrtm;
 }
@@ -1853,40 +1801,40 @@ double sc_ugauss(const sc_rng *r);
   Returns 0 on success and nonzero otherwise (eg,
   when U is non-positive def).
  */
-int sc_linalg_cholesky_decomp(MATRIX *U)
-{
+int sc_linalg_cholesky_decomp(MATRIX *U) {
   int i, j, err;
 
-  vnl_matrix< double > P(U->rows, U->cols);
-  vnl_matrix< double > C(U->rows, U->cols);
+  vnl_matrix<double> P(U->rows, U->cols);
+  vnl_matrix<double> C(U->rows, U->cols);
 
   for (i = 0; i < U->rows; i++)
-    for (j = 0; j < U->cols; j++) P(i, j) = *MATRIX_RELT(U, i + 1, j + 1);
+    for (j = 0; j < U->cols; j++)
+      P(i, j) = *MATRIX_RELT(U, i + 1, j + 1);
 
   vnl_cholesky chol(P);
   err = chol.rank_deficiency();
-  if (err) return (err);
+  if (err)
+    return (err);
 
   C = chol.upper_triangle();
 
   for (i = 0; i < U->rows; i++)
-    for (j = 0; j < U->cols; j++) *MATRIX_RELT(U, i + 1, j + 1) = C(i, j);
+    for (j = 0; j < U->cols; j++)
+      *MATRIX_RELT(U, i + 1, j + 1) = C(i, j);
 
   return (0);
 }
 
 //######### UTILS #######################################################
 
-static void sc_err_msg(const char *msg)
-{
+static void sc_err_msg(const char *msg) {
   printf("ERROR: %s", msg);
   exit(1);
 }
 
 //########################## RNG ###############################
 
-unsigned long int sc_inc_status(sc_status_t *status)
-{
+unsigned long int sc_inc_status(sc_status_t *status) {
   int i, j;
   long int step;
 
@@ -1897,24 +1845,21 @@ unsigned long int sc_inc_status(sc_status_t *status)
   if (step & SC_MASK_HI) {
     status->carry = 1;
     step &= SC_MASK_LO;
-  }
-  else {
+  } else {
     status->carry = 0;
   }
   status->u[i] = step;
 
   if (i == 0) {
     i = 23;
-  }
-  else {
+  } else {
     i--;
   }
   status->i = i;
 
   if (j == 0) {
     j = 23;
-  }
-  else {
+  } else {
     j--;
   }
   status->j = j;
@@ -1922,8 +1867,7 @@ unsigned long int sc_inc_status(sc_status_t *status)
   return (step);
 }
 
-unsigned long int sc_rng_get(const sc_rng *r)
-{
+unsigned long int sc_rng_get(const sc_rng *r) {
   sc_status_t *status;
   int i, skip;
   unsigned long int ret;
@@ -1935,14 +1879,14 @@ unsigned long int sc_rng_get(const sc_rng *r)
   status->n++;
   if (status->n == 24) {
     status->n = 0;
-    for (i = 0; i < skip; i++) sc_inc_status(status);
+    for (i = 0; i < skip; i++)
+      sc_inc_status(status);
   }
 
   return (ret);
 }
 
-void sc_rng_set(sc_rng *r, unsigned long int seed_in)
-{
+void sc_rng_set(sc_rng *r, unsigned long int seed_in) {
   int const_lux;
   sc_status_t *status;
   int i;
@@ -1954,8 +1898,7 @@ void sc_rng_set(sc_rng *r, unsigned long int seed_in)
 
   if (seed_in == 0) {
     seed = 314159265;
-  }
-  else {
+  } else {
     seed = seed_in;
   }
 
@@ -1975,20 +1918,18 @@ void sc_rng_set(sc_rng *r, unsigned long int seed_in)
 
   if (status->u[23] & SC_MASK_HI) {
     status->carry = 1;
-  }
-  else {
+  } else {
     status->carry = 0;
   }
 
   return;
 }
 
-sc_rng *sc_rng_alloc(const sc_rng_type *T)
-{
+sc_rng *sc_rng_alloc(const sc_rng_type *T) {
   sc_rng *r;
 
   r = (sc_rng *)malloc(sizeof(sc_rng));
-  if (r == NULL) {
+  if (r == nullptr) {
     sc_err_msg("*sc_rng_alloc(): problem with allocation");
   }
 
@@ -2000,17 +1941,17 @@ sc_rng *sc_rng_alloc(const sc_rng_type *T)
   return (r);
 }
 
-void sc_rng_free(sc_rng *r)
-{
-  if (r->status != NULL) free(r->status);
+void sc_rng_free(sc_rng *r) {
+  if (r->status != nullptr)
+    free(r->status);
 
-  if (r != NULL) free(r);
+  if (r != nullptr)
+    free(r);
 
   return;
 }
 
-double sc_uni(const sc_rng *r)
-{
+double sc_uni(const sc_rng *r) {
   double u;
 
   u = (double)(sc_rng_get(r) / 16777216.0);
@@ -2018,8 +1959,7 @@ double sc_uni(const sc_rng *r)
   return (u);
 }
 
-double sc_uni_pos(const sc_rng *r)
-{
+double sc_uni_pos(const sc_rng *r) {
   double x;
   do {
     x = (double)(sc_rng_get(r) / 16777216.0);
@@ -2030,8 +1970,7 @@ double sc_uni_pos(const sc_rng *r)
 
 //##################### RAN ###
 
-double sc_ran_flat(const sc_rng *r, const double a, const double b)
-{
+double sc_ran_flat(const sc_rng *r, const double a, const double b) {
   double u, ret;
 
   u = sc_uni(r);
@@ -2039,8 +1978,7 @@ double sc_ran_flat(const sc_rng *r, const double a, const double b)
   return (ret);
 }
 
-double sc_ran_gaussian(const sc_rng *r, const double sigma)
-{
+double sc_ran_gaussian(const sc_rng *r, const double sigma) {
   double x, y, r2, ret;
 
   do {
@@ -2053,8 +1991,7 @@ double sc_ran_gaussian(const sc_rng *r, const double sigma)
   return (ret);
 }
 
-double sc_ugauss(const sc_rng *r)
-{
+double sc_ugauss(const sc_rng *r) {
   double ret;
 
   ret = sc_ran_gaussian(r, 1.0);
@@ -2062,8 +1999,7 @@ double sc_ugauss(const sc_rng *r)
   return (ret);
 }
 
-double sc_gamma_int(const sc_rng *r, const unsigned int a)
-{
+double sc_gamma_int(const sc_rng *r, const unsigned int a) {
   unsigned int i;
   double prod, ret;
 
@@ -2074,15 +2010,13 @@ double sc_gamma_int(const sc_rng *r, const unsigned int a)
     }
     ret = -log(prod);
     return (ret);
-  }
-  else {
+  } else {
     ret = sc_gamma_large(r, (double)a);
     return (ret);
   }
 }
 
-double sc_gamma_large(const sc_rng *r, const double a)
-{
+double sc_gamma_large(const sc_rng *r, const double a) {
   double sqa, y, v, ret;
 
   sqa = sqrt(2 * a - 1);
@@ -2097,8 +2031,7 @@ double sc_gamma_large(const sc_rng *r, const double a)
   return (ret);
 }
 
-double sc_gamma_frac(const sc_rng *r, const double a)
-{
+double sc_gamma_frac(const sc_rng *r, const double a) {
   double p, q, u, v, ret;
   p = M_E / (a + M_E);
   do {
@@ -2108,8 +2041,7 @@ double sc_gamma_frac(const sc_rng *r, const double a)
     if (u < p) {
       ret = exp((1 / a) * log(v));
       q = exp(-ret);
-    }
-    else {
+    } else {
       ret = 1 - log(v);
       q = exp((a - 1) * log(ret));
     }
@@ -2118,8 +2050,7 @@ double sc_gamma_frac(const sc_rng *r, const double a)
   return (ret);
 }
 
-double sc_ran_gamma(const sc_rng *r, const double a, const double b)
-{
+double sc_ran_gamma(const sc_rng *r, const double a, const double b) {
   unsigned int na;
   double ret;
 
@@ -2127,19 +2058,16 @@ double sc_ran_gamma(const sc_rng *r, const double a, const double b)
   if (a == na) {
     ret = b * sc_gamma_int(r, na);
     return (ret);
-  }
-  else if (na == 0) {
+  } else if (na == 0) {
     ret = b * sc_gamma_frac(r, a);
     return (ret);
-  }
-  else {
+  } else {
     ret = b * (sc_gamma_int(r, na) + sc_gamma_frac(r, a - na));
     return (ret);
   }
 }
 
-double sc_ran_fdist(const sc_rng *r, const double nu1, const double nu2)
-{
+double sc_ran_fdist(const sc_rng *r, const double nu1, const double nu2) {
   double Y1, Y2, ret;
 
   Y1 = sc_ran_gamma(r, nu1 / 2, 2.0);
@@ -2149,16 +2077,14 @@ double sc_ran_fdist(const sc_rng *r, const double nu1, const double nu2)
   return (ret);
 }
 
-double sc_ran_chisq(const sc_rng *r, const double nu)
-{
+double sc_ran_chisq(const sc_rng *r, const double nu) {
   double ret;
 
   ret = 2 * sc_ran_gamma(r, nu / 2, 1.0);
   return (ret);
 }
 
-double sc_ran_tdist(const sc_rng *r, const double nu)
-{
+double sc_ran_tdist(const sc_rng *r, const double nu) {
   double Y1, Y2, Z, ret;
 
   if (nu <= 2) {
@@ -2166,8 +2092,7 @@ double sc_ran_tdist(const sc_rng *r, const double nu)
     Y2 = sc_ran_chisq(r, nu);
     ret = Y1 / sqrt(Y2 / nu);
     return (ret);
-  }
-  else {
+  } else {
     do {
       Y1 = sc_ugauss(r);
       Y2 = sc_ran_exponential(r, 1 / (nu / 2 - 1));
@@ -2179,8 +2104,7 @@ double sc_ran_tdist(const sc_rng *r, const double nu)
   }
 }
 
-double sc_ran_exponential(const sc_rng *r, const double mu)
-{
+double sc_ran_exponential(const sc_rng *r, const double mu) {
   double u, ret;
 
   u = sc_uni_pos(r);
@@ -2189,14 +2113,12 @@ double sc_ran_exponential(const sc_rng *r, const double mu)
   return (ret);
 }
 
-double sc_ran_binomial_pdf(unsigned int k, double p, unsigned int n)
-{
+double sc_ran_binomial_pdf(unsigned int k, double p, unsigned int n) {
   double ret;
 
   if (k == 0) {
     ret = bdtr(k, n, p);
-  }
-  else {
+  } else {
     ret = bdtr(k, n, p) - bdtr(k - 1, n, p);
   }
 
@@ -2205,32 +2127,35 @@ double sc_ran_binomial_pdf(unsigned int k, double p, unsigned int n)
 
 //##################### CDF ###
 
-double sc_cdf_flat_Q(double x, double a, double b)
-{
+double sc_cdf_flat_Q(double x, double a, double b) {
   double ret = 0.0;
 
-  if (x <= a) ret = 0.0;
-  if (a < x && x < b) ret = (x - a) / (b - a);
-  if (b <= x) ret = 1.0;
+  if (x <= a)
+    ret = 0.0;
+  if (a < x && x < b)
+    ret = (x - a) / (b - a);
+  if (b <= x)
+    ret = 1.0;
 
   return (1.0 - ret);
 }
 
-double sc_cdf_flat_Qinv(double Q, double a, double b)
-{
+double sc_cdf_flat_Qinv(double Q, double a, double b) {
   double ret = 0.0;
 
-  if (Q == 0.0) ret = b;
+  if (Q == 0.0)
+    ret = b;
 
-  if (Q == 1.0) ret = a;
+  if (Q == 1.0)
+    ret = a;
 
-  if (Q > 0.0 && Q < 1.0) ret = Q * a + (1.0 - Q) * b;
+  if (Q > 0.0 && Q < 1.0)
+    ret = Q * a + (1.0 - Q) * b;
 
   return (ret);
 }
 
-double sc_cdf_fdist_Q(double x, double nu1, double nu2)
-{
+double sc_cdf_fdist_Q(double x, double nu1, double nu2) {
   double ret = 0.0;
 
   ret = fdtrc(nu1, nu2, x);
@@ -2238,8 +2163,7 @@ double sc_cdf_fdist_Q(double x, double nu1, double nu2)
   return (ret);
 }
 
-double sc_cdf_fdist_Qinv(double Q, double nu1, double nu2)
-{
+double sc_cdf_fdist_Qinv(double Q, double nu1, double nu2) {
   double ret = 0.0;
 
   ret = fdtri(nu1, nu2, Q);
@@ -2247,8 +2171,7 @@ double sc_cdf_fdist_Qinv(double Q, double nu1, double nu2)
   return (ret);
 }
 
-double sc_cdf_tdist_Q(double x, double nu)
-{
+double sc_cdf_tdist_Q(double x, double nu) {
   double ret = 0.0;
 
   ret = 1.0 - stdtr(nu, x);
@@ -2256,8 +2179,7 @@ double sc_cdf_tdist_Q(double x, double nu)
   return (ret);
 }
 
-double sc_cdf_tdist_Qinv(double Q, double nu)
-{
+double sc_cdf_tdist_Qinv(double Q, double nu) {
   double ret = 0.0;
 
   ret = (-1) * stdtri(nu, Q);
@@ -2265,8 +2187,7 @@ double sc_cdf_tdist_Qinv(double Q, double nu)
   return (ret);
 }
 
-double sc_cdf_gaussian_Q(double x, double nu)
-{
+double sc_cdf_gaussian_Q(double x, double nu) {
   double ret = 0.0;
 
   if (nu != 1.0) {
@@ -2279,8 +2200,7 @@ double sc_cdf_gaussian_Q(double x, double nu)
   return (ret);
 }
 
-double sc_cdf_gaussian_Qinv(double Q, double nu)
-{
+double sc_cdf_gaussian_Qinv(double Q, double nu) {
   double ret = 0.0;
 
   if (nu != 1.0) {
@@ -2293,8 +2213,7 @@ double sc_cdf_gaussian_Qinv(double Q, double nu)
   return (ret);
 }
 
-double sc_cdf_chisq_Q(double x, double nu)
-{
+double sc_cdf_chisq_Q(double x, double nu) {
   double ret = 0.0;
 
   ret = chdtrc(nu, x);
@@ -2302,8 +2221,7 @@ double sc_cdf_chisq_Q(double x, double nu)
   return (ret);
 }
 
-double sc_cdf_chisq_Qinv(double Q, double nu)
-{
+double sc_cdf_chisq_Qinv(double Q, double nu) {
   double ret = 0.0;
 
   ret = chdtri(nu, Q);

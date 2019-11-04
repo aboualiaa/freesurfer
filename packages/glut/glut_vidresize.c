@@ -24,15 +24,15 @@
 #define GLX_SGIX_video_resize 1
 #endif
 
-//NJS begin
-extern int glXBindChannelToWindowSGIX (Display *, int, int, Window);
-extern int glXChannelRectSGIX (Display *, int, int, int, int, int, int);
-extern int glXQueryChannelRectSGIX 
-(Display *, int, int, int *, int *, int *, int *);
-extern int glXQueryChannelDeltasSGIX 
-(Display *, int, int, int *, int *, int *, int *);
-extern int glXChannelRectSyncSGIX (Display *, int, int, GLenum);
-//NJS end
+// NJS begin
+extern int glXBindChannelToWindowSGIX(Display *, int, int, Window);
+extern int glXChannelRectSGIX(Display *, int, int, int, int, int, int);
+extern int glXQueryChannelRectSGIX(Display *, int, int, int *, int *, int *,
+                                   int *);
+extern int glXQueryChannelDeltasSGIX(Display *, int, int, int *, int *, int *,
+                                     int *);
+extern int glXChannelRectSyncSGIX(Display *, int, int, GLenum);
+// NJS end
 
 #if defined(GLX_VERSION_1_1) && defined(GLX_SGIX_video_resize)
 static int canVideoResize = -1;
@@ -53,24 +53,18 @@ static int dx = -1, dy = -1, dw = -1, dh = -1;
 static volatile int errorCaught;
 
 /* ARGSUSED */
-static int
-catchXSGIvcErrors(Display * dpy, XErrorEvent * event)
-{
+static int catchXSGIvcErrors(Display *dpy, XErrorEvent *event) {
   errorCaught = 1;
   return 0;
 }
 #endif
 
 /* CENTRY */
-int APIENTRY
-glutVideoResizeGet(GLenum param)
-{
+int APIENTRY glutVideoResizeGet(GLenum param) {
 #if defined(GLX_VERSION_1_1) && defined(GLX_SGIX_video_resize)
-  if (canVideoResize < 0)
-  {
+  if (canVideoResize < 0) {
     canVideoResize = __glutIsSupportedByGLX("GLX_SGIX_video_resize");
-    if (canVideoResize)
-    {
+    if (canVideoResize) {
 #if __sgi
       /* This is a hack because IRIX 6.2, 6.3, and some 6.4
          versions were released with GLX_SGIX_video_resize
@@ -79,19 +73,17 @@ glutVideoResizeGet(GLenum param)
          determine if the libGL.so we are using actually has a
          video resize entrypoint before we try to use the
          feature. */
-      void (*func) (void);
+      void (*func)(void);
       void *glxDso = dlopen("libGL.so", RTLD_LAZY);
 
-      func = (void (*)(void)) dlsym(glxDso, "glXQueryChannelDeltasSGIX");
-      if (!func)
-      {
+      func = (void (*)(void))dlsym(glxDso, "glXQueryChannelDeltasSGIX");
+      if (!func) {
         canVideoResize = 0;
-      }
-      else
+      } else
 #endif
       {
         char *channelString;
-        int (*handler) (Display *, XErrorEvent *);
+        int (*handler)(Display *, XErrorEvent *);
 
         channelString = getenv("GLUT_VIDEO_RESIZE_CHANNEL");
         videoResizeChannel = channelString ? atoi(channelString) : 0;
@@ -121,10 +113,8 @@ glutVideoResizeGet(GLenum param)
            succeeded, but the values are filled with junk.
            Watch to make sure the delta variables really make
            sense. */
-        if (errorCaught ||
-            dx < 0 || dy < 0 || dw < 0 || dh < 0 ||
-            dx > 2048 || dy > 2048 || dw > 2048 || dh > 2048)
-        {
+        if (errorCaught || dx < 0 || dy < 0 || dw < 0 || dh < 0 || dx > 2048 ||
+            dy > 2048 || dw > 2048 || dh > 2048) {
           canVideoResize = 0;
         }
       }
@@ -132,8 +122,7 @@ glutVideoResizeGet(GLenum param)
   }
 #endif /* GLX_SGIX_video_resize */
 
-  switch (param)
-  {
+  switch (param) {
   case GLUT_VIDEO_RESIZE_POSSIBLE:
     return canVideoResize;
   case GLUT_VIDEO_RESIZE_IN_USE:
@@ -151,14 +140,12 @@ glutVideoResizeGet(GLenum param)
   case GLUT_VIDEO_RESIZE_WIDTH:
   case GLUT_VIDEO_RESIZE_HEIGHT:
 #if defined(GLX_VERSION_1_1) && defined(GLX_SGIX_video_resize)
-    if (videoResizeInUse)
-    {
+    if (videoResizeInUse) {
       int x, y, width, height;
 
-      glXQueryChannelRectSGIX(__glutDisplay, __glutScreen,
-                              videoResizeChannel, &x, &y, &width, &height);
-      switch (param)
-      {
+      glXQueryChannelRectSGIX(__glutDisplay, __glutScreen, videoResizeChannel,
+                              &x, &y, &width, &height);
+      switch (param) {
       case GLUT_VIDEO_RESIZE_X:
         return x;
       case GLUT_VIDEO_RESIZE_Y:
@@ -177,29 +164,22 @@ glutVideoResizeGet(GLenum param)
   }
 }
 
-void APIENTRY
-glutSetupVideoResizing(void)
-{
+void APIENTRY glutSetupVideoResizing(void) {
 #if defined(GLX_VERSION_1_1) && defined(GLX_SGIX_video_resize)
-  if (glutVideoResizeGet(GLUT_VIDEO_RESIZE_POSSIBLE))
-  {
-    glXBindChannelToWindowSGIX(__glutDisplay, __glutScreen,
-                               videoResizeChannel, __glutCurrentWindow->win);
+  if (glutVideoResizeGet(GLUT_VIDEO_RESIZE_POSSIBLE)) {
+    glXBindChannelToWindowSGIX(__glutDisplay, __glutScreen, videoResizeChannel,
+                               __glutCurrentWindow->win);
     videoResizeInUse = 1;
-  }
-  else
+  } else
 #endif
-    __glutFatalError("glutEstablishVideoResizing: video resizing not possible.\n");
+    __glutFatalError(
+        "glutEstablishVideoResizing: video resizing not possible.\n");
 }
 
-void APIENTRY
-glutStopVideoResizing(void)
-{
+void APIENTRY glutStopVideoResizing(void) {
 #if defined(GLX_VERSION_1_1) && defined(GLX_SGIX_video_resize)
-  if (glutVideoResizeGet(GLUT_VIDEO_RESIZE_POSSIBLE))
-  {
-    if (videoResizeInUse)
-    {
+  if (glutVideoResizeGet(GLUT_VIDEO_RESIZE_POSSIBLE)) {
+    if (videoResizeInUse) {
       glXBindChannelToWindowSGIX(__glutDisplay, __glutScreen,
                                  videoResizeChannel, None);
       videoResizeInUse = 0;
@@ -209,32 +189,26 @@ glutStopVideoResizing(void)
 }
 
 /* ARGSUSED */
-void APIENTRY
-glutVideoResize(int x, int y, int width, int height)
-{
+void APIENTRY glutVideoResize(int x, int y, int width, int height) {
 #if defined(GLX_VERSION_1_1) && defined(GLX_SGIX_video_resize)
-  if (videoResizeInUse)
-  {
+  if (videoResizeInUse) {
 #ifdef GLX_SYNC_SWAP_SGIX
     /* glXChannelRectSyncSGIX introduced in a patch to IRIX
        6.2; the original unpatched IRIX 6.2 behavior is always
        GLX_SYNC_SWAP_SGIX. */
-    glXChannelRectSyncSGIX(__glutDisplay, __glutScreen,
-                           videoResizeChannel, GLX_SYNC_SWAP_SGIX);
+    glXChannelRectSyncSGIX(__glutDisplay, __glutScreen, videoResizeChannel,
+                           GLX_SYNC_SWAP_SGIX);
 #endif
-    glXChannelRectSGIX(__glutDisplay, __glutScreen,
-                       videoResizeChannel, x, y, width, height);
+    glXChannelRectSGIX(__glutDisplay, __glutScreen, videoResizeChannel, x, y,
+                       width, height);
   }
 #endif
 }
 
 /* ARGSUSED */
-void APIENTRY
-glutVideoPan(int x, int y, int width, int height)
-{
+void APIENTRY glutVideoPan(int x, int y, int width, int height) {
 #if defined(GLX_VERSION_1_1) && defined(GLX_SGIX_video_resize)
-  if (videoResizeInUse)
-  {
+  if (videoResizeInUse) {
 #ifdef GLX_SYNC_FRAME_SGIX
     /* glXChannelRectSyncSGIX introduced in a patch to IRIX
        6.2; the original unpatched IRIX 6.2 behavior is always
@@ -242,11 +216,11 @@ glutVideoPan(int x, int y, int width, int height)
        accomplish GLX_SYNC_FRAME_SGIX on IRIX unpatched 6.2;
        this means you'd need a glutSwapBuffers to actually
        realize the video resize. */
-    glXChannelRectSyncSGIX(__glutDisplay, __glutScreen,
-                           videoResizeChannel, GLX_SYNC_FRAME_SGIX);
+    glXChannelRectSyncSGIX(__glutDisplay, __glutScreen, videoResizeChannel,
+                           GLX_SYNC_FRAME_SGIX);
 #endif
-    glXChannelRectSGIX(__glutDisplay, __glutScreen,
-                       videoResizeChannel, x, y, width, height);
+    glXChannelRectSGIX(__glutDisplay, __glutScreen, videoResizeChannel, x, y,
+                       width, height);
   }
 #endif
 }

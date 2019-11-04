@@ -23,11 +23,8 @@
  *
  */
 
-
 #include "MainApplication.h"
 #include <QKeyEvent>
 
-MainApplication::MainApplication( int & argc, char ** argv ) :
-  QApplication(argc, argv)
-{
-}
+MainApplication::MainApplication(int &argc, char **argv)
+    : QApplication(argc, argv) {}

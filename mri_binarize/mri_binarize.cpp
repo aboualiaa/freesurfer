@@ -25,7 +25,6 @@
  *
  */
 
-
 // $Id: mri_binarize.c,v 1.43 2016/06/09 20:46:21 greve Exp $
 
 /*
@@ -69,7 +68,7 @@ threshold will be ignored.
 
 --match matchvalue <matchvalue2 ...>
 
-Binarize based on matching values. Any number of match values can be 
+Binarize based on matching values. Any number of match values can be
 specified. Cannot be used with --min/--max.
 
 --o outvol
@@ -93,14 +92,14 @@ values. binvalnot only applies when a merge volume is NOT specified.
 
 --replace V1 V2
 
-Replace every occurrence of (int) value V1 with value V2. Multiple 
+Replace every occurrence of (int) value V1 with value V2. Multiple
 --replace args are possible.
 
 --replaceonly V1 V2
 
-Replace every occurrence of (int) value V1 with value V2. Multiple 
---replace args are possible. Other locations in the source volume will be propagated 
-to the output (unlike --replace which masks those locations)
+Replace every occurrence of (int) value V1 with value V2. Multiple
+--replace args are possible. Other locations in the source volume will be
+propagated to the output (unlike --replace which masks those locations)
 
 --frame frameno
 
@@ -113,7 +112,7 @@ Sum the frames together before applying threshold.
 --frame-and
 
 Treat the multi-frame volume as binary 'AND' the frames together. This
-takes an intersection of the individual frames. You do not need to 
+takes an intersection of the individual frames. You do not need to
 specify a --min (the min will be set to nframes-0.5).
 
 --copy copyvol
@@ -123,9 +122,9 @@ copy values from copyvol into the output, except where replaceval is matched
 --merge mergevol
 
 Merge binarization with the mergevol. If the voxel is within the threshold
-range (or matches), then its value will be binval. If not, then it will 
-inherit its value from the value at that voxel in mergevol. mergevol must 
-be the same dimension as the input volume. Combining this with --binval 
+range (or matches), then its value will be binval. If not, then it will
+inherit its value from the value at that voxel in mergevol. mergevol must
+be the same dimension as the input volume. Combining this with --binval
 allows you to construct crude segmentations.
 
 --mask maskvol
@@ -157,16 +156,15 @@ Save output file in 'uchar' format.
   ENDUSAGE
 */
 
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
 double round(double x);
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/utsname.h>
 #include <unistd.h>
-#include <float.h>
+#include <cfloat>
 
 #include "macros.h"
 #include "utils.h"
@@ -194,39 +192,40 @@ double round(double x);
 #include "cma.h"
 #include "region.h"
 
-static int  parse_commandline(int argc, char **argv);
-static void check_options(void);
-static void print_usage(void) ;
-static void usage_exit(void);
-static void print_help(void) ;
-static void print_version(void) ;
+static int parse_commandline(int argc, char **argv);
+static void check_options();
+static void print_usage();
+static void usage_exit();
+static void print_help();
+static void print_version();
 static void dump_options(FILE *fp);
-int main(int argc, char *argv[]) ;
+int main(int argc, char *argv[]);
 
-static char vcid[] = "$Id: mri_binarize.c,v 1.43 2016/06/09 20:46:21 greve Exp $";
-const char *Progname = NULL;
+static char vcid[] =
+    "$Id: mri_binarize.c,v 1.43 2016/06/09 20:46:21 greve Exp $";
+const char *Progname = nullptr;
 char *cmdline, cwd[2000];
-int debug=0;
-int checkoptsonly=0;
+int debug = 0;
+int checkoptsonly = 0;
 struct utsname uts;
 
-char *InVolFile=NULL;
-char *OutVolFile=NULL;
-char *MergeVolFile=NULL;
-char *CopyVolFile=NULL;
-char *MaskVolFile=NULL;
+char *InVolFile = nullptr;
+char *OutVolFile = nullptr;
+char *MergeVolFile = nullptr;
+char *CopyVolFile = nullptr;
+char *MaskVolFile = nullptr;
 double MinThresh, MaxThresh;
-int MinThreshSet=0, MaxThreshSet=0;
+int MinThreshSet = 0, MaxThreshSet = 0;
 double RMinThresh, RMaxThresh;
-int RMinThreshSet=0, RMaxThreshSet=0;
-char *CountFile = NULL;
+int RMinThreshSet = 0, RMaxThreshSet = 0;
+char *CountFile = nullptr;
 
-int BinVal=1;
-int BinValNot=0;
-int frame=0;
-int DoFrameLoop=1;
-int DoAbs=0;
-int DoNeg=0;
+int BinVal = 1;
+int BinValNot = 0;
+int frame = 0;
+int DoFrameLoop = 1;
+int DoAbs = 0;
+int DoNeg = 0;
 int ZeroColEdges = 0;
 int ZeroRowEdges = 0;
 int ZeroSliceEdges = 0;
@@ -236,7 +235,7 @@ int nMatch = 0;
 int MatchValues[1000];
 int Matched = 0;
 
-MRI *InVol,*OutVol,*MergeVol,*MaskVol=NULL, *CopyVol;
+MRI *InVol, *OutVol, *MergeVol, *MaskVol = nullptr, *CopyVol;
 double MaskThresh = 0.5;
 
 int nErode2d = 0;
@@ -253,58 +252,62 @@ double FDR;
 int DoFDR = 0;
 int FDRSign = 0;
 
-int nErodeNN=0, NNType=0;
+int nErodeNN = 0, NNType = 0;
 
-static int replace_only = 0 ;
+static int replace_only = 0;
 int nReplace = 0, SrcReplace[1000], TrgReplace[1000];
-char *SurfFile=NULL;
-int nsmoothsurf=0;
+char *SurfFile = nullptr;
+int nsmoothsurf = 0;
 
 int noverbose = 0;
-int DoBB = 0, nPadBB=0;
+int DoBB = 0, nPadBB = 0;
 int DoCount = 1;
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  int nargs, c, r, s, nhits, InMask, n, mriType,nvox;
+  int nargs, c, r, s, nhits, InMask, n, mriType, nvox;
   int fstart, fend, nframes;
-  double val,maskval,mergeval,gmean,gstd,gmax,voxvol;
+  double val, maskval, mergeval, gmean, gstd, gmax, voxvol;
   FILE *fp;
   MRI *mritmp;
 
   nargs = handle_version_option(argc, argv, vcid, "$Name:  $");
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
-  cmdline = argv2cmdline(argc,argv);
+  cmdline = argv2cmdline(argc, argv);
   uname(&uts);
-  getcwd(cwd,2000);
+  getcwd(cwd, 2000);
 
-  Progname = argv[0] ;
-  argc --;
+  Progname = argv[0];
+  argc--;
   argv++;
-  ErrorInit(NULL, NULL, NULL) ;
-  DiagInit(NULL, NULL, NULL) ;
-  if (argc == 0) usage_exit();
+  ErrorInit(NULL, NULL, NULL);
+  DiagInit(nullptr, nullptr, nullptr);
+  if (argc == 0)
+    usage_exit();
   parse_commandline(argc, argv);
   check_options();
-  if (checkoptsonly) return(0);
+  if (checkoptsonly)
+    return (0);
   if (noverbose == 0)
     dump_options(stdout);
 
   // Load the input volume
   InVol = MRIread(InVolFile);
-  if (InVol==NULL) exit(1);
+  if (InVol == nullptr)
+    exit(1);
   if (frame >= InVol->nframes) {
-    printf("ERROR: requested frame=%d >= nframes=%d\n",
-           frame,InVol->nframes);
+    printf("ERROR: requested frame=%d >= nframes=%d\n", frame, InVol->nframes);
     exit(1);
   }
 
   // Load the mask volume (if needed)
   if (MaskVolFile) {
-    printf("Loading mask %s\n",MaskVolFile);
+    printf("Loading mask %s\n", MaskVolFile);
     MaskVol = MRIread(MaskVolFile);
-    if (MaskVol==NULL) exit(1);
+    if (MaskVol == nullptr)
+      exit(1);
     if (MaskVol->width != InVol->width) {
       printf("ERROR: dimension mismatch between input and mask volumes\n");
       exit(1);
@@ -319,62 +322,65 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  if(DoFDR){
+  if (DoFDR) {
     double FDRThresh;
     // 1 = assume -log10(p)
-    MRIfdr2vwth(&InVol, 1, &frame, FDR, FDRSign, 1, &MaskVol, &FDRThresh, NULL);
-    printf("FDR %g, Sign=%d, Thresh = %g\n",FDR,FDRSign,FDRThresh);
-    if(FDRSign == 0) {
+    MRIfdr2vwth(&InVol, 1, &frame, FDR, FDRSign, 1, &MaskVol, &FDRThresh,
+                nullptr);
+    printf("FDR %g, Sign=%d, Thresh = %g\n", FDR, FDRSign, FDRThresh);
+    if (FDRSign == 0) {
       DoAbs = 1;
       MinThresh = FDRThresh;
-      MinThreshSet=1;
+      MinThreshSet = 1;
     }
-    if(FDRSign == +1) {
+    if (FDRSign == +1) {
       MinThresh = FDRThresh;
-      MinThreshSet=1;
+      MinThreshSet = 1;
     }
-    if(FDRSign == -1) {
+    if (FDRSign == -1) {
       MaxThresh = -FDRThresh;
-      MaxThreshSet=1;
+      MaxThreshSet = 1;
     }
   }
 
-  if(DoFrameSum || DoFrameAnd) {
-    printf("Summing over %d frames\n",InVol->nframes);
-    InVol = MRIframeSum(InVol,InVol);
+  if (DoFrameSum || DoFrameAnd) {
+    printf("Summing over %d frames\n", InVol->nframes);
+    InVol = MRIframeSum(InVol, InVol);
     frame = 0;
   }
-  if(DoFrameAnd) MinThresh = InVol->nframes - 0.5;
+  if (DoFrameAnd)
+    MinThresh = InVol->nframes - 0.5;
 
-  if(DoAbs) {
+  if (DoAbs) {
     printf("Removing sign from input\n");
-    MRIabs(InVol,InVol);
+    MRIabs(InVol, InVol);
   }
-  if(DoNeg) {
+  if (DoNeg) {
     printf("Negating input\n");
-    MRImultiplyConst(InVol,-1.0,InVol);
+    MRImultiplyConst(InVol, -1.0, InVol);
   }
 
-  if(RMinThreshSet || RMaxThreshSet){
+  if (RMinThreshSet || RMaxThreshSet) {
     printf("Computing global statistics \n");
-    RFglobalStats(InVol, NULL, &gmean, &gstd, &gmax);
-    printf("mean = %g, std = %g, max = %g\n",gmean, gstd, gmax);
-    if(RMinThreshSet)  {
+    RFglobalStats(InVol, nullptr, &gmean, &gstd, &gmax);
+    printf("mean = %g, std = %g, max = %g\n", gmean, gstd, gmax);
+    if (RMinThreshSet) {
       MinThresh = gmean * RMinThresh;
       MinThreshSet = 1;
-      printf("Setting min thresh to %g\n",MinThresh);
+      printf("Setting min thresh to %g\n", MinThresh);
     }
-    if(RMaxThreshSet) {
+    if (RMaxThreshSet) {
       MaxThresh = gmean * RMaxThresh;
       MaxThreshSet = 1;
-      printf("Setting max thresh to %g\n",MinThresh);
+      printf("Setting max thresh to %g\n", MinThresh);
     }
   }
 
   // Load the merge volume (if needed)
   if (MergeVolFile) {
     MergeVol = MRIread(MergeVolFile);
-    if (MergeVol==NULL) exit(1);
+    if (MergeVol == nullptr)
+      exit(1);
     if (MergeVol->width != InVol->width) {
       printf("ERROR: dimension mismatch between input and merge volumes\n");
       exit(1);
@@ -391,7 +397,8 @@ int main(int argc, char *argv[]) {
 
   if (CopyVolFile) {
     CopyVol = MRIread(CopyVolFile);
-    if (CopyVol==NULL) exit(1);
+    if (CopyVol == nullptr)
+      exit(1);
     if (CopyVol->width != InVol->width) {
       printf("ERROR: dimension mismatch between input and merge volumes\n");
       exit(1);
@@ -406,200 +413,212 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  if(DoPercent) {
-    printf("Computing threshold based on top %g percent\n",TopPercent);
+  if (DoPercent) {
+    printf("Computing threshold based on top %g percent\n", TopPercent);
     MinThresh = MRIpercentThresh(InVol, MaskVol, frame, TopPercent);
-    printf("  Threshold set to %g\n",MinThresh);
+    printf("  Threshold set to %g\n", MinThresh);
   }
 
-  if(DoFrameLoop){
+  if (DoFrameLoop) {
     fstart = 0;
-    fend = InVol->nframes-1;
-  }
-  else {
+    fend = InVol->nframes - 1;
+  } else {
     fstart = frame;
     fend = frame;
   }
   nframes = fend - fstart + 1;
   if (noverbose == 0)
-    printf("fstart = %d, fend = %d, nframes = %d\n",fstart,fend,nframes);
+    printf("fstart = %d, fend = %d, nframes = %d\n", fstart, fend, nframes);
 
   // Prepare the output volume
   mriType = MRI_INT;
-  if (mriTypeUchar) mriType = MRI_UCHAR;
-  OutVol = MRIallocSequence(InVol->width,InVol->height,InVol->depth,mriType,nframes);
-  if (OutVol == NULL) exit(1);
+  if (mriTypeUchar)
+    mriType = MRI_UCHAR;
+  OutVol = MRIallocSequence(InVol->width, InVol->height, InVol->depth, mriType,
+                            nframes);
+  if (OutVol == nullptr)
+    exit(1);
   MRIcopyHeader(InVol, OutVol);
 
   nhits = 0;
-  if(nReplace == 0){
+  if (nReplace == 0) {
     // Binarize
 
     mergeval = BinValNot;
     InMask = 1;
-    for(frame = fstart; frame <= fend; frame++){
-      for (c=0; c < InVol->width; c++) {
-	for (r=0; r < InVol->height; r++) {
-	  for (s=0; s < InVol->depth; s++) {
-	    if(MergeVol) mergeval = MRIgetVoxVal(MergeVol,c,r,s,frame);
-	    
-	    // Skip if on the edge
-	    if( (ZeroColEdges &&   (c == 0 || c == InVol->width-1))  ||
-		(ZeroRowEdges &&   (r == 0 || r == InVol->height-1)) ||
-		(ZeroSliceEdges && (s == 0 || s == InVol->depth-1)) ){
-	      MRIsetVoxVal(OutVol,c,r,s,frame,mergeval);
-	      continue;
-	    }
-	    
-	    // Skip if not in the mask
-	    if(MaskVol) {
-	      maskval = MRIgetVoxVal(MaskVol,c,r,s,0);
-	      if(maskval < MaskThresh){
-		MRIsetVoxVal(OutVol,c,r,s,frame-fstart,mergeval);
-		continue;
-	      }
-	    }
-	    
-	    // Get the value at this voxel
-	    val = MRIgetVoxVal(InVol,c,r,s,frame);
-	    
-	    if(DoMatch){
-	      // Check for a match
-	      Matched = 0;
-	      for(n=0; n < nMatch; n++){
-		if(fabs(val - MatchValues[n]) < 2*FLT_MIN){
-		  MRIsetVoxVal(OutVol,c,r,s,frame-fstart,BinVal);
-		  Matched = 1;
-		  nhits ++;
-		  break;
-		}
-	      }
-	      if(!Matched) MRIsetVoxVal(OutVol,c,r,s,frame-fstart,mergeval);
-	    }
-	    else{
-	      // Determine whether it is in range
-	      if((MinThreshSet && (val < MinThresh)) ||
-		 (MaxThreshSet && (val > MaxThresh))){
-		// It is NOT in the Range
-		MRIsetVoxVal(OutVol,c,r,s,frame-fstart,mergeval);
-	      }
-	      else {
-		// It is in the Range
-		MRIsetVoxVal(OutVol,c,r,s,frame-fstart,BinVal);
-		nhits ++;
-	      }
-	    }
-	    
-	  } // slice
-	} // row
-      } // col
-    } // frame
-  } // if(nReplace == 0)
+    for (frame = fstart; frame <= fend; frame++) {
+      for (c = 0; c < InVol->width; c++) {
+        for (r = 0; r < InVol->height; r++) {
+          for (s = 0; s < InVol->depth; s++) {
+            if (MergeVol)
+              mergeval = MRIgetVoxVal(MergeVol, c, r, s, frame);
 
-  if(nReplace != 0) {
+            // Skip if on the edge
+            if ((ZeroColEdges && (c == 0 || c == InVol->width - 1)) ||
+                (ZeroRowEdges && (r == 0 || r == InVol->height - 1)) ||
+                (ZeroSliceEdges && (s == 0 || s == InVol->depth - 1))) {
+              MRIsetVoxVal(OutVol, c, r, s, frame, mergeval);
+              continue;
+            }
 
-    if (replace_only)
-    {
-      printf("Replacing %d and propagating source list\n",nReplace);
-      OutVol = MRIcopy(InVol, NULL) ;
-      for(n=0; n < nReplace; n++) 
-      {
-	printf("%2d:  %4d %4d\n",n+1,SrcReplace[n],TrgReplace[n]);
-	MRIreplaceValues(OutVol, OutVol, SrcReplace[n], TrgReplace[n]);
+            // Skip if not in the mask
+            if (MaskVol) {
+              maskval = MRIgetVoxVal(MaskVol, c, r, s, 0);
+              if (maskval < MaskThresh) {
+                MRIsetVoxVal(OutVol, c, r, s, frame - fstart, mergeval);
+                continue;
+              }
+            }
+
+            // Get the value at this voxel
+            val = MRIgetVoxVal(InVol, c, r, s, frame);
+
+            if (DoMatch) {
+              // Check for a match
+              Matched = 0;
+              for (n = 0; n < nMatch; n++) {
+                if (fabs(val - MatchValues[n]) < 2 * FLT_MIN) {
+                  MRIsetVoxVal(OutVol, c, r, s, frame - fstart, BinVal);
+                  Matched = 1;
+                  nhits++;
+                  break;
+                }
+              }
+              if (!Matched)
+                MRIsetVoxVal(OutVol, c, r, s, frame - fstart, mergeval);
+            } else {
+              // Determine whether it is in range
+              if ((MinThreshSet && (val < MinThresh)) ||
+                  (MaxThreshSet && (val > MaxThresh))) {
+                // It is NOT in the Range
+                MRIsetVoxVal(OutVol, c, r, s, frame - fstart, mergeval);
+              } else {
+                // It is in the Range
+                MRIsetVoxVal(OutVol, c, r, s, frame - fstart, BinVal);
+                nhits++;
+              }
+            }
+
+          } // slice
+        }   // row
+      }     // col
+    }       // frame
+  }         // if(nReplace == 0)
+
+  if (nReplace != 0) {
+
+    if (replace_only) {
+      printf("Replacing %d and propagating source list\n", nReplace);
+      OutVol = MRIcopy(InVol, nullptr);
+      for (n = 0; n < nReplace; n++) {
+        printf("%2d:  %4d %4d\n", n + 1, SrcReplace[n], TrgReplace[n]);
+        MRIreplaceValues(OutVol, OutVol, SrcReplace[n], TrgReplace[n]);
       }
-    }
-    else
-    {
-      printf("Replacing %d\n",nReplace);
-      for(n=0; n < nReplace; n++) printf("%2d:  %4d %4d\n",n+1,SrcReplace[n],TrgReplace[n]);
-      OutVol = MRIreplaceList(InVol, SrcReplace, TrgReplace, nReplace, MaskVol, NULL);
+    } else {
+      printf("Replacing %d\n", nReplace);
+      for (n = 0; n < nReplace; n++)
+        printf("%2d:  %4d %4d\n", n + 1, SrcReplace[n], TrgReplace[n]);
+      OutVol = MRIreplaceList(InVol, SrcReplace, TrgReplace, nReplace, MaskVol,
+                              nullptr);
     }
   }
 
-  if (noverbose == 0) 
-    printf("Found %d values in range\n",nhits);
+  if (noverbose == 0)
+    printf("Found %d values in range\n", nhits);
 
-  if(nDilate3d > 0){
-    printf("Dilating %d voxels in 3d\n",nDilate3d);
-    for(n=0; n<nDilate3d; n++) MRIdilate(OutVol,OutVol);
+  if (nDilate3d > 0) {
+    printf("Dilating %d voxels in 3d\n", nDilate3d);
+    for (n = 0; n < nDilate3d; n++)
+      MRIdilate(OutVol, OutVol);
   }
-  if(nErode3d > 0){
-    printf("Eroding %d voxels in 3d\n",nErode3d);
-    for(n=0; n<nErode3d; n++) MRIerode(OutVol,OutVol);
+  if (nErode3d > 0) {
+    printf("Eroding %d voxels in 3d\n", nErode3d);
+    for (n = 0; n < nErode3d; n++)
+      MRIerode(OutVol, OutVol);
   }
-  if(nErode2d > 0){
-    printf("Eroding %d voxels in 2d\n",nErode2d);
-    for(n=0; n<nErode2d; n++) MRIerode2D(OutVol,OutVol);
+  if (nErode2d > 0) {
+    printf("Eroding %d voxels in 2d\n", nErode2d);
+    for (n = 0; n < nErode2d; n++)
+      MRIerode2D(OutVol, OutVol);
   }
-  if(nErodeNN > 0){
-    printf("Eroding %d voxels using %d\n",nErodeNN,NNType);
-    mritmp = NULL;
-    for(n=0; n<nErodeNN; n++) {
-      mritmp = MRIerodeNN(OutVol,mritmp,NNType);
-      MRIcopy(mritmp,OutVol);
+  if (nErodeNN > 0) {
+    printf("Eroding %d voxels using %d\n", nErodeNN, NNType);
+    mritmp = nullptr;
+    for (n = 0; n < nErodeNN; n++) {
+      mritmp = MRIerodeNN(OutVol, mritmp, NNType);
+      MRIcopy(mritmp, OutVol);
     }
     MRIfree(&mritmp);
   }
 
   nhits = -1;
-  if(DoCount){
-    if(noverbose == 0) printf("Counting number of voxels in first frame\n");
-    for (c=0; c < OutVol->width; c++) {
-      for (r=0; r < OutVol->height; r++) {
-	for (s=0; s < OutVol->depth; s++) {
-	  // Get the value at this voxel
-	  val = MRIgetVoxVal(OutVol,c,r,s,0);
-	  if(fabs(val-BinVal) < .00001) nhits ++;
-	} // slice
-      } // row
-    } // col
-    if(noverbose == 0)  printf("Found %d voxels in final mask\n",nhits);
+  if (DoCount) {
+    if (noverbose == 0)
+      printf("Counting number of voxels in first frame\n");
+    for (c = 0; c < OutVol->width; c++) {
+      for (r = 0; r < OutVol->height; r++) {
+        for (s = 0; s < OutVol->depth; s++) {
+          // Get the value at this voxel
+          val = MRIgetVoxVal(OutVol, c, r, s, 0);
+          if (fabs(val - BinVal) < .00001)
+            nhits++;
+        } // slice
+      }   // row
+    }     // col
+    if (noverbose == 0)
+      printf("Found %d voxels in final mask\n", nhits);
   }
 
-  if(DoBinCol){
+  if (DoBinCol) {
     printf("Filling mask with column number\n");
     MRIbinMaskToCol(OutVol, OutVol);
   }
 
-  if(DoBB){
-    // reduce volume to a smaller volume by reducing to a bounding box 
+  if (DoBB) {
+    // reduce volume to a smaller volume by reducing to a bounding box
     // around non-zero voxels
-    printf("Computing bounding box, npad = %d\n",nPadBB);
+    printf("Computing bounding box, npad = %d\n", nPadBB);
     MRI_REGION *region;
-    region = REGIONgetBoundingBox(OutVol,nPadBB);
+    region = REGIONgetBoundingBox(OutVol, nPadBB);
     REGIONprint(stdout, region);
-    mritmp = MRIextractRegion(OutVol, NULL, region);
-    if(mritmp == NULL) exit(1);
+    mritmp = MRIextractRegion(OutVol, nullptr, region);
+    if (mritmp == nullptr)
+      exit(1);
     MRIfree(&OutVol);
     OutVol = mritmp;
   }
 
   // if we didn't binarize, copy any embedded color table from the input
-  if ((nReplace != 0) && (InVol->ct)) OutVol->ct = CTABdeepCopy(InVol->ct);
+  if ((nReplace != 0) && (InVol->ct))
+    OutVol->ct = CTABdeepCopy(InVol->ct);
 
   // Save output
-  if(OutVolFile) MRIwrite(OutVol,OutVolFile);
+  if (OutVolFile)
+    MRIwrite(OutVol, OutVolFile);
 
-  if(SurfFile){
+  if (SurfFile) {
     MRIS *surf;
-    surf = MRIStessellate(OutVol,BinVal,0);
-    if(nsmoothsurf > 0) MRISaverageVertexPositions(surf, nsmoothsurf) ;
-    MRISwrite(surf,SurfFile);
+    surf = MRIStessellate(OutVol, BinVal, 0);
+    if (nsmoothsurf > 0)
+      MRISaverageVertexPositions(surf, nsmoothsurf);
+    MRISwrite(surf, SurfFile);
     MRISfree(&surf);
   }
 
   nvox = OutVol->width * OutVol->height * OutVol->depth;
   voxvol = OutVol->xsize * OutVol->ysize * OutVol->zsize;
   if (noverbose == 0)
-    printf("Count: %d %lf %d %lf\n",nhits,nhits*voxvol,nvox,(double)100*nhits/nvox);
+    printf("Count: %d %lf %d %lf\n", nhits, nhits * voxvol, nvox,
+           (double)100 * nhits / nvox);
 
-  if(CountFile){
-    fp = fopen(CountFile,"w");
-    if(fp == NULL){
-      printf("ERROR: could not open %s\n",CountFile);
+  if (CountFile) {
+    fp = fopen(CountFile, "w");
+    if (fp == nullptr) {
+      printf("ERROR: could not open %s\n", CountFile);
       exit(1);
     }
-    fprintf(fp,"%d %lf %d %lf\n",nhits,nhits*voxvol,nvox,(double)100*nhits/nvox);
+    fprintf(fp, "%d %lf %d %lf\n", nhits, nhits * voxvol, nvox,
+            (double)100 * nhits / nvox);
     fclose(fp);
   }
 
@@ -610,41 +629,54 @@ int main(int argc, char *argv[]) {
 }
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int  nargc , nargsused, nth;
-  char **pargv, *option ;
+  int nargc, nargsused, nth;
+  char **pargv, *option;
 
-  if (argc < 1) usage_exit();
+  if (argc < 1)
+    usage_exit();
 
-  nargc   = argc;
+  nargc = argc;
   pargv = argv;
   while (nargc > 0) {
 
     option = pargv[0];
-    if (debug) printf("%d %s\n",nargc,option);
+    if (debug)
+      printf("%d %s\n", nargc, option);
     nargc -= 1;
     pargv += 1;
 
     nargsused = 0;
 
-    if (!strcasecmp(option, "--help"))  print_help() ;
-    else if (!strcasecmp(option, "--version")) print_version() ;
-    else if (!strcasecmp(option, "--debug"))   debug = 1;
-    else if (!strcasecmp(option, "--noverbose"))   noverbose = 1;
-    else if (!strcasecmp(option, "--checkopts"))   checkoptsonly = 1;
-    else if (!strcasecmp(option, "--nocheckopts")) checkoptsonly = 0;
-    else if (!strcasecmp(option, "--abs")) DoAbs = 1;
-    else if (!strcasecmp(option, "--neg")) DoNeg = 1;
-    else if (!strcasecmp(option, "--bincol")) DoBinCol = 1;
-    else if (!strcasecmp(option, "--uchar")) mriTypeUchar = 1;
-    else if (!strcasecmp(option, "--no-count")) DoCount = 0;
-    else if (!strcasecmp(option, "--zero-edges")){
+    if (!strcasecmp(option, "--help"))
+      print_help();
+    else if (!strcasecmp(option, "--version"))
+      print_version();
+    else if (!strcasecmp(option, "--debug"))
+      debug = 1;
+    else if (!strcasecmp(option, "--noverbose"))
+      noverbose = 1;
+    else if (!strcasecmp(option, "--checkopts"))
+      checkoptsonly = 1;
+    else if (!strcasecmp(option, "--nocheckopts"))
+      checkoptsonly = 0;
+    else if (!strcasecmp(option, "--abs"))
+      DoAbs = 1;
+    else if (!strcasecmp(option, "--neg"))
+      DoNeg = 1;
+    else if (!strcasecmp(option, "--bincol"))
+      DoBinCol = 1;
+    else if (!strcasecmp(option, "--uchar"))
+      mriTypeUchar = 1;
+    else if (!strcasecmp(option, "--no-count"))
+      DoCount = 0;
+    else if (!strcasecmp(option, "--zero-edges")) {
       ZeroColEdges = 1;
       ZeroRowEdges = 1;
       ZeroSliceEdges = 1;
-    }
-    else if (!strcasecmp(option, "--zero-slice-edges")) ZeroSliceEdges = 1;
-    else if (!strcasecmp(option, "--ctx-wm") || !strcasecmp(option, "--wm")){
-      MatchValues[nMatch++] =  2;
+    } else if (!strcasecmp(option, "--zero-slice-edges"))
+      ZeroSliceEdges = 1;
+    else if (!strcasecmp(option, "--ctx-wm") || !strcasecmp(option, "--wm")) {
+      MatchValues[nMatch++] = 2;
       MatchValues[nMatch++] = 41;
       MatchValues[nMatch++] = 77;
       MatchValues[nMatch++] = 251;
@@ -653,9 +685,8 @@ static int parse_commandline(int argc, char **argv) {
       MatchValues[nMatch++] = 254;
       MatchValues[nMatch++] = 255;
       DoMatch = 1;
-    }
-    else if (!strcasecmp(option, "--all-wm")){
-      MatchValues[nMatch++] =  2;
+    } else if (!strcasecmp(option, "--all-wm")) {
+      MatchValues[nMatch++] = 2;
       MatchValues[nMatch++] = 41;
       MatchValues[nMatch++] = 77;
       MatchValues[nMatch++] = 251;
@@ -663,25 +694,24 @@ static int parse_commandline(int argc, char **argv) {
       MatchValues[nMatch++] = 253;
       MatchValues[nMatch++] = 254;
       MatchValues[nMatch++] = 255;
-      MatchValues[nMatch++] =  7; // Cerebellar WM
+      MatchValues[nMatch++] = 7;  // Cerebellar WM
       MatchValues[nMatch++] = 46; // Cerebellar WM
       DoMatch = 1;
-    }
-    else if (!strcasecmp(option, "--ventricles")){
-      MatchValues[nMatch++] =  4; // Left-Lateral-Ventricle
-      MatchValues[nMatch++] =  5; // Left-Inf-Lat-Vent
+    } else if (!strcasecmp(option, "--ventricles")) {
+      MatchValues[nMatch++] = 4;  // Left-Lateral-Ventricle
+      MatchValues[nMatch++] = 5;  // Left-Inf-Lat-Vent
       MatchValues[nMatch++] = 14; // 3rd-Ventricle
       MatchValues[nMatch++] = 43; // Right-Lateral-Ventricle
       MatchValues[nMatch++] = 44; // Right-Inf-Lat-Vent
       MatchValues[nMatch++] = 72; // 5th-Ventricle
-      MatchValues[nMatch++] = 31; // Left-choroid-plexus 
-      MatchValues[nMatch++] = 63; // Right-choroid-plexus 
-      //MatchValues[nMatch++] = 15; // 4th-Ventricle. Good to include?
+      MatchValues[nMatch++] = 31; // Left-choroid-plexus
+      MatchValues[nMatch++] = 63; // Right-choroid-plexus
+      // MatchValues[nMatch++] = 15; // 4th-Ventricle. Good to include?
       DoMatch = 1;
     }
 
-    else if (!strcasecmp(option, "--wm+vcsf")){
-      MatchValues[nMatch++] =  2;
+    else if (!strcasecmp(option, "--wm+vcsf")) {
+      MatchValues[nMatch++] = 2;
       MatchValues[nMatch++] = 41;
       MatchValues[nMatch++] = 77;
       MatchValues[nMatch++] = 251;
@@ -689,22 +719,21 @@ static int parse_commandline(int argc, char **argv) {
       MatchValues[nMatch++] = 253;
       MatchValues[nMatch++] = 254;
       MatchValues[nMatch++] = 255;
-      MatchValues[nMatch++] =  7; // Cerebellar WM
+      MatchValues[nMatch++] = 7;  // Cerebellar WM
       MatchValues[nMatch++] = 46; // Cerebellar WM
-      MatchValues[nMatch++] =  4; // Left-Lateral-Ventricle
-      MatchValues[nMatch++] =  5; // Left-Inf-Lat-Vent
+      MatchValues[nMatch++] = 4;  // Left-Lateral-Ventricle
+      MatchValues[nMatch++] = 5;  // Left-Inf-Lat-Vent
       MatchValues[nMatch++] = 14; // 3rd-Ventricle
       MatchValues[nMatch++] = 43; // Right-Lateral-Ventricle
       MatchValues[nMatch++] = 44; // Right-Inf-Lat-Vent
       MatchValues[nMatch++] = 72; // 5th-Ventricle
-      MatchValues[nMatch++] = 31; // Left-choroid-plexus 
-      MatchValues[nMatch++] = 63; // Right-choroid-plexus 
-      //MatchValues[nMatch++] = 15; // 4th-Ventricle. Good to include?
+      MatchValues[nMatch++] = 31; // Left-choroid-plexus
+      MatchValues[nMatch++] = 63; // Right-choroid-plexus
+      // MatchValues[nMatch++] = 15; // 4th-Ventricle. Good to include?
       DoMatch = 1;
-    }
-    else if (!strcasecmp(option, "--gm")) {
+    } else if (!strcasecmp(option, "--gm")) {
       // Create a mask of all other stuff and invert
-      MatchValues[nMatch++] =  2;
+      MatchValues[nMatch++] = 2;
       MatchValues[nMatch++] = 41;
       MatchValues[nMatch++] = 77;
       MatchValues[nMatch++] = 251;
@@ -712,18 +741,18 @@ static int parse_commandline(int argc, char **argv) {
       MatchValues[nMatch++] = 253;
       MatchValues[nMatch++] = 254;
       MatchValues[nMatch++] = 255;
-      MatchValues[nMatch++] =  7; // Cerebellar WM
+      MatchValues[nMatch++] = 7;  // Cerebellar WM
       MatchValues[nMatch++] = 46; // Cerebellar WM
-      MatchValues[nMatch++] =  4; // Left-Lateral-Ventricle
-      MatchValues[nMatch++] =  5; // Left-Inf-Lat-Vent
+      MatchValues[nMatch++] = 4;  // Left-Lateral-Ventricle
+      MatchValues[nMatch++] = 5;  // Left-Inf-Lat-Vent
       MatchValues[nMatch++] = 14; // 3rd-Ventricle
       MatchValues[nMatch++] = 43; // Right-Lateral-Ventricle
       MatchValues[nMatch++] = 44; // Right-Inf-Lat-Vent
-      MatchValues[nMatch++] = 15; // 4th-Ventricle 
+      MatchValues[nMatch++] = 15; // 4th-Ventricle
       MatchValues[nMatch++] = 72; // 5th-Ventricle
-      MatchValues[nMatch++] = 31; // Left-choroid-plexus 
-      MatchValues[nMatch++] = 63; // Right-choroid-plexus 
-      MatchValues[nMatch++] =  0; // Background
+      MatchValues[nMatch++] = 31; // Left-choroid-plexus
+      MatchValues[nMatch++] = 63; // Right-choroid-plexus
+      MatchValues[nMatch++] = 0;  // Background
       MatchValues[nMatch++] = 24; // CSF
       DoMatch = 1;
       // Invert the matches above
@@ -732,245 +761,292 @@ static int parse_commandline(int argc, char **argv) {
     }
 
     else if (!strcasecmp(option, "--i")) {
-      if (nargc < 1) CMDargNErr(option,1);
+      if (nargc < 1)
+        CMDargNErr(option, 1);
       InVolFile = pargv[0];
       nargsused = 1;
-    } 
-    else if (!strcasecmp(option, "--o")) {
-      if (nargc < 1) CMDargNErr(option,1);
+    } else if (!strcasecmp(option, "--o")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
       OutVolFile = pargv[0];
       nargsused = 1;
-    } 
-    else if (!strcasecmp(option, "--surf")) {
-      if (nargc < 1) CMDargNErr(option,1);
+    } else if (!strcasecmp(option, "--surf")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
       SurfFile = pargv[0];
       nargsused = 1;
-    } 
-    else if (!strcasecmp(option, "--surf-smooth")) {
-      if (nargc < 1) CMDargNErr(option,1);
-      sscanf(pargv[0],"%d",&nsmoothsurf); // number of iterations
+    } else if (!strcasecmp(option, "--surf-smooth")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      sscanf(pargv[0], "%d", &nsmoothsurf); // number of iterations
       nargsused = 1;
-    } 
-    else if (!strcasecmp(option, "--merge")) {
-      if (nargc < 1) CMDargNErr(option,1);
+    } else if (!strcasecmp(option, "--merge")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
       MergeVolFile = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--copy")) {
-      if (nargc < 1) CMDargNErr(option,1);
+      if (nargc < 1)
+        CMDargNErr(option, 1);
       CopyVolFile = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--mask")) {
-      if (nargc < 1) CMDargNErr(option,1);
+      if (nargc < 1)
+        CMDargNErr(option, 1);
       MaskVolFile = pargv[0];
       nargsused = 1;
     } else if (!strcasecmp(option, "--mask-thresh")) {
-      if (nargc < 1) CMDargNErr(option,1);
-      sscanf(pargv[0],"%lf",&MaskThresh);
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      sscanf(pargv[0], "%lf", &MaskThresh);
       nargsused = 1;
     } else if (!strcasecmp(option, "--pct")) {
-      if (nargc < 1) CMDargNErr(option,1);
-      sscanf(pargv[0],"%lf",&TopPercent);
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      sscanf(pargv[0], "%lf", &TopPercent);
       MinThreshSet = 1;
       DoPercent = 1;
       nargsused = 1;
     } else if (!strcasecmp(option, "--min")) {
-      if (nargc < 1) CMDargNErr(option,1);
-      sscanf(pargv[0],"%lf",&MinThresh);
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      sscanf(pargv[0], "%lf", &MinThresh);
       MinThreshSet = 1;
       nargsused = 1;
     } else if (!strcasecmp(option, "--max")) {
-      if (nargc < 1) CMDargNErr(option,1);
-      sscanf(pargv[0],"%lf",&MaxThresh);
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      sscanf(pargv[0], "%lf", &MaxThresh);
       MaxThreshSet = 1;
       nargsused = 1;
     } else if (!strcasecmp(option, "--rmin")) {
-      if (nargc < 1) CMDargNErr(option,1);
-      sscanf(pargv[0],"%lf",&RMinThresh);
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      sscanf(pargv[0], "%lf", &RMinThresh);
       RMinThreshSet = 1;
       nargsused = 1;
     } else if (!strcasecmp(option, "--rmax")) {
-      if (nargc < 1) CMDargNErr(option,1);
-      sscanf(pargv[0],"%lf",&RMaxThresh);
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      sscanf(pargv[0], "%lf", &RMaxThresh);
       RMaxThreshSet = 1;
       nargsused = 1;
     } else if (!strcasecmp(option, "--fdr")) {
-      if (nargc < 1) CMDargNErr(option,1);
-      sscanf(pargv[0],"%lf",&FDR);
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      sscanf(pargv[0], "%lf", &FDR);
       DoFDR = 1;
       nargsused = 1;
-    } 
-    else if (!strcasecmp(option, "--fdr-pos")) FDRSign = +1;
-    else if (!strcasecmp(option, "--fdr-neg")) FDRSign = -1;
-    else if (!strcasecmp(option, "--fdr-abs")) FDRSign =  0; //default
+    } else if (!strcasecmp(option, "--fdr-pos"))
+      FDRSign = +1;
+    else if (!strcasecmp(option, "--fdr-neg"))
+      FDRSign = -1;
+    else if (!strcasecmp(option, "--fdr-abs"))
+      FDRSign = 0; // default
 
     else if (!strcasecmp(option, "--bb")) {
-      if(nargc < 1) CMDargNErr(option,1);
-      sscanf(pargv[0],"%d",&nPadBB);
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      sscanf(pargv[0], "%d", &nPadBB);
       DoBB = 1;
       nargsused = 1;
-    }    
-    else if (!strcasecmp(option, "--replace")) {
-      if(nargc < 2) CMDargNErr(option,2);
-      sscanf(pargv[0],"%d",&SrcReplace[nReplace]);
-      sscanf(pargv[1],"%d",&TrgReplace[nReplace]);
+    } else if (!strcasecmp(option, "--replace")) {
+      if (nargc < 2)
+        CMDargNErr(option, 2);
+      sscanf(pargv[0], "%d", &SrcReplace[nReplace]);
+      sscanf(pargv[1], "%d", &TrgReplace[nReplace]);
       nReplace++;
       nargsused = 2;
-    }    
-    else if (!strcasecmp(option, "--replaceonly")) {
-      if(nargc < 2) CMDargNErr(option,2);
-      sscanf(pargv[0],"%d",&SrcReplace[nReplace]);
-      sscanf(pargv[1],"%d",&TrgReplace[nReplace]);
-      replace_only = 1 ;
+    } else if (!strcasecmp(option, "--replaceonly")) {
+      if (nargc < 2)
+        CMDargNErr(option, 2);
+      sscanf(pargv[0], "%d", &SrcReplace[nReplace]);
+      sscanf(pargv[1], "%d", &TrgReplace[nReplace]);
+      replace_only = 1;
       nReplace++;
       nargsused = 2;
-    }    
-    else if (!strcasecmp(option, "--binval")) {
-      if (nargc < 1) CMDargNErr(option,1);
-      sscanf(pargv[0],"%d",&BinVal);
+    } else if (!strcasecmp(option, "--binval")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      sscanf(pargv[0], "%d", &BinVal);
       nargsused = 1;
     } else if (!strcasecmp(option, "--binvalnot")) {
-      if (nargc < 1) CMDargNErr(option,1);
-      sscanf(pargv[0],"%d",&BinValNot);
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      sscanf(pargv[0], "%d", &BinValNot);
       nargsused = 1;
     } else if (!strcasecmp(option, "--inv")) {
       BinVal = 0;
       BinValNot = 1;
     } else if (!strcasecmp(option, "--match")) {
-      if (nargc < 1) CMDargNErr(option,1);
+      if (nargc < 1)
+        CMDargNErr(option, 1);
       nth = 0;
-      while(CMDnthIsArg(nargc, pargv, nth) ){
-	sscanf(pargv[nth],"%d",&MatchValues[nMatch]);
-	nMatch ++;
-	nth++;
+      while (CMDnthIsArg(nargc, pargv, nth)) {
+        sscanf(pargv[nth], "%d", &MatchValues[nMatch]);
+        nMatch++;
+        nth++;
       }
       nargsused = nth;
       DoMatch = 1;
-    } 
-    else if (!strcasecmp(option, "--subcort-gm")) {
-      MatchValues[nMatch] = Left_Thalamus; nMatch++;
-      MatchValues[nMatch] = Left_Caudate; nMatch++;
-      MatchValues[nMatch] = Left_Putamen; nMatch++;
-      MatchValues[nMatch] = Left_Pallidum; nMatch++;
-      MatchValues[nMatch] = Left_Hippocampus; nMatch++;
-      MatchValues[nMatch] = Left_Amygdala; nMatch++;
-      MatchValues[nMatch] = Left_Accumbens_area; nMatch++;
-      MatchValues[nMatch] = Left_VentralDC; nMatch++;
-      MatchValues[nMatch] = Left_Substancia_Nigra; nMatch++;
-      MatchValues[nMatch] = Left_Cerebellum_Cortex; nMatch++;
-      MatchValues[nMatch] = Right_Thalamus; nMatch++;
-      MatchValues[nMatch] = Right_Caudate; nMatch++;
-      MatchValues[nMatch] = Right_Putamen; nMatch++;
-      MatchValues[nMatch] = Right_Pallidum; nMatch++;
-      MatchValues[nMatch] = Right_Hippocampus; nMatch++;
-      MatchValues[nMatch] = Right_Amygdala; nMatch++;
-      MatchValues[nMatch] = Right_Accumbens_area; nMatch++;
-      MatchValues[nMatch] = Right_VentralDC; nMatch++;
-      MatchValues[nMatch] = Right_Substancia_Nigra; nMatch++;
-      MatchValues[nMatch] = Right_Cerebellum_Cortex; nMatch++;
-      //MatchValues[nMatch] = Brain_Stem; nMatch++;
+    } else if (!strcasecmp(option, "--subcort-gm")) {
+      MatchValues[nMatch] = Left_Thalamus;
+      nMatch++;
+      MatchValues[nMatch] = Left_Caudate;
+      nMatch++;
+      MatchValues[nMatch] = Left_Putamen;
+      nMatch++;
+      MatchValues[nMatch] = Left_Pallidum;
+      nMatch++;
+      MatchValues[nMatch] = Left_Hippocampus;
+      nMatch++;
+      MatchValues[nMatch] = Left_Amygdala;
+      nMatch++;
+      MatchValues[nMatch] = Left_Accumbens_area;
+      nMatch++;
+      MatchValues[nMatch] = Left_VentralDC;
+      nMatch++;
+      MatchValues[nMatch] = Left_Substancia_Nigra;
+      nMatch++;
+      MatchValues[nMatch] = Left_Cerebellum_Cortex;
+      nMatch++;
+      MatchValues[nMatch] = Right_Thalamus;
+      nMatch++;
+      MatchValues[nMatch] = Right_Caudate;
+      nMatch++;
+      MatchValues[nMatch] = Right_Putamen;
+      nMatch++;
+      MatchValues[nMatch] = Right_Pallidum;
+      nMatch++;
+      MatchValues[nMatch] = Right_Hippocampus;
+      nMatch++;
+      MatchValues[nMatch] = Right_Amygdala;
+      nMatch++;
+      MatchValues[nMatch] = Right_Accumbens_area;
+      nMatch++;
+      MatchValues[nMatch] = Right_VentralDC;
+      nMatch++;
+      MatchValues[nMatch] = Right_Substancia_Nigra;
+      nMatch++;
+      MatchValues[nMatch] = Right_Cerebellum_Cortex;
+      nMatch++;
+      // MatchValues[nMatch] = Brain_Stem; nMatch++;
       DoMatch = 1;
-    } 
-    else if (!strcasecmp(option, "--frame")) {
-      if (nargc < 1) CMDargNErr(option,1);
-      sscanf(pargv[0],"%d",&frame);
+    } else if (!strcasecmp(option, "--frame")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      sscanf(pargv[0], "%d", &frame);
       nargsused = 1;
       DoFrameLoop = 0;
-    } 
-    else if (!strcasecmp(option, "--frame-sum")) {
+    } else if (!strcasecmp(option, "--frame-sum")) {
       DoFrameSum = 1;
       DoFrameLoop = 0;
-    } 
-    else if (!strcasecmp(option, "--frame-and")) {
+    } else if (!strcasecmp(option, "--frame-and")) {
       DoFrameAnd = 1;
       MinThreshSet = 1;
       DoFrameLoop = 0;
-    } 
-    else if (!strcasecmp(option, "--dilate")) {
-      if (nargc < 1) CMDargNErr(option,1);
-      sscanf(pargv[0],"%d",&nDilate3d);
+    } else if (!strcasecmp(option, "--dilate")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      sscanf(pargv[0], "%d", &nDilate3d);
       nargsused = 1;
-    } 
-    else if (!strcasecmp(option, "--erode-face")) {
-      if (nargc < 1) CMDargNErr(option,1);
-      sscanf(pargv[0],"%d",&nErodeNN);
+    } else if (!strcasecmp(option, "--erode-face")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      sscanf(pargv[0], "%d", &nErodeNN);
       NNType = NEAREST_NEIGHBOR_FACE;
       nargsused = 1;
-    } 
-    else if (!strcasecmp(option, "--erode-edge")) {
-      if (nargc < 1) CMDargNErr(option,1);
-      sscanf(pargv[0],"%d",&nErodeNN);
+    } else if (!strcasecmp(option, "--erode-edge")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      sscanf(pargv[0], "%d", &nErodeNN);
       NNType = NEAREST_NEIGHBOR_EDGE;
       nargsused = 1;
-    } 
-    else if (!strcasecmp(option, "--erode-corner")) {
-      if (nargc < 1) CMDargNErr(option,1);
-      sscanf(pargv[0],"%d",&nErodeNN);
+    } else if (!strcasecmp(option, "--erode-corner")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      sscanf(pargv[0], "%d", &nErodeNN);
       NNType = NEAREST_NEIGHBOR_CORNER;
       nargsused = 1;
-    } 
-    else if (!strcasecmp(option, "--erode")) {
-      if (nargc < 1) CMDargNErr(option,1);
-      sscanf(pargv[0],"%d",&nErode3d);
+    } else if (!strcasecmp(option, "--erode")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      sscanf(pargv[0], "%d", &nErode3d);
       nargsused = 1;
-    } 
-    else if (!strcasecmp(option, "--erode2d")) {
-      if (nargc < 1) CMDargNErr(option,1);
-      sscanf(pargv[0],"%d",&nErode2d);
+    } else if (!strcasecmp(option, "--erode2d")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      sscanf(pargv[0], "%d", &nErode2d);
       nargsused = 1;
     } else if (!strcasecmp(option, "--count")) {
-      if (nargc < 1) CMDargNErr(option,1);
+      if (nargc < 1)
+        CMDargNErr(option, 1);
       CountFile = pargv[0];
       DoCount = 1;
       nargsused = 1;
     } else {
-      fprintf(stderr,"ERROR: Option %s unknown\n",option);
+      fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (CMDsingleDash(option))
-        fprintf(stderr,"       Did you really mean -%s ?\n",option);
+        fprintf(stderr, "       Did you really mean -%s ?\n", option);
       exit(-1);
     }
     nargc -= nargsused;
     pargv += nargsused;
   }
-  return(0);
+  return (0);
 }
 /* ------------------------------------------------------ */
-static void usage_exit(void) {
-  print_usage() ;
-  exit(1) ;
+static void usage_exit() {
+  print_usage();
+  exit(1);
 }
 /* --------------------------------------------- */
-static void print_usage(void) {
-  printf("USAGE: %s \n",Progname) ;
+static void print_usage() {
+  printf("USAGE: %s \n", Progname);
   printf("\n");
   printf("   --i invol  : input volume \n");
   printf("   \n");
   printf("   --min min  : min thresh (def is -inf)\n");
   printf("   --max max  : max thresh (def is +inf)\n");
-  printf("   --pct P : set threshold to capture top P%% (in mask or total volume)\n");
+  printf("   --pct P : set threshold to capture top P%% (in mask or total "
+         "volume)\n");
   printf("   --rmin rmin  : compute min based on rmin*globalmean\n");
   printf("   --rmax rmax  : compute max based on rmax*globalmean\n");
-  printf("   --fdr fdrthresh : compute min based on FDR (assuming -log10(p) input)\n");
-  printf("     --fdr-pos, --fdr-neg, --fdr-abs (use only pos, neg, or abs; abs is default)\n");
+  printf("   --fdr fdrthresh : compute min based on FDR (assuming -log10(p) "
+         "input)\n");
+  printf("     --fdr-pos, --fdr-neg, --fdr-abs (use only pos, neg, or abs; abs "
+         "is default)\n");
   printf("   --match matchval <matchval2 ...>  : match instead of threshold\n");
-  printf("   --replaceonly V1 V2 : replace voxels=V1 with V2 and propagate other src voxels instead of binarizing\n");
+  printf("   --replaceonly V1 V2 : replace voxels=V1 with V2 and propagate "
+         "other src voxels instead of binarizing\n");
   printf("   --replace V1 V2 : replace voxels=V1 with V2\n");
-  printf("   --ctx-wm : set match vals to 2, 41, 77, 251-255 (aseg for cerebral WM)\n");
-  printf("   --all-wm : set match vals to 2, 41, 77, 251-255, 7, and 46, (aseg for all WM)\n");
-  printf("   --ventricles : set match vals those for aseg ventricles+choroid (not 4th)\n");
-  printf("   --wm+vcsf : WM and ventricular CSF, including choroid (not 4th)\n");
+  printf("   --ctx-wm : set match vals to 2, 41, 77, 251-255 (aseg for "
+         "cerebral WM)\n");
+  printf("   --all-wm : set match vals to 2, 41, 77, 251-255, 7, and 46, (aseg "
+         "for all WM)\n");
+  printf("   --ventricles : set match vals those for aseg ventricles+choroid "
+         "(not 4th)\n");
+  printf(
+      "   --wm+vcsf : WM and ventricular CSF, including choroid (not 4th)\n");
   printf("   --gm : match for all WM and VCSF and background, then invert\n");
   printf("   --subcort-gm : subcortical gray matter\n");
   printf("   \n");
   printf("   --o outvol : output volume \n");
-  printf("   --count countfile : save number of hits in ascii file (hits,ntotvox,pct)\n");
-  printf("   --no-count : turn off counting number of voxels in the first frame -- good for large volumes\n");
+  printf("   --count countfile : save number of hits in ascii file "
+         "(hits,ntotvox,pct)\n");
+  printf("   --no-count : turn off counting number of voxels in the first "
+         "frame -- good for large volumes\n");
   printf("   \n");
-  printf("   --binval    val    : set vox within thresh to val (default is 1) \n");
-  printf("   --binvalnot notval : set vox outside range to notval (default is 0) \n");
+  printf(
+      "   --binval    val    : set vox within thresh to val (default is 1) \n");
+  printf("   --binvalnot notval : set vox outside range to notval (default is "
+         "0) \n");
   printf("   --inv              : set binval=0, binvalnot=1\n");
-  printf("   --frame frameno    : use 0-based frame of input (default is 0) \n");
+  printf(
+      "   --frame frameno    : use 0-based frame of input (default is 0) \n");
   printf("   --frame-sum : sum frames together before binarizing\n");
-  printf("   --frame-and : take intersection (AND) of frames. No --min needed.\n");
+  printf(
+      "   --frame-and : take intersection (AND) of frames. No --min needed.\n");
   printf("   --merge mergevol   : merge with mergevolume \n");
   printf("   --mask maskvol       : must be within mask \n");
   printf("   --mask-thresh thresh : set thresh for mask (def is 0.5) \n");
@@ -980,13 +1056,19 @@ static void print_usage(void) {
   printf("   --zero-slice-edges : zero the edge slice voxels\n");
   printf("   --dilate ndilate: dilate binarization in 3D\n");
   printf("   --erode  nerode: erode binarization in 3D (after any dilation)\n");
-  printf("   --erode2d nerode2d: erode binarization in 2D (after any 3D erosion)\n");
-  printf("   --erode-face   nerode: erode binarization using 'face' nearest neighbors\n");
-  printf("   --erode-edge   nerode: erode binarization using 'edge' nearest neighbors\n");
-  printf("   --erode-corner nerode: erode binarization using 'corner' nearest neighbors (same as --erode)\n");
-  printf("   --bb npad : reduce dim of output to the minimum volume of non-zero voxels with npad boundary\n");
+  printf("   --erode2d nerode2d: erode binarization in 2D (after any 3D "
+         "erosion)\n");
+  printf("   --erode-face   nerode: erode binarization using 'face' nearest "
+         "neighbors\n");
+  printf("   --erode-edge   nerode: erode binarization using 'edge' nearest "
+         "neighbors\n");
+  printf("   --erode-corner nerode: erode binarization using 'corner' nearest "
+         "neighbors (same as --erode)\n");
+  printf("   --bb npad : reduce dim of output to the minimum volume of "
+         "non-zero voxels with npad boundary\n");
   printf("   --surf surfname : create a surface mesh from the binarization\n");
-  printf("   --surf-smooth niterations : iteratively smooth the surface mesh\n");
+  printf(
+      "   --surf-smooth niterations : iteratively smooth the surface mesh\n");
   printf("   --noverbose (default *verbose*) \n");
   printf("\n");
   printf("   --debug     turn on debugging\n");
@@ -994,161 +1076,187 @@ static void print_usage(void) {
   printf("   --help      print out information on how to use this program\n");
   printf("   --version   print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid) ;
+  printf("%s\n", vcid);
   printf("\n");
 }
 /* --------------------------------------------- */
-static void print_help(void) {
-  print_usage() ;
-printf("\n");
-printf("Program to binarize a volume (or volume-encoded surface file). Can also\n");
-printf("be used to merge with other binarizations. Binarization can be done\n");
-printf("based on threshold or on matched values.\n");
-printf("\n");
-printf("--i invol\n");
-printf("\n");
-printf("Input volume to be binarized.\n");
-printf("\n");
-printf("--min min\n");
-printf("--max max\n");
-printf("--rmin rmin\n");
-printf("--rmax rmax\n");
-printf("\n");
-printf("--noverbose (default is *verbose*) \n");
-printf("\n");
-printf("Minimum and maximum thresholds. If the value at a voxel is >= min and\n");
-printf("<= max, then its value in the output will be 1 (or --binval),\n");
-printf("otherwise it is 0 (or --binvalnot) or the value of the merge volume at\n");
-printf("that voxel.  By default, min = -infinity and max = +infinity, but you\n");
-printf("must set one of the thresholds. Cannot be used with --match. If --rmin\n");
-printf("or --rmax are specified, then min (or max) is computed as rmin (or\n");
-printf("rmax) times the global mean of the input.\n");
-printf("\n");
-printf("--pct P\n");
-printf("\n");
-printf("Set min threshold so that the top P percent of the voxels are captured\n");
-printf("in the output mask. The percent will be computed based on the number of\n");
-printf("voxels in the volume (if not input mask is specified) or within the\n");
-printf("input mask.\n");
-printf("\n");
-printf("--fdr fdrthreshold\n");
-printf("\n");
-printf("Set min threshold to achieve a given FDR. By default, it uses the\n");
-printf("absolute value but this can be changed with --fdr-pos and\n");
-printf("--fdr-neg. If a mask is passed, it will compute the voxel-wise\n");
-printf("threshold only with in the places where mask > 0.5.  The mask\n");
-printf("threshold will be ignored.\n");
-printf("\n");
-printf("--match matchvalue <matchvalue2 ...>\n");
-printf("\n");
-printf("Binarize based on matching values. Any number of match values can be \n");
-printf("specified. Cannot be used with --min/--max.\n");
-printf("\n");
-printf("--o outvol\n");
-printf("\n");
-printf("Path to output volume.\n");
-printf("\n");
-printf("--count countfile\n");
-printf("\n");
-printf("Save number of voxels that meet match criteria in ascii\n");
-printf("countefile. Four numbers are saved: the number of voxels that match\n");
-printf("(nhits), the volume of the voxels that match, the total number of\n");
-printf("voxels in the volume (nvoxtot), and the percent matching\n");
-printf("(100*nhits/nvoxtot).\n");
-printf("\n");
-printf("--binval    binval\n");
-printf("--binvalnot binvalnot\n");
-printf("\n");
-printf("Value to use for those voxels that are in the threshold/match\n");
-printf("(--binval) or out of the range (--binvalnot). These must be integer\n");
-printf("values. binvalnot only applies when a merge volume is NOT specified.\n");
-printf("\n");
-printf("--replace V1 V2\n");
-printf("\n");
-printf("Replace every occurrence of (int) value V1 with value V2. Multiple \n");
-printf("--replace args are possible.\n");
-printf("\n");
-printf("--frame frameno\n");
-printf("\n");
-printf("Use give frame of the input. 0-based. Default is 0.\n");
-printf("\n");
-printf("--frame-sum\n");
-printf("\n");
-printf("Sum the frames together before applying threshold.\n");
-printf("\n");
-printf("--frame-and\n");
-printf("\n");
-printf("Treat the multi-frame volume as binary 'AND' the frames together. This\n");
-printf("takes an intersection of the individual frames. You do not need to \n");
-printf("specify a --min (the min will be set to nframes-0.5).\n");
-printf("\n");
-printf("--merge mergevol\n");
-printf("\n");
-printf("Merge binarization with the mergevol. If the voxel is within the threshold\n");
-printf("range (or matches), then its value will be binval. If not, then it will \n");
-printf("inherit its value from the value at that voxel in mergevol. mergevol must \n");
-printf("be the same dimension as the input volume. Combining this with --binval \n");
-printf("allows you to construct crude segmentations.\n");
-printf("\n");
-printf("--mask maskvol\n");
-printf("--mask-thresh thresh\n");
-printf("\n");
-printf("Mask input with mask. The mask volume is itself binarized at thresh\n");
-printf("(default is 0.5). If a voxel is not in the mask, then it will be assigned\n");
-printf("binvalnot or the value from the merge volume.\n");
-printf("\n");
-printf("--zero-edges\n");
-printf("\n");
-printf("Set the first and last planes in all dimensions to 0 (or --binvalnot). This\n");
-printf("makes sure that all the voxels on the edge of the imaging volume are 0.\n");
-printf("\n");
-printf("--zero-slice-edges\n");
-printf("\n");
-printf("Same as --zero-edges, but only for slices.\n");
-printf("\n");
-printf("--uchar\n");
-printf("\n");
-printf("Save output file in 'uchar' format.\n");
-printf("\n");
-  exit(1) ;
+static void print_help() {
+  print_usage();
+  printf("\n");
+  printf("Program to binarize a volume (or volume-encoded surface file). Can "
+         "also\n");
+  printf(
+      "be used to merge with other binarizations. Binarization can be done\n");
+  printf("based on threshold or on matched values.\n");
+  printf("\n");
+  printf("--i invol\n");
+  printf("\n");
+  printf("Input volume to be binarized.\n");
+  printf("\n");
+  printf("--min min\n");
+  printf("--max max\n");
+  printf("--rmin rmin\n");
+  printf("--rmax rmax\n");
+  printf("\n");
+  printf("--noverbose (default is *verbose*) \n");
+  printf("\n");
+  printf("Minimum and maximum thresholds. If the value at a voxel is >= min "
+         "and\n");
+  printf("<= max, then its value in the output will be 1 (or --binval),\n");
+  printf("otherwise it is 0 (or --binvalnot) or the value of the merge volume "
+         "at\n");
+  printf("that voxel.  By default, min = -infinity and max = +infinity, but "
+         "you\n");
+  printf("must set one of the thresholds. Cannot be used with --match. If "
+         "--rmin\n");
+  printf(
+      "or --rmax are specified, then min (or max) is computed as rmin (or\n");
+  printf("rmax) times the global mean of the input.\n");
+  printf("\n");
+  printf("--pct P\n");
+  printf("\n");
+  printf("Set min threshold so that the top P percent of the voxels are "
+         "captured\n");
+  printf("in the output mask. The percent will be computed based on the number "
+         "of\n");
+  printf(
+      "voxels in the volume (if not input mask is specified) or within the\n");
+  printf("input mask.\n");
+  printf("\n");
+  printf("--fdr fdrthreshold\n");
+  printf("\n");
+  printf("Set min threshold to achieve a given FDR. By default, it uses the\n");
+  printf("absolute value but this can be changed with --fdr-pos and\n");
+  printf("--fdr-neg. If a mask is passed, it will compute the voxel-wise\n");
+  printf("threshold only with in the places where mask > 0.5.  The mask\n");
+  printf("threshold will be ignored.\n");
+  printf("\n");
+  printf("--match matchvalue <matchvalue2 ...>\n");
+  printf("\n");
+  printf("Binarize based on matching values. Any number of match values can be "
+         "\n");
+  printf("specified. Cannot be used with --min/--max.\n");
+  printf("\n");
+  printf("--o outvol\n");
+  printf("\n");
+  printf("Path to output volume.\n");
+  printf("\n");
+  printf("--count countfile\n");
+  printf("\n");
+  printf("Save number of voxels that meet match criteria in ascii\n");
+  printf(
+      "countefile. Four numbers are saved: the number of voxels that match\n");
+  printf("(nhits), the volume of the voxels that match, the total number of\n");
+  printf("voxels in the volume (nvoxtot), and the percent matching\n");
+  printf("(100*nhits/nvoxtot).\n");
+  printf("\n");
+  printf("--binval    binval\n");
+  printf("--binvalnot binvalnot\n");
+  printf("\n");
+  printf("Value to use for those voxels that are in the threshold/match\n");
+  printf(
+      "(--binval) or out of the range (--binvalnot). These must be integer\n");
+  printf(
+      "values. binvalnot only applies when a merge volume is NOT specified.\n");
+  printf("\n");
+  printf("--replace V1 V2\n");
+  printf("\n");
+  printf(
+      "Replace every occurrence of (int) value V1 with value V2. Multiple \n");
+  printf("--replace args are possible.\n");
+  printf("\n");
+  printf("--frame frameno\n");
+  printf("\n");
+  printf("Use give frame of the input. 0-based. Default is 0.\n");
+  printf("\n");
+  printf("--frame-sum\n");
+  printf("\n");
+  printf("Sum the frames together before applying threshold.\n");
+  printf("\n");
+  printf("--frame-and\n");
+  printf("\n");
+  printf("Treat the multi-frame volume as binary 'AND' the frames together. "
+         "This\n");
+  printf(
+      "takes an intersection of the individual frames. You do not need to \n");
+  printf("specify a --min (the min will be set to nframes-0.5).\n");
+  printf("\n");
+  printf("--merge mergevol\n");
+  printf("\n");
+  printf("Merge binarization with the mergevol. If the voxel is within the "
+         "threshold\n");
+  printf("range (or matches), then its value will be binval. If not, then it "
+         "will \n");
+  printf("inherit its value from the value at that voxel in mergevol. mergevol "
+         "must \n");
+  printf("be the same dimension as the input volume. Combining this with "
+         "--binval \n");
+  printf("allows you to construct crude segmentations.\n");
+  printf("\n");
+  printf("--mask maskvol\n");
+  printf("--mask-thresh thresh\n");
+  printf("\n");
+  printf(
+      "Mask input with mask. The mask volume is itself binarized at thresh\n");
+  printf("(default is 0.5). If a voxel is not in the mask, then it will be "
+         "assigned\n");
+  printf("binvalnot or the value from the merge volume.\n");
+  printf("\n");
+  printf("--zero-edges\n");
+  printf("\n");
+  printf("Set the first and last planes in all dimensions to 0 (or "
+         "--binvalnot). This\n");
+  printf("makes sure that all the voxels on the edge of the imaging volume are "
+         "0.\n");
+  printf("\n");
+  printf("--zero-slice-edges\n");
+  printf("\n");
+  printf("Same as --zero-edges, but only for slices.\n");
+  printf("\n");
+  printf("--uchar\n");
+  printf("\n");
+  printf("Save output file in 'uchar' format.\n");
+  printf("\n");
+  exit(1);
 }
 /* --------------------------------------------- */
-static void print_version(void) {
-  printf("%s\n", vcid) ;
-  exit(1) ;
+static void print_version() {
+  printf("%s\n", vcid);
+  exit(1);
 }
 /* --------------------------------------------- */
-static void check_options(void) {
-  if (InVolFile == NULL) {
+static void check_options() {
+  if (InVolFile == nullptr) {
     printf("ERROR: must specify input volume\n");
     exit(1);
   }
-  if(OutVolFile == NULL && CountFile == NULL && SurfFile == NULL) {
+  if (OutVolFile == nullptr && CountFile == nullptr && SurfFile == nullptr) {
     printf("ERROR: must specify output volume or output count file\n");
     exit(1);
   }
-  if(MinThreshSet == 0  && MaxThreshSet == 0 &&
-     RMinThreshSet == 0 && RMaxThreshSet == 0 &&
-     !DoMatch && !DoFDR && nReplace == 0) {
-    printf("ERROR: must specify minimum and/or maximum threshold or match values\n");
+  if (MinThreshSet == 0 && MaxThreshSet == 0 && RMinThreshSet == 0 &&
+      RMaxThreshSet == 0 && !DoMatch && !DoFDR && nReplace == 0) {
+    printf("ERROR: must specify minimum and/or maximum threshold or match "
+           "values\n");
     exit(1);
   }
-  if((MinThreshSet || MaxThreshSet || RMinThreshSet || RMaxThreshSet) && DoMatch ) {
+  if ((MinThreshSet || MaxThreshSet || RMinThreshSet || RMaxThreshSet) &&
+      DoMatch) {
     printf("ERROR: cannot specify threshold and match values\n");
     exit(1);
   }
-  if(MinThreshSet && RMinThreshSet){
+  if (MinThreshSet && RMinThreshSet) {
     printf("ERROR: cannot --rmin and --min \n");
     exit(1);
   }
-  if(MaxThreshSet && RMaxThreshSet){
+  if (MaxThreshSet && RMaxThreshSet) {
     printf("ERROR: cannot --rmax and --max \n");
     exit(1);
   }
-  if(!DoMatch){
+  if (!DoMatch) {
     if (MaxThreshSet && MinThreshSet && MaxThresh < MinThresh) {
-      printf("ERROR: max thresh = %g < min thresh = %g\n",
-	     MaxThresh,MinThresh);
+      printf("ERROR: max thresh = %g < min thresh = %g\n", MaxThresh,
+             MinThresh);
       exit(1);
     }
   }
@@ -1159,43 +1267,48 @@ static void check_options(void) {
 static void dump_options(FILE *fp) {
   int n;
 
-  fprintf(fp,"\n");
-  fprintf(fp,"%s\n",vcid);
-  fprintf(fp,"cwd %s\n",cwd);
-  fprintf(fp,"cmdline %s\n",cmdline);
-  fprintf(fp,"sysname  %s\n",uts.sysname);
-  fprintf(fp,"hostname %s\n",uts.nodename);
-  fprintf(fp,"machine  %s\n",uts.machine);
-  fprintf(fp,"user     %s\n",VERuser());
-  fprintf(fp,"\n");
-  fprintf(fp,"input      %s\n",InVolFile);
-  fprintf(fp,"frame      %d\n",frame);
-  fprintf(fp,"nErode3d   %d\n",nErode3d);
-  fprintf(fp,"nErode2d   %d\n",nErode2d);
-  fprintf(fp,"output     %s\n",OutVolFile);
+  fprintf(fp, "\n");
+  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "cwd %s\n", cwd);
+  fprintf(fp, "cmdline %s\n", cmdline);
+  fprintf(fp, "sysname  %s\n", uts.sysname);
+  fprintf(fp, "hostname %s\n", uts.nodename);
+  fprintf(fp, "machine  %s\n", uts.machine);
+  fprintf(fp, "user     %s\n", VERuser());
+  fprintf(fp, "\n");
+  fprintf(fp, "input      %s\n", InVolFile);
+  fprintf(fp, "frame      %d\n", frame);
+  fprintf(fp, "nErode3d   %d\n", nErode3d);
+  fprintf(fp, "nErode2d   %d\n", nErode2d);
+  fprintf(fp, "output     %s\n", OutVolFile);
 
-  if(!DoMatch){
-    fprintf(fp,"Binarizing based on threshold\n");
-    if(MinThreshSet)        fprintf(fp,"min        %g\n",MinThresh);
-    else if(RMinThreshSet)  fprintf(fp,"rmin       %g\n",RMinThresh);
-    else                    fprintf(fp,"min        -infinity\n");
-    if(MaxThreshSet)        fprintf(fp,"max        %g\n",MaxThresh);
-    else if(RMaxThreshSet)  fprintf(fp,"rmax       %g\n",RMaxThresh);
-    else                    fprintf(fp,"max        +infinity\n");
+  if (!DoMatch) {
+    fprintf(fp, "Binarizing based on threshold\n");
+    if (MinThreshSet)
+      fprintf(fp, "min        %g\n", MinThresh);
+    else if (RMinThreshSet)
+      fprintf(fp, "rmin       %g\n", RMinThresh);
+    else
+      fprintf(fp, "min        -infinity\n");
+    if (MaxThreshSet)
+      fprintf(fp, "max        %g\n", MaxThresh);
+    else if (RMaxThreshSet)
+      fprintf(fp, "rmax       %g\n", RMaxThresh);
+    else
+      fprintf(fp, "max        +infinity\n");
+  } else {
+    fprintf(fp, "Binarizing based on matching values\n");
+    fprintf(fp, "nMatch %d\n", nMatch);
+    for (n = 0; n < nMatch; n++)
+      fprintf(fp, "%2d  %4d\n", n, MatchValues[n]);
   }
-  else {
-    fprintf(fp,"Binarizing based on matching values\n");
-    fprintf(fp,"nMatch %d\n",nMatch);
-    for(n=0; n < nMatch; n++)
-      fprintf(fp,"%2d  %4d\n",n,MatchValues[n]);
-  }
-  fprintf(fp,"binval        %d\n",BinVal);
-  fprintf(fp,"binvalnot     %d\n",BinValNot);
+  fprintf(fp, "binval        %d\n", BinVal);
+  fprintf(fp, "binvalnot     %d\n", BinValNot);
   if (MergeVolFile)
-    fprintf(fp,"merge      %s\n",MergeVolFile);
+    fprintf(fp, "merge      %s\n", MergeVolFile);
   if (MaskVolFile) {
-    fprintf(fp,"mask       %s\n",MaskVolFile);
-    fprintf(fp,"maskthresh %lf\n",MaskThresh);
+    fprintf(fp, "mask       %s\n", MaskVolFile);
+    fprintf(fp, "maskthresh %lf\n", MaskThresh);
   }
   return;
 }

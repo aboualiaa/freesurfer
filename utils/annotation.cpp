@@ -24,9 +24,9 @@
  *
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include <map>
 #include <vector>
@@ -46,8 +46,7 @@
 #include "annotation.h"
 #undef ANNOTATION_SRC
 
-typedef struct
-{
+typedef struct {
   int index;
   int r, g, b;
   int annotation;
@@ -58,8 +57,7 @@ static ATABLE_ELT *atable;
 static int num_entries = 0;
 
 /*-----------------------------------------------*/
-int print_annotation_table(FILE *fp)
-{
+int print_annotation_table(FILE *fp) {
   int n;
   if (num_entries <= 0) {
     read_annotation_table();
@@ -72,26 +70,24 @@ int print_annotation_table(FILE *fp)
 }
 
 /*-----------------------------------------------*/
-int print_annotation_colortable(FILE *fp)
-{
+int print_annotation_colortable(FILE *fp) {
   int n;
   if (num_entries <= 0) {
     read_annotation_table();
   }
 
   for (n = 0; n < num_entries; n++)
-    fprintf(
-        fp, "%3d   %-40s  %3d %3d %3d  0\n", atable[n].index, atable[n].name, atable[n].r, atable[n].g, atable[n].b);
+    fprintf(fp, "%3d   %-40s  %3d %3d %3d  0\n", atable[n].index,
+            atable[n].name, atable[n].r, atable[n].g, atable[n].b);
   return (0);
 }
 
-
-std::vector<int> readAnnotationIntoVector(const std::string& filename)
-{
+std::vector<int> readAnnotationIntoVector(const std::string &filename) {
   FILE *file = fopen(filename.c_str(), "r");
-  if (!file) logFatal(1) << "could not open " << filename;
+  if (!file)
+    logFatal(1) << "could not open " << filename;
 
-  std::map<int,int> annotmap;
+  std::map<int, int> annotmap;
   int num = freadInt(file);
 
   for (int i = 0; i < num; i++) {
@@ -104,16 +100,15 @@ std::vector<int> readAnnotationIntoVector(const std::string& filename)
 
   int maxv = annotmap.rbegin()->first;
   std::vector<int> annotlist(maxv, 0);
-  for (auto const& elt : annotmap) annotlist[elt.first] = elt.second;
+  for (auto const &elt : annotmap)
+    annotlist[elt.first] = elt.second;
   return annotlist;
 }
 
-
-int read_named_annotation_table(char *name)
-{
+int read_named_annotation_table(char *name) {
   FILE *fp;
   char fname[STRLEN], line[STRLEN];
-  const char *cp; 
+  const char *cp;
   int i;
 
   if (num_entries) {
@@ -128,8 +123,7 @@ int read_named_annotation_table(char *name)
       cp = ".";
     }
     sprintf(fname, "%s/%s", cp, name);
-  }
-  else {
+  } else {
     cp = ""; /* use path in name */
     sprintf(fname, "%s", name);
   }
@@ -157,15 +151,16 @@ int read_named_annotation_table(char *name)
     if (!cp) {
       break;
     }
-    sscanf(cp, "%d %s %d %d %d %*d", &atable[i].index, atable[i].name, &atable[i].r, &atable[i].g, &atable[i].b);
-    atable[i].annotation = atable[i].r + (atable[i].g << 8) + (atable[i].b << 16);
+    sscanf(cp, "%d %s %d %d %d %*d", &atable[i].index, atable[i].name,
+           &atable[i].r, &atable[i].g, &atable[i].b);
+    atable[i].annotation =
+        atable[i].r + (atable[i].g << 8) + (atable[i].b << 16);
   }
   return (NO_ERROR);
 }
 
 /*-----------------------------------------------*/
-int read_annotation_table(void)
-{
+int read_annotation_table() {
   FILE *fp;
   char fname[STRLEN], line[STRLEN];
   const char *cp;
@@ -181,10 +176,9 @@ int read_annotation_table(void)
     cp = ".";
   }
 
-  if (annotation_table_file == NULL) {
+  if (annotation_table_file == nullptr) {
     sprintf(fname, "%s/Simple_surface_labels2009.txt", cp);
-  }
-  else {
+  } else {
     sprintf(fname, "%s", annotation_table_file);
   }
 
@@ -211,13 +205,14 @@ int read_annotation_table(void)
     if (!cp) {
       break;
     }
-    sscanf(cp, "%d %s %d %d %d %*d", &atable[i].index, atable[i].name, &atable[i].r, &atable[i].g, &atable[i].b);
-    atable[i].annotation = atable[i].r + (atable[i].g << 8) + (atable[i].b << 16);
+    sscanf(cp, "%d %s %d %d %d %*d", &atable[i].index, atable[i].name,
+           &atable[i].r, &atable[i].g, &atable[i].b);
+    atable[i].annotation =
+        atable[i].r + (atable[i].g << 8) + (atable[i].b << 16);
   }
   return (NO_ERROR);
 }
-int annotation_to_index(int annotation)
-{
+int annotation_to_index(int annotation) {
   int i;
 
   if (num_entries <= 0) {
@@ -233,8 +228,7 @@ int annotation_to_index(int annotation)
   return (-1);
 }
 
-const char *index_to_name(int index)
-{
+const char *index_to_name(int index) {
   int i;
 
   if (num_entries <= 0) {
@@ -257,8 +251,7 @@ const char *index_to_name(int index)
   return ("NOT_FOUND");
 }
 
-int index_to_annotation(int index)
-{
+int index_to_annotation(int index) {
   int i;
 
   if (num_entries <= 0) {
@@ -274,8 +267,7 @@ int index_to_annotation(int index)
   return (-1);
 }
 
-const char *annotation_to_name(int annotation, int *pindex)
-{
+const char *annotation_to_name(int annotation, int *pindex) {
   int i;
 
   if (num_entries <= 0) {
@@ -310,8 +302,7 @@ const char *annotation_to_name(int annotation, int *pindex)
   given the index of the annotation in the color table.
   If no vertices with the index can be found, returns NULL.
 ------------------------------------------------------------*/
-LABEL *annotation2label(int annotid, MRIS *Surf)
-{
+LABEL *annotation2label(int annotid, MRIS *Surf) {
   int npoints, vtxno, annot, vtxannotid;
   VERTEX *vtx;
   LABEL *label;
@@ -324,8 +315,7 @@ LABEL *annotation2label(int annotid, MRIS *Surf)
     // Given this annotation, find its index in the ctab
     if (Surf->ct) {
       CTABfindAnnotation(Surf->ct, annot, &vtxannotid);
-    }
-    else {
+    } else {
       vtxannotid = annotation_to_index(annot);
     }
     if (vtxannotid == annotid) {
@@ -333,7 +323,7 @@ LABEL *annotation2label(int annotid, MRIS *Surf)
     }
   }
   if (npoints == 0) {
-    return (NULL);
+    return (nullptr);
   }
 
   // Allocate the label
@@ -347,8 +337,7 @@ LABEL *annotation2label(int annotid, MRIS *Surf)
     annot = Surf->vertices[vtxno].annotation;
     if (Surf->ct) {
       CTABfindAnnotation(Surf->ct, annot, &vtxannotid);
-    }
-    else {
+    } else {
       vtxannotid = annotation_to_index(annot);
     }
     if (vtxannotid == annotid) {
@@ -362,16 +351,15 @@ LABEL *annotation2label(int annotid, MRIS *Surf)
   return (label);
 }
 
-int set_atable_from_ctable(COLOR_TABLE *pct)
-{
+int set_atable_from_ctable(COLOR_TABLE *pct) {
   CTE *cte;
   int i;
 
-  if (pct == NULL) {
+  if (pct == nullptr) {
     return (ERROR_BAD_PARM);
   }
 
-  if (num_entries > 0)  // atable already set
+  if (num_entries > 0) // atable already set
   {
     return (NO_ERROR);
   }
@@ -385,7 +373,7 @@ int set_atable_from_ctable(COLOR_TABLE *pct)
   atable = (ATABLE_ELT *)calloc(num_entries, sizeof(ATABLE_ELT));
   for (i = 0; i < num_entries; i++) {
     cte = pct->entries[i];
-    if (NULL != cte) {
+    if (nullptr != cte) {
       atable[i].index = i;
       CTABcopyName(pct, i, atable[i].name, sizeof(atable[i].name));
       CTABrgbAtIndexi(pct, i, &atable[i].r, &atable[i].g, &atable[i].b);
@@ -395,18 +383,20 @@ int set_atable_from_ctable(COLOR_TABLE *pct)
 
   return (NO_ERROR);
 }
-int MRISdivideAnnotation(MRI_SURFACE *mris, int *nunits)
-{
+int MRISdivideAnnotation(MRI_SURFACE *mris, int *nunits) {
   int *done, vno, index, nadded, i, num, j, annot, new_annot;
   VERTEX *v;
   COLOR_TABLE *ct;
-  int rgb_scale = 30;  // need to pass as arg
+  int rgb_scale = 30; // need to pass as arg
 
   MRIScomputeMetricProperties(mris);
   MRIScomputeSecondFundamentalForm(mris);
   done = (int *)calloc(mris->ct->nentries, sizeof(int));
-  if (done == NULL)
-    ErrorExit(ERROR_NOMEMORY, "ERROR: MRISdivideAnnotation: could not allocate %d index table\n", mris->ct->nentries);
+  if (done == nullptr)
+    ErrorExit(
+        ERROR_NOMEMORY,
+        "ERROR: MRISdivideAnnotation: could not allocate %d index table\n",
+        mris->ct->nentries);
 
   MRISclearMarks(mris);
   MRISsetNeighborhoodSizeAndDist(mris, 2);
@@ -419,7 +409,7 @@ int MRISdivideAnnotation(MRI_SURFACE *mris, int *nunits)
       DiagBreak();
     }
     CTABfindAnnotation(mris->ct, v->annotation, &index);
-    if (index <= 0 || done[index])  // don't do unknown (index = 0)
+    if (index <= 0 || done[index]) // don't do unknown (index = 0)
     {
       continue;
     }
@@ -444,7 +434,7 @@ int MRISdivideAnnotation(MRI_SURFACE *mris, int *nunits)
     if (i == Gdiag_no) {
       DiagBreak();
     }
-    if (mris->ct->entries[i] == NULL) {
+    if (mris->ct->entries[i] == nullptr) {
       continue;
     }
     *(ct->entries[i]) = *(mris->ct->entries[i]);
@@ -452,7 +442,8 @@ int MRISdivideAnnotation(MRI_SURFACE *mris, int *nunits)
       int offset, new_index, ri, gi, bi, found;
 
       *(ct->entries[index]) = *(mris->ct->entries[i]);
-      sprintf(ct->entries[index]->name, "%s_div%d", ct->entries[i]->name, j + 1);
+      sprintf(ct->entries[index]->name, "%s_div%d", ct->entries[i]->name,
+              j + 1);
       offset = j;
       found = 0;
       do {
@@ -460,7 +451,8 @@ int MRISdivideAnnotation(MRI_SURFACE *mris, int *nunits)
         gi = (ct->entries[i]->gi + rgb_scale * offset) % 256;
         bi = (ct->entries[i]->bi + rgb_scale * offset) % 256;
         CTABfindRGBi(ct, ri, gi, bi, &new_index);
-        if (new_index < 0)  // couldn't find this r,g,b set - can use it for new entry
+        if (new_index <
+            0) // couldn't find this r,g,b set - can use it for new entry
         {
           ct->entries[index]->ri = ri;
           ct->entries[index]->gi = gi;
@@ -481,8 +473,7 @@ int MRISdivideAnnotation(MRI_SURFACE *mris, int *nunits)
             }
             v->annotation = new_annot;
           }
-        }
-        else {
+        } else {
           offset++;
           found = 0;
         }
@@ -505,11 +496,11 @@ int MRISdivideAnnotation(MRI_SURFACE *mris, int *nunits)
 
   return the # of additional parcellation units that have been added
 */
-int MRISdivideAnnotationUnit(MRI_SURFACE *mris, int annot, int nunits)
-{
+int MRISdivideAnnotationUnit(MRI_SURFACE *mris, int annot, int nunits) {
   int vno, num, min_vno;
   VERTEX *v, *vc;
-  float cx, cy, cz, dist, min_dist, evalues[3], u, w, dx, dy, dz, min_dot, max_dot, e1x, e1y, e1z, dot;
+  float cx, cy, cz, dist, min_dist, evalues[3], u, w, dx, dy, dz, min_dot,
+      max_dot, e1x, e1y, e1z, dot;
   MATRIX *m_obs, *m_obs_T, *m_cov, *m_eig;
 
   if (nunits < 2) {
@@ -528,7 +519,7 @@ int MRISdivideAnnotationUnit(MRI_SURFACE *mris, int annot, int nunits)
     cz += v->z;
     num++;
   }
-  if (num == 0)  // unused parcellation
+  if (num == 0) // unused parcellation
   {
     return (0);
   }
@@ -540,7 +531,7 @@ int MRISdivideAnnotationUnit(MRI_SURFACE *mris, int annot, int nunits)
   // find vertex in annotation closest to centroid
   min_dist = 100000;
   min_vno = -1;
-  vc = NULL;
+  vc = nullptr;
   for (vno = 0; vno < mris->nvertices; vno++) {
     v = &mris->vertices[vno];
     if (v->ripflag || v->annotation != annot) {
@@ -555,7 +546,9 @@ int MRISdivideAnnotationUnit(MRI_SURFACE *mris, int annot, int nunits)
   }
 
   if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
-    printf("using v %d as closest (%2.3f mm) from centroid (%2.1f, %2.1f, %2.1f)\n", min_vno, min_dist, cx, cy, cz);
+    printf("using v %d as closest (%2.3f mm) from centroid (%2.1f, %2.1f, "
+           "%2.1f)\n",
+           min_vno, min_dist, cx, cy, cz);
 
   // now compute eigensystem around this vertex
   m_obs = MatrixAlloc(2, num, MATRIX_REAL);
@@ -574,13 +567,16 @@ int MRISdivideAnnotationUnit(MRI_SURFACE *mris, int annot, int nunits)
     num++;
   }
 
-  m_obs_T = MatrixTranspose(m_obs, NULL);
+  m_obs_T = MatrixTranspose(m_obs, nullptr);
   m_cov = MatrixMultiply(m_obs, m_obs_T, NULL);
-  m_eig = MatrixEigenSystem(m_cov, evalues, NULL);
-  e1x = *MATRIX_RELT(m_eig, 1, 1) * vc->e1x + *MATRIX_RELT(m_eig, 2, 1) * vc->e2x;
-  e1y = *MATRIX_RELT(m_eig, 1, 1) * vc->e1y + *MATRIX_RELT(m_eig, 2, 1) * vc->e2y;
-  e1z = *MATRIX_RELT(m_eig, 1, 1) * vc->e1z + *MATRIX_RELT(m_eig, 2, 1) * vc->e2z;
-  if (e1y < 0)  // orient them from posterior to anterior
+  m_eig = MatrixEigenSystem(m_cov, evalues, nullptr);
+  e1x =
+      *MATRIX_RELT(m_eig, 1, 1) * vc->e1x + *MATRIX_RELT(m_eig, 2, 1) * vc->e2x;
+  e1y =
+      *MATRIX_RELT(m_eig, 1, 1) * vc->e1y + *MATRIX_RELT(m_eig, 2, 1) * vc->e2y;
+  e1z =
+      *MATRIX_RELT(m_eig, 1, 1) * vc->e1z + *MATRIX_RELT(m_eig, 2, 1) * vc->e2z;
+  if (e1y < 0) // orient them from posterior to anterior
   {
     e1x *= -1;
     e1y *= -1;
@@ -631,7 +627,7 @@ int MRISdivideAnnotationUnit(MRI_SURFACE *mris, int annot, int nunits)
     v->curv = (dot - min_dot) / (max_dot - min_dot);
     v->marked = (int)(nunits * v->curv);
     if (v->marked >= nunits) {
-      v->marked = nunits - 1;  // one with max_dot will be just too big
+      v->marked = nunits - 1; // one with max_dot will be just too big
     }
   }
 
@@ -656,8 +652,9 @@ int MRISdivideAnnotationUnit(MRI_SURFACE *mris, int annot, int nunits)
     parcnames[1] = "rostralmiddlefrontal";
     MRISmergeAnnotations(surf, 2, parcnames, "frontal");
 */
-int MRISmergeAnnotations(MRIS *mris, int nparcs, std::vector<std::string> parcnames, const char *newparcname)
-{
+int MRISmergeAnnotations(MRIS *mris, int nparcs,
+                         std::vector<std::string> parcnames,
+                         const char *newparcname) {
   int err, nthparc, parcid, nnewparcs, nthnewparc, m, match;
   int vtxno, *annotlist;
   COLOR_TABLE *ct;
@@ -667,7 +664,8 @@ int MRISmergeAnnotations(MRIS *mris, int nparcs, std::vector<std::string> parcna
     return (1);
   }
 
-  printf("MRISmergeAnnotations: parcCount=%d, newparcname=%s\n", nparcs, newparcname);
+  printf("MRISmergeAnnotations: parcCount=%d, newparcname=%s\n", nparcs,
+         newparcname);
 
   // Make sure each parc name is in the parcellation
   // Get the list of annotation numbers too
@@ -740,8 +738,7 @@ int MRISmergeAnnotations(MRIS *mris, int nparcs, std::vector<std::string> parcna
   the color table, it is given a value equal to the base (assumes
   base is "unknown").
 */
-MRI *MRISannot2seg(MRIS *surf, int base)
-{
+MRI *MRISannot2seg(MRIS *surf, int base) {
   int k, annot, annotid;
   MRI *seg;
 
@@ -751,12 +748,11 @@ MRI *MRISannot2seg(MRIS *surf, int base)
     annot = surf->vertices[k].annotation;
     if (surf->ct) {
       CTABfindAnnotation(surf->ct, annot, &annotid);
-    }
-    else {
+    } else {
       annotid = annotation_to_index(annot);
     }
     if (annotid == -1) {
-      annotid = 0;  // Assume base is unknown
+      annotid = 0; // Assume base is unknown
     }
     MRIsetVoxVal(seg, k, 0, 0, 0, annotid + base);
   }
@@ -768,9 +764,8 @@ MRI *MRISannot2seg(MRIS *surf, int base)
   Creates a binary overlay that is 1 for vertices as the border
   of parcellations and 0 everywhere else.
 */
-MRI *MRISannot2border(MRIS *surf)
-{
-  MRI* const border = MRIalloc(surf->nvertices, 1, 1, MRI_INT);
+MRI *MRISannot2border(MRIS *surf) {
+  MRI *const border = MRIalloc(surf->nvertices, 1, 1, MRI_INT);
   int k;
   for (k = 0; k < surf->nvertices; k++) {
     int const nnbrs = surf->vertices_topology[k].vnum;
@@ -778,7 +773,7 @@ MRI *MRISannot2border(MRIS *surf)
     int isborder = 0;
     int nthnbr;
     for (nthnbr = 0; nthnbr < nnbrs; nthnbr++) {
-      int const knbr     = surf->vertices_topology[k].v[nthnbr];
+      int const knbr = surf->vertices_topology[k].v[nthnbr];
       int const nbrannot = surf->vertices[knbr].annotation;
       if (nbrannot != annot) {
         isborder = 1;
@@ -798,8 +793,7 @@ MRI *MRISannot2border(MRIS *surf)
       Lobar division type can be specified by the 'a_lobeDivisionType' --
       see 'mris_annotation2Label.c' for the enumerated types.
 */
-int MRISaparc2lobes(MRIS *surf, int a_lobeDivisionType)
-{
+int MRISaparc2lobes(MRIS *surf, int a_lobeDivisionType) {
   int parcCount = 0;
   std::vector<std::string> parcnames(64);
 
@@ -814,52 +808,52 @@ int MRISaparc2lobes(MRIS *surf, int a_lobeDivisionType)
   parcnames[8] = "paracentral";
   parcnames[9] = "frontalpole";
   switch (a_lobeDivisionType) {
-    case 0:
-      parcCount = 10;
-      break;
-    case 1:
-    case 2:
-      parcnames[10] = "precentral";
-      parcCount = 11;
-      break;
+  case 0:
+    parcCount = 10;
+    break;
+  case 1:
+  case 2:
+    parcnames[10] = "precentral";
+    parcCount = 11;
+    break;
   }
   MRISmergeAnnotations(surf, parcCount, parcnames, "frontal");
 
   switch (a_lobeDivisionType) {
-    case 0:
-    case 1:
-      parcnames[0] = "superiortemporal";
-      parcnames[1] = "entorhinal";
-      parcnames[2] = "temporalpole";
-      parcnames[3] = "fusiform";
-      parcnames[4] = "inferiortemporal";
-      parcnames[5] = "middletemporal";
-      parcnames[6] = "parahippocampal";
-      parcnames[7] = "bankssts";
-      parcnames[8] = "transversetemporal";
-      parcCount = 9;
-      break;
-    case 2:
-      parcnames[0] = "superiortemporal";
-      parcnames[1] = "inferiortemporal";
-      parcnames[2] = "middletemporal";
-      parcnames[3] = "bankssts";
-      parcnames[4] = "transversetemporal";
-      parcCount = 5;
-      break;
+  case 0:
+  case 1:
+    parcnames[0] = "superiortemporal";
+    parcnames[1] = "entorhinal";
+    parcnames[2] = "temporalpole";
+    parcnames[3] = "fusiform";
+    parcnames[4] = "inferiortemporal";
+    parcnames[5] = "middletemporal";
+    parcnames[6] = "parahippocampal";
+    parcnames[7] = "bankssts";
+    parcnames[8] = "transversetemporal";
+    parcCount = 9;
+    break;
+  case 2:
+    parcnames[0] = "superiortemporal";
+    parcnames[1] = "inferiortemporal";
+    parcnames[2] = "middletemporal";
+    parcnames[3] = "bankssts";
+    parcnames[4] = "transversetemporal";
+    parcCount = 5;
+    break;
   }
   MRISmergeAnnotations(surf, parcCount, parcnames, "temporal");
 
   switch (a_lobeDivisionType) {
-    case 2:
-      parcnames[0] = "entorhinal";
-      parcnames[1] = "temporalpole";
-      parcnames[2] = "fusiform";
-      parcnames[3] = "parahippocampal";
-      MRISmergeAnnotations(surf, 4, parcnames, "parahippocampalgyrus");
-      break;
-    default:
-      break;
+  case 2:
+    parcnames[0] = "entorhinal";
+    parcnames[1] = "temporalpole";
+    parcnames[2] = "fusiform";
+    parcnames[3] = "parahippocampal";
+    MRISmergeAnnotations(surf, 4, parcnames, "parahippocampalgyrus");
+    break;
+  default:
+    break;
   }
 
   parcnames[0] = "supramarginal";
@@ -867,14 +861,14 @@ int MRISaparc2lobes(MRIS *surf, int a_lobeDivisionType)
   parcnames[2] = "superiorparietal";
   parcnames[3] = "precuneus";
   switch (a_lobeDivisionType) {
-    case 0:
-      parcCount = 4;
-      break;
-    case 1:
-    case 2:
-      parcnames[4] = "postcentral";
-      parcCount = 5;
-      break;
+  case 0:
+    parcCount = 4;
+    break;
+  case 1:
+  case 2:
+    parcnames[4] = "postcentral";
+    parcCount = 5;
+    break;
   }
   MRISmergeAnnotations(surf, parcCount, parcnames, "parietal");
 
@@ -898,8 +892,7 @@ int MRISaparc2lobes(MRIS *surf, int a_lobeDivisionType)
    by dividing some aparcs or other geometric manipulations. Based on
    conversations with Jim Fallon.
    -----------------------------------------------------------------*/
-int MRISfbirnAnnot(MRIS *surf)
-{
+int MRISfbirnAnnot(MRIS *surf) {
   int *nunits;
   int area32p, area32v, superiorfrontal, medialorbitofrontal;
   int rostralanteriorcingulate, rostralmiddlefrontal;
@@ -977,8 +970,7 @@ int MRISfbirnAnnot(MRIS *surf)
   loaded.  *nsegs returns the number of parcellations. **segidlist is
   a list of the parcellation id numbers (usually just 0 to nsegs-1.
 */
-double *MRISannotDice(MRIS *surf1, MRIS *surf2, int *nsegs, int **segidlist)
-{
+double *MRISannotDice(MRIS *surf1, MRIS *surf2, int *nsegs, int **segidlist) {
   MRI *seg1, *seg2;
   int k, id1, id2, k1 = 0, k2 = 0, vtxno;
   int nsegid1, *segidlist1;
@@ -997,8 +989,9 @@ double *MRISannotDice(MRIS *surf1, MRIS *surf2, int *nsegs, int **segidlist)
   segidlist2 = MRIsegIdList(seg1, &nsegid2, 0);
 
   if (nsegid1 != nsegid2) {
-    printf("ERROR: MRISannotDice(): nsegs do not match %d %d\n", nsegid1, nsegid2);
-    return (NULL);
+    printf("ERROR: MRISannotDice(): nsegs do not match %d %d\n", nsegid1,
+           nsegid2);
+    return (nullptr);
   }
   // Note: segidlist1 and 2 should be the same too
   printf("MRISannotDice(): found %d segs\n", nsegid1);

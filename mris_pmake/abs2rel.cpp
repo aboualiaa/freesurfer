@@ -23,9 +23,9 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#include <errno.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cerrno>
+#include <cstdlib>
+#include <cstring>
 /*
  * abs2rel: convert an absolute path name into relative.
  *
@@ -36,13 +36,8 @@
  * r)  != NULL: relative path
  *   == NULL: error
  */
-char *
-abs2rel(
-  const char  *path,
-  const char  *base,
-  char   *result,
-  const size_t  size
-) {
+char *abs2rel(const char *path, const char *base, char *result,
+              const size_t size) {
   const char *pp, *bp, *branch;
   /*
    * endp points the last position which is safe in the result buffer.
@@ -57,7 +52,7 @@ abs2rel(
     goto finish;
   } else if (*base != '/' || !size) {
     errno = EINVAL;
-    return (NULL);
+    return (nullptr);
   } else if (size == 1)
     goto erange;
   /*
@@ -108,5 +103,5 @@ finish:
   return result;
 erange:
   errno = ERANGE;
-  return (NULL);
+  return (nullptr);
 }

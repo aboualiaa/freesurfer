@@ -27,25 +27,18 @@
  *
  */
 
-
 #include "LayerProperty.h"
 
-LayerProperty::LayerProperty ( QObject* parent ) : QObject( parent ),
-  m_bShowInfo( true )
-{
-}
+LayerProperty::LayerProperty(QObject *parent)
+    : QObject(parent), m_bShowInfo(true) {}
 
-LayerProperty::~LayerProperty ()
-{
-}
+LayerProperty::~LayerProperty() {}
 
-void LayerProperty::SetShowInfo ( bool bShowInfo )
-{
-  if ( m_bShowInfo != bShowInfo )
-  {
+void LayerProperty::SetShowInfo(bool bShowInfo) {
+  if (m_bShowInfo != bShowInfo) {
     m_bShowInfo = bShowInfo;
 
-    emit ShowInfoChanged( bShowInfo );
+    emit ShowInfoChanged(bShowInfo);
     emit PropertyChanged();
   }
 }

@@ -35,26 +35,23 @@
 
 using namespace std;
 
-class QdecGlmFit
-{
+class QdecGlmFit {
 public:
-
   // Constructors/Destructors
   //
 
-  QdecGlmFit ( );
+  QdecGlmFit();
 
-  virtual ~QdecGlmFit ( );
+  virtual ~QdecGlmFit();
 
   // public attribute accessor methods
   //
-
 
   /**
    * @return int
    * @param  iGlmDesign
    */
-  int Run (QdecGlmDesign* iGlmDesign );
+  int Run(QdecGlmDesign *iGlmDesign);
 
   /**
    * Creates the contrast, stddef, coefficients, and fsgdf file names
@@ -63,20 +60,18 @@ public:
    * @return int
    * @param iGlmDesign
    */
-  int CreateResultsFromCachedData ( QdecGlmDesign* iGlmDesign );
+  int CreateResultsFromCachedData(QdecGlmDesign *iGlmDesign);
 
   /**
    * @return QdecGlmFitResults
    */
-  QdecGlmFitResults* GetResults ( );
+  QdecGlmFitResults *GetResults();
 
 private:
-
   // private attributes
   //
 
-  QdecGlmFitResults* mGlmFitResults;
-
+  QdecGlmFitResults *mGlmFitResults;
 };
 
 #endif // QDECGLMFIT_H

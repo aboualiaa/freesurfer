@@ -53,7 +53,6 @@
  * incbet underflow                     0.0
  */
 
-
 /*
   Cephes Math Library, Release 2.3:  March, 1995
   Copyright 1984, 1995 by Stephen L. Moshier
@@ -76,32 +75,28 @@ double gamma(), lgam(), exp(), log(), pow(), fabs();
 static double incbcf(), incbd(), pseries();
 
 static double big = 4.503599627370496e15;
-static double biginv =  2.22044604925031308085e-16;
+static double biginv = 2.22044604925031308085e-16;
 
-
-double incbet( aa, bb, xx )
-double aa, bb, xx;
+double incbet(aa, bb, xx) double aa, bb, xx;
 {
   double a, b, t, x, xc, w, y;
   int flag;
 
-  if ( aa <= 0.0 || bb <= 0.0 )
+  if (aa <= 0.0 || bb <= 0.0)
     goto domerr;
 
-  if ( (xx <= 0.0) || ( xx >= 1.0) )
-  {
-    if ( xx == 0.0 )
-      return(0.0);
-    if ( xx == 1.0 )
-      return( 1.0 );
-domerr:
-    mtherr( "incbet", DOMAIN );
-    return( 0.0 );
+  if ((xx <= 0.0) || (xx >= 1.0)) {
+    if (xx == 0.0)
+      return (0.0);
+    if (xx == 1.0)
+      return (1.0);
+  domerr:
+    mtherr("incbet", DOMAIN);
+    return (0.0);
   }
 
   flag = 0;
-  if ( (bb * xx) <= 1.0 && xx <= 0.95)
-  {
+  if ((bb * xx) <= 1.0 && xx <= 0.95) {
     t = pseries(aa, bb, xx);
     goto done;
   }
@@ -109,34 +104,30 @@ domerr:
   w = 1.0 - xx;
 
   /* Reverse a and b if x is greater than the mean. */
-  if ( xx > (aa/(aa+bb)) )
-  {
+  if (xx > (aa / (aa + bb))) {
     flag = 1;
     a = bb;
     b = aa;
     xc = xx;
     x = w;
-  }
-  else
-  {
+  } else {
     a = aa;
     b = bb;
     xc = w;
     x = xx;
   }
 
-  if ( flag == 1 && (b * x) <= 1.0 && x <= 0.95)
-  {
+  if (flag == 1 && (b * x) <= 1.0 && x <= 0.95) {
     t = pseries(a, b, x);
     goto done;
   }
 
   /* Choose expansion for better convergence. */
-  y = x * (a+b-2.0) - (a-1.0);
-  if ( y < 0.0 )
-    w = incbcf( a, b, x );
+  y = x * (a + b - 2.0) - (a - 1.0);
+  if (y < 0.0)
+    w = incbcf(a, b, x);
   else
-    w = incbd( a, b, x ) / xc;
+    w = incbd(a, b, x) / xc;
 
   /* Multiply w by the factor
      a      b   _             _     _
@@ -144,41 +135,38 @@ domerr:
 
   y = a * log(x);
   t = b * log(xc);
-  if ( (a+b) < MAXGAM && fabs(y) < MAXLOG && fabs(t) < MAXLOG )
-  {
-    t = pow(xc,b);
-    t *= pow(x,a);
+  if ((a + b) < MAXGAM && fabs(y) < MAXLOG && fabs(t) < MAXLOG) {
+    t = pow(xc, b);
+    t *= pow(x, a);
     t /= a;
     t *= w;
-    t *= tgamma(a+b) / (tgamma(a) * tgamma(b));
+    t *= tgamma(a + b) / (tgamma(a) * tgamma(b));
     goto done;
   }
   /* Resort to logarithms.  */
-  y += t + lgam(a+b) - lgam(a) - lgam(b);
-  y += log(w/a);
-  if ( y < MINLOG )
+  y += t + lgam(a + b) - lgam(a) - lgam(b);
+  y += log(w / a);
+  if (y < MINLOG)
     t = 0.0;
   else
     t = exp(y);
 
 done:
 
-  if ( flag == 1 )
-  {
-    if ( t <= MACHEP )
+  if (flag == 1) {
+    if (t <= MACHEP)
       t = 1.0 - MACHEP;
     else
       t = 1.0 - t;
   }
-  return( t );
+  return (t);
 }
 
 /* Continued fraction expansion #1
  * for incomplete beta integral
  */
 
-static double incbcf( a, b, x )
-double a, b, x;
+static double incbcf(a, b, x) double a, b, x;
 {
   double xk, pk, pkm1, pkm2, qk, qkm1, qkm2;
   double k1, k2, k3, k4, k5, k6, k7, k8;
@@ -202,36 +190,33 @@ double a, b, x;
   r = 1.0;
   n = 0;
   thresh = 3.0 * MACHEP;
-  do
-  {
+  do {
 
-    xk = -( x * k1 * k2 )/( k3 * k4 );
-    pk = pkm1 +  pkm2 * xk;
-    qk = qkm1 +  qkm2 * xk;
+    xk = -(x * k1 * k2) / (k3 * k4);
+    pk = pkm1 + pkm2 * xk;
+    qk = qkm1 + qkm2 * xk;
     pkm2 = pkm1;
     pkm1 = pk;
     qkm2 = qkm1;
     qkm1 = qk;
 
-    xk = ( x * k5 * k6 )/( k7 * k8 );
-    pk = pkm1 +  pkm2 * xk;
-    qk = qkm1 +  qkm2 * xk;
+    xk = (x * k5 * k6) / (k7 * k8);
+    pk = pkm1 + pkm2 * xk;
+    qk = qkm1 + qkm2 * xk;
     pkm2 = pkm1;
     pkm1 = pk;
     qkm2 = qkm1;
     qkm1 = qk;
 
-    if ( qk != 0 )
-      r = pk/qk;
-    if ( r != 0 )
-    {
-      t = fabs( (ans - r)/r );
+    if (qk != 0)
+      r = pk / qk;
+    if (r != 0) {
+      t = fabs((ans - r) / r);
       ans = r;
-    }
-    else
+    } else
       t = 1.0;
 
-    if ( t < thresh )
+    if (t < thresh)
       goto cdone;
 
     k1 += 1.0;
@@ -243,34 +228,29 @@ double a, b, x;
     k7 += 2.0;
     k8 += 2.0;
 
-    if ( (fabs(qk) + fabs(pk)) > big )
-    {
+    if ((fabs(qk) + fabs(pk)) > big) {
       pkm2 *= biginv;
       pkm1 *= biginv;
       qkm2 *= biginv;
       qkm1 *= biginv;
     }
-    if ( (fabs(qk) < biginv) || (fabs(pk) < biginv) )
-    {
+    if ((fabs(qk) < biginv) || (fabs(pk) < biginv)) {
       pkm2 *= big;
       pkm1 *= big;
       qkm2 *= big;
       qkm1 *= big;
     }
-  }
-  while ( ++n < 300 );
+  } while (++n < 300);
 
 cdone:
-  return(ans);
+  return (ans);
 }
-
 
 /* Continued fraction expansion #2
  * for incomplete beta integral
  */
 
-static double incbd( a, b, x )
-double a, b, x;
+static double incbd(a, b, x) double a, b, x;
 {
   double xk, pk, pkm1, pkm2, qk, qkm1, qkm2;
   double k1, k2, k3, k4, k5, k6, k7, k8;
@@ -291,41 +271,38 @@ double a, b, x;
   qkm2 = 1.0;
   pkm1 = 1.0;
   qkm1 = 1.0;
-  z = x / (1.0-x);
+  z = x / (1.0 - x);
   ans = 1.0;
   r = 1.0;
   n = 0;
   thresh = 3.0 * MACHEP;
-  do
-  {
+  do {
 
-    xk = -( z * k1 * k2 )/( k3 * k4 );
-    pk = pkm1 +  pkm2 * xk;
-    qk = qkm1 +  qkm2 * xk;
+    xk = -(z * k1 * k2) / (k3 * k4);
+    pk = pkm1 + pkm2 * xk;
+    qk = qkm1 + qkm2 * xk;
     pkm2 = pkm1;
     pkm1 = pk;
     qkm2 = qkm1;
     qkm1 = qk;
 
-    xk = ( z * k5 * k6 )/( k7 * k8 );
-    pk = pkm1 +  pkm2 * xk;
-    qk = qkm1 +  qkm2 * xk;
+    xk = (z * k5 * k6) / (k7 * k8);
+    pk = pkm1 + pkm2 * xk;
+    qk = qkm1 + qkm2 * xk;
     pkm2 = pkm1;
     pkm1 = pk;
     qkm2 = qkm1;
     qkm1 = qk;
 
-    if ( qk != 0 )
-      r = pk/qk;
-    if ( r != 0 )
-    {
-      t = fabs( (ans - r)/r );
+    if (qk != 0)
+      r = pk / qk;
+    if (r != 0) {
+      t = fabs((ans - r) / r);
       ans = r;
-    }
-    else
+    } else
       t = 1.0;
 
-    if ( t < thresh )
+    if (t < thresh)
       goto cdone;
 
     k1 += 1.0;
@@ -337,31 +314,27 @@ double a, b, x;
     k7 += 2.0;
     k8 += 2.0;
 
-    if ( (fabs(qk) + fabs(pk)) > big )
-    {
+    if ((fabs(qk) + fabs(pk)) > big) {
       pkm2 *= biginv;
       pkm1 *= biginv;
       qkm2 *= biginv;
       qkm1 *= biginv;
     }
-    if ( (fabs(qk) < biginv) || (fabs(pk) < biginv) )
-    {
+    if ((fabs(qk) < biginv) || (fabs(pk) < biginv)) {
       pkm2 *= big;
       pkm1 *= big;
       qkm2 *= big;
       qkm1 *= big;
     }
-  }
-  while ( ++n < 300 );
+  } while (++n < 300);
 cdone:
-  return(ans);
+  return (ans);
 }
 
 /* Power series for incomplete beta integral.
    Use when b*x is small and x not too close to 1.  */
 
-static double pseries( a, b, x )
-double a, b, x;
+static double pseries(a, b, x) double a, b, x;
 {
   double s, t, u, v, n, t1, z, ai;
 
@@ -373,8 +346,7 @@ double a, b, x;
   n = 2.0;
   s = 0.0;
   z = MACHEP * ai;
-  while ( fabs(v) > z )
-  {
+  while (fabs(v) > z) {
     u = (n - b) * x / n;
     t *= u;
     v = t / (a + n);
@@ -385,18 +357,15 @@ double a, b, x;
   s += ai;
 
   u = a * log(x);
-  if ( (a+b) < MAXGAM && fabs(u) < MAXLOG )
-  {
-    t = tgamma(a+b)/(tgamma(a)*tgamma(b));
-    s = s * t * pow(x,a);
-  }
-  else
-  {
-    t = lgam(a+b) - lgam(a) - lgam(b) + u + log(s);
-    if ( t < MINLOG )
+  if ((a + b) < MAXGAM && fabs(u) < MAXLOG) {
+    t = tgamma(a + b) / (tgamma(a) * tgamma(b));
+    s = s * t * pow(x, a);
+  } else {
+    t = lgam(a + b) - lgam(a) - lgam(b) + u + log(s);
+    if (t < MINLOG)
       s = 0.0;
     else
       s = exp(t);
   }
-  return(s);
+  return (s);
 }

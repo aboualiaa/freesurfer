@@ -4,6 +4,8 @@ if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
 endif()
 
+include_directories(../cuda)
+
 # add an executable
 add_executable(kvlAtlasMeshRasterizorTestGPU kvlAtlasMeshRasterizorTestGPU.cxx)
 target_link_libraries(kvlAtlasMeshRasterizorTestGPU kvlGEMSCommon)

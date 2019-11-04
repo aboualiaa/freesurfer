@@ -3,9 +3,9 @@
 #include "remesher.h"
 #include "surfgrad.h"
 
+int main(int argc, const char **argv) {
+  int nv0;
 
-int main(int argc, const char **argv) 
-{
   ArgumentParser parser;
   parser.addArgument("-i", "--input", 1, String, true);
   parser.addArgument("-o", "--output", 1, String, true);
@@ -15,14 +15,18 @@ int main(int argc, const char **argv)
 
   std::string inputname = parser.retrieve<std::string>("input");
   MRIS *surf = MRISread(inputname.c_str());
-  if (!surf) fs::fatal() << "could not read input surface " << inputname;
+  if (!surf)
+    fs::fatal() << "could not read input surface " << inputname;
+  nv0 = surf->nvertices;
 
   int iters = parser.exists("iters") ? parser.retrieve<int>("iters") : 5;
-  float length = parser.exists("edge-len") ? parser.retrieve<float>("edge-len") : 0.8;
+  float length =
+      parser.exists("edge-len") ? parser.retrieve<float>("edge-len") : 0.8;
 
   Remesher remesher = Remesher(surf);
   remesher.remeshBK(iters, length, false);
 
+  printf("Computing metric properties\n");
   MRIS *remeshed = remesher.toSurface();
   MRIScopyMetadata(surf, remeshed);
 

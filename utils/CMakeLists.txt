@@ -131,7 +131,7 @@ add_library(utils STATIC
   mripolv.cpp
   mriprob.cpp
   mris_compVolFrac.cpp
-  mris_fastmarching.cpp 
+  mris_fastmarching.cpp
   mrisegment.cpp
   mriset.cpp
   mrishash.cpp
@@ -198,7 +198,7 @@ add_library(utils STATIC
   xDebug.cpp
   xTypes.cpp
   xVoxel.cpp
-)
+  )
 
 target_link_libraries(utils
   jpeg
@@ -214,7 +214,7 @@ target_link_libraries(utils
   expat
   ${ZLIB_LIBRARIES}
   ${ITK_LIBRARIES}
-)
+  )
 
 if(NOT APPLE)
   target_link_libraries(utils crypt rt)

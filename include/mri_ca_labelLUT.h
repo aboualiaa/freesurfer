@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:10 $
@@ -22,7 +22,6 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
-
 
 #ifndef labelLUT_h
 #define labelLUT_h
@@ -41,50 +40,40 @@ using namespace std;
 
 typedef map<int, string> TypeMapLUT;
 
-
-
-
-class CLabelLUT
-{
+class CLabelLUT {
 public:
   // default dtor, copy , assign OK
-  CLabelLUT(string strFilepath, int nProt=0)
-  {
+  CLabelLUT(string strFilepath, int nProt = 0) {
     labelLUTConfigFile.init(strFilepath, nProt);
     mapLut.clear();
     read();
   }
 
-  void read()
-  { // init the data members to be empty
+  void read() { // init the data members to be empty
     mapLut.clear();
 
     TypeMatrixString arr2DLUTStrings;
     // get the values from the config file
     labelLUTConfigFile.get(arr2DLUTStrings, "LabelLUT", "");
-    for (int i=0; i<(int)arr2DLUTStrings.size(); i++)
-    {
-      if (arr2DLUTStrings[i].size()>=2)
-      {
-        int nKey=atoi(arr2DLUTStrings[i][0].c_str());
-        string strLabel=arr2DLUTStrings[i][1];
-        mapLut[nKey]=strLabel;
+    for (int i = 0; i < (int)arr2DLUTStrings.size(); i++) {
+      if (arr2DLUTStrings[i].size() >= 2) {
+        int nKey = atoi(arr2DLUTStrings[i][0].c_str());
+        string strLabel = arr2DLUTStrings[i][1];
+        mapLut[nKey] = strLabel;
       }
     }
   }
 
-  void write(bool bEchoToStdOut=false)
-  {
+  void write(bool bEchoToStdOut = false) {
     TypeMatrixString arr2DLUTStrings;
 
     TypeMapLUT::iterator it;
-    for (it=mapLut.begin(); it!=mapLut.end(); it++)
-    {
-      int nKey=it->first;
-      string strLabel=it->second;
+    for (it = mapLut.begin(); it != mapLut.end(); it++) {
+      int nKey = it->first;
+      string strLabel = it->second;
       char cstrKey[500];
-      sprintf(cstrKey,"%d",nKey);
-      string strKey=cstrKey;
+      sprintf(cstrKey, "%d", nKey);
+      string strKey = cstrKey;
       TypeVectorString vectorString;
       vectorString.push_back(strKey);
       vectorString.push_back(strLabel);
@@ -92,36 +81,23 @@ public:
     }
 
     // getwrite  the values to the config file
-    labelLUTConfigFile.writeSection("LabelLUT",bEchoToStdOut);
-    labelLUTConfigFile.write(arr2DLUTStrings, "",bEchoToStdOut);
+    labelLUTConfigFile.writeSection("LabelLUT", bEchoToStdOut);
+    labelLUTConfigFile.write(arr2DLUTStrings, "", bEchoToStdOut);
   }
 
+  int size() { return (mapLut.size()); }
 
-  int size()
-  {
-    return(mapLut.size());
-  }
+  string label(int nKey) { return (mapLut[nKey]); }
 
-  string label(int nKey)
-  {
-    return(mapLut[nKey]);
-  }
-
-  TypeMapLUT& getMapLUT()
-  {
-    return(mapLut);
-  }
-
+  TypeMapLUT &getMapLUT() { return (mapLut); }
 
 private:
-
   TypeMapLUT mapLut;
 
-  //friend istream& operator>>(istream&,CLabelLUT&);
-  //friend ostream& operator<<(ostream&,CLabelLUT&);
+  // friend istream& operator>>(istream&,CLabelLUT&);
+  // friend ostream& operator<<(ostream&,CLabelLUT&);
 
   CConfigFile labelLUTConfigFile;
-
 };
 
 /*
@@ -160,25 +136,3 @@ private:
 */
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

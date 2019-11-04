@@ -27,109 +27,94 @@
  *
  */
 
-
 #include <assert.h>
 #include "LayerPropertyDTI.h"
 #include "vtkLookupTable.h"
 
-LayerPropertyDTI::LayerPropertyDTI ( QObject* parent ) : LayerPropertyMRI(parent),
-  m_nDirectionCode ( RGB )
-{
+LayerPropertyDTI::LayerPropertyDTI(QObject *parent)
+    : LayerPropertyMRI(parent), m_nDirectionCode(RGB) {
   mDirectionCodedTable = vtkSmartPointer<vtkLookupTable>::New();
-  SetColorMap( DirectionCoded );
-  SetResliceInterpolation( 0 );
+  SetColorMap(DirectionCoded);
+  SetResliceInterpolation(0);
 }
 
-LayerPropertyDTI::~LayerPropertyDTI ()
-{}
+LayerPropertyDTI::~LayerPropertyDTI() {}
 
-vtkLookupTable* LayerPropertyDTI::GetDirectionCodedTable () const
-{
+vtkLookupTable *LayerPropertyDTI::GetDirectionCodedTable() const {
   return mDirectionCodedTable;
 }
 
-void LayerPropertyDTI::OnColorMapChanged()
-{
-  if ( GetColorMap() != DirectionCoded )
-  {
+void LayerPropertyDTI::OnColorMapChanged() {
+  if (GetColorMap() != DirectionCoded) {
     LayerPropertyMRI::OnColorMapChanged();
-  }
-  else
-  {
+  } else {
     int ns = 64;
-    mDirectionCodedTable->SetNumberOfTableValues(ns*ns*ns);
+    mDirectionCodedTable->SetNumberOfTableValues(ns * ns * ns);
     mDirectionCodedTable->ForceBuild();
-    mDirectionCodedTable->SetTableRange(0, ns*ns*ns-1);
-    switch ( m_nDirectionCode )
-    {
+    mDirectionCodedTable->SetTableRange(0, ns * ns * ns - 1);
+    switch (m_nDirectionCode) {
     case RGB:
-      for (int i = 0; i < ns; i++)
-      {
-        for (int j = 0; j < ns; j++)
-        {
-          for (int k = 0; k < ns; k++)
-          {
-            mDirectionCodedTable->SetTableValue(i*ns*ns+j*ns+k, (float)i/ns, (float)j/ns, (float)k/ns);
+      for (int i = 0; i < ns; i++) {
+        for (int j = 0; j < ns; j++) {
+          for (int k = 0; k < ns; k++) {
+            mDirectionCodedTable->SetTableValue(i * ns * ns + j * ns + k,
+                                                (float)i / ns, (float)j / ns,
+                                                (float)k / ns);
           }
         }
       }
       break;
     case RBG:
-      for (int i = 0; i < ns; i++)
-      {
-        for (int j = 0; j < ns; j++)
-        {
-          for (int k = 0; k < ns; k++)
-          {
-            mDirectionCodedTable->SetTableValue(i*ns*ns+j*ns+k, (float)i/ns, (float)k/ns, (float)j/ns);
+      for (int i = 0; i < ns; i++) {
+        for (int j = 0; j < ns; j++) {
+          for (int k = 0; k < ns; k++) {
+            mDirectionCodedTable->SetTableValue(i * ns * ns + j * ns + k,
+                                                (float)i / ns, (float)k / ns,
+                                                (float)j / ns);
           }
         }
       }
       break;
     case GRB:
-      for (int i = 0; i < ns; i++)
-      {
-        for (int j = 0; j < ns; j++)
-        {
-          for (int k = 0; k < ns; k++)
-          {
-            mDirectionCodedTable->SetTableValue(i*ns*ns+j*ns+k, (float)j/ns, (float)i/ns, (float)k/ns);
+      for (int i = 0; i < ns; i++) {
+        for (int j = 0; j < ns; j++) {
+          for (int k = 0; k < ns; k++) {
+            mDirectionCodedTable->SetTableValue(i * ns * ns + j * ns + k,
+                                                (float)j / ns, (float)i / ns,
+                                                (float)k / ns);
           }
         }
       }
       break;
     case GBR:
-      for (int i = 0; i < ns; i++)
-      {
-        for (int j = 0; j < ns; j++)
-        {
-          for (int k = 0; k < ns; k++)
-          {
-            mDirectionCodedTable->SetTableValue(i*ns*ns+j*ns+k, (float)j/ns, (float)k/ns, (float)i/ns);
+      for (int i = 0; i < ns; i++) {
+        for (int j = 0; j < ns; j++) {
+          for (int k = 0; k < ns; k++) {
+            mDirectionCodedTable->SetTableValue(i * ns * ns + j * ns + k,
+                                                (float)j / ns, (float)k / ns,
+                                                (float)i / ns);
           }
         }
       }
       break;
     case BRG:
-      for (int i = 0; i < ns; i++)
-      {
-        for (int j = 0; j < ns; j++)
-        {
-          for (int k = 0; k < ns; k++)
-          {
-            mDirectionCodedTable->SetTableValue(i*ns*ns+j*ns+k, (float)k/ns, (float)i/ns, (float)j/ns);
+      for (int i = 0; i < ns; i++) {
+        for (int j = 0; j < ns; j++) {
+          for (int k = 0; k < ns; k++) {
+            mDirectionCodedTable->SetTableValue(i * ns * ns + j * ns + k,
+                                                (float)k / ns, (float)i / ns,
+                                                (float)j / ns);
           }
         }
       }
       break;
     case BGR:
-      for (int i = 0; i < ns; i++)
-      {
-        for (int j = 0; j < ns; j++)
-        {
-          for (int k = 0; k < ns; k++)
-          {
-            mDirectionCodedTable->SetTableValue(i*ns*ns+j*ns+k, (float)k/ns, (float)j/ns, (float)i/ns);
+      for (int i = 0; i < ns; i++) {
+        for (int j = 0; j < ns; j++) {
+          for (int k = 0; k < ns; k++) {
+            mDirectionCodedTable->SetTableValue(i * ns * ns + j * ns + k,
+                                                (float)k / ns, (float)j / ns,
+                                                (float)i / ns);
           }
         }
       }
@@ -139,10 +124,8 @@ void LayerPropertyDTI::OnColorMapChanged()
   }
 }
 
-void LayerPropertyDTI::SetDirectionCode( int nCode )
-{
-  if ( m_nDirectionCode != nCode )
-  {
+void LayerPropertyDTI::SetDirectionCode(int nCode) {
+  if (m_nDirectionCode != nCode) {
     m_nDirectionCode = nCode;
     this->OnColorMapChanged();
   }

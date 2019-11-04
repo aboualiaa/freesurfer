@@ -34,19 +34,16 @@ using namespace std;
 
 #include "gcalinearprior.hpp"
 
-namespace Freesurfer
-{
+namespace Freesurfer {
 // ==========================================
-void GCAlinearPrior::PrintStats(ostream &os) const
-{
+void GCAlinearPrior::PrintStats(ostream &os) const {
   os << "Stats for GCAlinearPrior" << endl;
   os << "  Exhumation time = " << exhumeTime << " ms" << endl;
   os << "  Inhumation time = " << inhumeTime << " ms" << endl;
 }
 
 // ==========================================
-void GCAlinearPrior::ExtractDims(const GCA *const src)
-{
+void GCAlinearPrior::ExtractDims(const GCA *const src) {
   /*!
     Fills in the dimensions required from the given GCA.
     Does this by looping over all voxels, and finding the
@@ -69,8 +66,7 @@ void GCAlinearPrior::ExtractDims(const GCA *const src)
 }
 
 // ==========================================
-void GCAlinearPrior::Allocate(void)
-{
+void GCAlinearPrior::Allocate() {
   /*!
     Allocates the main arrays according to the 'dimension'
     members.
@@ -83,7 +79,7 @@ void GCAlinearPrior::Allocate(void)
 
   //! Space for the offsets4D array
   this->offsets4D.clear();
-  this->offsets4D.resize(nVoxels + 1, numeric_limits< size_t >::max());
+  this->offsets4D.resize(nVoxels + 1, numeric_limits<size_t>::max());
   this->bytes += this->offsets4D.size() * sizeof(unsigned int);
 
   //! Space for maxLabels
@@ -93,24 +89,23 @@ void GCAlinearPrior::Allocate(void)
 
   //! Space for the labels
   this->labels.clear();
-  this->labels.resize(this->n4D, numeric_limits< unsigned short >::max());
+  this->labels.resize(this->n4D, numeric_limits<unsigned short>::max());
   this->bytes += this->labels.size() * sizeof(unsigned short);
 
   //! Space for the priors
   this->priors.clear();
-  this->priors.resize(this->n4D, numeric_limits< float >::quiet_NaN());
+  this->priors.resize(this->n4D, numeric_limits<float>::quiet_NaN());
   this->bytes += this->priors.size() * sizeof(float);
 
   //! Space for totTraining
   this->totTraining.clear();
-  this->totTraining.resize(nVoxels, numeric_limits< int >::max());
+  this->totTraining.resize(nVoxels, numeric_limits<int>::max());
   this->bytes += this->totTraining.size() * sizeof(int);
 }
 
 // ==========================================
 
-void GCAlinearPrior::Exhume(const GCA *const src)
-{
+void GCAlinearPrior::Exhume(const GCA *const src) {
   /*!
     This method is responsible for extracting GCA_PRIOR data
     from the source GCA, and packing into the linear arrays
@@ -121,7 +116,8 @@ void GCAlinearPrior::Exhume(const GCA *const src)
   this->ExtractDims(src);
   this->Allocate();
 
-  std::vector< unsigned int > labelCounts(this->totTraining.size(), numeric_limits< unsigned int >::max());
+  std::vector<unsigned int> labelCounts(this->totTraining.size(),
+                                        numeric_limits<unsigned int>::max());
 
   // Handle the 3D data
   for (int ix = 0; ix < this->xDim; ix++) {
@@ -139,7 +135,8 @@ void GCAlinearPrior::Exhume(const GCA *const src)
 
   // Compute 4D offsets
   this->offsets4D.at(0) = 0;
-  std::partial_sum(labelCounts.begin(), labelCounts.end(), ++(this->offsets4D.begin()));
+  std::partial_sum(labelCounts.begin(), labelCounts.end(),
+                   ++(this->offsets4D.begin()));
 
   // Handle the 4D data
   for (int ix = 0; ix < this->xDim; ix++) {
@@ -147,7 +144,8 @@ void GCAlinearPrior::Exhume(const GCA *const src)
       for (int iz = 0; iz < this->zDim; iz++) {
         const GCA_PRIOR *const gcap = &(src->priors[ix][iy][iz]);
 
-        for (int iLabel = 0; iLabel < this->voxelLabelCount(ix, iy, iz); iLabel++) {
+        for (int iLabel = 0; iLabel < this->voxelLabelCount(ix, iy, iz);
+             iLabel++) {
           this->voxelLabel(ix, iy, iz, iLabel) = gcap->labels[iLabel];
           this->voxelPrior(ix, iy, iz, iLabel) = gcap->priors[iLabel];
         }
@@ -159,14 +157,13 @@ void GCAlinearPrior::Exhume(const GCA *const src)
 }
 
 // ==========================================
-const_GCAprior GCAlinearPrior::GetConstPrior(const int ix, const int iy, const int iz) const
-{
+const_GCAprior GCAlinearPrior::GetConstPrior(const int ix, const int iy,
+                                             const int iz) const {
   return (const_GCAprior(ix, iy, iz, *this));
 }
 
 // ==========================================
-void GCAlinearPrior::Inhume(GCA *dst) const
-{
+void GCAlinearPrior::Inhume(GCA *dst) const {
   /*!
     Stores data about the priors back into the target
     GCA.
@@ -207,7 +204,8 @@ void GCAlinearPrior::Inhume(GCA *dst) const
       // Allocate pointer block
       dst->priors[ix][iy] = (GCA_PRIOR *)calloc(this->zDim, sizeof(GCA_PRIOR));
       if (!(dst->priors[ix][iy])) {
-        cerr << __FUNCTION__ << ": dst->priors[ix][iy] allocation failed" << endl;
+        cerr << __FUNCTION__ << ": dst->priors[ix][iy] allocation failed"
+             << endl;
         exit(EXIT_FAILURE);
       }
 
@@ -221,7 +219,8 @@ void GCAlinearPrior::Inhume(GCA *dst) const
 
         gcap->total_training = cGCAp.totalTraining();
 
-        gcap->labels = (unsigned short *)calloc(gcap->nlabels, sizeof(unsigned short));
+        gcap->labels =
+            (unsigned short *)calloc(gcap->nlabels, sizeof(unsigned short));
         gcap->priors = (float *)calloc(gcap->nlabels, sizeof(float));
         for (int iLabel = 0; iLabel < gcap->nlabels; iLabel++) {
           gcap->labels[iLabel] = cGCAp.labels(iLabel);
@@ -236,8 +235,7 @@ void GCAlinearPrior::Inhume(GCA *dst) const
 
 // ==========================================
 
-void GCAlinearPrior::ScorchPriors(GCA *targ) const
-{
+void GCAlinearPrior::ScorchPriors(GCA *targ) const {
   /*!
     This method destroys the priors structure of a GCA,
     prior to inhumation of new data
@@ -254,4 +252,4 @@ void GCAlinearPrior::ScorchPriors(GCA *targ) const
   }
   free(targ->priors);
 }
-}  // namespace Freesurfer
+} // namespace Freesurfer

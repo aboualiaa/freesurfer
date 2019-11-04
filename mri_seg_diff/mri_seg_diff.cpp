@@ -30,7 +30,7 @@
 
   This program computes and merges differences in segmentation volumes
   (eg, aseg.auto.mgz and aseg.mgz) primarily for the purpose of
-  managing manual edits to aseg.mgz. 
+  managing manual edits to aseg.mgz.
 
   When computing a difference, it compares seg1 to seg2 at each
   voxel. If they are the same, then the diff volume voxel gets a value
@@ -47,10 +47,10 @@
 
   EXAMPLES:
 
-  # Determine manual edits 
+  # Determine manual edits
   mri_seg_diff --seg1 aseg.auto.mgz --seg2 aseg.mgz --diff aseg.manedits.mgz
 
-  # Merge manual edits 
+  # Merge manual edits
   mri_seg_diff --seg aseg.auto.mgz --merged aseg.mgz --diff-in aseg.manedits.mgz
 
   ENDHELP
@@ -62,10 +62,9 @@
   ENDUSAGE
 */
 
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
 double round(double x);
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -95,162 +94,180 @@ double round(double x);
 #include "volcluster.h"
 #include "surfcluster.h"
 
-static int  parse_commandline(int argc, char **argv);
-static void check_options(void);
-static void print_usage(void) ;
-static void usage_exit(void);
-static void print_help(void) ;
-static void print_version(void) ;
+static int parse_commandline(int argc, char **argv);
+static void check_options();
+static void print_usage();
+static void usage_exit();
+static void print_help();
+static void print_version();
 static void dump_options(FILE *fp);
-int main(int argc, char *argv[]) ;
+int main(int argc, char *argv[]);
 
-static char vcid[] = "$Id: mri_seg_diff.c,v 1.5 2011/03/02 00:04:24 nicks Exp $";
-const char *Progname = NULL;
+static char vcid[] =
+    "$Id: mri_seg_diff.c,v 1.5 2011/03/02 00:04:24 nicks Exp $";
+const char *Progname = nullptr;
 char *cmdline, cwd[2000];
-int debug=0;
-int checkoptsonly=0;
+int debug = 0;
+int checkoptsonly = 0;
 struct utsname uts;
 
-char *Seg1File=NULL;
-char *Seg2File=NULL;
-char *DiffFile=NULL;
-char *InDiffFile=NULL;
-char *MergedFile=NULL;
+char *Seg1File = nullptr;
+char *Seg2File = nullptr;
+char *DiffFile = nullptr;
+char *InDiffFile = nullptr;
+char *MergedFile = nullptr;
 int ForceDiff = 0;
 
 char *subject, *SUBJECTS_DIR;
 
 /*---------------------------------------------------------------*/
-int main(int argc, char *argv[]) 
-{
-  int nargs, DiffFlag=0;
+int main(int argc, char *argv[]) {
+  int nargs, DiffFlag = 0;
   MRI *seg1, *seg2, *diff;
 
-  nargs = handle_version_option (argc, argv, vcid, "$Name:  $");
-  if (nargs && argc - nargs == 1) exit (0);
+  nargs = handle_version_option(argc, argv, vcid, "$Name:  $");
+  if (nargs && argc - nargs == 1)
+    exit(0);
   argc -= nargs;
-  cmdline = argv2cmdline(argc,argv);
+  cmdline = argv2cmdline(argc, argv);
   uname(&uts);
-  getcwd(cwd,2000);
+  getcwd(cwd, 2000);
 
-  Progname = argv[0] ;
-  argc --;
+  Progname = argv[0];
+  argc--;
   argv++;
-  ErrorInit(NULL, NULL, NULL) ;
-  DiagInit(NULL, NULL, NULL) ;
-  if (argc == 0) usage_exit();
+  ErrorInit(NULL, NULL, NULL);
+  DiagInit(nullptr, nullptr, nullptr);
+  if (argc == 0)
+    usage_exit();
   parse_commandline(argc, argv);
   check_options();
-  if (checkoptsonly) return(0);
+  if (checkoptsonly)
+    return (0);
   dump_options(stdout);
 
   SUBJECTS_DIR = getenv("SUBJECTS_DIR");
-  if (SUBJECTS_DIR == NULL) {
+  if (SUBJECTS_DIR == nullptr) {
     printf("ERROR: SUBJECTS_DIR not defined in environment\n");
     exit(1);
   }
 
   seg1 = MRIread(Seg1File);
-  if(seg1 == NULL) exit(1);
+  if (seg1 == nullptr)
+    exit(1);
 
   // Compute diff of segs
-  if(DiffFile != NULL){
+  if (DiffFile != nullptr) {
     printf("Computing difference between segmentations\n");
     seg2 = MRIread(Seg2File);
-    if(seg2 == NULL) exit(1);
-    diff = MRIsegDiff(seg1,seg2,&DiffFlag);
-    if(diff == NULL) exit(1);
-    if(DiffFlag == 0) {
+    if (seg2 == nullptr)
+      exit(1);
+    diff = MRIsegDiff(seg1, seg2, &DiffFlag);
+    if (diff == nullptr)
+      exit(1);
+    if (DiffFlag == 0) {
       printf("No difference found.\n");
-      if(! ForceDiff) exit(0);
+      if (!ForceDiff)
+        exit(0);
       printf(" ... but saving diff file anyway.\n");
-    } else printf("A difference found, saving.\n");
+    } else
+      printf("A difference found, saving.\n");
 
-    MRIwrite(diff,DiffFile);
+    MRIwrite(diff, DiffFile);
     exit(0);
   }
 
   printf("Merging difference segmentation\n");
   diff = MRIread(InDiffFile);
-  if(diff == NULL) exit(1);
+  if (diff == nullptr)
+    exit(1);
 
   seg2 = MRIsegMergeDiff(seg1, diff);
-  if(seg2 == NULL) exit(1);
+  if (seg2 == nullptr)
+    exit(1);
 
-  MRIwrite(seg2,MergedFile);
+  MRIwrite(seg2, MergedFile);
 
   exit(0);
-  return(0);
+  return (0);
 }
 /*-------------------------------------------------------*/
 static int parse_commandline(int argc, char **argv) {
-  int  nargc , nargsused;
-  char **pargv, *option ;
+  int nargc, nargsused;
+  char **pargv, *option;
 
-  if (argc < 1) usage_exit();
+  if (argc < 1)
+    usage_exit();
 
-  nargc   = argc;
+  nargc = argc;
   pargv = argv;
   while (nargc > 0) {
 
     option = pargv[0];
-    if (debug) printf("%d %s\n",nargc,option);
+    if (debug)
+      printf("%d %s\n", nargc, option);
     nargc -= 1;
     pargv += 1;
 
     nargsused = 0;
 
-    if (!strcasecmp(option, "--help"))  print_help() ;
-    else if (!strcasecmp(option, "--version")) print_version() ;
-    else if (!strcasecmp(option, "--debug"))   debug = 1;
-    else if (!strcasecmp(option, "--checkopts"))   checkoptsonly = 1;
-    else if (!strcasecmp(option, "--nocheckopts")) checkoptsonly = 0;
-    else if (!strcasecmp(option, "--diff-force"))  ForceDiff = 1;
+    if (!strcasecmp(option, "--help"))
+      print_help();
+    else if (!strcasecmp(option, "--version"))
+      print_version();
+    else if (!strcasecmp(option, "--debug"))
+      debug = 1;
+    else if (!strcasecmp(option, "--checkopts"))
+      checkoptsonly = 1;
+    else if (!strcasecmp(option, "--nocheckopts"))
+      checkoptsonly = 0;
+    else if (!strcasecmp(option, "--diff-force"))
+      ForceDiff = 1;
 
     else if (!strcasecmp(option, "--seg1") || !strcasecmp(option, "--seg")) {
-      if (nargc < 1) CMDargNErr(option,1);
+      if (nargc < 1)
+        CMDargNErr(option, 1);
       Seg1File = pargv[0];
       nargsused = 1;
-    } 
-    else if (!strcasecmp(option, "--seg2")) {
-      if (nargc < 1) CMDargNErr(option,1);
+    } else if (!strcasecmp(option, "--seg2")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
       Seg2File = pargv[0];
       nargsused = 1;
-    } 
-    else if (!strcasecmp(option, "--diff")) {
-      if (nargc < 1) CMDargNErr(option,1);
+    } else if (!strcasecmp(option, "--diff")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
       DiffFile = pargv[0];
       nargsused = 1;
-    } 
-    else if (!strcasecmp(option, "--diff-in")) {
-      if (nargc < 1) CMDargNErr(option,1);
+    } else if (!strcasecmp(option, "--diff-in")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
       InDiffFile = pargv[0];
       nargsused = 1;
-    } 
-    else if (!strcasecmp(option, "--merged")) {
-      if (nargc < 1) CMDargNErr(option,1);
+    } else if (!strcasecmp(option, "--merged")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
       MergedFile = pargv[0];
       nargsused = 1;
-    } 
-    else {
-      fprintf(stderr,"ERROR: Option %s unknown\n",option);
+    } else {
+      fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (CMDsingleDash(option))
-        fprintf(stderr,"       Did you really mean -%s ?\n",option);
+        fprintf(stderr, "       Did you really mean -%s ?\n", option);
       exit(-1);
     }
     nargc -= nargsused;
     pargv += nargsused;
   }
-  return(0);
+  return (0);
 }
 /*-------------------------------------------------------*/
-static void usage_exit(void) {
-  print_usage() ;
-  exit(1) ;
+static void usage_exit() {
+  print_usage();
+  exit(1);
 }
 /*-------------------------------------------------------*/
-static void print_usage(void) {
-  printf("USAGE: %s \n",Progname) ;
+static void print_usage() {
+  printf("USAGE: %s \n", Progname);
   printf("\n");
   printf("Options for creating a diff\n");
   printf("   --seg1 seg1 : first segmentation (eg, unedited)\n");
@@ -268,75 +285,82 @@ static void print_usage(void) {
   printf("   --help      print out information on how to use this program\n");
   printf("   --version   print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid) ;
+  printf("%s\n", vcid);
   printf("\n");
 }
 /*-------------------------------------------------------*/
-static void print_help(void) {
-  print_usage() ;
-printf("\n");
-printf("  This program computes and merges differences in segmentation volumes\n");
-printf("  (eg, aseg.auto.mgz and aseg.mgz) primarily for the purpose of\n");
-printf("  managing manual edits to aseg.mgz. \n");
-printf("\n");
-printf("  When computing a difference, it compares seg1 to seg2 at each\n");
-printf("  voxel. If they are the same, then the diff volume voxel gets a value\n");
-printf("  of 256 (Voxel-Unchanged in FreeSurferColorLUT.txt). If they are\n");
-printf("  different, then it takes the value of seg2. The diff seg can be\n");
-printf("  loaded as a segmentation in tkmedit. If there is no difference,\n");
-printf("  then the difference volume will not be written unless you use\n");
-printf("  --diff-force.\n");
-printf("\n");
-printf("  When merging a difference, a voxel in the merged seg will take the\n");
-printf("  value of the input seg if the diff-in has a value of 256. If the\n");
-printf("  diff-in value is something other than 256, then the merged value\n");
-printf("  will be the diff-in value.\n");
-printf("\n");
-printf("  EXAMPLES:\n");
-printf("\n");
-printf("  # Determine manual edits \n");
-printf("  mri_seg_diff --seg1 aseg.auto.mgz --seg2 aseg.mgz --diff aseg.manedits.mgz\n");
-printf("\n");
-printf("  # Merge manual edits \n");
-printf("  mri_seg_diff --seg aseg.auto.mgz --merged aseg.mgz --diff-in aseg.manedits.mgz\n");
-printf("\n");
-  exit(1) ;
+static void print_help() {
+  print_usage();
+  printf("\n");
+  printf("  This program computes and merges differences in segmentation "
+         "volumes\n");
+  printf("  (eg, aseg.auto.mgz and aseg.mgz) primarily for the purpose of\n");
+  printf("  managing manual edits to aseg.mgz. \n");
+  printf("\n");
+  printf("  When computing a difference, it compares seg1 to seg2 at each\n");
+  printf("  voxel. If they are the same, then the diff volume voxel gets a "
+         "value\n");
+  printf("  of 256 (Voxel-Unchanged in FreeSurferColorLUT.txt). If they are\n");
+  printf("  different, then it takes the value of seg2. The diff seg can be\n");
+  printf("  loaded as a segmentation in tkmedit. If there is no difference,\n");
+  printf("  then the difference volume will not be written unless you use\n");
+  printf("  --diff-force.\n");
+  printf("\n");
+  printf(
+      "  When merging a difference, a voxel in the merged seg will take the\n");
+  printf(
+      "  value of the input seg if the diff-in has a value of 256. If the\n");
+  printf(
+      "  diff-in value is something other than 256, then the merged value\n");
+  printf("  will be the diff-in value.\n");
+  printf("\n");
+  printf("  EXAMPLES:\n");
+  printf("\n");
+  printf("  # Determine manual edits \n");
+  printf("  mri_seg_diff --seg1 aseg.auto.mgz --seg2 aseg.mgz --diff "
+         "aseg.manedits.mgz\n");
+  printf("\n");
+  printf("  # Merge manual edits \n");
+  printf("  mri_seg_diff --seg aseg.auto.mgz --merged aseg.mgz --diff-in "
+         "aseg.manedits.mgz\n");
+  printf("\n");
+  exit(1);
 }
 /*-------------------------------------------------------*/
-static void print_version(void) {
-  printf("%s\n", vcid) ;
-  exit(1) ;
+static void print_version() {
+  printf("%s\n", vcid);
+  exit(1);
 }
 /*-------------------------------------------------------*/
-static void check_options(void) {
-  if(Seg1File == NULL){
+static void check_options() {
+  if (Seg1File == nullptr) {
     printf("ERROR: need an input segmentation\n");
     exit(1);
   }
-  if(DiffFile == NULL && InDiffFile == NULL){
+  if (DiffFile == nullptr && InDiffFile == nullptr) {
     printf("ERROR: no diff file specified\n");
     exit(1);
   }
-  if(DiffFile != NULL && InDiffFile != NULL){
+  if (DiffFile != nullptr && InDiffFile != nullptr) {
     printf("ERROR: cannot specify --diff and --diff-in\n");
     exit(1);
   }
-  if(DiffFile != NULL){
-    if(Seg2File == NULL){
+  if (DiffFile != nullptr) {
+    if (Seg2File == nullptr) {
       printf("ERROR: --seg2 with --diff\n");
       exit(1);
     }
-    if(MergedFile != NULL){
+    if (MergedFile != nullptr) {
       printf("ERROR: cannot spec --merged with --diff\n");
       exit(1);
     }
   }
-  if(InDiffFile != NULL){
-    if(MergedFile == NULL){
+  if (InDiffFile != nullptr) {
+    if (MergedFile == nullptr) {
       printf("ERROR: must spec --merged with --diff-in\n");
       exit(1);
     }
-    if(Seg2File != NULL){
+    if (Seg2File != nullptr) {
       printf("ERROR: cannot spec --seg2 with --diff-in\n");
       exit(1);
     }
@@ -346,20 +370,20 @@ static void check_options(void) {
 }
 /*-------------------------------------------------------*/
 static void dump_options(FILE *fp) {
-  fprintf(fp,"\n");
-  fprintf(fp,"%s\n",vcid);
-  fprintf(fp,"cwd %s\n",cwd);
-  fprintf(fp,"cmdline %s\n",cmdline);
-  fprintf(fp,"sysname  %s\n",uts.sysname);
-  fprintf(fp,"hostname %s\n",uts.nodename);
-  fprintf(fp,"machine  %s\n",uts.machine);
-  fprintf(fp,"user     %s\n",VERuser());
-  fprintf(fp,"Seg1     %s\n",Seg1File);
-  fprintf(fp,"Seg2     %s\n",Seg2File);
-  fprintf(fp,"Diff     %s\n",DiffFile);
-  fprintf(fp,"InDiff   %s\n",InDiffFile);
-  fprintf(fp,"Merged   %s\n",MergedFile);
-  fprintf(fp,"ForceDiff %d\n",ForceDiff);
+  fprintf(fp, "\n");
+  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "cwd %s\n", cwd);
+  fprintf(fp, "cmdline %s\n", cmdline);
+  fprintf(fp, "sysname  %s\n", uts.sysname);
+  fprintf(fp, "hostname %s\n", uts.nodename);
+  fprintf(fp, "machine  %s\n", uts.machine);
+  fprintf(fp, "user     %s\n", VERuser());
+  fprintf(fp, "Seg1     %s\n", Seg1File);
+  fprintf(fp, "Seg2     %s\n", Seg2File);
+  fprintf(fp, "Diff     %s\n", DiffFile);
+  fprintf(fp, "InDiff   %s\n", InDiffFile);
+  fprintf(fp, "Merged   %s\n", MergedFile);
+  fprintf(fp, "ForceDiff %d\n", ForceDiff);
 
   return;
 }

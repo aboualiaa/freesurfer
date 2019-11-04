@@ -26,103 +26,116 @@
 #include "blood.h"
 #include "spline.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include <float.h>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <limits.h>
 #include <math.h>
-double round(double x);
+#include <stdlib.h>
+#include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/utsname.h>
-#include <unistd.h>
-#include <float.h>
-#include <limits.h>
-#include <limits>
-#include <iostream>
-#include <fstream>
-#include <iomanip>
-#include <vector>
-#include <string>
-#include <math.h>
-#include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
+#include <vector>
 
-#include "error.h"
-#include "diag.h"
-#include "mri.h"
-#include "fio.h"
-#include "version.h"
 #include "cmdargs.h"
+#include "diag.h"
+#include "error.h"
+#include "fio.h"
+#include "mri.h"
 #include "timer.h"
+#include "version.h"
 
 #include "TrackIO.h"
 
 using namespace std;
 
-static int  parse_commandline(int argc, char **argv);
-static void check_options(void);
-static void print_usage(void) ;
-static void usage_exit(void);
-static void print_help(void) ;
-static void print_version(void) ;
+static int parse_commandline(int argc, char **argv);
+static void check_options();
+static void print_usage();
+static void usage_exit();
+static void print_help();
+static void print_version();
 static void dump_options(FILE *fp);
 static void WriteHeader(char *OutFile);
 
 int debug = 0, checkoptsonly = 0;
 
-int main(int argc, char *argv[]) ;
+int main(int argc, char *argv[]);
 
 static char vcid[] = "";
 const char *Progname = "dmri_pathstats";
 
 float probThresh = .2, faThresh = 0;
 char PathMAP[] = "path.map.txt";
-char *inTrkFile = NULL, *inRoi1File = NULL, *inRoi2File = NULL,
-     *inTrcDir = NULL, *inVoxFile = PathMAP, *dtBase = NULL,
-     *outFile = NULL, *outVoxFile = NULL,
-     *outMedianFile = NULL, *outEndBase = NULL, *refVolFile = NULL,
-     fname[PATH_MAX];
+char *inTrkFile = nullptr, *inRoi1File = nullptr, *inRoi2File = nullptr,
+     *inTrcDir = nullptr, *inVoxFile = PathMAP, *dtBase = nullptr, *outFile = nullptr,
+     *outVoxFile = nullptr, *outMedianFile = nullptr, *outEndBase = nullptr,
+     *refVolFile = nullptr, fname[PATH_MAX];
 
 MRI *l1, *l2, *l3, *v1;
 
 struct utsname uts;
-char *cmdline, cwd[2000], subjName[100], pathName[100] ;
+char *cmdline, cwd[2000], subjName[100], pathName[100];
 
 Timer cputimer;
 
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
-  int nargs, cputime, count, volume, lenmin, lenmax, lencent;
+  int nargs;
+int cputime;
+int count;
+int volume;
+int lenmin;
+int lenmax;
+int lencent;
   float lenavg;
-  vector<float> avg, wavg, cavg;
+  vector<float> avg;
+vector<float> wavg;
+vector<float> cavg;
   vector<MRI *> meas;
   ofstream fout;
 
   /* rkt: check for and handle version tag */
-  nargs = handle_version_option (argc, argv, vcid, "$Name:  $");
-  if (nargs && argc - nargs == 1) exit (0);
+  nargs = handle_version_option(argc, argv, vcid, "$Name:  $");
+  if ((nargs != 0) && argc - nargs == 1) {
+    exit(0);
+}
   argc -= nargs;
-  cmdline = argv2cmdline(argc,argv);
+  cmdline = argv2cmdline(argc, argv);
   uname(&uts);
   getcwd(cwd, 2000);
 
-  Progname = argv[0] ;
-  argc --;
+  Progname = argv[0];
+  argc--;
   argv++;
-  ErrorInit(NULL, NULL, NULL) ;
-  DiagInit(NULL, NULL, NULL) ;
+  ErrorInit(NULL, NULL, NULL);
+  DiagInit(nullptr, nullptr, nullptr);
 
-  if (argc == 0) usage_exit();
+  if (argc == 0) {
+    usage_exit();
+}
 
   parse_commandline(argc, argv);
   check_options();
-  if (checkoptsonly) return(0);
+  if (checkoptsonly != 0) {
+    return (0);
+}
 
   dump_options(stdout);
 
-  printf("Computing statistics on %s...\n", inTrcDir?inTrcDir:inTrkFile);
+  printf("Computing statistics on %s...\n", inTrcDir != nullptr ? inTrcDir : inTrkFile);
   cputimer.reset();
 
-  if (dtBase) {
+  if (dtBase != nullptr) {
     sprintf(fname, "%s_L1.nii.gz", dtBase);
     l1 = MRIread(fname);
     sprintf(fname, "%s_L2.nii.gz", dtBase);
@@ -133,18 +146,18 @@ int main(int argc, char **argv) {
     v1 = MRIread(fname);
 
     sprintf(fname, "%s_L1.nii.gz", dtBase);
-    meas.push_back(MRIread(fname));		// Axial diffusivity
+    meas.push_back(MRIread(fname)); // Axial diffusivity
     sprintf(fname, "%s_L2.nii.gz", dtBase);
     meas.push_back(MRIread(fname));
     MRIadd(l3, meas[1], meas[1]);
-    MRIscalarMul(meas[1], meas[1], .5);		// Radial diffusivity
+    MRIscalarMul(meas[1], meas[1], .5); // Radial diffusivity
     sprintf(fname, "%s_MD.nii.gz", dtBase);
-    meas.push_back(MRIread(fname));		// Mean diffusivity
+    meas.push_back(MRIread(fname)); // Mean diffusivity
     sprintf(fname, "%s_FA.nii.gz", dtBase);
-    meas.push_back(MRIread(fname));		// Fractional anisotropy
+    meas.push_back(MRIread(fname)); // Fractional anisotropy
   }
 
-  if (outVoxFile) {
+  if (outVoxFile != nullptr) {
     WriteHeader(outVoxFile);
 
     ofstream fvox(outVoxFile, ios::app);
@@ -153,13 +166,22 @@ int main(int argc, char **argv) {
     fvox.close();
   }
 
-  if (inTrcDir != nullptr) {		     // Probabilistic paths
-    int len, nx, ny, nz, nvox = 0;
-    float wtot = 0, pthresh = 0;
-    vector<int> lengths, pathmap, basepathmap;
-    vector<float>::iterator iavg, iwavg;
+  if (inTrcDir != nullptr) { // Probabilistic paths
+    int len;
+int nx;
+int ny;
+int nz;
+int nvox = 0;
+    float wtot = 0;
+float pthresh = 0;
+    vector<int> lengths;
+vector<int> pathmap;
+vector<int> basepathmap;
+    vector<float>::iterator iavg;
+vector<float>::iterator iwavg;
     MRI *post;
-    ifstream lenfile, infile;
+    ifstream lenfile;
+ifstream infile;
     string pathline;
 
     // Read lengths of path samples
@@ -187,7 +209,7 @@ int main(int argc, char **argv) {
     nz = post->depth;
 
     // Find (robust) maximum value of posterior distribution
-    pthresh = (float) MRIfindPercentile(post, .99, 0);
+    pthresh = static_cast<float>(MRIfindPercentile(post, .99, 0));
 
     // Set probability threshold as a portion (default: 20%) of (robust) maximum
     pthresh *= probThresh;
@@ -198,21 +220,23 @@ int main(int argc, char **argv) {
     wavg.resize(meas.size());
     fill(wavg.begin(), wavg.end(), 0.0);
 
-    for (int iz = 0; iz < nz; iz++)
-      for (int iy = 0; iy < ny; iy++)
+    for (int iz = 0; iz < nz; iz++) {
+      for (int iy = 0; iy < ny; iy++) {
         for (int ix = 0; ix < nx; ix++) {
           const float h = MRIgetVoxVal(post, ix, iy, iz, 0);
 
           if (h > pthresh) {
-            if (faThresh > 0)		// If FA threshold has been set
-              if (MRIgetVoxVal(*(meas.end()-1), ix, iy, iz, 0) <= faThresh)
+            if (faThresh > 0) { // If FA threshold has been set
+              if (MRIgetVoxVal(*(meas.end() - 1), ix, iy, iz, 0) <= faThresh) {
                 continue;
+}
+}
 
             iavg = avg.begin();
             iwavg = wavg.begin();
 
-            for (vector<MRI *>::const_iterator ivol = meas.begin();
-                                               ivol < meas.end(); ivol++) {
+            for (auto ivol = meas.begin();
+                 ivol < meas.end(); ivol++) {
               *iavg += MRIgetVoxVal(*ivol, ix, iy, iz, 0);
               *iwavg += h * MRIgetVoxVal(*ivol, ix, iy, iz, 0);
 
@@ -224,14 +248,20 @@ int main(int argc, char **argv) {
             wtot += h;
           }
         }
+}
+}
 
-    if (nvox > 0)
-      for (iavg = avg.begin(); iavg < avg.end(); iavg++)
+    if (nvox > 0) {
+      for (iavg = avg.begin(); iavg < avg.end(); iavg++) {
         *iavg /= nvox;
+}
+}
 
-    if (wtot > 0)
-      for (iwavg = wavg.begin(); iwavg < wavg.end(); iwavg++)
+    if (wtot > 0) {
+      for (iwavg = wavg.begin(); iwavg < wavg.end(); iwavg++) {
         *iwavg /= wtot;
+}
+}
 
     // Read maximum a posteriori path coordinates
     sprintf(fname, "%s/%s", inTrcDir, inVoxFile);
@@ -245,13 +275,17 @@ int main(int argc, char **argv) {
       float coord;
       istringstream pathstr(pathline);
 
-      for (int k = 0; k < 3; k++)
-        if (pathstr >> coord)
-          pathmap.push_back((int) round(coord));
+      for (int k = 0; k < 3; k++) {
+        if (pathstr >> coord) {
+          pathmap.push_back(static_cast<int>(round(coord)));
+}
+}
 
-      for (int k = 0; k < 3; k++)
-        if (pathstr >> coord)
-          basepathmap.push_back((int) round(coord));
+      for (int k = 0; k < 3; k++) {
+        if (pathstr >> coord) {
+          basepathmap.push_back(static_cast<int>(round(coord)));
+}
+}
     }
 
     if (!basepathmap.empty() && basepathmap.size() != pathmap.size()) {
@@ -260,43 +294,44 @@ int main(int argc, char **argv) {
     }
 
     // Overall measures
-    count   = lengths.size();
-    volume  = nvox;
-    lenmin  = *min_element(lengths.begin(), lengths.end());
-    lenmax  = *max_element(lengths.begin(), lengths.end());
-    lenavg  = ( (lenavg > 0) ? (lenavg / (float) lengths.size()) : 0 );
+    count = lengths.size();
+    volume = nvox;
+    lenmin = *min_element(lengths.begin(), lengths.end());
+    lenmax = *max_element(lengths.begin(), lengths.end());
+    lenavg = ((lenavg > 0) ? (lenavg / static_cast<float>(lengths.size())) : 0);
     lencent = pathmap.size() / 3;
 
-    if (dtBase) {
+    if (dtBase != nullptr) {
       vector<float>::iterator iavg;
 
       cavg.resize(meas.size());
       fill(cavg.begin(), cavg.end(), 0.0);
 
-      for (vector<int>::const_iterator ipt = pathmap.begin();
-                                       ipt < pathmap.end(); ipt += 3) {
+      for (auto ipt = pathmap.begin();
+           ipt < pathmap.end(); ipt += 3) {
         iavg = cavg.begin();
 
-        for (vector<MRI *>::const_iterator ivol = meas.begin();
-                                           ivol < meas.end(); ivol++) {
+        for (auto ivol = meas.begin();
+             ivol < meas.end(); ivol++) {
           *iavg += MRIgetVoxVal(*ivol, ipt[0], ipt[1], ipt[2], 0);
           iavg++;
         }
       }
 
-      for (iavg = cavg.begin(); iavg < cavg.end(); iavg++)
+      for (iavg = cavg.begin(); iavg < cavg.end(); iavg++) {
         *iavg /= lencent;
+}
     }
 
     // Measures by voxel on MAP streamline
-    if (outVoxFile) {
+    if (outVoxFile != nullptr) {
       int npts;
       CTrackReader trkreader;
       TRACK_HEADER trkheadin;
       vector<int>::const_iterator iptbase;
       vector<float> valsum(meas.size());
       vector<float>::iterator ivalsum;
-      vector< vector<int> > pathsamples;
+      vector<vector<int>> pathsamples;
       ofstream outfile(outVoxFile, ios::app);
 
       if (!outfile) {
@@ -315,62 +350,65 @@ int main(int argc, char **argv) {
       }
 
       while (trkreader.GetNextPointCount(&npts)) {
-        float *iraw, *rawpts = new float[npts*3];
-        vector<int> coords(npts*3);
-        vector<int>::iterator icoord = coords.begin();
+        float *iraw;
+float *rawpts = new float[npts * 3];
+        vector<int> coords(npts * 3);
+        auto icoord = coords.begin();
 
         // Read a streamline from input file
         trkreader.GetNextTrackData(npts, rawpts);
 
         // Divide by input voxel size and make 0-based to get voxel coords
         iraw = rawpts;
-        for (int ipt = npts; ipt > 0; ipt--)
+        for (int ipt = npts; ipt > 0; ipt--) {
           for (int k = 0; k < 3; k++) {
-            *icoord = (int) round(*iraw / trkheadin.voxel_size[k] - .5);
+            *icoord = static_cast<int>(round(*iraw / trkheadin.voxel_size[k] - .5));
             iraw++;
             icoord++;
           }
+}
 
         pathsamples.push_back(coords);
         delete[] rawpts;
       }
 
       // Loop over all points along the MAP path
-      if (!basepathmap.empty())
+      if (!basepathmap.empty()) {
         iptbase = basepathmap.begin();
+}
 
-      for (vector<int>::const_iterator ipt = pathmap.begin();
-                                       ipt < pathmap.end(); ipt += 3) {
+      for (auto ipt = pathmap.begin();
+           ipt < pathmap.end(); ipt += 3) {
         int nsamp = 0;
 
         // Write coordinates of this point
-        if (!basepathmap.empty()) 	// In base space if longitudinal
+        if (!basepathmap.empty()) { // In base space if longitudinal
           outfile << iptbase[0] << " " << iptbase[1] << " " << iptbase[2];
-        else 				// In native space if cross-sectional
+        } else { // In native space if cross-sectional
           outfile << ipt[0] << " " << ipt[1] << " " << ipt[2];
+}
 
         // Write value of each diffusion measure at this point
-        for (vector<MRI *>::const_iterator ivol = meas.begin();
-                                           ivol < meas.end(); ivol++)
+        for (auto ivol = meas.begin();
+             ivol < meas.end(); ivol++) {
           outfile << " " << MRIgetVoxVal(*ivol, ipt[0], ipt[1], ipt[2], 0);
+}
 
         // Find closest point on each sample path
         fill(valsum.begin(), valsum.end(), 0.0);
 
-        for (vector< vector<int> >::const_iterator ipath = pathsamples.begin();
-                                                   ipath < pathsamples.end();
-                                                   ipath++) {
+        for (auto ipath = pathsamples.begin();
+             ipath < pathsamples.end(); ipath++) {
           int dmin = 1000000;
-          vector<int>::const_iterator iptmin = ipath->begin();
+          auto iptmin = ipath->begin();
 
-          for (vector<int>::const_iterator ipathpt = ipath->begin();
-                                           ipathpt < ipath->end();
-                                           ipathpt += 3) {
+          for (auto ipathpt = ipath->begin();
+               ipathpt < ipath->end(); ipathpt += 3) {
             int dist = 0;
 
             for (int k = 0; k < 3; k++) {
               const int diff = ipathpt[k] - ipt[k];
-              dist += diff*diff;
+              dist += diff * diff;
             }
 
             if (dist < dmin) {
@@ -379,22 +417,24 @@ int main(int argc, char **argv) {
             }
           }
 
-/* TESTING
-          if (MRIgetVoxVal(post, iptmin[0], iptmin[1], iptmin[2], 0) <= pthresh)
-            continue;
-*/
+          /* TESTING
+                    if (MRIgetVoxVal(post, iptmin[0], iptmin[1], iptmin[2], 0)
+             <= pthresh) continue;
+          */
 
-          if (faThresh > 0)           // If FA threshold has been set
-            if (MRIgetVoxVal(*(meas.end()-1),
-                             iptmin[0], iptmin[1], iptmin[2], 0) <= faThresh)
+          if (faThresh > 0) { // If FA threshold has been set
+            if (MRIgetVoxVal(*(meas.end() - 1), iptmin[0], iptmin[1], iptmin[2],
+                             0) <= faThresh) {
               continue;
+}
+}
 
           nsamp++;
 
           ivalsum = valsum.begin();
 
-          for (vector<MRI *>::const_iterator ivol = meas.begin();
-                                             ivol < meas.end(); ivol++) {
+          for (auto ivol = meas.begin();
+               ivol < meas.end(); ivol++) {
             *ivalsum += MRIgetVoxVal(*ivol, iptmin[0], iptmin[1], iptmin[2], 0);
             ivalsum++;
           }
@@ -403,20 +443,20 @@ int main(int argc, char **argv) {
         // Write average value of each diffusion measure around this point
         ivalsum = valsum.begin();
 
-        for (vector<MRI *>::const_iterator ivol = meas.begin();
-                                           ivol < meas.end(); ivol++) {
+        for (auto ivol = meas.begin();
+             ivol < meas.end(); ivol++) {
           outfile << " " << *ivalsum / nsamp;
           ivalsum++;
         }
 
         outfile << endl;
 
-        if (!basepathmap.empty())
+        if (!basepathmap.empty()) {
           iptbase += 3;
+}
       }
     }
-  }
-  else {				// Deterministic paths
+  } else { // Deterministic paths
     // Read .trk file
     Blood myblood(inTrkFile, inRoi1File, inRoi2File);
 
@@ -425,191 +465,220 @@ int main(int argc, char **argv) {
     myblood.FindCenterStreamline();
 
     // Overall measures
-    count   = myblood.GetNumStr();
-    volume  = myblood.GetVolume();
-    lenmin  = myblood.GetLengthMin();
-    lenmax  = myblood.GetLengthMax();
-    lenavg  = myblood.GetLengthAvg();
+    count = myblood.GetNumStr();
+    volume = myblood.GetVolume();
+    lenmin = myblood.GetLengthMin();
+    lenmax = myblood.GetLengthMax();
+    lenavg = myblood.GetLengthAvg();
     lencent = myblood.GetLengthCenter();
 
-    if (dtBase) {
-      avg  = myblood.ComputeAvgPath(meas);
+    if (dtBase != nullptr) {
+      avg = myblood.ComputeAvgPath(meas);
       wavg = myblood.ComputeWeightAvgPath(meas);
       cavg = myblood.ComputeAvgCenter(meas);
     }
 
     // Measures by voxel on median streamline
-    if (outVoxFile)
+    if (outVoxFile != nullptr) {
       myblood.WriteValuesPointwise(meas, outVoxFile);
+}
 
     // Save median streamline
-    if (outMedianFile)
+    if (outMedianFile != nullptr) {
       myblood.WriteCenterStreamline(outMedianFile, inTrkFile);
+}
 
     // Save streamline end points
-    if (outEndBase) {
+    if (outEndBase != nullptr) {
       MRI *refvol;
 
-      if (refVolFile)
+      if (refVolFile != nullptr) {
         refvol = MRIread(refVolFile);
-      else
+      } else {
         refvol = l1;
+}
 
       myblood.WriteEndPoints(outEndBase, refvol);
     }
   }
 
-  if (outFile) {
+  if (outFile != nullptr) {
     WriteHeader(outFile);
 
     fout.open(outFile, ios::app);
 
-    fout << "Count "      << count   << endl
-         << "Volume "     << volume  << endl
-         << "Len_Min "    << lenmin  << endl
-         << "Len_Max "    << lenmax  << endl
-         << "Len_Avg "    << lenavg  << endl
+    fout << "Count " << count << endl
+         << "Volume " << volume << endl
+         << "Len_Min " << lenmin << endl
+         << "Len_Max " << lenmax << endl
+         << "Len_Avg " << lenavg << endl
          << "Len_Center " << lencent << endl;
 
-    if (dtBase)
-      fout << "AD_Avg "        << avg[0]  << endl
+    if (dtBase != nullptr) {
+      fout << "AD_Avg " << avg[0] << endl
            << "AD_Avg_Weight " << wavg[0] << endl
            << "AD_Avg_Center " << cavg[0] << endl
-           << "RD_Avg "        << avg[1]  << endl
+           << "RD_Avg " << avg[1] << endl
            << "RD_Avg_Weight " << wavg[1] << endl
            << "RD_Avg_Center " << cavg[1] << endl
-           << "MD_Avg "        << avg[2]  << endl
+           << "MD_Avg " << avg[2] << endl
            << "MD_Avg_Weight " << wavg[2] << endl
            << "MD_Avg_Center " << cavg[2] << endl
-           << "FA_Avg "        << avg[3]  << endl
+           << "FA_Avg " << avg[3] << endl
            << "FA_Avg_Weight " << wavg[3] << endl
            << "FA_Avg_Center " << cavg[3] << endl;
+}
 
     fout.close();
   }
 
-  if (outVoxFile) {
+  if (outVoxFile != nullptr) {
     ofstream fvox(outVoxFile, ios::app);
     fvox << "# pathway end" << endl;
     fvox.close();
   }
 
   cputime = cputimer.milliseconds();
-  printf("Done in %g sec.\n", cputime/1000.0);
+  printf("Done in %g sec.\n", cputime / 1000.0);
 
   printf("dmri_pathstats done\n");
-  return(0);
+  return (0);
   exit(0);
 }
 
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
-  int  nargc, nargsused;
-  char **pargv, *option;
+  int nargc;
+int nargsused;
+  char **pargv;
+char *option;
 
-  if (argc < 1) usage_exit();
+  if (argc < 1) {
+    usage_exit();
+}
 
   nargc = argc;
   pargv = argv;
   while (nargc > 0) {
     option = pargv[0];
-    if (debug) printf("%d %s\n",nargc,option);
+    if (debug != 0) {
+      printf("%d %s\n", nargc, option);
+}
     nargc -= 1;
     pargv += 1;
 
     nargsused = 0;
 
-    if (!strcasecmp(option, "--help"))  print_help() ;
-    else if (!strcasecmp(option, "--version")) print_version() ;
-    else if (!strcasecmp(option, "--debug"))   debug = 1;
-    else if (!strcasecmp(option, "--checkopts"))   checkoptsonly = 1;
-    else if (!strcasecmp(option, "--nocheckopts")) checkoptsonly = 0;
-    else if (!strcmp(option, "--intrk")) {
-      if (nargc < 1) CMDargNErr(option,1);
+    if (strcasecmp(option, "--help") == 0) {
+      print_help();
+    } else if (strcasecmp(option, "--version") == 0) {
+      print_version();
+    } else if (strcasecmp(option, "--debug") == 0) {
+      debug = 1;
+    } else if (strcasecmp(option, "--checkopts") == 0) {
+      checkoptsonly = 1;
+    } else if (strcasecmp(option, "--nocheckopts") == 0) {
+      checkoptsonly = 0;
+    } else if (strcmp(option, "--intrk") == 0) {
+      if (nargc < 1) {
+        CMDargNErr(option, 1);
+}
       inTrkFile = fio_fullpath(pargv[0]);
       nargsused = 1;
-    }
-    else if (!strcmp(option, "--rois")) {
-      if (nargc < 2) CMDargNErr(option,2);
+    } else if (strcmp(option, "--rois") == 0) {
+      if (nargc < 2) {
+        CMDargNErr(option, 2);
+}
       inRoi1File = fio_fullpath(pargv[0]);
       inRoi2File = fio_fullpath(pargv[1]);
       nargsused = 2;
-    }
-    else if (!strcmp(option, "--intrc")) {
-      if (nargc < 1) CMDargNErr(option,1);
+    } else if (strcmp(option, "--intrc") == 0) {
+      if (nargc < 1) {
+        CMDargNErr(option, 1);
+}
       inTrcDir = fio_fullpath(pargv[0]);
       nargsused = 1;
-    }
-    else if (!strcmp(option, "--invox")) {
-      if (nargc < 1) CMDargNErr(option,1);
+    } else if (strcmp(option, "--invox") == 0) {
+      if (nargc < 1) {
+        CMDargNErr(option, 1);
+}
       inVoxFile = pargv[0];
       nargsused = 1;
-    }
-    else if (!strcmp(option, "--dtbase")) {
-      if (nargc < 1) CMDargNErr(option,1);
+    } else if (strcmp(option, "--dtbase") == 0) {
+      if (nargc < 1) {
+        CMDargNErr(option, 1);
+}
       dtBase = fio_fullpath(pargv[0]);
       nargsused = 1;
-    }
-    else if (!strcmp(option, "--path")) {
-      if (nargc < 1) CMDargNErr(option,1);
+    } else if (strcmp(option, "--path") == 0) {
+      if (nargc < 1) {
+        CMDargNErr(option, 1);
+}
       strcpy(pathName, pargv[0]);
       nargsused = 1;
-    }
-    else if (!strcmp(option, "--subj")) {
-      if (nargc < 1) CMDargNErr(option,1);
+    } else if (strcmp(option, "--subj") == 0) {
+      if (nargc < 1) {
+        CMDargNErr(option, 1);
+}
       strcpy(subjName, pargv[0]);
       nargsused = 1;
-    }
-    else if (!strcmp(option, "--out")) {
-      if (nargc < 1) CMDargNErr(option,1);
+    } else if (strcmp(option, "--out") == 0) {
+      if (nargc < 1) {
+        CMDargNErr(option, 1);
+}
       outFile = fio_fullpath(pargv[0]);
       nargsused = 1;
-    }
-    else if (!strcmp(option, "--outvox")) {
-      if (nargc < 1) CMDargNErr(option,1);
+    } else if (strcmp(option, "--outvox") == 0) {
+      if (nargc < 1) {
+        CMDargNErr(option, 1);
+}
       outVoxFile = fio_fullpath(pargv[0]);
       nargsused = 1;
-    }
-    else if (!strcmp(option, "--median")) {
-      if (nargc < 1) CMDargNErr(option,1);
+    } else if (strcmp(option, "--median") == 0) {
+      if (nargc < 1) {
+        CMDargNErr(option, 1);
+}
       outMedianFile = fio_fullpath(pargv[0]);
       nargsused = 1;
-    }
-    else if (!strcmp(option, "--ends")) {
-      if (nargc < 1) CMDargNErr(option,1);
+    } else if (strcmp(option, "--ends") == 0) {
+      if (nargc < 1) {
+        CMDargNErr(option, 1);
+}
       outEndBase = fio_fullpath(pargv[0]);
       nargsused = 1;
-    }
-    else if (!strcmp(option, "--ref")) {
-      if (nargc < 1) CMDargNErr(option,1);
+    } else if (strcmp(option, "--ref") == 0) {
+      if (nargc < 1) {
+        CMDargNErr(option, 1);
+}
       refVolFile = fio_fullpath(pargv[0]);
       nargsused = 1;
-    }
-    else if (!strcmp(option, "--pthr")) {
-      if (nargc < 1) CMDargNErr(option,1);
+    } else if (strcmp(option, "--pthr") == 0) {
+      if (nargc < 1) {
+        CMDargNErr(option, 1);
+}
       sscanf(pargv[0], "%f", &probThresh);
       nargsused = 1;
-    }
-    else if (!strcmp(option, "--fthr")) {
-      if (nargc < 1) CMDargNErr(option,1);
+    } else if (strcmp(option, "--fthr") == 0) {
+      if (nargc < 1) {
+        CMDargNErr(option, 1);
+}
       sscanf(pargv[0], "%f", &faThresh);
       nargsused = 1;
-    }
-    else {
-      fprintf(stderr,"ERROR: Option %s unknown\n",option);
-      if (CMDsingleDash(option))
-        fprintf(stderr,"       Did you really mean -%s ?\n",option);
+    } else {
+      fprintf(stderr, "ERROR: Option %s unknown\n", option);
+      if (CMDsingleDash(option) != 0) {
+        fprintf(stderr, "       Did you really mean -%s ?\n", option);
+}
       exit(-1);
     }
     nargc -= nargsused;
     pargv += nargsused;
   }
-  return(0);
+  return (0);
 }
 
 /* --------------------------------------------- */
-static void print_usage(void) 
-{
+static void print_usage() {
   printf("\n");
   printf("USAGE: ./dmri_pathstats\n");
   printf("\n");
@@ -628,13 +697,15 @@ static void print_usage(void)
   printf("   --out <file>:\n");
   printf("     Output text file for overall path measures\n");
   printf("   --outvox <file>:\n");
-  printf("     Output text file for voxel-by-voxel measures along path (optional)\n");
+  printf("     Output text file for voxel-by-voxel measures along path "
+         "(optional)\n");
   printf("   --median <file>:\n");
   printf("     Output .trk file of median streamline (optional)\n");
   printf("   --ends   <base>:\n");
   printf("     Base name of output volumes of streamline ends (optional)\n");
   printf("   --ref <file>:\n");
-  printf("     Reference volume (needed only if using --ends without --dtbase)\n");
+  printf(
+      "     Reference volume (needed only if using --ends without --dtbase)\n");
   printf("   --pthr <num>:\n");
   printf("     Lower threshold on path posterior distribution,\n");
   printf("     as a portion of the maximum (range: 0-1, default: 0.2)\n");
@@ -650,127 +721,132 @@ static void print_usage(void)
 }
 
 /* --------------------------------------------- */
-static void print_help(void) {
-  print_usage() ;
+static void print_help() {
+  print_usage();
   printf("\n");
   printf("...\n");
   printf("\n");
-  exit(1) ;
+  exit(1);
 }
 
 /* ------------------------------------------------------ */
-static void usage_exit(void) {
-  print_usage() ;
-  exit(1) ;
+static void usage_exit() {
+  print_usage();
+  exit(1);
 }
 
 /* --------------------------------------------- */
-static void print_version(void) {
-  printf("%s\n", vcid) ;
-  exit(1) ;
+static void print_version() {
+  printf("%s\n", vcid);
+  exit(1);
 }
 
 /* --------------------------------------------- */
-static void check_options(void) {
-  if(inTrcDir && inTrkFile) {
+static void check_options() {
+  if ((inTrcDir != nullptr) && (inTrkFile != nullptr)) {
     printf("ERROR: cannot specify both .trk file and tracula directory\n");
     exit(1);
   }
-  if(!inTrcDir && !inTrkFile) {
+  if ((inTrcDir == nullptr) && (inTrkFile == nullptr)) {
     printf("ERROR: must specify input .trk file or tracula directory\n");
     exit(1);
   }
-  if(!outFile && !outVoxFile && !outMedianFile && !outEndBase) {
+  if ((outFile == nullptr) && (outVoxFile == nullptr) && (outMedianFile == nullptr) && (outEndBase == nullptr)) {
     printf("ERROR: must specify at least one type of output\n");
     exit(1);
   }
-  if(outVoxFile && !dtBase) {
+  if ((outVoxFile != nullptr) && (dtBase == nullptr)) {
     printf("ERROR: must specify dtifit base name for voxel-by-voxel output\n");
     exit(1);
   }
-  if(outMedianFile && !inTrkFile) {
+  if ((outMedianFile != nullptr) && (inTrkFile == nullptr)) {
     printf("ERROR: must specify input .trk file to use --median\n");
     exit(1);
   }
-  if(outEndBase && !inTrkFile) {
+  if ((outEndBase != nullptr) && (inTrkFile == nullptr)) {
     printf("ERROR: must specify input .trk file to use --ends\n");
     exit(1);
   }
-  if(outEndBase && !refVolFile && !dtBase) {
+  if ((outEndBase != nullptr) && (refVolFile == nullptr) && (dtBase == nullptr)) {
     printf("ERROR: must specify reference volume to use --ends\n");
     exit(1);
   }
-  if(probThresh < 0 || probThresh > 1) {
+  if (probThresh < 0 || probThresh > 1) {
     printf("ERROR: probability threshold must be a number between 0 and 1\n");
     exit(1);
   }
-  if(faThresh < 0 || faThresh > 1) {
+  if (faThresh < 0 || faThresh > 1) {
     printf("ERROR: FA threshold must be a number between 0 and 1\n");
     exit(1);
   }
-  return;
-}
+  }
 
 /* --------------------------------------------- */
 static void WriteHeader(char *OutFile) {
   ofstream fout(OutFile, ios::out);
 
   fout << "# Title Pathway Statistics" << endl
-       << "#"                          << endl
-       << "# generating_program "      << Progname << endl
-       << "# cvs_version "             << vcid << endl
-       << "# cmdline "                 << cmdline << endl
-       << "# sysname "                 << uts.sysname << endl
-       << "# hostname "                << uts.nodename << endl
-       << "# machine "                 << uts.machine << endl
-       << "# user "                    << VERuser() << endl
-       << "# anatomy_type pathway"     << endl
-       << "#"                          << endl
-       << "# subjectname "             << subjName << endl
-       << "# pathwayname "             << pathName << endl
-       << "#"                          << endl;
+       << "#" << endl
+       << "# generating_program " << Progname << endl
+       << "# cvs_version " << vcid << endl
+       << "# cmdline " << cmdline << endl
+       << "# sysname " << uts.sysname << endl
+       << "# hostname " << uts.nodename << endl
+       << "# machine " << uts.machine << endl
+       << "# user " << VERuser() << endl
+       << "# anatomy_type pathway" << endl
+       << "#" << endl
+       << "# subjectname " << subjName << endl
+       << "# pathwayname " << pathName << endl
+       << "#" << endl;
 
   fout.close();
 }
 
 static void dump_options(FILE *fp) {
-  fprintf(fp,"\n");
-  fprintf(fp,"%s\n",vcid);
-  fprintf(fp,"cwd %s\n",cwd);
-  fprintf(fp,"cmdline %s\n",cmdline);
-  fprintf(fp,"sysname  %s\n",uts.sysname);
-  fprintf(fp,"hostname %s\n",uts.nodename);
-  fprintf(fp,"machine  %s\n",uts.machine);
-  fprintf(fp,"user     %s\n",VERuser());
+  fprintf(fp, "\n");
+  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "cwd %s\n", cwd);
+  fprintf(fp, "cmdline %s\n", cmdline);
+  fprintf(fp, "sysname  %s\n", uts.sysname);
+  fprintf(fp, "hostname %s\n", uts.nodename);
+  fprintf(fp, "machine  %s\n", uts.machine);
+  fprintf(fp, "user     %s\n", VERuser());
 
-  if (inTrkFile)
+  if (inTrkFile != nullptr) {
     fprintf(fp, "Input .trk file: %s\n", inTrkFile);
-  if (inRoi1File) {
+}
+  if (inRoi1File != nullptr) {
     fprintf(fp, "Input end ROI 1: %s\n", inRoi1File);
     fprintf(fp, "Input end ROI 2: %s\n", inRoi2File);
   }
-  if (inTrcDir)
+  if (inTrcDir != nullptr) {
     fprintf(fp, "Input tracula directory: %s\n", inTrcDir);
-  if (dtBase)
-    fprintf(fp, "Input DTI fit base: %s\n", dtBase);
-//  if (pathName)
-    fprintf(fp, "Pathway name: %s\n", pathName);
-//  if (subjName)
-    fprintf(fp, "Subject name: %s\n", subjName);
-  if (outFile)
-    fprintf(fp, "Output file for overall measures: %s\n", outFile);
-  if (outVoxFile)
-    fprintf(fp, "Output file for voxel-by-voxel measures: %s\n", outVoxFile);
-  if (outMedianFile)
-    fprintf(fp, "Output median streamline file: %s\n", outMedianFile);
-  if (outEndBase)
-    fprintf(fp, "Base name of output end point volumes: %s\n", outEndBase);
-  if (refVolFile)
-    fprintf(fp, "Reference for output end point volumes: %s\n", refVolFile);
-  fprintf(fp, "Lower threshold for probability: %f\n", probThresh);
-  if (faThresh > 0)
-    fprintf(fp, "Lower threshold for FA: %f\n", faThresh);
-
-  return;
 }
-
+  if (dtBase != nullptr) {
+    fprintf(fp, "Input DTI fit base: %s\n", dtBase);
+}
+  //  if (pathName)
+  fprintf(fp, "Pathway name: %s\n", pathName);
+  //  if (subjName)
+  fprintf(fp, "Subject name: %s\n", subjName);
+  if (outFile != nullptr) {
+    fprintf(fp, "Output file for overall measures: %s\n", outFile);
+}
+  if (outVoxFile != nullptr) {
+    fprintf(fp, "Output file for voxel-by-voxel measures: %s\n", outVoxFile);
+}
+  if (outMedianFile != nullptr) {
+    fprintf(fp, "Output median streamline file: %s\n", outMedianFile);
+}
+  if (outEndBase != nullptr) {
+    fprintf(fp, "Base name of output end point volumes: %s\n", outEndBase);
+}
+  if (refVolFile != nullptr) {
+    fprintf(fp, "Reference for output end point volumes: %s\n", refVolFile);
+}
+  fprintf(fp, "Lower threshold for probability: %f\n", probThresh);
+  if (faThresh > 0) {
+    fprintf(fp, "Lower threshold for FA: %f\n", faThresh);
+}
+}

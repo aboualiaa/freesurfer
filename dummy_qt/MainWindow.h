@@ -4,13 +4,12 @@
 #include <QMainWindow>
 
 namespace Ui {
-  class MainWindow;
+class MainWindow;
 }
 
 class QProcess;
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
   Q_OBJECT
 
 public:
@@ -30,12 +29,12 @@ public slots:
   void OnStandardOutput();
 
 protected:
-  void AddMessage(const QString& text, int type = Normal);
+  void AddMessage(const QString &text, int type = Normal);
 
 private:
   Ui::MainWindow *ui;
-  QProcess*   m_process;  // process/thread that runs mri_convert
-  QString     m_strLastDir;
+  QProcess *m_process; // process/thread that runs mri_convert
+  QString m_strLastDir;
 };
 
 #endif // MAINWINDOW_H

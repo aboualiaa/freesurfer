@@ -4,10 +4,10 @@
  *
  * This file has some some extra functions for use with the GIFTI
  * utilities. The official utilities reside in gifti_io.c and gifti_xml.c
- * 
+ *
  */
 /*
- * Original Author: Kevin Teich 
+ * Original Author: Kevin Teich
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:09 $
@@ -31,10 +31,11 @@
 #include "gifti_io.h"
 #include "mrisurf.h"
 
-MRIS* mrisReadGIFTIfile(const char *fname, MRIS *mris);
-MRIS* mrisReadGIFTIdanum(const char *fname, MRIS *mris, int daNum);
-MRI* MRISreadGiftiAsMRI(const char *fname, int read_volume);
-int MRISwriteGIFTI(MRIS* mris, int intent_code, const char *out_fname, const char *curv_fname);
-int mriWriteGifti(MRI* mri, const char *out_fname);
+MRIS *mrisReadGIFTIfile(const char *fname, MRIS *mris);
+MRIS *mrisReadGIFTIdanum(const char *fname, MRIS *mris, int daNum);
+MRI *MRISreadGiftiAsMRI(const char *fname, int read_volume);
+int MRISwriteGIFTI(MRIS *mris, int intent_code, const char *out_fname,
+                   const char *curv_fname);
+int mriWriteGifti(MRI *mri, const char *out_fname);
 
 #endif

@@ -21,22 +21,22 @@
  *
  */
 
-
 #ifndef MRI_IDENTIFY_H
 #define MRI_IDENTIFY_H
 
-#define GE_MAGIC  (0x494d4746)  /* GE magic number
+#define GE_MAGIC                                                               \
+  (0x494d4746) /* GE magic number                                              \
 (first four bytes, = "IMGF") */
 
-#define NIFTI1_MAGIC  "ni1\0"
-#define NII_MAGIC  "n+1\0"
-#define NRRD_MAGIC  "NRRD"
+#define NIFTI1_MAGIC "ni1\0"
+#define NII_MAGIC "n+1\0"
+#define NRRD_MAGIC "NRRD"
 
 /* ge compression codes */
-#define GE_COMPRESSION_ASIS                  0
-#define GE_COMPRESSION_RECTANGULAR           1
-#define GE_COMPRESSION_PACKED                2
-#define GE_COMPRESSION_COMPRESSED            3
+#define GE_COMPRESSION_ASIS 0
+#define GE_COMPRESSION_RECTANGULAR 1
+#define GE_COMPRESSION_PACKED 2
+#define GE_COMPRESSION_COMPRESSED 3
 #define GE_COMPRESSION_COMPRESSED_AND_PACKED 4
 
 int string_to_type(const char *string);
@@ -44,7 +44,7 @@ char *type_to_string(int type);
 
 int mri_identify(const char *fname);
 
-int   IDtypeFromStem(const char *stem);
+int IDtypeFromStem(const char *stem);
 char *IDnameFromStem(const char *stem);
 char *IDstemFromName(const char *name);
 char *IDextensionFromName(const char *name);
@@ -68,10 +68,10 @@ int is_nifti1(const char *fname);
 int is_nii(const char *fname);
 int is_nrrd(const char *fname);
 int IDisCurv(const char *curvfile);
-char * bhdr_stem(const char *fname);
-char * bhdr_precisionstring(const char *fname);
+char *bhdr_stem(const char *fname);
+char *bhdr_precisionstring(const char *fname);
 int bhdr_precision(const char *fname);
-char * bhdr_firstslicefname(const char *fname);
+char *bhdr_firstslicefname(const char *fname);
 
 /* EOF */
 #endif

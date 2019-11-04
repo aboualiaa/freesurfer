@@ -24,7 +24,6 @@
  *
  */
 
-
 #ifndef vtkKWProgressDialog_h
 #define vtkKWProgressDialog_h
 
@@ -39,23 +38,21 @@ class vtkKWApplication;
 class vtkKWProgressDialog : public vtkCommand {
 
 public:
+  static vtkKWProgressDialog *New();
+  vtkTypeRevisionMacro(vtkKWProgressDialog, vtkCommand);
 
-  static vtkKWProgressDialog* New ();
-  vtkTypeRevisionMacro( vtkKWProgressDialog, vtkCommand );
+  void Execute(vtkObject *iCaller, unsigned long iEvent, void *iCallData);
 
-  void Execute ( vtkObject* iCaller, unsigned long iEvent, void* iCallData );
-
-  void SetApplication ( vtkKWApplication* iApplication );
-  void SetWindowTitle ( const char* isTitle );
+  void SetApplication(vtkKWApplication *iApplication);
+  void SetWindowTitle(const char *isTitle);
 
 protected:
+  vtkKWProgressDialog();
+  virtual ~vtkKWProgressDialog();
 
-  vtkKWProgressDialog ();
-  virtual ~vtkKWProgressDialog ();
-
-  vtkKWApplication* mApplication;
-  vtkKWDialog* mDialog;
-  vtkKWProgressGauge* mProgressGauge;
+  vtkKWApplication *mApplication;
+  vtkKWDialog *mDialog;
+  vtkKWProgressGauge *mProgressGauge;
 
   char msWindowTitle[1024];
 };

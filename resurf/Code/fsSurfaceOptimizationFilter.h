@@ -6,32 +6,28 @@
 #include "fsSurface.h"
 
 using namespace itk;
-namespace fs
-{
+namespace fs {
 
-	template <typename TSurfaceIn, typename  TSurfaceOut>
-		class SurfaceOptimizationFilter : public itk::MeshToMeshFilter<TSurfaceIn, TSurfaceOut>
-	{
-		public:
+template <typename TSurfaceIn, typename TSurfaceOut>
+class SurfaceOptimizationFilter
+    : public itk::MeshToMeshFilter<TSurfaceIn, TSurfaceOut> {
+public:
+  typedef SurfaceOptimizationFilter Self;
+  typedef SmartPointer<Self> Pointer;
+  typedef itk::MeshToMeshFilter<TSurfaceIn, TSurfaceOut> Superclass;
+  typedef TSurfaceIn InSurfaceType;
+  typedef typename InSurfaceType::Pointer InSurfacePointer;
+  typedef TSurfaceOut OutSurfaceType;
+  typedef typename OutSurfaceType::Pointer OutSurfacePointer;
+  itkNewMacro(Self);
 
-			typedef SurfaceOptimizationFilter	                          Self;
-			typedef SmartPointer<Self>       	                       Pointer;
-			typedef itk::MeshToMeshFilter<TSurfaceIn, TSurfaceOut>       Superclass;
-			typedef TSurfaceIn InSurfaceType;
-			typedef typename InSurfaceType::Pointer InSurfacePointer;
-			typedef TSurfaceOut OutSurfaceType;
-			typedef typename OutSurfaceType::Pointer OutSurfacePointer;
-			itkNewMacro(Self);
-		protected:
+protected:
+  void GenerateData() override;
 
-			void GenerateData() override;	
-		private:
-
-
-	};
-
+private:
+};
 
 #include "fsSurfaceOptimizationFilter.txx"
 
-}
+} // namespace fs
 #endif

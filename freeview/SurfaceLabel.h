@@ -33,110 +33,70 @@
 #include <vtkSmartPointer.h>
 #include <QList>
 
-
-
 #include "label.h"
-
 
 class LayerSurface;
 class vtkRGBAColorTransferFunction;
 class LayerMRI;
 
-class SurfaceLabel  : public QObject
-{
+class SurfaceLabel : public QObject {
   Q_OBJECT
 public:
-  SurfaceLabel ( LayerSurface* surf, bool bInitializeLabel = false );
-  ~SurfaceLabel ();
+  SurfaceLabel(LayerSurface *surf, bool bInitializeLabel = false);
+  ~SurfaceLabel();
 
   enum ColorCode { SolidColor = 0, Heatscale };
-//  void SetSurface( LayerSurface* surf );
+  //  void SetSurface( LayerSurface* surf );
 
   QString GetName();
 
-  void SetName( const QString& name );
+  void SetName(const QString &name);
 
-  bool LoadLabel( const QString& filename );
+  bool LoadLabel(const QString &filename);
 
-  void SetColor( double r, double g, double b );
+  void SetColor(double r, double g, double b);
 
-  double* GetColor()
-  {
-    return m_rgbColor;
-  }
+  double *GetColor() { return m_rgbColor; }
 
-  void MapLabel( unsigned char* colordata, int nVertexCount );
+  void MapLabel(unsigned char *colordata, int nVertexCount);
 
-  bool GetShowOutline()
-  {
-    return m_bShowOutline;
-  }
+  bool GetShowOutline() { return m_bShowOutline; }
 
   void SetShowOutline(bool bOutline);
 
-  bool IsVisible()
-  {
-    return m_bVisible;
-  }
+  bool IsVisible() { return m_bVisible; }
 
-  double GetThreshold()
-  {
-    return m_dThreshold;
-  }
+  double GetThreshold() { return m_dThreshold; }
 
-  double GetHeatscaleMin()
-  {
-    return m_dHeatscaleMin;
-  }
+  double GetHeatscaleMin() { return m_dHeatscaleMin; }
 
-  double GetHeatscaleMax()
-  {
-    return m_dHeatscaleMax;
-  }
+  double GetHeatscaleMax() { return m_dHeatscaleMax; }
 
-  double GetOpacity()
-  {
-    return m_dOpacity;
-  }
+  double GetOpacity() { return m_dOpacity; }
 
-  int GetColorCode()
-  {
-    return m_nColorCode;
-  }
+  int GetColorCode() { return m_nColorCode; }
 
-  bool GetCentroid(double* x, double* y, double* z, int* nvo);
+  bool GetCentroid(double *x, double *y, double *z, int *nvo);
 
-  LABEL* GetLabelData()
-  {
-    return m_label;
-  }
+  LABEL *GetLabelData() { return m_label; }
 
-  void Resample(LayerMRI* mri);
+  void Resample(LayerMRI *mri);
   void Dilate(int nTimes = 1);
   void Erode(int nTimes = 1);
   void Open(int nTimes = 1);
   void Close(int nTimes = 1);
 
-  QString GetFileName()
-  {
-    return m_strFilename;
-  }
+  QString GetFileName() { return m_strFilename; }
 
   bool HasVertex(int nvo);
 
-  void EditVertices(const QVector<int>& verts, bool bAdd = true);
+  void EditVertices(const QVector<int> &verts, bool bAdd = true);
 
-  bool SaveToFile(const QString& filename = "");
+  bool SaveToFile(const QString &filename = "");
 
-  bool HasUndo()
-  {
-    return !m_undoBuffer.isEmpty();
-  }
+  bool HasUndo() { return !m_undoBuffer.isEmpty(); }
 
-  bool HasRedo()
-  {
-    return !m_redoBuffer.isEmpty();
-  }
+  bool HasRedo() { return !m_redoBuffer.isEmpty(); }
 
 Q_SIGNALS:
   void SurfaceLabelChanged();
@@ -158,23 +118,23 @@ private:
   void UpdateOutline();
   void UpdateLut();
 
-  LABEL*        m_label;
-  QString       m_strName;
-  LayerSurface* m_surface;
-  double        m_rgbColor[3];
-  bool          m_bTkReg;
-  bool          m_bShowOutline;
-  bool          m_bVisible;
-  int*          m_nOutlineIndices;
-  double        m_dThreshold;
-  int           m_nColorCode;
-  double        m_dHeatscaleMin;
-  double        m_dHeatscaleMax;
-  double        m_dOpacity;
-  QString       m_strFilename;
-  bool          m_bModified;
-  QList<LABEL*> m_undoBuffer;
-  QList<LABEL*> m_redoBuffer;
+  LABEL *m_label;
+  QString m_strName;
+  LayerSurface *m_surface;
+  double m_rgbColor[3];
+  bool m_bTkReg;
+  bool m_bShowOutline;
+  bool m_bVisible;
+  int *m_nOutlineIndices;
+  double m_dThreshold;
+  int m_nColorCode;
+  double m_dHeatscaleMin;
+  double m_dHeatscaleMax;
+  double m_dOpacity;
+  QString m_strFilename;
+  bool m_bModified;
+  QList<LABEL *> m_undoBuffer;
+  QList<LABEL *> m_redoBuffer;
 
   vtkSmartPointer<vtkRGBAColorTransferFunction> m_lut;
 };

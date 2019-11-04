@@ -22,7 +22,6 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-
 /*
 ** the end result of this is that the source file which includes
 ** this can be sure that TEEM_ZLIB is set, so that the required
@@ -30,7 +29,7 @@
 */
 
 #ifdef TEEM_PNG
-#  ifndef TEEM_ZLIB
-#    error TEEM_PNG set, but TEEM_ZLIB not set
-#  endif
+#ifndef TEEM_ZLIB
+#error TEEM_PNG set, but TEEM_ZLIB not set
+#endif
 #endif

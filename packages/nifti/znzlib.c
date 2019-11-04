@@ -48,8 +48,7 @@
    use_compression!=0 uses zlib (gzip) compression
 */
 
-znzFile znzopen(const char *path, const char *mode, int use_compression)
-{
+znzFile znzopen(const char *path, const char *mode, int use_compression) {
   znzFile file;
   file = (znzFile)calloc(1, sizeof(struct znzptr));
   if (file == NULL) {
@@ -68,8 +67,7 @@ znzFile znzopen(const char *path, const char *mode, int use_compression)
       free(file);
       file = NULL;
     }
-  }
-  else {
+  } else {
 #endif
 
     file->withz = 0;
@@ -85,8 +83,7 @@ znzFile znzopen(const char *path, const char *mode, int use_compression)
   return file;
 }
 
-znzFile znzdopen(int fd, const char *mode, int use_compression)
-{
+znzFile znzdopen(int fd, const char *mode, int use_compression) {
   znzFile file;
   file = (znzFile)calloc(1, sizeof(struct znzptr));
   if (file == NULL) {
@@ -98,8 +95,7 @@ znzFile znzdopen(int fd, const char *mode, int use_compression)
     file->withz = 1;
     file->zfptr = gzdopen(fd, mode);
     file->nzfptr = NULL;
-  }
-  else {
+  } else {
 #endif
     file->withz = 0;
 #ifdef HAVE_FDOPEN
@@ -112,8 +108,7 @@ znzFile znzdopen(int fd, const char *mode, int use_compression)
   return file;
 }
 
-int Xznzclose(znzFile *file)
-{
+int Xznzclose(znzFile *file) {
   int retval = 0;
   if (*file != NULL) {
 #ifdef HAVE_ZLIB
@@ -131,131 +126,131 @@ int Xznzclose(znzFile *file)
   return retval;
 }
 
-size_t znzread(void *buf, size_t size, size_t nmemb, znzFile file)
-{
+size_t znzread(void *buf, size_t size, size_t nmemb, znzFile file) {
   if (file == NULL) {
     return 0;
   }
 #ifdef HAVE_ZLIB
-  if (file->zfptr != NULL) return (size_t)(gzread(file->zfptr, buf, ((int)size) * ((int)nmemb)) / size);
+  if (file->zfptr != NULL)
+    return (size_t)(gzread(file->zfptr, buf, ((int)size) * ((int)nmemb)) /
+                    size);
 #endif
   return fread(buf, size, nmemb, file->nzfptr);
 }
 
-size_t znzwrite(void *buf, size_t size, size_t nmemb, znzFile file)
-{
+size_t znzwrite(void *buf, size_t size, size_t nmemb, znzFile file) {
   if (file == NULL) {
     return 0;
   }
 #ifdef HAVE_ZLIB
-  if (file->zfptr != NULL) return (size_t)(gzwrite(file->zfptr, buf, size * nmemb) / size);
+  if (file->zfptr != NULL)
+    return (size_t)(gzwrite(file->zfptr, buf, size * nmemb) / size);
 #endif
   return fwrite(buf, size, nmemb, file->nzfptr);
 }
 
-long znzseek(znzFile file, long offset, int whence)
-{
+long znzseek(znzFile file, long offset, int whence) {
   if (file == NULL) {
     return 0;
   }
 #ifdef HAVE_ZLIB
-  if (file->zfptr != NULL) return (long)gzseek(file->zfptr, offset, whence);
+  if (file->zfptr != NULL)
+    return (long)gzseek(file->zfptr, offset, whence);
 #endif
   return fseek(file->nzfptr, offset, whence);
 }
 
-int znzrewind(znzFile stream)
-{
+int znzrewind(znzFile stream) {
   if (stream == NULL) {
     return 0;
   }
 #ifdef HAVE_ZLIB
-  if (stream->zfptr != NULL) return gzrewind(stream->zfptr);
+  if (stream->zfptr != NULL)
+    return gzrewind(stream->zfptr);
 #endif
   rewind(stream->nzfptr);
   return 0;
 }
 
-long znztell(znzFile file)
-{
+long znztell(znzFile file) {
   if (file == NULL) {
     return 0;
   }
 #ifdef HAVE_ZLIB
-  if (file->zfptr != NULL) return (long)gztell(file->zfptr);
+  if (file->zfptr != NULL)
+    return (long)gztell(file->zfptr);
 #endif
   return ftell(file->nzfptr);
 }
 
-int znzputs(char *str, znzFile file)
-{
+int znzputs(char *str, znzFile file) {
   if (file == NULL) {
     return 0;
   }
 #ifdef HAVE_ZLIB
-  if (file->zfptr != NULL) return gzputs(file->zfptr, str);
+  if (file->zfptr != NULL)
+    return gzputs(file->zfptr, str);
 #endif
   return fputs(str, file->nzfptr);
 }
 
-char *znzgets(char *str, int size, znzFile file)
-{
+char *znzgets(char *str, int size, znzFile file) {
   if (file == NULL) {
     return NULL;
   }
 #ifdef HAVE_ZLIB
-  if (file->zfptr != NULL) return gzgets(file->zfptr, str, size);
+  if (file->zfptr != NULL)
+    return gzgets(file->zfptr, str, size);
 #endif
   return fgets(str, size, file->nzfptr);
 }
 
-int znzflush(znzFile file)
-{
+int znzflush(znzFile file) {
   if (file == NULL) {
     return 0;
   }
 #ifdef HAVE_ZLIB
-  if (file->zfptr != NULL) return gzflush(file->zfptr, Z_SYNC_FLUSH);
+  if (file->zfptr != NULL)
+    return gzflush(file->zfptr, Z_SYNC_FLUSH);
 #endif
   return fflush(file->nzfptr);
 }
 
-int znzeof(znzFile file)
-{
+int znzeof(znzFile file) {
   if (file == NULL) {
     return 0;
   }
 #ifdef HAVE_ZLIB
-  if (file->zfptr != NULL) return gzeof(file->zfptr);
+  if (file->zfptr != NULL)
+    return gzeof(file->zfptr);
 #endif
   return feof(file->nzfptr);
 }
 
-int znzputc(int c, znzFile file)
-{
+int znzputc(int c, znzFile file) {
   if (file == NULL) {
     return 0;
   }
 #ifdef HAVE_ZLIB
-  if (file->zfptr != NULL) return gzputc(file->zfptr, c);
+  if (file->zfptr != NULL)
+    return gzputc(file->zfptr, c);
 #endif
   return fputc(c, file->nzfptr);
 }
 
-int znzgetc(znzFile file)
-{
+int znzgetc(znzFile file) {
   if (file == NULL) {
     return 0;
   }
 #ifdef HAVE_ZLIB
-  if (file->zfptr != NULL) return gzgetc(file->zfptr);
+  if (file->zfptr != NULL)
+    return gzgetc(file->zfptr);
 #endif
   return fgetc(file->nzfptr);
 }
 
 #if !defined(WIN32)
-int znzprintf(znzFile stream, const char *format, ...)
-{
+int znzprintf(znzFile stream, const char *format, ...) {
   int retval = 0;
 #ifdef HAVE_ZLIB
   char *tmpstr = NULL;
@@ -277,8 +272,7 @@ int znzprintf(znzFile stream, const char *format, ...)
     vsprintf(tmpstr, format, va);
     retval = gzprintf(stream->zfptr, "%s", tmpstr);
     free(tmpstr);
-  }
-  else
+  } else
 #endif
   {
     retval = vfprintf(stream->nzfptr, format, va);
@@ -289,4 +283,4 @@ int znzprintf(znzFile stream, const char *format, ...)
 
 #endif
 
-#endif  // HAVE_NIFTI_LIBS
+#endif // HAVE_NIFTI_LIBS

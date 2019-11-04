@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:40 $
@@ -23,7 +23,6 @@
  *
  */
 
-
 ////SVM-LIB////////////////////////////////////////////////////////////////
 //
 // Name: SvmParam
@@ -34,8 +33,6 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-
-
 #ifndef __SVM_DATA_PARAM_H__
 #define __SVM_DATA_PARAM_H__
 
@@ -45,9 +42,9 @@
 class DataParam {
 public:
   static const int NO_FILE = 0;
-  static const int ONE     = 1;
-  static const int TWO     = 2;
-  static const int MANY    = 3;
+  static const int ONE = 1;
+  static const int TWO = 2;
+  static const int MANY = 3;
 
   int mode;
   bool binary;
@@ -61,40 +58,32 @@ private:
 
   void initFileNames(int count);
 
-
 public:
-
   // Constructors
-  DataParam() : mode(NO_FILE), binary(false),
-      _fileCount(0), fileName(NULL), _posCount(0), _negCount(0) {}
+  DataParam()
+      : mode(NO_FILE), binary(false), _fileCount(0), fileName(nullptr),
+        _posCount(0), _negCount(0) {}
 
   ~DataParam() {
-    if ( _fileCount > 0 ) {
-      for ( int i = 0; i < _fileCount; i++ )
-        delete [] fileName[i];
-      delete [] fileName;
+    if (_fileCount > 0) {
+      for (int i = 0; i < _fileCount; i++)
+        delete[] fileName[i];
+      delete[] fileName;
     }
   }
 
-
-  void init (int posCount, int negCount) {
+  void init(int posCount, int negCount) {
     _posCount = posCount;
     _negCount = negCount;
   }
 
-
   // I/O
-  bool parse(const char* const* argv, int argc, int& startIndex);
+  bool parse(const char *const *argv, int argc, int &startIndex);
 
-  bool readData(SvmRealMatrix& data);
+  bool readData(SvmRealMatrix &data);
 
-  static std::ostream& printUsage(std::ostream& s);
-  static std::ostream& printUsageHelp(std::ostream& s);
+  static std::ostream &printUsage(std::ostream &s);
+  static std::ostream &printUsageHelp(std::ostream &s);
 };
 
-
 #endif // __SVM_DATA_PARAM_H__
-
-
-
-

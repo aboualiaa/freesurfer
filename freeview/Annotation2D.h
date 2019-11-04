@@ -36,20 +36,19 @@ class vtkRenderer;
 class vtkAxisActor2D;
 class vtkPropCollection;
 
-class Annotation2D : public QObject
-{
+class Annotation2D : public QObject {
   Q_OBJECT
 public:
-  Annotation2D( QObject* parent );
+  Annotation2D(QObject *parent);
   virtual ~Annotation2D();
 
-  void Update( vtkRenderer* renderer, int nPlane );
+  void Update(vtkRenderer *renderer, int nPlane);
 
-  void AppendAnnotations( vtkRenderer* renderer, bool bScaleBar = false );
+  void AppendAnnotations(vtkRenderer *renderer, bool bScaleBar = false);
 
   bool GetShowScaleLine();
 
-  void Show( bool bShow );
+  void Show(bool bShow);
   bool IsVisible();
 
   QColor GetColor();
@@ -59,21 +58,19 @@ public:
   void SetTextSize(int nsize);
 
 public slots:
-  void ShowScaleLine( bool bShow );
-  void SetColor(const QColor& c);
+  void ShowScaleLine(bool bShow);
+  void SetColor(const QColor &c);
 
 Q_SIGNALS:
   void Updated();
 
 private:
-  void UpdateScaleActors( double length, int nNumOfTicks, const char* title );
+  void UpdateScaleActors(double length, int nNumOfTicks, const char *title);
 
   vtkSmartPointer<vtkTextActor> m_actorCoordinates[6];
-  vtkSmartPointer<vtkActor2D>  m_actorScaleLine;
+  vtkSmartPointer<vtkActor2D> m_actorScaleLine;
   vtkSmartPointer<vtkTextActor> m_actorScaleTitle;
   vtkSmartPointer<vtkPropCollection> m_actorsAll;
 };
 
 #endif
-
-

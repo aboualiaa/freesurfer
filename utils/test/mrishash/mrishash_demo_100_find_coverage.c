@@ -32,7 +32,6 @@
 
   ----------------------------------------------*/
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -51,57 +50,39 @@
 
 #include "gw_utils.h"
 
-
 #define VERTEXCOUNT 8
 
-GWUTILS_VERTEX vertices[VERTEXCOUNT] = {
-  {0, 0, 0},
-  {0, 0, 1},
-  {0, 1, 0},
-  {0, 1, 1},
-  {1, 0, 0},
-  {1, 0, 1},
-  {1, 1, 0},
-  {1, 1, 1}
-};
+GWUTILS_VERTEX vertices[VERTEXCOUNT] = {{0, 0, 0}, {0, 0, 1}, {0, 1, 0},
+                                        {0, 1, 1}, {1, 0, 0}, {1, 0, 1},
+                                        {1, 1, 0}, {1, 1, 1}};
 
 #define FACECOUNT 12
 
-GWUTILS_FACE faces[FACECOUNT] = {
-  {{3, 2, 6}},
-  {{3, 6, 7}},
-  {{1, 3, 7}},
-  {{1, 7, 5}},
-  {{0, 1, 5}},
-  {{0, 5, 4}},
-  {{2, 0, 4}},
-  {{2, 4, 6}},
-  {{6, 4, 5}},
-  {{6, 5, 7}},
-  {{3, 1, 0}},
-  {{3, 0, 2}}
-};
+GWUTILS_FACE faces[FACECOUNT] = {{{3, 2, 6}}, {{3, 6, 7}}, {{1, 3, 7}},
+                                 {{1, 7, 5}}, {{0, 1, 5}}, {{0, 5, 4}},
+                                 {{2, 0, 4}}, {{2, 4, 6}}, {{6, 4, 5}},
+                                 {{6, 5, 7}}, {{3, 1, 0}}, {{3, 0, 2}}};
 
 //---------------- main at bottom ---------------
-char * Progname;
+char *Progname;
 
-#define int_bkg       10
-#define int_default   20
-#define int_base      50
-#define int_cube     255
+#define int_bkg 10
+#define int_default 20
+#define int_base 50
+#define int_cube 255
 //-----------------------------------
 void CoverageTest() {
-//-----------------------------------
+  //-----------------------------------
   const int xyzmid = 127;
   const float hashres = 16.0;
 
-  MRI * amri;
-  MRIS * amris;
-  MHT  * amht;
+  MRI *amri;
+  MRIS *amris;
+  MHT *amht;
   int rslt;
-  int  xsi, ysi, zsi, xvi, yvi, zvi;
+  int xsi, ysi, zsi, xvi, yvi, zvi;
   int intens, halfscansize, closest_vertnum, vno;
-  double xs,  ys,  zs,  xv,  yv,  zv;
+  double xs, ys, zs, xv, yv, zv;
   VERTEX vtx, *v;
   double ddist;
 
@@ -112,9 +93,9 @@ void CoverageTest() {
   //-------------------------------
   // Set some voxels as background test
   //-------------------------------
-  for (zvi = xyzmid - 30; zvi <= xyzmid+30; zvi++) {
-    for (yvi = xyzmid - 30; yvi <= xyzmid+30; yvi++) {
-      for (xvi = xyzmid - 30; xvi <= xyzmid+30; xvi++) {
+  for (zvi = xyzmid - 30; zvi <= xyzmid + 30; zvi++) {
+    for (yvi = xyzmid - 30; yvi <= xyzmid + 30; yvi++) {
+      for (xvi = xyzmid - 30; xvi <= xyzmid + 30; xvi++) {
 
         MRIvox(amri, xvi, yvi, zvi) = int_bkg;
       }
@@ -124,10 +105,7 @@ void CoverageTest() {
   //-------------------------------
   // Make a small cube at 0,0,0
   //-------------------------------
-  amris = GWU_make_surface_from_lists(vertices,
-                                      VERTEXCOUNT,
-                                      faces,
-                                      FACECOUNT);
+  amris = GWU_make_surface_from_lists(vertices, VERTEXCOUNT, faces, FACECOUNT);
 
   //-------------------------------
   // Move surface to some test position
@@ -158,9 +136,9 @@ void CoverageTest() {
   //-------------------------------
   printf("Starting closest-vertex scan\n");
   halfscansize = 64;
-  for (zsi =         -halfscansize; zsi <= halfscansize; zsi++) {
+  for (zsi = -halfscansize; zsi <= halfscansize; zsi++) {
     printf("zsi: %d\n", zsi);
-    for (ysi =     -halfscansize; ysi <= halfscansize; ysi++) {
+    for (ysi = -halfscansize; ysi <= halfscansize; ysi++) {
       for (xsi = -halfscansize; xsi <= halfscansize; xsi++) {
         // Surface-space coords
         xs = xsi;
@@ -169,9 +147,9 @@ void CoverageTest() {
 
         //------- Calc the voxel coords --------
         MRIsurfaceRASToVoxel(amri, xs, ys, zs, &xv, &yv, &zv);
-        xvi=xv;
-        yvi=yv;
-        zvi=zv;
+        xvi = xv;
+        yvi = yv;
+        zvi = zv;
 
         // Copy surface-space coords to vertex
         vtx.x = xs;
@@ -184,12 +162,8 @@ void CoverageTest() {
         // Here you could exercise any of the find functions to discover
         // their behavior
         //----------------------------------------
-        MHTfindClosestVertexGeneric(
-          amht, amris,
-          xs, ys, zs,
-          1000, 3,
-          NULL, &closest_vertnum, &ddist
-          );
+        MHTfindClosestVertexGeneric(amht, amris, xs, ys, zs, 1000, 3, NULL,
+                                    &closest_vertnum, &ddist);
         if (closest_vertnum >= 0) {
           MHTfindReportCounts(&BucketsChecked, &BucketsPresent, NULL);
           intens = int_base + (BucketsChecked >> 1);
@@ -220,18 +194,19 @@ void CoverageTest() {
 
   rslt = MRIwrite(amri, "./mrishash_demo_100_find_coverage_mri.mgz");
   printf("MRIWrite: %d\n", rslt);
- done:
+done:
   return;
 }
 
 //-----------------------------------
 int main(int argc, char *argv[]) {
-//-----------------------------------
+  //-----------------------------------
   //   char msg[500];
-  char * cp;
+  char *cp;
   Progname = argv[0];
 
-  if (getenv("SKIP_MRISHASH_TEST")) exit(77); // bypass
+  if (getenv("SKIP_MRISHASH_TEST"))
+    exit(77); // bypass
 
   printf("Program: %s  V1.07: \n", Progname);
 
@@ -244,4 +219,3 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
-

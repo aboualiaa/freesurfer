@@ -2,8 +2,8 @@
  * @file  mrishash_internals.h
  * @brief Implements a hash table mechanism to speed comparing vertices
  *
- * The purpose of MRI hash tables is to vastly accelerate algorithms which 
- * need to compare vertices with one another or to a point.  See: 
+ * The purpose of MRI hash tables is to vastly accelerate algorithms which
+ * need to compare vertices with one another or to a point.  See:
  * http://wideman-one.com/gw/brain/fs/2007/mrishash/mrishash_100_overview.htm
  */
 /*
@@ -26,32 +26,26 @@
  *
  */
 
-
 #pragma once
 
 #include "mrishash.h"
 #include "romp_support.h"
 
+//--------------------------
+typedef struct {
+  int fno;
+} MRIS_HASH_BIN, MHB;
 
 //--------------------------
-typedef struct
-{
-    int fno ;
-} MRIS_HASH_BIN, MHB ;
-
-
-//--------------------------
-typedef struct MRIS_HASH_BUCKET
-{
+typedef struct MRIS_HASH_BUCKET {
 #ifdef HAVE_OPENMP
-    omp_lock_t     mutable bucket_lock;
+  omp_lock_t mutable bucket_lock;
 #endif
-    MRIS_HASH_BIN  * const bins ;
-    int              const max_bins ;
-    int                    nused ;
-    int                    size, ysize, zsize ;
-} MHBT ;
-
+  MRIS_HASH_BIN *const bins;
+  int const max_bins;
+  int nused;
+  int size, ysize, zsize;
+} MHBT;
 
 //-----------------------------------------------------------
 // In mrishash, "voxel" means box in rectangular grid used
@@ -68,27 +62,23 @@ typedef struct MRIS_HASH_BUCKET
 //-----------------------------------------------------------
 
 // FIELD_OF_VIEW: Way more than needed even at 1mm resolution.
-#define FIELD_OF_VIEW  400
+#define FIELD_OF_VIEW 400
 
 // VOXEL_RES: Default value for MHT->vres for when caller doesn't set it.
-#define VOXEL_RES      1.0
+#define VOXEL_RES 1.0
 
 // TABLE_SIZE dimensions for array of hash buckets. As defined here
 // TABLE_SIZE = 400.
 //#define TABLE_SIZE     ((int)(FIELD_OF_VIEW / VOXEL_RES))
-#define TABLE_SIZE     2000
-
+#define TABLE_SIZE 2000
 
 typedef struct mht_face_t {
-    // for per-vertex information that should not be stored in the MRIS FACE
-    float cx,cy,cz; // centroid
+  // for per-vertex information that should not be stored in the MRIS FACE
+  float cx, cy, cz; // centroid
 } MHT_FACE;
 
+MHBT *MHTacqBucketAtVoxIx(MRIS_HASH_TABLE *mht, int xv, int yv, int zv);
+MHBT *MHTacqBucket(MRIS_HASH_TABLE *mht, float x, float y, float z);
 
-MHBT * MHTacqBucketAtVoxIx(MRIS_HASH_TABLE *mht, int  xv, int   yv, int   zv);
-MHBT * MHTacqBucket       (MRIS_HASH_TABLE *mht, float x, float y,  float z );
-
-void MHTrelBucket(MHBT**);
+void MHTrelBucket(MHBT **);
 void MHTrelBucketC(MHBT const **);
-
-

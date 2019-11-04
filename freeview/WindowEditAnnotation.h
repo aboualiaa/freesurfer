@@ -13,15 +13,14 @@ class LayerSurface;
 class Layer;
 class QTreeWidgetItem;
 
-class WindowEditAnnotation : public QWidget
-{
+class WindowEditAnnotation : public QWidget {
   Q_OBJECT
 
 public:
   explicit WindowEditAnnotation(QWidget *parent = nullptr);
   ~WindowEditAnnotation();
 
-  void showEvent(QShowEvent* e);
+  void showEvent(QShowEvent *e);
 
   int GetCurrentIndex();
 
@@ -29,28 +28,29 @@ signals:
   void LabelClicked(int n);
 
 public slots:
-  void OnActiveSurfaceChanged(Layer* layer);
+  void OnActiveSurfaceChanged(Layer *layer);
   void UpdateUI();
   void PopulateColorTable(bool bForce = false);
-  void OnExistingLabelClicked(QTreeWidgetItem* item);
+  void OnExistingLabelClicked(QTreeWidgetItem *item);
   void OnExistingLabelItemChanged(QTreeWidgetItem *item);
   void OnCheckBoxShowAllLabels(int);
-  void OnSurfaceVertexClicked(LayerSurface* surf);
+  void OnSurfaceVertexClicked(LayerSurface *surf);
   void OnEditNameReturnPressed();
-  void OnColorChanged(const QColor& color);
+  void OnColorChanged(const QColor &color);
   void PopulateAvailableColorTable();
-  void OnAvailableLabelClicked(QTreeWidgetItem* item);
+  void OnAvailableLabelClicked(QTreeWidgetItem *item);
   void OnButtonSet();
   void OnButtonUndo();
   void OnButtonRedo();
 
 private:
-  void UpdateLabelItem(QTreeWidgetItem* item, int i, const QString& name, const QColor& color);
+  void UpdateLabelItem(QTreeWidgetItem *item, int i, const QString &name,
+                       const QColor &color);
 
   Ui::WindowEditAnnotation *ui;
 
-  LayerSurface* m_layerSurface;
-  COLOR_TABLE*  m_ctab;
+  LayerSurface *m_layerSurface;
+  COLOR_TABLE *m_ctab;
 };
 
 #endif // WINDOWEDITANNOTATION_H

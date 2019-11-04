@@ -26,8 +26,7 @@
 
 #include <QDialog>
 
-namespace Ui
-{
+namespace Ui {
 class DialogCropVolume;
 }
 
@@ -35,28 +34,27 @@ class Layer;
 class LayerMRI;
 class QSpinBox;
 
-class DialogCropVolume : public QDialog
-{
+class DialogCropVolume : public QDialog {
   Q_OBJECT
 public:
-  explicit DialogCropVolume(QWidget *parent = 0, LayerMRI* layer = 0);
+  explicit DialogCropVolume(QWidget *parent = 0, LayerMRI *layer = 0);
   ~DialogCropVolume();
 
-  void SetVolume( LayerMRI* mri );
+  void SetVolume(LayerMRI *mri);
 
 protected slots:
-  void OnCropBoundChanged(LayerMRI* mri);
-  void OnLayerRemoved(Layer* layer);
-  void OnSpinRange      (int nVal);
+  void OnCropBoundChanged(LayerMRI *mri);
+  void OnLayerRemoved(Layer *layer);
+  void OnSpinRange(int nVal);
   void showEvent(QShowEvent *);
   void hideEvent(QHideEvent *);
 
 private:
   Ui::DialogCropVolume *ui;
-  QSpinBox*   m_spinRange[6];
+  QSpinBox *m_spinRange[6];
 
-  LayerMRI*   m_mri;
-  bool        m_bShowSliceFrame;
+  LayerMRI *m_mri;
+  bool m_bShowSliceFrame;
 };
 
 #endif // DIALOGCROPVOLUME_H

@@ -30,38 +30,32 @@
 
 class SurfaceROI;
 
-class Interactor3D : public Interactor
-{
+class Interactor3D : public Interactor {
   Q_OBJECT
 public:
-  Interactor3D(QObject* parent = 0);
+  Interactor3D(QObject *parent = 0);
   virtual ~Interactor3D();
 
   // return true if to have parent Interactor3D continue processing the event
   // return false to stop event from further processing
-  virtual bool ProcessMouseDownEvent ( QMouseEvent* event, RenderView* view );
-  virtual bool ProcessMouseUpEvent( QMouseEvent* event, RenderView* view );
-  virtual bool ProcessMouseMoveEvent( QMouseEvent* event, RenderView* view );
-  virtual bool ProcessKeyDownEvent( QKeyEvent* event, RenderView* view );
+  virtual bool ProcessMouseDownEvent(QMouseEvent *event, RenderView *view);
+  virtual bool ProcessMouseUpEvent(QMouseEvent *event, RenderView *view);
+  virtual bool ProcessMouseMoveEvent(QMouseEvent *event, RenderView *view);
+  virtual bool ProcessKeyDownEvent(QKeyEvent *event, RenderView *view);
   virtual bool ProcessMouseWheelEvent(QWheelEvent *event, RenderView *view);
 
 protected:
-  virtual void UpdateCursor( QEvent* event, QWidget* wnd );
-  bool IsInAction()
-  {
-    return m_bWindowLevel || m_bMoveSlice;
-  }
+  virtual void UpdateCursor(QEvent *event, QWidget *wnd);
+  bool IsInAction() { return m_bWindowLevel || m_bMoveSlice; }
 
-  int  m_nMousePosX;
-  int  m_nMousePosY;
-  int  m_nPressedPosX;
-  int  m_nPressedPosY;
+  int m_nMousePosX;
+  int m_nMousePosY;
+  int m_nPressedPosX;
+  int m_nPressedPosY;
 
   bool m_bWindowLevel;
   bool m_bMoveSlice;
-  SurfaceROI*   m_surfaceROI;
+  SurfaceROI *m_surfaceROI;
 };
 
 #endif
-
-

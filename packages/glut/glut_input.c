@@ -20,8 +20,8 @@
 #include <X11/Xutil.h>
 #else
 #include <windows.h>
-#include <mmsystem.h>  /* Win32 Multimedia API header. */
-#endif /* !_WIN32 */
+#include <mmsystem.h> /* Win32 Multimedia API header. */
+#endif                /* !_WIN32 */
 
 #include "glutint.h"
 
@@ -29,7 +29,7 @@ int __glutNumDials = 0;
 int __glutNumSpaceballButtons = 0;
 int __glutNumButtonBoxButtons = 0;
 int __glutNumTabletButtons = 0;
-int __glutNumMouseButtons = 3;  /* Good guess. */
+int __glutNumMouseButtons = 3; /* Good guess. */
 XDevice *__glutTablet = NULL;
 XDevice *__glutDials = NULL;
 XDevice *__glutSpaceball = NULL;
@@ -39,16 +39,14 @@ int __glutNumJoystickButtons = 0;
 int __glutNumJoystickAxes = 0;
 
 #if !defined(_WIN32)
-typedef struct _Range
-{
+typedef struct _Range {
   int min;
   int range;
-}
-Range;
+} Range;
 
 #define NUM_SPACEBALL_AXIS 6
-#define NUM_TABLET_AXIS  2
-#define NUM_DIALS_AXIS  8
+#define NUM_TABLET_AXIS 2
+#define NUM_DIALS_AXIS 8
 
 Range __glutSpaceballRange[NUM_SPACEBALL_AXIS];
 Range __glutTabletRange[NUM_TABLET_AXIS];
@@ -62,51 +60,43 @@ int __glutDeviceButtonPressGrab = 0;
 int __glutDeviceButtonRelease = 0;
 int __glutDeviceStateNotify = 0;
 
-static int
-normalizeTabletPos(int axis, int rawValue)
-{
+static int normalizeTabletPos(int axis, int rawValue) {
   assert(rawValue >= __glutTabletRange[axis].min);
-  assert(rawValue <= __glutTabletRange[axis].min
-         + __glutTabletRange[axis].range);
+  assert(rawValue <=
+         __glutTabletRange[axis].min + __glutTabletRange[axis].range);
   /* Normalize rawValue to between 0 and 4000. */
   return ((rawValue - __glutTabletRange[axis].min) * 4000) /
          __glutTabletRange[axis].range;
 }
 
-static int
-normalizeDialAngle(int axis, int rawValue)
-{
+static int normalizeDialAngle(int axis, int rawValue) {
   /* XXX Assumption made that the resolution of the device is
      number of clicks for one complete dial revolution.  This
      is true for SGI's dial & button box. */
   return (rawValue * 360.0) / __glutDialsResolution[axis];
 }
 
-static int
-normalizeSpaceballAngle(int axis, int rawValue)
-{
+static int normalizeSpaceballAngle(int axis, int rawValue) {
   assert(rawValue >= __glutSpaceballRange[axis].min);
-  assert(rawValue <= __glutSpaceballRange[axis].min +
-         __glutSpaceballRange[axis].range);
+  assert(rawValue <=
+         __glutSpaceballRange[axis].min + __glutSpaceballRange[axis].range);
   /* Normalize rawValue to between -1800 and 1800. */
   return ((rawValue - __glutSpaceballRange[axis].min) * 3600) /
-         __glutSpaceballRange[axis].range - 1800;
+             __glutSpaceballRange[axis].range -
+         1800;
 }
 
-static int
-normalizeSpaceballDelta(int axis, int rawValue)
-{
+static int normalizeSpaceballDelta(int axis, int rawValue) {
   assert(rawValue >= __glutSpaceballRange[axis].min);
-  assert(rawValue <= __glutSpaceballRange[axis].min +
-         __glutSpaceballRange[axis].range);
+  assert(rawValue <=
+         __glutSpaceballRange[axis].min + __glutSpaceballRange[axis].range);
   /* Normalize rawValue to between -1000 and 1000. */
   return ((rawValue - __glutSpaceballRange[axis].min) * 2000) /
-         __glutSpaceballRange[axis].range - 1000;
+             __glutSpaceballRange[axis].range -
+         1000;
 }
 
-static void
-queryTabletPos(GLUTwindow * window)
-{
+static void queryTabletPos(GLUTwindow *window) {
   XDeviceState *state;
   XInputClass *any;
   XValuatorState *v;
@@ -114,17 +104,14 @@ queryTabletPos(GLUTwindow * window)
 
   state = XQueryDeviceState(__glutDisplay, __glutTablet);
   any = state->data;
-  for (i = 0; i < state->num_classes; i++)
-  {
+  for (i = 0; i < state->num_classes; i++) {
 #if defined(__cplusplus) || defined(c_plusplus)
-    switch (any->c_class)
-    {
+    switch (any->c_class) {
 #else
-    switch (any->class)
-    {
+    switch (any->class) {
 #endif
     case ValuatorClass:
-      v = (XValuatorState *) any;
+      v = (XValuatorState *)any;
       if (v->num_valuators < 2)
         goto end;
       if (window->tabletPos[0] == -1)
@@ -132,26 +119,22 @@ queryTabletPos(GLUTwindow * window)
       if (window->tabletPos[1] == -1)
         window->tabletPos[1] = normalizeTabletPos(1, v->valuators[1]);
     }
-    any = (XInputClass *) ((char *) any + any->length);
+    any = (XInputClass *)((char *)any + any->length);
   }
 end:
   XFreeDeviceState(state);
 }
 
-static void
-tabletPosChange(GLUTwindow * window, int first, int count, int *data)
-{
+static void tabletPosChange(GLUTwindow *window, int first, int count,
+                            int *data) {
   int i, value, genEvent = 0;
 
-  for (i = first; i < first + count; i++)
-  {
-    switch (i)
-    {
-    case 0:            /* X axis */
-    case 1:            /* Y axis */
+  for (i = first; i < first + count; i++) {
+    switch (i) {
+    case 0: /* X axis */
+    case 1: /* Y axis */
       value = normalizeTabletPos(i, data[i - first]);
-      if (value != window->tabletPos[i])
-      {
+      if (value != window->tabletPos[i]) {
         window->tabletPos[i] = value;
         genEvent = 1;
       }
@@ -165,9 +148,7 @@ tabletPosChange(GLUTwindow * window, int first, int count, int *data)
 }
 #endif /* !_WIN32 */
 
-int
-__glutProcessDeviceEvents(XEvent * event)
-{
+int __glutProcessDeviceEvents(XEvent *event) {
 #if !defined(_WIN32)
   GLUTwindow *window;
 
@@ -176,116 +157,84 @@ __glutProcessDeviceEvents(XEvent * event)
   /* Can't use switch/case since X Input event types are
      dynamic. */
 
-  if (__glutDeviceMotionNotify && event->type == __glutDeviceMotionNotify)
-  {
-    XDeviceMotionEvent *devmot = (XDeviceMotionEvent *) event;
+  if (__glutDeviceMotionNotify && event->type == __glutDeviceMotionNotify) {
+    XDeviceMotionEvent *devmot = (XDeviceMotionEvent *)event;
 
     window = __glutGetWindow(devmot->window);
-    if (window)
-    {
-      if (__glutTablet
-          && devmot->deviceid == __glutTablet->device_id
-          && window->tabletMotion)
-      {
+    if (window) {
+      if (__glutTablet && devmot->deviceid == __glutTablet->device_id &&
+          window->tabletMotion) {
         tabletPosChange(window, devmot->first_axis, devmot->axes_count,
                         devmot->axis_data);
-      }
-      else if (__glutDials
-               && devmot->deviceid == __glutDials->device_id
-               && window->dials)
-      {
+      } else if (__glutDials && devmot->deviceid == __glutDials->device_id &&
+                 window->dials) {
         int i, first = devmot->first_axis, count = devmot->axes_count;
 
         for (i = first; i < first + count; i++)
           window->dials(i + 1,
                         normalizeDialAngle(i, devmot->axis_data[i - first]));
-      }
-      else if (__glutSpaceball
-               && devmot->deviceid == __glutSpaceball->device_id)
-      {
+      } else if (__glutSpaceball &&
+                 devmot->deviceid == __glutSpaceball->device_id) {
         /* XXX Assume that space ball motion events come in as
            all the first 6 axes.  Assume first 3 axes are XYZ
            translations; second 3 axes are XYZ rotations. */
-        if (devmot->first_axis == 0 && devmot->axes_count == 6)
-        {
+        if (devmot->first_axis == 0 && devmot->axes_count == 6) {
           if (window->spaceMotion)
             window->spaceMotion(
-              normalizeSpaceballDelta(0, devmot->axis_data[0]),
-              normalizeSpaceballDelta(1, devmot->axis_data[1]),
-              normalizeSpaceballDelta(2, devmot->axis_data[2]));
+                normalizeSpaceballDelta(0, devmot->axis_data[0]),
+                normalizeSpaceballDelta(1, devmot->axis_data[1]),
+                normalizeSpaceballDelta(2, devmot->axis_data[2]));
           if (window->spaceRotate)
             window->spaceRotate(
-              normalizeSpaceballAngle(3, devmot->axis_data[3]),
-              normalizeSpaceballAngle(4, devmot->axis_data[4]),
-              normalizeSpaceballAngle(5, devmot->axis_data[5]));
+                normalizeSpaceballAngle(3, devmot->axis_data[3]),
+                normalizeSpaceballAngle(4, devmot->axis_data[4]),
+                normalizeSpaceballAngle(5, devmot->axis_data[5]));
         }
       }
       return 1;
     }
-  }
-  else if (__glutDeviceButtonPress
-           && event->type == __glutDeviceButtonPress)
-  {
-    XDeviceButtonEvent *devbtn = (XDeviceButtonEvent *) event;
+  } else if (__glutDeviceButtonPress &&
+             event->type == __glutDeviceButtonPress) {
+    XDeviceButtonEvent *devbtn = (XDeviceButtonEvent *)event;
 
     window = __glutGetWindow(devbtn->window);
-    if (window)
-    {
-      if (__glutTablet
-          && devbtn->deviceid == __glutTablet->device_id
-          && window->tabletButton
-          && devbtn->first_axis == 0
-          && devbtn->axes_count == 2)
-      {
+    if (window) {
+      if (__glutTablet && devbtn->deviceid == __glutTablet->device_id &&
+          window->tabletButton && devbtn->first_axis == 0 &&
+          devbtn->axes_count == 2) {
         tabletPosChange(window, devbtn->first_axis, devbtn->axes_count,
                         devbtn->axis_data);
-        window->tabletButton(devbtn->button, GLUT_DOWN,
-                             window->tabletPos[0], window->tabletPos[1]);
-      }
-      else if (__glutDials
-               && devbtn->deviceid == __glutDials->device_id
-               && window->buttonBox)
-      {
+        window->tabletButton(devbtn->button, GLUT_DOWN, window->tabletPos[0],
+                             window->tabletPos[1]);
+      } else if (__glutDials && devbtn->deviceid == __glutDials->device_id &&
+                 window->buttonBox) {
         window->buttonBox(devbtn->button, GLUT_DOWN);
-      }
-      else if (__glutSpaceball
-               && devbtn->deviceid == __glutSpaceball->device_id
-               && window->spaceButton)
-      {
+      } else if (__glutSpaceball &&
+                 devbtn->deviceid == __glutSpaceball->device_id &&
+                 window->spaceButton) {
         window->spaceButton(devbtn->button, GLUT_DOWN);
       }
       return 1;
     }
-  }
-  else if (__glutDeviceButtonRelease
-           && event->type == __glutDeviceButtonRelease)
-  {
-    XDeviceButtonEvent *devbtn = (XDeviceButtonEvent *) event;
+  } else if (__glutDeviceButtonRelease &&
+             event->type == __glutDeviceButtonRelease) {
+    XDeviceButtonEvent *devbtn = (XDeviceButtonEvent *)event;
 
     window = __glutGetWindow(devbtn->window);
-    if (window)
-    {
-      if (__glutTablet
-          && devbtn->deviceid == __glutTablet->device_id
-          && window->tabletButton
-          && devbtn->first_axis == 0
-          && devbtn->axes_count == 2)
-      {
+    if (window) {
+      if (__glutTablet && devbtn->deviceid == __glutTablet->device_id &&
+          window->tabletButton && devbtn->first_axis == 0 &&
+          devbtn->axes_count == 2) {
         tabletPosChange(window, devbtn->first_axis, devbtn->axes_count,
                         devbtn->axis_data);
-        window->tabletButton(devbtn->button, GLUT_UP,
-                             window->tabletPos[0], window->tabletPos[1]);
-      }
-      else if (__glutDials
-               && devbtn->deviceid == __glutDials->device_id
-               && window->buttonBox)
-      {
+        window->tabletButton(devbtn->button, GLUT_UP, window->tabletPos[0],
+                             window->tabletPos[1]);
+      } else if (__glutDials && devbtn->deviceid == __glutDials->device_id &&
+                 window->buttonBox) {
         window->buttonBox(devbtn->button, GLUT_UP);
-      }
-      else if (__glutSpaceball
-               && devbtn->deviceid == __glutSpaceball->device_id
-               && window->spaceButton)
-      {
+      } else if (__glutSpaceball &&
+                 devbtn->deviceid == __glutSpaceball->device_id &&
+                 window->spaceButton) {
         window->spaceButton(devbtn->button, GLUT_UP);
       }
       return 1;
@@ -302,11 +251,9 @@ __glutProcessDeviceEvents(XEvent * event)
     JOYERR_PARMS. Count the number of times we get JOYERR_NOERROR
     indicating an installed joystick driver with a joystick currently
     attached to the port. */
-    while ((result = joyGetPosEx(njoyId++,&info)) != JOYERR_PARMS)
-    {
-      if (result == JOYERR_NOERROR)
-      {
-        ++nConnected;  /* The count of connected joysticks. */
+    while ((result = joyGetPosEx(njoyId++, &info)) != JOYERR_PARMS) {
+      if (result == JOYERR_NOERROR) {
+        ++nConnected; /* The count of connected joysticks. */
       }
     }
   }
@@ -314,14 +261,9 @@ __glutProcessDeviceEvents(XEvent * event)
   return 0;
 }
 
-static GLUTeventParser eventParser =
-  {
-    __glutProcessDeviceEvents, NULL
-  };
+static GLUTeventParser eventParser = {__glutProcessDeviceEvents, NULL};
 
-static void
-addDeviceEventParser(void)
-{
+static void addDeviceEventParser(void) {
   static Bool been_here = False;
 
   if (been_here)
@@ -330,9 +272,7 @@ addDeviceEventParser(void)
   __glutRegisterEventParser(&eventParser);
 }
 
-static int
-probeDevices(void)
-{
+static int probeDevices(void) {
   static Bool been_here = False;
   static int support;
 #if !defined(_WIN32)
@@ -342,12 +282,11 @@ probeDevices(void)
   XButtonInfoPtr b;
   XValuatorInfoPtr v;
   XAxisInfoPtr a;
-  int num_dev, btns=0, dials=0;
+  int num_dev, btns = 0, dials = 0;
   int i, j, k;
 #endif /* !_WIN32 */
 
-  if (been_here)
-  {
+  if (been_here) {
     return support;
   }
   been_here = True;
@@ -357,175 +296,143 @@ probeDevices(void)
   /* Ugh.  XInput extension API forces annoying cast of a pointer
      to a long so it can be compared with the NoSuchExtension
      value (#defined to 1). */
-  if (version == NULL || ((long) version) == NoSuchExtension)
-  {
+  if (version == NULL || ((long)version) == NoSuchExtension) {
     support = 0;
     return support;
   }
   XFree(version);
   device_info = XListInputDevices(__glutDisplay, &num_dev);
-  if (device_info)
-  {
-    for (i = 0; i < num_dev; i++)
-    {
+  if (device_info) {
+    for (i = 0; i < num_dev; i++) {
       /* XXX These are SGI names for these devices;
          unfortunately, no good standard exists for standard
          types of X input extension devices. */
 
       device = &device_info[i];
-      any = (XAnyClassPtr) device->inputclassinfo;
+      any = (XAnyClassPtr)device->inputclassinfo;
 
-      if (!__glutSpaceball && !strcmp(device->name, "spaceball"))
-      {
+      if (!__glutSpaceball && !strcmp(device->name, "spaceball")) {
         v = NULL;
         b = NULL;
-        for (j = 0; j < device->num_classes; j++)
-        {
+        for (j = 0; j < device->num_classes; j++) {
 #if defined(__cplusplus) || defined(c_plusplus)
-          switch (any->c_class)
-          {
+          switch (any->c_class) {
 #else
-          switch (any->class)
-          {
+          switch (any->class) {
 #endif
           case ButtonClass:
-            b = (XButtonInfoPtr) any;
+            b = (XButtonInfoPtr)any;
             btns = b->num_buttons;
             break;
           case ValuatorClass:
-            v = (XValuatorInfoPtr) any;
+            v = (XValuatorInfoPtr)any;
             /* Sanity check: at least 6 valuators? */
             if (v->num_axes < NUM_SPACEBALL_AXIS)
               goto skip_device;
-            a = (XAxisInfoPtr) ((char *) v + sizeof(XValuatorInfo));
-            for (k = 0; k < NUM_SPACEBALL_AXIS; k++, a++)
-            {
+            a = (XAxisInfoPtr)((char *)v + sizeof(XValuatorInfo));
+            for (k = 0; k < NUM_SPACEBALL_AXIS; k++, a++) {
               __glutSpaceballRange[k].min = a->min_value;
               __glutSpaceballRange[k].range = a->max_value - a->min_value;
             }
             break;
           }
-          any = (XAnyClassPtr) ((char *) any + any->length);
+          any = (XAnyClassPtr)((char *)any + any->length);
         }
-        if (v)
-        {
+        if (v) {
           __glutSpaceball = XOpenDevice(__glutDisplay, device->id);
-          if (__glutSpaceball)
-          {
+          if (__glutSpaceball) {
             __glutNumSpaceballButtons = btns;
             addDeviceEventParser();
           }
         }
-      }
-      else if (!__glutDials && !strcmp(device->name, "dial+buttons"))
-      {
+      } else if (!__glutDials && !strcmp(device->name, "dial+buttons")) {
         v = NULL;
         b = NULL;
-        for (j = 0; j < device->num_classes; j++)
-        {
+        for (j = 0; j < device->num_classes; j++) {
 #if defined(__cplusplus) || defined(c_plusplus)
-          switch (any->c_class)
-          {
+          switch (any->c_class) {
 #else
-          switch (any->class)
-          {
+          switch (any->class) {
 #endif
           case ButtonClass:
-            b = (XButtonInfoPtr) any;
+            b = (XButtonInfoPtr)any;
             btns = b->num_buttons;
             break;
           case ValuatorClass:
-            v = (XValuatorInfoPtr) any;
+            v = (XValuatorInfoPtr)any;
             /* Sanity check: at least 8 valuators? */
             if (v->num_axes < NUM_DIALS_AXIS)
               goto skip_device;
             dials = v->num_axes;
-            __glutDialsResolution = (int *) malloc(sizeof(int) * dials);
-            a = (XAxisInfoPtr) ((char *) v + sizeof(XValuatorInfo));
-            for (k = 0; k < dials; k++, a++)
-            {
+            __glutDialsResolution = (int *)malloc(sizeof(int) * dials);
+            a = (XAxisInfoPtr)((char *)v + sizeof(XValuatorInfo));
+            for (k = 0; k < dials; k++, a++) {
               __glutDialsResolution[k] = a->resolution;
             }
             break;
           }
-          any = (XAnyClassPtr) ((char *) any + any->length);
+          any = (XAnyClassPtr)((char *)any + any->length);
         }
-        if (v)
-        {
+        if (v) {
           __glutDials = XOpenDevice(__glutDisplay, device->id);
-          if (__glutDials)
-          {
+          if (__glutDials) {
             __glutNumButtonBoxButtons = btns;
             __glutNumDials = dials;
             addDeviceEventParser();
           }
         }
-      }
-      else if (!__glutTablet && !strcmp(device->name, "tablet"))
-      {
+      } else if (!__glutTablet && !strcmp(device->name, "tablet")) {
         v = NULL;
         b = NULL;
-        for (j = 0; j < device->num_classes; j++)
-        {
+        for (j = 0; j < device->num_classes; j++) {
 #if defined(__cplusplus) || defined(c_plusplus)
-          switch (any->c_class)
-          {
+          switch (any->c_class) {
 #else
-          switch (any->class)
-          {
+          switch (any->class) {
 #endif
           case ButtonClass:
-            b = (XButtonInfoPtr) any;
+            b = (XButtonInfoPtr)any;
             btns = b->num_buttons;
             break;
           case ValuatorClass:
-            v = (XValuatorInfoPtr) any;
+            v = (XValuatorInfoPtr)any;
             /* Sanity check: exactly 2 valuators? */
             if (v->num_axes != NUM_TABLET_AXIS)
               goto skip_device;
-            a = (XAxisInfoPtr) ((char *) v + sizeof(XValuatorInfo));
-            for (k = 0; k < NUM_TABLET_AXIS; k++, a++)
-            {
+            a = (XAxisInfoPtr)((char *)v + sizeof(XValuatorInfo));
+            for (k = 0; k < NUM_TABLET_AXIS; k++, a++) {
               __glutTabletRange[k].min = a->min_value;
               __glutTabletRange[k].range = a->max_value - a->min_value;
             }
             break;
           }
-          any = (XAnyClassPtr) ((char *) any + any->length);
+          any = (XAnyClassPtr)((char *)any + any->length);
         }
-        if (v)
-        {
+        if (v) {
           __glutTablet = XOpenDevice(__glutDisplay, device->id);
-          if (__glutTablet)
-          {
+          if (__glutTablet) {
             __glutNumTabletButtons = btns;
             addDeviceEventParser();
           }
         }
-      }
-      else if (!strcmp(device->name, "mouse"))
-      {
-        for (j = 0; j < device->num_classes; j++)
-        {
+      } else if (!strcmp(device->name, "mouse")) {
+        for (j = 0; j < device->num_classes; j++) {
 #if defined(__cplusplus) || defined(c_plusplus)
-          if (any->c_class == ButtonClass)
-          {
+          if (any->c_class == ButtonClass) {
 #else
-          if (any->class == ButtonClass)
-          {
+          if (any->class == ButtonClass) {
 #endif
-            b = (XButtonInfoPtr) any;
+            b = (XButtonInfoPtr)any;
             __glutNumMouseButtons = b->num_buttons;
           }
-          any = (XAnyClassPtr) ((char *) any + any->length);
+          any = (XAnyClassPtr)((char *)any + any->length);
         }
       }
-skip_device:
-      ;
+    skip_device:;
     }
     XFreeDeviceList(device_info);
   }
-#else /* _WIN32 */
+#else  /* _WIN32 */
   __glutNumMouseButtons = GetSystemMetrics(SM_CMOUSEBUTTONS);
 #endif /* !_WIN32 */
   /* X Input extension might be supported, but only if there is
@@ -535,9 +442,7 @@ skip_device:
   return support;
 }
 
-void
-__glutUpdateInputDeviceMask(GLUTwindow * window)
-{
+void __glutUpdateInputDeviceMask(GLUTwindow *window) {
 #if !defined(_WIN32)
   /* 5 (dial and buttons) + 5 (tablet locator and buttons) + 5
      (Spaceball buttons and axis) = 15 */
@@ -545,19 +450,15 @@ __glutUpdateInputDeviceMask(GLUTwindow * window)
   int rc, numEvents;
 
   rc = probeDevices();
-  if (rc)
-  {
+  if (rc) {
     numEvents = 0;
-    if (__glutTablet)
-    {
-      if (window->tabletMotion)
-      {
+    if (__glutTablet) {
+      if (window->tabletMotion) {
         DeviceMotionNotify(__glutTablet, __glutDeviceMotionNotify,
                            eventList[numEvents]);
         numEvents++;
       }
-      if (window->tabletButton)
-      {
+      if (window->tabletButton) {
         DeviceButtonPress(__glutTablet, __glutDeviceButtonPress,
                           eventList[numEvents]);
         numEvents++;
@@ -568,23 +469,19 @@ __glutUpdateInputDeviceMask(GLUTwindow * window)
                             eventList[numEvents]);
         numEvents++;
       }
-      if (window->tabletMotion || window->tabletButton)
-      {
+      if (window->tabletMotion || window->tabletButton) {
         DeviceStateNotify(__glutTablet, __glutDeviceStateNotify,
                           eventList[numEvents]);
         numEvents++;
       }
     }
-    if (__glutDials)
-    {
-      if (window->dials)
-      {
+    if (__glutDials) {
+      if (window->dials) {
         DeviceMotionNotify(__glutDials, __glutDeviceMotionNotify,
                            eventList[numEvents]);
         numEvents++;
       }
-      if (window->buttonBox)
-      {
+      if (window->buttonBox) {
         DeviceButtonPress(__glutDials, __glutDeviceButtonPress,
                           eventList[numEvents]);
         numEvents++;
@@ -595,23 +492,19 @@ __glutUpdateInputDeviceMask(GLUTwindow * window)
                             eventList[numEvents]);
         numEvents++;
       }
-      if (window->dials || window->buttonBox)
-      {
+      if (window->dials || window->buttonBox) {
         DeviceStateNotify(__glutDials, __glutDeviceStateNotify,
                           eventList[numEvents]);
         numEvents++;
       }
     }
-    if (__glutSpaceball)
-    {
-      if (window->spaceMotion || window->spaceRotate)
-      {
+    if (__glutSpaceball) {
+      if (window->spaceMotion || window->spaceRotate) {
         DeviceMotionNotify(__glutSpaceball, __glutDeviceMotionNotify,
                            eventList[numEvents]);
         numEvents++;
       }
-      if (window->spaceButton)
-      {
+      if (window->spaceButton) {
         DeviceButtonPress(__glutSpaceball, __glutDeviceButtonPress,
                           eventList[numEvents]);
         numEvents++;
@@ -622,8 +515,7 @@ __glutUpdateInputDeviceMask(GLUTwindow * window)
                             eventList[numEvents]);
         numEvents++;
       }
-      if (window->spaceMotion || window->spaceRotate || window->spaceButton)
-      {
+      if (window->spaceMotion || window->spaceRotate || window->spaceButton) {
         DeviceStateNotify(__glutSpaceball, __glutDeviceStateNotify,
                           eventList[numEvents]);
         numEvents++;
@@ -643,16 +535,12 @@ __glutUpdateInputDeviceMask(GLUTwindow * window)
       while (child);
     }
 #endif
-    XSelectExtensionEvent(__glutDisplay, window->win,
-                          eventList, numEvents);
-    if (window->overlay)
-    {
-      XSelectExtensionEvent(__glutDisplay, window->overlay->win,
-                            eventList, numEvents);
+    XSelectExtensionEvent(__glutDisplay, window->win, eventList, numEvents);
+    if (window->overlay) {
+      XSelectExtensionEvent(__glutDisplay, window->overlay->win, eventList,
+                            numEvents);
     }
-  }
-  else
-  {
+  } else {
     /* X Input extension not supported; no chance for exotic
        input devices. */
   }
@@ -660,12 +548,9 @@ __glutUpdateInputDeviceMask(GLUTwindow * window)
 }
 
 /* CENTRY */
-int APIENTRY
-glutDeviceGet(GLenum param)
-{
+int APIENTRY glutDeviceGet(GLenum param) {
   probeDevices();
-  switch (param)
-  {
+  switch (param) {
   case GLUT_HAS_KEYBOARD:
   case GLUT_HAS_MOUSE:
     /* Assume window system always has mouse and keyboard. */
@@ -689,8 +574,7 @@ glutDeviceGet(GLenum param)
   case GLUT_DEVICE_IGNORE_KEY_REPEAT:
     return __glutCurrentWindow->ignoreKeyRepeat;
 #ifndef _WIN32
-  case GLUT_DEVICE_KEY_REPEAT:
-  {
+  case GLUT_DEVICE_KEY_REPEAT: {
     XKeyboardState state;
 
     XGetKeyboardControl(__glutDisplay, &state);

@@ -27,13 +27,11 @@
 #include <QDialog>
 #include <QStringList>
 
-namespace Ui
-{
+namespace Ui {
 class DialogLoadVolume;
 }
 
-class DialogLoadVolume : public QDialog
-{
+class DialogLoadVolume : public QDialog {
   Q_OBJECT
 
 public:
@@ -52,20 +50,17 @@ public:
 
   QString GetLUT();
 
-  void SetLastDir( const QString& dir )
-  {
-    m_strLastDir = dir;
-  }
+  void SetLastDir(const QString &dir) { m_strLastDir = dir; }
 
-  void SetRecentFiles( const QStringList& filenames );
+  void SetRecentFiles(const QStringList &filenames);
 
   bool GetLoadAsVector();
 
 protected slots:
   void OnOpen();
   void OnOpenRegistration();
-  void OnColorMap( int nSel );
-  void OnLUT( int nSel );
+  void OnColorMap(int nSel);
+  void OnLUT(int nSel);
   void OnOK();
 
 private:

@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:40 $
@@ -22,7 +22,6 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
-
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,103 +40,95 @@
 #include "timer.h"
 #include "version.h"
 
-int main(int argc, char *argv[]) ;
-static int get_option(int argc, char *argv[]) ;
+int main(int argc, char *argv[]);
+static int get_option(int argc, char *argv[]);
 
-const char *Progname ;
-static void usage_exit(int code) ;
+const char *Progname;
+static void usage_exit(int code);
 
-static int normalize_flag = 0 ;
+static int normalize_flag = 0;
 
-
-int
-main(int argc, char *argv[]) {
-  char   **av, fname[STRLEN] ;
-  int    ac, nargs, i ;
-  char   *in_fname, *out_fname ;
-  int          msec, minutes, seconds ;
-  Timer start ;
+int main(int argc, char *argv[]) {
+  char **av, fname[STRLEN];
+  int ac, nargs, i;
+  char *in_fname, *out_fname;
+  int msec, minutes, seconds;
+  Timer start;
 
   /* rkt: check for and handle version tag */
-  nargs = handle_version_option (argc, argv, "$Id: main_template.c,v 1.5 2011/03/02 00:04:40 nicks Exp $", "$Name:  $");
+  nargs = handle_version_option(
+      argc, argv, "$Id: main_template.c,v 1.5 2011/03/02 00:04:40 nicks Exp $",
+      "$Name:  $");
   if (nargs && argc - nargs == 1)
-    exit (0);
+    exit(0);
   argc -= nargs;
 
-  Progname = argv[0] ;
-  ErrorInit(NULL, NULL, NULL) ;
-  DiagInit(NULL, NULL, NULL) ;
+  Progname = argv[0];
+  ErrorInit(NULL, NULL, NULL);
+  DiagInit(NULL, NULL, NULL);
 
-  start.reset() ;
+  start.reset();
 
-  ac = argc ;
-  av = argv ;
-  for ( ; argc > 1 && ISOPTION(*argv[1]) ; argc--, argv++) {
-    nargs = get_option(argc, argv) ;
-    argc -= nargs ;
-    argv += nargs ;
+  ac = argc;
+  av = argv;
+  for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
+    nargs = get_option(argc, argv);
+    argc -= nargs;
+    argv += nargs;
   }
 
   if (argc < 3)
-    usage_exit(1) ;
+    usage_exit(1);
 
-
-  msec = start.milliseconds() ;
-  seconds = nint((float)msec/1000.0f) ;
-  minutes = seconds / 60 ;
-  seconds = seconds % 60 ;
-  fprintf(stderr, "inverse operator application took %d minutes"
-          " and %d seconds.\n", minutes, seconds) ;
-  exit(0) ;
-  return(0) ;
+  msec = start.milliseconds();
+  seconds = nint((float)msec / 1000.0f);
+  minutes = seconds / 60;
+  seconds = seconds % 60;
+  fprintf(stderr,
+          "inverse operator application took %d minutes"
+          " and %d seconds.\n",
+          minutes, seconds);
+  exit(0);
+  return (0);
 }
 /*----------------------------------------------------------------------
             Parameters:
 
            Description:
 ----------------------------------------------------------------------*/
-static int
-get_option(int argc, char *argv[]) {
-  int  nargs = 0 ;
-  char *option ;
+static int get_option(int argc, char *argv[]) {
+  int nargs = 0;
+  char *option;
 
-  option = argv[1] + 1 ;            /* past '-' */
+  option = argv[1] + 1; /* past '-' */
   switch (toupper(*option)) {
   case 'N':
-    normalize_flag = atoi(argv[2]) ;
+    normalize_flag = atoi(argv[2]);
     fprintf(stderr, "noise-sensitiviy normalization %s\n",
-            normalize_flag ? "on" : "off") ;
-    nargs = 1 ;
-    break ;
+            normalize_flag ? "on" : "off");
+    nargs = 1;
+    break;
   case '?':
   case 'U':
-    usage_exit(0) ;
-    break ;
+    usage_exit(0);
+    break;
   default:
-    fprintf(stderr, "unknown option %s\n", argv[1]) ;
-    exit(1) ;
-    break ;
+    fprintf(stderr, "unknown option %s\n", argv[1]);
+    exit(1);
+    break;
   }
 
-  return(nargs) ;
+  return (nargs);
 }
 /*----------------------------------------------------------------------
             Parameters:
 
            Description:
 ----------------------------------------------------------------------*/
-static void
-usage_exit(int code) {
+static void usage_exit(int code) {
   printf("usage: %s [options] <inverse operator> <EEG/MEG data file>",
-         Progname) ;
-  printf(
-    "\tf <f low> <f hi> - apply specified filter (not implemented yet)\n"
-  );
-  printf("\tn - noise-sensitivity normalize inverse (default=1)") ;
-  exit(code) ;
+         Progname);
+  printf("\tf <f low> <f hi> - apply specified filter (not implemented yet)\n");
+  printf("\tn - noise-sensitivity normalize inverse (default=1)");
+  exit(code);
 }
-
-
-
-
-

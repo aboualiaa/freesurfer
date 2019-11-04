@@ -9,8 +9,8 @@
   Copyright (c) Insight Software Consortium. All rights reserved.
   See ITKCopyright.txt or http://www.itk.org/HTML/Copyright.htm for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -21,8 +21,7 @@
 #include "itkVertexCell.h"
 #include "itkVectorContainer.h"
 
-namespace itk
-{
+namespace itk {
 
 /** \class PolylineCell
  * PolylineCell represents a line segment for a Mesh.
@@ -39,56 +38,51 @@ namespace itk
  * \ingroup MeshObjects
  */
 
-template < typename TCellInterface >
-class ITK_EXPORT PolylineCell: public TCellInterface
-{
+template <typename TCellInterface>
+class ITK_EXPORT PolylineCell : public TCellInterface {
 public:
   /** Standard class typedefs. */
   itkCellCommonTypedefs(PolylineCell);
   itkCellInheritedTypedefs(TCellInterface);
-  
+
   /** Standard part of every itk Object. */
   itkTypeMacro(PolylineCell, CellInterface);
 
   /** The type of boundary for this lines's vertices. */
-  typedef VertexCell< TCellInterface >         VertexType;
-  typedef typename VertexType::SelfAutoPointer VertexAutoPointer;
+  using VertexType = VertexCell<TCellInterface>;
+  using VertexAutoPointer = typename VertexType::SelfAutoPointer;
 
-  typedef VectorContainer<unsigned int, PointIdentifier>   PointIdentifierVector;
-  typedef typename PointIdentifierVector::Pointer          PointIdentifierVectorPointer;
-    
+  using PointIdentifierVector = VectorContainer<unsigned int, PointIdentifier>;
+  using PointIdentifierVectorPointer = typename PointIdentifierVector::Pointer;
+
   /** Polyline-specific topology numbers. */
   enum { CellDimension = 1 };
 
-  
   /** Implement the standard CellInterface. */
-  virtual CellGeometry GetType(void) const 
-  {return Superclass::POLYGON_CELL;}
-  virtual void MakeCopy( CellAutoPointer & ) const;
-  virtual unsigned int GetDimension(void) const;
-  virtual unsigned int GetNumberOfPoints(void) const;
+  virtual CellGeometry GetType() const { return Superclass::POLYGON_CELL; }
+  virtual void MakeCopy(CellAutoPointer &) const;
+  virtual unsigned int GetDimension() const;
+  virtual unsigned int GetNumberOfPoints() const;
   virtual CellFeatureCount GetNumberOfBoundaryFeatures(int dimension) const;
-  virtual bool GetBoundaryFeature(int dimension, CellFeatureIdentifier,CellAutoPointer &);
+  virtual bool GetBoundaryFeature(int dimension, CellFeatureIdentifier,
+                                  CellAutoPointer &);
   virtual void SetPointIds(PointIdConstIterator first);
   virtual void SetPointIds(PointIdConstIterator first,
                            PointIdConstIterator last);
   virtual void SetPointId(int localId, PointIdentifier);
-  virtual PointIdIterator      PointIdsBegin(void);
-  virtual PointIdConstIterator PointIdsBegin(void) const;
-  virtual PointIdIterator      PointIdsEnd(void);
-  virtual PointIdConstIterator PointIdsEnd(void) const; 
-  
+  virtual PointIdIterator PointIdsBegin();
+  virtual PointIdConstIterator PointIdsBegin() const;
+  virtual PointIdIterator PointIdsEnd();
+  virtual PointIdConstIterator PointIdsEnd() const;
+
   /** Line-specific interface. */
-  virtual CellFeatureCount GetNumberOfVertices(void) const;
+  virtual CellFeatureCount GetNumberOfVertices() const;
   virtual bool GetVertex(CellFeatureIdentifier, VertexAutoPointer &);
-  
+
   /** Visitor interface */
   itkCellVisitMacro(Superclass::POLYGON_CELL);
 
-  PolylineCell()
-  {
-    m_PointIds = PointIdentifierVector::New();
-  }
+  PolylineCell() { m_PointIds = PointIdentifierVector::New(); }
   ~PolylineCell() {}
 
 protected:
@@ -96,10 +90,9 @@ protected:
   PointIdentifierVectorPointer m_PointIds;
 
 private:
-  PolylineCell(const Self&); //purposely not implemented
-  void operator=(const Self&); //purposely not implemented
+  PolylineCell(const Self &);   // purposely not implemented
+  void operator=(const Self &); // purposely not implemented
 };
-
 
 } // end namespace itk
 

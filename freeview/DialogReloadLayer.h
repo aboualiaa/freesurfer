@@ -10,15 +10,14 @@ class DialogReloadLayer;
 
 class Layer;
 
-class DialogReloadLayer : public QDialog
-{
+class DialogReloadLayer : public QDialog {
   Q_OBJECT
 
 public:
   explicit DialogReloadLayer(QWidget *parent = 0);
   ~DialogReloadLayer();
 
-  int Execute(const QList<Layer*>& layers);
+  int Execute(const QList<Layer *> &layers);
   bool GetCloseLayerFirst();
 
 private:

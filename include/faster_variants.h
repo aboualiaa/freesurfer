@@ -1,12 +1,13 @@
 /**
  * @file  faster_variants.h
- * @brief define the macros that conditionalize faster variants of some algorithms
- *        before those variants completely replace the original variant
+ * @brief define the macros that conditionalize faster variants of some
+ * algorithms before those variants completely replace the original variant
  *
- *        keep both variants when the faster variant is 
+ *        keep both variants when the faster variant is
  *           1) not yet fully tested, or
  *           2) substantially more complex than the original
- *                  because comparing the two results can test the faster one for correctness
+ *                  because comparing the two results can test the faster one
+ * for correctness
  */
 /*
  * Original Author: Bevin Brett

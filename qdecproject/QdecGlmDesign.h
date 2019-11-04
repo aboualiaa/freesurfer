@@ -40,24 +40,21 @@
 
 using namespace std;
 
-class QdecGlmDesign
-{
+class QdecGlmDesign {
 public:
-
   // Constructors/Destructors
   //
 
-  QdecGlmDesign ( QdecDataTable* iDataTable );
+  QdecGlmDesign(QdecDataTable *iDataTable);
 
-  virtual ~QdecGlmDesign ( );
+  virtual ~QdecGlmDesign();
 
   /**
    * Returns true if this design is valid (input parameters have been set and
    * mri_glmfit input data created, ie. Create() has been called successfully)
    * @return bool
    */
-  bool IsValid ( );
-
+  bool IsValid();
 
   /**
    * Initializes the design with the given design parameters.
@@ -75,198 +72,167 @@ public:
    * @param  iSmoothnessLevel
    * @param  iProgressUpdateGUI
    */
-  int Create ( QdecDataTable* iDataTable,
-               const char* isName,
-               const char* isFirstDiscreteFactor,
-               const char* isSecondDiscreteFactor,
-               const char* isFirstContinuousFactor,
-               const char* isSecondContinuousFactor,
-               const char** isNuisanceFactors,
-               int inNumNuisanceFactors,
-               const char* isMeasure,
-               const char* isHemi,
-               int iSmoothnessLevel,
-               ProgressUpdateGUI* iProgressUpdateGUI );
+  int Create(QdecDataTable *iDataTable, const char *isName,
+             const char *isFirstDiscreteFactor,
+             const char *isSecondDiscreteFactor,
+             const char *isFirstContinuousFactor,
+             const char *isSecondContinuousFactor,
+             const char **isNuisanceFactors, int inNumNuisanceFactors,
+             const char *isMeasure, const char *isHemi, int iSmoothnessLevel,
+             ProgressUpdateGUI *iProgressUpdateGUI);
 
   /**
    *
    */
-  void ClearDiscreteFactors ( );
-
-
-  /**
-   *
-   */
-  void AddDiscreteFactor ( const char* isFactorName);
-
+  void ClearDiscreteFactors();
 
   /**
    *
    */
-  void ClearContinuousFactors ( );
-
-
-  /**
-   *
-   */
-  void AddContinuousFactor ( const char* isFactorName);
-
+  void AddDiscreteFactor(const char *isFactorName);
 
   /**
    *
    */
-  void ClearNuisanceFactors ( );
-
+  void ClearContinuousFactors();
 
   /**
    *
    */
-  void AddNuisanceFactor ( const char* isFactorName);
+  void AddContinuousFactor(const char *isFactorName);
 
+  /**
+   *
+   */
+  void ClearNuisanceFactors();
+
+  /**
+   *
+   */
+  void AddNuisanceFactor(const char *isFactorName);
 
   /**
    * @return int
    */
-  int GetDegreesOfFreedom ( );
-
-
-  /**
-   * @return string
-   */
-  string GetName ( );
-
-
-  /**
-   * 
-   */
-  void SetName ( const char* isName );
-
+  int GetDegreesOfFreedom();
 
   /**
    * @return string
    */
-  string GetHemi ( );
-
-
-  /**
-   * 
-   */
-  void SetHemi ( const char* isHemi );
-
-
-  /**
-   * @return string
-   */
-  string GetMeasure ( );
-
-
-  /**
-   * 
-   */
-  void SetMeasure ( const char* isMeasure );
-
-
-  /**
-   * @return int
-   */
-  int GetSmoothness ( );
-
+  string GetName();
 
   /**
    *
    */
-  void SetSmoothness ( int iVal );
+  void SetName(const char *isName);
 
   /**
    * @return string
    */
-  string GetDesignMatrixType ( );
-
+  string GetHemi();
 
   /**
-   * @param const char*
+   *
    */
-  void SetDesignMatrixType ( const char* isDesignMatrixType );
-
+  void SetHemi(const char *isHemi);
 
   /**
    * @return string
    */
-  string GetSubjectsDir ( );
-
+  string GetMeasure();
 
   /**
-   * @param const char*
+   *
    */
-  int SetSubjectsDir ( const char* ifnSubjectsDir );
+  void SetMeasure(const char *isMeasure);
+
+  /**
+   * @return int
+   */
+  int GetSmoothness();
+
+  /**
+   *
+   */
+  void SetSmoothness(int iVal);
 
   /**
    * @return string
    */
-  string GetAverageSubject ( );
-
+  string GetDesignMatrixType();
 
   /**
    * @param const char*
    */
-  void SetAverageSubject ( const char* isAverageSubject );
+  void SetDesignMatrixType(const char *isDesignMatrixType);
 
+  /**
+   * @return string
+   */
+  string GetSubjectsDir();
+
+  /**
+   * @param const char*
+   */
+  int SetSubjectsDir(const char *ifnSubjectsDir);
+
+  /**
+   * @return string
+   */
+  string GetAverageSubject();
+
+  /**
+   * @param const char*
+   */
+  void SetAverageSubject(const char *isAverageSubject);
 
   /**
    * returns the pathname to the fsgd file required by mri_glmfit.
    * @return string
    */
-  string GetFsgdFileName ( );
-
+  string GetFsgdFileName();
 
   /**
    * returns the pathname to the input data, 'y', required by mri_glmfit.
    * @return string
    */
-  string GetYdataFileName ( );
-
-
-  /**
-   * @return vector< string >
-   */
-  vector< string > GetContrastNames ( );
-
+  string GetYdataFileName();
 
   /**
    * @return vector< string >
    */
-  vector< string > GetContrastQuestions ( );
-
+  vector<string> GetContrastNames();
 
   /**
    * @return vector< string >
    */
-  vector< string > GetContrastFileNames ( );
+  vector<string> GetContrastQuestions();
 
+  /**
+   * @return vector< string >
+   */
+  vector<string> GetContrastFileNames();
 
   /**
    * @return string
    */
-  string GetDefaultWorkingDir ( );
-
+  string GetDefaultWorkingDir();
 
   /**
    * @return string
    */
-  string GetWorkingDir ( );
-
+  string GetWorkingDir();
 
   /**
    * @return int
    * @param  isPathName
    */
-  int SetWorkingDir ( const char* isPathName );
-
+  int SetWorkingDir(const char *isPathName);
 
   /**
    * @return ProgressUpdateGUI*
    */
-  ProgressUpdateGUI* GetProgressUpdateGUI ( );
+  ProgressUpdateGUI *GetProgressUpdateGUI();
 
   /**
    * SetExcludeSubjectID ( const char* isSubjecID, bool ibExclude ) -
@@ -275,60 +241,54 @@ public:
    * param const char* isSubjectID
    * param bool ibExclude
    */
-  void SetExcludeSubjectID ( const char* isSubjectID, bool ibExclude );
+  void SetExcludeSubjectID(const char *isSubjectID, bool ibExclude);
 
   /**
    * GetExcludeSubjectID ( const char* isSubjecID ) -
    * Returns a subject ID's exclusion status.
    * param const char* isSubjectID
    */
-  bool GetExcludeSubjectID ( const char* isSubjectID );
+  bool GetExcludeSubjectID(const char *isSubjectID);
 
   /**
    * SetExcludeSubjectsFactorGT
    */
-  void SetExcludeSubjectsFactorGT ( const char* isFactorName,
-                                    double inExcludeGT,
-                                    bool ibExclude );
+  void SetExcludeSubjectsFactorGT(const char *isFactorName, double inExcludeGT,
+                                  bool ibExclude);
 
   /**
    * SetExcludeSubjectsFactorLT
    */
-  void SetExcludeSubjectsFactorLT ( const char* isFactorName,
-                                    double inExcludeLT,
-                                    bool ibExclude );
+  void SetExcludeSubjectsFactorLT(const char *isFactorName, double inExcludeLT,
+                                  bool ibExclude);
 
   /**
    * SetExcludeSubjectsFactorET
    */
-  void SetExcludeSubjectsFactorET ( const char* isFactorName,
-                                    double inExcludeET,
-                                    bool ibExclude );
+  void SetExcludeSubjectsFactorET(const char *isFactorName, double inExcludeET,
+                                  bool ibExclude);
 
   /**
    * ClearAllExcludedSubjects
    */
-  void  ClearAllExcludedSubjects ( );
+  void ClearAllExcludedSubjects();
 
   /**
    * GetNumberOfExcludedSubjects
    */
-  int  GetNumberOfExcludedSubjects ( );
-
+  int GetNumberOfExcludedSubjects();
 
   /**
    * Using the design parameters, writes FSGF file to the working directory.
    * @return int
    */
-  int WriteFsgdFile ( );
-
+  int WriteFsgdFile();
 
   /**
    * Using the design parameters, writes .mat files for all our contrasts.
    * @return int
    */
-  int WriteContrastMatrices ( );
-
+  int WriteContrastMatrices();
 
   /**
    * Using the design parameters, creates the 'y' input data to
@@ -336,38 +296,37 @@ public:
    * to the specified filename.
    * @return int
    */
-  int WriteYdataFile ( );
+  int WriteYdataFile();
 
   /**
-   * Creates the 'y' input data to mri_glmfit for a volume-based analysis, 
+   * Creates the 'y' input data to mri_glmfit for a volume-based analysis,
    * by creating a multi-frame 'volume' of 1x1x1 size, sticking the single
    * dat point for each subject in the 'volume'.  One frame per subject.
    * @return int
    */
-  int WriteYdataFile ( const char* isMeasureName );
+  int WriteYdataFile(const char *isMeasureName);
 
-  /** 
+  /**
    * Access the discrete and continuous factor names.
-   * Returns a const vector of QdecFactors pointers. 
+   * Returns a const vector of QdecFactors pointers.
    */
-  vector<QdecFactor*> const& GetDiscreteFactors () const;
-  vector<QdecFactor*> const& GetContinuousFactors () const;
-  vector<QdecFactor*> const& GetNuisanceFactors () const;
+  vector<QdecFactor *> const &GetDiscreteFactors() const;
+  vector<QdecFactor *> const &GetContinuousFactors() const;
+  vector<QdecFactor *> const &GetNuisanceFactors() const;
 
 private:
-
   // private attributes
   //
 
   bool mbValid;
-  QdecDataTable* mDataTable;
+  QdecDataTable *mDataTable;
   string msName;
   // Stores seleted discrete factors.  Initially empty.
-  vector< QdecFactor* > mDiscreteFactors;
+  vector<QdecFactor *> mDiscreteFactors;
   // Stores selected continous factors.  Initially empty.
-  vector< QdecFactor* > mContinuousFactors;
+  vector<QdecFactor *> mContinuousFactors;
   // Stores selected nuisance factors.  Initially empty.
-  vector< QdecFactor* > mNuisanceFactors;
+  vector<QdecFactor *> mNuisanceFactors;
   string msMeasure;
   string msHemi;
   int mSmoothness;
@@ -375,15 +334,15 @@ private:
   string mfnSubjectsDir;
   string msAverageSubject;
   // Stores contrasts created from an fsgdf file. Can be empty.
-  vector< QdecContrast* > mContrasts;
+  vector<QdecContrast *> mContrasts;
   string mfnFsgdfFile;
   string mfnYdataFile;
   string mfnDefaultWorkingDir;
   string mfnWorkingDir;
-  ProgressUpdateGUI* mProgressUpdateGUI;  
+  ProgressUpdateGUI *mProgressUpdateGUI;
 
   // A list of excluded subjects. These will not be included when
-  // writing the fsgd and ydata files. The key values are subject IDs, 
+  // writing the fsgd and ydata files. The key values are subject IDs,
   // as found in data table, and if there is a value present in the set,
   // that subject is to be excluded.
   std::set<string> maExcludedSubjects;
@@ -391,33 +350,22 @@ private:
   // private methods
   //
 
-  int GetNumberOfDiscreteFactors ( ) 
-  { 
-    return this->mDiscreteFactors.size(); 
-  }
-  int GetNumberOfContinuousFactors ( ) 
-  { 
-    return this->mContinuousFactors.size(); 
-  }
-  int GetNumberOfNuisanceFactors ( ) 
-  { 
-    return this->mNuisanceFactors.size(); 
-  }
+  int GetNumberOfDiscreteFactors() { return this->mDiscreteFactors.size(); }
+  int GetNumberOfContinuousFactors() { return this->mContinuousFactors.size(); }
+  int GetNumberOfNuisanceFactors() { return this->mNuisanceFactors.size(); }
 
   /**
    * GetNumberOfClasses( ) - returns the number of classes for the design.
    * The number of classes is just all the combinations of all
    * the levels for the discrete factors.
    */
-  int GetNumberOfClasses ( );
-
+  int GetNumberOfClasses();
 
   /**
    * GetNumberOfRegressors() - returns the number of regressors for the
    * given design.
    */
-  int GetNumberOfRegressors( );
-
+  int GetNumberOfRegressors();
 
   /**
    * GetLevels2ClassName() - returns the class name given that
@@ -426,16 +374,14 @@ private:
    * The class name is created by appending
    *   Factor1NameLevelName-Factor2NameLevelName...
    */
-  string GetLevels2ClassName ( unsigned int* nthlevels );
-
+  string GetLevels2ClassName(unsigned int *nthlevels);
 
   /**
    * Creates Contrast objects based on the selected factors.
    * Stores them in our 'mContrasts' QdecContrast container.
    * @return int
    */
-  int GenerateContrasts ( );
-
+  int GenerateContrasts();
 };
 
 #endif // QDECGLMDESIGN_H

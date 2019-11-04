@@ -23,43 +23,41 @@
  *
  */
 
-#include <stdio.h>
+#include <cstdio>
 
 #include "machine.h"
 
-double swapDouble(double d)
-{
+double swapDouble(double d) {
   size_t typeSize = sizeof(double);
   char *pVar = (char *)(&d);
   char tmp;
   double w;
   size_t i;
-  for (i = 0; i < typeSize / 2; ++i)  // typeSize must be even
+  for (i = 0; i < typeSize / 2; ++i) // typeSize must be even
   {
     // swap front and back
     tmp = *(pVar + 2 * i);
     *(pVar + 2 * i) = *(pVar + typeSize - 1 - 2 * i);
     *(pVar + typeSize - 1 - 2 * i) = tmp;
   }
-  w = *((double *)(pVar));  // copy
+  w = *((double *)(pVar)); // copy
   return w;
 }
 
-long64 swapLong64(long64 l)
-{
+long64 swapLong64(long64 l) {
   size_t typeSize = sizeof(long64);
   char *pVar = (char *)(&l);
   char tmp;
   double w;
   size_t i;
-  for (i = 0; i < typeSize / 2; ++i)  // typeSize must be even
+  for (i = 0; i < typeSize / 2; ++i) // typeSize must be even
   {
     // swap front and back
     tmp = *(pVar + 2 * i);
     *(pVar + 2 * i) = *(pVar + typeSize - 1 - 2 * i);
     *(pVar + typeSize - 1 - 2 * i) = tmp;
   }
-  w = *((long64 *)(pVar));  // copy
+  w = *((long64 *)(pVar)); // copy
   return w;
 }
 
@@ -76,8 +74,7 @@ typedef union {
 } SWAP_LONG32;
 
 /* does not work for 64 bit OS */
-long32 swapLong32(long32 l)
-{
+long32 swapLong32(long32 l) {
   SWAP_LONG32 sl;
   short s;
 
@@ -94,8 +91,7 @@ long32 swapLong32(long32 l)
   return (sl.l);
 }
 
-float swapFloat(float f)
-{
+float swapFloat(float f) {
   SWAP_LONG32 sl;
   short s;
 
@@ -117,8 +113,7 @@ typedef union {
   char buf[sizeof(short)];
 } SWAP_SHORT;
 
-short swapShort(short s)
-{
+short swapShort(short s) {
   SWAP_SHORT ss;
   char c;
 
@@ -155,8 +150,7 @@ swapDouble(double d)
 }
 */
 
-int swapInt(int i)
-{
+int swapInt(int i) {
   SWAP_LONG32 sl;
   short s;
 
@@ -182,8 +176,7 @@ int swapInt(int i)
     3. This is consistent with the endianness flag in the
        bshort/bfloat format.
   --------------------------------------------------------*/
-int Arch486(void)
-{
+int Arch486() {
   int endian;
   short tmp = 1;
   char *ctmp;
@@ -201,23 +194,23 @@ int Arch486(void)
   in Buf. nitems is the number of nBytesPerItem-byte items
   in Buf.
   ---------------------------------------------------------*/
-int ByteSwapBuf(void *Buf, long int nItems, int nBytesPerItem)
-{
+int ByteSwapBuf(void *Buf, long int nItems, int nBytesPerItem) {
   switch (nBytesPerItem) {
-    case 1:
-      break;
-    case 2:
-      ByteSwap2(Buf, nItems);
-      break;
-    case 4:
-      ByteSwap4(Buf, nItems);
-      break;
-    case 8:
-      ByteSwap8(Buf, nItems);
-      break;
-    default:
-      printf("ERROR: ByteSwapBuf: nBytesPerItem = %d not supported\n", nBytesPerItem);
-      return (1);
+  case 1:
+    break;
+  case 2:
+    ByteSwap2(Buf, nItems);
+    break;
+  case 4:
+    ByteSwap4(Buf, nItems);
+    break;
+  case 8:
+    ByteSwap8(Buf, nItems);
+    break;
+  default:
+    printf("ERROR: ByteSwapBuf: nBytesPerItem = %d not supported\n",
+           nBytesPerItem);
+    return (1);
   }
   return (0);
 }
@@ -226,8 +219,7 @@ int ByteSwapBuf(void *Buf, long int nItems, int nBytesPerItem)
   Reverses the byte order of each 2-byte buffer of buf2.
   nitems is the number of 2-byte items in buf2;
   ---------------------------------------------------------*/
-int ByteSwap2(void *buf2, long int nitems)
-{
+int ByteSwap2(void *buf2, long int nitems) {
   char *cbuf, ctmp;
   long int n;
 
@@ -245,8 +237,7 @@ int ByteSwap2(void *buf2, long int nitems)
   Reverses the byte order of each 4-byte buffer of buf4.
   nitems is the number of 4-byte items in buf4;
   ---------------------------------------------------------*/
-int ByteSwap4(void *buf4, long int nitems)
-{
+int ByteSwap4(void *buf4, long int nitems) {
   char *cbuf, ctmp;
   long int n;
 
@@ -272,8 +263,7 @@ int ByteSwap4(void *buf4, long int nitems)
   Reverses the byte order of each 8-byte buffer of buf8.
   nitems is the number of 8-byte items in buf8;
   ---------------------------------------------------------*/
-int ByteSwap8(void *buf8, long int nitems)
-{
+int ByteSwap8(void *buf8, long int nitems) {
   char *cbuf, ctmp;
   long int n;
 

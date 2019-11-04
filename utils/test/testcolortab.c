@@ -28,51 +28,45 @@
 
 #include "colortab.h"
 
-const char* Progname = "testcolortab";
+const char *Progname = "testcolortab";
 
-int main(int argc, char *argv[])
-{
-  int errs=ctabDuplicates=0; // CTABreadASCII will increment ctabDuplicates
-  fprintf(stdout,"Colortable test...\n");
-  char defaultfname[]="../../distribution/FreeSurferColorLUT.txt";
-  char* fname=argv[1];
-  if (NULL==fname) fname = defaultfname;
+int main(int argc, char *argv[]) {
+  int errs = ctabDuplicates = 0; // CTABreadASCII will increment ctabDuplicates
+  fprintf(stdout, "Colortable test...\n");
+  char defaultfname[] = "../../distribution/FreeSurferColorLUT.txt";
+  char *fname = argv[1];
+  if (NULL == fname)
+    fname = defaultfname;
   COLOR_TABLE *ct = CTABreadASCII(fname);
-  if (NULL==ct)
-  {
-    fprintf(stderr,"usage:   %s colortable_fname [1]\n",argv[0]);
-    fprintf(stderr,"example: %s FreeSurferColorLUT.txt\n",argv[0]);
-    fprintf
-      (stderr,
-       "default: %s ../../distribution/FreeSurferColorLUT.txt\n",
-       argv[0]);
-    fprintf
-      (stderr,
-       "option:  if 1 is the second arg, look for duplicate annotations\n");
+  if (NULL == ct) {
+    fprintf(stderr, "usage:   %s colortable_fname [1]\n", argv[0]);
+    fprintf(stderr, "example: %s FreeSurferColorLUT.txt\n", argv[0]);
+    fprintf(stderr, "default: %s ../../distribution/FreeSurferColorLUT.txt\n",
+            argv[0]);
+    fprintf(
+        stderr,
+        "option:  if 1 is the second arg, look for duplicate annotations\n");
     exit(1);
   }
-  errs=ctabDuplicates; // CTABreadASCII puts duplicate count in ctabDuplicates
-  errs+=CTABfindDuplicateNames(ct);
-  if ((NULL!=argv[2]) && (0==strcmp(argv[2],"1")))
-  {
-    errs+=CTABfindDuplicateAnnotations(ct);
+  errs = ctabDuplicates; // CTABreadASCII puts duplicate count in ctabDuplicates
+  errs += CTABfindDuplicateNames(ct);
+  if ((NULL != argv[2]) && (0 == strcmp(argv[2], "1"))) {
+    errs += CTABfindDuplicateAnnotations(ct);
   }
-  if (ct->nentries > 20000)
-  {
-    fprintf(stderr,"\nERROR: colortable has more than 20000 entries (%d)!\n"
+  if (ct->nentries > 20000) {
+    fprintf(stderr,
+            "\nERROR: colortable has more than 20000 entries (%d)!\n"
             "Adjust array size in MRIvoxelsInLabelWithPartialVolumeEffects "
-            "in mri.c\n", ct->nentries);
+            "in mri.c\n",
+            ct->nentries);
     errs++;
   }
-  if (errs)
-  {
+  if (errs) {
     fflush(stderr);
     fflush(stdout);
-    fprintf(stderr,"\n!!! FAILURE !!! found %d errors in %s\n",errs,fname);
-  }
-  else
-  {
-    fprintf(stdout,"passed.\n");
+    fprintf(stderr, "\n!!! FAILURE !!! found %d errors in %s\n", errs, fname);
+  } else {
+    fprintf(stdout, "passed.\n");
   }
   return errs;
 }

@@ -26,16 +26,14 @@
 
 #include "PanelLayer.h"
 
-namespace Ui
-{
+namespace Ui {
 class PanelPointSet;
 }
 
 class QLabel;
 class QTreeWidgetItem;
 
-class PanelPointSet : public PanelLayer
-{
+class PanelPointSet : public PanelLayer {
   Q_OBJECT
 
 public:
@@ -45,44 +43,44 @@ public:
 protected:
   void DoUpdateWidgets();
   void DoIdle();
-  virtual void ConnectLayer( Layer* layer );
+  virtual void ConnectLayer(Layer *layer);
   void LoadScalarValues();
   void UpdatePointInfo();
 
 protected slots:
-  void OnSliderOpacity( int nVal );
+  void OnSliderOpacity(int nVal);
   void OnSliderMin(int nVal);
   void OnSliderMid(int nVal);
   void OnSliderMax(int nVal);
   void OnSliderOffset(int nVal);
-  void OnLineEditMin(const QString& text);
-  void OnLineEditMid(const QString& text);
-  void OnLineEditMax(const QString& text);
-  void OnLineEditOffset(const QString& text);
-  void OnLineEditRadius(const QString& text);
-  void OnLineEditSplineRadius(const QString& text);
+  void OnLineEditMin(const QString &text);
+  void OnLineEditMid(const QString &text);
+  void OnLineEditMax(const QString &text);
+  void OnLineEditOffset(const QString &text);
+  void OnLineEditRadius(const QString &text);
+  void OnLineEditSplineRadius(const QString &text);
   void OnComboScalarMap(int nSel);
   void OnSpinBoxGoToPoint(int val);
   void OnButtonGoToPoint();
   void OnButtonCommentAdd();
   void OnButtonStatAdd();
   void OnButtonStatDelete();
-  void OnCommentLabelClicked(const QString& link);
+  void OnCommentLabelClicked(const QString &link);
   void ScrollCommentsToBottom();
-  void OnStatItemChanged(QTreeWidgetItem* item, int col);
-  void OnCurrentStatItemChanged(QTreeWidgetItem* cur, QTreeWidgetItem* old);
+  void OnStatItemChanged(QTreeWidgetItem *item, int col);
+  void OnCurrentStatItemChanged(QTreeWidgetItem *cur, QTreeWidgetItem *old);
   void SetCurrentPoint(int nIndex);
 
 private:
-  QLabel* MakeCommentItem(const QVariantMap& map);
-  QTreeWidgetItem* AddStatItem(const QString& name, double value);
+  QLabel *MakeCommentItem(const QVariantMap &map);
+  QTreeWidgetItem *AddStatItem(const QString &name, double value);
 
   Ui::PanelPointSet *ui;
-  QList<QWidget*> m_widgetlistSolidColor;
-  QList<QWidget*> m_widgetlistHeatScale;
-  QList<QWidget*> m_widgetlistSpline;
+  QList<QWidget *> m_widgetlistSolidColor;
+  QList<QWidget *> m_widgetlistHeatScale;
+  QList<QWidget *> m_widgetlistSpline;
 
-  QString     m_self;
+  QString m_self;
 };
 
 #endif // PANELPOINTSET_H

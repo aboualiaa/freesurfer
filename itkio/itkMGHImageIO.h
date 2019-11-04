@@ -20,242 +20,217 @@
 #include <vnl/vnl_cross.h>
 #undef export
 
-
 #include <zlib.h>
 
 // variables used in the IO
 //
 // because of the templated functions, need to declare them here
 // try to avoid name scoping
-namespace fs
-{
+namespace fs {
 const int MRI_UCHAR = 0;
-const int MRI_INT   = 1;
+const int MRI_INT = 1;
 const int MRI_FLOAT = 3;
 const int MRI_SHORT = 4;
-const int MRI_TENSOR= 6;
+const int MRI_TENSOR = 6;
 
 const int FS_DIMENSION_HEADER_SIZE = sizeof(int) * 7;
 const int FS_RAS_HEADER_SIZE = (sizeof(float) * 15) + sizeof(short);
 const int FS_UNUSED_HEADER_SIZE = 256 - FS_RAS_HEADER_SIZE;
 const int FS_WHOLE_HEADER_SIZE =
-  FS_RAS_HEADER_SIZE + FS_DIMENSION_HEADER_SIZE + FS_UNUSED_HEADER_SIZE;
+    FS_RAS_HEADER_SIZE + FS_DIMENSION_HEADER_SIZE + FS_UNUSED_HEADER_SIZE;
 
-};
+}; // namespace fs
 
-namespace itk
-{
+namespace itk {
 
-  class OutputStreamWrapper;
+class OutputStreamWrapper;
 
-  class ITK_EXPORT MGHImageIO : public ImageIOBase
-  {
-  public:
-    typedef MGHImageIO              Self;
-    typedef ImageIOBase             Superclass;
-    typedef SmartPointer<Self>      Pointer;
+class ITK_EXPORT MGHImageIO : public ImageIOBase {
+public:
+  typedef MGHImageIO Self;
+  typedef ImageIOBase Superclass;
+  typedef SmartPointer<Self> Pointer;
 
-    /** Method for creation through the object factory **/
-    itkNewMacro(Self);
-    /** RTTI (and related methods) **/
-    itkTypeMacro(MGHImageIO, Superclass);
+  /** Method for creation through the object factory **/
+  itkNewMacro(Self);
+  /** RTTI (and related methods) **/
+  itkTypeMacro(MGHImageIO, Superclass);
 
-    
-    /**--------------- Read the data----------------- **/
-    virtual bool CanReadFile(const char* FileNameToRead);
-    /* Set the spacing and dimension information for the set file name */
-    virtual void ReadImageInformation();
-    /* Read the data from the disk into provided memory buffer */
-    virtual void Read(void* buffer);
-    
-    /**---------------Write the data------------------**/
-    
-    virtual bool CanWriteFile(const char* FileNameToWrite);
-    /* Set the spacing and dimension information for the set file name */
-    virtual void WriteImageInformation();
-    /* Write the data to the disk from the provided memory buffer */
-    virtual void Write(const void* buffer);
+  /**--------------- Read the data----------------- **/
+  virtual bool CanReadFile(const char *FileNameToRead);
+  /* Set the spacing and dimension information for the set file name */
+  virtual void ReadImageInformation();
+  /* Read the data from the disk into provided memory buffer */
+  virtual void Read(void *buffer);
 
-  protected:
-    MGHImageIO();
-    ~MGHImageIO();
-    void PrintSelf(std::ostream& os, Indent indent) const;
+  /**---------------Write the data------------------**/
 
-    void ReadVolumeHeader(gzFile fp);
+  virtual bool CanWriteFile(const char *FileNameToWrite);
+  /* Set the spacing and dimension information for the set file name */
+  virtual void WriteImageInformation();
+  /* Write the data to the disk from the provided memory buffer */
+  virtual void Write(const void *buffer);
 
-  private:
-    // processes the actual data buffer
-    void SwapBytesIfNecessary(void* buffer, 
-            unsigned long numberOfPixels);
-    // examines the direction cosines and creates encapsulation data
-    //void MriDirCos();
+protected:
+  MGHImageIO();
+  ~MGHImageIO();
+  void PrintSelf(std::ostream &os, Indent indent) const;
 
-    template<class Writer>
-    void WriteHeader(Writer& writer);
+  void ReadVolumeHeader(gzFile fp);
 
-    template<class Writer>
-      void WriteData(Writer& writer, const void* buffer);
+private:
+  // processes the actual data buffer
+  void SwapBytesIfNecessary(void *buffer, unsigned long numberOfPixels);
+  // examines the direction cosines and creates encapsulation data
+  // void MriDirCos();
 
-    void PermuteFrameValues(const void* buffer, char* tempmemory);
+  template <class Writer> void WriteHeader(Writer &writer);
 
-    unsigned int GetComponentSize() const;
+  template <class Writer> void WriteData(Writer &writer, const void *buffer);
 
-  }; // end class declaration
+  void PermuteFrameValues(const void *buffer, char *tempmemory);
 
-  //-----------------------------------
-  //
-  // WriteHeader
-  //
-  //-----------------------------------
-  template<class Writer>
-  void
-  MGHImageIO::WriteHeader(Writer& writer)
-  {
-    const int mghVersion = 1;
-    
-    // version
-    writer.Write( mghVersion );
+  unsigned int GetComponentSize() const;
 
-    // dimensions
-    for(unsigned int ui=0; ui<3; ++ui)
-      writer.Write( (int)m_Dimensions[ui] );
+}; // end class declaration
 
-    // nframes
-    writer.Write( (int)m_NumberOfComponents );
+//-----------------------------------
+//
+// WriteHeader
+//
+//-----------------------------------
+template <class Writer> void MGHImageIO::WriteHeader(Writer &writer) {
+  const int mghVersion = 1;
 
-    // type
-    switch( m_ComponentType )
-      {
-      case UCHAR:
-        writer.Write( fs::MRI_UCHAR ); break;
-      case USHORT:
-        itkWarningMacro( << " Casting from USHORT to INT!!!" );
-      case INT:
-        writer.Write( fs::MRI_INT ); break;
-      case DOUBLE:
-        itkWarningMacro( << " Casting from DOUBLE to INT!!!" );
-      case FLOAT:
-        writer.Write( fs::MRI_FLOAT ); break;
-      case SHORT:
-        writer.Write( fs::MRI_SHORT ); break;
+  // version
+  writer.Write(mghVersion);
 
-      // DJ -- added these cases to make the compiler shut up
-      case UNKNOWNCOMPONENTTYPE:
-      case CHAR:
-      case UINT:
-      case ULONG:
-      case LONG:
-        break;
+  // dimensions
+  for (unsigned int ui = 0; ui < 3; ++ui)
+    writer.Write((int)m_Dimensions[ui]);
 
-      }
+  // nframes
+  writer.Write((int)m_NumberOfComponents);
 
-    // dof !?! -> default value = 1
-    writer.Write( (int)1 );
-    
-    // write RAS and voxel size info
-    writer.Write( (short)1 );
-    
-    // spacing
-    for(unsigned int ui=0; ui<3; ++ui)
-      writer.Write( (float)m_Spacing[ui] );
+  // type
+  switch (m_ComponentType) {
+  case UCHAR:
+    writer.Write(fs::MRI_UCHAR);
+    break;
+  case USHORT:
+    itkWarningMacro(<< " Casting from USHORT to INT!!!");
+  case INT:
+    writer.Write(fs::MRI_INT);
+    break;
+  case DOUBLE:
+    itkWarningMacro(<< " Casting from DOUBLE to INT!!!");
+  case FLOAT:
+    writer.Write(fs::MRI_FLOAT);
+    break;
+  case SHORT:
+    writer.Write(fs::MRI_SHORT);
+    break;
 
-    //=================================================
-    // get directions matrix
-    std::vector<std::vector<double> > vvRas;
-    for(unsigned int ui=0; ui<3; ++ui) vvRas.push_back( GetDirection(ui) );
-    // transpose data before writing it
-    std::vector<float> vBufRas;
-    // transpose matrix
-    for(unsigned int ui=0; ui<3; ++ui)
-      for(unsigned int uj=0; uj<3; ++uj)
-	vBufRas.push_back( (float)vvRas[ui][uj] );
-    //==================================================
-
-    for(std::vector<float>::const_iterator cit = vBufRas.begin();
-	cit != vBufRas.end(); ++cit )
-      writer.Write( *cit );
-
-    // write c_r, c_a, c_s
-    // defined as origin + DC x resolution x ( dim0/2 , dim1/2, dim2/2 )
-    // 
-    float crasBuf;
-    for(unsigned int ui=0; ui<3; ++ui)
-      {
-	crasBuf = m_Origin[ui];
-	for(unsigned int uj=0; uj<3; ++uj)
-	  crasBuf += vvRas[uj][ui]*m_Spacing[uj]*(float)m_Dimensions[uj]/2.0f;
-	writer.Write( crasBuf );
-      } // next ui
-
-    // fill the rest of the buffer with zeros
-    char* buffer = new char[ fs::FS_UNUSED_HEADER_SIZE *sizeof(char) ];
-    memset( buffer, 0, fs::FS_UNUSED_HEADER_SIZE *sizeof(char) );
-    writer.WriteBuffer( buffer, fs::FS_UNUSED_HEADER_SIZE );
-    delete[] buffer;
+  // DJ -- added these cases to make the compiler shut up
+  case UNKNOWNCOMPONENTTYPE:
+  case CHAR:
+  case UINT:
+  case ULONG:
+  case LONG:
+    break;
   }
 
-  //--------------------------------------------
+  // dof !?! -> default value = 1
+  writer.Write((int)1);
+
+  // write RAS and voxel size info
+  writer.Write((short)1);
+
+  // spacing
+  for (unsigned int ui = 0; ui < 3; ++ui)
+    writer.Write((float)m_Spacing[ui]);
+
+  //=================================================
+  // get directions matrix
+  std::vector<std::vector<double>> vvRas;
+  for (unsigned int ui = 0; ui < 3; ++ui)
+    vvRas.push_back(GetDirection(ui));
+  // transpose data before writing it
+  std::vector<float> vBufRas;
+  // transpose matrix
+  for (unsigned int ui = 0; ui < 3; ++ui)
+    for (unsigned int uj = 0; uj < 3; ++uj)
+      vBufRas.push_back((float)vvRas[ui][uj]);
+  //==================================================
+
+  for (std::vector<float>::const_iterator cit = vBufRas.begin();
+       cit != vBufRas.end(); ++cit)
+    writer.Write(*cit);
+
+  // write c_r, c_a, c_s
+  // defined as origin + DC x resolution x ( dim0/2 , dim1/2, dim2/2 )
   //
-  // WriteData
-  //
-  //--------------------------------------------
-  template<class Writer>
-    void
-    MGHImageIO::WriteData(Writer& writer,
-			  const void* buffer)
-    {
-      // swap bytes if necessary
-      const unsigned long int numvalues = m_Dimensions[0]
-	* m_Dimensions[1] * m_Dimensions[2] * m_NumberOfComponents;
-      const unsigned long int numbytes = this->GetComponentSize() * numvalues;
+  float crasBuf;
+  for (unsigned int ui = 0; ui < 3; ++ui) {
+    crasBuf = m_Origin[ui];
+    for (unsigned int uj = 0; uj < 3; ++uj)
+      crasBuf += vvRas[uj][ui] * m_Spacing[uj] * (float)m_Dimensions[uj] / 2.0f;
+    writer.Write(crasBuf);
+  } // next ui
 
-      char* tempmemory = new char[numbytes];
+  // fill the rest of the buffer with zeros
+  char *buffer = new char[fs::FS_UNUSED_HEADER_SIZE * sizeof(char)];
+  memset(buffer, 0, fs::FS_UNUSED_HEADER_SIZE * sizeof(char));
+  writer.WriteBuffer(buffer, fs::FS_UNUSED_HEADER_SIZE);
+  delete[] buffer;
+}
 
-      // re-arrange data in frames
-      if ( m_NumberOfComponents > 1 )
-	{
-	  PermuteFrameValues(buffer, tempmemory);
-	}
-      else
-	memcpy(tempmemory, buffer, numbytes);
+//--------------------------------------------
+//
+// WriteData
+//
+//--------------------------------------------
+template <class Writer>
+void MGHImageIO::WriteData(Writer &writer, const void *buffer) {
+  // swap bytes if necessary
+  const unsigned long int numvalues = m_Dimensions[0] * m_Dimensions[1] *
+                                      m_Dimensions[2] * m_NumberOfComponents;
+  const unsigned long int numbytes = this->GetComponentSize() * numvalues;
 
+  char *tempmemory = new char[numbytes];
 
-      this->SwapBytesIfNecessary(tempmemory,numvalues);
-    
-      writer.WriteBuffer( tempmemory, numbytes );
+  // re-arrange data in frames
+  if (m_NumberOfComponents > 1) {
+    PermuteFrameValues(buffer, tempmemory);
+  } else
+    memcpy(tempmemory, buffer, numbytes);
 
-      delete[] tempmemory;
+  this->SwapBytesIfNecessary(tempmemory, numvalues);
 
-      itk::MetaDataDictionary &thisDic=this->GetMetaDataDictionary();
-    
-      float fScanBuffer=0.0;
+  writer.WriteBuffer(tempmemory, numbytes);
 
-      if ( ExposeMetaData<float>(thisDic, "TR", fScanBuffer) )
-	{
-	  writer.Write(fScanBuffer);
-	  if ( ExposeMetaData<float>(thisDic, "FlipAngle", fScanBuffer) )
-	    {
-	      writer.Write(fScanBuffer);
-	      if ( ExposeMetaData<float>(thisDic, "TE", fScanBuffer) )
-		{
-		  writer.Write(fScanBuffer);
-		  if ( ExposeMetaData<float>(thisDic, "TI", fScanBuffer) )
-		    {
-		      writer.Write(fScanBuffer);
-		      if ( ExposeMetaData<float>(thisDic, "FoV", fScanBuffer) )
-			writer.Write(fScanBuffer);
-		    } // end TI
-		} // end TE
-	    } // end FlipAngle
-	} // end TR
+  delete[] tempmemory;
 
-    }
+  itk::MetaDataDictionary &thisDic = this->GetMetaDataDictionary();
 
+  float fScanBuffer = 0.0;
+
+  if (ExposeMetaData<float>(thisDic, "TR", fScanBuffer)) {
+    writer.Write(fScanBuffer);
+    if (ExposeMetaData<float>(thisDic, "FlipAngle", fScanBuffer)) {
+      writer.Write(fScanBuffer);
+      if (ExposeMetaData<float>(thisDic, "TE", fScanBuffer)) {
+        writer.Write(fScanBuffer);
+        if (ExposeMetaData<float>(thisDic, "TI", fScanBuffer)) {
+          writer.Write(fScanBuffer);
+          if (ExposeMetaData<float>(thisDic, "FoV", fScanBuffer))
+            writer.Write(fScanBuffer);
+        } // end TI
+      }   // end TE
+    }     // end FlipAngle
+  }       // end TR
+}
 
 } // end namespace itk
 
-
 #endif // H_ITK_IMAGE_IO_H
-
-
-

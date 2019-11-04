@@ -27,26 +27,23 @@
 #include <string.h>
 
 #ifdef BUILD_MAIN
-int
-main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   char *me;
   float pinf, qnan;
   int i;
 
   me = argv[0];
-  if (sizeof(int) != sizeof(float))
-  {
-    fprintf(stderr, "%s: MADNESS:  sizeof(float)=%d != sizeof(int)=%d\n",
-            me, (int)sizeof(float), (int)sizeof(int));
+  if (sizeof(int) != sizeof(float)) {
+    fprintf(stderr, "%s: MADNESS:  sizeof(float)=%d != sizeof(int)=%d\n", me,
+            (int)sizeof(float), (int)sizeof(int));
     return -1;
   }
   pinf = FLT_MAX;
-  pinf = pinf*pinf;
-  qnan = pinf/pinf;
-  //type-punning not allowed when treating compiler warnings as errors
-  //replaced w/ memcpy
-  //i = *(int*)(&qnan);
+  pinf = pinf * pinf;
+  qnan = pinf / pinf;
+  // type-punning not allowed when treating compiler warnings as errors
+  // replaced w/ memcpy
+  // i = *(int*)(&qnan);
   memmove(&i, &qnan, sizeof(int));
   printf("-DTEEM_QNANHIBIT=%d\n", (i >> 22) & 1);
   return (int)((i >> 22) & 1);

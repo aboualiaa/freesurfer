@@ -36,31 +36,25 @@
 char stdout_buffer[BUFFER_SIZE] = {0};
 char stderr_buffer[BUFFER_SIZE] = {0};
 
-void outcallback( const char* ptr, std::streamsize count, void* pBuffer )
-{
+void outcallback(const char *ptr, std::streamsize count, void *pBuffer) {
   Q_UNUSED(count)
-  QString* str = static_cast<QString*>(pBuffer);
+  QString *str = static_cast<QString *>(pBuffer);
   *str += ptr;
 }
 
-void errcallback( const char* ptr, std::streamsize count, void* pBuffer )
-{
+void errcallback(const char *ptr, std::streamsize count, void *pBuffer) {
   Q_UNUSED(count)
-  QString* str = static_cast<QString*>(pBuffer);
+  QString *str = static_cast<QString *>(pBuffer);
   *str += ptr;
 }
 
 QStringList Known_Shell_Cmds;
 
-TermWidget::TermWidget(QWidget *parent) :
-  QWidget(parent),
-  ui(new Ui::TermWidget),
-  m_stdOut(0),
-  m_stdErr(0),
-  m_stdinNotifier(NULL)
-{
+TermWidget::TermWidget(QWidget *parent)
+    : QWidget(parent), ui(new Ui::TermWidget), m_stdOut(0), m_stdErr(0),
+      m_stdinNotifier(NULL) {
   ui->setupUi(this);
-  setWindowFlags( Qt::Tool );
+  setWindowFlags(Qt::Tool);
   SetDarkTheme(true);
   QFont font = ui->textCommand->font();
   font.setFamily("Menlo");
@@ -70,24 +64,29 @@ TermWidget::TermWidget(QWidget *parent) :
   ui->textLog->setFont(font);
   ui->textLog->setWordWrapMode(QTextOption::WrapAnywhere);
   ui->textCommand->setFocus();
-  connect(ui->textCommand, SIGNAL(CommandTriggered(QString)),
-          this, SLOT(OnCommandTriggered(QString)), Qt::QueuedConnection);
+  connect(ui->textCommand, SIGNAL(CommandTriggered(QString)), this,
+          SLOT(OnCommandTriggered(QString)), Qt::QueuedConnection);
 
   QSettings settings;
-  this->restoreGeometry(settings.value("/CommandConsole/Geometry").toByteArray());
+  this->restoreGeometry(
+      settings.value("/CommandConsole/Geometry").toByteArray());
 
   SetRedirectStdOutput(true);
   SetDuplicateStdOutput(true);
 
-  Known_Shell_Cmds << "ls" << "pwd" << "cd" << "cp" << "dir" << "copy";
+  Known_Shell_Cmds << "ls"
+                   << "pwd"
+                   << "cd"
+                   << "cp"
+                   << "dir"
+                   << "copy";
 
-  QTimer* timer = new QTimer(this);
+  QTimer *timer = new QTimer(this);
   connect(timer, SIGNAL(timeout()), this, SLOT(OnTimeOut()));
   timer->start(200);
 }
 
-TermWidget::~TermWidget()
-{
+TermWidget::~TermWidget() {
   QSettings settings;
   settings.setValue("/CommandConsole/Geometry", this->saveGeometry());
 
@@ -95,40 +94,34 @@ TermWidget::~TermWidget()
   delete ui;
 }
 
-void TermWidget::EnableListeningStdin()
-{
-  if (!m_stdinNotifier)
-  {
-    m_stdinNotifier = new QSocketNotifier(STDIN_FILENO, QSocketNotifier::Read, this);
-    connect(m_stdinNotifier, SIGNAL(activated(int)), this, SLOT(OnStdinActivated()));
+void TermWidget::EnableListeningStdin() {
+  if (!m_stdinNotifier) {
+    m_stdinNotifier =
+        new QSocketNotifier(STDIN_FILENO, QSocketNotifier::Read, this);
+    connect(m_stdinNotifier, SIGNAL(activated(int)), this,
+            SLOT(OnStdinActivated()));
   }
 }
 
-void TermWidget::SetRedirectStdOutput(bool bRedir)
-{
+void TermWidget::SetRedirectStdOutput(bool bRedir) {
   m_bRedirectStdOutput = bRedir;
-  if (bRedir)
-  {
-    if (m_stdOut)
-    {
+  if (bRedir) {
+    if (m_stdOut) {
       delete m_stdOut;
     }
-    if (m_stdErr)
-    {
+    if (m_stdErr) {
       delete m_stdErr;
     }
 
-    m_stdOut = new StdRedirector<>( std::cout, outcallback, &m_bufferStdOut );
-    m_stdErr = new StdRedirector<>( std::cerr, errcallback, &m_bufferStdErr );
+    m_stdOut = new StdRedirector<>(std::cout, outcallback, &m_bufferStdOut);
+    m_stdErr = new StdRedirector<>(std::cerr, errcallback, &m_bufferStdErr);
     fflush(stdout);
     setvbuf(stdout, stdout_buffer, _IOLBF, BUFFER_SIZE);
     fflush(stderr);
     setvbuf(stderr, stderr_buffer, _IOLBF, BUFFER_SIZE);
     stdout_buffer[0] = 0;
     stderr_buffer[0] = 0;
-  }
-  else
-  {
+  } else {
     delete m_stdOut;
     delete m_stdErr;
     m_stdOut = 0;
@@ -140,55 +133,47 @@ void TermWidget::SetRedirectStdOutput(bool bRedir)
   }
 }
 
-void TermWidget::OnCommandTriggered(const QString &cmd)
-{
+void TermWidget::OnCommandTriggered(const QString &cmd) {
   QString strg = cmd;
-  if (strg.trimmed().isEmpty())
-  {
+  if (strg.trimmed().isEmpty()) {
     return;
   }
 
-  if (strg == "abort")
-  {
+  if (strg == "abort") {
     MainWindow::GetMainWindow()->AbortScripts();
     return;
   }
 
-  if (strg[strg.size()-1] == '&')
-  {
-    strg.resize(strg.size()-1);
+  if (strg[strg.size() - 1] == '&') {
+    strg.resize(strg.size() - 1);
   }
   ui->textLog->append(QString("<span style=\"color:%1;\">%2</span>")
-                      .arg(m_strLogColor)
-                      .arg(ui->textCommand->GetPrompt() + strg));
+                          .arg(m_strLogColor)
+                          .arg(ui->textCommand->GetPrompt() + strg));
   ScrollToBottom();
   m_bufferStdOut.clear();
   m_bufferStdErr.clear();
   QStringList args = cmd.split(" ", QString::SkipEmptyParts);
-  if (Known_Shell_Cmds.contains(args[0].toLower()))
-  {
-    AppendErrorString("This is not a shell. Only freeview commands are supported. Type '-h' for all the available commands.\n");
-  }
-  else if (args[0].toLower() == "clear")
-  {
+  if (Known_Shell_Cmds.contains(args[0].toLower())) {
+    AppendErrorString("This is not a shell. Only freeview commands are "
+                      "supported. Type '-h' for all the available commands.\n");
+  } else if (args[0].toLower() == "clear") {
     ui->textLog->clear();
-  }
-  else
-  {
+  } else {
     if (strg[0] == '-')
       MainWindow::GetMainWindow()->ParseCommand(QString("freeview ") + strg);
     else
-      MainWindow::GetMainWindow()->AddScript(strg.split(" ", QString::SkipEmptyParts));
+      MainWindow::GetMainWindow()->AddScript(
+          strg.split(" ", QString::SkipEmptyParts));
 
-    if ( MainWindow::GetMainWindow()->IsBusy())
-    {
-      AppendErrorString("Still busy. Command is added to queue and will be executed later.\n");
+    if (MainWindow::GetMainWindow()->IsBusy()) {
+      AppendErrorString("Still busy. Command is added to queue and will be "
+                        "executed later.\n");
     }
   }
 }
 
-void TermWidget::OnStdinActivated()
-{
+void TermWidget::OnStdinActivated() {
   if (!m_stdinNotifier)
     return;
 
@@ -199,89 +184,73 @@ void TermWidget::OnStdinActivated()
   fflush(stdin);
 
   QString line = QString::fromUtf8(sbuf).trimmed();
-  if (line.indexOf("freeview") == 0)
-  {
+  if (line.indexOf("freeview") == 0) {
     line = line.mid(8).trimmed();
     OnCommandTriggered(line);
   }
   m_stdinNotifier->setEnabled(true);
 }
 
-void TermWidget::OnTimeOut()
-{
-  if (!m_bRedirectStdOutput)
-  {
+void TermWidget::OnTimeOut() {
+  if (!m_bRedirectStdOutput) {
     return;
   }
 
-  if (stdout_buffer[0] != 0)
-  {
+  if (stdout_buffer[0] != 0) {
     m_bufferStdOut += stdout_buffer;
     fflush(stdout);
     stdout_buffer[0] = 0;
   }
-  if (!m_bufferStdOut.isEmpty())
-  {
+  if (!m_bufferStdOut.isEmpty()) {
     ui->textLog->append(m_bufferStdOut);
     ScrollToBottom();
-    if (m_bDuplicateStdOutput)
-    {
+    if (m_bDuplicateStdOutput) {
       delete m_stdOut;
       setbuf(stdout, NULL);
       std::cout << qPrintable(m_bufferStdOut);
       fflush(0);
       m_bufferStdOut.clear();
-      m_stdOut = new StdRedirector<>( std::cout, outcallback, &m_bufferStdOut );
+      m_stdOut = new StdRedirector<>(std::cout, outcallback, &m_bufferStdOut);
       setvbuf(stdout, stdout_buffer, _IOLBF, BUFFER_SIZE);
-    }
-    else
-    {
+    } else {
       m_bufferStdOut.clear();
     }
   }
 
-  if (stderr_buffer[0] != 0)
-  {
+  if (stderr_buffer[0] != 0) {
     m_bufferStdErr += stderr_buffer;
     fflush(stderr);
     stderr_buffer[0] = 0;
   }
-  if (!m_bufferStdErr.isEmpty())
-  {
+  if (!m_bufferStdErr.isEmpty()) {
     AppendErrorString(m_bufferStdErr);
     ScrollToBottom();
-    if (m_bDuplicateStdOutput)
-    {
+    if (m_bDuplicateStdOutput) {
       delete m_stdErr;
       setbuf(stderr, NULL);
       std::cerr << qPrintable(m_bufferStdErr);
       fflush(0);
       m_bufferStdErr.clear();
-      m_stdErr = new StdRedirector<>( std::cerr, outcallback, &m_bufferStdErr );
+      m_stdErr = new StdRedirector<>(std::cerr, outcallback, &m_bufferStdErr);
       setvbuf(stderr, stderr_buffer, _IOLBF, BUFFER_SIZE);
-    }
-    else
-    {
+    } else {
       m_bufferStdErr.clear();
     }
     MainWindow::GetMainWindow()->SetHadError(true);
   }
 }
 
-void TermWidget::AppendErrorString(const QString &strg_in)
-{
+void TermWidget::AppendErrorString(const QString &strg_in) {
   QString strg = strg_in;
   strg.replace("\n", "<br />");
   ui->textLog->append(QString("<span style=\"color:%1;\">%2</span>")
-                      .arg(m_strErrorColor)
-                      .arg(strg.trimmed()));
+                          .arg(m_strErrorColor)
+                          .arg(strg.trimmed()));
 }
 
-void TermWidget::SetDarkTheme(bool bDark)
-{
-  QScrollBar* sb = ui->textLog->verticalScrollBar();
-  if (bDark)
-  {
+void TermWidget::SetDarkTheme(bool bDark) {
+  QScrollBar *sb = ui->textLog->verticalScrollBar();
+  if (bDark) {
     QPalette pal = ui->textLog->palette();
     pal.setColor(QPalette::Text, QColor(0x909090));
     pal.setColor(QPalette::Base, QColor(0x333333));
@@ -299,9 +268,7 @@ void TermWidget::SetDarkTheme(bool bDark)
     pal.setColor(QPalette::Text, QColor(0xd0d0d0));
     pal.setColor(QPalette::Base, QColor(0x222222));
     ui->textCommand->setPalette(pal);
-  }
-  else
-  {
+  } else {
     QPalette pal = ui->textLog->palette();
     pal.setColor(QPalette::Text, QColor(0x777777));
     pal.setColor(QPalette::Base, QColor(0xeeeeee));
@@ -322,16 +289,11 @@ void TermWidget::SetDarkTheme(bool bDark)
   }
 }
 
-void TermWidget::ScrollToBottom()
-{
-  QScrollBar* sb = ui->textLog->verticalScrollBar();
-  if (sb)
-  {
+void TermWidget::ScrollToBottom() {
+  QScrollBar *sb = ui->textLog->verticalScrollBar();
+  if (sb) {
     sb->setSliderPosition(sb->maximum());
   }
 }
 
-bool TermWidget::GetDarkTheme()
-{
-  return (m_strLogColor != "#444444");
-}
+bool TermWidget::GetDarkTheme() { return (m_strLogColor != "#444444"); }

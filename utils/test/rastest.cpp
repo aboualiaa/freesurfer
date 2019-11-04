@@ -25,28 +25,24 @@
 #include <iostream>
 #include <iomanip>
 
-extern "C"
-{
+extern "C" {
 #include "mri.h"
-const char *Progname="rastest";
+const char *Progname = "rastest";
 }
 
 using namespace std;
 
 double t = 0.000001;
 
-bool equal(double &x, double &y, double &tol)
-{
-  if (fabs(x-y) < tol)
+bool equal(double &x, double &y, double &tol) {
+  if (fabs(x - y) < tol)
     return true;
   else
     return false;
 }
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   // verify various vox, ras, surfaceRAS, relations
-  if (argc < 2)
-  {
+  if (argc < 2) {
     cout << "Usage: rastest <vol>" << endl;
     exit(1);
   }
@@ -55,8 +51,7 @@ int main(int argc, char *argv[])
   double xsr, ysr, zsr, xsr1, ysr1, zsr1;
   double xv, yv, zv, xv1, yv1, zv1, xv2, yv2, zv2;
   char more = 'y';
-  while (more != 'n')
-  {
+  while (more != 'n') {
     cout << "vox x: ";
     cin >> xv;
     cout << "vox y: ";

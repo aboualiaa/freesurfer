@@ -44,25 +44,23 @@ class LayerMRI;
 class LayerPropertyROI;
 class LayerSurface;
 
- 
 #include "label.h"
 
-
-class LayerROI : public LayerVolumeBase
-{
+class LayerROI : public LayerVolumeBase {
   Q_OBJECT
 public:
-  LayerROI( LayerMRI* layerMRI, QObject* parent = NULL  );
+  LayerROI(LayerMRI *layerMRI, QObject *parent = NULL);
   virtual ~LayerROI();
 
-  bool LoadROIFromFile( const QString& filename );
+  bool LoadROIFromFile(const QString &filename);
 
-  virtual void Append2DProps( vtkRenderer* renderer, int nPlane );
-  virtual void Append3DProps( vtkRenderer* renderer, bool* bSliceVisibility = NULL );
+  virtual void Append2DProps(vtkRenderer *renderer, int nPlane);
+  virtual void Append3DProps(vtkRenderer *renderer,
+                             bool *bSliceVisibility = NULL);
 
-  bool HasProp( vtkProp* prop );
+  bool HasProp(vtkProp *prop);
 
-  void SetVisible( bool bVisible = true );
+  void SetVisible(bool bVisible = true);
   bool IsVisible();
 
   virtual bool HasUndo();
@@ -71,35 +69,28 @@ public:
   virtual void Undo();
   virtual void Redo();
 
-  virtual void SaveForUndo(int nPlane = -1, bool bAllFrames = false );
+  virtual void SaveForUndo(int nPlane = -1, bool bAllFrames = false);
 
-  inline LayerPropertyROI* GetProperty()
-  {
-    return (LayerPropertyROI*)mProperty;
+  inline LayerPropertyROI *GetProperty() {
+    return (LayerPropertyROI *)mProperty;
   }
 
   bool SaveROI();
 
   void UpdateLabelData();
 
-  bool GetCentroidPosition(double* pos);
+  bool GetCentroidPosition(double *pos);
 
   void GetStats(int nPlane, int *count_out, float *area_out,
                 LayerMRI *underlying_mri, double *mean_out, double *sd_out);
 
-  LayerSurface* GetMappedSurface()
-  {
-    return m_layerMappedSurface;
-  }
+  LayerSurface *GetMappedSurface() { return m_layerMappedSurface; }
 
-  void MapLabelColorData( unsigned char* colordata, int nVertexCount);
+  void MapLabelColorData(unsigned char *colordata, int nVertexCount);
 
-  LABEL*  GetRawLabel();
+  LABEL *GetRawLabel();
 
-  LayerMRI* GetRefMRI()
-  {
-    return m_layerSource;
-  }
+  LayerMRI *GetRefMRI() { return m_layerSource; }
 
 public slots:
 
@@ -107,7 +98,7 @@ public slots:
   void UpdateOpacity();
   void UpdateColorMap();
   void UpdateThreshold();
-  void SetMappedSurface(LayerSurface* s);
+  void SetMappedSurface(LayerSurface *s);
   void OnUpdateLabelRequested();
   void EditVertex(int nvo, bool bAdd);
   void EditVertex(const QVector<int> list_nvo, bool bAdd);
@@ -117,35 +108,33 @@ public slots:
   void Close(int nTimes = 1);
   void Resample();
   void Clear();
-  void OnSurfaceDestroyed(QObject* obj);
+  void OnSurfaceDestroyed(QObject *obj);
 
 protected slots:
-  void OnBaseVoxelEdited(const QVector<int>& voxel_list, bool bAdd);
+  void OnBaseVoxelEdited(const QVector<int> &voxel_list, bool bAdd);
 
 protected:
-  bool DoRotate( std::vector<RotationElement>& rotations );
+  bool DoRotate(std::vector<RotationElement> &rotations);
   void DoRestore();
   void InitializeActors();
   void UpdateProperties();
   void OnLabelDataUpdated();
-  void UpdateFilteredImage(vtkImageData* mask_before, vtkImageData* mask_after);
+  void UpdateFilteredImage(vtkImageData *mask_before, vtkImageData *mask_after);
   vtkSmartPointer<vtkImageData> GetThresholdedMaskImage();
 
-  virtual void OnSlicePositionChanged( int nPlane );
+  virtual void OnSlicePositionChanged(int nPlane);
 
   // Pipeline ------------------------------------------------------------
-  vtkSmartPointer<vtkImageReslice>   mReslice[3];
-  vtkSmartPointer<vtkImageMapToColors>  mColorMap[3];
+  vtkSmartPointer<vtkImageReslice> mReslice[3];
+  vtkSmartPointer<vtkImageMapToColors> mColorMap[3];
 
-  LayerMRI*  m_layerSource;
-  FSLabel*   m_label;
-  LayerSurface* m_layerMappedSurface;
+  LayerMRI *m_layerSource;
+  FSLabel *m_label;
+  LayerSurface *m_layerMappedSurface;
 
-  vtkImageActor*  m_sliceActor2D[3];
-  vtkImageActor*  m_sliceActor3D[3];
-  int*      m_nVertexCache;
+  vtkImageActor *m_sliceActor2D[3];
+  vtkImageActor *m_sliceActor3D[3];
+  int *m_nVertexCache;
 };
 
 #endif
-
-

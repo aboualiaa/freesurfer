@@ -16,21 +16,17 @@
    so implement a private one for GLUT.  OpenVMS does not have a
    strdup; Linux's standard libc doesn't declare strdup by default
    (unless BSD or SVID interfaces are requested). */
-char *
-__glutStrdup(const char *string)
-{
+char *__glutStrdup(const char *string) {
   char *copy;
 
-  copy = (char*) malloc(strlen(string) + 1);
+  copy = (char *)malloc(strlen(string) + 1);
   if (copy == NULL)
     return NULL;
   strcpy(copy, string);
   return copy;
 }
 
-void
-__glutWarning(char *format,...)
-{
+void __glutWarning(char *format, ...) {
   va_list args;
 
   va_start(args, format);
@@ -42,9 +38,7 @@ __glutWarning(char *format,...)
 }
 
 /* CENTRY */
-void APIENTRY
-glutReportErrors(void)
-{
+void APIENTRY glutReportErrors(void) {
   GLenum error;
 
   while ((error = glGetError()) != GL_NO_ERROR)
@@ -52,9 +46,7 @@ glutReportErrors(void)
 }
 /* ENDCENTRY */
 
-void
-__glutFatalError(char *format,...)
-{
+void __glutFatalError(char *format, ...) {
   va_list args;
 
   va_start(args, format);
@@ -66,9 +58,7 @@ __glutFatalError(char *format,...)
   exit(1);
 }
 
-void
-__glutFatalUsage(char *format,...)
-{
+void __glutFatalUsage(char *format, ...) {
   va_list args;
 
   va_start(args, format);

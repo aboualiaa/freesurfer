@@ -1,6 +1,7 @@
 /**
  * @file  MRISrigidBodyAlignGlobal.h
- * @brief functions for finding the best rotation for aligning a MRIS with a target
+ * @brief functions for finding the best rotation for aligning a MRIS with a
+ * target
  *
  */
 /*
@@ -26,11 +27,10 @@
 
 #include "mrisurf.h"
 
-void MRISrigidBodyAlignGlobal_findMinSSE(
-    double* mina, double* new_minb, double* new_ming, double* new_sse,  // outputs
-    MRI_SURFACE*        mris,
-    INTEGRATION_PARMS*  parms,
-    float               min_radians,
-    float               max_radians,
-    double              ext_sse,
-    int                 nangles);
+void MRISrigidBodyAlignGlobal_findMinSSE(double *mina, double *new_minb,
+                                         double *new_ming,
+                                         double *new_sse, // outputs
+                                         MRI_SURFACE *mris,
+                                         INTEGRATION_PARMS *parms,
+                                         float min_radians, float max_radians,
+                                         double ext_sse, int nangles);

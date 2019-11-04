@@ -8,29 +8,25 @@
 
 #include "datamodel/events/CommandUpdate.h" // dmri_poistats
 
-class TensorReaderStrategy
-{
+class TensorReaderStrategy {
 public:
-
-  typedef itk::DiffusionTensor3D< float > TensorPixelType;
-  typedef itk::Image< TensorPixelType, 3 > TensorImageType;
+  typedef itk::DiffusionTensor3D<float> TensorPixelType;
+  typedef itk::Image<TensorPixelType, 3> TensorImageType;
 
   TensorReaderStrategy();
 
   virtual ~TensorReaderStrategy();
-  
-  void SetObserver( CommandUpdate* observer );
-  
-  virtual TensorImageType::Pointer GetTensors() = 0;  
-  
-  void SetFileName( std::string fileName );
+
+  void SetObserver(CommandUpdate *observer);
+
+  virtual TensorImageType::Pointer GetTensors() = 0;
+
+  void SetFileName(std::string fileName);
 
 protected:
+  CommandUpdate *m_Observer;
 
-  CommandUpdate* m_Observer;
-  
   std::string m_TensorFileName;
-  
 };
 
 #endif /*TENSORREADERSTRATEGY_H_*/

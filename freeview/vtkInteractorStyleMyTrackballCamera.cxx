@@ -27,18 +27,16 @@
 vtkStandardNewMacro(vtkInteractorStyleMyTrackballCamera);
 
 //----------------------------------------------------------------------------
-vtkInteractorStyleMyTrackballCamera::vtkInteractorStyleMyTrackballCamera()
-{
+vtkInteractorStyleMyTrackballCamera::vtkInteractorStyleMyTrackballCamera() {
   m_bRotateAroundPoint = false;
 }
 
-vtkInteractorStyleMyTrackballCamera::~vtkInteractorStyleMyTrackballCamera () {}
+vtkInteractorStyleMyTrackballCamera::~vtkInteractorStyleMyTrackballCamera() {}
 
-void vtkInteractorStyleMyTrackballCamera::SetRotateByPoint(bool b, double *dPos)
-{
+void vtkInteractorStyleMyTrackballCamera::SetRotateByPoint(bool b,
+                                                           double *dPos) {
   m_bRotateAroundPoint = b;
-  if (dPos)
-  {
+  if (dPos) {
     m_dCenterPoint[0] = dPos[0];
     m_dCenterPoint[1] = dPos[1];
     m_dCenterPoint[2] = dPos[2];
@@ -46,10 +44,8 @@ void vtkInteractorStyleMyTrackballCamera::SetRotateByPoint(bool b, double *dPos)
 }
 
 //----------------------------------------------------------------------------
-void vtkInteractorStyleMyTrackballCamera::Rotate()
-{
-  if (this->CurrentRenderer == nullptr)
-  {
+void vtkInteractorStyleMyTrackballCamera::Rotate() {
+  if (this->CurrentRenderer == nullptr) {
     return;
   }
 
@@ -83,9 +79,9 @@ void vtkInteractorStyleMyTrackballCamera::Rotate()
 
   //  rwi->Render();
 
-  if (m_bRotateAroundPoint)
-  {
-    vtkRenderWindowInteractor *rwi = this->Interactor;;
+  if (m_bRotateAroundPoint) {
+    vtkRenderWindowInteractor *rwi = this->Interactor;
+    ;
     vtkRenderer *renderer = this->CurrentRenderer;
     vtkCamera *camera = renderer->GetActiveCamera();
 
@@ -105,23 +101,27 @@ void vtkInteractorStyleMyTrackballCamera::Rotate()
     double *viewUp = camera->GetViewUp();
     double *position = camera->GetPosition();
     double axis[3];
-    axis[0] = -camera->GetViewTransformMatrix()->GetElement(0,0);
-    axis[1] = -camera->GetViewTransformMatrix()->GetElement(0,1);
-    axis[2] = -camera->GetViewTransformMatrix()->GetElement(0,2);
+    axis[0] = -camera->GetViewTransformMatrix()->GetElement(0, 0);
+    axis[1] = -camera->GetViewTransformMatrix()->GetElement(0, 1);
+    axis[2] = -camera->GetViewTransformMatrix()->GetElement(0, 2);
 
     // Build The transformatio /////////////////////////////////////////////////
-    vtkSmartPointer<vtkTransform> transform = vtkSmartPointer<vtkTransform>::New();
+    vtkSmartPointer<vtkTransform> transform =
+        vtkSmartPointer<vtkTransform>::New();
     transform->Identity();
 
-    transform->Translate(m_dCenterPoint[0], m_dCenterPoint[1], m_dCenterPoint[2]);
+    transform->Translate(m_dCenterPoint[0], m_dCenterPoint[1],
+                         m_dCenterPoint[2]);
     transform->RotateWXYZ(rxf, viewUp); // Azimuth
     transform->RotateWXYZ(ryf, axis);   // Elevation
-    transform->Translate(-m_dCenterPoint[0], -m_dCenterPoint[1], -m_dCenterPoint[2]);
+    transform->Translate(-m_dCenterPoint[0], -m_dCenterPoint[1],
+                         -m_dCenterPoint[2]);
 
     double newPosition[3];
-    transform->TransformPoint(position,newPosition); // Transform Position
+    transform->TransformPoint(position, newPosition); // Transform Position
     double newFocalPoint[3];
-    transform->TransformPoint(focalPoint, newFocalPoint); // Transform Focal Point
+    transform->TransformPoint(focalPoint,
+                              newFocalPoint); // Transform Focal Point
 
     camera->SetPosition(newPosition);
     camera->SetFocalPoint(newFocalPoint);
@@ -130,19 +130,15 @@ void vtkInteractorStyleMyTrackballCamera::Rotate()
     camera->OrthogonalizeViewUp();
     //    renderer->ResetCameraClippingRange();
 
-    if (this->AutoAdjustCameraClippingRange)
-    {
+    if (this->AutoAdjustCameraClippingRange) {
       this->CurrentRenderer->ResetCameraClippingRange();
     }
 
-    if (rwi->GetLightFollowCamera())
-    {
+    if (rwi->GetLightFollowCamera()) {
       this->CurrentRenderer->UpdateLightsGeometryToFollowCamera();
     }
 
     rwi->Render();
-  }
-  else
+  } else
     vtkInteractorStyleTrackballCamera::Rotate();
 }
-

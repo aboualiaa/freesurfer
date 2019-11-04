@@ -9,25 +9,21 @@
 
 #include "glut.h"
 
-typedef struct
-{
+typedef struct {
   const GLsizei width;
   const GLsizei height;
   const GLfloat xorig;
   const GLfloat yorig;
   const GLfloat advance;
   const GLubyte *bitmap;
-}
-BitmapCharRec, *BitmapCharPtr;
+} BitmapCharRec, *BitmapCharPtr;
 
-typedef struct
-{
+typedef struct {
   const char *name;
   const int num_chars;
   const int first;
-  const BitmapCharRec * const *ch;
-}
-BitmapFontRec, *BitmapFontPtr;
+  const BitmapCharRec *const *ch;
+} BitmapFontRec, *BitmapFontPtr;
 
 typedef void *GLUTbitmapFont;
 

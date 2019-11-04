@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:10 $
@@ -23,7 +23,6 @@
  *
  */
 
-
 #ifndef MRI_CIRCULARS_H
 #define MRI_CIRCULARS_H
 
@@ -34,31 +33,20 @@
 // are needed.
 
 #include "image.h" // IMAGE
-IMAGE *MRItoImage(MRI *mri,
-                  IMAGE *image,
-                  int slice) ;
+IMAGE *MRItoImage(MRI *mri, IMAGE *image, int slice);
 MRI *ImageToMRI(IMAGE *image);
-IMAGE *MRItoImageView(MRI *mri,
-                      IMAGE *image,
-                      int slice,
-                      int view,
-                      int frame) ;
+IMAGE *MRItoImageView(MRI *mri, IMAGE *image, int slice, int view, int frame);
 
 #include "mrisurf.h" // MRIS
-int MRIwriteAnyFormat(MRI *mri,
-                      const char *fileid,
-                      const char *fmt,
-                      int mriframe,
-                      MRIS *surf);
+int MRIwriteAnyFormat(MRI *mri, const char *fileid, const char *fmt,
+                      int mriframe, MRIS *surf);
 
 #include "label.h" // LABEL
-HISTOGRAM  *MRIhistogramLabelStruct(MRI *mri,
-                                    int nbins,
-                                    HISTOGRAM *histo,
-                                    LABEL *label) ;
+HISTOGRAM *MRIhistogramLabelStruct(MRI *mri, int nbins, HISTOGRAM *histo,
+                                   LABEL *label);
 
 #include "transform.h" // VOL_GEOM
-int MRIcopyVolGeomToMRI( MRI *mri, const VOL_GEOM *vg ) ;
-int MRIcopyVolGeomFromMRI( const MRI *mri, VOL_GEOM *vg ) ;
+int MRIcopyVolGeomToMRI(MRI *mri, const VOL_GEOM *vg);
+int MRIcopyVolGeomFromMRI(const MRI *mri, VOL_GEOM *vg);
 
 #endif // MRI_CIRCULARS_H

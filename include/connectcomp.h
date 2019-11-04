@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: fischl $
  *    $Date: 2011/10/25 13:52:29 $
@@ -23,40 +23,36 @@
  *
  */
 
-
 #ifndef SUBROUTINES_H
 #define SUBROUTINES_H
 
 #include "mri.h"
 
 typedef struct {
-  int x,y,z;
-}
-POINTI;
-
+  int x, y, z;
+} POINTI;
 
 void RemoveHoles(MRI *orivol);
-void  GrassFire(MRI *orivol, MRI *Label, int label, POINTI *Pt,
-                int *curSize, int *minX, int *maxX, int *minY, int *maxY,
-                int *minZ, int *maxZ);
-void  GrassFire6(MRI *orivol, MRI *Label, int label, POINTI *Pt,
-                 int *curSize, int *minX, int *maxX, int *minY, int *maxY,
-                 int *minZ, int *maxZ);
+void GrassFire(MRI *orivol, MRI *Label, int label, POINTI *Pt, int *curSize,
+               int *minX, int *maxX, int *minY, int *maxY, int *minZ,
+               int *maxZ);
+void GrassFire6(MRI *orivol, MRI *Label, int label, POINTI *Pt, int *curSize,
+                int *minX, int *maxX, int *minY, int *maxY, int *minZ,
+                int *maxZ);
 
-void  GrassFire18(MRI *orivol, MRI *Label, int label, POINTI *Pt,
-                  int *curSize, int *minX, int *maxX, int *minY, int *maxY,
-                  int *minZ, int *maxZ);
+void GrassFire18(MRI *orivol, MRI *Label, int label, POINTI *Pt, int *curSize,
+                 int *minX, int *maxX, int *minY, int *maxY, int *minZ,
+                 int *maxZ);
 void GetLargestCC18(MRI *orivol);
 void GetLargestCC6(MRI *orivol);
-MRI * Dilation6(MRI *ori, MRI *out, int);
-MRI * Erosion6(MRI *ori, MRI *out, int);
-MRI * Dilation26(MRI *ori, MRI *out, int);
-MRI * Erosion26(MRI *ori, MRI *out, int);
-MRI * BinaryOpen6(MRI *ori, MRI *out, int R);
-MRI * BinaryOpen26(MRI *ori, MRI *out, int R);
-MRI * BinaryClose6(MRI *ori, MRI *out, int R);
-MRI * BinaryClose26(MRI *ori, MRI *out, int R);
-
+MRI *Dilation6(MRI *ori, MRI *out, int);
+MRI *Erosion6(MRI *ori, MRI *out, int);
+MRI *Dilation26(MRI *ori, MRI *out, int);
+MRI *Erosion26(MRI *ori, MRI *out, int);
+MRI *BinaryOpen6(MRI *ori, MRI *out, int R);
+MRI *BinaryOpen26(MRI *ori, MRI *out, int R);
+MRI *BinaryClose6(MRI *ori, MRI *out, int R);
+MRI *BinaryClose26(MRI *ori, MRI *out, int R);
 
 /*============================================================================
 //                        MYutil Summary
@@ -169,82 +165,79 @@ MRI * BinaryClose26(MRI *ori, MRI *out, int R);
 //  myQueueElementSize ............ returns the size of an element
 //==========================================================================*/
 
-
 typedef struct {
-  int   elementSize;
-  int   size;
+  int elementSize;
+  int size;
   void *data;
-  int   capacity;
-  int   capacityIncrement;
-}
-MYlistStruct;
+  int capacity;
+  int capacityIncrement;
+} MYlistStruct;
 
-typedef MYlistStruct *MYlist;
+using MYlist = MYlistStruct *;
 #define MYstack MYlist
 
 typedef struct {
   int start;
   int end;
   MYlist list;
-}
-MYqueueStruct;
+} MYqueueStruct;
 
-typedef MYqueueStruct *MYqueue;
+using MYqueue = MYqueueStruct *;
 
-#define MY_QUEUE_Q    2
+#define MY_QUEUE_Q 2
 
+#define myListIsEmpty(list) ((list)->size == 0 ? 1 : 0)
+#define myListSize(list) ((list)->size)
+#define myListData(list) ((list)->data)
+#define myListElementSize(list) ((list)->elementSize)
 
-#define myListIsEmpty(list)            ((list)->size == 0 ? 1: 0)
-#define myListSize(list)               ((list)->size)
-#define myListData(list)               ((list)->data)
-#define myListElementSize(list)        ((list)->elementSize)
-
-void* myMalloc(int size);
-void* myRealloc(void* ptr, int size);
+void *myMalloc(int size);
+void *myRealloc(void *ptr, int size);
 void myError(const char error_text[]);
 
-MYlist  myList(int elementSize);
-MYlist  myList1(int elementSize, int capacity);
-MYlist  myList2(int elementSize, int capacity, int capacityIncrement);
-MYlist  myListOfSize(int size, int elementSize);
-void    myListDelete(MYlist list);
-void    myListAddElement(MYlist list, void *element);
-void    myListAddInt(MYlist list, int element);
-void    myListAddArray(MYlist list, void *array, int num);
+MYlist myList(int elementSize);
+MYlist myList1(int elementSize, int capacity);
+MYlist myList2(int elementSize, int capacity, int capacityIncrement);
+MYlist myListOfSize(int size, int elementSize);
+void myListDelete(MYlist list);
+void myListAddElement(MYlist list, void *element);
+void myListAddInt(MYlist list, int element);
+void myListAddArray(MYlist list, void *array, int num);
 int myListInsertElementAt(MYlist list, int index, void *element);
 int myListSetElementAt(MYlist list, int index, void *element);
 int myListElementAt(MYlist list, int index,
                     /* stores the result at */ void *element);
 int myListRemoveElementAt(MYlist list, int index);
-void    myListRemoveAllElements(MYlist list);
-void    myListTrim(MYlist list);
-void    myListInfo(MYlist list);
+void myListRemoveAllElements(MYlist list);
+void myListTrim(MYlist list);
+void myListInfo(MYlist list);
 
-#define myStack(elementSize)       myList(elementSize)
-#define myStack1(elementSize,capacity)  myList(elementSize,capacity)
-#define myStack2(elementSize,capacity,capacityIncrement) myList(elementSize,capacity,capacityIncrement)
+#define myStack(elementSize) myList(elementSize)
+#define myStack1(elementSize, capacity) myList(elementSize, capacity)
+#define myStack2(elementSize, capacity, capacityIncrement)                     \
+  myList(elementSize, capacity, capacityIncrement)
 #define myStackPush(stack, element) myListAddElement(stack, element)
-void    myStackPop(MYstack stack, /* stores the result at */ void *element);
-#define myStackIsEmpty(stack)       myListIsEmpty(stack)
+void myStackPop(MYstack stack, /* stores the result at */ void *element);
+#define myStackIsEmpty(stack) myListIsEmpty(stack)
 #define myStackRemoveAllElements(stack) myListRemoveAllElements(stack)
-#define myStackTrim(stack)          myListTrim(stack)
-#define myStackDelete(stack)        myListDelete(stack)
-#define myStackElementSize(stack)  (stack->elementSize)
+#define myStackTrim(stack) myListTrim(stack)
+#define myStackDelete(stack) myListDelete(stack)
+#define myStackElementSize(stack) (stack->elementSize)
 
 MYqueue myQueue2(int elementSize, int capacity, int capacityIncrement);
 MYqueue myQueue1(int elementSize, int capacity);
 MYqueue myQueue(int elementSize);
-void    myQueueDelete(MYqueue queue);
-void    myQueueRemoveAllElements(MYqueue queue);
-void    myQueuePush(MYqueue queue, void* element);
-void    myQueuePushArray(MYqueue queue, void* array, int num);
-int myQueuePop(MYqueue queue, void* element);
-void    myQueueTrim(MYqueue queue);
-void*   myQueueToArray(MYqueue queue);
-void    myQueueInfo(MYqueue queue);
-#define myQueueSize(queue)         (queue->end - queue->start + 1)
-#define myQueueIsEmpty(queue)      (myQueueSize(queue) == 0)
-#define myQueueElementSize(queue)  (myListElementSize(queue->list))
+void myQueueDelete(MYqueue queue);
+void myQueueRemoveAllElements(MYqueue queue);
+void myQueuePush(MYqueue queue, void *element);
+void myQueuePushArray(MYqueue queue, void *array, int num);
+int myQueuePop(MYqueue queue, void *element);
+void myQueueTrim(MYqueue queue);
+void *myQueueToArray(MYqueue queue);
+void myQueueInfo(MYqueue queue);
+#define myQueueSize(queue) (queue->end - queue->start + 1)
+#define myQueueIsEmpty(queue) (myQueueSize(queue) == 0)
+#define myQueueElementSize(queue) (myListElementSize(queue->list))
 
 /*============================================================================
 //                        MYutil private functions
@@ -264,13 +257,12 @@ void    myQueueInfo(MYqueue queue);
 /*--------------------------------------------------------------------------
 // Private functions
 //------------------------------------------------------------------------*/
-#define myListCapacity(list)                  ((list)->capacity)
-#define myListCapacityIncrement(list)         ((list)->capacityIncrement)
-#define myListSetElementSize(list, val)       (list)->elementSize = val
-#define myListSetSize(list, val)              (list)->size = val
-#define myListSetData(list, val)              (list)->data = (void *)val
-#define myListSetCapacity(list, val)          (list)->capacity = val
+#define myListCapacity(list) ((list)->capacity)
+#define myListCapacityIncrement(list) ((list)->capacityIncrement)
+#define myListSetElementSize(list, val) (list)->elementSize = val
+#define myListSetSize(list, val) (list)->size = val
+#define myListSetData(list, val) (list)->data = (void *)val
+#define myListSetCapacity(list, val) (list)->capacity = val
 #define myListSetCapacityIncrement(list, val) (list)->capacityIncrement = val
-
 
 #endif

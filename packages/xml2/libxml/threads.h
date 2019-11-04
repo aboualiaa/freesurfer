@@ -36,49 +36,35 @@ typedef xmlRMutex *xmlRMutexPtr;
 #ifdef __cplusplus
 extern "C" {
 #endif
-XMLPUBFUN xmlMutexPtr XMLCALL
-			xmlNewMutex	(void);
-XMLPUBFUN void XMLCALL
-			xmlMutexLock	(xmlMutexPtr tok);
-XMLPUBFUN void XMLCALL
-			xmlMutexUnlock	(xmlMutexPtr tok);
-XMLPUBFUN void XMLCALL
-			xmlFreeMutex	(xmlMutexPtr tok);
+XMLPUBFUN xmlMutexPtr XMLCALL xmlNewMutex(void);
+XMLPUBFUN void XMLCALL xmlMutexLock(xmlMutexPtr tok);
+XMLPUBFUN void XMLCALL xmlMutexUnlock(xmlMutexPtr tok);
+XMLPUBFUN void XMLCALL xmlFreeMutex(xmlMutexPtr tok);
 
-XMLPUBFUN xmlRMutexPtr XMLCALL
-			xmlNewRMutex	(void);
-XMLPUBFUN void XMLCALL
-			xmlRMutexLock	(xmlRMutexPtr tok);
-XMLPUBFUN void XMLCALL
-			xmlRMutexUnlock	(xmlRMutexPtr tok);
-XMLPUBFUN void XMLCALL
-			xmlFreeRMutex	(xmlRMutexPtr tok);
+XMLPUBFUN xmlRMutexPtr XMLCALL xmlNewRMutex(void);
+XMLPUBFUN void XMLCALL xmlRMutexLock(xmlRMutexPtr tok);
+XMLPUBFUN void XMLCALL xmlRMutexUnlock(xmlRMutexPtr tok);
+XMLPUBFUN void XMLCALL xmlFreeRMutex(xmlRMutexPtr tok);
 
 /*
  * Library wide APIs.
  */
-XMLPUBFUN void XMLCALL
-			xmlInitThreads	(void);
-XMLPUBFUN void XMLCALL
-			xmlLockLibrary	(void);
-XMLPUBFUN void XMLCALL
-			xmlUnlockLibrary(void);
-XMLPUBFUN int XMLCALL
-			xmlGetThreadId	(void);
-XMLPUBFUN int XMLCALL
-			xmlIsMainThread	(void);
-XMLPUBFUN void XMLCALL
-			xmlCleanupThreads(void);
-XMLPUBFUN xmlGlobalStatePtr XMLCALL
-			xmlGetGlobalState(void);
+XMLPUBFUN void XMLCALL xmlInitThreads(void);
+XMLPUBFUN void XMLCALL xmlLockLibrary(void);
+XMLPUBFUN void XMLCALL xmlUnlockLibrary(void);
+XMLPUBFUN int XMLCALL xmlGetThreadId(void);
+XMLPUBFUN int XMLCALL xmlIsMainThread(void);
+XMLPUBFUN void XMLCALL xmlCleanupThreads(void);
+XMLPUBFUN xmlGlobalStatePtr XMLCALL xmlGetGlobalState(void);
 
-#if defined(HAVE_WIN32_THREADS) && !defined(HAVE_COMPILER_TLS) && defined(LIBXML_STATIC_FOR_DLL)
-int XMLCALL xmlDllMain(void *hinstDLL, unsigned long fdwReason, void *lpvReserved);
+#if defined(HAVE_WIN32_THREADS) && !defined(HAVE_COMPILER_TLS) &&              \
+    defined(LIBXML_STATIC_FOR_DLL)
+int XMLCALL xmlDllMain(void *hinstDLL, unsigned long fdwReason,
+                       void *lpvReserved);
 #endif
 
 #ifdef __cplusplus
 }
 #endif
-
 
 #endif /* __XML_THREADS_H__ */

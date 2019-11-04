@@ -25,79 +25,84 @@
 #include <cstring> // memcpy
 #include "loop.h"
 
-Loop::Loop(void) {
-  npoints=0;
-  maxpoints=0;
-  points=0;
+Loop::Loop() {
+  npoints = 0;
+  maxpoints = 0;
+  points = nullptr;
 }
 
 Loop::Loop(int maxpts) {
-  points=0;
+  points = nullptr;
   Alloc(maxpts);
 }
 
-Loop::~Loop(void) {
-  if (points) delete [] points;
+Loop::~Loop() {
+  if (points)
+    delete[] points;
 }
 
 void Loop::Alloc(int maxpts) {
-  if (points) delete [] points;
-  points = 0 ;
+  if (points)
+    delete[] points;
+  points = nullptr;
   maxpoints = maxpts;
   points = new int[maxpoints];
-  npoints=0;
+  npoints = 0;
 }
 
 #define INCREASE_FACTOR 1.2
 void Loop::_ReAlloc(int maxpts) {
   if (maxpts < maxpoints)
-    maxpoints = int(maxpoints*INCREASE_FACTOR+1);
-  else maxpoints = maxpts;
+    maxpoints = int(maxpoints * INCREASE_FACTOR + 1);
+  else
+    maxpoints = maxpts;
 
   int *new_points = new int[maxpoints];
-  memcpy(new_points,points,npoints*sizeof(int));
-  if (points) delete [] points;
-  points=new_points;
+  memcpy(new_points, points, npoints * sizeof(int));
+  if (points)
+    delete[] points;
+  points = new_points;
 }
 
 void Loop::AddPoint(int pt) {
-  if (npoints==maxpoints) {
-    if (maxpoints==0) _ReAlloc(10);
-    else _ReAlloc();
+  if (npoints == maxpoints) {
+    if (maxpoints == 0)
+      _ReAlloc(10);
+    else
+      _ReAlloc();
   }
-  points[npoints++]=pt;
+  points[npoints++] = pt;
 }
-
 
 void Loop::Print() const {
-  for (int n = 0 ; n < npoints-1 ; n++)
+  for (int n = 0; n < npoints - 1; n++)
     cout << points[n] << "->";
-  cout << points[npoints-1]<< "." << endl;
+  cout << points[npoints - 1] << "." << endl;
 }
 
-int Loop::End() {
-  return points[npoints-1];
-}
+int Loop::End() { return points[npoints - 1]; }
 
 void Loop::Pop() {
-  if (npoints==0) return;
+  if (npoints == 0)
+    return;
   npoints--;
 }
 
 int Loop::Replace(int pt, int new_pt) {
-  int nreplaced=0;
-  for (int n = 0 ; n < npoints ; n++)
-    if (points[n]==pt) {
-      points[n]=new_pt;
+  int nreplaced = 0;
+  for (int n = 0; n < npoints; n++)
+    if (points[n] == pt) {
+      points[n] = new_pt;
       nreplaced++;
     }
   return nreplaced;
 }
 
-const Loop & Loop::operator=(const Loop& loop) {
-  if (maxpoints < loop.npoints) _ReAlloc(loop.npoints);
+const Loop &Loop::operator=(const Loop &loop) {
+  if (maxpoints < loop.npoints)
+    _ReAlloc(loop.npoints);
   npoints = loop.npoints;
-  for (int n = 0 ; n < npoints ; n++)
+  for (int n = 0; n < npoints; n++)
     points[n] = loop.points[n];
   return loop;
 }

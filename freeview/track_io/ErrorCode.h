@@ -1,8 +1,7 @@
 #ifndef ERRORCODE_H
 #define ERRORCODE_H
 
-enum ERROR_CODE
-{
+enum ERROR_CODE {
   TE_NO_ERROR = 0,
 
   // Track IO error
@@ -26,6 +25,4 @@ enum ERROR_CODE
   UNKNOWN_ERROR
 };
 
-
 #endif
-

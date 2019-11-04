@@ -36,54 +36,46 @@ class vtkActor;
 class vtkCursor2D;
 class RenderView2D;
 
-class Cursor2D : public QObject
-{
+class Cursor2D : public QObject {
   Q_OBJECT
 public:
-  Cursor2D( RenderView2D* view );
+  Cursor2D(RenderView2D *view);
   virtual ~Cursor2D();
 
-  void SetPosition( double* pos, bool bConnectPrevious = false );
-  void SetPosition2( double* pos);
+  void SetPosition(double *pos, bool bConnectPrevious = false);
+  void SetPosition2(double *pos);
 
-  double* GetPosition();
-  void GetPosition( double* pos );
+  double *GetPosition();
+  void GetPosition(double *pos);
 
-  void SetInterpolationPoints( std::vector<double> pts );
+  void SetInterpolationPoints(std::vector<double> pts);
 
-  std::vector<double> GetInterpolationPoints()
-  {
+  std::vector<double> GetInterpolationPoints() {
     return m_dInterpolationPoints;
   }
 
-  void ClearInterpolationPoints()
-  {
-    m_dInterpolationPoints.clear();
-  }
+  void ClearInterpolationPoints() { m_dInterpolationPoints.clear(); }
 
-  void GetColor( double* rgb );
-  void SetColor( double r, double g, double b );
+  void GetColor(double *rgb);
+  void SetColor(double r, double g, double b);
 
   QColor GetColor();
 
-  void Update( bool bConnectPrevious = false );
+  void Update(bool bConnectPrevious = false);
 
-  void AppendActor( vtkRenderer* renderer );
+  void AppendActor(vtkRenderer *renderer);
 
-  void Show( bool bShow = true );
+  void Show(bool bShow = true);
 
   bool IsShown();
 
   int GetSize();
 
-  int GetThickness()
-  {
-    return m_nThickness;
-  }
+  int GetThickness() { return m_nThickness; }
 
 public slots:
-  void SetColor( const QColor& color );
-  void SetSize( int nSize );
+  void SetColor(const QColor &color);
+  void SetSize(int nSize);
   void SetThickness(int nThickness);
 
 Q_SIGNALS:
@@ -92,16 +84,14 @@ Q_SIGNALS:
 private:
   vtkSmartPointer<vtkActor2D> m_actorCursor;
 
-  RenderView2D* m_view;
+  RenderView2D *m_view;
 
-  double  m_dPosition[3];
-  double  m_dPosition2[3];
+  double m_dPosition[3];
+  double m_dPosition2[3];
   std::vector<double> m_dInterpolationPoints;
 
-  int   m_nSize;
-  int   m_nThickness;
+  int m_nSize;
+  int m_nThickness;
 };
 
 #endif
-
-

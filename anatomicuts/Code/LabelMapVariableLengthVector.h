@@ -15,46 +15,37 @@
 using namespace blitz;
 using namespace itk;
 
-template <typename TValueType , class TMesh>
-class LabelMapVariableLengthVector : public VariableLengthVector<TValueType>
-{
+template <typename TValueType, class TMesh>
+class LabelMapVariableLengthVector : public VariableLengthVector<TValueType> {
 public:
- 
   /** The element type stored at each location in the Array. */
-  typedef TValueType                                    ValueType;
-  typedef TValueType                                    ComponentType;
-  typedef typename NumericTraits< ValueType >::RealType RealValueType;
-  typedef LabelMapVariableLengthVector                          Self;
-  typedef VariableLengthVector<TValueType>              Superclass;
-  typedef TMesh						MeshType;
-  typedef typename MeshType::Pointer			MeshPointerType;
-  typedef typename MeshType::CellPixelType		CellType; //??
-  typedef typename MeshType::CellAutoPointer		CellAutoPointerType; //??
+  typedef TValueType ValueType;
+  typedef TValueType ComponentType;
+  typedef typename NumericTraits<ValueType>::RealType RealValueType;
+  typedef LabelMapVariableLengthVector Self;
+  typedef VariableLengthVector<TValueType> Superclass;
+  typedef TMesh MeshType;
+  typedef typename MeshType::Pointer MeshPointerType;
+  typedef typename MeshType::CellPixelType CellType;              //??
+  typedef typename MeshType::CellAutoPointer CellAutoPointerType; //??
 
-  LabelMapVariableLengthVector():Superclass(){
-	;
-}; 
+  LabelMapVariableLengthVector() : Superclass() { ; };
 
   /** Constructor with size. Size can only be changed by assignment */
-  LabelMapVariableLengthVector(unsigned int dimension):Superclass(dimension){
-	;
-};
-  LabelMapVariableLengthVector( ValueType* data, unsigned int sz, 
-                                        bool LetArrayManageMemory = false):Superclass(data, sz, LetArrayManageMemory){};
- 	void SetCell(MeshPointerType mesh, int cellID);
-	const CellType* GetLabels() const 
-	{
-		return &this->m_labels;
-	}
-	const CellType* GetDirections() const 
-	{
-		return &this->m_directions;
-	}
-void Print() const{};
-private:
-	CellType m_labels;
-	CellType m_directions;
-};
+  LabelMapVariableLengthVector(unsigned int dimension) : Superclass(dimension) {
+    ;
+  };
+  LabelMapVariableLengthVector(ValueType *data, unsigned int sz,
+                               bool LetArrayManageMemory = false)
+      : Superclass(data, sz, LetArrayManageMemory){};
+  void SetCell(MeshPointerType mesh, int cellID);
+  const CellType *GetLabels() const { return &this->m_labels; }
+  const CellType *GetDirections() const { return &this->m_directions; }
+  void Print() const {};
 
+private:
+  CellType m_labels;
+  CellType m_directions;
+};
 
 #endif

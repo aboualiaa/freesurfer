@@ -28,33 +28,31 @@
 #include <QVariantMap>
 #include "UIUpdateHelper.h"
 
-namespace Ui
-{
+namespace Ui {
 class DialogPreferences;
 }
 
 class QAbstractButton;
 class QComboBox;
 
-class DialogPreferences : public QDialog, public UIUpdateHelper
-{
+class DialogPreferences : public QDialog, public UIUpdateHelper {
   Q_OBJECT
 
 public:
   explicit DialogPreferences(QWidget *parent = 0);
   ~DialogPreferences();
 
-  void SetSettings(const QVariantMap& map);
+  void SetSettings(const QVariantMap &map);
 
   QVariantMap GetSettings();
 
 protected slots:
-  void OnClicked(QAbstractButton* btn);
-  void OnComboShortcutChanged(const QString& text);
-  void SetActionShortcut(QAction* act, const QString& text);
+  void OnClicked(QAbstractButton *btn);
+  void OnComboShortcutChanged(const QString &text);
+  void SetActionShortcut(QAction *act, const QString &text);
 
 private:
-  void SetCurrentComboText(QComboBox* combo, const QString& text);
+  void SetCurrentComboText(QComboBox *combo, const QString &text);
 
   Ui::DialogPreferences *ui;
 };

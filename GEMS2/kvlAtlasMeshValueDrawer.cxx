@@ -1,12 +1,11 @@
 #include "kvlAtlasMeshValueDrawer.h"
 #include "kvlTetrahedronInteriorIterator.h"
 
-
 namespace kvl {
 
-
-bool AtlasMeshValueDrawer::RasterizeTetrahedron(const AtlasMesh* mesh, AtlasMesh::CellIdentifier tetrahedronId, int threadNumber)
-{
+bool AtlasMeshValueDrawer::RasterizeTetrahedron(
+    const AtlasMesh *mesh, AtlasMesh::CellIdentifier tetrahedronId,
+    int threadNumber) {
   // get tetrahedron cell
   AtlasMesh::CellAutoPointer cell;
   mesh->GetCell(tetrahedronId, cell);
@@ -30,26 +29,28 @@ bool AtlasMeshValueDrawer::RasterizeTetrahedron(const AtlasMesh* mesh, AtlasMesh
   mesh->GetPoint(id1, &p1);
   mesh->GetPoint(id2, &p2);
   mesh->GetPoint(id3, &p3);
-  
-  const double * valuesInVertex0 = &m_Values[id0 * m_NumFrames];
-  const double * valuesInVertex1 = &m_Values[id1 * m_NumFrames];
-  const double * valuesInVertex2 = &m_Values[id2 * m_NumFrames];
-  const double * valuesInVertex3 = &m_Values[id3 * m_NumFrames];
+
+  const double *valuesInVertex0 = &m_Values[id0 * m_NumFrames];
+  const double *valuesInVertex1 = &m_Values[id1 * m_NumFrames];
+  const double *valuesInVertex2 = &m_Values[id2 * m_NumFrames];
+  const double *valuesInVertex3 = &m_Values[id3 * m_NumFrames];
 
   // loop over all voxels within the tetrahedron and interpolate
 
   // ----
   TetrahedronInteriorIterator<ImageType::PixelType> it(m_Image, p0, p1, p2, p3);
-  for (int f = 0; f < m_NumFrames; f++) it.AddExtraLoading(valuesInVertex0[f], valuesInVertex1[f], valuesInVertex2[f], valuesInVertex3[f]);
-  
+  for (int f = 0; f < m_NumFrames; f++)
+    it.AddExtraLoading(valuesInVertex0[f], valuesInVertex1[f],
+                       valuesInVertex2[f], valuesInVertex3[f]);
+
   // ----
-  for ( ; !it.IsAtEnd(); ++it ) {
-    it.Value() = AtlasAlphasType(m_NumFrames);  
-    for (int f = 0; f < m_NumFrames; f++) it.Value()[f] = it.GetExtraLoadingInterpolatedValue(f);
+  for (; !it.IsAtEnd(); ++it) {
+    it.Value() = AtlasAlphasType(m_NumFrames);
+    for (int f = 0; f < m_NumFrames; f++)
+      it.Value()[f] = it.GetExtraLoadingInterpolatedValue(f);
   }
-    
+
   return true;
 }
 
-  
 } // End namespace kvl

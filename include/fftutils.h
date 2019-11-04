@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:09 $
@@ -23,27 +23,23 @@
  *
  */
 
-
-
 #ifndef FFTUTILS_INC
 #define FFTUTILS_INC
 
+void CFFTforward(float *re, float *im, int length);
+void CFFTbackward(float *re, float *im, int length);
 
-void CFFTforward(float* re, float* im, int length);
-void CFFTbackward(float* re, float* im, int length);
+void RFFTforward(float *data, int length, float *re, float *im);
 
-void RFFTforward(float* data,int length, float* re, float* im );
-
-
-void RFFT( float* data, int data_length, int length, int direction );
+void RFFT(float *data, int data_length, int length, int direction);
 void FFTdebugAssert(int b, const char *string);
-int FFTisPowerOf2( int x ); 
-int FFTpow2( int exponent );
-float FFTdist(int x,int y,int z,int len);
-int FFTlog2( int x );
-void FFTswitch_with_z (float *** vect, int dimension, int is_y);
-void FFTmodarg_to_reim(float *** re_mod, float *** im_arg, int l);
-float ***FFTinv_quarter(float *** vect, int dimension);
-void FFTreim_to_modarg (float *** re_mod, float *** im_arg, int l);
+int FFTisPowerOf2(int x);
+int FFTpow2(int exponent);
+float FFTdist(int x, int y, int z, int len);
+int FFTlog2(int x);
+void FFTswitch_with_z(float ***vect, int dimension, int is_y);
+void FFTmodarg_to_reim(float ***re_mod, float ***im_arg, int l);
+float ***FFTinv_quarter(float ***vect, int dimension);
+void FFTreim_to_modarg(float ***re_mod, float ***im_arg, int l);
 
 #endif

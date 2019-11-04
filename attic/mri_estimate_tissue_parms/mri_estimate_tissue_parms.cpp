@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: zkaufman $
  *    $Date: 2015/03/12 20:24:06 $
@@ -22,7 +22,6 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
-
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,17 +42,17 @@
 
 static int computeErrorSurface(char *fname, MRI **mri_flash, int nflash, int x,
                                int y, int z, double min_PD, double max_PD,
-                               double min_T1, double max_T1) ;
-static double findInitialParameters(MRI **mri_flash, int nflash, int x,
-                                    int y, int z, double min_PD, double max_PD,
-                                    double min_T1, double max_T1, double *pPD, double *pT1,
-                                    int nsteps) ;
-MRI *MRIsadd(MRI *mri1, MRI *mri2, MRI *mri_dst) ;
-MRI *MRIsscalarMul(MRI *mri_src, MRI *mri_dst, float scalar) ;
-MRI *MRIssqrt(MRI *mri_src, MRI *mri_dst) ;
-int main(int argc, char *argv[]) ;
-static MRI *compute_residuals(MRI *mri_flash, MRI *mri_T1, MRI *mri_PD) ;
-static int get_option(int argc, char *argv[]) ;
+                               double min_T1, double max_T1);
+static double findInitialParameters(MRI **mri_flash, int nflash, int x, int y,
+                                    int z, double min_PD, double max_PD,
+                                    double min_T1, double max_T1, double *pPD,
+                                    double *pT1, int nsteps);
+MRI *MRIsadd(MRI *mri1, MRI *mri2, MRI *mri_dst);
+MRI *MRIsscalarMul(MRI *mri_src, MRI *mri_dst, float scalar);
+MRI *MRIssqrt(MRI *mri_src, MRI *mri_dst);
+int main(int argc, char *argv[]);
+static MRI *compute_residuals(MRI *mri_flash, MRI *mri_T1, MRI *mri_PD);
+static int get_option(int argc, char *argv[]);
 #if 0
 static MRI *align_with_average(MRI *mri_src, MRI *mri_avg) ;
 static MATRIX *align_pca(MRI *mri_src, MRI *mri_avg) ;
@@ -62,181 +61,183 @@ static MATRIX *pca_matrix(MATRIX *m_in_evectors, double in_means[3],
 static int thresh_low = 0 ;
 #endif
 
-const char *Progname ;
-static int align = 1 ;
-static int window_flag = 0 ;
-static MORPH_PARMS  parms ;
+const char *Progname;
+static int align = 1;
+static int window_flag = 0;
+static MORPH_PARMS parms;
 
-static void usage_exit(int code) ;
-static int no_valid_data(MRI **mri_flash, int nvolumes,
-                         int x, int y, int z, float thresh) ;
+static void usage_exit(int code);
+static int no_valid_data(MRI **mri_flash, int nvolumes, int x, int y, int z,
+                         float thresh);
 
-static float thresh = 25 ;
-static int conform = 0 ;
+static float thresh = 25;
+static int conform = 0;
 static int sinc_flag = 1;
 static int sinchalfwindow = 3;
 
-static char *residual_name = NULL ;
+static char *residual_name = NULL;
 
 #define MAX_IMAGES 100
-#define MIN_T1   5  /* avoid singularity at T1=0 */
-#define MIN_PD   5
+#define MIN_T1 5 /* avoid singularity at T1=0 */
+#define MIN_PD 5
 #define MIN_ITER 5
 #define MAX_ITER 5000
 
-
-static double dM_dT1(double flip_angle, double TR, double PD, double T1) ;
-static double dM_dPD(double flip_angle, double TR, double PD, double T1) ;
+static double dM_dT1(double flip_angle, double TR, double PD, double T1);
+static double dM_dPD(double flip_angle, double TR, double PD, double T1);
 static double FLASHforwardModel(double flip_angle, double TR, double PD,
-                                double T1) ;
+                                double T1);
 static double estimateVoxelParameters(MRI **mri_flash, int nvolumes, int x,
                                       int y, int z, MRI *mri_T1, MRI *mri_PD,
-                                      int nsteps) ;
+                                      int nsteps);
 
-static double
-computeVoxelSSE(MRI **mri_flash, int nflash, int x,
-                int y, int z, double PD, double T1) ;
+static double computeVoxelSSE(MRI **mri_flash, int nflash, int x, int y, int z,
+                              double PD, double T1);
 
-static int write_iterations = 0, nsteps = 4 ;
-static float        tr = 0, te = 0, fa = 0 ;
+static int write_iterations = 0, nsteps = 4;
+static float tr = 0, te = 0, fa = 0;
 
-int
-main(int argc, char *argv[]) {
-  char   **av, fname[STRLEN] ;
-  int    ac, nargs, i ;
-  MRI    *mri_flash[MAX_IMAGES], *mri_T1, *mri_PD ;
-  char   *in_fname, *out_PD_fname, *out_T1_fname ;
-  int          msec, minutes, seconds, nvolumes ;
-  Timer start ;
+int main(int argc, char *argv[]) {
+  char **av, fname[STRLEN];
+  int ac, nargs, i;
+  MRI *mri_flash[MAX_IMAGES], *mri_T1, *mri_PD;
+  char *in_fname, *out_PD_fname, *out_T1_fname;
+  int msec, minutes, seconds, nvolumes;
+  Timer start;
 
   /* rkt: check for and handle version tag */
-  nargs = handle_version_option (argc, argv, "$Id: mri_estimate_tissue_parms.c,v 1.10 2015/03/12 20:24:06 zkaufman Exp $", "$Name:  $");
+  nargs = handle_version_option(argc, argv,
+                                "$Id: mri_estimate_tissue_parms.c,v 1.10 "
+                                "2015/03/12 20:24:06 zkaufman Exp $",
+                                "$Name:  $");
   if (nargs && argc - nargs == 1)
-    exit (0);
+    exit(0);
   argc -= nargs;
 
-  Progname = argv[0] ;
-  ErrorInit(NULL, NULL, NULL) ;
-  DiagInit(NULL, NULL, NULL) ;
+  Progname = argv[0];
+  ErrorInit(NULL, NULL, NULL);
+  DiagInit(NULL, NULL, NULL);
 
-  start.reset() ;
-  parms.dt = 1e-6 ;
-  parms.tol = 1e-5 ;
-  parms.momentum = 0.0 ;
-  parms.niterations = 20 ;
+  start.reset();
+  parms.dt = 1e-6;
+  parms.tol = 1e-5;
+  parms.momentum = 0.0;
+  parms.niterations = 20;
 
-  ac = argc ;
-  av = argv ;
-  for ( ; argc > 1 && ISOPTION(*argv[1]) ; argc--, argv++) {
-    nargs = get_option(argc, argv) ;
-    argc -= nargs ;
-    argv += nargs ;
+  ac = argc;
+  av = argv;
+  for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
+    nargs = get_option(argc, argv);
+    argc -= nargs;
+    argv += nargs;
   }
 
   if (argc < 4)
-    usage_exit(1) ;
+    usage_exit(1);
 
-  out_T1_fname = argv[argc-2] ;
-  out_PD_fname = argv[argc-1] ;
-  FileNameOnly(out_T1_fname, fname) ;
-  FileNameRemoveExtension(fname, fname) ;
-  strcpy(parms.base_name, fname) ;
+  out_T1_fname = argv[argc - 2];
+  out_PD_fname = argv[argc - 1];
+  FileNameOnly(out_T1_fname, fname);
+  FileNameRemoveExtension(fname, fname);
+  strcpy(parms.base_name, fname);
 
-  nvolumes = 0 ;
-  for (i = 1 ; i < argc-2 ; i++) {
+  nvolumes = 0;
+  for (i = 1; i < argc - 2; i++) {
     if (argv[i][0] == '-') {
-      if (!stricmp(argv[i]+1, "te"))
-        te = atof(argv[i+1]) ;
-      else if (!stricmp(argv[i]+1, "tr"))
-        tr = atof(argv[i+1]) ;
-      else if (!stricmp(argv[i]+1, "fa"))
-        fa = RADIANS(atof(argv[i+1])) ;
+      if (!stricmp(argv[i] + 1, "te"))
+        te = atof(argv[i + 1]);
+      else if (!stricmp(argv[i] + 1, "tr"))
+        tr = atof(argv[i + 1]);
+      else if (!stricmp(argv[i] + 1, "fa"))
+        fa = RADIANS(atof(argv[i + 1]));
       else
-        ErrorExit(ERROR_BADPARM, "%s: unsupported MR parameter %s",
-                  Progname, argv[i]+1) ;
-      i++ ;  /* skip parameter */
-      continue ;
+        ErrorExit(ERROR_BADPARM, "%s: unsupported MR parameter %s", Progname,
+                  argv[i] + 1);
+      i++; /* skip parameter */
+      continue;
     }
 
-    in_fname = argv[i] ;
-    printf("reading %s...", in_fname) ;
+    in_fname = argv[i];
+    printf("reading %s...", in_fname);
 
-    mri_flash[nvolumes] = MRIread(in_fname) ;
+    mri_flash[nvolumes] = MRIread(in_fname);
     if (!mri_flash[nvolumes])
-      ErrorExit(Gerror, "%s: MRIread(%s) failed", Progname, in_fname) ;
+      ErrorExit(Gerror, "%s: MRIread(%s) failed", Progname, in_fname);
     if (tr > 0) {
-      mri_flash[nvolumes]->tr = tr ;
-      tr = 0 ;
+      mri_flash[nvolumes]->tr = tr;
+      tr = 0;
     }
     if (te > 0) {
-      mri_flash[nvolumes]->te = te ;
-      te = 0 ;
+      mri_flash[nvolumes]->te = te;
+      te = 0;
     }
     if (fa > 0) {
-      mri_flash[nvolumes]->flip_angle = fa ;
-      fa = 0 ;
+      mri_flash[nvolumes]->flip_angle = fa;
+      fa = 0;
     }
     printf("TE = %2.2f, TR = %2.2f, alpha = %2.2f\n", mri_flash[nvolumes]->te,
-           mri_flash[nvolumes]->tr, DEGREES(mri_flash[nvolumes]->flip_angle)) ;
+           mri_flash[nvolumes]->tr, DEGREES(mri_flash[nvolumes]->flip_angle));
     mri_flash[nvolumes]->flip_angle = mri_flash[nvolumes]->flip_angle;
     if (conform) {
-      MRI *mri_tmp ;
+      MRI *mri_tmp;
 
-      printf("embedding and interpolating volume\n") ;
-      mri_tmp = MRIconform(mri_flash[nvolumes]) ;
+      printf("embedding and interpolating volume\n");
+      mri_tmp = MRIconform(mri_flash[nvolumes]);
       /*      MRIfree(&mri_src) ;*/
-      mri_flash[nvolumes] = mri_tmp ;
+      mri_flash[nvolumes] = mri_tmp;
     }
     if (FZERO(mri_flash[nvolumes]->tr) ||
         FZERO(mri_flash[nvolumes]->flip_angle))
-      ErrorExit(ERROR_BADPARM, "%s: invalid TR or FA for image %d:%s",
-                Progname, nvolumes, in_fname) ;
-    nvolumes++ ;
+      ErrorExit(ERROR_BADPARM, "%s: invalid TR or FA for image %d:%s", Progname,
+                nvolumes, in_fname);
+    nvolumes++;
   }
-  printf("using %d FLASH volumes to estimate tissue parameters.\n", nvolumes) ;
-  mri_T1 = MRIclone(mri_flash[0], NULL) ;
-  mri_PD = MRIclone(mri_flash[0], NULL) ;
-
+  printf("using %d FLASH volumes to estimate tissue parameters.\n", nvolumes);
+  mri_T1 = MRIclone(mri_flash[0], NULL);
+  mri_PD = MRIclone(mri_flash[0], NULL);
 
   {
-    double   sse, last_T1, last_PD, total_rms, avg_rms ;
-    int      x, y, z, width, height, depth, total_vox, ignored, nvox ;
+    double sse, last_T1, last_PD, total_rms, avg_rms;
+    int x, y, z, width, height, depth, total_vox, ignored, nvox;
 
-    Progname = argv[0] ;
-    ErrorInit(NULL, NULL, NULL) ;
-    DiagInit(NULL, NULL, NULL) ;
+    Progname = argv[0];
+    ErrorInit(NULL, NULL, NULL);
+    DiagInit(NULL, NULL, NULL);
 
     Timer first_slice;
 
-    last_T1 = last_PD = 1000 ;
-    sse = 0.0 ;
-    width = mri_T1->width ;
-    height = mri_T1->height ;
-    depth = mri_T1->depth ;
-    total_vox = width*depth*height ;
+    last_T1 = last_PD = 1000;
+    sse = 0.0;
+    width = mri_T1->width;
+    height = mri_T1->height;
+    depth = mri_T1->depth;
+    total_vox = width * depth * height;
 #if 0
     estimateVoxelParameters(mri_flash, nvolumes, width/2, height/2, depth/2,
                             mri_T1, mri_PD, last_T1, last_PD) ;
 #endif
     if (Gdiag_no == 999) {
-      x = 130 ;
-      y = 124 ;
-      z = 74 ; /* CSF */
-      computeErrorSurface("error_surf_csf.dat",mri_flash,nvolumes,x,y,z,500,3000,500,3000);
-      x = 161 ;
-      y = 157 ;
-      z = 63 ;  /* wm */
-      computeErrorSurface("error_surf_wm.dat",mri_flash,nvolumes,x,y,z,250,3000,250,3000);
-      x = 166 ;
-      y = 153 ;
-      z = 63 ;  /* gm */
-      computeErrorSurface("error_surf_gm.dat",mri_flash,nvolumes,x,y,z,250,3000,250,3000);
+      x = 130;
+      y = 124;
+      z = 74; /* CSF */
+      computeErrorSurface("error_surf_csf.dat", mri_flash, nvolumes, x, y, z,
+                          500, 3000, 500, 3000);
+      x = 161;
+      y = 157;
+      z = 63; /* wm */
+      computeErrorSurface("error_surf_wm.dat", mri_flash, nvolumes, x, y, z,
+                          250, 3000, 250, 3000);
+      x = 166;
+      y = 153;
+      z = 63; /* gm */
+      computeErrorSurface("error_surf_gm.dat", mri_flash, nvolumes, x, y, z,
+                          250, 3000, 250, 3000);
     }
-    avg_rms = 0 ;
-    for (ignored = z = 0 ; z < depth ; z++) {
+    avg_rms = 0;
+    for (ignored = z = 0; z < depth; z++) {
       if (z > 0)
-        printf("z = %d, avg rms=%2.1f, T1=%2.0f, PD=%2.0f...\n",
-               z, avg_rms, last_T1, last_PD) ;
+        printf("z = %d, avg rms=%2.1f, T1=%2.0f, PD=%2.0f...\n", z, avg_rms,
+               last_T1, last_PD);
 #if 0
       if (z > 0 && z*width*height - ignored > 0) {
         int processed = z*width*height - ignored, hours ;
@@ -258,45 +259,45 @@ main(int argc, char *argv[]) {
         printf("estimate %02d:%02d:%02d remaining.\n", hours,minutes, seconds);
       }
 #endif
-      if (write_iterations > 0 && z > 0 && !(z%write_iterations)) {
-        printf("writing T1 esimates to %s...\n", out_T1_fname) ;
-        printf("writing PD estimates to %s...\n", out_PD_fname) ;
-        MRIwrite(mri_T1, out_T1_fname) ;
-        MRIwrite(mri_PD, out_PD_fname) ;
-        printf("writing residuals to %s...\n", residual_name) ;
+      if (write_iterations > 0 && z > 0 && !(z % write_iterations)) {
+        printf("writing T1 esimates to %s...\n", out_T1_fname);
+        printf("writing PD estimates to %s...\n", out_PD_fname);
+        MRIwrite(mri_T1, out_T1_fname);
+        MRIwrite(mri_PD, out_PD_fname);
+        printf("writing residuals to %s...\n", residual_name);
         if (residual_name) {
-          MRI *mri_res, *mri_res_total = NULL ;
-          for (i = 0 ; i < nvolumes ; i++) {
+          MRI *mri_res, *mri_res_total = NULL;
+          for (i = 0; i < nvolumes; i++) {
 
-            mri_res = compute_residuals(mri_flash[i], mri_T1, mri_PD) ;
-            sprintf(fname, "%s%d.mgh", residual_name, i) ;
+            mri_res = compute_residuals(mri_flash[i], mri_T1, mri_PD);
+            sprintf(fname, "%s%d.mgh", residual_name, i);
 #if 0
             MRIwrite(mri_res, fname) ;
 #endif
             if (!mri_res_total) {
-              mri_res_total = MRIcopy(mri_res, NULL) ;
+              mri_res_total = MRIcopy(mri_res, NULL);
             } else {
-              MRIsadd(mri_res, mri_res_total, mri_res_total) ;
+              MRIsadd(mri_res, mri_res_total, mri_res_total);
             }
 
-            MRIfree(&mri_res) ;
+            MRIfree(&mri_res);
           }
-          MRIsscalarMul(mri_res_total, mri_res_total, 1.0/(float)nvolumes) ;
-          MRIssqrt(mri_res_total, mri_res_total) ;
-          sprintf(fname, "%s.mgh", residual_name) ;
-          MRIwrite(mri_res_total, fname) ;
+          MRIsscalarMul(mri_res_total, mri_res_total, 1.0 / (float)nvolumes);
+          MRIssqrt(mri_res_total, mri_res_total);
+          sprintf(fname, "%s.mgh", residual_name);
+          MRIwrite(mri_res_total, fname);
         }
       }
 
-      nvox = 0 ;
-      total_rms = 0 ;
-      for (y = 0 ; y < height ; y++) {
+      nvox = 0;
+      total_rms = 0;
+      for (y = 0; y < height; y++) {
 #if 0
         if (y%32 == 0 && nvox > 0)
           printf("z = %d, y = %d, avg rms=%2.1f, T1=%2.0f, PD=%2.0f...\n",
                  z, y, total_rms/(double)nvox, last_T1, last_PD) ;
 #endif
-        for (x = 0 ; x < width ; x++) {
+        for (x = 0; x < width; x++) {
 #if 0
           for (i = 0 ; i < nvolumes ; i++)
             if (MRISvox(mri_flash[i],x,y,z) > thresh)
@@ -306,10 +307,10 @@ main(int argc, char *argv[]) {
           if (no_valid_data(mri_flash, nvolumes, x, y, z, thresh))
 #endif
           {
-            ignored++ ;
-            MRISvox(mri_T1, x, y, z) = MRISvox(mri_PD, x, y, z) = 0 ;
+            ignored++;
+            MRISvox(mri_T1, x, y, z) = MRISvox(mri_PD, x, y, z) = 0;
             /*            last_T1 = last_PD = 1000 ;*/
-            continue ;
+            continue;
           }
 #if 0
           sse = findInitialParameters(mri_flash, nvolumes, x, y, z,
@@ -329,108 +330,107 @@ main(int argc, char *argv[]) {
             continue ;
           }
 #endif
-          sse = estimateVoxelParameters(mri_flash, nvolumes, x, y, z,
-                                        mri_T1, mri_PD, nsteps) ;
-          nvox++ ;
-          last_T1 = MRISvox(mri_T1, x, y, z) ;
-          last_PD = MRISvox(mri_PD, x, y, z) ;
-          total_rms += sqrt(sse/nvolumes) ;
+          sse = estimateVoxelParameters(mri_flash, nvolumes, x, y, z, mri_T1,
+                                        mri_PD, nsteps);
+          nvox++;
+          last_T1 = MRISvox(mri_T1, x, y, z);
+          last_PD = MRISvox(mri_PD, x, y, z);
+          total_rms += sqrt(sse / nvolumes);
           if (!isfinite(total_rms))
-            DiagBreak() ;
+            DiagBreak();
         }
       }
-      avg_rms = total_rms / nvox ;
+      avg_rms = total_rms / nvox;
       if (!isfinite(avg_rms))
-        DiagBreak() ;
+        DiagBreak();
     }
   }
 
-
-  printf("writing T1 esimates to %s...\n", out_T1_fname) ;
-  printf("writing PD estimates to %s...\n", out_PD_fname) ;
-  MRIwrite(mri_T1, out_T1_fname) ;
-  MRIwrite(mri_PD, out_PD_fname) ;
+  printf("writing T1 esimates to %s...\n", out_T1_fname);
+  printf("writing PD estimates to %s...\n", out_PD_fname);
+  MRIwrite(mri_T1, out_T1_fname);
+  MRIwrite(mri_PD, out_PD_fname);
   if (residual_name) {
-    MRI *mri_res_total = NULL ;
+    MRI *mri_res_total = NULL;
 
-    for (i = 0 ; i < nvolumes ; i++) {
-      MRI *mri_res ;
+    for (i = 0; i < nvolumes; i++) {
+      MRI *mri_res;
 
-      mri_res = compute_residuals(mri_flash[i], mri_T1, mri_PD) ;
+      mri_res = compute_residuals(mri_flash[i], mri_T1, mri_PD);
 #if 0
       sprintf(fname, "%s%d.mgh", residual_name, i) ;
       MRIwrite(mri_res, fname) ;
 #endif
       if (!mri_res_total) {
-        mri_res_total = MRIcopy(mri_res, NULL) ;
+        mri_res_total = MRIcopy(mri_res, NULL);
       } else {
-        MRIsadd(mri_res, mri_res_total, mri_res_total) ;
+        MRIsadd(mri_res, mri_res_total, mri_res_total);
       }
-      MRIfree(&mri_res) ;
+      MRIfree(&mri_res);
     }
-    MRIsscalarMul(mri_res_total, mri_res_total, 1.0/(float)nvolumes) ;
-    MRIssqrt(mri_res_total, mri_res_total) ;
-    sprintf(fname, "%s.mgh", residual_name) ;
-    MRIwrite(mri_res_total, fname) ;
+    MRIsscalarMul(mri_res_total, mri_res_total, 1.0 / (float)nvolumes);
+    MRIssqrt(mri_res_total, mri_res_total);
+    sprintf(fname, "%s.mgh", residual_name);
+    MRIwrite(mri_res_total, fname);
   }
-  MRIfree(&mri_T1) ;
-  MRIfree(&mri_PD) ;
-  msec = start.milliseconds() ;
-  seconds = nint((float)msec/1000.0f) ;
-  minutes = seconds / 60 ;
-  seconds = seconds % 60 ;
-  printf("parameter estimation took %d minutes and %d seconds.\n",
-         minutes, seconds) ;
-  exit(0) ;
-  return(0) ;
+  MRIfree(&mri_T1);
+  MRIfree(&mri_PD);
+  msec = start.milliseconds();
+  seconds = nint((float)msec / 1000.0f);
+  minutes = seconds / 60;
+  seconds = seconds % 60;
+  printf("parameter estimation took %d minutes and %d seconds.\n", minutes,
+         seconds);
+  exit(0);
+  return (0);
 }
 /*----------------------------------------------------------------------
             Parameters:
 
            Description:
 ----------------------------------------------------------------------*/
-static int
-get_option(int argc, char *argv[]) {
-  int  nargs = 0 ;
-  char *option ;
+static int get_option(int argc, char *argv[]) {
+  int nargs = 0;
+  char *option;
 
-  option = argv[1] + 1 ;            /* past '-' */
+  option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "dt")) {
-    parms.dt = atof(argv[2]) ;
-    nargs = 1 ;
-    printf("using dt = %2.3e\n", parms.dt) ;
+    parms.dt = atof(argv[2]);
+    nargs = 1;
+    printf("using dt = %2.3e\n", parms.dt);
   } else if (!stricmp(option, "tol")) {
-    parms.tol = atof(argv[2]) ;
-    nargs = 1 ;
-    printf("using tol = %2.3e\n", parms.tol) ;
+    parms.tol = atof(argv[2]);
+    nargs = 1;
+    printf("using tol = %2.3e\n", parms.tol);
   } else if (!stricmp(option, "conform")) {
-    conform = 1 ;
-    printf("interpolating volume to be isotropic 1mm^3\n") ;
+    conform = 1;
+    printf("interpolating volume to be isotropic 1mm^3\n");
   } else if (!stricmp(option, "sinc")) {
     sinchalfwindow = atoi(argv[2]);
     sinc_flag = 1;
     nargs = 1;
     printf("using sinc interpolation with windowwidth of %d\n",
-           2*sinchalfwindow);
+           2 * sinchalfwindow);
   } else if (!stricmp(option, "tr")) {
-    tr = atof(argv[2]) ;
+    tr = atof(argv[2]);
     nargs = 1;
   } else if (!stricmp(option, "te")) {
-    te = atof(argv[2]) ;
+    te = atof(argv[2]);
     nargs = 1;
   } else if (!stricmp(option, "fa")) {
-    fa = atof(argv[2]) ;
+    fa = atof(argv[2]);
     nargs = 1;
   } else if (!stricmp(option, "trilinear")) {
     sinc_flag = 0;
     printf("using trilinear interpolation\n");
   } else if (!stricmp(option, "window")) {
-    window_flag = 1 ;
-    printf("applying hanning window to volumes...\n") ;
+    window_flag = 1;
+    printf("applying hanning window to volumes...\n");
   } else if (!stricmp(option, "noconform")) {
-    conform = 0 ;
-    printf("inhibiting isotropic volume interpolation\n") ;
-  } else switch (toupper(*option)) {
+    conform = 0;
+    printf("inhibiting isotropic volume interpolation\n");
+  } else
+    switch (toupper(*option)) {
 #if 0
     case 'W':
       parms.write_iterations = atoi(argv[2]) ;
@@ -441,58 +441,59 @@ get_option(int argc, char *argv[]) {
       break ;
 #endif
     case 'W':
-      write_iterations = atoi(argv[2]) ;
+      write_iterations = atoi(argv[2]);
       printf("writing out intermediate volumes every %d slices...\n",
-             write_iterations) ;
-      nargs = 1 ;
-      break ;
+             write_iterations);
+      nargs = 1;
+      break;
     case 'M':
-      parms.momentum = atof(argv[2]) ;
-      nargs = 1 ;
-      printf("using momentum = %2.3f\n", parms.momentum) ;
-      break ;
+      parms.momentum = atof(argv[2]);
+      nargs = 1;
+      printf("using momentum = %2.3f\n", parms.momentum);
+      break;
     case 'R':
-      residual_name = argv[2] ;
-      printf("writing out residuals to %s...\n", residual_name) ;
-      nargs = 1 ;
-      break ;
+      residual_name = argv[2];
+      printf("writing out residuals to %s...\n", residual_name);
+      nargs = 1;
+      break;
     case 'T':
-      thresh = atof(argv[2]) ;
-      nargs = 1 ;
+      thresh = atof(argv[2]);
+      nargs = 1;
       printf("ignoring locations in which all images are less than %2.2f\n",
-             thresh) ;
-      break ;
+             thresh);
+      break;
     case 'N':
-      nsteps = atoi(argv[2]) ;
-      nargs = 1 ;
-      printf("using %d steps for global search...\n", nsteps) ;
-      break ;
+      nsteps = atoi(argv[2]);
+      nargs = 1;
+      printf("using %d steps for global search...\n", nsteps);
+      break;
     case 'A':
-      align = 1 ;
-      printf("aligning volumes before averaging...\n") ;
-      break ;
+      align = 1;
+      printf("aligning volumes before averaging...\n");
+      break;
     case '?':
     case 'U':
-      usage_exit(0) ;
-      break ;
+      usage_exit(0);
+      break;
     default:
-      printf("unknown option %s\n", argv[1]) ;
-      exit(1) ;
-      break ;
+      printf("unknown option %s\n", argv[1]);
+      exit(1);
+      break;
     }
 
-  return(nargs) ;
+  return (nargs);
 }
 /*----------------------------------------------------------------------
             Parameters:
 
            Description:
 ----------------------------------------------------------------------*/
-static void
-usage_exit(int code) {
-  printf("usage: %s [options] <volume> ... <output T1 volume> <output PD volume>\n", Progname) ;
-  printf("\t-a    rigid alignment of input volumes before averaging\n") ;
-  exit(code) ;
+static void usage_exit(int code) {
+  printf("usage: %s [options] <volume> ... <output T1 volume> <output PD "
+         "volume>\n",
+         Progname);
+  printf("\t-a    rigid alignment of input volumes before averaging\n");
+  exit(code);
 }
 
 #if 0
@@ -653,7 +654,7 @@ pca_matrix(MATRIX *m_in_evectors, double in_means[3],
   z_angle = atan2(r21 / cosy, r11 / cosy) ;
   x_angle = atan2(r32 / cosy, r33 / cosy) ;
 
-#define MAX_ANGLE  (RADIANS(30))
+#define MAX_ANGLE (RADIANS(30))
   if (fabs(x_angle) > MAX_ANGLE || fabs(y_angle) > MAX_ANGLE ||
       fabs(z_angle) > MAX_ANGLE) {
     MatrixFree(&m_in_T) ;
@@ -732,175 +733,166 @@ pca_matrix(MATRIX *m_in_evectors, double in_means[3],
 }
 #endif
 
+static double computeVoxelSSE(MRI **mri_flash, int nflash, int x, int y, int z,
+                              double PD, double T1) {
+  double sse, estimate, err;
+  int i;
+  MRI *mri;
 
-
-static double
-computeVoxelSSE(MRI **mri_flash, int nflash, int x,
-                int y, int z, double PD, double T1) {
-  double    sse, estimate, err ;
-  int       i ;
-  MRI       *mri ;
-
-  for (sse = 0.0, i = 0 ; i < nflash ; i++) {
-    mri = mri_flash[i] ;
-    estimate = FLASHforwardModel(mri->flip_angle, mri->tr, PD, T1) ;
-    err = (MRISvox(mri,x,y,z)- estimate) ;
-    sse += err*err ;
+  for (sse = 0.0, i = 0; i < nflash; i++) {
+    mri = mri_flash[i];
+    estimate = FLASHforwardModel(mri->flip_angle, mri->tr, PD, T1);
+    err = (MRISvox(mri, x, y, z) - estimate);
+    sse += err * err;
   }
   if (!isfinite(sse))
-    DiagBreak() ;
-  return(sse) ;
+    DiagBreak();
+  return (sse);
 }
 
-static double
-findInitialParameters(MRI **mri_flash, int nflash, int x, int y, int z,
-                      double min_PD, double max_PD, double min_T1,
-                      double max_T1, double *pPD, double *pT1, int nsteps) {
-  double    estimate, err, T1, PD, T1_step, PD_step, sse, min_sse ;
-  int       i ;
-  MRI       *mri ;
+static double findInitialParameters(MRI **mri_flash, int nflash, int x, int y,
+                                    int z, double min_PD, double max_PD,
+                                    double min_T1, double max_T1, double *pPD,
+                                    double *pT1, int nsteps) {
+  double estimate, err, T1, PD, T1_step, PD_step, sse, min_sse;
+  int i;
+  MRI *mri;
 
-  T1_step = (max_T1 - min_T1) / (double)nsteps ;
-  PD_step = (max_PD - min_PD) / (double)nsteps ;
-  min_sse = nflash * (255.0*255.0) ;
-  for (T1 = min_T1 ; T1 <= max_T1 ; T1 += T1_step) {
-    for (PD = min_PD ; PD <= max_PD ; PD += PD_step) {
-      for (sse = 0.0, i = 0 ; i < nflash ; i++) {
-        mri = mri_flash[i] ;
-        estimate = FLASHforwardModel(mri->flip_angle, mri->tr, PD, T1) ;
-        err = (MRISvox(mri,x,y,z)- estimate) ;
-        sse += (err*err) ;
+  T1_step = (max_T1 - min_T1) / (double)nsteps;
+  PD_step = (max_PD - min_PD) / (double)nsteps;
+  min_sse = nflash * (255.0 * 255.0);
+  for (T1 = min_T1; T1 <= max_T1; T1 += T1_step) {
+    for (PD = min_PD; PD <= max_PD; PD += PD_step) {
+      for (sse = 0.0, i = 0; i < nflash; i++) {
+        mri = mri_flash[i];
+        estimate = FLASHforwardModel(mri->flip_angle, mri->tr, PD, T1);
+        err = (MRISvox(mri, x, y, z) - estimate);
+        sse += (err * err);
       }
       if (sse < min_sse) {
-        min_sse = sse ;
-        *pT1 = T1 ;
-        *pPD = PD ;
+        min_sse = sse;
+        *pT1 = T1;
+        *pPD = PD;
       }
     }
   }
-  return(min_sse) ;
+  return (min_sse);
 }
-static int
-computeErrorSurface(char *fname, MRI **mri_flash, int nflash, int x,
-                    int y, int z, double min_PD, double max_PD, double min_T1, double max_T1) {
-  double    estimate, err, T1, PD, T1_step, PD_step, sse ;
-  int       i ;
-  MRI       *mri ;
-  FILE      *fp ;
+static int computeErrorSurface(char *fname, MRI **mri_flash, int nflash, int x,
+                               int y, int z, double min_PD, double max_PD,
+                               double min_T1, double max_T1) {
+  double estimate, err, T1, PD, T1_step, PD_step, sse;
+  int i;
+  MRI *mri;
+  FILE *fp;
 
-  fp = fopen(fname, "w") ;
-  T1_step = (max_T1 - min_T1) / 200.0 ;
-  PD_step = (max_PD - min_PD) / 200.0 ;
-  for (T1 = min_T1 ; T1 <= max_T1 ; T1 += T1_step) {
-    for (PD = min_PD ; PD <= max_PD ; PD += PD_step) {
-      for (sse = 0.0, i = 0 ; i < nflash ; i++) {
-        mri = mri_flash[i] ;
-        estimate = FLASHforwardModel(mri->flip_angle, mri->tr, PD, T1) ;
-        err = (MRISvox(mri,x,y,z)- estimate) ;
-        sse += (err*err) ;
+  fp = fopen(fname, "w");
+  T1_step = (max_T1 - min_T1) / 200.0;
+  PD_step = (max_PD - min_PD) / 200.0;
+  for (T1 = min_T1; T1 <= max_T1; T1 += T1_step) {
+    for (PD = min_PD; PD <= max_PD; PD += PD_step) {
+      for (sse = 0.0, i = 0; i < nflash; i++) {
+        mri = mri_flash[i];
+        estimate = FLASHforwardModel(mri->flip_angle, mri->tr, PD, T1);
+        err = (MRISvox(mri, x, y, z) - estimate);
+        sse += (err * err);
       }
-      fprintf(fp, "%2.2f %2.2f %2.2f\n", PD, T1, sse) ;
+      fprintf(fp, "%2.2f %2.2f %2.2f\n", PD, T1, sse);
     }
   }
-  fclose(fp) ;
-  return(NO_ERROR) ;
+  fclose(fp);
+  return (NO_ERROR);
 }
 
-static double
-FLASHforwardModel(double flip_angle, double TR, double PD, double T1) {
-  double FLASH, E1 ;
-  double  CFA, SFA ;
+static double FLASHforwardModel(double flip_angle, double TR, double PD,
+                                double T1) {
+  double FLASH, E1;
+  double CFA, SFA;
 
+  CFA = cos(flip_angle);
+  SFA = sin(flip_angle);
+  E1 = exp(-TR / T1);
 
-  CFA = cos(flip_angle) ;
-  SFA = sin(flip_angle) ;
-  E1 = exp(-TR/T1) ;
-
-  FLASH = PD * SFA ;
+  FLASH = PD * SFA;
   if (!DZERO(T1))
-    FLASH *= (1-E1)/(1-CFA*E1);
-  return(FLASH) ;
+    FLASH *= (1 - E1) / (1 - CFA * E1);
+  return (FLASH);
 }
 
+static double dM_dT1(double flip_angle, double TR, double PD, double T1) {
+  double dT1, E1;
+  static double CFA, SFA2_3, CFA2;
 
-static double
-dM_dT1(double flip_angle, double TR, double PD, double T1) {
-  double  dT1, E1 ;
-  static double  CFA, SFA2_3, CFA2 ;
+  CFA = cos(flip_angle);
+  SFA2_3 = sin(flip_angle / 2);
+  SFA2_3 = SFA2_3 * SFA2_3 * SFA2_3;
+  CFA2 = cos(flip_angle / 2);
+  E1 = exp(TR / T1);
 
+  dT1 = -4 * E1 * PD * TR * CFA2 * SFA2_3 / (T1 * T1 * pow(-E1 + CFA, 2));
 
-  CFA = cos(flip_angle) ;
-  SFA2_3 = sin(flip_angle/2) ;
-  SFA2_3 = SFA2_3*SFA2_3*SFA2_3 ;
-  CFA2 = cos(flip_angle/2) ;
-  E1 = exp(TR/T1) ;
-
-  dT1 = -4*E1*PD*TR*CFA2*SFA2_3/ (T1*T1*pow(-E1 + CFA,2)) ;
-
-  return(dT1) ;
+  return (dT1);
 }
 
-static double
-dM_dPD(double flip_angle, double TR, double PD, double T1) {
-  double  dPD, E1 ;
-  static double  CFA, SFA ;
+static double dM_dPD(double flip_angle, double TR, double PD, double T1) {
+  double dPD, E1;
+  static double CFA, SFA;
 
-  CFA = cos(flip_angle) ;
-  SFA = sin(flip_angle) ;
-  E1 = exp(TR/T1) ;
-  dPD = (-1 + E1)*SFA/(E1 - CFA) ;
+  CFA = cos(flip_angle);
+  SFA = sin(flip_angle);
+  E1 = exp(TR / T1);
+  dPD = (-1 + E1) * SFA / (E1 - CFA);
 
-  return(dPD) ;
+  return (dPD);
 }
-static double STEP_SIZE = 10 ;  /* was 0.1 */
-static double momentum = 0.9 ;  /* was 0.8 */
-static double tol = 0.001 ;
+static double STEP_SIZE = 10; /* was 0.1 */
+static double momentum = 0.9; /* was 0.8 */
+static double tol = 0.001;
 
-static double
-estimateVoxelParameters(MRI **mri_flash, int nvolumes, int x,
-                        int y, int z, MRI *mri_T1, MRI *mri_PD, int nsteps) {
-  double   sse, last_sse, dT1, dPD, ival, estimate, err, T1, PD,
-  last_dT1, last_dPD, min_T1, max_T1, min_PD, max_PD, search_size ;
-  int      i, niter ;
-  MRI      *mri ;
+static double estimateVoxelParameters(MRI **mri_flash, int nvolumes, int x,
+                                      int y, int z, MRI *mri_T1, MRI *mri_PD,
+                                      int nsteps) {
+  double sse, last_sse, dT1, dPD, ival, estimate, err, T1, PD, last_dT1,
+      last_dPD, min_T1, max_T1, min_PD, max_PD, search_size;
+  int i, niter;
+  MRI *mri;
 
 #define SEARCH_STEPS 4
-  search_size = 3000 ;
-  T1 = PD = 3000 ;
-  for (i = 0 ; i < nsteps ; i++) {
-    min_T1 = MAX(MIN_T1, T1-search_size) ;
-    max_T1 = T1+search_size ;
-    min_PD = MAX(MIN_PD, PD-search_size) ;
-    max_PD = PD+search_size ;
-    sse = findInitialParameters(mri_flash, nvolumes, x, y, z,
-                                min_PD, max_PD, min_T1, max_T1,
-                                &PD, &T1, SEARCH_STEPS) ;
+  search_size = 3000;
+  T1 = PD = 3000;
+  for (i = 0; i < nsteps; i++) {
+    min_T1 = MAX(MIN_T1, T1 - search_size);
+    max_T1 = T1 + search_size;
+    min_PD = MAX(MIN_PD, PD - search_size);
+    max_PD = PD + search_size;
+    sse = findInitialParameters(mri_flash, nvolumes, x, y, z, min_PD, max_PD,
+                                min_T1, max_T1, &PD, &T1, SEARCH_STEPS);
     if (Gdiag == 99)
-      printf("min rms %2.1f at (T1=%2.0f, PD=%2.0f)\n",
-             sqrt(sse/nvolumes), T1, PD) ;
-    search_size /= SEARCH_STEPS ;
+      printf("min rms %2.1f at (T1=%2.0f, PD=%2.0f)\n", sqrt(sse / nvolumes),
+             T1, PD);
+    search_size /= SEARCH_STEPS;
   }
 
-  last_sse = sse = computeVoxelSSE(mri_flash, nvolumes, x, y, z,PD,T1);
+  last_sse = sse = computeVoxelSSE(mri_flash, nvolumes, x, y, z, PD, T1);
 
-  niter = 0 ;
-  last_dT1 = last_dPD = 0.0 ;
+  niter = 0;
+  last_dT1 = last_dPD = 0.0;
   do {
-    for (dT1 = dPD = 0.0, i = 0 ; i < nvolumes ; i++) {
-      mri = mri_flash[i] ;
-      ival = (double)MRISvox(mri, x, y, z) ;
-      estimate = FLASHforwardModel(mri->flip_angle, mri->tr, PD, T1) ;
-      err = (ival - estimate) ;
-      dT1 += err*dM_dT1(mri->flip_angle, mri->tr, PD, T1) ;
-      dPD += err*dM_dPD(mri->flip_angle, mri->tr, PD, T1) ;
+    for (dT1 = dPD = 0.0, i = 0; i < nvolumes; i++) {
+      mri = mri_flash[i];
+      ival = (double)MRISvox(mri, x, y, z);
+      estimate = FLASHforwardModel(mri->flip_angle, mri->tr, PD, T1);
+      err = (ival - estimate);
+      dT1 += err * dM_dT1(mri->flip_angle, mri->tr, PD, T1);
+      dPD += err * dM_dPD(mri->flip_angle, mri->tr, PD, T1);
     }
 
-    dT1 = STEP_SIZE * dT1 + momentum * last_dT1 ;
-    T1 += dT1 ;
-    last_dT1 = dT1 ;
-    dPD = STEP_SIZE * dPD + momentum * last_dPD ;
-    PD += dPD ;
-    last_dPD = dPD ;
+    dT1 = STEP_SIZE * dT1 + momentum * last_dT1;
+    T1 += dT1;
+    last_dT1 = dT1;
+    dPD = STEP_SIZE * dPD + momentum * last_dPD;
+    PD += dPD;
+    last_dPD = dPD;
     sse = computeVoxelSSE(mri_flash, nvolumes, x, y, z, PD, T1);
 #if 0
     if (Gdiag_no == 1)
@@ -908,117 +900,114 @@ estimateVoxelParameters(MRI **mri_flash, int nvolumes, int x,
              niter, sse, sse-last_sse, dT1, dPD, T1, PD) ;
 #endif
     if (T1 < MIN_T1) {
-      T1 = MIN_T1 ;
+      T1 = MIN_T1;
       sse = computeVoxelSSE(mri_flash, nvolumes, x, y, z, PD, T1);
-      break ;
+      break;
     }
     if ((last_sse < sse) || FZERO(sse))
-      break ;
-    if (((last_sse - sse)/last_sse < tol) && niter > MIN_ITER)
-      break ;
+      break;
+    if (((last_sse - sse) / last_sse < tol) && niter > MIN_ITER)
+      break;
 
-    last_sse = sse ;
-  } while (niter++ < MAX_ITER) ;
-  MRISvox(mri_T1, x, y, z) = (short)(T1+0.5) ;
+    last_sse = sse;
+  } while (niter++ < MAX_ITER);
+  MRISvox(mri_T1, x, y, z) = (short)(T1 + 0.5);
   ;
-  MRISvox(mri_PD, x, y, z) = (short)(PD+0.5) ;
+  MRISvox(mri_PD, x, y, z) = (short)(PD + 0.5);
   if (MRISvox(mri_T1, x, y, z) == 0)
-    DiagBreak() ;
-  return(sse) ;
+    DiagBreak();
+  return (sse);
 }
 
-static int compare_sort_array(const void *pc1, const void *pc2) ;
+static int compare_sort_array(const void *pc1, const void *pc2);
 
-static int
-no_valid_data(MRI **mri_flash, int nvolumes, int x, int y, int z, float thresh) {
-  int sort_array[MAX_IMAGES], i, nsmall ;
-  float median ;
+static int no_valid_data(MRI **mri_flash, int nvolumes, int x, int y, int z,
+                         float thresh) {
+  int sort_array[MAX_IMAGES], i, nsmall;
+  float median;
 
-  for (nsmall = 0, i = 0 ; i < nvolumes ; i++) {
-    sort_array[i] = MRISvox(mri_flash[i], x, y, z) ;
-    if (sort_array[i] < thresh/2)
-      nsmall++ ;
+  for (nsmall = 0, i = 0; i < nvolumes; i++) {
+    sort_array[i] = MRISvox(mri_flash[i], x, y, z);
+    if (sort_array[i] < thresh / 2)
+      nsmall++;
   }
   if (nsmall >= nvolumes)
-    return(1) ;
+    return (1);
 
-  qsort(sort_array, nvolumes, sizeof(int), compare_sort_array) ;
+  qsort(sort_array, nvolumes, sizeof(int), compare_sort_array);
   if (ODD(nvolumes))
-    median = sort_array[(nvolumes-1)/2] ;
+    median = sort_array[(nvolumes - 1) / 2];
   else
-    median = (sort_array[(nvolumes-1)/2] + sort_array[nvolumes/2]) / 2  ;
+    median = (sort_array[(nvolumes - 1) / 2] + sort_array[nvolumes / 2]) / 2;
 
-  return(median < thresh/2) ;
+  return (median < thresh / 2);
 }
 
-static int
-compare_sort_array(const void *pc1, const void *pc2) {
-  int c1, c2 ;
+static int compare_sort_array(const void *pc1, const void *pc2) {
+  int c1, c2;
 
-  c1 = *(int *)pc1 ;
-  c2 = *(int *)pc2 ;
+  c1 = *(int *)pc1;
+  c2 = *(int *)pc2;
 
   /*  return(c1 > c2 ? 1 : c1 == c2 ? 0 : -1) ;*/
   if (c1 > c2)
-    return(1) ;
+    return (1);
   else if (c1 < c2)
-    return(-1) ;
+    return (-1);
 
-  return(0) ;
+  return (0);
 }
 
-static MRI *
-compute_residuals(MRI *mri_flash, MRI *mri_T1, MRI *mri_PD) {
-  MRI    *mri_res ;
-  int    x, y, z, width, depth, height, T1, PD, val ;
-  double prediction, sse ;
+static MRI *compute_residuals(MRI *mri_flash, MRI *mri_T1, MRI *mri_PD) {
+  MRI *mri_res;
+  int x, y, z, width, depth, height, T1, PD, val;
+  double prediction, sse;
 
-  mri_res = MRIclone(mri_flash, NULL) ;
+  mri_res = MRIclone(mri_flash, NULL);
 
-  width = mri_PD->width ;
-  height = mri_PD->height ;
-  depth = mri_PD->depth ;
-  for (z = 0 ; z < depth ; z++) {
-    for (y = 0 ; y < height ; y++) {
-      for (x = 0 ; x < width ; x++) {
-        T1 = MRISvox(mri_T1, x, y, z) ;
-        PD = MRISvox(mri_PD, x, y, z) ;
-        prediction = FLASHforwardModel(mri_flash->flip_angle, mri_flash->tr,
-                                       PD, T1) ;
+  width = mri_PD->width;
+  height = mri_PD->height;
+  depth = mri_PD->depth;
+  for (z = 0; z < depth; z++) {
+    for (y = 0; y < height; y++) {
+      for (x = 0; x < width; x++) {
+        T1 = MRISvox(mri_T1, x, y, z);
+        PD = MRISvox(mri_PD, x, y, z);
+        prediction =
+            FLASHforwardModel(mri_flash->flip_angle, mri_flash->tr, PD, T1);
 
-        val = MRISvox(mri_flash, x, y, z) ;
-        sse = val - prediction ;
-        sse *= sse ;
-        MRISvox(mri_res, x, y, z) = (short)nint(sse) ;
+        val = MRISvox(mri_flash, x, y, z);
+        sse = val - prediction;
+        sse *= sse;
+        MRISvox(mri_res, x, y, z) = (short)nint(sse);
       }
     }
   }
-  return(mri_res) ;
+  return (mri_res);
 }
-MRI *
-MRIsadd(MRI *mri1, MRI *mri2, MRI *mri_dst) {
-  int     width, height, depth, x, y, z ;
-  short   *p1, *p2, *pdst ;
+MRI *MRIsadd(MRI *mri1, MRI *mri2, MRI *mri_dst) {
+  int width, height, depth, x, y, z;
+  short *p1, *p2, *pdst;
 
-  width = mri1->width ;
-  height = mri1->height ;
-  depth = mri1->depth ;
+  width = mri1->width;
+  height = mri1->height;
+  depth = mri1->depth;
 
   if (!mri_dst) {
-    mri_dst = MRIalloc(width, height, depth, mri1->type) ;
-    MRIcopyHeader(mri1, mri_dst) ;
+    mri_dst = MRIalloc(width, height, depth, mri1->type);
+    MRIcopyHeader(mri1, mri_dst);
   }
 
-  for (z = 0 ; z < depth ; z++) {
-    for (y = 0 ; y < height ; y++) {
-      p1 = &MRISvox(mri1, 0, y, z) ;
-      p2 = &MRISvox(mri2, 0, y, z) ;
-      pdst = &MRISvox(mri_dst, 0, y, z) ;
-      for (x = 0 ; x < width ; x++)
-        *pdst++ = *p1++ + *p2++ ;
+  for (z = 0; z < depth; z++) {
+    for (y = 0; y < height; y++) {
+      p1 = &MRISvox(mri1, 0, y, z);
+      p2 = &MRISvox(mri2, 0, y, z);
+      pdst = &MRISvox(mri_dst, 0, y, z);
+      for (x = 0; x < width; x++)
+        *pdst++ = *p1++ + *p2++;
     }
   }
-  return(mri_dst) ;
+  return (mri_dst);
 }
 /*-----------------------------------------------------
         Parameters:
@@ -1027,36 +1016,34 @@ MRIsadd(MRI *mri1, MRI *mri2, MRI *mri_dst) {
 
         Description
 ------------------------------------------------------*/
-MRI *
-MRIssqrt(MRI *mri_src, MRI *mri_dst) {
-  int     width, height, depth, x, y, z, frame ;
-  short   *psrc, *pdst ;
+MRI *MRIssqrt(MRI *mri_src, MRI *mri_dst) {
+  int width, height, depth, x, y, z, frame;
+  short *psrc, *pdst;
 
-  width = mri_src->width ;
-  height = mri_src->height ;
-  depth = mri_src->depth ;
+  width = mri_src->width;
+  height = mri_src->height;
+  depth = mri_src->depth;
   if (!mri_dst)
-    mri_dst = MRIclone(mri_src, NULL) ;
+    mri_dst = MRIclone(mri_src, NULL);
 
-  for (frame = 0 ; frame < mri_src->nframes ; frame++) {
-    for (z = 0 ; z < depth ; z++) {
-      for (y = 0 ; y < height ; y++) {
+  for (frame = 0; frame < mri_src->nframes; frame++) {
+    for (z = 0; z < depth; z++) {
+      for (y = 0; y < height; y++) {
         switch (mri_src->type) {
         case MRI_SHORT:
-          psrc = &MRISseq_vox(mri_src, 0, y, z, frame) ;
-          pdst = &MRISseq_vox(mri_dst, 0, y, z, frame) ;
-          for (x = 0 ; x < width ; x++)
-            *pdst++ = sqrt(*psrc++) ;
-          break ;
+          psrc = &MRISseq_vox(mri_src, 0, y, z, frame);
+          pdst = &MRISseq_vox(mri_dst, 0, y, z, frame);
+          for (x = 0; x < width; x++)
+            *pdst++ = sqrt(*psrc++);
+          break;
         default:
-          ErrorReturn(NULL,
-                      (ERROR_UNSUPPORTED,
-                       "MRIssqrt: unsupported type %d", mri_src->type)) ;
+          ErrorReturn(NULL, (ERROR_UNSUPPORTED, "MRIssqrt: unsupported type %d",
+                             mri_src->type));
         }
       }
     }
   }
-  return(mri_dst) ;
+  return (mri_dst);
 }
 /*-----------------------------------------------------
         Parameters:
@@ -1065,34 +1052,33 @@ MRIssqrt(MRI *mri_src, MRI *mri_dst) {
 
         Description
 ------------------------------------------------------*/
-MRI *
-MRIsscalarMul(MRI *mri_src, MRI *mri_dst, float scalar) {
-  int     width, height, depth, x, y, z, frame ;
-  short   *psrc, *pdst ;
+MRI *MRIsscalarMul(MRI *mri_src, MRI *mri_dst, float scalar) {
+  int width, height, depth, x, y, z, frame;
+  short *psrc, *pdst;
 
-  width = mri_src->width ;
-  height = mri_src->height ;
-  depth = mri_src->depth ;
+  width = mri_src->width;
+  height = mri_src->height;
+  depth = mri_src->depth;
   if (!mri_dst)
-    mri_dst = MRIclone(mri_src, NULL) ;
+    mri_dst = MRIclone(mri_src, NULL);
 
-  for (frame = 0 ; frame < mri_src->nframes ; frame++) {
-    for (z = 0 ; z < depth ; z++) {
-      for (y = 0 ; y < height ; y++) {
+  for (frame = 0; frame < mri_src->nframes; frame++) {
+    for (z = 0; z < depth; z++) {
+      for (y = 0; y < height; y++) {
         switch (mri_src->type) {
         case MRI_SHORT:
-          psrc = &MRISseq_vox(mri_src, 0, y, z, frame) ;
-          pdst = &MRISseq_vox(mri_dst, 0, y, z, frame) ;
-          for (x = 0 ; x < width ; x++)
-            *pdst++ = *psrc++ * scalar ;
-          break ;
+          psrc = &MRISseq_vox(mri_src, 0, y, z, frame);
+          pdst = &MRISseq_vox(mri_dst, 0, y, z, frame);
+          for (x = 0; x < width; x++)
+            *pdst++ = *psrc++ * scalar;
+          break;
         default:
           ErrorReturn(NULL,
-                      (ERROR_UNSUPPORTED,
-                       "MRIsscalarMul: unsupported type %d", mri_src->type)) ;
+                      (ERROR_UNSUPPORTED, "MRIsscalarMul: unsupported type %d",
+                       mri_src->type));
         }
       }
     }
   }
-  return(mri_dst) ;
+  return (mri_dst);
 }

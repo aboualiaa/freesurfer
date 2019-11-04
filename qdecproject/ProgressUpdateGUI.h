@@ -27,11 +27,11 @@
 
 class ProgressUpdateGUI {
 public:
-  virtual ~ProgressUpdateGUI () {};
-  virtual void BeginActionWithProgress ( const char * isTitle ) = 0;
-  virtual void UpdateProgressMessage ( const char* isMessage ) = 0;
-  virtual void UpdateProgressPercent ( float iPercent ) = 0; // 0 - 100
-  virtual void EndActionWithProgress () = 0;
+  virtual ~ProgressUpdateGUI(){};
+  virtual void BeginActionWithProgress(const char *isTitle) = 0;
+  virtual void UpdateProgressMessage(const char *isMessage) = 0;
+  virtual void UpdateProgressPercent(float iPercent) = 0; // 0 - 100
+  virtual void EndActionWithProgress() = 0;
 };
 
 #endif // ProgressUpdateGUI_H

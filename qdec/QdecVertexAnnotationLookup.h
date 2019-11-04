@@ -30,12 +30,11 @@
 
 class QdecVertexAnnotationLookup {
 
- public:
-
+public:
   virtual ~QdecVertexAnnotationLookup(){};
 
   // Get the annotation string for a given vertex number.
-  virtual const char* GetAnnotationForVertex ( int inVertex ) = 0;
+  virtual const char *GetAnnotationForVertex(int inVertex) = 0;
 };
 
 #endif

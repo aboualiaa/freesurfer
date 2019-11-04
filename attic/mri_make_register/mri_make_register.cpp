@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:22 $
@@ -22,7 +22,6 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
-
 
 #include <stdio.h>
 #include <sys/stat.h>
@@ -57,17 +56,23 @@ void usage(int exit_val);
 void read_functional_header(char *fct_stem);
 MATRIX *make_register_matrix(MRI *high_res_vol, MRI *fct_run_vol);
 void set_matrix(MATRIX *m, float e11, float e12, float e13, float e14,
-                float e21, float e22, float e23, float e24,
-                float e31, float e32, float e33, float e34,
-                float e41, float e42, float e43, float e44);
+                float e21, float e22, float e23, float e24, float e31,
+                float e32, float e33, float e34, float e41, float e42,
+                float e43, float e44);
 
 void usage(int exit_val) {
 
-  fprintf(stderr, "usage: %s [options] <subject name> <fct stem> <path to T1 dir> [<structural dir>]\n", Progname);
+  fprintf(stderr,
+          "usage: %s [options] <subject name> <fct stem> <path to T1 dir> "
+          "[<structural dir>]\n",
+          Progname);
   fprintf(stderr, "       options are:\n");
-  fprintf(stderr, "         -r register_fname  defaults to register.dat in the functional directory\n");
-  fprintf(stderr, "         -a analyse_fname   defaults to analyse.dat in the functional directory\n");
-  fprintf(stderr, "       use '-r -' or '-a -' to suppress writing of register or analyse files\n");
+  fprintf(stderr, "         -r register_fname  defaults to register.dat in the "
+                  "functional directory\n");
+  fprintf(stderr, "         -a analyse_fname   defaults to analyse.dat in the "
+                  "functional directory\n");
+  fprintf(stderr, "       use '-r -' or '-a -' to suppress writing of register "
+                  "or analyse files\n");
 
   exit(exit_val);
 
@@ -90,9 +95,12 @@ int main(int argc, char *argv[]) {
   int nargs;
 
   /* rkt: check for and handle version tag */
-  nargs = handle_version_option (argc, argv, "$Id: mri_make_register.c,v 1.9 2011/03/02 00:04:22 nicks Exp $", "$Name:  $");
+  nargs = handle_version_option(
+      argc, argv,
+      "$Id: mri_make_register.c,v 1.9 2011/03/02 00:04:22 nicks Exp $",
+      "$Name:  $");
   if (nargs && argc - nargs == 1)
-    exit (0);
+    exit(0);
   argc -= nargs;
 
   Progname = strrchr(argv[0], '/');
@@ -104,16 +112,16 @@ int main(int argc, char *argv[]) {
   subject_name = fct_stem = NULL;
   structural_dir[0] = '\0';
 
-  for (i = 1;i < argc;i++) {
+  for (i = 1; i < argc; i++) {
     if (strcmp(argv[i], "-a") == 0) {
-      if (argc == i+1)
+      if (argc == i + 1)
         usage(1);
-      strcpy(analyse_name, argv[i+1]);
+      strcpy(analyse_name, argv[i + 1]);
       i++;
     } else if (strcmp(argv[i], "-r") == 0) {
-      if (argc == i+1)
+      if (argc == i + 1)
         usage(1);
-      strcpy(register_name, argv[i+1]);
+      strcpy(register_name, argv[i + 1]);
       i++;
     } else if (subject_name == NULL)
       subject_name = argv[i];
@@ -135,17 +143,18 @@ int main(int argc, char *argv[]) {
   if (s == NULL)
     s = fct_stem;
   if (analyse_name[0] == '\0') {
-    strncpy(analyse_name, fct_stem, s-fct_stem);
+    strncpy(analyse_name, fct_stem, s - fct_stem);
     strcat(analyse_name, "/analyse.dat");
   }
   if (register_name[0] == '\0') {
-    strncpy(register_name, fct_stem, s-fct_stem);
+    strncpy(register_name, fct_stem, s - fct_stem);
     strcat(register_name, "/register.dat");
   }
 
   if (strlen(structural_dir) == 0) {
     if ((subjects_dir = getenv("SUBJECTS_DIR")) == NULL)
-      ErrorExit(ERROR_BAD_PARM, "can't get environment variable SUBJECTS_DIR", Progname);
+      ErrorExit(ERROR_BAD_PARM, "can't get environment variable SUBJECTS_DIR",
+                Progname);
     sprintf(structural_dir, "%s/%s/mri/T1", subjects_dir, subject_name);
   }
 
@@ -157,15 +166,32 @@ int main(int argc, char *argv[]) {
 
   if (strcmp(register_name, "-") != 0) {
     if ((fp = fopen(register_name, "w")) == NULL)
-      ErrorExit(ERROR_BAD_FILE, "%s: couldn't open file %s for writing", Progname, register_name);
+      ErrorExit(ERROR_BAD_FILE, "%s: couldn't open file %s for writing",
+                Progname, register_name);
     fprintf(fp, "%s\n", subject_name);
     fprintf(fp, "%g\n", fct_in_plane_resolution);
     fprintf(fp, "%g\n", fct_slice_thickness);
     fprintf(fp, "%g\n", 0.1);
-    fprintf(fp, "%10.5g %10.5g %10.5g %10.5g\n", *MATRIX_RELT(register_matrix, 1, 1), *MATRIX_RELT(register_matrix, 1, 2), *MATRIX_RELT(register_matrix, 1, 3), *MATRIX_RELT(register_matrix, 1, 4));
-    fprintf(fp, "%10.5g %10.5g %10.5g %10.5g\n", *MATRIX_RELT(register_matrix, 2, 1), *MATRIX_RELT(register_matrix, 2, 2), *MATRIX_RELT(register_matrix, 2, 3), *MATRIX_RELT(register_matrix, 2, 4));
-    fprintf(fp, "%10.5g %10.5g %10.5g %10.5g\n", *MATRIX_RELT(register_matrix, 3, 1), *MATRIX_RELT(register_matrix, 3, 2), *MATRIX_RELT(register_matrix, 3, 3), *MATRIX_RELT(register_matrix, 3, 4));
-    fprintf(fp, "%10.5g %10.5g %10.5g %10.5g\n", *MATRIX_RELT(register_matrix, 4, 1), *MATRIX_RELT(register_matrix, 4, 2), *MATRIX_RELT(register_matrix, 4, 3), *MATRIX_RELT(register_matrix, 4, 4));
+    fprintf(fp, "%10.5g %10.5g %10.5g %10.5g\n",
+            *MATRIX_RELT(register_matrix, 1, 1),
+            *MATRIX_RELT(register_matrix, 1, 2),
+            *MATRIX_RELT(register_matrix, 1, 3),
+            *MATRIX_RELT(register_matrix, 1, 4));
+    fprintf(fp, "%10.5g %10.5g %10.5g %10.5g\n",
+            *MATRIX_RELT(register_matrix, 2, 1),
+            *MATRIX_RELT(register_matrix, 2, 2),
+            *MATRIX_RELT(register_matrix, 2, 3),
+            *MATRIX_RELT(register_matrix, 2, 4));
+    fprintf(fp, "%10.5g %10.5g %10.5g %10.5g\n",
+            *MATRIX_RELT(register_matrix, 3, 1),
+            *MATRIX_RELT(register_matrix, 3, 2),
+            *MATRIX_RELT(register_matrix, 3, 3),
+            *MATRIX_RELT(register_matrix, 3, 4));
+    fprintf(fp, "%10.5g %10.5g %10.5g %10.5g\n",
+            *MATRIX_RELT(register_matrix, 4, 1),
+            *MATRIX_RELT(register_matrix, 4, 2),
+            *MATRIX_RELT(register_matrix, 4, 3),
+            *MATRIX_RELT(register_matrix, 4, 4));
     fclose(fp);
   }
 
@@ -177,7 +203,8 @@ int main(int argc, char *argv[]) {
 
   if (strcmp(analyse_name, "-") != 0) {
     if ((fp = fopen(analyse_name, "w")) == NULL)
-      ErrorExit(ERROR_BAD_FILE, "%s: couldn't open file %s for writing", Progname, analyse_name);
+      ErrorExit(ERROR_BAD_FILE, "%s: couldn't open file %s for writing",
+                Progname, analyse_name);
     fprintf(fp, "%s\n", t1_path);
     s = strrchr(fct_stem, '/');
     s = (s == NULL ? fct_stem : s + 1);
@@ -205,107 +232,115 @@ void read_functional_header(char *fct_stem) {
     if ((fp = fopen(aws_header_name, "r")) == NULL) {
       sprintf(aws_header_name, "%s.ras", fct_stem);
       if ((fp = fopen(aws_header_name, "r")) == NULL)
-        ErrorExit(ERROR_NO_FILE, "%s: couldn't open header file to functional set %s", Progname, fct_stem);
+        ErrorExit(ERROR_NO_FILE,
+                  "%s: couldn't open header file to functional set %s",
+                  Progname, fct_stem);
     }
   }
 
   while (fgets(aws_header_line, STRLEN, fp) != NULL) {
     if ((s = strstr(aws_header_line, "normal_r")) != NULL) {
-      s+=10;
+      s += 10;
       fct_n_r = (float)atof(s);
       good_fct_header_flag = 1;
     }
     if ((s = strstr(aws_header_line, "normal_a")) != NULL) {
-      s+=10;
+      s += 10;
       fct_n_a = (float)atof(s);
       good_fct_header_flag = 1;
     }
     if ((s = strstr(aws_header_line, "normal_s")) != NULL) {
-      s+=10;
+      s += 10;
       fct_n_s = (float)atof(s);
       good_fct_header_flag = 1;
     }
     if ((s = strstr(aws_header_line, "top_left_r")) != NULL) {
-      s+=12;
+      s += 12;
       fct_tl_r = (float)atof(s);
       good_fct_header_flag = 1;
     }
     if ((s = strstr(aws_header_line, "top_left_a")) != NULL) {
-      s+=12;
+      s += 12;
       fct_tl_a = (float)atof(s);
       good_fct_header_flag = 1;
     }
     if ((s = strstr(aws_header_line, "top_left_s")) != NULL) {
-      s+=12;
+      s += 12;
       fct_tl_s = (float)atof(s);
       good_fct_header_flag = 1;
     }
     if ((s = strstr(aws_header_line, "top_right_r")) != NULL) {
-      s+=13;
+      s += 13;
       fct_tr_r = (float)atof(s);
       good_fct_header_flag = 1;
     }
     if ((s = strstr(aws_header_line, "top_right_a")) != NULL) {
-      s+=13;
+      s += 13;
       fct_tr_a = (float)atof(s);
       good_fct_header_flag = 1;
     }
     if ((s = strstr(aws_header_line, "top_right_s")) != NULL) {
-      s+=13;
+      s += 13;
       fct_tr_s = (float)atof(s);
       good_fct_header_flag = 1;
     }
     if ((s = strstr(aws_header_line, "bottom_right_r")) != NULL) {
-      s+=16;
+      s += 16;
       fct_br_r = (float)atof(s);
       good_fct_header_flag = 1;
     }
     if ((s = strstr(aws_header_line, "bottom_right_a")) != NULL) {
-      s+=16;
+      s += 16;
       fct_br_a = (float)atof(s);
       good_fct_header_flag = 1;
     }
     if ((s = strstr(aws_header_line, "bottom_right_s")) != NULL) {
-      s+=16;
+      s += 16;
       fct_br_s = (float)atof(s);
       good_fct_header_flag = 1;
     }
 
     if ((s = strstr(aws_header_line, "slice_thick")) != NULL) {
-      s+=13;
+      s += 13;
       fct_slice_thickness = (float)atof(s);
     }
     if ((s = strstr(aws_header_line, "cols")) != NULL) {
-      s+=6;
+      s += 6;
       fct_cols = atoi(s);
     }
     if ((s = strstr(aws_header_line, "rows")) != NULL) {
-      s+=6;
+      s += 6;
       fct_rows = atoi(s);
     }
     if ((s = strstr(aws_header_line, "nslices")) != NULL) {
-      s+=9;
+      s += 9;
       fct_slices = atoi(s);
     }
-
   }
 
   fclose(fp);
 
   if (good_fct_header_flag == 0)
-    ErrorExit(ERROR_BAD_FILE, "%s: %s does not contain necessary ras information", Progname, aws_header_name);
+    ErrorExit(ERROR_BAD_FILE,
+              "%s: %s does not contain necessary ras information", Progname,
+              aws_header_name);
 
-  fct_c_r = fct_tl_r + (fct_br_r - fct_tl_r) / 2 + fct_slice_thickness * fct_n_r * (fct_slices - 1) / 2;
-  fct_c_a = fct_tl_a + (fct_br_a - fct_tl_a) / 2 + fct_slice_thickness * fct_n_a * (fct_slices - 1) / 2;
-  fct_c_s = fct_tl_s + (fct_br_s - fct_tl_s) / 2 + fct_slice_thickness * fct_n_s * (fct_slices - 1) / 2;
+  fct_c_r = fct_tl_r + (fct_br_r - fct_tl_r) / 2 +
+            fct_slice_thickness * fct_n_r * (fct_slices - 1) / 2;
+  fct_c_a = fct_tl_a + (fct_br_a - fct_tl_a) / 2 +
+            fct_slice_thickness * fct_n_a * (fct_slices - 1) / 2;
+  fct_c_s = fct_tl_s + (fct_br_s - fct_tl_s) / 2 +
+            fct_slice_thickness * fct_n_s * (fct_slices - 1) / 2;
 
-  fct_in_plane_resolution = sqrt((fct_tl_r - fct_tr_r) * (fct_tl_r - fct_tr_r) +
-                                 (fct_tl_a - fct_tr_a) * (fct_tl_a - fct_tr_a) +
-                                 (fct_tl_s - fct_tr_s) * (fct_tl_s - fct_tr_s)) / (float)fct_cols;
+  fct_in_plane_resolution =
+      sqrt((fct_tl_r - fct_tr_r) * (fct_tl_r - fct_tr_r) +
+           (fct_tl_a - fct_tr_a) * (fct_tl_a - fct_tr_a) +
+           (fct_tl_s - fct_tr_s) * (fct_tl_s - fct_tr_s)) /
+      (float)fct_cols;
 
   return;
 
-}  /*  end read_functional_header()  */
+} /*  end read_functional_header()  */
 
 MATRIX *make_register_matrix(MRI *high_res_vol, MRI *fct_run_vol) {
 
@@ -380,14 +415,14 @@ MATRIX *make_register_matrix(MRI *high_res_vol, MRI *fct_run_vol) {
    *
    ******************************************************************/
 
-  itoi     = MatrixAlloc(4, 4, MATRIX_REAL);
+  itoi = MatrixAlloc(4, 4, MATRIX_REAL);
   si2toras = MatrixAlloc(4, 4, MATRIX_REAL);
   fi2toras = MatrixAlloc(4, 4, MATRIX_REAL);
-  si1toi2  = MatrixAlloc(4, 4, MATRIX_REAL);
-  fi1toi2  = MatrixAlloc(4, 4, MATRIX_REAL);
-  si1tor   = MatrixAlloc(4, 4, MATRIX_REAL);
-  fi1tor   = MatrixAlloc(4, 4, MATRIX_REAL);
-  rm       = MatrixAlloc(4, 4, MATRIX_REAL);
+  si1toi2 = MatrixAlloc(4, 4, MATRIX_REAL);
+  fi1toi2 = MatrixAlloc(4, 4, MATRIX_REAL);
+  si1tor = MatrixAlloc(4, 4, MATRIX_REAL);
+  fi1tor = MatrixAlloc(4, 4, MATRIX_REAL);
+  rm = MatrixAlloc(4, 4, MATRIX_REAL);
 
   if (high_res_vol->ras_good_flag == 0) {
     printf("T1 volume contains no orientation information\n");
@@ -397,46 +432,37 @@ MATRIX *make_register_matrix(MRI *high_res_vol, MRI *fct_run_vol) {
        +y -> inferior
        +z -> anterior */
 
-    set_matrix(si2toras, -1,  0, 0, 0,
-               0,  0, 1, 0,
-               0, -1, 0, 0,
-               0,  0, 0, 1);
+    set_matrix(si2toras, -1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1);
 
   } else {
-    set_matrix(si2toras, high_res_vol->x_r, high_res_vol->y_r, high_res_vol->z_r, high_res_vol->c_r,
-               high_res_vol->x_a, high_res_vol->y_a, high_res_vol->z_a, high_res_vol->c_a,
-               high_res_vol->x_s, high_res_vol->y_s, high_res_vol->z_s, high_res_vol->c_s,
-               0, 0, 0, 1);
+    set_matrix(si2toras, high_res_vol->x_r, high_res_vol->y_r,
+               high_res_vol->z_r, high_res_vol->c_r, high_res_vol->x_a,
+               high_res_vol->y_a, high_res_vol->z_a, high_res_vol->c_a,
+               high_res_vol->x_s, high_res_vol->y_s, high_res_vol->z_s,
+               high_res_vol->c_s, 0, 0, 0, 1);
   }
 
-  set_matrix(si1toi2, 1, 0, 0, -high_res_vol->width/2,
-             0, 1, 0, -high_res_vol->height/2,
-             0, 0, 1, -high_res_vol->depth/2,
-             0, 0, 0, 1);
+  set_matrix(si1toi2, 1, 0, 0, -high_res_vol->width / 2, 0, 1, 0,
+             -high_res_vol->height / 2, 0, 0, 1, -high_res_vol->depth / 2, 0, 0,
+             0, 1);
 
-  set_matrix(fi2toras, fct_x_r, fct_y_r, fct_z_r, fct_c_r,
-             fct_x_a, fct_y_a, fct_z_a, fct_c_a,
-             fct_x_s, fct_y_s, fct_z_s, fct_c_s,
-             0, 0, 0, 1);
+  set_matrix(fi2toras, fct_x_r, fct_y_r, fct_z_r, fct_c_r, fct_x_a, fct_y_a,
+             fct_z_a, fct_c_a, fct_x_s, fct_y_s, fct_z_s, fct_c_s, 0, 0, 0, 1);
 
-  set_matrix(fi1toi2, 1, 0, 0, -fct_cols/2,
-             0, 1, 0, -fct_rows/2,
-             0, 0, 1, -fct_slices/2,
-             0, 0, 0, 1);
+  set_matrix(fi1toi2, 1, 0, 0, -fct_cols / 2, 0, 1, 0, -fct_rows / 2, 0, 0, 1,
+             -fct_slices / 2, 0, 0, 0, 1);
 
   fctxmn = -fct_cols * fct_in_plane_resolution / 2;
   fctymn = -fct_rows * fct_in_plane_resolution / 2;
   fctzmn = -fct_slices * fct_slice_thickness / 2;
 
-  set_matrix(si1tor, -high_res_vol->xsize, 0, 0, high_res_vol->xend,
-             0, 0, high_res_vol->zsize, high_res_vol->zstart,
-             0, -high_res_vol->ysize, 0, high_res_vol->yend,
-             0, 0, 0, 1);
+  set_matrix(si1tor, -high_res_vol->xsize, 0, 0, high_res_vol->xend, 0, 0,
+             high_res_vol->zsize, high_res_vol->zstart, 0, -high_res_vol->ysize,
+             0, high_res_vol->yend, 0, 0, 0, 1);
 
-  set_matrix(fi1tor, -fct_in_plane_resolution, 0, 0, -fctxmn,
-             0, 0, fct_slice_thickness, fctzmn,
-             0, -fct_in_plane_resolution, 0, -fctymn,
-             0, 0, 0, 1);
+  set_matrix(fi1tor, -fct_in_plane_resolution, 0, 0, -fctxmn, 0, 0,
+             fct_slice_thickness, fctzmn, 0, -fct_in_plane_resolution, 0,
+             -fctymn, 0, 0, 0, 1);
 
   MatrixMultiply(si2toras, si1toi2, itoi);
   MatrixMultiply(MatrixInverse(fi2toras, NULL), itoi, itoi);
@@ -453,14 +479,14 @@ MATRIX *make_register_matrix(MRI *high_res_vol, MRI *fct_run_vol) {
   MatrixFree(&si1tor);
   MatrixFree(&fi1tor);
 
-  return(rm);
+  return (rm);
 
-}  /*  end make_register_matrix()  */
+} /*  end make_register_matrix()  */
 
 void set_matrix(MATRIX *m, float e11, float e12, float e13, float e14,
-                float e21, float e22, float e23, float e24,
-                float e31, float e32, float e33, float e34,
-                float e41, float e42, float e43, float e44) {
+                float e21, float e22, float e23, float e24, float e31,
+                float e32, float e33, float e34, float e41, float e42,
+                float e43, float e44) {
 
   *MATRIX_RELT(m, 1, 1) = e11;
   *MATRIX_RELT(m, 1, 2) = e12;
@@ -484,6 +510,6 @@ void set_matrix(MATRIX *m, float e11, float e12, float e13, float e14,
 
   return;
 
-}  /*  end set_matrix()  */
+} /*  end set_matrix()  */
 
 /* EOF */

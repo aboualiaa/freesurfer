@@ -4,28 +4,27 @@
 #include <QMainWindow>
 
 namespace Ui {
-    class MainWindow;
+class MainWindow;
 }
 
 class QImage;
 
-class MainWindow : public QMainWindow
-{
-    Q_OBJECT
+class MainWindow : public QMainWindow {
+  Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+  explicit MainWindow(QWidget *parent = nullptr);
+  ~MainWindow();
 
-    void Load(int, char*[]);
+  void Load(int, char *[]);
 
-    void keyPressEvent(QKeyEvent *);
+  void keyPressEvent(QKeyEvent *);
 
 protected slots:
-    void OnCurrentImageChanged(const QImage& image, int n);
+  void OnCurrentImageChanged(const QImage &image, int n);
 
 private:
-    Ui::MainWindow *ui;
+  Ui::MainWindow *ui;
 };
 
 #endif // MAINWINDOW_H

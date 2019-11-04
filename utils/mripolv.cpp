@@ -26,11 +26,11 @@
                     INCLUDE FILES
 -------------------------------------------------------*/
 
-#include <math.h>
+#include <cmath>
 #include <memory.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include "box.h"
 #include "diag.h"
@@ -55,17 +55,20 @@
 -------------------------------------------------------*/
 
 /* vertices of an icosohedron (sp?) */
-float ic_x_vertices[NVERTICES] = {0,       0.8944, 0.2764,  -0.7236, -0.7236, 0.2764, -0.4253, -0.8507,
-                                  -0.4253, 0.1625, -0.2629, 0.5257,  0.6882,  0.1625, 0.6882,  -0.2629,
-                                  -0.5878, 0,      -0.9511, -0.9511, -0.5878, 1.00};
+float ic_x_vertices[NVERTICES] = {
+    0,       0.8944, 0.2764,  -0.7236, -0.7236, 0.2764, -0.4253, -0.8507,
+    -0.4253, 0.1625, -0.2629, 0.5257,  0.6882,  0.1625, 0.6882,  -0.2629,
+    -0.5878, 0,      -0.9511, -0.9511, -0.5878, 1.00};
 
-float ic_y_vertices[NVERTICES] = {0,      0,       0.8507,  0.5257,  -0.5257, -0.8507, -0.3090, 0,
-                                  0.3090, -0.5000, -0.8090, 0,       -0.5000, 0.5000,  0.5000,  0.8090,
-                                  0.8090, 1.0000,  0.3090,  -0.3090, -0.8090, 0.00};
+float ic_y_vertices[NVERTICES] = {
+    0,      0,       0.8507,  0.5257,  -0.5257, -0.8507, -0.3090, 0,
+    0.3090, -0.5000, -0.8090, 0,       -0.5000, 0.5000,  0.5000,  0.8090,
+    0.8090, 1.0000,  0.3090,  -0.3090, -0.8090, 0.00};
 
-float ic_z_vertices[NVERTICES] = {1.0000, 0.4472, 0.4472, 0.4472, 0.4472, 0.4472, 0.8507, 0.5257,
-                                  0.8507, 0.8507, 0.5257, 0.8507, 0.5257, 0.8507, 0.5257, 0.5257,
-                                  0,      0,      0,      0,      0,      0.00};
+float ic_z_vertices[NVERTICES] = {
+    1.0000, 0.4472, 0.4472, 0.4472, 0.4472, 0.4472, 0.8507, 0.5257,
+    0.8507, 0.8507, 0.5257, 0.8507, 0.5257, 0.8507, 0.5257, 0.5257,
+    0,      0,      0,      0,      0,      0.00};
 
 static int vertices_initialized = 0;
 static float e1_x_v[NVERTICES];
@@ -81,7 +84,7 @@ static float e2_z_v[NVERTICES];
 
 static int compare_sort_array(const void *pc1, const void *pc2);
 static int compare_sort_farray(const void *pc1, const void *pc2);
-static void init_basis_vectors(void);
+static void init_basis_vectors();
 
 /*-----------------------------------------------------
                     GLOBAL FUNCTIONS
@@ -93,9 +96,9 @@ static void init_basis_vectors(void);
 
         Description
 ------------------------------------------------------*/
-MRI *MRIpolvMean(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize)
-{
-  int width, height, depth, x, y, z, whalf, xk, yk, n, vertex, xi, yi, zi, *pxi, *pyi, *pzi;
+MRI *MRIpolvMean(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize) {
+  int width, height, depth, x, y, z, whalf, xk, yk, n, vertex, xi, yi, zi, *pxi,
+      *pyi, *pzi;
   float e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase, total;
   BUFTYPE *pdst, *pptr;
 
@@ -105,7 +108,8 @@ MRI *MRIpolvMean(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize)
   depth = mri_src->depth;
   whalf = (wsize - 1) / 2;
 
-  if (!mri_dst) mri_dst = MRIclone(mri_src, NULL);
+  if (!mri_dst)
+    mri_dst = MRIclone(mri_src, nullptr);
 
   pxi = mri_src->xi;
   pyi = mri_src->yi;
@@ -160,9 +164,10 @@ MRI *MRIpolvMean(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize)
 
         Description
 ------------------------------------------------------*/
-MRI *MRIpolvNormalCurvature(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize)
-{
-  int width, height, depth, x, y, z, whalf, yk, n, vertex, xi, yi, zi, *pxi, *pyi, *pzi;
+MRI *MRIpolvNormalCurvature(MRI *mri_src, MRI *mri_dst, MRI *mri_polv,
+                            int wsize) {
+  int width, height, depth, x, y, z, whalf, yk, n, vertex, xi, yi, zi, *pxi,
+      *pyi, *pzi;
   float nx, ny, nz, mean, var, val, std, *pdst;
   BUFTYPE *pptr;
 
@@ -173,7 +178,8 @@ MRI *MRIpolvNormalCurvature(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize
   whalf = (wsize - 1) / 2;
 
   if (!mri_dst) {
-    mri_dst = MRIallocSequence(width, height, depth, MRI_FLOAT, mri_src->nframes);
+    mri_dst =
+        MRIallocSequence(width, height, depth, MRI_FLOAT, mri_src->nframes);
     MRIcopyHeader(mri_src, mri_dst);
   }
 
@@ -199,7 +205,8 @@ MRI *MRIpolvNormalCurvature(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize
         /* now find the values in the normal direction */
         mean = var = 0.0f;
         for (yk = -whalf; yk <= whalf; yk++) {
-          if (!yk) continue; /* skip central point */
+          if (!yk)
+            continue; /* skip central point */
           xi = pxi[nint((float)x + (float)yk * nx)];
           yi = pyi[nint((float)y + (float)yk * ny)];
           zi = pzi[nint((float)z + (float)yk * nz)];
@@ -227,9 +234,9 @@ MRI *MRIpolvNormalCurvature(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize
 
         Description
 ------------------------------------------------------*/
-MRI *MRIpolvZscore(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize)
-{
-  int width, height, depth, x, y, z, whalf, yk, n, vertex, xi, yi, zi, *pxi, *pyi, *pzi;
+MRI *MRIpolvZscore(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize) {
+  int width, height, depth, x, y, z, whalf, yk, n, vertex, xi, yi, zi, *pxi,
+      *pyi, *pzi;
   float nx, ny, nz, mean, var, val, std, *pdst, xf, yf, zf;
   BUFTYPE *pptr;
 
@@ -240,7 +247,8 @@ MRI *MRIpolvZscore(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize)
   whalf = (wsize - 1) / 2;
 
   if (!mri_dst) {
-    mri_dst = MRIallocSequence(width, height, depth, MRI_FLOAT, mri_src->nframes);
+    mri_dst =
+        MRIallocSequence(width, height, depth, MRI_FLOAT, mri_src->nframes);
     MRIcopyHeader(mri_src, mri_dst);
   }
 
@@ -299,9 +307,9 @@ MRI *MRIpolvZscore(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize)
 
         Description
 ------------------------------------------------------*/
-MRI *MRIpolvMedian(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize)
-{
-  int width, height, depth, x, y, z, whalf, xk, yk, n, vertex, xi, yi, zi, *pxi, *pyi, *pzi;
+MRI *MRIpolvMedian(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize) {
+  int width, height, depth, x, y, z, whalf, xk, yk, n, vertex, xi, yi, zi, *pxi,
+      *pyi, *pzi;
   float e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase;
   BUFTYPE *pdst, *pptr, plane_vals[MAXLEN], *pvals;
 
@@ -311,7 +319,8 @@ MRI *MRIpolvMedian(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize)
   whalf = (wsize - 1) / 2;
 
   init_basis_vectors();
-  if (!mri_dst) mri_dst = MRIclone(mri_src, NULL);
+  if (!mri_dst)
+    mri_dst = MRIclone(mri_src, nullptr);
 
   pxi = mri_src->xi;
   pyi = mri_src->yi;
@@ -368,9 +377,10 @@ MRI *MRIpolvMedian(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize)
 
         Description
 ------------------------------------------------------*/
-MRI *MRIpolvOrder(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize, int thresh)
-{
-  int width, height, depth, x, y, z, whalf, xk, yk, n, vertex, xi, yi, zi, *pxi, *pyi, *pzi, order;
+MRI *MRIpolvOrder(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize,
+                  int thresh) {
+  int width, height, depth, x, y, z, whalf, xk, yk, n, vertex, xi, yi, zi, *pxi,
+      *pyi, *pzi, order;
   float e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase;
   BUFTYPE *pdst, *pptr, plane_vals[MAXLEN], *pvals;
 
@@ -380,7 +390,8 @@ MRI *MRIpolvOrder(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize, int thre
   whalf = (wsize - 1) / 2;
 
   init_basis_vectors();
-  if (!mri_dst) mri_dst = MRIclone(mri_src, NULL);
+  if (!mri_dst)
+    mri_dst = MRIclone(mri_src, nullptr);
 
   pxi = mri_src->xi;
   pyi = mri_src->yi;
@@ -427,7 +438,8 @@ MRI *MRIpolvOrder(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize, int thre
         /* find the 1st supra-threshold value in the array */
         pvals = plane_vals;
         for (order = 0; order < n; order++)
-          if (*pvals++ > thresh) break;
+          if (*pvals++ > thresh)
+            break;
         *pdst++ = (BUFTYPE)order;
       }
     }
@@ -442,34 +454,44 @@ MRI *MRIpolvOrder(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize, int thre
 
         Description
 ------------------------------------------------------*/
-MRI *MRIpolvMeanRegion(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize, MRI_REGION *region)
-{
-  int width, height, depth, x, y, z, whalf, xk, yk, n, vertex, x0, y0, z0, xi, yi, zi, *pxi, *pyi, *pzi;
+MRI *MRIpolvMeanRegion(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize,
+                       MRI_REGION *region) {
+  int width, height, depth, x, y, z, whalf, xk, yk, n, vertex, x0, y0, z0, xi,
+      yi, zi, *pxi, *pyi, *pzi;
   float e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase, total;
   BUFTYPE *pdst, *pptr;
 
   init_basis_vectors();
-  if (mri_src->type != MRI_UCHAR) ErrorReturn(mri_dst, (ERROR_UNSUPPORTED, "MRIpolvMeanRegion: unsupported src type"));
+  if (mri_src->type != MRI_UCHAR)
+    ErrorReturn(mri_dst,
+                (ERROR_UNSUPPORTED, "MRIpolvMeanRegion: unsupported src type"));
 
   pxi = mri_src->xi;
   pyi = mri_src->yi;
   pzi = mri_src->zi;
   width = region->x + region->dx;
-  if (width > mri_src->width) width = mri_src->width;
+  if (width > mri_src->width)
+    width = mri_src->width;
   height = region->y + region->dy;
-  if (height > mri_src->height) height = mri_src->height;
+  if (height > mri_src->height)
+    height = mri_src->height;
   depth = region->z + region->dz;
-  if (depth > mri_src->depth) depth = mri_src->depth;
+  if (depth > mri_src->depth)
+    depth = mri_src->depth;
   x0 = region->x;
-  if (x0 < 0) x0 = 0;
+  if (x0 < 0)
+    x0 = 0;
   y0 = region->y;
-  if (y0 < 0) y0 = 0;
+  if (y0 < 0)
+    y0 = 0;
   z0 = region->z;
-  if (z0 < 0) z0 = 0;
+  if (z0 < 0)
+    z0 = 0;
   whalf = (wsize - 1) / 2;
 
   if (mri_dst && mri_dst->type != MRI_UCHAR)
-    ErrorReturn(mri_dst, (ERROR_UNSUPPORTED, "MRIpolvMeanRegion: unsupported dst type"));
+    ErrorReturn(mri_dst,
+                (ERROR_UNSUPPORTED, "MRIpolvMeanRegion: unsupported dst type"));
 
   if (!mri_dst) {
     int w, h, d;
@@ -536,35 +558,44 @@ MRI *MRIpolvMeanRegion(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize, MRI
 
         Description
 ------------------------------------------------------*/
-MRI *MRIpolvMedianRegion(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize, MRI_REGION *region)
-{
-  int width, height, depth, x, y, z, whalf, xk, yk, n, vertex, x0, y0, z0, xi, yi, zi, *pxi, *pyi, *pzi, median_index;
+MRI *MRIpolvMedianRegion(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize,
+                         MRI_REGION *region) {
+  int width, height, depth, x, y, z, whalf, xk, yk, n, vertex, x0, y0, z0, xi,
+      yi, zi, *pxi, *pyi, *pzi, median_index;
   float e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase;
   BUFTYPE *pdst, *pptr, plane_vals[MAXLEN], *pvals;
 
   init_basis_vectors();
   if (mri_src->type != MRI_UCHAR)
-    ErrorReturn(mri_dst, (ERROR_UNSUPPORTED, "MRIpolvMedianRegion: unsupported src type"));
+    ErrorReturn(mri_dst, (ERROR_UNSUPPORTED,
+                          "MRIpolvMedianRegion: unsupported src type"));
 
   pxi = mri_src->xi;
   pyi = mri_src->yi;
   pzi = mri_src->zi;
   width = region->x + region->dx;
-  if (width > mri_src->width) width = mri_src->width;
+  if (width > mri_src->width)
+    width = mri_src->width;
   height = region->y + region->dy;
-  if (height > mri_src->height) height = mri_src->height;
+  if (height > mri_src->height)
+    height = mri_src->height;
   depth = region->z + region->dz;
-  if (depth > mri_src->depth) depth = mri_src->depth;
+  if (depth > mri_src->depth)
+    depth = mri_src->depth;
   x0 = region->x;
-  if (x0 < 0) x0 = 0;
+  if (x0 < 0)
+    x0 = 0;
   y0 = region->y;
-  if (y0 < 0) y0 = 0;
+  if (y0 < 0)
+    y0 = 0;
   z0 = region->z;
-  if (z0 < 0) z0 = 0;
+  if (z0 < 0)
+    z0 = 0;
   whalf = (wsize - 1) / 2;
 
   if (mri_dst && (mri_dst->type != MRI_UCHAR))
-    ErrorReturn(mri_dst, (ERROR_UNSUPPORTED, "MRIpolvMedianRegion: unsupported dst type"));
+    ErrorReturn(mri_dst, (ERROR_UNSUPPORTED,
+                          "MRIpolvMedianRegion: unsupported dst type"));
   if (!mri_dst) {
     int w, h, d;
 
@@ -631,8 +662,8 @@ MRI *MRIpolvMedianRegion(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize, M
 
         Description
 ------------------------------------------------------*/
-MRI *MRIextractCpolvCoords(MRI *mri_src, int *px, int *py, int *pz, MRI *mri_polv, int x, int y, int z, int wsize)
-{
+MRI *MRIextractCpolvCoords(MRI *mri_src, int *px, int *py, int *pz,
+                           MRI *mri_polv, int x, int y, int z, int wsize) {
   float e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase;
   int vertex, whalf, xk, yk, xi, yi, zi;
 
@@ -671,8 +702,8 @@ MRI *MRIextractCpolvCoords(MRI *mri_src, int *px, int *py, int *pz, MRI *mri_pol
 
         Description
 ------------------------------------------------------*/
-MRI *MRIextractCpolv(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int x, int y, int z, int wsize)
-{
+MRI *MRIextractCpolv(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int x, int y,
+                     int z, int wsize) {
   float e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase;
   int vertex, whalf, xk, yk, xi, yi, zi;
 
@@ -722,8 +753,8 @@ MRI *MRIextractCpolv(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int x, int y, in
 
         Description
 ------------------------------------------------------*/
-MRI *MRIextractPolvPlane(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int x, int y, int z, int wsize)
-{
+MRI *MRIextractPolvPlane(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int x,
+                         int y, int z, int wsize) {
   float e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase;
   int vertex, whalf, xk, yk, xi, yi, zi;
 
@@ -773,8 +804,8 @@ MRI *MRIextractPolvPlane(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int x, int y
 
         Description
 ------------------------------------------------------*/
-int MRIcountPlanarAboveThreshold(MRI *mri_src, int vertex, int x, int y, int z, int wsize, int lo_lim, int hi_lim)
-{
+int MRIcountPlanarAboveThreshold(MRI *mri_src, int vertex, int x, int y, int z,
+                                 int wsize, int lo_lim, int hi_lim) {
   int whalf, xk, yk, n, xi, yi, zi, *pxi, *pyi, *pzi, count;
   float e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase;
   BUFTYPE val;
@@ -811,7 +842,8 @@ int MRIcountPlanarAboveThreshold(MRI *mri_src, int vertex, int x, int y, int z, 
       zi = nint(zbase + xk * e1_z);
       zi = pzi[zi];
       val = MRIvox(mri_src, xi, yi, zi);
-      if (val >= lo_lim && val <= hi_lim) count++;
+      if (val >= lo_lim && val <= hi_lim)
+        count++;
     }
   }
 
@@ -825,11 +857,10 @@ int MRIcountPlanarAboveThreshold(MRI *mri_src, int vertex, int x, int y, int z, 
         Description
 ------------------------------------------------------*/
 
-MRI *MRIplaneOfLeastVarianceNormal(MRI *mri_src, MRI *mri_dst, int wsize)
-{
+MRI *MRIplaneOfLeastVarianceNormal(MRI *mri_src, MRI *mri_dst, int wsize) {
   int width, height, depth, x, y, z, whalf, vertex, xk, yk, zk, pno, mini, maxi;
-  float min_var, max_var, a, b, c, total[MAXLEN], total_sq[MAXLEN], nv[MAXLEN], varv[MAXLEN], avgv[MAXLEN], val,
-      total_var;
+  float min_var, max_var, a, b, c, total[MAXLEN], total_sq[MAXLEN], nv[MAXLEN],
+      varv[MAXLEN], avgv[MAXLEN], val, total_var;
   BUFTYPE *psrc, *pdst;
 
   width = mri_src->width;
@@ -837,7 +868,8 @@ MRI *MRIplaneOfLeastVarianceNormal(MRI *mri_src, MRI *mri_dst, int wsize)
   depth = mri_src->depth;
   whalf = (wsize - 1) / 2;
 
-  if (!mri_dst) mri_dst = MRIclone(mri_src, NULL);
+  if (!mri_dst)
+    mri_dst = MRIclone(mri_src, nullptr);
 
   depth -= whalf; /* don't do outer ring of pixels, so we don't have */
   width -= whalf; /* to deal with boundary conditions */
@@ -857,7 +889,8 @@ MRI *MRIplaneOfLeastVarianceNormal(MRI *mri_src, MRI *mri_dst, int wsize)
         maxi = mini = -1;
         min_var = 100000.0f;  /* minimum variance of set of planes */
         max_var = -100000.0f; /* maximum variance of set of planes */
-        if (MRIvox(mri_src, x, y, z) < 50) continue;
+        if (MRIvox(mri_src, x, y, z) < 50)
+          continue;
 
         for (vertex = 0; vertex < NVERTICES; vertex++) {
           a = ic_x_vertices[vertex]; /* vector on unit sphere */
@@ -920,13 +953,15 @@ MRI *MRIplaneOfLeastVarianceNormal(MRI *mri_src, MRI *mri_dst, int wsize)
 
         Description
 ------------------------------------------------------*/
-MRI *MRIcentralPlaneOfLeastVarianceNormal(MRI *mri_src, MRI *mri_dst, int wsize)
-{
-  int width, height, depth, x, y, z, whalf, vertex, xk, yk, mini, maxi, xi, yi, zi, *pxi, *pyi, *pzi, x1, y1, z1, x0,
-      y0, z0;
-  float min_mean, min_var, max_var, total, total_sq, nv, varv, avgv, val, background_val, fmax;
+MRI *MRIcentralPlaneOfLeastVarianceNormal(MRI *mri_src, MRI *mri_dst,
+                                          int wsize) {
+  int width, height, depth, x, y, z, whalf, vertex, xk, yk, mini, maxi, xi, yi,
+      zi, *pxi, *pyi, *pzi, x1, y1, z1, x0, y0, z0;
+  float min_mean, min_var, max_var, total, total_sq, nv, varv, avgv, val,
+      background_val, fmax;
   BUFTYPE *pdst, max_val;
-  float xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y, *pe2_z, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
+  float xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y, *pe2_z,
+      e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
 
   if (getenv("USE_CACHED_CPOLV")) {
     char fname[100];
@@ -936,9 +971,12 @@ MRI *MRIcentralPlaneOfLeastVarianceNormal(MRI *mri_src, MRI *mri_dst, int wsize)
     sprintf(fname, "%s/cpolv.mnc", mri_src->fname);
     mri_tmp = MRIread(fname);
     if (mri_tmp) {
-      if (Gdiag & DIAG_SHOW) fprintf(stderr, "reading previously calculated cpolv %s\n", fname);
-      if (mri_tmp->width == mri_src->width && mri_tmp->height == mri_src->height && mri_tmp->depth == mri_src->depth) {
-        mri_dst = MRIcopy(mri_tmp, NULL);
+      if (Gdiag & DIAG_SHOW)
+        fprintf(stderr, "reading previously calculated cpolv %s\n", fname);
+      if (mri_tmp->width == mri_src->width &&
+          mri_tmp->height == mri_src->height &&
+          mri_tmp->depth == mri_src->depth) {
+        mri_dst = MRIcopy(mri_tmp, nullptr);
         MRIfree(&mri_tmp);
         return (mri_dst);
       }
@@ -959,7 +997,8 @@ MRI *MRIcentralPlaneOfLeastVarianceNormal(MRI *mri_src, MRI *mri_dst, int wsize)
   depth = mri_src->depth;
   whalf = (wsize - 1) / 2;
 
-  if (!mri_dst) mri_dst = MRIclone(mri_src, NULL);
+  if (!mri_dst)
+    mri_dst = MRIclone(mri_src, nullptr);
 
 #if 0
   depth -= whalf ;   /* don't do outer ring of pixels, so we don't have */
@@ -974,8 +1013,7 @@ MRI *MRIcentralPlaneOfLeastVarianceNormal(MRI *mri_src, MRI *mri_dst, int wsize)
     x1 = MIN(x0 + mri_src->roi.dx - 1, width - 1);
     y1 = MIN(y0 + mri_src->roi.dy - 1, height - 1);
     z1 = MIN(z0 + mri_src->roi.dz - 1, depth - 1);
-  }
-  else {
+  } else {
     x0 = y0 = z0 = 0;
     x1 = width - 1;
     y1 = height - 1;
@@ -1075,14 +1113,15 @@ MRI *MRIcentralPlaneOfLeastVarianceNormal(MRI *mri_src, MRI *mri_dst, int wsize)
 
         Description
 ------------------------------------------------------*/
-MRI *MRIcentralPlaneOfLeastVarianceNormalMarked(MRI *mri_src, MRI *mri_mask, MRI *mri_dst, int wsize)
-{
-  int width, height, depth, x, y, z, whalf, vertex, xk, yk, mini, maxi, xi, yi, zi, *pxi, *pyi, *pzi, x1, y1, z1, x0,
-      y0, z0;
+MRI *MRIcentralPlaneOfLeastVarianceNormalMarked(MRI *mri_src, MRI *mri_mask,
+                                                MRI *mri_dst, int wsize) {
+  int width, height, depth, x, y, z, whalf, vertex, xk, yk, mini, maxi, xi, yi,
+      zi, *pxi, *pyi, *pzi, x1, y1, z1, x0, y0, z0;
   float min_mean, min_var, max_var, total, total_sq, nv, varv, avgv, val;
 
   BUFTYPE *pdst, max_val, *pmask;
-  float xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y, *pe2_z, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
+  float xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y, *pe2_z,
+      e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
 
   init_basis_vectors();
 
@@ -1095,7 +1134,8 @@ MRI *MRIcentralPlaneOfLeastVarianceNormalMarked(MRI *mri_src, MRI *mri_mask, MRI
   depth = mri_src->depth;
   whalf = (wsize - 1) / 2;
 
-  if (!mri_dst) mri_dst = MRIclone(mri_src, NULL);
+  if (!mri_dst)
+    mri_dst = MRIclone(mri_src, nullptr);
 
   if (mri_src->roi.dx > 0) {
     x0 = MAX(0, mri_src->roi.x);
@@ -1104,8 +1144,7 @@ MRI *MRIcentralPlaneOfLeastVarianceNormalMarked(MRI *mri_src, MRI *mri_mask, MRI
     x1 = MIN(x0 + mri_src->roi.dx - 1, width - 1);
     y1 = MIN(y0 + mri_src->roi.dy - 1, height - 1);
     z1 = MIN(z0 + mri_src->roi.dz - 1, depth - 1);
-  }
-  else {
+  } else {
     x0 = y0 = z0 = 0;
     x1 = width - 1;
     y1 = height - 1;
@@ -1194,8 +1233,7 @@ MRI *MRIcentralPlaneOfLeastVarianceNormalMarked(MRI *mri_src, MRI *mri_mask, MRI
   }
   return (mri_dst);
 }
-static int compare_sort_farray(const void *pc1, const void *pc2)
-{
+static int compare_sort_farray(const void *pc1, const void *pc2) {
   float c1, c2;
 
   c1 = *(float *)pc1;
@@ -1216,8 +1254,7 @@ static int compare_sort_farray(const void *pc1, const void *pc2)
 
         Description
 ------------------------------------------------------*/
-static int compare_sort_array(const void *pc1, const void *pc2)
-{
+static int compare_sort_array(const void *pc1, const void *pc2) {
   BUFTYPE c1, c2;
 
   c1 = *(BUFTYPE *)pc1;
@@ -1242,13 +1279,13 @@ static int compare_sort_array(const void *pc1, const void *pc2)
              product of that vector with the normal (ez) to obtain
              the 2nd in-plane basis vector.
 ------------------------------------------------------*/
-static void init_basis_vectors(void)
-{
-  float vx, vy, vz, *px, *py, *pz, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y, *pe2_z, e3_x, e3_y, e3_z, e1_x, e1_y, e1_z,
-      e2_x, e2_y, e2_z, len;
+static void init_basis_vectors() {
+  float vx, vy, vz, *px, *py, *pz, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y,
+      *pe2_z, e3_x, e3_y, e3_z, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, len;
   int vertex;
 
-  if (vertices_initialized) return;
+  if (vertices_initialized)
+    return;
 
   px = ic_x_vertices;
   py = ic_y_vertices;
@@ -1343,14 +1380,13 @@ static void init_basis_vectors(void)
 
         Description
 ------------------------------------------------------*/
-MRI *MRIfindThinWMStrands(MRI *mri_src, MRI *mri_dst, int wsize)
-{
-  int width, height, depth, x, y, z, whalf, yk, n, vertex, xi, yi, zi, *pxi, *pyi, *pzi, thin, was_white, black_white,
-      val;
+MRI *MRIfindThinWMStrands(MRI *mri_src, MRI *mri_dst, int wsize) {
+  int width, height, depth, x, y, z, whalf, yk, n, vertex, xi, yi, zi, *pxi,
+      *pyi, *pzi, thin, was_white, black_white, val;
   float nx, ny, nz, xf, yf, zf;
   BUFTYPE *pdst, *psrc;
 
-  printf("MRIfindThinWMStrands() wsize=%d\n",wsize);
+  printf("MRIfindThinWMStrands() wsize=%d\n", wsize);
 
   width = mri_src->width;
   height = mri_src->height;
@@ -1358,7 +1394,8 @@ MRI *MRIfindThinWMStrands(MRI *mri_src, MRI *mri_dst, int wsize)
   whalf = (wsize - 1) / 2;
 
   init_basis_vectors();
-  if (!mri_dst) mri_dst = MRIclone(mri_src, NULL);
+  if (!mri_dst)
+    mri_dst = MRIclone(mri_src, nullptr);
 
   pxi = mri_src->xi;
   pyi = mri_src->yi;
@@ -1394,8 +1431,7 @@ MRI *MRIfindThinWMStrands(MRI *mri_src, MRI *mri_dst, int wsize)
                   thin = ((yk - black_white) <= wsize);
                   break;
                 }
-              }
-              else if (!was_white && val > 0) /* black to white transition */
+              } else if (!was_white && val > 0) /* black to white transition */
                 black_white = yk;
               was_white = val > 0;
 
@@ -1420,8 +1456,7 @@ MRI *MRIfindThinWMStrands(MRI *mri_src, MRI *mri_dst, int wsize)
         Description
 ------------------------------------------------------*/
 #define MAX_LABELS 10000
-MRI *MRIresegmentThinWMStrands(MRI *mri_src, MRI *mri_dst, int thickness)
-{
+MRI *MRIresegmentThinWMStrands(MRI *mri_src, MRI *mri_dst, int thickness) {
   int width, height, depth, x, y, z, vertex, thin, i;
   float nx, ny, nz, nd;
   BUFTYPE *pdst, *psrc;
@@ -1435,7 +1470,8 @@ MRI *MRIresegmentThinWMStrands(MRI *mri_src, MRI *mri_dst, int thickness)
   max_dist = thickness / 2 + 1; /* allow search to extend into non-white */
 
   init_basis_vectors();
-  if (!mri_dst) mri_dst = MRIclone(mri_src, NULL);
+  if (!mri_dst)
+    mri_dst = MRIclone(mri_src, nullptr);
 
   for (vertex = 0; vertex < NVERTICES; vertex++) {
     nx = ic_x_vertices[vertex]; /* normal vector */
@@ -1446,7 +1482,8 @@ MRI *MRIresegmentThinWMStrands(MRI *mri_src, MRI *mri_dst, int thickness)
         psrc = &MRIvox(mri_src, 0, y, z); /* ptr to source */
         pdst = &MRIvox(mri_dst, 0, y, z); /* ptr to destination */
         for (x = 0; x < width; x++) {
-          if (x == 153 && y == 151 && z == 149) DiagBreak();
+          if (x == 153 && y == 151 && z == 149)
+            DiagBreak();
           thin = 0;
           if (*psrc++) {
             /* first search 'downwards' to see if we can find non-white */
@@ -1498,23 +1535,21 @@ MRI *MRIresegmentThinWMStrands(MRI *mri_src, MRI *mri_dst, int thickness)
       float max_area = 0.0;
       int max_i = -1;
 
-      mri_label = NULL;
+      mri_label = nullptr;
       for (i = 0; i < mriseg->max_segments; i++) {
         if (mriseg->segments[i].area > max_area) {
           max_area = mriseg->segments[i].area;
           max_i = i;
           if (mriseg->segments[i].nvoxels > 100) {
-            fprintf(stderr,
-                    "segment %3d, area = %2.2f, nvox=%d\n",
-                    i,
-                    mriseg->segments[i].area,
-                    mriseg->segments[i].nvoxels);
+            fprintf(stderr, "segment %3d, area = %2.2f, nvox=%d\n", i,
+                    mriseg->segments[i].area, mriseg->segments[i].nvoxels);
             mri_label = MRIsegmentToImage(mri_src, mri_label, mriseg, i);
           }
         }
       }
       if (max_i >= 0) {
-        if (!mri_label) mri_label = MRIsegmentToImage(mri_src, NULL, mriseg, i);
+        if (!mri_label)
+          mri_label = MRIsegmentToImage(mri_src, nullptr, mriseg, i);
         MRIwrite(mri_label, "max_label.mgh");
         MRIfree(&mri_label);
       }
@@ -1525,7 +1560,8 @@ MRI *MRIresegmentThinWMStrands(MRI *mri_src, MRI *mri_dst, int thickness)
 
   return (mri_dst);
 }
-MRI *MRIfillPlanarHoles(MRI *mri_src, MRI *mri_segment, MRI *mri_dst, MRI_SEGMENT *mseg);
+MRI *MRIfillPlanarHoles(MRI *mri_src, MRI *mri_segment, MRI *mri_dst,
+                        MRI_SEGMENT *mseg);
 #if 0
 /*-----------------------------------------------------
         Parameters:
@@ -1668,24 +1704,26 @@ Description
 ------------------------------------------------------*/
 #define MAX_LABELS 10000
 #define TOO_THIN 2
-MRI *MRIthickenThinWMStrands(MRI *mri_T1, MRI *mri_src, MRI *mri_dst, int thickness, int nsegments, float wm_hi)
-{
-  int width, height, depth, x, y, z, thin, i, dont_fill, up_added, down_added, total_filled, nfilled, nseg, nx, ny, nz,
-      xv, yv, zv, v;
+MRI *MRIthickenThinWMStrands(MRI *mri_T1, MRI *mri_src, MRI *mri_dst,
+                             int thickness, int nsegments, float wm_hi) {
+  int width, height, depth, x, y, z, thin, i, dont_fill, up_added, down_added,
+      total_filled, nfilled, nseg, nx, ny, nz, xv, yv, zv, v;
   float nd;
   double val, xf, yf, zf, max_dist, up_dist, down_dist /*, xt, yt, zt*/;
   MRI_SEGMENTATION *mriseg;
   MRI *mri_thin, *mri_tmp;
-  printf("MRIthickenThinWMStrands(): thickness=%d, nsegments=%d\n",thickness,nsegments);
+  printf("MRIthickenThinWMStrands(): thickness=%d, nsegments=%d\n", thickness,
+         nsegments);
   width = mri_src->width;
   height = mri_src->height;
   depth = mri_src->depth;
   max_dist = thickness / 2 + 1; /* allow search to extend into non-white */
 
   init_basis_vectors();
-  if (!mri_dst) mri_dst = MRIclone(mri_src, NULL);
-  mri_thin = MRIclone(mri_src, NULL);
-  mri_tmp = MRIremoveIslands(mri_src, NULL, 3, 27-3);
+  if (!mri_dst)
+    mri_dst = MRIclone(mri_src, nullptr);
+  mri_thin = MRIclone(mri_src, nullptr);
+  mri_tmp = MRIremoveIslands(mri_src, nullptr, 3, 27 - 3);
   MRIclose(mri_tmp, mri_tmp);
 
   MRIcopy(mri_src, mri_dst);
@@ -1693,15 +1731,19 @@ MRI *MRIthickenThinWMStrands(MRI *mri_T1, MRI *mri_src, MRI *mri_dst, int thickn
     for (y = 0; y < height; y++) {
       for (x = 0; x < width; x++) {
         thin = 0;
-        if (MRIgetVoxVal(mri_src, x, y, z, 0) > 0) /* this is in closed volume to prevent fragmentation */
+        if (MRIgetVoxVal(mri_src, x, y, z, 0) >
+            0) /* this is in closed volume to prevent fragmentation */
         {
           for (nz = 0; !thin && nz <= 1; nz++) {
             for (ny = 0; !thin && ny <= 1; ny++) {
               for (nx = 0; !thin && nx <= 1; nx++) {
-                if (!nx && !ny && !nz) continue;
-                if ((fabs(nx) + fabs(ny) + fabs(nz)) > 1) continue;
+                if (!nx && !ny && !nz)
+                  continue;
+                if ((fabs(nx) + fabs(ny) + fabs(nz)) > 1)
+                  continue;
                 /* hack - only allow superior-inferior thickening */
-                if (!ny || nx || nz) continue;
+                if (!ny || nx || nz)
+                  continue;
 
                 /* first search 'downwards' to see if we can find non-white */
                 down_dist = thickness + 1;
@@ -1733,23 +1775,26 @@ MRI *MRIthickenThinWMStrands(MRI *mri_T1, MRI *mri_src, MRI *mri_dst, int thickn
             }
           }
         }
-        if (thin) MRIsetVoxVal(mri_thin, x, y, z, 0, thin);
+        if (thin)
+          MRIsetVoxVal(mri_thin, x, y, z, 0, thin);
       }
     }
   }
 
-  /* now thicken the strand, being careful not to connect with other  strands.  */
+  /* now thicken the strand, being careful not to connect with other  strands.
+   */
   total_filled = 0;
   mriseg = MRIsegment(mri_thin, 1, 255);
 
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
     char fname[200];
     MRI_SEGMENT *mseg;
-    MRI *mri_tmp = NULL;
+    MRI *mri_tmp = nullptr;
 
     for (nseg = 0; nseg < nsegments; nseg++) {
       i = MRIsegmentMax(mriseg); /* find largest remaining segment */
-      if (i < 0) break;
+      if (i < 0)
+        break;
       mseg = &mriseg->segments[i];
       mri_tmp = MRIsegmentToImage(mri_src, mri_tmp, mriseg, i);
       sprintf(fname, "seg%d.mgh", i);
@@ -1758,17 +1803,19 @@ MRI *MRIthickenThinWMStrands(MRI *mri_T1, MRI *mri_src, MRI *mri_dst, int thickn
     MRIfree(&mri_tmp);
   }
 
-  int NDILATIONS=5;
-  for (i = 0; i < NDILATIONS; i++) MRIsegmentDilate(mriseg, mri_src);
+  int NDILATIONS = 5;
+  for (i = 0; i < NDILATIONS; i++)
+    MRIsegmentDilate(mriseg, mri_src);
 
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
     char fname[200];
-    MRI *mri_tmp = NULL;
+    MRI *mri_tmp = nullptr;
     MRI_SEGMENT *mseg;
 
     for (nseg = 0; nseg < nsegments; nseg++) {
       i = MRIsegmentMax(mriseg); /* find largest remaining segment */
-      if (i < 0) break;
+      if (i < 0)
+        break;
       mseg = &mriseg->segments[i];
       mri_tmp = MRIsegmentToImage(mri_src, mri_tmp, mriseg, i);
       sprintf(fname, "dilated_seg%d.mgh", i);
@@ -1782,9 +1829,10 @@ MRI *MRIthickenThinWMStrands(MRI *mri_T1, MRI *mri_src, MRI *mri_dst, int thickn
     /*    int         v, xd, yd, zd ;*/
 
     i = MRIsegmentMax(mriseg); /* find largest remaining segment */
-    if (i < 0) break;          /* no more segments to process */
+    if (i < 0)
+      break; /* no more segments to process */
     mseg = &mriseg->segments[i];
-    MRIclear(mri_thin);                              /* mri_thin will now contain the segment */
+    MRIclear(mri_thin); /* mri_thin will now contain the segment */
     MRIsegmentToImage(mri_tmp, mri_thin, mriseg, i); /* build image of seg */
 
     nfilled = 0;
@@ -1794,16 +1842,21 @@ MRI *MRIthickenThinWMStrands(MRI *mri_T1, MRI *mri_src, MRI *mri_dst, int thickn
       x = mseg->voxels[v].x;
       y = mseg->voxels[v].y;
       z = mseg->voxels[v].z;
-      if (x == 96 && y == 134 && z == 97) DiagBreak();
-      if (MRIgetVoxVal(mri_src, x, y, z, 0) < WM_MIN_VAL) continue;
+      if (x == 96 && y == 134 && z == 97)
+        DiagBreak();
+      if (MRIgetVoxVal(mri_src, x, y, z, 0) < WM_MIN_VAL)
+        continue;
 
       /* find the direction in which this voxel is thin and thicken it */
       for (nz = 0; nz <= 1; nz++) {
         for (ny = 0; ny <= 1; ny++) {
           for (nx = 0; nx <= 1; nx++) {
-            if (!nx && !ny && !nz) continue;
-            if ((fabs(nx) + fabs(ny) + fabs(nz)) > 1) continue;
-            if (!ny || nx || nz) continue; /* hack - only allow superior-inferior thickening */
+            if (!nx && !ny && !nz)
+              continue;
+            if ((fabs(nx) + fabs(ny) + fabs(nz)) > 1)
+              continue;
+            if (!ny || nx || nz)
+              continue; /* hack - only allow superior-inferior thickening */
 
             /* first search 'downwards' to see if we can find non-white */
             down_dist = TOO_THIN + 1;
@@ -1838,21 +1891,22 @@ MRI *MRIthickenThinWMStrands(MRI *mri_T1, MRI *mri_src, MRI *mri_dst, int thickn
                 yv = nint((double)y + (up_dist + 1.5) * ny);
                 zv = nint((double)z + (up_dist + 1.5) * nz);
                 // bounds-checking
-                if (xv >= mri_dst->width || xv < 0 || yv >= mri_dst->height || yv < 0 || zv >= mri_dst->depth ||
-                    zv < 0) {
-                  ErrorPrintf(ERROR_BADPARM,
-                              "ERROR: MRIthickenThinWMStrands: "
-                              "invalid x,y,z!\n");
+                if (xv >= mri_dst->width || xv < 0 || yv >= mri_dst->height ||
+                    yv < 0 || zv >= mri_dst->depth || zv < 0) {
+                  ErrorPrintf(ERROR_BADPARM, "ERROR: MRIthickenThinWMStrands: "
+                                             "invalid x,y,z!\n");
                   break;
                 }
-                if ((MRIindexNotInVolume(mri_T1, xv, yv, zv) == 0) && !MRIgetVoxVal(mri_dst, xv, yv, zv, 0)) {
+                if ((MRIindexNotInVolume(mri_T1, xv, yv, zv) == 0) &&
+                    !MRIgetVoxVal(mri_dst, xv, yv, zv, 0)) {
                   up_added = 1;
                   xv = nint((double)x + (up_dist + .5) * nx);
                   yv = nint((double)y + (up_dist + .5) * ny);
                   zv = nint((double)z + (up_dist + .5) * nz);
 
                   if (MRIgetVoxVal(mri_T1, xv, yv, zv, 0) < wm_hi) {
-                    if (xv == 110 && yv == 125 && zv == 172) DiagBreak(); /* T1=148, wm=THICKEN */
+                    if (xv == 110 && yv == 125 && zv == 172)
+                      DiagBreak(); /* T1=148, wm=THICKEN */
                     MRIsetVoxVal(mri_dst, xv, yv, zv, 0, THICKEN_FILL);
                     MRIsetVoxVal(mri_thin, xv, yv, zv, 0, THICKEN_FILL);
                     nfilled++;
@@ -1864,11 +1918,10 @@ MRI *MRIthickenThinWMStrands(MRI *mri_T1, MRI *mri_src, MRI *mri_dst, int thickn
                 yv = nint((double)y - (down_dist + 1.5) * ny);
                 zv = nint((double)z - (down_dist + 1.5) * nz);
                 // bounds-checking
-                if (xv >= mri_dst->width || xv < 0 || yv >= mri_dst->height || yv < 0 || zv >= mri_dst->depth ||
-                    zv < 0) {
-                  ErrorPrintf(ERROR_BADPARM,
-                              "ERROR: MRIthickenThinWMStrands: "
-                              "invalid x,y,z!\n");
+                if (xv >= mri_dst->width || xv < 0 || yv >= mri_dst->height ||
+                    yv < 0 || zv >= mri_dst->depth || zv < 0) {
+                  ErrorPrintf(ERROR_BADPARM, "ERROR: MRIthickenThinWMStrands: "
+                                             "invalid x,y,z!\n");
                   break;
                 }
                 if (!MRIgetVoxVal(mri_dst, xv, yv, zv, 0)) {
@@ -1877,17 +1930,21 @@ MRI *MRIthickenThinWMStrands(MRI *mri_T1, MRI *mri_src, MRI *mri_dst, int thickn
                   yv = nint((double)y - (down_dist + .5) * ny);
                   zv = nint((double)z - (down_dist + .5) * nz);
                   if (MRIgetVoxVal(mri_T1, xv, yv, zv, 0) < wm_hi) {
-                    if (xv == 110 && yv == 125 && zv == 172) DiagBreak(); /* T1=148, wm=THICKEN */
+                    if (xv == 110 && yv == 125 && zv == 172)
+                      DiagBreak(); /* T1=148, wm=THICKEN */
                     MRIsetVoxVal(mri_dst, xv, yv, zv, 0, THICKEN_FILL);
                     MRIsetVoxVal(mri_thin, xv, yv, zv, 0, THICKEN_FILL);
                     nfilled++;
                   }
                 }
               }
-              if (up_added) up_dist += 1.0f;
-              if (down_added) down_dist += 1.0f;
+              if (up_added)
+                up_dist += 1.0f;
+              if (down_added)
+                down_dist += 1.0f;
               thin = ((up_dist + down_dist) <= TOO_THIN);
-              if (!up_added && !down_added) break;
+              if (!up_added && !down_added)
+                break;
             }
           }
         }
@@ -1896,13 +1953,8 @@ MRI *MRIthickenThinWMStrands(MRI *mri_T1, MRI *mri_src, MRI *mri_dst, int thickn
 
     total_filled += nfilled;
     if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
-      fprintf(stderr,
-              "%d: segment %d, %d voxels, filled = %d, total = %d\n",
-              nseg,
-              i,
-              mseg->nvoxels,
-              nfilled,
-              total_filled);
+      fprintf(stderr, "%d: segment %d, %d voxels, filled = %d, total = %d\n",
+              nseg, i, mseg->nvoxels, nfilled, total_filled);
 
     mseg->ignore = 1;
 
@@ -1914,13 +1966,18 @@ MRI *MRIthickenThinWMStrands(MRI *mri_T1, MRI *mri_src, MRI *mri_dst, int thickn
       for (z = 1; z < depth - 1; z++) {
         for (y = 1; y < height - 1; y++) {
           for (x = 1; x < width - 1; x++) {
-            if (x == 160 && y == 140 && z == 121) DiagBreak();
+            if (x == 160 && y == 140 && z == 121)
+              DiagBreak();
 
             /* check if it should be filled */
-            if (!MRIgetVoxVal(mri_dst, x, y, z, 0) && (MRIgetVoxVal(mri_T1, x, y, z, 0) < wm_hi)) {
-              if ((MRIgetVoxVal(mri_thin, x + 1, y, z, 0) && MRIgetVoxVal(mri_thin, x - 1, y, z, 0)) ||
-                  (MRIgetVoxVal(mri_thin, x, y + 1, z, 0) && MRIgetVoxVal(mri_thin, x, y - 1, z, 0)) ||
-                  (MRIgetVoxVal(mri_thin, x, y, z + 1, 0) && MRIgetVoxVal(mri_thin, x, y, z - 1, 0))) {
+            if (!MRIgetVoxVal(mri_dst, x, y, z, 0) &&
+                (MRIgetVoxVal(mri_T1, x, y, z, 0) < wm_hi)) {
+              if ((MRIgetVoxVal(mri_thin, x + 1, y, z, 0) &&
+                   MRIgetVoxVal(mri_thin, x - 1, y, z, 0)) ||
+                  (MRIgetVoxVal(mri_thin, x, y + 1, z, 0) &&
+                   MRIgetVoxVal(mri_thin, x, y - 1, z, 0)) ||
+                  (MRIgetVoxVal(mri_thin, x, y, z + 1, 0) &&
+                   MRIgetVoxVal(mri_thin, x, y, z - 1, 0))) {
                 dont_fill = 0;
                 for (nz = -1; !dont_fill && nz <= 1; nz++) {
                   for (ny = -1; !dont_fill && ny <= 1; ny++) {
@@ -1936,7 +1993,8 @@ MRI *MRIthickenThinWMStrands(MRI *mri_T1, MRI *mri_src, MRI *mri_dst, int thickn
                 }
 
                 if (!dont_fill) {
-                  if (x == 160 && y == 140 && z == 122) DiagBreak();
+                  if (x == 160 && y == 140 && z == 122)
+                    DiagBreak();
                   MRIsetVoxVal(mri_dst, x, y, z, 0, NBHD_FILL);
                   MRIsetVoxVal(mri_thin, x, y, z, 0, NBHD_FILL);
                   nfilled++;
@@ -1956,7 +2014,8 @@ MRI *MRIthickenThinWMStrands(MRI *mri_T1, MRI *mri_src, MRI *mri_dst, int thickn
 
   MRIsegmentFree(&mriseg);
 
-  if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) MRIwrite(mri_thin, "thin.mgh");
+  if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
+    MRIwrite(mri_thin, "thin.mgh");
   MRIfree(&mri_thin);
   MRIfree(&mri_tmp);
   return (mri_dst);
@@ -1969,18 +2028,20 @@ MRI *MRIthickenThinWMStrands(MRI *mri_T1, MRI *mri_src, MRI *mri_dst, int thickn
 
         Description
 ------------------------------------------------------*/
-MRI *MRIorderThreshold(MRI *mri_src, MRI *mri_dst, MRI *mri_order, int num)
-{
+MRI *MRIorderThreshold(MRI *mri_src, MRI *mri_dst, MRI *mri_order, int num) {
   int width, height, depth, x, y, z, frame;
   BUFTYPE *psrc, *pdst, *porder, val;
 
   width = mri_src->width;
   height = mri_src->height;
   depth = mri_src->depth;
-  if (!mri_dst) mri_dst = MRIclone(mri_src, NULL);
+  if (!mri_dst)
+    mri_dst = MRIclone(mri_src, nullptr);
 
-  if (mri_src->type != MRI_UCHAR || mri_dst->type != MRI_UCHAR || mri_order->type != MRI_UCHAR)
-    ErrorReturn(NULL, (ERROR_UNSUPPORTED, "MRIorderThresh: all input MRs must be byte"));
+  if (mri_src->type != MRI_UCHAR || mri_dst->type != MRI_UCHAR ||
+      mri_order->type != MRI_UCHAR)
+    ErrorReturn(NULL, (ERROR_UNSUPPORTED,
+                       "MRIorderThresh: all input MRs must be byte"));
 
   for (frame = 0; frame < mri_src->nframes; frame++) {
     for (z = 0; z < depth; z++) {
@@ -2007,9 +2068,10 @@ MRI *MRIorderThreshold(MRI *mri_src, MRI *mri_dst, MRI *mri_order, int num)
 
         Description
 ------------------------------------------------------*/
-MRI *MRIpolvCount(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize, int lo_lim, int hi_lim)
-{
-  int width, height, depth, x, y, z, whalf, xk, yk, n, vertex, xi, yi, zi, *pxi, *pyi, *pzi, order;
+MRI *MRIpolvCount(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize,
+                  int lo_lim, int hi_lim) {
+  int width, height, depth, x, y, z, whalf, xk, yk, n, vertex, xi, yi, zi, *pxi,
+      *pyi, *pzi, order;
   float e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase;
   float val;
 
@@ -2019,7 +2081,8 @@ MRI *MRIpolvCount(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize, int lo_l
   whalf = (wsize - 1) / 2;
 
   init_basis_vectors();
-  if (!mri_dst) mri_dst = MRIclone(mri_src, NULL);
+  if (!mri_dst)
+    mri_dst = MRIclone(mri_src, nullptr);
 
   pxi = mri_src->xi;
   pyi = mri_src->yi;
@@ -2056,7 +2119,8 @@ MRI *MRIpolvCount(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize, int lo_l
             zi = nint(zbase + xk * e1_z);
             zi = pzi[zi];
             val = MRIvox(mri_src, xi, yi, zi);
-            if (val >= lo_lim && val <= hi_lim) order++;
+            if (val >= lo_lim && val <= hi_lim)
+              order++;
           }
         }
 
@@ -2095,26 +2159,32 @@ MRI *MRIpolvCount(MRI *mri_src, MRI *mri_dst, MRI *mri_polv, int wsize, int lo_l
 #define REVERSE_THRESH (N2_SIZE * REVERSE_PCT)
 
 #define DEBUG_POINT(x, y, z) (((x) == 75) && ((y) == 96) && ((z) == 127))
-MRI *MRIwmfilter(MRI *mri_src, MRI *mri_polv, MRI *mri_dst, float nslope, float pslope)
-{
-  int width, height, depth, x, y, z, whalf, vertex, xi, yi, zi, xo, yo, zo, *pxi, *pyi, *pzi, i, nwhite, nblack, count;
+MRI *MRIwmfilter(MRI *mri_src, MRI *mri_polv, MRI *mri_dst, float nslope,
+                 float pslope) {
+  int width, height, depth, x, y, z, whalf, vertex, xi, yi, zi, xo, yo, zo,
+      *pxi, *pyi, *pzi, i, nwhite, nblack, count;
   float nx, ny, nz, dx, dy, dz, curv;
-  BUFTYPE *pdst, *pptr, val0, /* *psrc, */ gray_hi, white_low /*,mean, *pmean*/, *plabel, *psrc, l;
+  BUFTYPE *pdst, *pptr, val0, /* *psrc, */ gray_hi, white_low /*,mean, *pmean*/,
+      *plabel, *psrc, l;
   MRI *mri_curv, *mri_label /*, *mri_tmp*/;
 
-  if (FZERO(pslope)) pslope = PSLOPE;
-  if (FZERO(nslope)) nslope = NSLOPE;
+  if (FZERO(pslope))
+    pslope = PSLOPE;
+  if (FZERO(nslope))
+    nslope = NSLOPE;
 
   width = mri_src->width;
   height = mri_src->height;
   depth = mri_src->depth;
-  if (DIAG_VERBOSE_ON) mri_curv = MRIalloc(width, height, depth, MRI_FLOAT);
+  if (DIAG_VERBOSE_ON)
+    mri_curv = MRIalloc(width, height, depth, MRI_FLOAT);
   mri_label = MRIalloc(width, height, depth, MRI_UCHAR);
   /*  mri_tmp = MRIalloc(width, height, depth, MRI_UCHAR) ;*/
   whalf = (WSIZE - 1) / 2;
 
   init_basis_vectors();
-  if (!mri_dst) mri_dst = MRIclone(mri_src, NULL);
+  if (!mri_dst)
+    mri_dst = MRIclone(mri_src, nullptr);
 
   pxi = mri_src->xi;
   pyi = mri_src->yi;
@@ -2131,7 +2201,8 @@ MRI *MRIwmfilter(MRI *mri_src, MRI *mri_polv, MRI *mri_dst, float nslope, float 
       pdst = &MRIvox(mri_dst, 0, y, z);
       pptr = &MRIvox(mri_polv, 0, y, z); /* ptr to normal vectors */
       for (x = 0; x < width; x++) {
-        if (DEBUG_POINT(x, y, z)) DiagBreak();
+        if (DEBUG_POINT(x, y, z))
+          DiagBreak();
 
         /* calculate through-polv curvature */
         vertex = *pptr++;
@@ -2144,7 +2215,8 @@ MRI *MRIwmfilter(MRI *mri_src, MRI *mri_polv, MRI *mri_dst, float nslope, float 
         /* now compute the curvature in the normal direction */
         for (curv = 0.0f, i = -whalf; i <= whalf; i++) {
           double rval;
-          if (!i) continue;
+          if (!i)
+            continue;
           dx = (float)i * nx;
           dy = (float)i * ny;
           dz = (float)i * nz;
@@ -2158,7 +2230,8 @@ MRI *MRIwmfilter(MRI *mri_src, MRI *mri_polv, MRI *mri_dst, float nslope, float 
 #else
         /* now compute the curvature in the normal direction */
         for (curv = 0.0f, i = -whalf; i <= whalf; i++) {
-          if (!i) continue;
+          if (!i)
+            continue;
           dx = (float)i * nx;
           dy = (float)i * ny;
           dz = (float)i * nz;
@@ -2172,7 +2245,8 @@ MRI *MRIwmfilter(MRI *mri_src, MRI *mri_polv, MRI *mri_dst, float nslope, float 
             double rval;
             MRIsampleVolume(mri_src, x + dx, y + dy, z + dz, &rval);
             val = (float)rval;
-            if (val < 70) val = 70;
+            if (val < 70)
+              val = 70;
           }
 #endif
           dsq = sqrt(dx * dx + dy * dy + dz * dz);
@@ -2181,7 +2255,8 @@ MRI *MRIwmfilter(MRI *mri_src, MRI *mri_polv, MRI *mri_dst, float nslope, float 
         }
         curv /= (WSIZE - 1);
 #endif
-        if (DIAG_VERBOSE_ON) MRIFvox(mri_curv, x, y, z) = curv;
+        if (DIAG_VERBOSE_ON)
+          MRIFvox(mri_curv, x, y, z) = curv;
 
         white_low = WHITE_LOW;
         gray_hi = GRAY_HI;
@@ -2189,8 +2264,7 @@ MRI *MRIwmfilter(MRI *mri_src, MRI *mri_polv, MRI *mri_dst, float nslope, float 
         {
           white_low += nint(nslope * curv);
           gray_hi += nint(nslope * curv);
-        }
-        else if (curv > 0.0f) {
+        } else if (curv > 0.0f) {
           gray_hi += nint(pslope * curv);
           white_low += nint(pslope * curv);
         }
@@ -2220,7 +2294,8 @@ MRI *MRIwmfilter(MRI *mri_src, MRI *mri_polv, MRI *mri_dst, float nslope, float 
     }
   }
 
-  if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) MRIwrite(mri_label, "label.mnc");
+  if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
+    MRIwrite(mri_label, "label.mnc");
 
   /* now go through the tentatively labeled volume and definitively label
      any points which lie in an unambiguous neighborhood and put them into
@@ -2232,7 +2307,8 @@ MRI *MRIwmfilter(MRI *mri_src, MRI *mri_polv, MRI *mri_dst, float nslope, float 
       psrc = &MRIvox(mri_src, 0, y, z);
       plabel = &MRIvox(mri_label, 0, y, z);
       for (x = 0; x < width; x++) {
-        if (DEBUG_POINT(x, y, z)) DiagBreak();
+        if (DEBUG_POINT(x, y, z))
+          DiagBreak();
         l = *pdst;
         if (l != LABEL_AMBIGUOUS) {
           psrc++;
@@ -2268,7 +2344,8 @@ MRI *MRIwmfilter(MRI *mri_src, MRI *mri_polv, MRI *mri_dst, float nslope, float 
     }
   }
 
-  if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) MRIwrite(mri_dst, "dst1.mnc");
+  if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
+    MRIwrite(mri_dst, "dst1.mnc");
   /*
     now go through again, and for any voxel which was labeled ambiguous,
     look at the number of in-plane labels. If enough of them are different
@@ -2281,7 +2358,8 @@ MRI *MRIwmfilter(MRI *mri_src, MRI *mri_polv, MRI *mri_dst, float nslope, float 
       pptr = &MRIvox(mri_polv, 0, y, z);    /* ptr to normal vectors */
       psrc = &MRIvox(mri_src, 0, y, z);     /* ptr to normal vectors */
       for (x = 0; x < width; x++) {
-        if (DEBUG_POINT(x, y, z)) DiagBreak();
+        if (DEBUG_POINT(x, y, z))
+          DiagBreak();
         l = *pdst;
         if (l != LABEL_AMBIGUOUS) {
           pdst++;
@@ -2296,7 +2374,8 @@ MRI *MRIwmfilter(MRI *mri_src, MRI *mri_polv, MRI *mri_dst, float nslope, float 
         nx = ic_x_vertices[vertex];
         ny = ic_y_vertices[vertex];
         nz = ic_z_vertices[vertex];
-        count = MRIcountPlanarAboveThreshold(mri_label, vertex, x, y, z, 5, 1, 255);
+        count =
+            MRIcountPlanarAboveThreshold(mri_label, vertex, x, y, z, 5, 1, 255);
         if (val0 && count < N2_SIZE - REVERSE_THRESH)
           val0 = 0;
         else if (!val0 && count > REVERSE_THRESH)
@@ -2388,9 +2467,10 @@ MRI *MRIwmfilter(MRI *mri_src, MRI *mri_polv, MRI *mri_dst, float nslope, float 
   MRIfree(&mri_label);
   return (mri_dst);
 }
-MRI *MRIwmfilterMarked(MRI *mri_src, MRI *mri_mask, MRI *mri_dst, int wsize, float pct, int onoff)
-{
-  int width, height, depth, x, y, z, whalf, vertex, num_on, num_off, num, changed, low_thresh;
+MRI *MRIwmfilterMarked(MRI *mri_src, MRI *mri_mask, MRI *mri_dst, int wsize,
+                       float pct, int onoff) {
+  int width, height, depth, x, y, z, whalf, vertex, num_on, num_off, num,
+      changed, low_thresh;
   float thresh;
   BUFTYPE *pdst, *pmask, *psrc, l;
 
@@ -2402,7 +2482,8 @@ MRI *MRIwmfilterMarked(MRI *mri_src, MRI *mri_mask, MRI *mri_dst, int wsize, flo
   low_thresh = (wsize * wsize) / 2;
 
   init_basis_vectors();
-  if (!mri_dst) mri_dst = MRIclone(mri_src, NULL);
+  if (!mri_dst)
+    mri_dst = MRIclone(mri_src, nullptr);
 
   /*
     now go through again, and for any voxel which was labeled ambiguous,
@@ -2415,7 +2496,8 @@ MRI *MRIwmfilterMarked(MRI *mri_src, MRI *mri_mask, MRI *mri_dst, int wsize, flo
       pmask = &MRIvox(mri_mask, 0, y, z); /* ptr to destination */
       psrc = &MRIvox(mri_src, 0, y, z);   /* ptr to normal vectors */
       for (x = 0; x < width; x++) {
-        if (DEBUG_POINT(x, y, z)) DiagBreak();
+        if (DEBUG_POINT(x, y, z))
+          DiagBreak();
         l = *pmask++;
         if (l == 0) /* don't check it */
         {
@@ -2424,9 +2506,11 @@ MRI *MRIwmfilterMarked(MRI *mri_src, MRI *mri_mask, MRI *mri_dst, int wsize, flo
         }
 
         vertex = MRIcountCpolvAtVoxel(mri_src, x, y, z, wsize, &num_on, l);
-        if (!vertex) DiagBreak();
+        if (!vertex)
+          DiagBreak();
         vertex = MRIcountCpolvAtVoxel(mri_src, x, y, z, wsize, &num_off, 0);
-        if (!vertex) DiagBreak();
+        if (!vertex)
+          DiagBreak();
 
         /*
           we are only considering voxels that are off (which may represent
@@ -2439,15 +2523,15 @@ MRI *MRIwmfilterMarked(MRI *mri_src, MRI *mri_mask, MRI *mri_dst, int wsize, flo
           changed++;
           *pdst++ = l;
           psrc++;
-        }
-        else
+        } else
           *pdst++ = *psrc++;
       }
     }
   }
 
   if (Gdiag & DIAG_SHOW)
-    fprintf(stderr, "%d holes examined, %d changed (%2.1f%%)\n", num, changed, 100 * (float)changed / (float)num);
+    fprintf(stderr, "%d holes examined, %d changed (%2.1f%%)\n", num, changed,
+            100 * (float)changed / (float)num);
   return (mri_dst);
 }
 
@@ -2458,14 +2542,17 @@ MRI *MRIwmfilterMarked(MRI *mri_src, MRI *mri_mask, MRI *mri_dst, int wsize, flo
 
         Description
 ------------------------------------------------------*/
-int MRIcountCpolvAtVoxel(MRI *mri_src, int x, int y, int z, int wsize, int *pnum, int label_to_check)
-{
-  int whalf, vertex, xk, yk, label, xi, yi, zi, *pxi, *pyi, *pzi, peak_vertex, max_count, num;
-  float xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y, *pe2_z, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
+int MRIcountCpolvAtVoxel(MRI *mri_src, int x, int y, int z, int wsize,
+                         int *pnum, int label_to_check) {
+  int whalf, vertex, xk, yk, label, xi, yi, zi, *pxi, *pyi, *pzi, peak_vertex,
+      max_count, num;
+  float xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y, *pe2_z,
+      e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
 
   init_basis_vectors();
 
-  if (x == 166 && y == 150 && z == 127) DiagBreak(); /* 113 */
+  if (x == 166 && y == 150 && z == 127)
+    DiagBreak(); /* 113 */
 
   pxi = mri_src->xi;
   pyi = mri_src->yi;
@@ -2510,7 +2597,8 @@ int MRIcountCpolvAtVoxel(MRI *mri_src, int x, int y, int z, int wsize, int *pnum
         zi = nint(zbase + xk * e1_z);
         zi = pzi[zi];
         label = MRIgetVoxVal(mri_src, xi, yi, zi, 0);
-        if (label == label_to_check) num++;
+        if (label == label_to_check)
+          num++;
       }
     }
     if (num >= max_count) {
@@ -2519,7 +2607,8 @@ int MRIcountCpolvAtVoxel(MRI *mri_src, int x, int y, int z, int wsize, int *pnum
     }
   }
 
-  if (pnum) *pnum = max_count;
+  if (pnum)
+    *pnum = max_count;
 
   return (peak_vertex);
 }
@@ -2530,14 +2619,17 @@ int MRIcountCpolvAtVoxel(MRI *mri_src, int x, int y, int z, int wsize, int *pnum
 
         Description
 ------------------------------------------------------*/
-int MRIcountCpolvOnAtVoxel(MRI *mri_src, int x, int y, int z, int wsize, int *pnum)
-{
-  int whalf, vertex, xk, yk, label, xi, yi, zi, *pxi, *pyi, *pzi, peak_vertex, max_count, num;
-  float xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y, *pe2_z, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
+int MRIcountCpolvOnAtVoxel(MRI *mri_src, int x, int y, int z, int wsize,
+                           int *pnum) {
+  int whalf, vertex, xk, yk, label, xi, yi, zi, *pxi, *pyi, *pzi, peak_vertex,
+      max_count, num;
+  float xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y, *pe2_z,
+      e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
 
   init_basis_vectors();
 
-  if (x == 166 && y == 150 && z == 127) DiagBreak(); /* 113 */
+  if (x == 166 && y == 150 && z == 127)
+    DiagBreak(); /* 113 */
 
   pxi = mri_src->xi;
   pyi = mri_src->yi;
@@ -2582,7 +2674,8 @@ int MRIcountCpolvOnAtVoxel(MRI *mri_src, int x, int y, int z, int wsize, int *pn
         zi = nint(zbase + xk * e1_z);
         zi = pzi[zi];
         label = MRIvox(mri_src, xi, yi, zi);
-        if (label) num++;
+        if (label)
+          num++;
       }
     }
     if (num >= max_count) {
@@ -2591,7 +2684,8 @@ int MRIcountCpolvOnAtVoxel(MRI *mri_src, int x, int y, int z, int wsize, int *pn
     }
   }
 
-  if (pnum) *pnum = max_count;
+  if (pnum)
+    *pnum = max_count;
 
   return (peak_vertex);
 }
@@ -2602,14 +2696,17 @@ int MRIcountCpolvOnAtVoxel(MRI *mri_src, int x, int y, int z, int wsize, int *pn
 
         Description
 ------------------------------------------------------*/
-int MRIcountCpolvOffAtVoxel(MRI *mri_src, int x, int y, int z, int wsize, int *pnum)
-{
-  int whalf, vertex, xk, yk, label, xi, yi, zi, *pxi, *pyi, *pzi, peak_vertex, max_count, num;
-  float xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y, *pe2_z, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
+int MRIcountCpolvOffAtVoxel(MRI *mri_src, int x, int y, int z, int wsize,
+                            int *pnum) {
+  int whalf, vertex, xk, yk, label, xi, yi, zi, *pxi, *pyi, *pzi, peak_vertex,
+      max_count, num;
+  float xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y, *pe2_z,
+      e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
 
   init_basis_vectors();
 
-  if (x == 166 && y == 150 && z == 127) DiagBreak(); /* 113 */
+  if (x == 166 && y == 150 && z == 127)
+    DiagBreak(); /* 113 */
 
   pxi = mri_src->xi;
   pyi = mri_src->yi;
@@ -2654,7 +2751,8 @@ int MRIcountCpolvOffAtVoxel(MRI *mri_src, int x, int y, int z, int wsize, int *p
         zi = nint(zbase + xk * e1_z);
         zi = pzi[zi];
         label = MRIvox(mri_src, xi, yi, zi);
-        if (!label) num++;
+        if (!label)
+          num++;
       }
     }
     if (num >= max_count) {
@@ -2663,7 +2761,8 @@ int MRIcountCpolvOffAtVoxel(MRI *mri_src, int x, int y, int z, int wsize, int *p
     }
   }
 
-  if (pnum) *pnum = max_count;
+  if (pnum)
+    *pnum = max_count;
 
   return (peak_vertex);
 }
@@ -2674,10 +2773,10 @@ int MRIcountCpolvOffAtVoxel(MRI *mri_src, int x, int y, int z, int wsize, int *p
 
         Description
 ------------------------------------------------------*/
-MRI *MRIcpolvThreshold(MRI *mri_src, MRI *mri_labeled, MRI *mri_dst, int wm_low, int gray_hi, int wsize)
-{
-  int width, height, depth, x, y, z, whalf, vertex, xk, yk, xi, yi, zi, *pxi, *pyi, *pzi, label, nlabeled, num_white,
-      num_ambiguous, num_non_white;
+MRI *MRIcpolvThreshold(MRI *mri_src, MRI *mri_labeled, MRI *mri_dst, int wm_low,
+                       int gray_hi, int wsize) {
+  int width, height, depth, x, y, z, whalf, vertex, xk, yk, xi, yi, zi, *pxi,
+      *pyi, *pzi, label, nlabeled, num_white, num_ambiguous, num_non_white;
   BUFTYPE *pdst, src, thresh;
   float xbase, ybase, zbase, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
 
@@ -2693,7 +2792,8 @@ MRI *MRIcpolvThreshold(MRI *mri_src, MRI *mri_labeled, MRI *mri_dst, int wm_low,
   depth = mri_labeled->depth;
   whalf = (wsize - 1) / 2;
 
-  if (!mri_dst) mri_dst = MRIclone(mri_labeled, NULL);
+  if (!mri_dst)
+    mri_dst = MRIclone(mri_labeled, nullptr);
 
   nlabeled = 0;
   for (z = 0; z < depth; z++) {
@@ -2704,11 +2804,13 @@ MRI *MRIcpolvThreshold(MRI *mri_src, MRI *mri_labeled, MRI *mri_dst, int wm_low,
         label = MRIvox(mri_labeled, x, y, z);
         if (label == MRI_AMBIGUOUS) {
           nlabeled++;
-          if (!FZERO(e2_z_v[0])) DiagBreak();
+          if (!FZERO(e2_z_v[0]))
+            DiagBreak();
 #if 0
           vertex = MRIneighborhoodPlanarDirection(mri_labeled,x,y,z,3,5);
 #else
-          vertex = MRIcentralPlaneOfLeastVarianceNormalVoxel(mri_src, wsize, x, y, z);
+          vertex = MRIcentralPlaneOfLeastVarianceNormalVoxel(mri_src, wsize, x,
+                                                             y, z);
 #endif
           e1_x = e1_x_v[vertex]; /* first in-plane basis vector */
           e1_y = e1_y_v[vertex];
@@ -2751,9 +2853,7 @@ MRI *MRIcpolvThreshold(MRI *mri_src, MRI *mri_labeled, MRI *mri_dst, int wm_low,
     }
   }
   if (Gdiag & DIAG_SHOW)
-    fprintf(stderr,
-            "              %8d voxels processed (%2.2f%%)\n",
-            nlabeled,
+    fprintf(stderr, "              %8d voxels processed (%2.2f%%)\n", nlabeled,
             100.0f * (float)nlabeled / (float)(width * height * depth));
   return (mri_dst);
 }
@@ -2764,13 +2864,14 @@ MRI *MRIcpolvThreshold(MRI *mri_src, MRI *mri_labeled, MRI *mri_dst, int wm_low,
 
         Description
 ------------------------------------------------------*/
-MRI *MRIcpolvVote(MRI *mri_src, MRI *mri_labeled, MRI *mri_dst, int wsize, int niter, int use_all)
-{
-  int i, width, height, depth, x, y, z, whalf, vertex, xk, yk, xi, yi, zi, *pxi, *pyi, *pzi, label, nvox, nlabeled,
-      num_white, num_ambiguous, num_non_white;
+MRI *MRIcpolvVote(MRI *mri_src, MRI *mri_labeled, MRI *mri_dst, int wsize,
+                  int niter, int use_all) {
+  int i, width, height, depth, x, y, z, whalf, vertex, xk, yk, xi, yi, zi, *pxi,
+      *pyi, *pzi, label, nvox, nlabeled, num_white, num_ambiguous,
+      num_non_white;
   BUFTYPE *pdst;
   float xbase, ybase, zbase, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
-  MRI *mri_tmp = NULL;
+  MRI *mri_tmp = nullptr;
 
   init_basis_vectors();
 
@@ -2783,9 +2884,10 @@ MRI *MRIcpolvVote(MRI *mri_src, MRI *mri_labeled, MRI *mri_dst, int wsize, int n
   depth = mri_labeled->depth;
   whalf = (wsize - 1) / 2;
 
-  if (!mri_dst) mri_dst = MRIclone(mri_labeled, NULL);
+  if (!mri_dst)
+    mri_dst = MRIclone(mri_labeled, nullptr);
   if (niter > 1) {
-    mri_tmp = MRIcopy(mri_labeled, NULL);
+    mri_tmp = MRIcopy(mri_labeled, nullptr);
     mri_labeled = mri_tmp;
   }
 
@@ -2797,14 +2899,17 @@ MRI *MRIcpolvVote(MRI *mri_src, MRI *mri_labeled, MRI *mri_dst, int wsize, int n
         pdst = &MRIvox(mri_dst, 0, y, z);
         for (x = 0; x < width; x++) {
           label = MRIvox(mri_labeled, x, y, z);
-          if (label == MRI_WHITE) DiagBreak();
+          if (label == MRI_WHITE)
+            DiagBreak();
           if (label == MRI_AMBIGUOUS) {
             nvox++;
-            if (!FZERO(e2_z_v[0])) DiagBreak();
+            if (!FZERO(e2_z_v[0]))
+              DiagBreak();
 #if 0
             vertex = MRIneighborhoodPlanarDirection(mri_labeled,x,y,z,3,5);
 #else
-            vertex = MRIcentralPlaneOfLeastVarianceNormalVoxel(mri_src, wsize, x, y, z);
+            vertex = MRIcentralPlaneOfLeastVarianceNormalVoxel(mri_src, wsize,
+                                                               x, y, z);
 #endif
             e1_x = e1_x_v[vertex]; /* first in-plane basis vector */
             e1_y = e1_y_v[vertex];
@@ -2829,16 +2934,16 @@ MRI *MRIcpolvVote(MRI *mri_src, MRI *mri_labeled, MRI *mri_dst, int wsize, int n
                 zi = pzi[zi];
                 label = MRIvox(mri_labeled, xi, yi, zi);
                 switch (label) {
-                  default:
-                  case MRI_WHITE:
-                    num_white++;
-                    break;
-                  case MRI_AMBIGUOUS:
-                    num_ambiguous++;
-                    break;
-                  case MRI_NOT_WHITE:
-                    num_non_white++;
-                    break;
+                default:
+                case MRI_WHITE:
+                  num_white++;
+                  break;
+                case MRI_AMBIGUOUS:
+                  num_ambiguous++;
+                  break;
+                case MRI_NOT_WHITE:
+                  num_non_white++;
+                  break;
                 }
               }
             }
@@ -2850,32 +2955,30 @@ MRI *MRIcpolvVote(MRI *mri_src, MRI *mri_labeled, MRI *mri_dst, int wsize, int n
                 label = MRI_NOT_WHITE;
               else
                 label = MRI_AMBIGUOUS;
-            }
-            else {
+            } else {
               if (num_white >= num_non_white)
                 label = MRI_WHITE;
               else
                 label = MRI_NOT_WHITE;
             }
-            if (label != MRI_AMBIGUOUS) nlabeled++;
+            if (label != MRI_AMBIGUOUS)
+              nlabeled++;
           }
           *pdst++ = label;
         }
       }
     }
-    if (i < niter - 1) MRIcopy(mri_dst, mri_labeled);
+    if (i < niter - 1)
+      MRIcopy(mri_dst, mri_labeled);
     if (Gdiag & DIAG_SHOW) {
-      fprintf(stderr,
-              "                %8d voxels processed (%2.2f%%)\n",
-              nvox,
+      fprintf(stderr, "                %8d voxels processed (%2.2f%%)\n", nvox,
               100.0f * (float)nvox / (float)(width * height * depth));
-      fprintf(stderr,
-              "              %8d voxels labeled (%2.2f%%)\n",
-              nlabeled,
+      fprintf(stderr, "              %8d voxels labeled (%2.2f%%)\n", nlabeled,
               100.0f * (float)nlabeled / (float)(width * height * depth));
     }
   }
-  if (mri_tmp) MRIfree(&mri_tmp);
+  if (mri_tmp)
+    MRIfree(&mri_tmp);
   return (mri_dst);
 }
 /*-----------------------------------------------------
@@ -2885,10 +2988,11 @@ MRI *MRIcpolvVote(MRI *mri_src, MRI *mri_labeled, MRI *mri_dst, int wsize, int n
 
         Description
 ------------------------------------------------------*/
-MRI *MRIcpolvSmooth(MRI *mri_orig, MRI *mri_src, MRI *mri_dst, int wsize, int low_val, int hi_val, int niter)
-{
-  int width, height, depth, x, y, z, label, num_white, total_vox, white_vertex, black_vertex, x0, y0, z0, xi, yi, zi,
-      nskipped, dst_label, num_black, nwhite_to_black, nblack_to_white, i, skip;
+MRI *MRIcpolvSmooth(MRI *mri_orig, MRI *mri_src, MRI *mri_dst, int wsize,
+                    int low_val, int hi_val, int niter) {
+  int width, height, depth, x, y, z, label, num_white, total_vox, white_vertex,
+      black_vertex, x0, y0, z0, xi, yi, zi, nskipped, dst_label, num_black,
+      nwhite_to_black, nblack_to_white, i, skip;
   BUFTYPE *pdst, *psrc, *porig, orig;
   float thresh, hi_thresh, sthresh;
   MRI *mri_tmp;
@@ -2901,9 +3005,10 @@ MRI *MRIcpolvSmooth(MRI *mri_orig, MRI *mri_src, MRI *mri_dst, int wsize, int lo
   thresh = (float)(wsize * wsize) / 3.0f;
   hi_thresh = (float)(wsize * wsize) - thresh;
 
-  if (!mri_dst) mri_dst = MRIclone(mri_src, NULL);
+  if (!mri_dst)
+    mri_dst = MRIclone(mri_src, nullptr);
   if (niter > 1)
-    mri_tmp = MRIcopy(mri_src, NULL);
+    mri_tmp = MRIcopy(mri_src, nullptr);
   else
     mri_tmp = mri_src;
   mri_src = mri_tmp; /* don't overwrite input */
@@ -2918,9 +3023,12 @@ MRI *MRIcpolvSmooth(MRI *mri_orig, MRI *mri_src, MRI *mri_dst, int wsize, int lo
         psrc = &MRIvox(mri_src, 0, y, z);
         porig = &MRIvox(mri_orig, 0, y, z);
         for (x = 0; x < width; x++) {
-          if (x == 10 && y == 43 && z == 13) DiagBreak();
-          if (x == 10 && y == 44 && z == 10) DiagBreak();
-          if (x == 107 && y == 147 && z == 127) DiagBreak();
+          if (x == 10 && y == 43 && z == 13)
+            DiagBreak();
+          if (x == 10 && y == 44 && z == 10)
+            DiagBreak();
+          if (x == 107 && y == 147 && z == 127)
+            DiagBreak();
           dst_label = *psrc++;
 
           total_vox++;
@@ -2940,10 +3048,11 @@ MRI *MRIcpolvSmooth(MRI *mri_orig, MRI *mri_src, MRI *mri_dst, int wsize, int lo
                   ++num_black;
 
                 if (dst_label == MRI_WHITE) {
-                  if ((float)num_white > sthresh) skip = 1;
-                }
-                else {
-                  if ((float)num_black > sthresh) skip = 1;
+                  if ((float)num_white > sthresh)
+                    skip = 1;
+                } else {
+                  if ((float)num_black > sthresh)
+                    skip = 1;
                 }
               }
             }
@@ -2955,24 +3064,32 @@ MRI *MRIcpolvSmooth(MRI *mri_orig, MRI *mri_src, MRI *mri_dst, int wsize, int lo
             continue;
           }
           if (dst_label == MRI_WHITE) {
-            white_vertex = MRIneighborhoodCpolv(mri_src, x, y, z, 3, wsize, NULL);
+            white_vertex =
+                MRIneighborhoodCpolv(mri_src, x, y, z, 3, wsize, nullptr);
             num_white = MRIwhiteInPlane(mri_src, x, y, z, white_vertex, wsize);
             if (num_white < (wsize * wsize) / 2) {
-              black_vertex = MRIneighborhoodBlackCpolv(mri_src, x, y, z, 3, wsize, NULL);
-              num_black = wsize * wsize - MRIwhiteInPlane(mri_src, x, y, z, black_vertex, wsize);
-              if ((num_white < num_black) && (((float)num_white < thresh) || (num_black >= hi_thresh))) {
+              black_vertex = MRIneighborhoodBlackCpolv(mri_src, x, y, z, 3,
+                                                       wsize, nullptr);
+              num_black = wsize * wsize - MRIwhiteInPlane(mri_src, x, y, z,
+                                                          black_vertex, wsize);
+              if ((num_white < num_black) &&
+                  (((float)num_white < thresh) || (num_black >= hi_thresh))) {
                 nwhite_to_black++;
                 dst_label = MRI_NOT_WHITE;
               }
             }
-          }
-          else {
-            black_vertex = MRIneighborhoodBlackCpolv(mri_src, x, y, z, 3, wsize, NULL);
-            num_black = wsize * wsize - MRIwhiteInPlane(mri_src, x, y, z, black_vertex, wsize);
+          } else {
+            black_vertex =
+                MRIneighborhoodBlackCpolv(mri_src, x, y, z, 3, wsize, nullptr);
+            num_black = wsize * wsize -
+                        MRIwhiteInPlane(mri_src, x, y, z, black_vertex, wsize);
             if (num_black < wsize * wsize / 2) {
-              white_vertex = MRIneighborhoodCpolv(mri_src, x, y, z, 3, wsize, NULL);
-              num_white = MRIwhiteInPlane(mri_src, x, y, z, white_vertex, wsize);
-              if ((num_white > num_black) && (((float)num_black < thresh) || (num_white >= hi_thresh))) {
+              white_vertex =
+                  MRIneighborhoodCpolv(mri_src, x, y, z, 3, wsize, nullptr);
+              num_white =
+                  MRIwhiteInPlane(mri_src, x, y, z, white_vertex, wsize);
+              if ((num_white > num_black) &&
+                  (((float)num_black < thresh) || (num_white >= hi_thresh))) {
                 nblack_to_white++;
                 dst_label = MRI_WHITE;
               }
@@ -2985,22 +3102,22 @@ MRI *MRIcpolvSmooth(MRI *mri_orig, MRI *mri_src, MRI *mri_dst, int wsize, int lo
     }
 
     if (Gdiag & DIAG_SHOW) {
-      fprintf(stderr,
-              "                %8d voxels deleted (%2.2f%%)\n",
+      fprintf(stderr, "                %8d voxels deleted (%2.2f%%)\n",
               nwhite_to_black,
               100.0f * (float)nwhite_to_black / (float)total_vox);
-      fprintf(stderr,
-              "              %8d voxel added (%2.2f%%)\n",
+      fprintf(stderr, "              %8d voxel added (%2.2f%%)\n",
               nblack_to_white,
               100.0f * (float)nblack_to_white / (float)total_vox);
-      fprintf(stderr, "              %8d skipped (%%%2.2f)\n", nskipped, 100.0f * (float)nskipped / (float)total_vox);
+      fprintf(stderr, "              %8d skipped (%%%2.2f)\n", nskipped,
+              100.0f * (float)nskipped / (float)total_vox);
     }
     if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
       char fname[100];
       sprintf(fname, "/tmp/smooth%d.mnc", i + 1);
       MRIwrite(mri_dst, fname);
     }
-    if (i < niter - 1) MRIcopy(mri_dst, mri_src);
+    if (i < niter - 1)
+      MRIcopy(mri_dst, mri_src);
   }
 
   return (mri_dst);
@@ -3012,8 +3129,8 @@ MRI *MRIcpolvSmooth(MRI *mri_orig, MRI *mri_src, MRI *mri_dst, int wsize, int lo
 
         Description
 ------------------------------------------------------*/
-MRI *MRIextractVertexCoords(MRI *mri_src, int *px, int *py, int *pz, int vertex, int x, int y, int z, int wsize)
-{
+MRI *MRIextractVertexCoords(MRI *mri_src, int *px, int *py, int *pz, int vertex,
+                            int x, int y, int z, int wsize) {
   float e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase;
   int whalf, xk, yk, xi, yi, zi;
 
@@ -3051,8 +3168,8 @@ MRI *MRIextractVertexCoords(MRI *mri_src, int *px, int *py, int *pz, int vertex,
 
         Description
 ------------------------------------------------------*/
-MRI *MRIextractVertexPlane(MRI *mri_src, MRI *mri_dst, int vertex, int x0, int y0, int z0, int wsize)
-{
+MRI *MRIextractVertexPlane(MRI *mri_src, MRI *mri_dst, int vertex, int x0,
+                           int y0, int z0, int wsize) {
   float e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, xbase, ybase, zbase, x, y, z;
   int whalf, xk, yk;
   double val;
@@ -3103,15 +3220,18 @@ MRI *MRIextractVertexPlane(MRI *mri_src, MRI *mri_dst, int vertex, int x0, int y
 
         Description
 ------------------------------------------------------*/
-int MRIneighborhoodBlackCpolv(MRI *mri_src, int xv, int yv, int zv, int nsize, int wsize, int *pnum_black)
-{
-  int best_plane[NVERTICES], whalf, nhalf, vertex, xk, yk, label, xi, yi, zi, *pxi, *pyi, *pzi, peak_vertex_index,
-      max_count, x0, x1, y0, y1, z0, z1, x, y, z, num_black;
-  float xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y, *pe2_z, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
+int MRIneighborhoodBlackCpolv(MRI *mri_src, int xv, int yv, int zv, int nsize,
+                              int wsize, int *pnum_black) {
+  int best_plane[NVERTICES], whalf, nhalf, vertex, xk, yk, label, xi, yi, zi,
+      *pxi, *pyi, *pzi, peak_vertex_index, max_count, x0, x1, y0, y1, z0, z1, x,
+      y, z, num_black;
+  float xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y, *pe2_z,
+      e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
 
   init_basis_vectors();
 
-  if (xv == 166 && yv == 150 && zv == 127) DiagBreak(); /* 113 */
+  if (xv == 166 && yv == 150 && zv == 127)
+    DiagBreak(); /* 113 */
 
   pxi = mri_src->xi;
   pyi = mri_src->yi;
@@ -3139,7 +3259,8 @@ int MRIneighborhoodBlackCpolv(MRI *mri_src, int xv, int yv, int zv, int nsize, i
     for (y = y0; y <= y1; y++) {
       for (x = x0; x <= x1; x++) {
         label = MRIvox(mri_src, x, y, z);
-        if (label > MRI_NOT_WHITE) continue;
+        if (label > MRI_NOT_WHITE)
+          continue;
         pe1_x = e1_x_v;
         pe1_y = e1_y_v;
         pe1_z = e1_z_v;
@@ -3169,7 +3290,8 @@ int MRIneighborhoodBlackCpolv(MRI *mri_src, int xv, int yv, int zv, int nsize, i
               zi = nint(zbase + xk * e1_z);
               zi = pzi[zi];
               label = MRIvox(mri_src, xi, yi, zi);
-              if (label < MRI_AMBIGUOUS) num_black++;
+              if (label < MRI_AMBIGUOUS)
+                num_black++;
             }
           }
           if (num_black && (num_black >= max_count)) {
@@ -3184,7 +3306,8 @@ int MRIneighborhoodBlackCpolv(MRI *mri_src, int xv, int yv, int zv, int nsize, i
       }
     }
   }
-  if (pnum_black) *pnum_black = max_count;
+  if (pnum_black)
+    *pnum_black = max_count;
   peak_vertex_index = 0;
 
   /* now find the orientation with the most of the best-fitting planes */
@@ -3204,15 +3327,18 @@ int MRIneighborhoodBlackCpolv(MRI *mri_src, int xv, int yv, int zv, int nsize, i
 
         Description
 ------------------------------------------------------*/
-int MRIneighborhoodCpolv(MRI *mri_src, int xv, int yv, int zv, int nsize, int wsize, int *pnum_white)
-{
-  int best_plane[NVERTICES], whalf, nhalf, vertex, xk, yk, label, xi, yi, zi, *pxi, *pyi, *pzi, peak_vertex_index,
-      max_count, x0, x1, y0, y1, z0, z1, x, y, z, num_white;
-  float xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y, *pe2_z, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
+int MRIneighborhoodCpolv(MRI *mri_src, int xv, int yv, int zv, int nsize,
+                         int wsize, int *pnum_white) {
+  int best_plane[NVERTICES], whalf, nhalf, vertex, xk, yk, label, xi, yi, zi,
+      *pxi, *pyi, *pzi, peak_vertex_index, max_count, x0, x1, y0, y1, z0, z1, x,
+      y, z, num_white;
+  float xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y, *pe2_z,
+      e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
 
   init_basis_vectors();
 
-  if (xv == 166 && yv == 150 && zv == 127) DiagBreak(); /* 113 */
+  if (xv == 166 && yv == 150 && zv == 127)
+    DiagBreak(); /* 113 */
 
   pxi = mri_src->xi;
   pyi = mri_src->yi;
@@ -3240,7 +3366,8 @@ int MRIneighborhoodCpolv(MRI *mri_src, int xv, int yv, int zv, int nsize, int ws
     for (y = y0; y <= y1; y++) {
       for (x = x0; x <= x1; x++) {
         label = MRIvox(mri_src, x, y, z);
-        if (label != MRI_WHITE) continue;
+        if (label != MRI_WHITE)
+          continue;
         pe1_x = e1_x_v;
         pe1_y = e1_y_v;
         pe1_z = e1_z_v;
@@ -3270,7 +3397,8 @@ int MRIneighborhoodCpolv(MRI *mri_src, int xv, int yv, int zv, int nsize, int ws
               zi = nint(zbase + xk * e1_z);
               zi = pzi[zi];
               label = MRIvox(mri_src, xi, yi, zi);
-              if (label == MRI_WHITE) num_white++;
+              if (label == MRI_WHITE)
+                num_white++;
             }
           }
           if (num_white && (num_white >= max_count)) {
@@ -3285,7 +3413,8 @@ int MRIneighborhoodCpolv(MRI *mri_src, int xv, int yv, int zv, int nsize, int ws
       }
     }
   }
-  if (pnum_white) *pnum_white = max_count;
+  if (pnum_white)
+    *pnum_white = max_count;
   peak_vertex_index = 0;
 
   /* now find the orientation with the most of the best-fitting planes */
@@ -3305,16 +3434,19 @@ int MRIneighborhoodCpolv(MRI *mri_src, int xv, int yv, int zv, int nsize, int ws
 
         Description
 ------------------------------------------------------*/
-int MRIneighborhoodPlanarDirection(MRI *mri_src, int xv, int yv, int zv, int nsize, int wsize)
-{
-  int best_white_plane[NVERTICES], best_black_plane[NVERTICES], whalf, nhalf, vertex, xk, yk, label, src_label,
-      max_black_count, xi, yi, zi, *pxi, *pyi, *pzi, peak_vertex_index, max_white_count, x0, x1, y0, y1, z0, z1, x, y,
-      z, num_white, num_black, max_count;
-  float xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y, *pe2_z, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
+int MRIneighborhoodPlanarDirection(MRI *mri_src, int xv, int yv, int zv,
+                                   int nsize, int wsize) {
+  int best_white_plane[NVERTICES], best_black_plane[NVERTICES], whalf, nhalf,
+      vertex, xk, yk, label, src_label, max_black_count, xi, yi, zi, *pxi, *pyi,
+      *pzi, peak_vertex_index, max_white_count, x0, x1, y0, y1, z0, z1, x, y, z,
+      num_white, num_black, max_count;
+  float xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y, *pe2_z,
+      e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
 
   init_basis_vectors();
 
-  if (xv == 166 && yv == 150 && zv == 127) DiagBreak(); /* 113 */
+  if (xv == 166 && yv == 150 && zv == 127)
+    DiagBreak(); /* 113 */
 
   pxi = mri_src->xi;
   pyi = mri_src->yi;
@@ -3342,7 +3474,8 @@ int MRIneighborhoodPlanarDirection(MRI *mri_src, int xv, int yv, int zv, int nsi
     for (y = y0; y <= y1; y++) {
       for (x = x0; x <= x1; x++) {
         src_label = MRIvox(mri_src, x, y, z);
-        if (src_label == MRI_AMBIGUOUS) continue;
+        if (src_label == MRI_AMBIGUOUS)
+          continue;
         pe1_x = e1_x_v;
         pe1_y = e1_y_v;
         pe1_z = e1_z_v;
@@ -3378,15 +3511,16 @@ int MRIneighborhoodPlanarDirection(MRI *mri_src, int xv, int yv, int zv, int nsi
                 num_black++;
             }
           }
-          if (src_label == MRI_NOT_WHITE && (num_black && (num_black >= max_black_count))) {
+          if (src_label == MRI_NOT_WHITE &&
+              (num_black && (num_black >= max_black_count))) {
             if (num_black > max_black_count) /* new best-fit */
             {
               memset(best_black_plane, 0, sizeof(best_black_plane));
               max_black_count = num_black;
             }
             best_black_plane[vertex]++;
-          }
-          else if (src_label == MRI_WHITE && (num_white && (num_white >= max_white_count))) {
+          } else if (src_label == MRI_WHITE &&
+                     (num_white && (num_white >= max_white_count))) {
             if (num_white > max_white_count) /* new best-fit */
             {
               memset(best_white_plane, 0, sizeof(best_white_plane));
@@ -3417,8 +3551,7 @@ int MRIneighborhoodPlanarDirection(MRI *mri_src, int xv, int yv, int zv, int nsi
 
         Description
 ------------------------------------------------------*/
-int MRIwhiteInPlane(MRI *mri_src, int x, int y, int z, int vertex, int wsize)
-{
+int MRIwhiteInPlane(MRI *mri_src, int x, int y, int z, int vertex, int wsize) {
   int whalf, xk, yk, label, xi, yi, zi, *pxi, *pyi, *pzi, num_white;
   float xbase, ybase, zbase, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
 
@@ -3459,7 +3592,8 @@ int MRIwhiteInPlane(MRI *mri_src, int x, int y, int z, int vertex, int wsize)
       zi = nint(zbase + xk * e1_z);
       zi = pzi[zi];
       label = MRIvox(mri_src, xi, yi, zi);
-      if (label >= MRI_WHITE) num_white++;
+      if (label >= MRI_WHITE)
+        num_white++;
     }
   }
   return (num_white);
@@ -3473,17 +3607,18 @@ int MRIwhiteInPlane(MRI *mri_src, int x, int y, int z, int vertex, int wsize)
         Description
           Remove small inconsistincies in the labeling of a volume.
 ------------------------------------------------------*/
-MRI *MRIremoveHoles(MRI *mri_src, MRI *mri_dst, int wsize, float pct, int use_all)
-{
-  int width, height, depth, x, y, z, whalf, x0, y0, z0, thresh, xi, yi, zi, num_on, num_off, in_val, nvox, nprocessed,
-      nlabeled;
+MRI *MRIremoveHoles(MRI *mri_src, MRI *mri_dst, int wsize, float pct,
+                    int use_all) {
+  int width, height, depth, x, y, z, whalf, x0, y0, z0, thresh, xi, yi, zi,
+      num_on, num_off, in_val, nvox, nprocessed, nlabeled;
   BUFTYPE val, *pdst;
   float wcubed;
 
   width = mri_src->width;
   height = mri_src->height;
   depth = mri_src->depth;
-  if (!mri_dst) mri_dst = MRIcopy(mri_src, NULL);
+  if (!mri_dst)
+    mri_dst = MRIcopy(mri_src, nullptr);
 
   wcubed = (float)(wsize * wsize * wsize);
   thresh = nint((float)wcubed * pct);
@@ -3494,7 +3629,8 @@ MRI *MRIremoveHoles(MRI *mri_src, MRI *mri_dst, int wsize, float pct, int use_al
     for (y = 0; y < height; y++) {
       pdst = &MRIvox(mri_dst, 0, y, z);
       for (x = 0; x < width; x++) {
-        if (x == 80 && y == 2 && z == 0) DiagBreak();
+        if (x == 80 && y == 2 && z == 0)
+          DiagBreak();
         in_val = MRIvox(mri_src, x, y, z);
         if (in_val != MRI_AMBIGUOUS) {
           *pdst++ = in_val;
@@ -3526,19 +3662,17 @@ MRI *MRIremoveHoles(MRI *mri_src, MRI *mri_dst, int wsize, float pct, int use_al
           val = MRI_WHITE;
         else
           val = MRI_AMBIGUOUS;
-        if (val != MRI_AMBIGUOUS) nlabeled++;
+        if (val != MRI_AMBIGUOUS)
+          nlabeled++;
         *pdst++ = val;
       }
     }
   }
   if (Gdiag & DIAG_SHOW) {
-    fprintf(stderr,
-            "               %8d voxels processed (%2.2f%%)\n",
+    fprintf(stderr, "               %8d voxels processed (%2.2f%%)\n",
             nprocessed,
             100.0f * (float)nprocessed / (float)(width * height * depth));
-    fprintf(stderr,
-            "               %8d voxels labeled (%2.2f%%)\n",
-            nlabeled,
+    fprintf(stderr, "               %8d voxels labeled (%2.2f%%)\n", nlabeled,
             100.0f * (float)nlabeled / (float)(width * height * depth));
   }
   return (mri_dst);
@@ -3551,16 +3685,17 @@ MRI *MRIremoveHoles(MRI *mri_src, MRI *mri_dst, int wsize, float pct, int use_al
         Description
           Remove small inconsistincies in the labeling of a volume.
 ------------------------------------------------------*/
-MRI *MRImeanLabel(MRI *mri_src, MRI *mri_label, MRI *mri_dst, int wsize)
-{
-  int width, height, depth, x, y, z, whalf, x0, y0, z0, xi, yi, zi, in_val, label, total;
+MRI *MRImeanLabel(MRI *mri_src, MRI *mri_label, MRI *mri_dst, int wsize) {
+  int width, height, depth, x, y, z, whalf, x0, y0, z0, xi, yi, zi, in_val,
+      label, total;
   BUFTYPE val, *pdst, *plabel, *psrc;
   float wcubed, mean;
 
   width = mri_src->width;
   height = mri_src->height;
   depth = mri_src->depth;
-  if (!mri_dst) mri_dst = MRIclone(mri_src, NULL);
+  if (!mri_dst)
+    mri_dst = MRIclone(mri_src, nullptr);
 
   wcubed = (float)(wsize * wsize * wsize);
   whalf = wsize / 2;
@@ -3571,7 +3706,8 @@ MRI *MRImeanLabel(MRI *mri_src, MRI *mri_label, MRI *mri_dst, int wsize)
       pdst = &MRIvox(mri_dst, 0, y, z);
       psrc = &MRIvox(mri_src, 0, y, z);
       for (x = 0; x < width; x++) {
-        if (x == 80 && y == 2 && z == 0) DiagBreak();
+        if (x == 80 && y == 2 && z == 0)
+          DiagBreak();
         in_val = *psrc++;
         label = *plabel++;
         if (label != MRI_AMBIGUOUS) {
@@ -3608,31 +3744,31 @@ MRI *MRImeanLabel(MRI *mri_src, MRI *mri_label, MRI *mri_dst, int wsize)
         Description
           Remove small inconsistincies in the labeling of a volume.
 ------------------------------------------------------*/
-MRI *MRIintensitySegmentation(MRI *mri_src, MRI *mri_labeled, float wm_low, float wm_hi, float gray_hi)
-{
+MRI *MRIintensitySegmentation(MRI *mri_src, MRI *mri_labeled, float wm_low,
+                              float wm_hi, float gray_hi) {
   int width, height, depth, x, y, z, nwhite, nblack, nambiguous;
   float val;
 
   width = mri_src->width;
   height = mri_src->height;
   depth = mri_src->depth;
-  if (!mri_labeled) mri_labeled = MRIclone(mri_src, NULL);
+  if (!mri_labeled)
+    mri_labeled = MRIclone(mri_src, nullptr);
 
   nwhite = nblack = nambiguous = 0;
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
       for (x = 0; x < width; x++) {
-        if (x == 105 && y == 75 && z == 127) DiagBreak();
+        if (x == 105 && y == 75 && z == 127)
+          DiagBreak();
         val = MRIgetVoxVal(mri_src, x, y, z, 0);
         if (val < wm_low || val > wm_hi) {
           val = MRI_NOT_WHITE;
           nblack++;
-        }
-        else if (val <= gray_hi) {
+        } else if (val <= gray_hi) {
           nambiguous++;
           val = MRI_AMBIGUOUS;
-        }
-        else {
+        } else {
           nwhite++;
           val = MRI_WHITE;
         }
@@ -3641,17 +3777,11 @@ MRI *MRIintensitySegmentation(MRI *mri_src, MRI *mri_labeled, float wm_low, floa
     }
   }
   if (Gdiag & DIAG_SHOW) {
-    fprintf(stderr,
-            "              %8d voxel white     (%.2f%%)\n",
-            nwhite,
+    fprintf(stderr, "              %8d voxel white     (%.2f%%)\n", nwhite,
             100.0f * (float)nwhite / (float)(width * height * depth));
-    fprintf(stderr,
-            "              %8d voxel non white (%.2f%%)\n",
-            nblack,
+    fprintf(stderr, "              %8d voxel non white (%.2f%%)\n", nblack,
             100.0f * (float)nblack / (float)(width * height * depth));
-    fprintf(stderr,
-            "              %8d voxel ambiguous (%.2f%%)\n",
-            nambiguous,
+    fprintf(stderr, "              %8d voxel ambiguous (%.2f%%)\n", nambiguous,
             100.0f * (float)nambiguous / (float)(width * height * depth));
   }
   return (mri_labeled);
@@ -3664,15 +3794,16 @@ MRI *MRIintensitySegmentation(MRI *mri_src, MRI *mri_labeled, float wm_low, floa
         Description
           Remove small inconsistincies in the labeling of a volume.
 ------------------------------------------------------*/
-MRI *MRIthresholdLabel(MRI *mri_src, MRI *mri_labeled, MRI *mri_dst, int wm_low)
-{
+MRI *MRIthresholdLabel(MRI *mri_src, MRI *mri_labeled, MRI *mri_dst,
+                       int wm_low) {
   int width, height, depth, x, y, z;
   BUFTYPE val, *psrc, *plabel, *pdst, label;
 
   width = mri_src->width;
   height = mri_src->height;
   depth = mri_src->depth;
-  if (!mri_dst) mri_dst = MRIclone(mri_src, NULL);
+  if (!mri_dst)
+    mri_dst = MRIclone(mri_src, nullptr);
 
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
@@ -3704,18 +3835,19 @@ MRI *MRIthresholdLabel(MRI *mri_src, MRI *mri_labeled, MRI *mri_dst, int wm_low)
         Description
           Segment an MR image based on an order statistic.
 ------------------------------------------------------*/
-MRI *MRIorderSegment(MRI *mri_src, MRI *mri_labeled, float thresh, int wsize)
-{
-  int width, height, depth, x, y, z, whalf, x0, y0, z0, xi, yi, zi, in_val, thresh_index, label, nvox;
+MRI *MRIorderSegment(MRI *mri_src, MRI *mri_labeled, float thresh, int wsize) {
+  int width, height, depth, x, y, z, whalf, x0, y0, z0, xi, yi, zi, in_val,
+      thresh_index, label, nvox;
   BUFTYPE val, *pdst, *sptr;
   float wcubed;
-  static BUFTYPE *sort_array = NULL;
+  static BUFTYPE *sort_array = nullptr;
   static int sort_size = 0;
 
   width = mri_src->width;
   height = mri_src->height;
   depth = mri_src->depth;
-  if (!mri_labeled) mri_labeled = MRIclone(mri_src, NULL);
+  if (!mri_labeled)
+    mri_labeled = MRIclone(mri_src, nullptr);
 
   wcubed = (float)(wsize * wsize * wsize);
   whalf = wsize / 2;
@@ -3723,7 +3855,7 @@ MRI *MRIorderSegment(MRI *mri_src, MRI *mri_labeled, float thresh, int wsize)
 
   if (sort_array && (wcubed != sort_size)) {
     free(sort_array);
-    sort_array = NULL;
+    sort_array = nullptr;
   }
   if (!sort_array) {
     sort_array = (BUFTYPE *)calloc(wcubed, sizeof(BUFTYPE));
@@ -3736,7 +3868,8 @@ MRI *MRIorderSegment(MRI *mri_src, MRI *mri_labeled, float thresh, int wsize)
       for (x = 0; x < width; x++) {
         label = *pdst;
         in_val = MRIvox(mri_src, x, y, z);
-        if (x == 28 && y == 10 && z == 63) DiagBreak();
+        if (x == 28 && y == 10 && z == 63)
+          DiagBreak();
         if (label != MRI_AMBIGUOUS) {
           pdst++;
           continue;
@@ -3763,9 +3896,7 @@ MRI *MRIorderSegment(MRI *mri_src, MRI *mri_labeled, float thresh, int wsize)
     }
   }
   if (Gdiag & DIAG_SHOW)
-    fprintf(stderr,
-            "segmentation: %8d voxel processed (%2.2f%%)\n",
-            nvox,
+    fprintf(stderr, "segmentation: %8d voxel processed (%2.2f%%)\n", nvox,
             100.0f * (float)nvox / (float)(width * height * depth));
   return (mri_labeled);
 }
@@ -3776,20 +3907,21 @@ MRI *MRIorderSegment(MRI *mri_src, MRI *mri_labeled, float thresh, int wsize)
 
         Description
 ------------------------------------------------------*/
-MRI *MRImaskLabels(MRI *mri_src, MRI *mri_mask, MRI *mri_dst)
-{
+MRI *MRImaskLabels(MRI *mri_src, MRI *mri_mask, MRI *mri_dst) {
   int width, height, depth, x, y, z;
   float mask, src;
 
   width = mri_src->width;
   height = mri_src->height;
   depth = mri_src->depth;
-  if (!mri_dst) mri_dst = MRIclone(mri_src, NULL);
+  if (!mri_dst)
+    mri_dst = MRIclone(mri_src, nullptr);
 
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
       for (x = 0; x < width; x++) {
-        if (x == 157 && y == 154 && z == 127) DiagBreak();
+        if (x == 157 && y == 154 && z == 127)
+          DiagBreak();
         mask = MRIgetVoxVal(mri_mask, x, y, z, 0);
         src = MRIgetVoxVal(mri_src, x, y, z, 0);
         if (mask == MRI_AMBIGUOUS)
@@ -3810,12 +3942,14 @@ MRI *MRImaskLabels(MRI *mri_src, MRI *mri_mask, MRI *mri_dst)
 
         Description
 ------------------------------------------------------*/
-int MRIcentralPlaneOfLeastVarianceNormalVoxel(MRI *mri_src, int wsize, int x, int y, int z)
-{
-  int width, height, depth, whalf, vertex, xk, yk, min_vertex, max_vertex, xi, yi, zi, *pxi, *pyi, *pzi;
+int MRIcentralPlaneOfLeastVarianceNormalVoxel(MRI *mri_src, int wsize, int x,
+                                              int y, int z) {
+  int width, height, depth, whalf, vertex, xk, yk, min_vertex, max_vertex, xi,
+      yi, zi, *pxi, *pyi, *pzi;
   float min_mean, min_var, max_var, total, total_sq, nv, varv, avgv, val;
   BUFTYPE max_val;
-  float xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y, *pe2_z, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
+  float xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, *pe2_x, *pe2_y, *pe2_z,
+      e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
 
   init_basis_vectors();
 
@@ -3901,15 +4035,16 @@ int MRIcentralPlaneOfLeastVarianceNormalVoxel(MRI *mri_src, int wsize, int x, in
   \brief Reclassifies MRI_AMBIGUOUS voxels
 
 */
-MRI *MRIcpolvMedianCurveSegment(
-    MRI *mri, MRI *mri_labeled, MRI *mri_dst, int wsize, float len, float gray_hi, float wm_low)
-{
+MRI *MRIcpolvMedianCurveSegment(MRI *mri, MRI *mri_labeled, MRI *mri_dst,
+                                int wsize, float len, float gray_hi,
+                                float wm_low) {
   int x, y, z, width, height, depth, label, nlabeled, non, noff;
 
   printf("MRIcpolvMedianCurveSegment(): wsize=%d, len=%g, gmhi=%g, wmlow=%g\n",
-	 wsize,len,gray_hi,wm_low);
+         wsize, len, gray_hi, wm_low);
 
-  if (!mri_dst) mri_dst = MRIcopy(mri_labeled, NULL);
+  if (!mri_dst)
+    mri_dst = MRIcopy(mri_labeled, nullptr);
 
   width = mri->width;
   height = mri->height;
@@ -3918,11 +4053,14 @@ MRI *MRIcpolvMedianCurveSegment(
     DiagShowPctDone((float)z / (float)(depth - 1), 5);
     for (y = 0; y < height; y++) {
       for (x = 0; x < width; x++) {
-        if (x == 148 && y == 143 && z == 159) DiagBreak();
+        if (x == 148 && y == 143 && z == 159)
+          DiagBreak();
         label = MRIvox(mri_labeled, x, y, z);
-        if (label != MRI_AMBIGUOUS) continue;
+        if (label != MRI_AMBIGUOUS)
+          continue;
         nlabeled++;
-        label = MRIcpolvMedianCurveVoxel(mri, mri_labeled, x, y, z, wsize, len, gray_hi, wm_low);
+        label = MRIcpolvMedianCurveVoxel(mri, mri_labeled, x, y, z, wsize, len,
+                                         gray_hi, wm_low);
         if (label == MRI_WHITE)
           non++;
         else
@@ -3933,11 +4071,11 @@ MRI *MRIcpolvMedianCurveSegment(
   }
 
   printf("  %8d voxels processed (%2.2f%%)\n", nlabeled,
-            100.0f * (float)nlabeled / (float)(width * height * depth));
+         100.0f * (float)nlabeled / (float)(width * height * depth));
   printf("  %8d voxels white (%2.2f%%)\n", non,
-            100.0f * (float)non / (float)(width * height * depth));
-  printf("  %8d voxels non-white (%2.2f%%)\n",noff,
-            100.0f * (float)noff / (float)(width * height * depth));
+         100.0f * (float)non / (float)(width * height * depth));
+  printf("  %8d voxels non-white (%2.2f%%)\n", noff,
+         100.0f * (float)noff / (float)(width * height * depth));
 
   return (mri_dst);
 }
@@ -3948,13 +4086,14 @@ MRI *MRIcpolvMedianCurveSegment(
 
         Description
 ------------------------------------------------------*/
-int MRIcpolvMedianCurveVoxel(
-    MRI *mri, MRI *mri_labeled, int x0, int y0, int z0, int wsize, float len, float gray_hi, float wm_low)
-{
+int MRIcpolvMedianCurveVoxel(MRI *mri, MRI *mri_labeled, int x0, int y0, int z0,
+                             int wsize, float len, float gray_hi,
+                             float wm_low) {
   int vertex, what, i, maxi;
-  FILE *fp = NULL;
-  float dist, x, y, z, median, nx, ny, nz, white_dist, gray_dist, gray_val, white_val, val, white_grad, gray_grad,
-      max_val, min_val, max_val_dist, min_val_dist;
+  FILE *fp = nullptr;
+  float dist, x, y, z, median, nx, ny, nz, white_dist, gray_dist, gray_val,
+      white_val, val, white_grad, gray_grad, max_val, min_val, max_val_dist,
+      min_val_dist;
   float medians[200], dists[200];
 
 #if 0
@@ -3986,8 +4125,7 @@ int MRIcpolvMedianCurveVoxel(
     if ((median >= gray_hi) && (fabs(dist) < white_dist)) {
       white_val = median;
       white_dist = fabs(dist);
-    }
-    else if ((median <= wm_low) && (fabs(dist) < gray_dist)) {
+    } else if ((median <= wm_low) && (fabs(dist) < gray_dist)) {
       gray_val = median;
       gray_dist = fabs(dist);
     }
@@ -4006,12 +4144,12 @@ int MRIcpolvMedianCurveVoxel(
       if (median >= gray_hi) {
         /*        fprintf(stderr, "median=%2.2f --> WHITE\n", median) ;*/
         what = MRI_WHITE;
-      }
-      else if (median <= wm_low) {
+      } else if (median <= wm_low) {
         what = MRI_NOT_WHITE;
         /*        fprintf(stderr, "median=%2.2f --> NOT WHITE\n", median) ;*/
       }
-      if (!((Gdiag & DIAG_WRITE) && DIAG_VERBOSE_ON) && what != MRI_AMBIGUOUS) return (what);
+      if (!((Gdiag & DIAG_WRITE) && DIAG_VERBOSE_ON) && what != MRI_AMBIGUOUS)
+        return (what);
     }
   }
 #if 0
@@ -4030,7 +4168,8 @@ int MRIcpolvMedianCurveVoxel(
   if ((Gdiag & DIAG_WRITE) && DIAG_VERBOSE_ON) {
     fp = fopen("med.plt", "w");
     maxi = i;
-    for (i = 0; i < maxi; i++) fprintf(fp, "%2.2f  %2.3f\n", dists[i], medians[i]);
+    for (i = 0; i < maxi; i++)
+      fprintf(fp, "%2.2f  %2.3f\n", dists[i], medians[i]);
     fclose(fp);
   }
 
@@ -4043,7 +4182,8 @@ int MRIcpolvMedianCurveVoxel(
         white_dist = fabs(dists[i]);
       }
     }
-    if (FZERO(white_dist)) what = MRI_WHITE; /* peak in this plane - must be white matter */
+    if (FZERO(white_dist))
+      what = MRI_WHITE; /* peak in this plane - must be white matter */
   }
 
   if (gray_dist > len) /* couldn't find gray matter - look for peak */
@@ -4056,7 +4196,8 @@ int MRIcpolvMedianCurveVoxel(
         gray_dist = fabs(dists[i]);
       }
     }
-    if (FZERO(gray_dist)) what = MRI_NOT_WHITE; /* peak in this plane - must be gray matter */
+    if (FZERO(gray_dist))
+      what = MRI_NOT_WHITE; /* peak in this plane - must be gray matter */
   }
 
   /* check to see if one distance is substantially bigger than the other */
@@ -4072,7 +4213,8 @@ int MRIcpolvMedianCurveVoxel(
      gradient magnitude.
   */
   if (what == MRI_AMBIGUOUS) {
-    if (white_dist > 2.0) what = MRI_NOT_WHITE;
+    if (white_dist > 2.0)
+      what = MRI_NOT_WHITE;
 #if 1
     else {
 #if 0
@@ -4093,8 +4235,7 @@ int MRIcpolvMedianCurveVoxel(
         what = MRI_NOT_WHITE;
       else
         what = MRI_WHITE;
-    }
-    else if (gray_dist > white_dist)
+    } else if (gray_dist > white_dist)
       what = MRI_WHITE;
     else
       what = MRI_NOT_WHITE;
@@ -4109,8 +4250,8 @@ int MRIcpolvMedianCurveVoxel(
 
         Description
 ------------------------------------------------------*/
-float MRIcpolvMedianAtVoxel(MRI *mri_src, int vertex, float x, float y, float z, int wsize)
-{
+float MRIcpolvMedianAtVoxel(MRI *mri_src, int vertex, float x, float y, float z,
+                            int wsize) {
   int whalf, xk, yk;
   float xbase, ybase, zbase, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
   float plane_vals[MAXLEN], *pvals;
@@ -4125,7 +4266,8 @@ float MRIcpolvMedianAtVoxel(MRI *mri_src, int vertex, float x, float y, float z,
   e2_y = e2_y_v[vertex];
   e2_z = e2_z_v[vertex];
 
-  if (x == 166 && y == 150 && z == 127) DiagBreak(); /* 113 */
+  if (x == 166 && y == 150 && z == 127)
+    DiagBreak(); /* 113 */
 
   whalf = (wsize - 1) / 2;
 
@@ -4156,10 +4298,12 @@ float MRIcpolvMedianAtVoxel(MRI *mri_src, int vertex, float x, float y, float z,
   qsort(plane_vals, wsize * wsize, sizeof(float), compare_sort_farray);
   return (plane_vals[wsize * wsize / 2]);
 }
-int MRIvertexToVector(int vertex, float *pdx, float *pdy, float *pdz)
-{
-  if ((vertex < 0) || ((unsigned)vertex >= sizeof(ic_x_vertices) / sizeof(ic_x_vertices[0])))
-    ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "MRIvertexToVector(%d): index out of range", vertex));
+int MRIvertexToVector(int vertex, float *pdx, float *pdy, float *pdz) {
+  if ((vertex < 0) ||
+      ((unsigned)vertex >= sizeof(ic_x_vertices) / sizeof(ic_x_vertices[0])))
+    ErrorReturn(
+        ERROR_BADPARM,
+        (ERROR_BADPARM, "MRIvertexToVector(%d): index out of range", vertex));
   *pdx = ic_x_vertices[vertex];
   *pdy = ic_y_vertices[vertex];
   *pdz = ic_z_vertices[vertex];
@@ -4174,16 +4318,17 @@ int MRIvertexToVector(int vertex, float *pdx, float *pdy, float *pdz)
         Description
           Remove small inconsistincies in the labelling of a volume.
 ------------------------------------------------------*/
-MRI *MRIremoveIslands(MRI *mri_src, MRI *mri_dst, int wsize, int thresh)
-{
-  int width, height, depth, x, y, z, whalf, x0, y0, z0, xi, yi, zi, num_on, num_off;
+MRI *MRIremoveIslands(MRI *mri_src, MRI *mri_dst, int wsize, int thresh) {
+  int width, height, depth, x, y, z, whalf, x0, y0, z0, xi, yi, zi, num_on,
+      num_off;
   float val, out_val;
   float wcubed;
 
   width = mri_src->width;
   height = mri_src->height;
   depth = mri_src->depth;
-  if (!mri_dst) mri_dst = MRIclone(mri_src, NULL);
+  if (!mri_dst)
+    mri_dst = MRIclone(mri_src, nullptr);
 
   wcubed = (float)(wsize * wsize * wsize);
   whalf = wsize / 2;
@@ -4201,7 +4346,8 @@ MRI *MRIremoveIslands(MRI *mri_src, MRI *mri_dst, int wsize, int thresh)
               if (!val)
                 num_off++;
               else {
-                if (!out_val) out_val = 0;
+                if (!out_val)
+                  out_val = 0;
                 num_on++;
               }
             }
@@ -4218,8 +4364,8 @@ MRI *MRIremoveIslands(MRI *mri_src, MRI *mri_dst, int wsize, int thresh)
   }
   return (mri_dst);
 }
-MRI *MRIfillPlanarHoles(MRI *mri_src, MRI *mri_segment, MRI *mri_dst, MRI_SEGMENT *mseg)
-{
+MRI *MRIfillPlanarHoles(MRI *mri_src, MRI *mri_segment, MRI *mri_dst,
+                        MRI_SEGMENT *mseg) {
   int width, height, depth, x, y, z, nfilled, total_filled, vertex;
   MRI *mri_binary_strand, *mri_strand_border;
 
@@ -4230,12 +4376,12 @@ MRI *MRIfillPlanarHoles(MRI *mri_src, MRI *mri_segment, MRI *mri_dst, MRI_SEGMEN
   mri_dst = MRIcopy(mri_src, mri_dst);
 
   /* make it 0-1 */
-  mri_binary_strand = MRIbinarize(mri_segment, NULL, WM_MIN_VAL, 0, 1);
+  mri_binary_strand = MRIbinarize(mri_segment, nullptr, WM_MIN_VAL, 0, 1);
 
   /* mri_strand_border will be all voxels not in the segment, but within 2
      voxels of a segment voxel.
   */
-  mri_strand_border = MRIdilate(mri_binary_strand, NULL);
+  mri_strand_border = MRIdilate(mri_binary_strand, nullptr);
   MRIdilate(mri_strand_border, mri_strand_border);
   MRIxor(mri_binary_strand, mri_strand_border, mri_strand_border, 1, 255);
 
@@ -4256,13 +4402,16 @@ MRI *MRIfillPlanarHoles(MRI *mri_src, MRI *mri_segment, MRI *mri_dst, MRI_SEGMEN
     for (z = 0; z < depth; z++) {
       for (y = 0; y < height; y++) {
         for (x = 0; x < width; x++) {
-          if (x == 161 && y == 140 && z == 120) DiagBreak();
+          if (x == 161 && y == 140 && z == 120)
+            DiagBreak();
 
           /*
             find a voxel which is off but is close to the thin strand
             being considered.
           */
-          if ((MRIvox(mri_dst, x, y, z) > WM_MIN_VAL) || (MRIvox(mri_strand_border, x, y, z) == 0)) continue;
+          if ((MRIvox(mri_dst, x, y, z) > WM_MIN_VAL) ||
+              (MRIvox(mri_strand_border, x, y, z) == 0))
+            continue;
 
           /* if this voxel neighbors an on voxel that is not in the
              strand then don't ever fill it.
@@ -4272,8 +4421,10 @@ MRI *MRIfillPlanarHoles(MRI *mri_src, MRI *mri_segment, MRI *mri_dst, MRI_SEGMEN
             and if so fill it.
           */
           vertex = MRIcpolvMaxWhiteAtVoxel(mri_binary_strand, x, y, z, 5);
-          if (MRIcpolvAllQuadrantsFilled(mri_binary_strand, x, y, z, vertex, 5)) {
-            if (MRIneighborsOn(mri_binary_strand, x, y, z, 1) == MRIneighborsOn(mri_dst, x, y, z, WM_MIN_VAL)) {
+          if (MRIcpolvAllQuadrantsFilled(mri_binary_strand, x, y, z, vertex,
+                                         5)) {
+            if (MRIneighborsOn(mri_binary_strand, x, y, z, 1) ==
+                MRIneighborsOn(mri_dst, x, y, z, WM_MIN_VAL)) {
               MRIsetVoxVal(mri_dst, x, y, z, 0, THICKEN_FILL);
               MRIsetVoxVal(mri_binary_strand, x, y, z, 0, 1);
               MRIsetVoxVal(mri_strand_border, x, y, z, 0, 0);
@@ -4286,22 +4437,23 @@ MRI *MRIfillPlanarHoles(MRI *mri_src, MRI *mri_segment, MRI *mri_dst, MRI_SEGMEN
     total_filled += nfilled;
   } while (nfilled > 0);
 
-  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) fprintf(stderr, "%d planar holes filled\n", total_filled);
+  if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
+    fprintf(stderr, "%d planar holes filled\n", total_filled);
   MRIfree(&mri_binary_strand);
   MRIfree(&mri_strand_border);
   return (mri_dst);
 }
 
-int MRIcpolvMaxWhiteAtVoxel(MRI *mri, int x, int y, int z, int wsize)
-{
+int MRIcpolvMaxWhiteAtVoxel(MRI *mri, int x, int y, int z, int wsize) {
   int whalf, vertex, xk, yk, peak_vertex, max_count, num, xi, yi, zi;
-  float xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, xf, yf, zf, *pe2_x, *pe2_y, *pe2_z, e1_x, e1_y, e1_z, e2_x, e2_y,
-      e2_z;
+  float xbase, ybase, zbase, *pe1_x, *pe1_y, *pe1_z, xf, yf, zf, *pe2_x, *pe2_y,
+      *pe2_z, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z;
   double val;
 
   init_basis_vectors();
 
-  if (x == 166 && y == 150 && z == 127) DiagBreak(); /* 113 */
+  if (x == 166 && y == 150 && z == 127)
+    DiagBreak(); /* 113 */
 
   whalf = (wsize - 1) / 2;
 
@@ -4346,7 +4498,8 @@ int MRIcpolvMaxWhiteAtVoxel(MRI *mri, int x, int y, int z, int wsize)
 #else
         val = MRIgetVoxVal(mri, xi, yi, zi, 0);
 #endif
-        if (val > 0.5) num++;
+        if (val > 0.5)
+          num++;
       }
     }
     if (num >= max_count) {
@@ -4358,8 +4511,8 @@ int MRIcpolvMaxWhiteAtVoxel(MRI *mri, int x, int y, int z, int wsize)
   return (peak_vertex);
 }
 
-int MRIcpolvAllQuadrantsFilled(MRI *mri, int x, int y, int z, int vertex, int wsize)
-{
+int MRIcpolvAllQuadrantsFilled(MRI *mri, int x, int y, int z, int vertex,
+                               int wsize) {
 #if 1
   int whalf;
   float xf, yf, zf, e1_x, e1_y, e1_z, e2_x, e2_y, e2_z, dist;
@@ -4367,7 +4520,8 @@ int MRIcpolvAllQuadrantsFilled(MRI *mri, int x, int y, int z, int vertex, int ws
 
   init_basis_vectors();
 
-  if (x == 166 && y == 150 && z == 127) DiagBreak(); /* 113 */
+  if (x == 166 && y == 150 && z == 127)
+    DiagBreak(); /* 113 */
 
   whalf = (wsize - 1) / 2;
 
@@ -4396,9 +4550,11 @@ int MRIcpolvAllQuadrantsFilled(MRI *mri, int x, int y, int z, int vertex, int ws
     yf = (float)y + dist * e1_y;
     zf = (float)z + dist * e1_z;
     MRIsampleVolume(mri, xf, yf, zf, &val);
-    if (val > 0.5) break;
+    if (val > 0.5)
+      break;
   }
-  if (val <= 0.5) return (0);
+  if (val <= 0.5)
+    return (0);
 
   /* negative 'y' direction */
   for (dist = STEP_SIZE; dist <= whalf; dist += STEP_SIZE) {
@@ -4406,9 +4562,11 @@ int MRIcpolvAllQuadrantsFilled(MRI *mri, int x, int y, int z, int vertex, int ws
     yf = (float)y - dist * e1_y;
     zf = (float)z - dist * e1_z;
     MRIsampleVolume(mri, xf, yf, zf, &val);
-    if (val > 0.5) break;
+    if (val > 0.5)
+      break;
   }
-  if (val <= 0.5) return (0);
+  if (val <= 0.5)
+    return (0);
 
   /* positive 'y' direction */
   for (dist = STEP_SIZE; dist <= whalf; dist += STEP_SIZE) {
@@ -4416,9 +4574,11 @@ int MRIcpolvAllQuadrantsFilled(MRI *mri, int x, int y, int z, int vertex, int ws
     yf = (float)y + dist * e2_y;
     zf = (float)z + dist * e2_z;
     MRIsampleVolume(mri, xf, yf, zf, &val);
-    if (val > 0.5) break;
+    if (val > 0.5)
+      break;
   }
-  if (val <= 0.5) return (0);
+  if (val <= 0.5)
+    return (0);
 
   /* negative 'y' direction */
   for (dist = STEP_SIZE; dist <= whalf; dist += STEP_SIZE) {
@@ -4426,9 +4586,11 @@ int MRIcpolvAllQuadrantsFilled(MRI *mri, int x, int y, int z, int vertex, int ws
     yf = (float)y - dist * e2_y;
     zf = (float)z - dist * e2_z;
     MRIsampleVolume(mri, xf, yf, zf, &val);
-    if (val > 0.5) break;
+    if (val > 0.5)
+      break;
   }
-  if (val <= 0.5) return (0);
+  if (val <= 0.5)
+    return (0);
 
   return (1);
 #else
@@ -4438,7 +4600,8 @@ int MRIcpolvAllQuadrantsFilled(MRI *mri, int x, int y, int z, int vertex, int ws
 
   init_basis_vectors();
 
-  if (x == 166 && y == 150 && z == 127) DiagBreak(); /* 113 */
+  if (x == 166 && y == 150 && z == 127)
+    DiagBreak(); /* 113 */
 
   whalf = (wsize - 1) / 2;
 
@@ -4476,7 +4639,8 @@ int MRIcpolvAllQuadrantsFilled(MRI *mri, int x, int y, int z, int vertex, int ws
 
   for (i = 0; i <= 1; i++)
     for (j = 0; j <= 1; j++)
-      if (quads[i][j] == 0) return (0);
+      if (quads[i][j] == 0)
+        return (0);
 
   return (1);
 #endif

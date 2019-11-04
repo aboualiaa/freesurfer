@@ -7,8 +7,7 @@ namespace Ui {
 class DialogThresholdVolume;
 }
 
-class DialogThresholdVolume : public QDialog
-{
+class DialogThresholdVolume : public QDialog {
   Q_OBJECT
 
 public:

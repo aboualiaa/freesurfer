@@ -23,11 +23,11 @@
  */
 
 #include "ctrpoints.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <pwd.h>
-#include <time.h>
+#include <ctime>
 #include "diag.h"
 #include "error.h"
 #include "fio.h"
@@ -36,11 +36,9 @@
 #include "proto.h"
 #include "transform.h"
 #include "timer.h"
-#include "utils.h"  //  fgetl
+#include "utils.h" //  fgetl
 
-
-MPoint *MRIreadControlPoints(const char *fname, int *count, int *useRealRAS)
-{
+MPoint *MRIreadControlPoints(const char *fname, int *count, int *useRealRAS) {
   FILE *fp;
   char *cp, line[STRLEN];
   int i = 0;
@@ -49,22 +47,27 @@ MPoint *MRIreadControlPoints(const char *fname, int *count, int *useRealRAS)
   int val;
   // int numpoints;
   int num_control_points, nargs;
-  MPoint *pointArray = 0;
+  MPoint *pointArray = nullptr;
   char extension[STRLEN];
 
   FileNameExtension(fname, extension);
   if (!stricmp(extension, "label")) {
     LABEL *area;
 
-    area = LabelRead(NULL, fname);
-    if (area == NULL) ErrorReturn(NULL, (ERROR_NOFILE, "MRIreadControlPoints: could not load label file %s", fname));
+    area = LabelRead(nullptr, fname);
+    if (area == nullptr)
+      ErrorReturn(NULL, (ERROR_NOFILE,
+                         "MRIreadControlPoints: could not load label file %s",
+                         fname));
 
     *count = num_control_points = area->n_points;
 
     // allocate memory
     pointArray = (MPoint *)malloc(num_control_points * sizeof(MPoint));
     if (!pointArray)
-      ErrorExit(ERROR_NOMEMORY, "MRIreadControlPoints could not allocate %d-sized array", num_control_points);
+      ErrorExit(ERROR_NOMEMORY,
+                "MRIreadControlPoints could not allocate %d-sized array",
+                num_control_points);
     *useRealRAS = area->coords == LABEL_COORDS_SCANNER_RAS;
     for (i = 0; i < num_control_points; i++) {
       pointArray[i].x = (double)area->lv[i].x;
@@ -76,11 +79,13 @@ MPoint *MRIreadControlPoints(const char *fname, int *count, int *useRealRAS)
   }
 
   *useRealRAS = 0;
-  if (Gdiag & DIAG_SHOW) fprintf(stderr, "reading control points from %s...\n", fname);
+  if (Gdiag & DIAG_SHOW)
+    fprintf(stderr, "reading control points from %s...\n", fname);
 
   //
   fp = fopen(fname, "r");
-  if (!fp) ErrorReturn(NULL, (ERROR_BADPARM, "cannot open control point file", fname));
+  if (!fp)
+    ErrorReturn(NULL, (ERROR_BADPARM, "cannot open control point file", fname));
 
   // get number of points
   num_control_points = 0;
@@ -91,14 +96,13 @@ MPoint *MRIreadControlPoints(const char *fname, int *count, int *useRealRAS)
       i = sscanf(cp, "%f %f %f", &xw, &yw, &zw);
       if (i == 3) {
         num_control_points++;
-      }
-      else  // new format
+      } else // new format
       {
         i = sscanf(cp, "%s %d", text, &val);
         // if (strcmp("numpoints", text) == 0 && i == 2) {
-          // numpoints = val;
+        // numpoints = val;
         // }
-        // else 
+        // else
         if (strcmp("useRealRAS", text) == 0 && i == 2) {
           *useRealRAS = val;
         }
@@ -112,13 +116,15 @@ MPoint *MRIreadControlPoints(const char *fname, int *count, int *useRealRAS)
   // allocate memory
   pointArray = (MPoint *)malloc(num_control_points * sizeof(MPoint));
   if (!pointArray)
-    ErrorExit(ERROR_NOMEMORY, "MRIreadControlPoints could not allocate %d-sized array", num_control_points);
+    ErrorExit(ERROR_NOMEMORY,
+              "MRIreadControlPoints could not allocate %d-sized array",
+              num_control_points);
   rewind(fp);
   for (i = 0; i < num_control_points; i++) {
     cp = fgetl(line, 199, fp);
     nargs = sscanf(cp, "%f %f %f", &xw, &yw, &zw);
     if (nargs != 3) {
-      i--;  // not a control point
+      i--; // not a control point
       continue;
     }
     pointArray[i].x = (double)xw;
@@ -130,35 +136,34 @@ MPoint *MRIreadControlPoints(const char *fname, int *count, int *useRealRAS)
   return pointArray;
 }
 
-int MRIwriteControlPoints(const MPoint *pointArray, int count, int useRealRAS, const char *fname)
-{
+int MRIwriteControlPoints(const MPoint *pointArray, int count, int useRealRAS,
+                          const char *fname) {
   FILE *fp;
   int i;
   int res;
 
-  if (Gdiag & DIAG_SHOW) fprintf(stderr, "Writing control points to %s...\n", fname);
+  if (Gdiag & DIAG_SHOW)
+    fprintf(stderr, "Writing control points to %s...\n", fname);
 
   if (useRealRAS > 1 || useRealRAS < 0)
-    ErrorReturn(ERROR_BADPARM,
-                (ERROR_BADPARM,
-                 "MRIwriteControlPoints useRealRAS must"
-                 " be 0 (surfaceRAS) or 1 (scannerRAS) but %d\n",
-                 useRealRAS))
+    ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM,
+                                "MRIwriteControlPoints useRealRAS must"
+                                " be 0 (surfaceRAS) or 1 (scannerRAS) but %d\n",
+                                useRealRAS))
 
         fp = fopen(fname, "w");
   if (!fp)
-    ErrorReturn(ERROR_BADPARM,
-                (ERROR_BADPARM,
-                 "MRIwriteControlPoints(%s): could not"
-                 " open file",
-                 fname));
+    ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM,
+                                "MRIwriteControlPoints(%s): could not"
+                                " open file",
+                                fname));
   for (i = 0; i < count; ++i) {
-    if ((res = fprintf(fp, "%f %f %f\n", pointArray[i].x, pointArray[i].y, pointArray[i].z)) < 0)
-      ErrorReturn(ERROR_BADPARM,
-                  (ERROR_BADPARM,
-                   "MRIwriteControlPoints(%s): could not"
-                   " write file",
-                   fname));
+    if ((res = fprintf(fp, "%f %f %f\n", pointArray[i].x, pointArray[i].y,
+                       pointArray[i].z)) < 0)
+      ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM,
+                                  "MRIwriteControlPoints(%s): could not"
+                                  " write file",
+                                  fname));
   }
   // if res < 0, then error
   res = fprintf(fp, "info\n");
@@ -167,7 +172,7 @@ int MRIwriteControlPoints(const MPoint *pointArray, int count, int useRealRAS, c
   // get user id
   char user[1024];
   struct passwd *pw = getpwuid(geteuid());
-  if ((pw != NULL) && (pw->pw_name != NULL)) {
+  if ((pw != nullptr) && (pw->pw_name != nullptr)) {
     strcpy(user, pw->pw_name);
   } else {
     strcpy(user, "unknown user");
@@ -179,12 +184,17 @@ int MRIwriteControlPoints(const MPoint *pointArray, int count, int useRealRAS, c
 }
 
 // (mr) uses LTA to map point array:
-MPoint *MRImapControlPoints(const MPoint *pointArray, int count, int useRealRAS, MPoint *trgArray, LTA *lta)
-{
-  if (trgArray == NULL) trgArray = (MPoint *)malloc(count * sizeof(MPoint));
+MPoint *MRImapControlPoints(const MPoint *pointArray, int count, int useRealRAS,
+                            MPoint *trgArray, LTA *lta) {
+  if (trgArray == nullptr)
+    trgArray = (MPoint *)malloc(count * sizeof(MPoint));
 
-  if (!lta->xforms[0].src.valid) ErrorExit(ERROR_BADPARM, "MRImapControlPoints LTA src geometry not valid!\n");
-  if (!lta->xforms[0].dst.valid) ErrorExit(ERROR_BADPARM, "MRImapControlPoints LTA dst geometry not valid!\n");
+  if (!lta->xforms[0].src.valid)
+    ErrorExit(ERROR_BADPARM,
+              "MRImapControlPoints LTA src geometry not valid!\n");
+  if (!lta->xforms[0].dst.valid)
+    ErrorExit(ERROR_BADPARM,
+              "MRImapControlPoints LTA dst geometry not valid!\n");
 
   // create face src and target mri from lta:
   MRI *mri_src = MRIallocHeader(1, 1, 1, MRI_UCHAR, 1);
@@ -195,25 +205,26 @@ MPoint *MRImapControlPoints(const MPoint *pointArray, int count, int useRealRAS,
   // set vox ras transforms depending on flag:
   MATRIX *src_ras2vox, *src_vox2ras, *trg_vox2ras;
   switch (useRealRAS) {
-    case 0:
-      src_vox2ras = MRIxfmCRS2XYZtkreg(mri_src);
-      src_ras2vox = MatrixInverse(src_vox2ras, NULL);
-      MatrixFree(&src_vox2ras);
-      trg_vox2ras = MRIxfmCRS2XYZtkreg(mri_trg);
-      break;
-    case 1:
-      src_ras2vox = extract_r_to_i(mri_src);
-      trg_vox2ras = extract_i_to_r(mri_trg);
-      break;
-    default:
-      ErrorExit(ERROR_BADPARM, "MRImapControlPoints has bad useRealRAS flag %d\n", useRealRAS);
+  case 0:
+    src_vox2ras = MRIxfmCRS2XYZtkreg(mri_src);
+    src_ras2vox = MatrixInverse(src_vox2ras, nullptr);
+    MatrixFree(&src_vox2ras);
+    trg_vox2ras = MRIxfmCRS2XYZtkreg(mri_trg);
+    break;
+  case 1:
+    src_ras2vox = extract_r_to_i(mri_src);
+    trg_vox2ras = extract_i_to_r(mri_trg);
+    break;
+  default:
+    ErrorExit(ERROR_BADPARM, "MRImapControlPoints has bad useRealRAS flag %d\n",
+              useRealRAS);
   }
 
   // make vox2vox:
   lta = LTAchangeType(lta, LINEAR_VOX_TO_VOX);
 
   // concatenate transforms:
-  MATRIX *M = NULL;
+  MATRIX *M = nullptr;
   M = MatrixMultiply(lta->xforms[0].m_L, src_ras2vox, M);
   M = MatrixMultiply(trg_vox2ras, M, M);
 
@@ -259,11 +270,10 @@ MPoint *MRImapControlPoints(const MPoint *pointArray, int count, int useRealRAS,
   in the given volume. The col, row slice remain floating point.
   Note: UseRealRAS has not really been tested.
  */
-MPoint *ControlPoints2Vox(MPoint *ras, int npoints, int UseRealRAS, MRI *vol)
-{
+MPoint *ControlPoints2Vox(MPoint *ras, int npoints, int UseRealRAS, MRI *vol) {
   MPoint *crs;
   int n;
-  MATRIX *vox2ras, *ras2vox, *vras, *vcrs = NULL;
+  MATRIX *vox2ras, *ras2vox, *vras, *vcrs = nullptr;
 
   crs = (MPoint *)calloc(sizeof(MPoint), npoints);
 
@@ -271,7 +281,7 @@ MPoint *ControlPoints2Vox(MPoint *ras, int npoints, int UseRealRAS, MRI *vol)
     vox2ras = MRIxfmCRS2XYZ(vol, 0);
   else
     vox2ras = MRIxfmCRS2XYZtkreg(vol);
-  ras2vox = MatrixInverse(vox2ras, NULL);
+  ras2vox = MatrixInverse(vox2ras, nullptr);
   MatrixFree(&vox2ras);
 
   vras = MatrixAlloc(4, 1, MATRIX_REAL);
@@ -301,12 +311,13 @@ MPoint *ControlPoints2Vox(MPoint *ras, int npoints, int UseRealRAS, MRI *vol)
   *M, MPoint *outctr)
   \brief Multiplies the xyz of the control points by the given matrix
  */
-MPoint *ControlPointsApplyMatrix(MPoint *srcctr, int nctrpoints, MATRIX *M, MPoint *outctr)
-{
+MPoint *ControlPointsApplyMatrix(MPoint *srcctr, int nctrpoints, MATRIX *M,
+                                 MPoint *outctr) {
   int n;
-  MATRIX *srcras = NULL, *outras = NULL;
+  MATRIX *srcras = nullptr, *outras = nullptr;
 
-  if (outctr == NULL) outctr = (MPoint *)calloc(sizeof(MPoint), nctrpoints);
+  if (outctr == nullptr)
+    outctr = (MPoint *)calloc(sizeof(MPoint), nctrpoints);
 
   srcras = MatrixAlloc(4, 1, MATRIX_REAL);
   srcras->rptr[4][1] = 1;
@@ -333,8 +344,7 @@ MPoint *ControlPointsApplyMatrix(MPoint *srcctr, int nctrpoints, MATRIX *M, MPoi
   points in control.dat bring the contol points into the "talairach"
   (ie, fsaverage) space.
  */
-MATRIX *ControlPoints2TalMatrix(char *subject)
-{
+MATRIX *ControlPoints2TalMatrix(char *subject) {
   MATRIX *Ta, *Na, *Tv, *Nv, *invNa, *invTv, *XFM, *M;
   char *SUBJECTS_DIR, tmpstr[2000];
   MRI *fsa, *vol;
@@ -345,27 +355,29 @@ MATRIX *ControlPoints2TalMatrix(char *subject)
   sprintf(tmpstr, "%s/fsaverage/mri/orig.mgz", SUBJECTS_DIR);
   printf("%s\n", tmpstr);
   fsa = MRIreadHeader(tmpstr, MRI_VOLUME_TYPE_UNKNOWN);
-  if (fsa == NULL) return (NULL);
+  if (fsa == nullptr)
+    return (nullptr);
   Na = MRIxfmCRS2XYZ(fsa, 0);
   Ta = MRIxfmCRS2XYZtkreg(fsa);
-  invNa = MatrixInverse(Na, NULL);
+  invNa = MatrixInverse(Na, nullptr);
 
   sprintf(tmpstr, "%s/%s/mri/orig.mgz", SUBJECTS_DIR, subject);
   printf("%s\n", tmpstr);
   vol = MRIreadHeader(tmpstr, MRI_VOLUME_TYPE_UNKNOWN);
-  if (vol == NULL) return (NULL);
+  if (vol == nullptr)
+    return (nullptr);
   Nv = MRIxfmCRS2XYZ(vol, 0);
   Tv = MRIxfmCRS2XYZtkreg(vol);
-  invTv = MatrixInverse(Tv, NULL);
+  invTv = MatrixInverse(Tv, nullptr);
 
   sprintf(tmpstr, "%s/%s/mri/transforms/talairach.xfm", SUBJECTS_DIR, subject);
   printf("%s\n", tmpstr);
   lta = LTAreadEx(tmpstr);
-  if (lta == NULL) {
+  if (lta == nullptr) {
     printf("ERROR: reading %s\n", tmpstr);
-    return (NULL);
+    return (nullptr);
   }
-  XFM = MatrixCopy(lta->xforms[0].m_L, NULL);
+  XFM = MatrixCopy(lta->xforms[0].m_L, nullptr);
   LTAfree(&lta);
 
   M = MatrixMultiply(Ta, invNa, NULL);
@@ -394,10 +406,9 @@ MATRIX *ControlPoints2TalMatrix(char *subject)
   converts them to talairach (fsaverage) space. If a subject does not
   have a control.dat then it is skipped.
  */
-MPoint *GetTalControlPoints(char **subjectlist, int nsubjects, int *pnctrtot)
-{
+MPoint *GetTalControlPoints(char **subjectlist, int nsubjects, int *pnctrtot) {
   int nthsubject, nc, nctot, CPUseRealRAS, k;
-  MPoint *subjctr, *fsactr, *ctr = NULL;
+  MPoint *subjctr, *fsactr, *ctr = nullptr;
   char *SUBJECTS_DIR, tmpstr[2000];
   MATRIX *M;
 
@@ -407,24 +418,29 @@ MPoint *GetTalControlPoints(char **subjectlist, int nsubjects, int *pnctrtot)
   // allocated
   nctot = 0;
   for (nthsubject = 0; nthsubject < nsubjects; nthsubject++) {
-    sprintf(tmpstr, "%s/%s/tmp/control.dat", SUBJECTS_DIR, subjectlist[nthsubject]);
-    if (!fio_FileExistsReadable(tmpstr)) continue;
+    sprintf(tmpstr, "%s/%s/tmp/control.dat", SUBJECTS_DIR,
+            subjectlist[nthsubject]);
+    if (!fio_FileExistsReadable(tmpstr))
+      continue;
     subjctr = MRIreadControlPoints(tmpstr, &nc, &CPUseRealRAS);
     nctot += nc;
     free(subjctr);
   }
-  printf("  GetTalControlPoints(): nsubjects = %d, nctot = %d\n", nsubjects, nctot);
+  printf("  GetTalControlPoints(): nsubjects = %d, nctot = %d\n", nsubjects,
+         nctot);
   ctr = (MPoint *)calloc(sizeof(MPoint), nctot);
 
   // Now load the control points for each subject and convert them "talairach",
   // ie, fsaverage space.
   nctot = 0;
   for (nthsubject = 0; nthsubject < nsubjects; nthsubject++) {
-    sprintf(tmpstr, "%s/%s/tmp/control.dat", SUBJECTS_DIR, subjectlist[nthsubject]);
-    if (!fio_FileExistsReadable(tmpstr)) continue;
+    sprintf(tmpstr, "%s/%s/tmp/control.dat", SUBJECTS_DIR,
+            subjectlist[nthsubject]);
+    if (!fio_FileExistsReadable(tmpstr))
+      continue;
     subjctr = MRIreadControlPoints(tmpstr, &nc, &CPUseRealRAS);
     M = ControlPoints2TalMatrix(subjectlist[nthsubject]);
-    fsactr = ControlPointsApplyMatrix(subjctr, nc, M, NULL);
+    fsactr = ControlPointsApplyMatrix(subjctr, nc, M, nullptr);
     for (k = 0; k < nc; k++) {
       ctr[nctot + k].x = fsactr[k].x;
       ctr[nctot + k].y = fsactr[k].y;
@@ -449,8 +465,7 @@ MPoint *GetTalControlPoints(char **subjectlist, int nsubjects, int *pnctrtot)
   converts them to talairach (fsaverage) space. If a subject does not
   have a control.dat then it is skipped.
  */
-MPoint *GetTalControlPointsSFile(const char *subjectlistfile, int *pnctrtot)
-{
+MPoint *GetTalControlPointsSFile(const char *subjectlistfile, int *pnctrtot) {
   MPoint *ctr;
   FILE *fp;
   int nsubjects, r;
@@ -458,14 +473,15 @@ MPoint *GetTalControlPointsSFile(const char *subjectlistfile, int *pnctrtot)
 
   printf("  GetTalControlPointsSFile(): opening %s\n", subjectlistfile);
   fp = fopen(subjectlistfile, "r");
-  if (fp == NULL) {
+  if (fp == nullptr) {
     printf("ERROR: cannot open %s\n", subjectlistfile);
-    return (NULL);
+    return (nullptr);
   }
   nsubjects = 0;
-  while (1) {
+  while (true) {
     r = fscanf(fp, "%s", tmpstr);
-    if (r == EOF) break;
+    if (r == EOF)
+      break;
     nsubjects++;
   }
   fclose(fp);
@@ -473,15 +489,16 @@ MPoint *GetTalControlPointsSFile(const char *subjectlistfile, int *pnctrtot)
   printf("   GetTalControlPointsSFile(): Found %d subjects\n", nsubjects);
   if (nsubjects == 0) {
     printf(" ERROR: no subjects found in %s\n", subjectlistfile);
-    return (NULL);
+    return (nullptr);
   }
   subjectlist = (char **)calloc(sizeof(char *), nsubjects);
 
   fp = fopen(subjectlistfile, "r");
   nsubjects = 0;
-  while (1) {
+  while (true) {
     r = fscanf(fp, "%s", tmpstr);
-    if (r == EOF) break;
+    if (r == EOF)
+      break;
     subjectlist[nsubjects] = strcpyalloc(tmpstr);
     nsubjects++;
   }

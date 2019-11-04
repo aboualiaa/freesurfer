@@ -36,13 +36,8 @@
  * r)  != NULL: absolute path
  *   == NULL: error
  */
-char *
-rel2abs(
-  const char  *path,
-  const char  *base,
-  char   *result,
-  const size_t  size
-) {
+char *rel2abs(const char *path, const char *base, char *result,
+              const size_t size) {
   const char *pp, *bp;
   /*
    * endp points the last position which is safe in the result buffer.
@@ -58,7 +53,7 @@ rel2abs(
     goto finish;
   } else if (*base != '/' || !size) {
     errno = EINVAL;
-    return (NULL);
+    return (nullptr);
   } else if (size == 1)
     goto erange;
 
@@ -98,7 +93,7 @@ rel2abs(
   /*
    * up to root.
    */
-  for (pp = path; *pp && *pp == '.'; ) {
+  for (pp = path; *pp && *pp == '.';) {
     if (!strncmp(pp, "../", 3)) {
       pp += 3;
       while (bp > base && *--bp != '/')
@@ -129,5 +124,5 @@ finish:
   return result;
 erange:
   errno = ERANGE;
-  return (NULL);
+  return (nullptr);
 }

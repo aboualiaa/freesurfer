@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:14 $
@@ -23,11 +23,10 @@
  *
  */
 
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+#include <cctype>
 
 #include "mri.h"
 #include "macros.h"
@@ -40,117 +39,116 @@
 #include "transform.h"
 #include "version.h"
 
-int main(int argc, char *argv[]) ;
-static int get_option(int argc, char *argv[]) ;
+int main(int argc, char *argv[]);
+static int get_option(int argc, char *argv[]);
 #if 0
 static int test(MRI *mri1, MRI *mri2, MRI *mri3, MATRIX *m_vol1_to_vol2_ras) ;
 #endif
 
-const char *Progname ;
-static void usage_exit(int code) ;
+const char *Progname;
+static void usage_exit(int code);
 
-static char *histo_parms = NULL ;
-static int write_flag = 0 ;
-static char *log_fname = NULL ;
-static char *parc_dir = "parc" ;
-static char *T1_name = "flash/T1.mgh" ;
-static char *PD_name = "flash/PD.mgh" ;
+static char *histo_parms = nullptr;
+static int write_flag = 0;
+static char *log_fname = nullptr;
+static char *parc_dir = "parc";
+static char *T1_name = "flash/T1.mgh";
+static char *PD_name = "flash/PD.mgh";
 
-static char *xform_name = NULL ;
+static char *xform_name = nullptr;
 
-static char subjects_dir[STRLEN] ;
+static char subjects_dir[STRLEN];
 
-int
-main(int argc, char *argv[]) {
-  TRANSFORM    *transform = NULL ;
-  char         **av, fname[STRLEN], *gca_fname, *subject_name, *cp ;
-  int          ac, nargs, i, n ;
-  int          msec, minutes, seconds, nsubjects ;
-  Timer start ;
-  GCA          *gca ;
-  MRI          *mri_parc, *mri_T1, *mri_PD ;
-  FILE         *fp ;
+int main(int argc, char *argv[]) {
+  TRANSFORM *transform = nullptr;
+  char **av, fname[STRLEN], *gca_fname, *subject_name, *cp;
+  int ac, nargs, i, n;
+  int msec, minutes, seconds, nsubjects;
+  Timer start;
+  GCA *gca;
+  MRI *mri_parc, *mri_T1, *mri_PD;
+  FILE *fp;
 
   /* rkt: check for and handle version tag */
-  nargs = handle_version_option (argc, argv, "$Id: mri_ca_tissue_parms.c,v 1.8 2011/03/02 00:04:14 nicks Exp $", "$Name:  $");
+  nargs = handle_version_option(
+      argc, argv,
+      "$Id: mri_ca_tissue_parms.c,v 1.8 2011/03/02 00:04:14 nicks Exp $",
+      "$Name:  $");
   if (nargs && argc - nargs == 1)
-    exit (0);
+    exit(0);
   argc -= nargs;
 
-  Progname = argv[0] ;
-  ErrorInit(NULL, NULL, NULL) ;
-  DiagInit(NULL, NULL, NULL) ;
+  Progname = argv[0];
+  ErrorInit(NULL, NULL, NULL);
+  DiagInit(nullptr, nullptr, nullptr);
 
-  start.reset() ;
+  start.reset();
 
-  ac = argc ;
-  av = argv ;
-  for ( ; argc > 1 && ISOPTION(*argv[1]) ; argc--, argv++) {
-    nargs = get_option(argc, argv) ;
-    argc -= nargs ;
-    argv += nargs ;
+  ac = argc;
+  av = argv;
+  for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
+    nargs = get_option(argc, argv);
+    argc -= nargs;
+    argv += nargs;
   }
 
   if (!strlen(subjects_dir)) /* hasn't been set on command line */
   {
-    cp = getenv("SUBJECTS_DIR") ;
+    cp = getenv("SUBJECTS_DIR");
     if (!cp)
       ErrorExit(ERROR_BADPARM, "%s: SUBJECTS_DIR not defined in environment",
                 Progname);
-    strcpy(subjects_dir, cp) ;
+    strcpy(subjects_dir, cp);
     if (argc < 3)
-      usage_exit(1) ;
+      usage_exit(1);
   }
 
+  gca_fname = argv[1];
+  nsubjects = argc - 2;
+  printf("computing average tissue parameters on %d subject\n", nsubjects);
 
-  gca_fname = argv[1] ;
-  nsubjects = argc-2 ;
-  printf("computing average tissue parameters on %d subject\n",
-         nsubjects) ;
+  n = 0;
 
-  n = 0 ;
+  printf("reading GCA from %s...\n", gca_fname);
+  gca = GCAread(gca_fname);
 
-  printf("reading GCA from %s...\n", gca_fname) ;
-  gca = GCAread(gca_fname) ;
-
-  for (i = 0 ; i < nsubjects ; i++) {
-    subject_name = argv[i+2] ;
-    printf("processing subject %s, %d of %d...\n", subject_name,i+1,
+  for (i = 0; i < nsubjects; i++) {
+    subject_name = argv[i + 2];
+    printf("processing subject %s, %d of %d...\n", subject_name, i + 1,
            nsubjects);
-    sprintf(fname, "%s/%s/mri/%s", subjects_dir, subject_name, parc_dir) ;
+    sprintf(fname, "%s/%s/mri/%s", subjects_dir, subject_name, parc_dir);
     if (DIAG_VERBOSE_ON)
-      printf("reading parcellation from %s...\n", fname) ;
-    mri_parc = MRIread(fname) ;
+      printf("reading parcellation from %s...\n", fname);
+    mri_parc = MRIread(fname);
     if (!mri_parc)
       ErrorExit(ERROR_NOFILE, "%s: could not read parcellation file %s",
-                Progname, fname) ;
+                Progname, fname);
 
-    sprintf(fname, "%s/%s/mri/%s", subjects_dir, subject_name, T1_name) ;
+    sprintf(fname, "%s/%s/mri/%s", subjects_dir, subject_name, T1_name);
     if (DIAG_VERBOSE_ON)
-      printf("reading co-registered T1 from %s...\n", fname) ;
-    mri_T1 = MRIread(fname) ;
+      printf("reading co-registered T1 from %s...\n", fname);
+    mri_T1 = MRIread(fname);
     if (!mri_T1)
       ErrorExit(ERROR_NOFILE, "%s: could not read T1 data from file %s",
-                Progname, fname) ;
+                Progname, fname);
 
-    sprintf(fname, "%s/%s/mri/%s", subjects_dir, subject_name, PD_name) ;
+    sprintf(fname, "%s/%s/mri/%s", subjects_dir, subject_name, PD_name);
     if (DIAG_VERBOSE_ON)
-      printf("reading co-registered T1 from %s...\n", fname) ;
-    mri_PD = MRIread(fname) ;
+      printf("reading co-registered T1 from %s...\n", fname);
+    mri_PD = MRIread(fname);
     if (!mri_PD)
       ErrorExit(ERROR_NOFILE, "%s: could not read PD data from file %s",
-                Progname, fname) ;
-
+                Progname, fname);
 
     if (xform_name) {
       /*      VECTOR *v_tmp, *v_tmp2 ;*/
 
-      sprintf(fname, "%s/%s/mri/%s", subjects_dir, subject_name, xform_name) ;
-      printf("reading xform from %s...\n", fname) ;
-      transform = TransformRead(fname) ;
+      sprintf(fname, "%s/%s/mri/%s", subjects_dir, subject_name, xform_name);
+      printf("reading xform from %s...\n", fname);
+      transform = TransformRead(fname);
       if (!transform)
-        ErrorExit(ERROR_NOFILE, "%s: could not read xform from %s",
-                  Progname, fname) ;
+        ErrorExit(ERROR_NOFILE, "%s: could not read xform from %s", Progname,
+                  fname);
 #if 0
       v_tmp = VectorAlloc(4,MATRIX_REAL) ;
       *MATRIX_RELT(v_tmp,4,1)=1.0 ;
@@ -160,9 +158,9 @@ main(int argc, char *argv[]) {
 #endif
 
       if (transform->type == LINEAR_RAS_TO_RAS) {
-        MATRIX *m_L ;
-        m_L = ((LTA *)transform->xform)->xforms[0].m_L ;
-        MRIrasXformToVoxelXform(mri_parc, mri_T1, m_L,m_L) ;
+        MATRIX *m_L;
+        m_L = ((LTA *)transform->xform)->xforms[0].m_L;
+        MRIrasXformToVoxelXform(mri_parc, mri_T1, m_L, m_L);
       }
 #if 0
       v_tmp2 = MatrixMultiply(lta->xforms[0].m_L, v_tmp, v_tmp2) ;
@@ -174,120 +172,116 @@ main(int argc, char *argv[]) {
 #endif
     }
     if (histo_parms)
-      GCAhistogramTissueStatistics(gca,mri_T1,mri_PD,mri_parc,transform,histo_parms);
+      GCAhistogramTissueStatistics(gca, mri_T1, mri_PD, mri_parc, transform,
+                                   histo_parms);
 #if 0
     else
       GCAaccumulateTissueStatistics(gca, mri_T1, mri_PD, mri_parc, transform) ;
 #endif
 
-    MRIfree(&mri_parc) ;
-    MRIfree(&mri_T1) ;
-    MRIfree(&mri_PD) ;
+    MRIfree(&mri_parc);
+    MRIfree(&mri_T1);
+    MRIfree(&mri_PD);
   }
-  GCAnormalizeTissueStatistics(gca) ;
+  GCAnormalizeTissueStatistics(gca);
 
   if (log_fname) {
-    printf("writing tissue parameters to %s\n", log_fname) ;
-    fp = fopen(log_fname, "w") ;
-    for (n = 1 ; n < MAX_GCA_LABELS ; n++) {
-      GCA_TISSUE_PARMS *gca_tp ;
+    printf("writing tissue parameters to %s\n", log_fname);
+    fp = fopen(log_fname, "w");
+    for (n = 1; n < MAX_GCA_LABELS; n++) {
+      GCA_TISSUE_PARMS *gca_tp;
 
-      gca_tp = &gca->tissue_parms[n] ;
+      gca_tp = &gca->tissue_parms[n];
       if (gca_tp->total_training <= 0)
-        continue ;
-      fprintf(fp, "%d  %f  %f\n", n, gca_tp->T1_mean, gca_tp->PD_mean) ;
+        continue;
+      fprintf(fp, "%d  %f  %f\n", n, gca_tp->T1_mean, gca_tp->PD_mean);
     }
-    fclose(fp) ;
+    fclose(fp);
   }
 
   if (write_flag)
-    GCAwrite(gca, gca_fname) ;
-  GCAfree(&gca) ;
-  msec = start.milliseconds() ;
-  seconds = nint((float)msec/1000.0f) ;
-  minutes = seconds / 60 ;
-  seconds = seconds % 60 ;
+    GCAwrite(gca, gca_fname);
+  GCAfree(&gca);
+  msec = start.milliseconds();
+  seconds = nint((float)msec / 1000.0f);
+  minutes = seconds / 60;
+  seconds = seconds % 60;
   printf("tissue parameter statistic calculation took %d minutes"
-         " and %d seconds.\n", minutes, seconds) ;
-  exit(0) ;
-  return(0) ;
+         " and %d seconds.\n",
+         minutes, seconds);
+  exit(0);
+  return (0);
 }
 /*----------------------------------------------------------------------
             Parameters:
 
            Description:
 ----------------------------------------------------------------------*/
-static int
-get_option(int argc, char *argv[]) {
-  int  nargs = 0 ;
-  char *option ;
+static int get_option(int argc, char *argv[]) {
+  int nargs = 0;
+  char *option;
 
-  option = argv[1] + 1 ;            /* past '-' */
+  option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "T1")) {
-    T1_name = argv[2] ;
-    nargs = 1 ;
-    printf("reading T1 data from subject's mri/%s directory\n",
-           T1_name) ;
+    T1_name = argv[2];
+    nargs = 1;
+    printf("reading T1 data from subject's mri/%s directory\n", T1_name);
   } else if (!stricmp(option, "PD")) {
-    PD_name = argv[2] ;
-    nargs = 1 ;
-    printf("reading PD map from subject's mri/%s directory\n",
-           PD_name) ;
+    PD_name = argv[2];
+    nargs = 1;
+    printf("reading PD map from subject's mri/%s directory\n", PD_name);
   } else if (!stricmp(option, "SDIR")) {
-    strcpy(subjects_dir, argv[2]) ;
-    nargs = 1 ;
-    printf("using %s as SUBJECTS_DIR\n", subjects_dir) ;
+    strcpy(subjects_dir, argv[2]);
+    nargs = 1;
+    printf("using %s as SUBJECTS_DIR\n", subjects_dir);
   } else if (!stricmp(option, "xform")) {
-    xform_name = argv[2] ;
-    nargs = 1 ;
-    printf("reading and applying xform from %s for each subject\n",
-           xform_name) ;
+    xform_name = argv[2];
+    nargs = 1;
+    printf("reading and applying xform from %s for each subject\n", xform_name);
   } else if (!stricmp(option, "PARC_DIR")) {
-    parc_dir = argv[2] ;
-    nargs = 1 ;
-    printf("reading parcellation from subject's mri/%s directory\n",
-           parc_dir) ;
+    parc_dir = argv[2];
+    nargs = 1;
+    printf("reading parcellation from subject's mri/%s directory\n", parc_dir);
   } else if (!stricmp(option, "SDIR")) {
-    strcpy(subjects_dir, argv[2]) ;
-    nargs = 1 ;
-    printf("using %s as subjects directory\n", subjects_dir) ;
-  } else switch (toupper(*option)) {
+    strcpy(subjects_dir, argv[2]);
+    nargs = 1;
+    printf("using %s as subjects directory\n", subjects_dir);
+  } else
+    switch (toupper(*option)) {
     case 'H':
-      histo_parms = argv[2] ;
-      nargs = 1 ;
-      printf("writing T1/PD histograms to %s...\n", histo_parms) ;
-      break ;
-      break ;
+      histo_parms = argv[2];
+      nargs = 1;
+      printf("writing T1/PD histograms to %s...\n", histo_parms);
+      break;
+      break;
     case 'L':
-      log_fname = argv[2] ;
-      nargs = 1 ;
-      printf("writing T1/PD class info to %s...\n", log_fname) ;
-      break ;
+      log_fname = argv[2];
+      nargs = 1;
+      printf("writing T1/PD class info to %s...\n", log_fname);
+      break;
     case '?':
     case 'U':
-      usage_exit(0) ;
-      break ;
+      usage_exit(0);
+      break;
     default:
-      fprintf(stderr, "unknown option %s\n", argv[1]) ;
-      exit(1) ;
-      break ;
+      fprintf(stderr, "unknown option %s\n", argv[1]);
+      exit(1);
+      break;
     }
 
-  return(nargs) ;
+  return (nargs);
 }
 /*----------------------------------------------------------------------
             Parameters:
 
            Description:
 ----------------------------------------------------------------------*/
-static void
-usage_exit(int code) {
+static void usage_exit(int code) {
   printf("usage: %s [options] <subject 1> <subject 2> ... <output file>\n",
-         Progname) ;
-  printf(
-    "\t-spacing  - spacing of classifiers in canonical space\n");
-  printf("\t-gradient - use intensity gradient as input to classifier.\n") ;
-  exit(code) ;
+         Progname);
+  printf("\t-spacing  - spacing of classifiers in canonical space\n");
+  printf("\t-gradient - use intensity gradient as input to classifier.\n");
+  exit(code);
 }
 #if 0
 static int

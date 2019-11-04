@@ -30,10 +30,8 @@
 
 // ============================================================
 
-namespace Freesurfer
-{
-void GetGCAstats(const GCA *const src)
-{
+namespace Freesurfer {
+void GetGCAstats(const GCA *const src) {
   std::cout << "GCA Vital Statistics" << std::endl;
 
   std::cout << "ninputs    : " << src->ninputs << std::endl;
@@ -47,8 +45,7 @@ void GetGCAstats(const GCA *const src)
 
 // --------------------------------------
 
-void GetGCAnodeStats(const GCA *const src)
-{
+void GetGCAnodeStats(const GCA *const src) {
   std::cout << "Stats from nodes:" << std::endl;
 
   unsigned int nx, ny, nz;
@@ -61,8 +58,8 @@ void GetGCAnodeStats(const GCA *const src)
             << "( " << nx << ", " << ny << ", " << nz << " )" << std::endl;
   // ---
 
-  MinMax< int > nLabelsNode, nMaxLabelsNode;
-  MinMax< short > nLabelsGC1D[GIBBS_NEIGHBORHOOD];
+  MinMax<int> nLabelsNode, nMaxLabelsNode;
+  MinMax<short> nLabelsGC1D[GIBBS_NEIGHBORHOOD];
 
   for (unsigned int ix = 0; ix < nx; ix++) {
     for (unsigned int iy = 0; iy < ny; iy++) {
@@ -75,7 +72,8 @@ void GetGCAnodeStats(const GCA *const src)
         for (int iGC1D = 0; iGC1D < gcan->nlabels; iGC1D++) {
           const GC1D *const gc1d = &(gcan->gcs[iGC1D]);
 
-          for (unsigned int iNeighbour = 0; iNeighbour < GIBBS_NEIGHBORHOOD; iNeighbour++) {
+          for (unsigned int iNeighbour = 0; iNeighbour < GIBBS_NEIGHBORHOOD;
+               iNeighbour++) {
             nLabelsGC1D[iNeighbour].Accumulate(gc1d->nlabels[iNeighbour]);
           }
         }
@@ -95,8 +93,7 @@ void GetGCAnodeStats(const GCA *const src)
 
 // --------------------------------------
 
-void GetGCApriorStats(const GCA *const src)
-{
+void GetGCApriorStats(const GCA *const src) {
   std::cout << "Stats from priors:" << std::endl;
 
   unsigned int nx, ny, nz;
@@ -110,8 +107,8 @@ void GetGCApriorStats(const GCA *const src)
 
   // ---
 
-  MinMax< short > nLabelsPrior;
-  MinMax< short > maxLabelsPrior;
+  MinMax<short> nLabelsPrior;
+  MinMax<short> maxLabelsPrior;
 
   for (unsigned int ix = 0; ix < nx; ix++) {
     for (unsigned int iy = 0; iy < ny; iy++) {
@@ -128,4 +125,4 @@ void GetGCApriorStats(const GCA *const src)
   std::cout << "  nLabels   : " << nLabelsPrior << std::endl;
   std::cout << "  maxLabels : " << maxLabelsPrior << std::endl;
 }
-}  // namespace Freesurfer
+} // namespace Freesurfer

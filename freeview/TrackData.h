@@ -30,8 +30,7 @@
 #include <QPair>
 #include <QColor>
 
-class TrackData : public QObject
-{
+class TrackData : public QObject {
   friend class LayerTrack;
 
   Q_OBJECT
@@ -39,17 +38,11 @@ public:
   TrackData(QObject *parent = 0);
   ~TrackData();
 
-  bool LoadFromFiles(const QStringList& filenames);
+  bool LoadFromFiles(const QStringList &filenames);
 
-  int GetNumberOfTracks()
-  {
-    return m_nNumberOfTracks;
-  }
+  int GetNumberOfTracks() { return m_nNumberOfTracks; }
 
-  bool HasEmbeddedColor()
-  {
-    return m_bHasEmbeddedColor;
-  }
+  bool HasEmbeddedColor() { return m_bHasEmbeddedColor; }
 
 signals:
   void Progress(int n);
@@ -58,24 +51,24 @@ public slots:
   void Clear();
 
 protected:
-  int     m_nDim[3];
-  float   m_dVoxelSize[3];
-  int     m_nNumberOfScalars;
+  int m_nDim[3];
+  float m_dVoxelSize[3];
+  int m_nNumberOfScalars;
   QStringList m_scalarNames;
-  int     m_nNumberOfProperties;
+  int m_nNumberOfProperties;
   QStringList m_propertyNames;
-  double  m_dVoxToRas[4][4];
+  double m_dVoxToRas[4][4];
 
-  int     m_nNumberOfTracks;
-  int     m_nNumberOfPoints;
-  int     m_nNumberOfSegs;
+  int m_nNumberOfTracks;
+  int m_nNumberOfPoints;
+  int m_nNumberOfSegs;
 
-  bool    m_bValidVoxToRas;
-  bool    m_bHasEmbeddedColor;
+  bool m_bValidVoxToRas;
+  bool m_bHasEmbeddedColor;
 
-  QList<Track>    m_tracks;
-  QList< QPair<double, double> > m_rangeScalar;
-  QList< QPair<double, double> > m_rangeProperty;
+  QList<Track> m_tracks;
+  QList<QPair<double, double>> m_rangeScalar;
+  QList<QPair<double, double>> m_rangeProperty;
 };
 
 #endif // TRACKDATA_H

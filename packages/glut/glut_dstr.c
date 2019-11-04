@@ -11,19 +11,18 @@
 #include <string.h>
 #include "glutint.h"
 
-//NJS begin
-extern GLXFBConfigSGIX glXGetFBConfigFromVisualSGIX (Display *, XVisualInfo *);
-extern int glXGetFBConfigAttribSGIX (Display *, GLXFBConfigSGIX, int, int *);
+// NJS begin
+extern GLXFBConfigSGIX glXGetFBConfigFromVisualSGIX(Display *, XVisualInfo *);
+extern int glXGetFBConfigAttribSGIX(Display *, GLXFBConfigSGIX, int, int *);
 #ifndef GLX_NONE_EXT
-#define GLX_NONE_EXT  0x8000
+#define GLX_NONE_EXT 0x8000
 #endif
-///NJS end
+/// NJS end
 
 /* glxcaps matches the criteria macros listed in glutint.h, but
    only list the first set (those that correspond to GLX visual
    attributes). */
-static int glxcap[NUM_GLXCAPS] =
-  {
+static int glxcap[NUM_GLXCAPS] = {
     GLX_RGBA,
     GLX_BUFFER_SIZE,
     GLX_DOUBLEBUFFER,
@@ -40,7 +39,7 @@ static int glxcap[NUM_GLXCAPS] =
     GLX_ACCUM_BLUE_SIZE,
     GLX_ACCUM_ALPHA_SIZE,
     GLX_LEVEL,
-  };
+};
 
 #ifdef TEST
 
@@ -48,35 +47,30 @@ static int glxcap[NUM_GLXCAPS] =
 char *__glutProgramName = "dstr";
 Display *__glutDisplay;
 int __glutScreen;
-XVisualInfo *(*__glutDetermineVisualFromString) (char *string, Bool * treatAsSingle,
-    Criterion * requiredCriteria, int nRequired, int requiredMask, void **fbc) = NULL;
+XVisualInfo *(*__glutDetermineVisualFromString)(char *string,
+                                                Bool *treatAsSingle,
+                                                Criterion *requiredCriteria,
+                                                int nRequired, int requiredMask,
+                                                void **fbc) = NULL;
 char *__glutDisplayString = NULL;
 #endif
 static int verbose = 0;
 
-static char *compstr[] =
-  {
-    "none", "=", "!=", "<=", ">=", ">", "<", "~"
-  };
-static char *capstr[] =
-  {
-    "rgba", "bufsize", "double", "stereo", "auxbufs", "red", "green", "blue", "alpha",
-    "depth", "stencil", "acred", "acgreen", "acblue", "acalpha", "level", "xvisual",
-    "transparent", "samples", "xstaticgray", "xgrayscale", "xstaticcolor", "xpseudocolor",
-    "xtruecolor", "xdirectcolor", "slow", "conformant", "num"
-  };
+static char *compstr[] = {"none", "=", "!=", "<=", ">=", ">", "<", "~"};
+static char *capstr[] = {
+    "rgba",       "bufsize",      "double",       "stereo",     "auxbufs",
+    "red",        "green",        "blue",         "alpha",      "depth",
+    "stencil",    "acred",        "acgreen",      "acblue",     "acalpha",
+    "level",      "xvisual",      "transparent",  "samples",    "xstaticgray",
+    "xgrayscale", "xstaticcolor", "xpseudocolor", "xtruecolor", "xdirectcolor",
+    "slow",       "conformant",   "num"};
 
-static void
-printCriteria(Criterion * criteria, int ncriteria)
-{
+static void printCriteria(Criterion *criteria, int ncriteria) {
   int i;
   printf("Criteria: %d\n", ncriteria);
-  for (i = 0; i < ncriteria; i++)
-  {
-    printf("  %s %s %d\n",
-           capstr[criteria[i].capability],
-           compstr[criteria[i].comparison],
-           criteria[i].value);
+  for (i = 0; i < ncriteria; i++) {
+    printf("  %s %s %d\n", capstr[criteria[i].capability],
+           compstr[criteria[i].comparison], criteria[i].value);
   }
 }
 
@@ -84,23 +78,21 @@ printCriteria(Criterion * criteria, int ncriteria)
 
 static int isMesaGLX = -1;
 
-static int
-determineMesaGLX(void)
-{
+static int determineMesaGLX(void) {
 #ifdef GLX_VERSION_1_1
   const char *vendor, *version, *ch;
 
   vendor = glXGetClientString(__glutDisplay, GLX_VENDOR);
-  if (!strcmp(vendor, "Brian Paul"))
-  {
+  if (!strcmp(vendor, "Brian Paul")) {
     version = glXGetClientString(__glutDisplay, GLX_VERSION);
-    for (ch = version; *ch != ' ' && *ch != '\0'; ch++);
-    for (; *ch == ' ' && *ch != '\0'; ch++);
+    for (ch = version; *ch != ' ' && *ch != '\0'; ch++)
+      ;
+    for (; *ch == ' ' && *ch != '\0'; ch++)
+      ;
 
-#define MESA_NAME "Mesa "  /* Trailing space is intentional. */
+#define MESA_NAME "Mesa " /* Trailing space is intentional. */
 
-    if (!strncmp(MESA_NAME, ch, sizeof(MESA_NAME) - 1))
-    {
+    if (!strncmp(MESA_NAME, ch, sizeof(MESA_NAME) - 1)) {
       return 1;
     }
   }
@@ -114,20 +106,17 @@ determineMesaGLX(void)
   return 0;
 }
 
-static XVisualInfo **
-getMesaVisualList(int *n)
-{
+static XVisualInfo **getMesaVisualList(int *n) {
   XVisualInfo **vlist, *vinfo;
   int attribs[23];
   int i, x, cnt;
 
-  vlist = (XVisualInfo **) malloc((32 + 16) * sizeof(XVisualInfo *));
+  vlist = (XVisualInfo **)malloc((32 + 16) * sizeof(XVisualInfo *));
   if (!vlist)
     __glutFatalError("out of memory.");
 
   cnt = 0;
-  for (i = 0; i < 32; i++)
-  {
+  for (i = 0; i < 32; i++) {
     x = 0;
     attribs[x] = GLX_RGBA;
     x++;
@@ -143,22 +132,19 @@ getMesaVisualList(int *n)
     x++;
     attribs[x] = 1;
     x++;
-    if (i & 1)
-    {
+    if (i & 1) {
       attribs[x] = GLX_DEPTH_SIZE;
       x++;
       attribs[x] = 1;
       x++;
     }
-    if (i & 2)
-    {
+    if (i & 2) {
       attribs[x] = GLX_STENCIL_SIZE;
       x++;
       attribs[x] = 1;
       x++;
     }
-    if (i & 4)
-    {
+    if (i & 4) {
       attribs[x] = GLX_ACCUM_RED_SIZE;
       x++;
       attribs[x] = 1;
@@ -172,22 +158,19 @@ getMesaVisualList(int *n)
       attribs[x] = 1;
       x++;
     }
-    if (i & 8)
-    {
+    if (i & 8) {
       attribs[x] = GLX_ALPHA_SIZE;
       x++;
       attribs[x] = 1;
       x++;
-      if (i & 4)
-      {
+      if (i & 4) {
         attribs[x] = GLX_ACCUM_ALPHA_SIZE;
         x++;
         attribs[x] = 1;
         x++;
       }
     }
-    if (i & 16)
-    {
+    if (i & 16) {
       attribs[x] = GLX_DOUBLEBUFFER;
       x++;
     }
@@ -195,36 +178,30 @@ getMesaVisualList(int *n)
     x++;
     assert(x <= sizeof(attribs) / sizeof(attribs[0]));
     vinfo = glXChooseVisual(__glutDisplay, __glutScreen, attribs);
-    if (vinfo)
-    {
+    if (vinfo) {
       vlist[cnt] = vinfo;
       cnt++;
     }
   }
-  for (i = 0; i < 16; i++)
-  {
+  for (i = 0; i < 16; i++) {
     x = 0;
-    if (i & 1)
-    {
+    if (i & 1) {
       attribs[x] = GLX_DEPTH_SIZE;
       x++;
       attribs[x] = 1;
       x++;
     }
-    if (i & 2)
-    {
+    if (i & 2) {
       attribs[x] = GLX_STENCIL_SIZE;
       x++;
       attribs[x] = 1;
       x++;
     }
-    if (i & 4)
-    {
+    if (i & 4) {
       attribs[x] = GLX_DOUBLEBUFFER;
       x++;
     }
-    if (i & 8)
-    {
+    if (i & 8) {
       attribs[x] = GLX_LEVEL;
       x++;
       attribs[x] = 1;
@@ -240,8 +217,7 @@ getMesaVisualList(int *n)
     x++;
     assert(x <= sizeof(attribs) / sizeof(attribs[0]));
     vinfo = glXChooseVisual(__glutDisplay, __glutScreen, attribs);
-    if (vinfo)
-    {
+    if (vinfo) {
       vlist[cnt] = vinfo;
       cnt++;
     }
@@ -251,9 +227,7 @@ getMesaVisualList(int *n)
   return vlist;
 }
 
-static FrameBufferMode *
-loadVisuals(int *nitems_return)
-{
+static FrameBufferMode *loadVisuals(int *nitems_return) {
   XVisualInfo *vinfo, **vlist, template;
   FrameBufferMode *fbmodes, *mode;
   int n, i, j, rc, glcapable;
@@ -271,19 +245,16 @@ loadVisuals(int *nitems_return)
 #endif
 
   isMesaGLX = determineMesaGLX();
-  if (isMesaGLX)
-  {
+  if (isMesaGLX) {
     vlist = getMesaVisualList(&n);
-  }
-  else {
+  } else {
 #if !defined(_WIN32)
     template.screen = __glutScreen;
     vinfo = XGetVisualInfo(__glutDisplay, VisualScreenMask, &template, &n);
 #else
     vinfo = XGetVisualInfo(__glutDisplay, 0, &template, &n);
 #endif
-    if (vinfo == NULL)
-    {
+    if (vinfo == NULL) {
       *nitems_return = 0;
       return NULL;
     }
@@ -295,13 +266,10 @@ loadVisuals(int *nitems_return)
        XGetVisualInfo.  (Mesa expects us to return the _exact_
        pointer returned by glXChooseVisual so we could not just
        copy the returned structure.) */
-    vlist = (XVisualInfo **) malloc(n * sizeof(XVisualInfo *));
+    vlist = (XVisualInfo **)malloc(n * sizeof(XVisualInfo *));
     if (!vlist)
       __glutFatalError("out of memory.");
-    for (i = 0;
-         i < n;
-         i++)
-    {
+    for (i = 0; i < n; i++) {
       vlist[i] = &vinfo[i];
     }
   }
@@ -319,38 +287,31 @@ loadVisuals(int *nitems_return)
   fbconfig = __glutIsSupportedByGLX("GLX_SGIX_fbconfig");
 #endif
 
-  fbmodes = (FrameBufferMode *) malloc(n * sizeof(FrameBufferMode));
-  if (fbmodes == NULL)
-  {
+  fbmodes = (FrameBufferMode *)malloc(n * sizeof(FrameBufferMode));
+  if (fbmodes == NULL) {
     *nitems_return = -1;
     return NULL;
   }
-  for (i = 0;
-       i < n;
-       i++)
-  {
+  for (i = 0; i < n; i++) {
     mode = &fbmodes[i];
     mode->vi = vlist[i];
 #if defined(GLX_VERSION_1_1) && defined(GLX_SGIX_fbconfig)
     mode->fbc = NULL;
 #endif
     rc = glXGetConfig(__glutDisplay, vlist[i], GLX_USE_GL, &glcapable);
-    if (rc == 0 && glcapable)
-    {
-      mode->valid = 1;  /* Assume the best until proven
-                                       otherwise. */
-      for (j = 0; j < NUM_GLXCAPS; j++)
-      {
+    if (rc == 0 && glcapable) {
+      mode->valid = 1; /* Assume the best until proven
+                                      otherwise. */
+      for (j = 0; j < NUM_GLXCAPS; j++) {
         rc = glXGetConfig(__glutDisplay, vlist[i], glxcap[j], &mode->cap[j]);
-        if (rc != 0)
-        {
+        if (rc != 0) {
           mode->valid = 0;
         }
       }
 #if defined(_WIN32)
       mode->cap[XVISUAL] = ChoosePixelFormat(XHDC, vlist[i]);
 #else
-      mode->cap[XVISUAL] = (int) vlist[i]->visualid;
+      mode->cap[XVISUAL] = (int)vlist[i]->visualid;
 #endif
       mode->cap[XSTATICGRAY] = 0;
       mode->cap[XGRAYSCALE] = 0;
@@ -360,11 +321,9 @@ loadVisuals(int *nitems_return)
       mode->cap[XDIRECTCOLOR] = 0;
 #if !defined(_WIN32)
 #if defined(__cplusplus) || defined(c_plusplus)
-      switch (vlist[i]->c_class)
-      {
+      switch (vlist[i]->c_class) {
 #else
-      switch (vlist[i]->class)
-      {
+      switch (vlist[i]->class) {
 #endif
       case StaticGray:
         mode->cap[XSTATICGRAY] = 1;
@@ -387,8 +346,7 @@ loadVisuals(int *nitems_return)
       }
 #endif
 #if defined(GLX_VERSION_1_1) && defined(GLX_EXT_visual_rating)
-      if (visual_rating)
-      {
+      if (visual_rating) {
         int rating;
 
         /* babcock@cs.montana.edu reported that DEC UNIX (OSF1) V4.0
@@ -399,17 +357,13 @@ loadVisuals(int *nitems_return)
 #define GLX_VISUAL_CAVEAT_EXT 0x20
 #endif
 
-        rc = glXGetConfig(__glutDisplay,
-                          vlist[i], GLX_VISUAL_CAVEAT_EXT, &rating);
-        if (rc != 0)
-        {
+        rc = glXGetConfig(__glutDisplay, vlist[i], GLX_VISUAL_CAVEAT_EXT,
+                          &rating);
+        if (rc != 0) {
           mode->cap[SLOW] = 0;
           mode->cap[CONFORMANT] = 1;
-        }
-        else
-        {
-          switch (rating)
-          {
+        } else {
+          switch (rating) {
           case GLX_SLOW_VISUAL_EXT:
             mode->cap[SLOW] = 1;
             mode->cap[CONFORMANT] = 1;
@@ -418,7 +372,7 @@ loadVisuals(int *nitems_return)
             /* IRIX 5.3 for the R10K Indigo2 may have shipped without this
                properly defined in /usr/include/GL/glxtokens.h */
 #ifndef GLX_NON_CONFORMANT_VISUAL_EXT
-#define GLX_NON_CONFORMANT_VISUAL_EXT   0x800D
+#define GLX_NON_CONFORMANT_VISUAL_EXT 0x800D
 #endif
 
           case GLX_NON_CONFORMANT_VISUAL_EXT:
@@ -426,16 +380,14 @@ loadVisuals(int *nitems_return)
             mode->cap[CONFORMANT] = 0;
             break;
           case GLX_NONE_EXT:
-          default:     /* XXX Hopefully this is a good default
-                                                   assumption. */
+          default: /* XXX Hopefully this is a good default
+                                               assumption. */
             mode->cap[SLOW] = 0;
             mode->cap[CONFORMANT] = 1;
             break;
           }
         }
-      }
-      else
-      {
+      } else {
         mode->cap[TRANSPARENT] = 0;
       }
 #else
@@ -443,8 +395,7 @@ loadVisuals(int *nitems_return)
       mode->cap[CONFORMANT] = 1;
 #endif
 #if defined(GLX_VERSION_1_1) && defined(GLX_EXT_visual_info)
-      if (visual_info)
-      {
+      if (visual_info) {
         int transparent;
 
         /* babcock@cs.montana.edu reported that DEC UNIX (OSF1) V4.0
@@ -455,84 +406,66 @@ loadVisuals(int *nitems_return)
 #define GLX_TRANSPARENT_TYPE_EXT 0x23
 #endif
 
-        rc = glXGetConfig(__glutDisplay,
-                          vlist[i], GLX_TRANSPARENT_TYPE_EXT, &transparent);
-        if (rc != 0)
-        {
+        rc = glXGetConfig(__glutDisplay, vlist[i], GLX_TRANSPARENT_TYPE_EXT,
+                          &transparent);
+        if (rc != 0) {
           mode->cap[TRANSPARENT] = 0;
-        }
-        else
-        {
+        } else {
           mode->cap[TRANSPARENT] = (transparent != GLX_NONE_EXT);
         }
-      }
-      else
-      {
+      } else {
         mode->cap[TRANSPARENT] = 0;
       }
 #else
       mode->cap[TRANSPARENT] = 0;
 #endif
 #if defined(GLX_VERSION_1_1) && defined(GLX_SGIS_multisample)
-      if (multisample)
-      {
-        rc = glXGetConfig(__glutDisplay,
-                          vlist[i], GLX_SAMPLES_SGIS, &mode->cap[SAMPLES]);
-        if (rc != 0)
-        {
+      if (multisample) {
+        rc = glXGetConfig(__glutDisplay, vlist[i], GLX_SAMPLES_SGIS,
+                          &mode->cap[SAMPLES]);
+        if (rc != 0) {
           mode->cap[SAMPLES] = 0;
         }
-      }
-      else
-      {
+      } else {
         mode->cap[SAMPLES] = 0;
       }
 #else
       mode->cap[SAMPLES] = 0;
 #endif
-    }
-    else
-    {
+    } else {
 #if defined(GLX_VERSION_1_1) && defined(GLX_SGIX_fbconfig)
-      if (fbconfig)
-      {
+      if (fbconfig) {
         GLXFBConfigSGIX fbc;
         int fbconfigID, drawType, renderType;
 
         fbc = glXGetFBConfigFromVisualSGIX(__glutDisplay, vlist[i]);
-        if (fbc)
-        {
+        if (fbc) {
           rc = glXGetFBConfigAttribSGIX(__glutDisplay, fbc,
                                         GLX_FBCONFIG_ID_SGIX, &fbconfigID);
-          if ((rc == 0) && (fbconfigID != None))
-          {
+          if ((rc == 0) && (fbconfigID != None)) {
             rc = glXGetFBConfigAttribSGIX(__glutDisplay, fbc,
                                           GLX_DRAWABLE_TYPE_SGIX, &drawType);
-            if ((rc == 0) && (drawType & GLX_WINDOW_BIT_SGIX))
-            {
+            if ((rc == 0) && (drawType & GLX_WINDOW_BIT_SGIX)) {
               rc = glXGetFBConfigAttribSGIX(__glutDisplay, fbc,
                                             GLX_RENDER_TYPE_SGIX, &renderType);
-              if ((rc == 0) && (renderType & GLX_RGBA_BIT_SGIX))
-              {
+              if ((rc == 0) && (renderType & GLX_RGBA_BIT_SGIX)) {
                 mode->fbc = fbc;
-                mode->valid = 1;  /* Assume the best until
-                                     proven otherwise. */
+                mode->valid = 1; /* Assume the best until
+                                    proven otherwise. */
 
                 assert(glxcap[0] == GLX_RGBA);
                 mode->cap[0] = 1;
 
                 /* Start with "j = 1" to skip the GLX_RGBA attribute. */
-                for (j = 1; j < NUM_GLXCAPS; j++)
-                {
-                  rc = glXGetFBConfigAttribSGIX(__glutDisplay,
-                                                fbc, glxcap[j], &mode->cap[j]);
-                  if (rc != 0)
-                  {
+                for (j = 1; j < NUM_GLXCAPS; j++) {
+                  rc = glXGetFBConfigAttribSGIX(__glutDisplay, fbc, glxcap[j],
+                                                &mode->cap[j]);
+                  if (rc != 0) {
                     mode->valid = 0;
                   }
                 }
 
-                mode->cap[XVISUAL] = (int) vlist[i]->visualid;
+                mode->cap[XVISUAL] = (int)vlist[i]->visualid;
                 mode->cap[XSTATICGRAY] = 0;
                 mode->cap[XGRAYSCALE] = 0;
                 mode->cap[XSTATICCOLOR] = 0;
@@ -540,11 +473,9 @@ loadVisuals(int *nitems_return)
                 mode->cap[XTRUECOLOR] = 0;
                 mode->cap[XDIRECTCOLOR] = 0;
 #if defined(__cplusplus) || defined(c_plusplus)
-                switch (vlist[i]->c_class)
-                {
+                switch (vlist[i]->c_class) {
 #else
-                switch (vlist[i]->class)
-                {
+                switch (vlist[i]->class) {
 #endif
                 case StaticGray:
                   mode->cap[XSTATICGRAY] = 1;
@@ -566,8 +497,7 @@ loadVisuals(int *nitems_return)
                   break;
                 }
 #if defined(GLX_VERSION_1_1) && defined(GLX_EXT_visual_rating)
-                if (visual_rating)
-                {
+                if (visual_rating) {
                   int rating;
 
                   /* babcock@cs.montana.edu reported that DEC UNIX (OSF1) V4.0
@@ -578,26 +508,22 @@ loadVisuals(int *nitems_return)
 #define GLX_VISUAL_CAVEAT_EXT 0x20
 #endif
 
-                  rc = glXGetFBConfigAttribSGIX(__glutDisplay,
-                                                fbc, GLX_VISUAL_CAVEAT_EXT, &rating);
-                  if (rc != 0)
-                  {
+                  rc = glXGetFBConfigAttribSGIX(__glutDisplay, fbc,
+                                                GLX_VISUAL_CAVEAT_EXT, &rating);
+                  if (rc != 0) {
                     mode->cap[SLOW] = 0;
                     mode->cap[CONFORMANT] = 1;
-                  }
-                  else
-                  {
-                    switch (rating)
-                    {
+                  } else {
+                    switch (rating) {
                     case GLX_SLOW_VISUAL_EXT:
                       mode->cap[SLOW] = 1;
                       mode->cap[CONFORMANT] = 1;
                       break;
 
-                      /* IRIX 5.3 for the R10K Indigo2 may have shipped without this
-                         properly defined in /usr/include/GL/glxtokens.h */
+                      /* IRIX 5.3 for the R10K Indigo2 may have shipped without
+                         this properly defined in /usr/include/GL/glxtokens.h */
 #ifndef GLX_NON_CONFORMANT_VISUAL_EXT
-#define GLX_NON_CONFORMANT_VISUAL_EXT   0x800D
+#define GLX_NON_CONFORMANT_VISUAL_EXT 0x800D
 #endif
 
                     case GLX_NON_CONFORMANT_VISUAL_EXT:
@@ -605,16 +531,15 @@ loadVisuals(int *nitems_return)
                       mode->cap[CONFORMANT] = 0;
                       break;
                     case GLX_NONE_EXT:
-                    default:  /* XXX Hopefully this is a good
-                                                                              default assumption. */
+                    default: /* XXX Hopefully this is a good
+                                                                             default
+                                assumption. */
                       mode->cap[SLOW] = 0;
                       mode->cap[CONFORMANT] = 1;
                       break;
                     }
                   }
-                }
-                else
-                {
+                } else {
                   mode->cap[TRANSPARENT] = 0;
                 }
 #else
@@ -622,8 +547,7 @@ loadVisuals(int *nitems_return)
                 mode->cap[CONFORMANT] = 1;
 #endif
 #if defined(GLX_VERSION_1_1) && defined(GLX_EXT_visual_info)
-                if (visual_info)
-                {
+                if (visual_info) {
                   int transparent;
 
                   /* babcock@cs.montana.edu reported that DEC UNIX (OSF1) V4.0
@@ -634,45 +558,36 @@ loadVisuals(int *nitems_return)
 #define GLX_TRANSPARENT_TYPE_EXT 0x23
 #endif
 
-                  rc = glXGetFBConfigAttribSGIX(__glutDisplay,
-                                                fbc, GLX_TRANSPARENT_TYPE_EXT, &transparent);
-                  if (rc != 0)
-                  {
+                  rc = glXGetFBConfigAttribSGIX(__glutDisplay, fbc,
+                                                GLX_TRANSPARENT_TYPE_EXT,
+                                                &transparent);
+                  if (rc != 0) {
                     mode->cap[TRANSPARENT] = 0;
-                  }
-                  else
-                  {
+                  } else {
                     mode->cap[TRANSPARENT] = (transparent != GLX_NONE_EXT);
                   }
-                }
-                else
-                {
+                } else {
                   mode->cap[TRANSPARENT] = 0;
                 }
 #else
                 mode->cap[TRANSPARENT] = 0;
 #endif
 #if defined(GLX_VERSION_1_1) && defined(GLX_SGIS_multisample)
-                if (multisample)
-                {
-                  rc = glXGetFBConfigAttribSGIX(__glutDisplay,
-                                                fbc, GLX_SAMPLES_SGIS, &mode->cap[SAMPLES]);
-                  if (rc != 0)
-                  {
+                if (multisample) {
+                  rc = glXGetFBConfigAttribSGIX(__glutDisplay, fbc,
+                                                GLX_SAMPLES_SGIS,
+                                                &mode->cap[SAMPLES]);
+                  if (rc != 0) {
                     mode->cap[SAMPLES] = 0;
                   }
-                }
-                else
-                {
+                } else {
                   mode->cap[SAMPLES] = 0;
                 }
 #else
                 mode->cap[SAMPLES] = 0;
 #endif
 
-              }
-              else
-              {
+              } else {
                 /* Fbconfig is not RGBA; GLUT only uses RGBA
                    FBconfigs. */
                 /* XXX Code could be exteneded to handle color
@@ -681,29 +596,21 @@ loadVisuals(int *nitems_return)
                    advertised as an X visual. */
                 mode->valid = 0;
               }
-            }
-            else
-            {
+            } else {
               /* Fbconfig does not support window rendering;
                  not a valid FBconfig for GLUT windows. */
               mode->valid = 0;
             }
-          }
-          else
-          {
+          } else {
             /* FBconfig ID is None (zero); not a valid
                FBconfig. */
             mode->valid = 0;
           }
-        }
-        else
-        {
+        } else {
           /* FBconfig ID is None (zero); not a valid FBconfig. */
           mode->valid = 0;
         }
-      }
-      else
-      {
+      } else {
         /* No SGIX_fbconfig GLX sever implementation support. */
         mode->valid = 0;
       }
@@ -719,37 +626,32 @@ loadVisuals(int *nitems_return)
   return fbmodes;
 }
 
-static XVisualInfo *
-findMatch(FrameBufferMode * fbmodes, int nfbmodes,
-          Criterion * criteria, int ncriteria, void **fbc)
-{
+static XVisualInfo *findMatch(FrameBufferMode *fbmodes, int nfbmodes,
+                              Criterion *criteria, int ncriteria, void **fbc) {
   FrameBufferMode *found;
   int *bestScore, *thisScore;
-  int i, j, numok, result=0, worse, better;
+  int i, j, numok, result = 0, worse, better;
 
   found = NULL;
-  numok = 1;            /* "num" capability is indexed from 1,
-                               not 0. */
+  numok = 1; /* "num" capability is indexed from 1,
+                    not 0. */
 
   /* XXX alloca canidate. */
-  bestScore = (int *) malloc(ncriteria * sizeof(int));
+  bestScore = (int *)malloc(ncriteria * sizeof(int));
   if (!bestScore)
     __glutFatalError("out of memory.");
-  for (j = 0; j < ncriteria; j++)
-  {
+  for (j = 0; j < ncriteria; j++) {
     /* Very negative number. */
     bestScore[j] = -32768;
   }
 
   /* XXX alloca canidate. */
-  thisScore = (int *) malloc(ncriteria * sizeof(int));
+  thisScore = (int *)malloc(ncriteria * sizeof(int));
   if (!thisScore)
     __glutFatalError("out of memory.");
 
-  for (i = 0; i < nfbmodes; i++)
-  {
-    if (fbmodes[i].valid)
-    {
+  for (i = 0; i < nfbmodes; i++) {
+    if (fbmodes[i].valid) {
 #ifdef TEST
 #if !defined(_WIN32)
       if (verbose)
@@ -760,27 +662,22 @@ findMatch(FrameBufferMode * fbmodes, int nfbmodes,
       worse = 0;
       better = 0;
 
-      for (j = 0; j < ncriteria; j++)
-      {
+      for (j = 0; j < ncriteria; j++) {
         int cap, cvalue, fbvalue;
 
         cap = criteria[j].capability;
         cvalue = criteria[j].value;
-        if (cap == NUM)
-        {
+        if (cap == NUM) {
           fbvalue = numok;
-        }
-        else
-        {
+        } else {
           fbvalue = fbmodes[i].cap[cap];
         }
 #ifdef TEST
         if (verbose)
-          printf("  %s %s %d to %d\n",
-                 capstr[cap], compstr[criteria[j].comparison], cvalue, fbvalue);
+          printf("  %s %s %d to %d\n", capstr[cap],
+                 compstr[criteria[j].comparison], cvalue, fbvalue);
 #endif
-        switch (criteria[j].comparison)
-        {
+        switch (criteria[j].comparison) {
         case EQ:
           result = cvalue == fbvalue;
           thisScore[j] = 1;
@@ -813,81 +710,59 @@ findMatch(FrameBufferMode * fbmodes, int nfbmodes,
 
 #ifdef TEST
         if (verbose)
-          printf("                result=%d   score=%d   bestScore=%d\n", result, thisScore[j], bestScore[j]);
+          printf("                result=%d   score=%d   bestScore=%d\n",
+                 result, thisScore[j], bestScore[j]);
 #endif
 
-        if (result)
-        {
-          if (better || thisScore[j] > bestScore[j])
-          {
+        if (result) {
+          if (better || thisScore[j] > bestScore[j]) {
             better = 1;
-          }
-          else if (thisScore[j] == bestScore[j])
-          {
+          } else if (thisScore[j] == bestScore[j]) {
             /* Keep looking. */
-          }
-          else
-          {
+          } else {
             goto nextFBM;
           }
-        }
-        else
-        {
-          if (cap == NUM)
-          {
+        } else {
+          if (cap == NUM) {
             worse = 1;
-          }
-          else
-          {
+          } else {
             goto nextFBM;
           }
         }
-
       }
 
-      if (better && !worse)
-      {
+      if (better && !worse) {
         found = &fbmodes[i];
-        for (j = 0; j < ncriteria; j++)
-        {
+        for (j = 0; j < ncriteria; j++) {
           bestScore[j] = thisScore[j];
         }
       }
       numok++;
 
-nextFBM:
-      ;
-
+    nextFBM:;
     }
   }
   free(bestScore);
   free(thisScore);
-  if (found)
-  {
+  if (found) {
 #if defined(GLX_VERSION_1_1) && defined(GLX_SGIX_fbconfig)
     *fbc = found->fbc;
 #endif
     return found->vi;
-  }
-  else
-  {
+  } else {
     return NULL;
   }
 }
 
-static int
-parseCriteria(char *word, Criterion * criterion, int *mask,
-              Bool * allowDoubleAsSingle)
-{
+static int parseCriteria(char *word, Criterion *criterion, int *mask,
+                         Bool *allowDoubleAsSingle) {
   char *cstr, *vstr, *response;
-  int comparator, value=0;
+  int comparator, value = 0;
   int rgb, rgba, acc, acca, count, i;
 
   cstr = strpbrk(word, "=><!~");
-  if (cstr)
-  {
-    switch (cstr[0])
-    {
+  if (cstr) {
+    switch (cstr[0]) {
     case '=':
       comparator = EQ;
       vstr = &cstr[1];
@@ -897,68 +772,51 @@ parseCriteria(char *word, Criterion * criterion, int *mask,
       vstr = &cstr[1];
       break;
     case '>':
-      if (cstr[1] == '=')
-      {
+      if (cstr[1] == '=') {
         comparator = GTE;
         vstr = &cstr[2];
-      }
-      else
-      {
+      } else {
         comparator = GT;
         vstr = &cstr[1];
       }
       break;
     case '<':
-      if (cstr[1] == '=')
-      {
+      if (cstr[1] == '=') {
         comparator = LTE;
         vstr = &cstr[2];
-      }
-      else
-      {
+      } else {
         comparator = LT;
         vstr = &cstr[1];
       }
       break;
     case '!':
-      if (cstr[1] == '=')
-      {
+      if (cstr[1] == '=') {
         comparator = NEQ;
         vstr = &cstr[2];
-      }
-      else
-      {
+      } else {
         return -1;
       }
       break;
     default:
       return -1;
     }
-    value = (int) strtol(vstr, &response, 0);
-    if (response == vstr)
-    {
+    value = (int)strtol(vstr, &response, 0);
+    if (response == vstr) {
       /* Not a valid number. */
       return -1;
     }
     *cstr = '\0';
-  }
-  else
-  {
+  } else {
     comparator = NONE;
   }
-  switch (word[0])
-  {
+  switch (word[0]) {
   case 'a':
-    if (!strcmp(word, "alpha"))
-    {
+    if (!strcmp(word, "alpha")) {
       criterion[0].capability = ALPHA_SIZE;
-      if (comparator == NONE)
-      {
+      if (comparator == NONE) {
         criterion[0].comparison = GTE;
         criterion[0].value = 1;
-      }
-      else
-      {
+      } else {
         criterion[0].comparison = comparator;
         criterion[0].value = value;
       }
@@ -969,45 +827,35 @@ parseCriteria(char *word, Criterion * criterion, int *mask,
     }
     acca = !strcmp(word, "acca");
     acc = !strcmp(word, "acc");
-    if (acc || acca)
-    {
+    if (acc || acca) {
       criterion[0].capability = ACCUM_RED_SIZE;
       criterion[1].capability = ACCUM_GREEN_SIZE;
       criterion[2].capability = ACCUM_BLUE_SIZE;
       criterion[3].capability = ACCUM_ALPHA_SIZE;
-      if (acca)
-      {
+      if (acca) {
         count = 4;
-      }
-      else
-      {
+      } else {
         count = 3;
         criterion[3].comparison = MIN;
         criterion[3].value = 0;
       }
-      if (comparator == NONE)
-      {
+      if (comparator == NONE) {
         comparator = GTE;
         value = 8;
       }
-      for (i = 0; i < count; i++)
-      {
+      for (i = 0; i < count; i++) {
         criterion[i].comparison = comparator;
         criterion[i].value = value;
       }
       *mask |= (1 << ACCUM_RED_SIZE);
       return 4;
     }
-    if (!strcmp(word, "auxbufs"))
-    {
+    if (!strcmp(word, "auxbufs")) {
       criterion[0].capability = AUX_BUFFERS;
-      if (comparator == NONE)
-      {
+      if (comparator == NONE) {
         criterion[0].comparison = MIN;
         criterion[0].value = 1;
-      }
-      else
-      {
+      } else {
         criterion[0].comparison = comparator;
         criterion[0].value = value;
       }
@@ -1016,16 +864,12 @@ parseCriteria(char *word, Criterion * criterion, int *mask,
     }
     return -1;
   case 'b':
-    if (!strcmp(word, "blue"))
-    {
+    if (!strcmp(word, "blue")) {
       criterion[0].capability = BLUE_SIZE;
-      if (comparator == NONE)
-      {
+      if (comparator == NONE) {
         criterion[0].comparison = GTE;
         criterion[0].value = 1;
-      }
-      else
-      {
+      } else {
         criterion[0].comparison = comparator;
         criterion[0].value = value;
       }
@@ -1033,16 +877,12 @@ parseCriteria(char *word, Criterion * criterion, int *mask,
       *mask |= (1 << RGBA_MODE);
       return 1;
     }
-    if (!strcmp(word, "buffer"))
-    {
+    if (!strcmp(word, "buffer")) {
       criterion[0].capability = BUFFER_SIZE;
-      if (comparator == NONE)
-      {
+      if (comparator == NONE) {
         criterion[0].comparison = GTE;
         criterion[0].value = 1;
-      }
-      else
-      {
+      } else {
         criterion[0].comparison = comparator;
         criterion[0].value = value;
       }
@@ -1050,16 +890,12 @@ parseCriteria(char *word, Criterion * criterion, int *mask,
     }
     return -1;
   case 'c':
-    if (!strcmp(word, "conformant"))
-    {
+    if (!strcmp(word, "conformant")) {
       criterion[0].capability = CONFORMANT;
-      if (comparator == NONE)
-      {
+      if (comparator == NONE) {
         criterion[0].comparison = EQ;
         criterion[0].value = 1;
-      }
-      else
-      {
+      } else {
         criterion[0].comparison = comparator;
         criterion[0].value = value;
       }
@@ -1068,32 +904,24 @@ parseCriteria(char *word, Criterion * criterion, int *mask,
     }
     return -1;
   case 'd':
-    if (!strcmp(word, "depth"))
-    {
+    if (!strcmp(word, "depth")) {
       criterion[0].capability = DEPTH_SIZE;
-      if (comparator == NONE)
-      {
+      if (comparator == NONE) {
         criterion[0].comparison = GTE;
         criterion[0].value = 12;
-      }
-      else
-      {
+      } else {
         criterion[0].comparison = comparator;
         criterion[0].value = value;
       }
       *mask |= (1 << DEPTH_SIZE);
       return 1;
     }
-    if (!strcmp(word, "double"))
-    {
+    if (!strcmp(word, "double")) {
       criterion[0].capability = DOUBLEBUFFER;
-      if (comparator == NONE)
-      {
+      if (comparator == NONE) {
         criterion[0].comparison = EQ;
         criterion[0].value = 1;
-      }
-      else
-      {
+      } else {
         criterion[0].comparison = comparator;
         criterion[0].value = value;
       }
@@ -1102,16 +930,12 @@ parseCriteria(char *word, Criterion * criterion, int *mask,
     }
     return -1;
   case 'g':
-    if (!strcmp(word, "green"))
-    {
+    if (!strcmp(word, "green")) {
       criterion[0].capability = GREEN_SIZE;
-      if (comparator == NONE)
-      {
+      if (comparator == NONE) {
         criterion[0].comparison = GTE;
         criterion[0].value = 1;
-      }
-      else
-      {
+      } else {
         criterion[0].comparison = comparator;
         criterion[0].value = value;
       }
@@ -1121,21 +945,17 @@ parseCriteria(char *word, Criterion * criterion, int *mask,
     }
     return -1;
   case 'i':
-    if (!strcmp(word, "index"))
-    {
+    if (!strcmp(word, "index")) {
       criterion[0].capability = RGBA;
       criterion[0].comparison = EQ;
       criterion[0].value = 0;
       *mask |= (1 << RGBA);
       *mask |= (1 << CI_MODE);
       criterion[1].capability = BUFFER_SIZE;
-      if (comparator == NONE)
-      {
+      if (comparator == NONE) {
         criterion[1].comparison = GTE;
         criterion[1].value = 1;
-      }
-      else
-      {
+      } else {
         criterion[1].comparison = comparator;
         criterion[1].value = value;
       }
@@ -1143,20 +963,16 @@ parseCriteria(char *word, Criterion * criterion, int *mask,
     }
     return -1;
   case 'l':
-    if (!strcmp(word, "luminance"))
-    {
+    if (!strcmp(word, "luminance")) {
       criterion[0].capability = RGBA;
       criterion[0].comparison = EQ;
       criterion[0].value = 1;
 
       criterion[1].capability = RED_SIZE;
-      if (comparator == NONE)
-      {
+      if (comparator == NONE) {
         criterion[1].comparison = GTE;
         criterion[1].value = 1;
-      }
-      else
-      {
+      } else {
         criterion[1].comparison = comparator;
         criterion[1].value = value;
       }
@@ -1176,15 +992,11 @@ parseCriteria(char *word, Criterion * criterion, int *mask,
     }
     return -1;
   case 'n':
-    if (!strcmp(word, "num"))
-    {
+    if (!strcmp(word, "num")) {
       criterion[0].capability = NUM;
-      if (comparator == NONE)
-      {
+      if (comparator == NONE) {
         return -1;
-      }
-      else
-      {
+      } else {
         criterion[0].comparison = comparator;
         criterion[0].value = value;
         return 1;
@@ -1192,16 +1004,12 @@ parseCriteria(char *word, Criterion * criterion, int *mask,
     }
     return -1;
   case 'r':
-    if (!strcmp(word, "red"))
-    {
+    if (!strcmp(word, "red")) {
       criterion[0].capability = RED_SIZE;
-      if (comparator == NONE)
-      {
+      if (comparator == NONE) {
         criterion[0].comparison = GTE;
         criterion[0].value = 1;
-      }
-      else
-      {
+      } else {
         criterion[0].comparison = comparator;
         criterion[0].value = value;
       }
@@ -1211,8 +1019,7 @@ parseCriteria(char *word, Criterion * criterion, int *mask,
     }
     rgba = !strcmp(word, "rgba");
     rgb = !strcmp(word, "rgb");
-    if (rgb || rgba)
-    {
+    if (rgb || rgba) {
       criterion[0].capability = RGBA;
       criterion[0].comparison = EQ;
       criterion[0].value = 1;
@@ -1221,23 +1028,18 @@ parseCriteria(char *word, Criterion * criterion, int *mask,
       criterion[2].capability = GREEN_SIZE;
       criterion[3].capability = BLUE_SIZE;
       criterion[4].capability = ALPHA_SIZE;
-      if (rgba)
-      {
+      if (rgba) {
         count = 5;
-      }
-      else
-      {
+      } else {
         count = 4;
         criterion[4].comparison = MIN;
         criterion[4].value = 0;
       }
-      if (comparator == NONE)
-      {
+      if (comparator == NONE) {
         comparator = GTE;
         value = 1;
       }
-      for (i = 1; i < count; i++)
-      {
+      for (i = 1; i < count; i++) {
         criterion[i].comparison = comparator;
         criterion[i].value = value;
       }
@@ -1247,83 +1049,63 @@ parseCriteria(char *word, Criterion * criterion, int *mask,
     }
     return -1;
   case 's':
-    if (!strcmp(word, "stencil"))
-    {
+    if (!strcmp(word, "stencil")) {
       criterion[0].capability = STENCIL_SIZE;
-      if (comparator == NONE)
-      {
+      if (comparator == NONE) {
         criterion[0].comparison = MIN;
         criterion[0].value = 1;
-      }
-      else
-      {
+      } else {
         criterion[0].comparison = comparator;
         criterion[0].value = value;
       }
       *mask |= (1 << STENCIL_SIZE);
       return 1;
     }
-    if (!strcmp(word, "single"))
-    {
+    if (!strcmp(word, "single")) {
       criterion[0].capability = DOUBLEBUFFER;
-      if (comparator == NONE)
-      {
+      if (comparator == NONE) {
         criterion[0].comparison = EQ;
         criterion[0].value = 0;
         *allowDoubleAsSingle = True;
         *mask |= (1 << DOUBLEBUFFER);
         return 1;
-      }
-      else
-      {
+      } else {
         return -1;
       }
     }
-    if (!strcmp(word, "stereo"))
-    {
+    if (!strcmp(word, "stereo")) {
       criterion[0].capability = STEREO;
-      if (comparator == NONE)
-      {
+      if (comparator == NONE) {
         criterion[0].comparison = EQ;
         criterion[0].value = 1;
-      }
-      else
-      {
+      } else {
         criterion[0].comparison = comparator;
         criterion[0].value = value;
       }
       *mask |= (1 << STEREO);
       return 1;
     }
-    if (!strcmp(word, "samples"))
-    {
+    if (!strcmp(word, "samples")) {
       criterion[0].capability = SAMPLES;
-      if (comparator == NONE)
-      {
+      if (comparator == NONE) {
         criterion[0].comparison = LTE;
         criterion[0].value = 4;
-      }
-      else
-      {
+      } else {
         criterion[0].comparison = comparator;
         criterion[0].value = value;
       }
       *mask |= (1 << SAMPLES);
       return 1;
     }
-    if (!strcmp(word, "slow"))
-    {
+    if (!strcmp(word, "slow")) {
       criterion[0].capability = SLOW;
-      if (comparator == NONE)
-      {
+      if (comparator == NONE) {
         /* Just "slow" means permit fast visuals, but accept
            slow ones in preference. Presumably the slow ones
            must be higher quality or something else desirable. */
         criterion[0].comparison = GTE;
         criterion[0].value = 0;
-      }
-      else
-      {
+      } else {
         criterion[0].comparison = comparator;
         criterion[0].value = value;
       }
@@ -1333,15 +1115,11 @@ parseCriteria(char *word, Criterion * criterion, int *mask,
     return -1;
 #if defined(_WIN32)
   case 'w':
-    if (!strcmp(word, "win32pfd"))
-    {
+    if (!strcmp(word, "win32pfd")) {
       criterion[0].capability = XVISUAL;
-      if (comparator == NONE)
-      {
+      if (comparator == NONE) {
         return -1;
-      }
-      else
-      {
+      } else {
         criterion[0].comparison = comparator;
         criterion[0].value = value;
         return 1;
@@ -1351,14 +1129,10 @@ parseCriteria(char *word, Criterion * criterion, int *mask,
 #endif
 #if !defined(_WIN32)
   case 'x':
-    if (!strcmp(word, "xvisual"))
-    {
-      if (comparator == NONE)
-      {
+    if (!strcmp(word, "xvisual")) {
+      if (comparator == NONE) {
         return -1;
-      }
-      else
-      {
+      } else {
         criterion[0].capability = XVISUAL;
         criterion[0].comparison = comparator;
         criterion[0].value = value;
@@ -1372,57 +1146,48 @@ parseCriteria(char *word, Criterion * criterion, int *mask,
     /* Be a little over-eager to fill in the comparison and
        value so we won't have to replicate the code after each
        string match. */
-    if (comparator == NONE)
-    {
+    if (comparator == NONE) {
       criterion[0].comparison = EQ;
       criterion[0].value = 1;
-    }
-    else
-    {
+    } else {
       criterion[0].comparison = comparator;
       criterion[0].value = value;
     }
 
-    if (!strcmp(word, "xstaticgray"))
-    {
+    if (!strcmp(word, "xstaticgray")) {
       criterion[0].capability = XSTATICGRAY;
-      *mask |= (1 << XSTATICGRAY);  /* Indicates _any_ visual
-                                                   class selected. */
+      *mask |= (1 << XSTATICGRAY); /* Indicates _any_ visual
+                                                  class selected. */
       return 1;
     }
-    if (!strcmp(word, "xgrayscale"))
-    {
+    if (!strcmp(word, "xgrayscale")) {
       criterion[0].capability = XGRAYSCALE;
-      *mask |= (1 << XSTATICGRAY);  /* Indicates _any_ visual
-                                                   class selected. */
+      *mask |= (1 << XSTATICGRAY); /* Indicates _any_ visual
+                                                  class selected. */
       return 1;
     }
-    if (!strcmp(word, "xstaticcolor"))
-    {
+    if (!strcmp(word, "xstaticcolor")) {
       criterion[0].capability = XSTATICCOLOR;
-      *mask |= (1 << XSTATICGRAY);  /* Indicates _any_ visual
-                                                   class selected. */
+      *mask |= (1 << XSTATICGRAY); /* Indicates _any_ visual
+                                                  class selected. */
       return 1;
     }
-    if (!strcmp(word, "xpseudocolor"))
-    {
+    if (!strcmp(word, "xpseudocolor")) {
       criterion[0].capability = XPSEUDOCOLOR;
-      *mask |= (1 << XSTATICGRAY);  /* Indicates _any_ visual
-                                                   class selected. */
+      *mask |= (1 << XSTATICGRAY); /* Indicates _any_ visual
+                                                  class selected. */
       return 1;
     }
-    if (!strcmp(word, "xtruecolor"))
-    {
+    if (!strcmp(word, "xtruecolor")) {
       criterion[0].capability = XTRUECOLOR;
-      *mask |= (1 << XSTATICGRAY);  /* Indicates _any_ visual
-                                                   class selected. */
+      *mask |= (1 << XSTATICGRAY); /* Indicates _any_ visual
+                                                  class selected. */
       return 1;
     }
-    if (!strcmp(word, "xdirectcolor"))
-    {
+    if (!strcmp(word, "xdirectcolor")) {
       criterion[0].capability = XDIRECTCOLOR;
-      *mask |= (1 << XSTATICGRAY);  /* Indicates _any_ visual
-                                                   class selected. */
+      *mask |= (1 << XSTATICGRAY); /* Indicates _any_ visual
+                                                  class selected. */
       return 1;
     }
     return -1;
@@ -1432,10 +1197,10 @@ parseCriteria(char *word, Criterion * criterion, int *mask,
   }
 }
 
-static Criterion *
-parseModeString(char *mode, int *ncriteria, Bool * allowDoubleAsSingle,
-                Criterion * requiredCriteria, int nRequired, int requiredMask)
-{
+static Criterion *parseModeString(char *mode, int *ncriteria,
+                                  Bool *allowDoubleAsSingle,
+                                  Criterion *requiredCriteria, int nRequired,
+                                  int requiredMask) {
   Criterion *criteria = NULL;
   int n, mask, parsed, i;
   char *copy, *word;
@@ -1446,17 +1211,15 @@ parseModeString(char *mode, int *ncriteria, Bool * allowDoubleAsSingle,
      needed. */
   n = 0;
   word = strtok(copy, " \t");
-  while (word)
-  {
+  while (word) {
     n++;
     word = strtok(NULL, " \t");
   }
   /* Overestimate by 4 times ("rgba" might add four criteria
      entries) plus add in possible defaults plus space for
      required criteria. */
-  criteria = (Criterion *) malloc((4 * n + 30 + nRequired) * sizeof(Criterion));
-  if (!criteria)
-  {
+  criteria = (Criterion *)malloc((4 * n + 30 + nRequired) * sizeof(Criterion));
+  if (!criteria) {
     __glutFatalError("out of memory.");
   }
 
@@ -1467,45 +1230,35 @@ parseModeString(char *mode, int *ncriteria, Bool * allowDoubleAsSingle,
      highest priority). Typically these will be used to force a
      specific level (layer), transparency, and/or visual type. */
   mask = requiredMask;
-  for (i = 0; i < nRequired; i++)
-  {
+  for (i = 0; i < nRequired; i++) {
     criteria[i] = requiredCriteria[i];
   }
   n = nRequired;
 
   word = strtok(copy, " \t");
-  while (word)
-  {
+  while (word) {
     parsed = parseCriteria(word, &criteria[n], &mask, allowDoubleAsSingle);
-    if (parsed >= 0)
-    {
+    if (parsed >= 0) {
       n += parsed;
-    }
-    else
-    {
+    } else {
       __glutWarning("Unrecognized display string word: %s (ignoring)\n", word);
     }
     word = strtok(NULL, " \t");
   }
 
 #if defined(GLX_VERSION_1_1) && defined(GLX_SGIS_multisample)
-  if (__glutIsSupportedByGLX("GLX_SGIS_multisample"))
-  {
-    if (!(mask & (1 << SAMPLES)))
-    {
+  if (__glutIsSupportedByGLX("GLX_SGIS_multisample")) {
+    if (!(mask & (1 << SAMPLES))) {
       criteria[n].capability = SAMPLES;
       criteria[n].comparison = EQ;
       criteria[n].value = 0;
       n++;
-    }
-    else
-    {
+    } else {
       /* Multisample visuals are marked nonconformant.  If
          multisampling was requeste and no conformant
          preference was set, assume that we will settle for a
          non-conformant visual to get multisampling. */
-      if (!(mask & (1 << CONFORMANT)))
-      {
+      if (!(mask & (1 << CONFORMANT))) {
         criteria[n].capability = CONFORMANT;
         criteria[n].comparison = MIN;
         criteria[n].value = 0;
@@ -1516,10 +1269,8 @@ parseModeString(char *mode, int *ncriteria, Bool * allowDoubleAsSingle,
   }
 #endif
 #if defined(GLX_VERSION_1_1) && defined(GLX_EXT_visual_info)
-  if (__glutIsSupportedByGLX("GLX_EXT_visual_info"))
-  {
-    if (!(mask & (1 << TRANSPARENT)))
-    {
+  if (__glutIsSupportedByGLX("GLX_EXT_visual_info")) {
+    if (!(mask & (1 << TRANSPARENT))) {
       criteria[n].capability = TRANSPARENT;
       criteria[n].comparison = EQ;
       criteria[n].value = 0;
@@ -1528,17 +1279,14 @@ parseModeString(char *mode, int *ncriteria, Bool * allowDoubleAsSingle,
   }
 #endif
 #if defined(GLX_VERSION_1_1) && defined(GLX_EXT_visual_rating)
-  if (__glutIsSupportedByGLX("GLX_EXT_visual_rating"))
-  {
-    if (!(mask & (1 << SLOW)))
-    {
+  if (__glutIsSupportedByGLX("GLX_EXT_visual_rating")) {
+    if (!(mask & (1 << SLOW))) {
       criteria[n].capability = SLOW;
       criteria[n].comparison = EQ;
       criteria[n].value = 0;
       n++;
     }
-    if (!(mask & (1 << CONFORMANT)))
-    {
+    if (!(mask & (1 << CONFORMANT))) {
       criteria[n].capability = CONFORMANT;
       criteria[n].comparison = EQ;
       criteria[n].value = 1;
@@ -1546,8 +1294,7 @@ parseModeString(char *mode, int *ncriteria, Bool * allowDoubleAsSingle,
     }
   }
 #endif
-  if (!(mask & (1 << ACCUM_RED_SIZE)))
-  {
+  if (!(mask & (1 << ACCUM_RED_SIZE))) {
     criteria[n].capability = ACCUM_RED_SIZE;
     criteria[n].comparison = MIN;
     criteria[n].value = 0;
@@ -1562,15 +1309,13 @@ parseModeString(char *mode, int *ncriteria, Bool * allowDoubleAsSingle,
     criteria[n + 3].value = 0;
     n += 4;
   }
-  if (!(mask & (1 << AUX_BUFFERS)))
-  {
+  if (!(mask & (1 << AUX_BUFFERS))) {
     criteria[n].capability = AUX_BUFFERS;
     criteria[n].comparison = MIN;
     criteria[n].value = 0;
     n++;
   }
-  if (!(mask & (1 << RGBA)))
-  {
+  if (!(mask & (1 << RGBA))) {
     criteria[n].capability = RGBA;
     criteria[n].comparison = EQ;
     criteria[n].value = 1;
@@ -1590,23 +1335,18 @@ parseModeString(char *mode, int *ncriteria, Bool * allowDoubleAsSingle,
     mask |= (1 << RGBA_MODE);
   }
 #if !defined(_WIN32)
-  if (!(mask & (1 << XSTATICGRAY)))
-  {
+  if (!(mask & (1 << XSTATICGRAY))) {
     assert(isMesaGLX != -1);
-    if ((mask & (1 << RGBA_MODE)) && !isMesaGLX)
-    {
+    if ((mask & (1 << RGBA_MODE)) && !isMesaGLX) {
       /* Normally, request an RGBA mode visual be TrueColor,
          except in the case of Mesa where we trust Mesa (and
          other code in GLUT) to handle any type of RGBA visual
          reasonably. */
-      if (mask & (1 << LUMINANCE_MODE))
-      {
+      if (mask & (1 << LUMINANCE_MODE)) {
         /* If RGBA luminance was requested, actually go for
            a StaticGray visual. */
         criteria[n].capability = XSTATICGRAY;
-      }
-      else
-      {
+      } else {
         criteria[n].capability = XTRUECOLOR;
       }
       criteria[n].value = 1;
@@ -1614,8 +1354,7 @@ parseModeString(char *mode, int *ncriteria, Bool * allowDoubleAsSingle,
 
       n++;
     }
-    if (mask & (1 << CI_MODE))
-    {
+    if (mask & (1 << CI_MODE)) {
       criteria[n].capability = XPSEUDOCOLOR;
       criteria[n].value = 1;
       criteria[n].comparison = EQ;
@@ -1623,55 +1362,46 @@ parseModeString(char *mode, int *ncriteria, Bool * allowDoubleAsSingle,
     }
   }
 #endif
-  if (!(mask & (1 << STEREO)))
-  {
+  if (!(mask & (1 << STEREO))) {
     criteria[n].capability = STEREO;
     criteria[n].comparison = EQ;
     criteria[n].value = 0;
     n++;
   }
-  if (!(mask & (1 << DOUBLEBUFFER)))
-  {
+  if (!(mask & (1 << DOUBLEBUFFER))) {
     criteria[n].capability = DOUBLEBUFFER;
     criteria[n].comparison = EQ;
     criteria[n].value = 0;
     *allowDoubleAsSingle = True;
     n++;
   }
-  if (!(mask & (1 << DEPTH_SIZE)))
-  {
+  if (!(mask & (1 << DEPTH_SIZE))) {
     criteria[n].capability = DEPTH_SIZE;
     criteria[n].comparison = MIN;
     criteria[n].value = 0;
     n++;
   }
-  if (!(mask & (1 << STENCIL_SIZE)))
-  {
+  if (!(mask & (1 << STENCIL_SIZE))) {
     criteria[n].capability = STENCIL_SIZE;
     criteria[n].comparison = MIN;
     criteria[n].value = 0;
     n++;
   }
-  if (!(mask & (1 << LEVEL)))
-  {
+  if (!(mask & (1 << LEVEL))) {
     criteria[n].capability = LEVEL;
     criteria[n].comparison = EQ;
     criteria[n].value = 0;
     n++;
   }
-  if (n)
-  {
+  if (n) {
     /* Since over-estimated the size needed; squeeze it down to
        reality. */
-    criteria = (Criterion *) realloc(criteria, n * sizeof(Criterion));
-    if (!criteria)
-    {
+    criteria = (Criterion *)realloc(criteria, n * sizeof(Criterion));
+    if (!criteria) {
       /* Should never happen since should be shrinking down! */
       __glutFatalError("out of memory.");
     }
-  }
-  else
-  {
+  } else {
     /* For portability, avoid "realloc(ptr,0)" call. */
     free(criteria);
     criteria = NULL;
@@ -1685,23 +1415,21 @@ parseModeString(char *mode, int *ncriteria, Bool * allowDoubleAsSingle,
 static FrameBufferMode *fbmodes = NULL;
 static int nfbmodes = 0;
 
-static XVisualInfo *
-getVisualInfoFromString(char *string, Bool * treatAsSingle,
-                        Criterion * requiredCriteria, int nRequired, int requiredMask, void **fbc)
-{
+static XVisualInfo *getVisualInfoFromString(char *string, Bool *treatAsSingle,
+                                            Criterion *requiredCriteria,
+                                            int nRequired, int requiredMask,
+                                            void **fbc) {
   Criterion *criteria;
   XVisualInfo *visinfo;
   Bool allowDoubleAsSingle;
   int ncriteria, i;
 
-  if (!fbmodes)
-  {
+  if (!fbmodes) {
     fbmodes = loadVisuals(&nfbmodes);
   }
-  criteria = parseModeString(string, &ncriteria,
-                             &allowDoubleAsSingle, requiredCriteria, nRequired, requiredMask);
-  if (criteria == NULL)
-  {
+  criteria = parseModeString(string, &ncriteria, &allowDoubleAsSingle,
+                             requiredCriteria, nRequired, requiredMask);
+  if (criteria == NULL) {
     __glutWarning("failed to parse mode string");
     return NULL;
   }
@@ -1709,37 +1437,28 @@ getVisualInfoFromString(char *string, Bool * treatAsSingle,
   printCriteria(criteria, ncriteria);
 #endif
   visinfo = findMatch(fbmodes, nfbmodes, criteria, ncriteria, fbc);
-  if (visinfo)
-  {
+  if (visinfo) {
     *treatAsSingle = 0;
-  }
-  else
-  {
-    if (allowDoubleAsSingle)
-    {
+  } else {
+    if (allowDoubleAsSingle) {
       /* Rewrite criteria so that we now look for a double
          buffered visual which will then get treated as a
          single buffered visual. */
-      for (i = 0; i < ncriteria; i++)
-      {
-        if (criteria[i].capability == DOUBLEBUFFER
-            && criteria[i].comparison == EQ
-            && criteria[i].value == 0)
-        {
+      for (i = 0; i < ncriteria; i++) {
+        if (criteria[i].capability == DOUBLEBUFFER &&
+            criteria[i].comparison == EQ && criteria[i].value == 0) {
           criteria[i].value = 1;
         }
       }
       visinfo = findMatch(fbmodes, nfbmodes, criteria, ncriteria, fbc);
-      if (visinfo)
-      {
+      if (visinfo) {
         *treatAsSingle = 1;
       }
     }
   }
   free(criteria);
 
-  if (visinfo)
-  {
+  if (visinfo) {
 #if defined(_WIN32)
     /* We could have a valid pixel format for drawing to a
        bitmap. However, we don't want to draw into a bitmap, we
@@ -1749,34 +1468,26 @@ getVisualInfoFromString(char *string, Bool * treatAsSingle,
       return NULL;
 #endif
     return visinfo;
-  }
-  else
-  {
+  } else {
     return NULL;
   }
 }
 
 /* CENTRY */
-void APIENTRY
-glutInitDisplayString(const char *string)
-{
+void APIENTRY glutInitDisplayString(const char *string) {
 #ifdef _WIN32
   XHDC = GetDC(GetDesktopWindow());
 #endif
 
   __glutDetermineVisualFromString = getVisualInfoFromString;
-  if (__glutDisplayString)
-  {
+  if (__glutDisplayString) {
     free(__glutDisplayString);
   }
-  if (string)
-  {
+  if (string) {
     __glutDisplayString = __glutStrdup(string);
     if (!__glutDisplayString)
       __glutFatalError("out of memory.");
-  }
-  else
-  {
+  } else {
     __glutDisplayString = NULL;
   }
 }
@@ -1784,33 +1495,23 @@ glutInitDisplayString(const char *string)
 
 #ifdef TEST
 
-Criterion requiredWindowCriteria[] =
-  {
-    {
-      LEVEL, EQ, 0
-    },
-    {TRANSPARENT, EQ, 0}
-  };
-int numRequiredWindowCriteria = sizeof(requiredWindowCriteria) / sizeof(Criterion);
+Criterion requiredWindowCriteria[] = {{LEVEL, EQ, 0}, {TRANSPARENT, EQ, 0}};
+int numRequiredWindowCriteria =
+    sizeof(requiredWindowCriteria) / sizeof(Criterion);
 int requiredWindowCriteriaMask = (1 << LEVEL) | (1 << TRANSPARENT);
 
-Criterion requiredOverlayCriteria[] =
-  {
-    {
-      LEVEL, EQ, 1
-    },
-    {TRANSPARENT, EQ, 1},
-    {XPSEUDOCOLOR, EQ, 1},
-    {RGBA, EQ, 0},
-    {BUFFER_SIZE, GTE, 1}
-  };
-int numRequiredOverlayCriteria = sizeof(requiredOverlayCriteria) / sizeof(Criterion);
-int requiredOverlayCriteriaMask =
-  (1 << LEVEL) | (1 << TRANSPARENT) | (1 << XSTATICGRAY) | (1 << RGBA) | (1 << CI_MODE);
+Criterion requiredOverlayCriteria[] = {{LEVEL, EQ, 1},
+                                       {TRANSPARENT, EQ, 1},
+                                       {XPSEUDOCOLOR, EQ, 1},
+                                       {RGBA, EQ, 0},
+                                       {BUFFER_SIZE, GTE, 1}};
+int numRequiredOverlayCriteria =
+    sizeof(requiredOverlayCriteria) / sizeof(Criterion);
+int requiredOverlayCriteriaMask = (1 << LEVEL) | (1 << TRANSPARENT) |
+                                  (1 << XSTATICGRAY) | (1 << RGBA) |
+                                  (1 << CI_MODE);
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   Display *dpy;
   XVisualInfo *vinfo;
   Bool treatAsSingle;
@@ -1825,69 +1526,57 @@ main(int argc, char **argv)
 
 #if !defined(_WIN32)
   dpy = XOpenDisplay(NULL);
-  if (dpy == NULL)
-  {
+  if (dpy == NULL) {
     printf("Could not connect to X server\n");
     exit(1);
   }
   __glutDisplay = dpy;
   __glutScreen = DefaultScreen(__glutDisplay);
 #endif
-  while (!feof(stdin))
-  {
+  while (!feof(stdin)) {
     if (tty)
       printf("dstr> ");
     str = gets(buffer);
-    if (str)
-    {
+    if (str) {
       printf("\n");
-      if (!strcmp("v", str))
-      {
+      if (!strcmp("v", str)) {
         verbose = 1 - verbose;
         printf("verbose = %d\n\n", verbose);
-      }
-      else if (!strcmp("s", str))
-      {
+      } else if (!strcmp("s", str)) {
         showconfig = 1 - showconfig;
         printf("showconfig = %d\n\n", showconfig);
-      }
-      else if (!strcmp("o", str))
-      {
+      } else if (!strcmp("o", str)) {
         overlay = 1 - overlay;
         printf("overlay = %d\n\n", overlay);
-      }
-      else
-      {
-        if (overlay)
-        {
-          vinfo = getVisualInfoFromString(str, &treatAsSingle,
-                                          requiredOverlayCriteria, numRequiredOverlayCriteria, requiredOverlayCriteriaMask, (void**) &fbc);
+      } else {
+        if (overlay) {
+          vinfo = getVisualInfoFromString(
+              str, &treatAsSingle, requiredOverlayCriteria,
+              numRequiredOverlayCriteria, requiredOverlayCriteriaMask,
+              (void **)&fbc);
+        } else {
+          vinfo = getVisualInfoFromString(
+              str, &treatAsSingle, requiredWindowCriteria,
+              numRequiredWindowCriteria, requiredWindowCriteriaMask,
+              (void **)&fbc);
         }
-        else
-        {
-          vinfo = getVisualInfoFromString(str, &treatAsSingle,
-                                          requiredWindowCriteria, numRequiredWindowCriteria, requiredWindowCriteriaMask, (void**) &fbc);
-        }
-        if (vinfo)
-        {
+        if (vinfo) {
           printf("\n");
           if (!tty)
             printf("Display string: %s", str);
 #ifdef _WIN32
           printf("Visual = 0x%x\n", 0);
 #else
-          printf("Visual = 0x%x%s\n", vinfo->visualid, fbc ? " (needs FBC)" : "");
+          printf("Visual = 0x%x%s\n", vinfo->visualid,
+                 fbc ? " (needs FBC)" : "");
 #endif
-          if (treatAsSingle)
-          {
+          if (treatAsSingle) {
             printf("Treat as SINGLE.\n");
           }
-          if (showconfig)
-          {
-            int glxCapable, bufferSize, level, renderType, doubleBuffer,
-            stereo, auxBuffers, redSize, greenSize, blueSize,
-            alphaSize, depthSize, stencilSize, acRedSize, acGreenSize,
-            acBlueSize, acAlphaSize;
+          if (showconfig) {
+            int glxCapable, bufferSize, level, renderType, doubleBuffer, stereo,
+                auxBuffers, redSize, greenSize, blueSize, alphaSize, depthSize,
+                stencilSize, acRedSize, acGreenSize, acBlueSize, acAlphaSize;
 
             glXGetConfig(dpy, vinfo, GLX_BUFFER_SIZE, &bufferSize);
             glXGetConfig(dpy, vinfo, GLX_LEVEL, &level);
@@ -1905,8 +1594,10 @@ main(int argc, char **argv)
             glXGetConfig(dpy, vinfo, GLX_ACCUM_GREEN_SIZE, &acGreenSize);
             glXGetConfig(dpy, vinfo, GLX_ACCUM_BLUE_SIZE, &acBlueSize);
             glXGetConfig(dpy, vinfo, GLX_ACCUM_ALPHA_SIZE, &acAlphaSize);
-            printf("RGBA = (%d, %d, %d, %d)\n", redSize, greenSize, blueSize, alphaSize);
-            printf("acc  = (%d, %d, %d, %d)\n", acRedSize, acGreenSize, acBlueSize, acAlphaSize);
+            printf("RGBA = (%d, %d, %d, %d)\n", redSize, greenSize, blueSize,
+                   alphaSize);
+            printf("acc  = (%d, %d, %d, %d)\n", acRedSize, acGreenSize,
+                   acBlueSize, acAlphaSize);
             printf("db   = %d\n", doubleBuffer);
             printf("str  = %d\n", stereo);
             printf("aux  = %d\n", auxBuffers);
@@ -1916,9 +1607,7 @@ main(int argc, char **argv)
             printf("z    = %d\n", depthSize);
             printf("s    = %d\n", stencilSize);
           }
-        }
-        else
-        {
+        } else {
           printf("\n");
           printf("No match.\n");
         }

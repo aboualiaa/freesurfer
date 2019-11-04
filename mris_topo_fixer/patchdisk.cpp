@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:56 $
@@ -23,25 +23,22 @@
  *
  */
 
-
 #include "patchdisk.h"
 
-PatchDisk::PatchDisk(void) {
-  vtrans=0;
-  ftrans=0;
+PatchDisk::PatchDisk() {
+  vtrans = nullptr;
+  ftrans = nullptr;
 }
 
-PatchDisk::PatchDisk(int which_patch) {
-  Create(which_patch);
-}
+PatchDisk::PatchDisk(int which_patch) { Create(which_patch); }
 
 void PatchDisk::_Alloc(int which_patch) {
   Face *face;
 
   switch (which_patch) {
-  case 0: //super small surface
-    disk.Expand(3,1);
-    disk.nvertices=3;
+  case 0: // super small surface
+    disk.Expand(3, 1);
+    disk.nvertices = 3;
     disk.nfaces = 1;
     face = &disk.faces[0];
     face->v[0] = 0;
@@ -49,8 +46,8 @@ void PatchDisk::_Alloc(int which_patch) {
     face->v[2] = 1;
     break;
   case 1:
-    disk.Expand(5,4);
-    disk.nvertices=5;
+    disk.Expand(5, 4);
+    disk.nvertices = 5;
     disk.nfaces = 4;
     face = &disk.faces[0];
     face->v[0] = 0;
@@ -69,10 +66,10 @@ void PatchDisk::_Alloc(int which_patch) {
     face->v[1] = 1;
     face->v[2] = 4;
     break;
-  case 2: //small surface
-    disk.Expand(21,28);
-    disk.nvertices=21;
-    disk.nfaces=28;
+  case 2: // small surface
+    disk.Expand(21, 28);
+    disk.nvertices = 21;
+    disk.nfaces = 28;
     face = &disk.faces[0];
     face->v[0] = 2;
     face->v[1] = 3;
@@ -186,11 +183,11 @@ void PatchDisk::_Alloc(int which_patch) {
     face->v[1] = 13;
     face->v[2] = 15;
     break;
-  case 3: //medium surface
+  case 3: // medium surface
   default:
-    disk.Expand(33,52);
-    disk.nvertices=33;
-    disk.nfaces=52;
+    disk.Expand(33, 52);
+    disk.nvertices = 33;
+    disk.nfaces = 52;
     face = &disk.faces[0];
     face->v[0] = 12;
     face->v[1] = 0;
@@ -406,39 +403,40 @@ void PatchDisk::_Alloc(int which_patch) {
   ftrans = new int[disk.nfaces];
 }
 
+void PatchDisk::_Init() {
+  // finding the init_ring of faces in the disk
+  for (int n = 0; n < disk.nvertices; n++)
+    disk.vertices[n].marked = 0;
 
-void PatchDisk::_Init(void) {
-  //finding the init_ring of faces in the disk
-  for (int n = 0 ; n < disk.nvertices ; n++)
-    disk.vertices[n].marked=0;
-
-  int first_v1 = -1 , first_v2 = -1;
-  for (int n = 0 ; n < disk.nfaces ; n++)
-    for (int i = 0 ; i < 3 ; i++) {
-      if (disk.faces[n].f[i]==-1) { //we have a border face
-        disk.vertices[disk.faces[n].v[i]].marked=1;
-        if (first_v1==-1) first_v1 = disk.faces[n].v[i];
-        disk.vertices[disk.faces[n].v[(i+1)%3]].marked=1;
-        if (first_v2==-1) first_v2 = disk.faces[n].v[(i+1)%3];
+  int first_v1 = -1, first_v2 = -1;
+  for (int n = 0; n < disk.nfaces; n++)
+    for (int i = 0; i < 3; i++) {
+      if (disk.faces[n].f[i] == -1) { // we have a border face
+        disk.vertices[disk.faces[n].v[i]].marked = 1;
+        if (first_v1 == -1)
+          first_v1 = disk.faces[n].v[i];
+        disk.vertices[disk.faces[n].v[(i + 1) % 3]].marked = 1;
+        if (first_v2 == -1)
+          first_v2 = disk.faces[n].v[(i + 1) % 3];
       }
     }
 
   init_ring.AddPoint(first_v1);
-  disk.vertices[first_v1].marked=2;
+  disk.vertices[first_v1].marked = 2;
   init_ring.AddPoint(first_v2);
-  disk.vertices[first_v2].marked=2;
+  disk.vertices[first_v2].marked = 2;
 
   int current_vertex = first_v2;
-  bool found=true;
+  bool found = true;
   while (found) {
-    found=false;
-    Vertex *v=&disk.vertices[current_vertex];
-    for (int p = 0 ; p < v->vnum ; p++) {
-      if (disk.vertices[v->v[p]].marked==1) {
+    found = false;
+    Vertex *v = &disk.vertices[current_vertex];
+    for (int p = 0; p < v->vnum; p++) {
+      if (disk.vertices[v->v[p]].marked == 1) {
         found = true;
         current_vertex = v->v[p];
         init_ring.AddPoint(v->v[p]);
-        disk.vertices[v->v[p]].marked=2;
+        disk.vertices[v->v[p]].marked = 2;
         break;
       }
     }
@@ -447,13 +445,15 @@ void PatchDisk::_Init(void) {
   ring.npoints = init_ring.npoints;
 }
 
-PatchDisk::~PatchDisk(void) {
-  if (vtrans) delete [] vtrans;
-  if (ftrans) delete [] ftrans;
+PatchDisk::~PatchDisk() {
+  if (vtrans)
+    delete[] vtrans;
+  if (ftrans)
+    delete[] ftrans;
 }
 
 void PatchDisk::Init() {
-  for (int n = 0 ; n < ring.npoints ; n++)
+  for (int n = 0; n < ring.npoints; n++)
     ring.points[n] = init_ring.points[n];
 }
 

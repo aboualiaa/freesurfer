@@ -30,23 +30,22 @@
 class Layer;
 class QDropEvent;
 
-class MyItemDelegate : public QItemDelegate
-{
+class MyItemDelegate : public QItemDelegate {
   Q_OBJECT
 
 public:
-  explicit MyItemDelegate (QTreeWidget *parent)
-    : QItemDelegate (parent), ParentView (parent) { }
-  ~MyItemDelegate() { }
+  explicit MyItemDelegate(QTreeWidget *parent)
+      : QItemDelegate(parent), ParentView(parent) {}
+  ~MyItemDelegate() {}
 
-  QRect GetCheckBoxRect(const QModelIndex &index, const QStyleOptionViewItem& option) const;
+  QRect GetCheckBoxRect(const QModelIndex &index,
+                        const QStyleOptionViewItem &option) const;
 
 private:
-  QTreeWidget* ParentView ;
+  QTreeWidget *ParentView;
 };
 
-class LayerTreeWidget : public QTreeWidget
-{
+class LayerTreeWidget : public QTreeWidget {
   Q_OBJECT
 public:
   explicit LayerTreeWidget(QWidget *parent = 0);
@@ -57,7 +56,7 @@ public:
   void mouseReleaseEvent(QMouseEvent *event);
 
 signals:
-  void ToReorderLayers(const QList<Layer*>& newlist);
+  void ToReorderLayers(const QList<Layer *> &newlist);
 
 public slots:
   void ForceUpdate();
@@ -72,23 +71,19 @@ public slots:
   void OnEditName();
   void OnSaveVisibleVolumes();
   void SelectAll();
-  void selectAll()
-  {
-    SelectAll();
-  }
+  void selectAll() { SelectAll(); }
   void DeselectAll();
-  void SetSelectedLayers(const QList<int>& layer_ids);
+  void SetSelectedLayers(const QList<int> &layer_ids);
 
 protected:
-  bool event(QEvent* e);
-  void drawRow ( QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index ) const;
-  virtual void dropEvent(QDropEvent * event);
+  bool event(QEvent *e);
+  void drawRow(QPainter *painter, const QStyleOptionViewItem &option,
+               const QModelIndex &index) const;
+  virtual void dropEvent(QDropEvent *event);
 
-  MyItemDelegate* m_itemDelegate;
-  QRect         rectCheckbox;
-  bool          m_bCheckBoxClicked;
+  MyItemDelegate *m_itemDelegate;
+  QRect rectCheckbox;
+  bool m_bCheckBoxClicked;
 };
-
-
 
 #endif // LAYERTREEWIDGET_H

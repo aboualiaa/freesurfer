@@ -5,7 +5,6 @@
 #include <map>
 #include <vector>
 
-
 class LookupTable {
 
   struct LabelInfo {
@@ -14,7 +13,7 @@ class LookupTable {
   };
 
 public:
-  LookupTable() {};
+  LookupTable(){};
   LookupTable(std::string filename);
 
   void add(int label, std::string labelname = "");
@@ -27,9 +26,9 @@ public:
   bool empty();
 
   // extensions of std::map
-  LabelInfo& operator[](int index) { return labelmap[index]; }
-  typedef std::map<int, LabelInfo>::iterator iterator;
-  typedef std::map<int, LabelInfo>::const_iterator const_iterator;
+  LabelInfo &operator[](int index) { return labelmap[index]; }
+  using iterator = std::map<int, LabelInfo>::iterator;
+  using const_iterator = std::map<int, LabelInfo>::const_iterator;
   iterator begin() { return labelmap.begin(); }
   iterator end() { return labelmap.end(); }
 

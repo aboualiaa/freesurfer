@@ -12,15 +12,14 @@ Gheorghe Postelnicu, 2007
 
 #include "fem_3d.h"
 
-class TopologySolver
-{
+class TopologySolver {
 public:
   typedef std::vector<unsigned int> IndexVectorType;
   typedef std::shared_ptr<IndexVectorType> IndexVectorPointer;
   typedef std::list<IndexVectorPointer> ClusterContainerType;
 
-  TopologySolver(TMesh3d& mesh, unsigned int radius=2,
-                 double de=1.0, double dnu=0.3);
+  TopologySolver(TMesh3d &mesh, unsigned int radius = 2, double de = 1.0,
+                 double dnu = 0.3);
 
 private:
   void BuildClusters();
@@ -28,7 +27,7 @@ private:
 
   void DoLocalSmoothing();
 
-  TMesh3d& m_mesh;
+  TMesh3d &m_mesh;
   unsigned int m_radius;
   double m_dE, m_dnu;
 

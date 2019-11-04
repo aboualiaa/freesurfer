@@ -8,8 +8,7 @@ namespace Ui {
 class DialogLoadSurface;
 }
 
-class DialogLoadSurface : public QDialog
-{
+class DialogLoadSurface : public QDialog {
   Q_OBJECT
 
 public:

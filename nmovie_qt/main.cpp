@@ -7,10 +7,8 @@
 #include "MainWindow.h"
 #include <QDebug>
 
-int main(int argc, char *argv[])
-{
-  if (argc < 2)
-  {
+int main(int argc, char *argv[]) {
+  if (argc < 2) {
     qWarning() << "nmovie_qt <image file> <image file> ...\n";
     return -1;
   }

@@ -1,31 +1,32 @@
-/* $Header: /cvsroot/osrs/libtiff/libtiff/tiffcomp.h,v 1.4 2003/10/12 08:46:11 dron Exp $ */
+/* $Header: /cvsroot/osrs/libtiff/libtiff/tiffcomp.h,v 1.4 2003/10/12 08:46:11
+ * dron Exp $ */
 
 /*
  * Copyright (c) 1990-1997 Sam Leffler
  * Copyright (c) 1991-1997 Silicon Graphics, Inc.
  *
- * Permission to use, copy, modify, distribute, and sell this software and 
+ * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation for any purpose is hereby granted without fee, provided
  * that (i) the above copyright notices and this permission notice appear in
  * all copies of the software and related documentation, and (ii) the names of
  * Sam Leffler and Silicon Graphics may not be used in any advertising or
  * publicity relating to the software without the specific, prior written
  * permission of Sam Leffler and Silicon Graphics.
- * 
- * THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND, 
- * EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY 
- * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  
- * 
+ *
+ * THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
+ * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+ *
  * IN NO EVENT SHALL SAM LEFFLER OR SILICON GRAPHICS BE LIABLE FOR
  * ANY SPECIAL, INCIDENTAL, INDIRECT OR CONSEQUENTIAL DAMAGES OF ANY KIND,
  * OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
- * WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF 
- * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE 
+ * WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF
+ * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  */
 
 #ifndef _COMPAT_
-#define	_COMPAT_
+#define _COMPAT_
 /*
  * This file contains a hodgepodge of definitions and
  * declarations that are needed to provide compatibility
@@ -60,7 +61,8 @@
 
 #if defined(__PPCC__) || defined(__SC__) || defined(__MRC__)
 #include <types.h>
-#elif !defined(__MWERKS__) && !defined(THINK_C) && !defined(__acornriscos) && !defined(applec)
+#elif !defined(__MWERKS__) && !defined(THINK_C) && !defined(__acornriscos) &&  \
+    !defined(applec)
 #include <sys/types.h>
 #endif
 
@@ -79,22 +81,25 @@
  * additional includes are also done to pull in the
  * appropriate definitions we're looking for.
  */
-#if defined(__MWERKS__) || defined(THINK_C) || defined(__PPCC__) || defined(__SC__) || defined(__MRC__)
+#if defined(__MWERKS__) || defined(THINK_C) || defined(__PPCC__) ||            \
+    defined(__SC__) || defined(__MRC__)
 #include <stdlib.h>
-#define	BSDTYPES
-#define	HAVE_UNISTD_H	0
-#elif (defined(_WINDOWS) || defined(__WIN32__) || defined(_Windows) || defined(_WIN32)) && !defined(unix)
-#define	BSDTYPES
+#define BSDTYPES
+#define HAVE_UNISTD_H 0
+#elif (defined(_WINDOWS) || defined(__WIN32__) || defined(_Windows) ||         \
+       defined(_WIN32)) &&                                                     \
+    !defined(unix)
+#define BSDTYPES
 #elif defined(OS2_16) || defined(OS2_32)
-#define	BSDTYPES
+#define BSDTYPES
 #elif defined(__acornriscos)
 #include <stdlib.h>
-#define	BSDTYPES
-#define	HAVE_UNISTD_H	0
+#define BSDTYPES
+#define HAVE_UNISTD_H 0
 #elif defined(VMS)
-#define	HAVE_UNISTD_H	0
+#define HAVE_UNISTD_H 0
 #else
-#define	HAVE_UNISTD_H	1
+#define HAVE_UNISTD_H 1
 #endif
 
 /*
@@ -119,16 +124,16 @@
  * then define BSDTYPES in your Makefile.
  */
 #if defined(BSDTYPES)
-# ifndef _BSDTYPES_DEFINED
-#  ifndef __u_char_defined
-typedef	unsigned char u_char;
-typedef	unsigned short u_short;
-typedef	unsigned int u_int;
-typedef	unsigned long u_long;
-#   define __u_char_defined
-#  endif /* __u_char_defined */
-#  define _BSDTYPES_DEFINED
-# endif /* _BSDTYPES_DEFINED */
+#ifndef _BSDTYPES_DEFINED
+#ifndef __u_char_defined
+typedef unsigned char u_char;
+typedef unsigned short u_short;
+typedef unsigned int u_int;
+typedef unsigned long u_long;
+#define __u_char_defined
+#endif /* __u_char_defined */
+#define _BSDTYPES_DEFINED
+#endif /* _BSDTYPES_DEFINED */
 #endif /* BSDTYPES */
 
 /*
@@ -150,12 +155,12 @@ typedef double dblparam_t;
  */
 #if defined(__GNUC__)
 #if defined(__STRICT_ANSI__)
-#define	INLINE	__inline__
+#define INLINE __inline__
 #else
-#define	INLINE	inline
+#define INLINE inline
 #endif
 #else /* !__GNUC__ */
-#define	INLINE
+#define INLINE
 #endif
 
 /*
@@ -172,14 +177,14 @@ typedef double dblparam_t;
  */
 #if defined(VAX) && defined(VMS)
 #if defined(VAXC)
-#define GLOBALDATA(TYPE,NAME)	extern noshare TYPE NAME
+#define GLOBALDATA(TYPE, NAME) extern noshare TYPE NAME
 #endif
 #if defined(__GNUC__)
-#define GLOBALDATA(TYPE,NAME)	extern TYPE NAME \
-	asm("_$$PsectAttributes_NOSHR$$" #NAME)
+#define GLOBALDATA(TYPE, NAME)                                                 \
+  extern TYPE NAME asm("_$$PsectAttributes_NOSHR$$" #NAME)
 #endif
-#else	/* !VAX/VMS */
-#define GLOBALDATA(TYPE,NAME)	extern TYPE NAME
+#else /* !VAX/VMS */
+#define GLOBALDATA(TYPE, NAME) extern TYPE NAME
 #endif
 
 #if defined(__acornriscos)
@@ -192,12 +197,12 @@ typedef double dblparam_t;
 #if defined(__cplusplus)
 #include <osfcn.h>
 #else
-#define	O_RDONLY	0
-#define	O_WRONLY	1
-#define	O_RDWR		2
-#define	O_APPEND	8
-#define	O_CREAT		0x200
-#define	O_TRUNC		0x400
+#define O_RDONLY 0
+#define O_WRONLY 1
+#define O_RDWR 2
+#define O_APPEND 8
+#define O_CREAT 0x200
+#define O_TRUNC 0x400
 typedef long off_t;
 extern int open(const char *name, int flags, int mode);
 extern int close(int fd);
@@ -213,8 +218,7 @@ extern int creat(const char *path, int mode);
 #undef HOST_FILLORDER
 #undef HOST_BIGENDIAN
 #define HOST_FILLORDER FILLORDER_LSB2MSB
-#define HOST_BIGENDIAN	0
+#define HOST_BIGENDIAN 0
 #endif
-
 
 #endif /* _COMPAT_ */

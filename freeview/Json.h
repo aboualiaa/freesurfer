@@ -5,8 +5,7 @@
 #include <QVariantMap>
 #include <QtScript/QScriptEngine>
 
-class Json
-{
+class Json {
 public:
   Json();
 
@@ -14,7 +13,7 @@ public:
 
   QVariantMap decode(const QString &jsonStr);
 
-  QScriptValue encodeInner(const QVariantMap &map, QScriptEngine* engine);
+  QScriptValue encodeInner(const QVariantMap &map, QScriptEngine *engine);
 
   QVariantMap decodeInner(QScriptValue object);
 

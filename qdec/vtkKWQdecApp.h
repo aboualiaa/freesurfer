@@ -25,7 +25,6 @@
  *
  */
 
-
 #ifndef __vtkKWQdecApp_h
 #define __vtkKWQdecApp_h
 
@@ -40,44 +39,41 @@ class vtkKWTopLevel;
 class vtkKWQdecApp : public vtkKWApplication {
 
 public:
-
-  static vtkKWQdecApp* New ();
-  vtkTypeRevisionMacro ( vtkKWQdecApp, vtkKWApplication );
+  static vtkKWQdecApp *New();
+  vtkTypeRevisionMacro(vtkKWQdecApp, vtkKWApplication);
 
   // Override to show our window.
-  virtual void Start ( int argc, char* argv[] );
-  
+  virtual void Start(int argc, char *argv[]);
+
   // Override to clean up.
-  virtual int Exit ();
+  virtual int Exit();
 
   // Override to add text to 'Help About' box
-  virtual void AddAboutText ( ostream &os );
+  virtual void AddAboutText(ostream &os);
 
   // Thse are just passed right to the window.
-  void LoadDataTable ( const char* ifnDataTable );
-  void LoadProjectFile ( const char* ifnProject );
-  void LoadSurface ( const char* ifnSurface );
-  void LoadGDFFile ( const char* ifnGDF );
-  void LoadSurfaceScalars ( const char* ifnScalars );
-  void LoadSurfaceCurvatureScalars ( const char* ifnScalars );
-  void LoadAnnotation ( const char* ifnAnnotation );
-  void LoadSurfaceOverlayScalars ( const char* ifnScalars,
-				   const char* ifnColors );
-  void LoadLabel ( const char* ifnLabel );
-  void SetAverageSubject ( const char* isAvgSubj );
+  void LoadDataTable(const char *ifnDataTable);
+  void LoadProjectFile(const char *ifnProject);
+  void LoadSurface(const char *ifnSurface);
+  void LoadGDFFile(const char *ifnGDF);
+  void LoadSurfaceScalars(const char *ifnScalars);
+  void LoadSurfaceCurvatureScalars(const char *ifnScalars);
+  void LoadAnnotation(const char *ifnAnnotation);
+  void LoadSurfaceOverlayScalars(const char *ifnScalars, const char *ifnColors);
+  void LoadLabel(const char *ifnLabel);
+  void SetAverageSubject(const char *isAvgSubj);
 
   // Display an error message dialog and log the message.
-  virtual void ErrorMessage ( const char* isMessage );
-  
+  virtual void ErrorMessage(const char *isMessage);
+
   // Show our help dialog.
-  void DisplayHelpDialog ( vtkKWTopLevel* iTop );
+  void DisplayHelpDialog(vtkKWTopLevel *iTop);
 
 protected:
+  vtkKWQdecApp();
+  ~vtkKWQdecApp();
 
-  vtkKWQdecApp ();
-  ~vtkKWQdecApp ();
-
-  //BTX
+  // BTX
 
   // The main application window.
   vtkSmartPointer<vtkKWQdecWindow> mWindow;
@@ -85,7 +81,7 @@ protected:
   // Help dialog.
   vtkSmartPointer<vtkKWDialog> mDlogHelp;
 
-  //ETX
+  // ETX
 };
 
 #endif

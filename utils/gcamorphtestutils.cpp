@@ -33,10 +33,12 @@ using namespace std;
 
 // ======================================================================
 
-GCAMorphUtils::GCAMorphUtils(void) : varTypeMap(), scalarTypeMap()
-{
-  std::cout << __FUNCTION__ << ": Will not write out saved, saved2 and saved original positions" << std::endl;
-  std::cout << __FUNCTION__ << ": Will not write out spacing scalar value" << std::endl;
+GCAMorphUtils::GCAMorphUtils() : varTypeMap(), scalarTypeMap() {
+  std::cout << __FUNCTION__
+            << ": Will not write out saved, saved2 and saved original positions"
+            << std::endl;
+  std::cout << __FUNCTION__ << ": Will not write out spacing scalar value"
+            << std::endl;
 
   // Sanity check
   if (this->nVars != 24) {
@@ -100,8 +102,7 @@ GCAMorphUtils::GCAMorphUtils(void) : varTypeMap(), scalarTypeMap()
   }
 }
 
-void GCAMorphUtils::Write(const GCAM *src, string fName) const
-{
+void GCAMorphUtils::Write(const GCAM *src, string fName) const {
   // Construct the filename, using fName passed by value
   fName += ".nc";
 
@@ -126,16 +127,15 @@ void GCAMorphUtils::Write(const GCAM *src, string fName) const
   NC_SAFE_CALL(nc_def_dim(ncid, "z", src->depth, &dimIDs[this->iZ]));
 
   // Set up the variable IDs
-  map< string, int > varIDmap;
-  map< string, nc_type >::const_iterator myIt;
+  map<string, int> varIDmap;
+  map<string, nc_type>::const_iterator myIt;
 
-  for (myIt = this->varTypeMap.begin(); myIt != this->varTypeMap.end(); myIt++) {
+  for (myIt = this->varTypeMap.begin(); myIt != this->varTypeMap.end();
+       myIt++) {
     NC_SAFE_CALL(nc_def_var(ncid,
-                            myIt->first.c_str(),  // Name of the variable
-                            myIt->second,         // Type of the variable
-                            this->nDims,
-                            dimIDs,
-                            &varIDmap[myIt->first]));
+                            myIt->first.c_str(), // Name of the variable
+                            myIt->second,        // Type of the variable
+                            this->nDims, dimIDs, &varIDmap[myIt->first]));
   }
 
   // Sanity check
@@ -146,16 +146,17 @@ void GCAMorphUtils::Write(const GCAM *src, string fName) const
 
   // Set up the scalars
 
-  map< string, int > scalarIDmap;
-  map< string, nc_type >::const_iterator scalarVarIt;
+  map<string, int> scalarIDmap;
+  map<string, nc_type>::const_iterator scalarVarIt;
 
   // Do the doubles
-  for (scalarVarIt = this->scalarTypeMap.begin(); scalarVarIt != this->scalarTypeMap.end(); scalarVarIt++) {
+  for (scalarVarIt = this->scalarTypeMap.begin();
+       scalarVarIt != this->scalarTypeMap.end(); scalarVarIt++) {
     NC_SAFE_CALL(nc_def_var(ncid,
-                            scalarVarIt->first.c_str(),  // Name of the variable
-                            scalarVarIt->second,         // Type of variable
-                            0,                           // Zero dimensions implies scalar
-                            NULL,                        // No pointer to dimensions for scalar
+                            scalarVarIt->first.c_str(), // Name of the variable
+                            scalarVarIt->second,        // Type of variable
+                            0,    // Zero dimensions implies scalar
+                            NULL, // No pointer to dimensions for scalar
                             &scalarIDmap[scalarVarIt->first]));
   }
 
@@ -165,16 +166,16 @@ void GCAMorphUtils::Write(const GCAM *src, string fName) const
   // Pack into contiguous arrays
   const size_t nElems = src->width * src->height * src->depth;
 
-  vector< double > x(nElems), y(nElems), z(nElems);
-  vector< double > origx(nElems), origy(nElems), origz(nElems);
-  vector< float > dx(nElems), dy(nElems), dz(nElems);
-  vector< float > odx(nElems), ody(nElems), odz(nElems);
-  vector< float > area(nElems), area1(nElems), area2(nElems);
-  vector< float > origArea(nElems), origArea1(nElems), origArea2(nElems);
-  vector< char > invalid(nElems);
-  vector< int > label(nElems), status(nElems);
-  vector< float > labelDist(nElems);
-  vector< float > mean(nElems), variance(nElems);
+  vector<double> x(nElems), y(nElems), z(nElems);
+  vector<double> origx(nElems), origy(nElems), origz(nElems);
+  vector<float> dx(nElems), dy(nElems), dz(nElems);
+  vector<float> odx(nElems), ody(nElems), odz(nElems);
+  vector<float> area(nElems), area1(nElems), area2(nElems);
+  vector<float> origArea(nElems), origArea1(nElems), origArea2(nElems);
+  vector<char> invalid(nElems);
+  vector<int> label(nElems), status(nElems);
+  vector<float> labelDist(nElems);
+  vector<float> mean(nElems), variance(nElems);
 
   // Ugly loop to do the writing element by element
   for (int i = 0; i < src->width; i++) {
@@ -216,8 +217,7 @@ void GCAMorphUtils::Write(const GCAM *src, string fName) const
         if (gcamn.gc != NULL) {
           mean.at(i1d) = gcamn.gc->means[0];
           variance.at(i1d) = gcamn.gc->covars[0];
-        }
-        else {
+        } else {
           mean.at(i1d) = -1;
           variance.at(i1d) = -1;
         }
@@ -231,9 +231,12 @@ void GCAMorphUtils::Write(const GCAM *src, string fName) const
   NC_SAFE_CALL(nc_put_var_double(ncid, varIDmap.find("ry")->second, &y[0]));
   NC_SAFE_CALL(nc_put_var_double(ncid, varIDmap.find("rz")->second, &z[0]));
 
-  NC_SAFE_CALL(nc_put_var_double(ncid, varIDmap.find("origx")->second, &origx[0]));
-  NC_SAFE_CALL(nc_put_var_double(ncid, varIDmap.find("origy")->second, &origy[0]));
-  NC_SAFE_CALL(nc_put_var_double(ncid, varIDmap.find("origz")->second, &origz[0]));
+  NC_SAFE_CALL(
+      nc_put_var_double(ncid, varIDmap.find("origx")->second, &origx[0]));
+  NC_SAFE_CALL(
+      nc_put_var_double(ncid, varIDmap.find("origy")->second, &origy[0]));
+  NC_SAFE_CALL(
+      nc_put_var_double(ncid, varIDmap.find("origz")->second, &origz[0]));
 
   NC_SAFE_CALL(nc_put_var_float(ncid, varIDmap.find("dx")->second, &dx[0]));
   NC_SAFE_CALL(nc_put_var_float(ncid, varIDmap.find("dy")->second, &dy[0]));
@@ -243,27 +246,38 @@ void GCAMorphUtils::Write(const GCAM *src, string fName) const
   NC_SAFE_CALL(nc_put_var_float(ncid, varIDmap.find("ody")->second, &ody[0]));
   NC_SAFE_CALL(nc_put_var_float(ncid, varIDmap.find("odz")->second, &odz[0]));
 
-  NC_SAFE_CALL(nc_put_var_float(ncid, varIDmap.find("origArea")->second, &origArea[0]));
-  NC_SAFE_CALL(nc_put_var_float(ncid, varIDmap.find("origArea1")->second, &origArea1[0]));
-  NC_SAFE_CALL(nc_put_var_float(ncid, varIDmap.find("origArea2")->second, &origArea2[0]));
+  NC_SAFE_CALL(
+      nc_put_var_float(ncid, varIDmap.find("origArea")->second, &origArea[0]));
+  NC_SAFE_CALL(nc_put_var_float(ncid, varIDmap.find("origArea1")->second,
+                                &origArea1[0]));
+  NC_SAFE_CALL(nc_put_var_float(ncid, varIDmap.find("origArea2")->second,
+                                &origArea2[0]));
 
   NC_SAFE_CALL(nc_put_var_float(ncid, varIDmap.find("area")->second, &area[0]));
-  NC_SAFE_CALL(nc_put_var_float(ncid, varIDmap.find("area1")->second, &area1[0]));
-  NC_SAFE_CALL(nc_put_var_float(ncid, varIDmap.find("area2")->second, &area2[0]));
+  NC_SAFE_CALL(
+      nc_put_var_float(ncid, varIDmap.find("area1")->second, &area1[0]));
+  NC_SAFE_CALL(
+      nc_put_var_float(ncid, varIDmap.find("area2")->second, &area2[0]));
 
-  NC_SAFE_CALL(nc_put_var_text(ncid, varIDmap.find("invalid")->second, &invalid[0]));
+  NC_SAFE_CALL(
+      nc_put_var_text(ncid, varIDmap.find("invalid")->second, &invalid[0]));
 
   NC_SAFE_CALL(nc_put_var_int(ncid, varIDmap.find("label")->second, &label[0]));
-  NC_SAFE_CALL(nc_put_var_float(ncid, varIDmap.find("labelDist")->second, &labelDist[0]));
-  NC_SAFE_CALL(nc_put_var_int(ncid, varIDmap.find("status")->second, &status[0]));
+  NC_SAFE_CALL(nc_put_var_float(ncid, varIDmap.find("labelDist")->second,
+                                &labelDist[0]));
+  NC_SAFE_CALL(
+      nc_put_var_int(ncid, varIDmap.find("status")->second, &status[0]));
 
   NC_SAFE_CALL(nc_put_var_float(ncid, varIDmap.find("mean")->second, &mean[0]));
-  NC_SAFE_CALL(nc_put_var_float(ncid, varIDmap.find("variance")->second, &variance[0]));
+  NC_SAFE_CALL(
+      nc_put_var_float(ncid, varIDmap.find("variance")->second, &variance[0]));
 
   // Sort out the scalars
 
-  NC_SAFE_CALL(nc_put_var_double(ncid, scalarIDmap.find("exp_k")->second, &(src->exp_k)));
-  NC_SAFE_CALL(nc_put_var_int(ncid, scalarIDmap.find("neg")->second, &(src->neg)));
+  NC_SAFE_CALL(nc_put_var_double(ncid, scalarIDmap.find("exp_k")->second,
+                                 &(src->exp_k)));
+  NC_SAFE_CALL(
+      nc_put_var_int(ncid, scalarIDmap.find("neg")->second, &(src->neg)));
 
   // Close the file
   NC_SAFE_CALL(nc_close(ncid));
@@ -273,8 +287,7 @@ void GCAMorphUtils::Write(const GCAM *src, string fName) const
 
 // ---------------
 
-void GCAMorphUtils::Read(GCAM **dst, string fName) const
-{
+void GCAMorphUtils::Read(GCAM **dst, string fName) const {
   // Make sure input pointer is NULL
   if (*dst != NULL) {
     cerr << __FUNCTION__ << ": dst pointer not NULL!" << endl;
@@ -298,12 +311,12 @@ void GCAMorphUtils::Read(GCAM **dst, string fName) const
   NC_SAFE_CALL(nc_inq_ndims(ncid, &nDimFile));
   NC_SAFE_CALL(nc_inq_nvars(ncid, &nVarFile));
 
-  if (nDimFile != static_cast< int >(this->nDims)) {
+  if (nDimFile != static_cast<int>(this->nDims)) {
     cerr << "Invalid number of dimensions " << nDimFile << endl;
     exit(EXIT_FAILURE);
   }
 
-  if (nVarFile != static_cast< int >(this->totalVars)) {
+  if (nVarFile != static_cast<int>(this->totalVars)) {
     std::cerr << "Invalid number of variables " << nVarFile << endl;
     exit(EXIT_FAILURE);
   }
@@ -330,39 +343,46 @@ void GCAMorphUtils::Read(GCAM **dst, string fName) const
   (*dst)->ninputs = 1;
 
   // Get hold of the variable IDs
-  map< string, int > varIDmap;
-  map< string, nc_type >::const_iterator myIt;
+  map<string, int> varIDmap;
+  map<string, nc_type>::const_iterator myIt;
 
-  for (myIt = this->varTypeMap.begin(); myIt != this->varTypeMap.end(); myIt++) {
+  for (myIt = this->varTypeMap.begin(); myIt != this->varTypeMap.end();
+       myIt++) {
     // Get the variable ID
     NC_SAFE_CALL(nc_inq_varid(ncid,
-                              myIt->first.c_str(),  // Name of the variable
+                              myIt->first.c_str(), // Name of the variable
                               &varIDmap[myIt->first]));
 
     // Do a simple sanity check
     nc_type varType;
-    NC_SAFE_CALL(nc_inq_vartype(ncid, varIDmap.find(myIt->first)->second, &varType));
+    NC_SAFE_CALL(
+        nc_inq_vartype(ncid, varIDmap.find(myIt->first)->second, &varType));
     if (varType != myIt->second) {
-      cerr << __FUNCTION__ << ": Mismatched type for variable " << myIt->first << endl;
+      cerr << __FUNCTION__ << ": Mismatched type for variable " << myIt->first
+           << endl;
       exit(EXIT_FAILURE);
     }
   }
 
   // Get hold of the variable IDs for the scalars
-  map< string, int > scalarIDmap;
-  map< string, nc_type >::const_iterator scalarVarIt;
+  map<string, int> scalarIDmap;
+  map<string, nc_type>::const_iterator scalarVarIt;
 
-  for (scalarVarIt = this->scalarTypeMap.begin(); scalarVarIt != this->scalarTypeMap.end(); scalarVarIt++) {
+  for (scalarVarIt = this->scalarTypeMap.begin();
+       scalarVarIt != this->scalarTypeMap.end(); scalarVarIt++) {
     // Get the variable ID
-    NC_SAFE_CALL(nc_inq_varid(ncid,
-                              scalarVarIt->first.c_str(),  // Name of the variable
-                              &scalarIDmap[scalarVarIt->first]));
+    NC_SAFE_CALL(
+        nc_inq_varid(ncid,
+                     scalarVarIt->first.c_str(), // Name of the variable
+                     &scalarIDmap[scalarVarIt->first]));
 
     // Do a simple sanity check
     nc_type varType;
-    NC_SAFE_CALL(nc_inq_vartype(ncid, scalarIDmap.find(scalarVarIt->first)->second, &varType));
+    NC_SAFE_CALL(nc_inq_vartype(
+        ncid, scalarIDmap.find(scalarVarIt->first)->second, &varType));
     if (varType != scalarVarIt->second) {
-      cerr << __FUNCTION__ << ": Mismatched type for scalar " << scalarVarIt->first << endl;
+      cerr << __FUNCTION__ << ": Mismatched type for scalar "
+           << scalarVarIt->first << endl;
       exit(EXIT_FAILURE);
     }
   }
@@ -370,16 +390,16 @@ void GCAMorphUtils::Read(GCAM **dst, string fName) const
   // Read into contiguous arrays
   const size_t nElems = (*dst)->width * (*dst)->height * (*dst)->depth;
 
-  vector< double > x(nElems), y(nElems), z(nElems);
-  vector< double > origx(nElems), origy(nElems), origz(nElems);
-  vector< float > dx(nElems), dy(nElems), dz(nElems);
-  vector< float > odx(nElems), ody(nElems), odz(nElems);
-  vector< float > area(nElems), area1(nElems), area2(nElems);
-  vector< float > origArea(nElems), origArea1(nElems), origArea2(nElems);
-  vector< char > invalid(nElems);
-  vector< int > label(nElems), status(nElems);
-  vector< float > labelDist(nElems);
-  vector< float > mean(nElems), variance(nElems);
+  vector<double> x(nElems), y(nElems), z(nElems);
+  vector<double> origx(nElems), origy(nElems), origz(nElems);
+  vector<float> dx(nElems), dy(nElems), dz(nElems);
+  vector<float> odx(nElems), ody(nElems), odz(nElems);
+  vector<float> area(nElems), area1(nElems), area2(nElems);
+  vector<float> origArea(nElems), origArea1(nElems), origArea2(nElems);
+  vector<char> invalid(nElems);
+  vector<int> label(nElems), status(nElems);
+  vector<float> labelDist(nElems);
+  vector<float> mean(nElems), variance(nElems);
 
   // We use 'find' to get an exception if the name doesn't exist
 
@@ -387,9 +407,12 @@ void GCAMorphUtils::Read(GCAM **dst, string fName) const
   NC_SAFE_CALL(nc_get_var_double(ncid, varIDmap.find("ry")->second, &y[0]));
   NC_SAFE_CALL(nc_get_var_double(ncid, varIDmap.find("rz")->second, &z[0]));
 
-  NC_SAFE_CALL(nc_get_var_double(ncid, varIDmap.find("origx")->second, &origx[0]));
-  NC_SAFE_CALL(nc_get_var_double(ncid, varIDmap.find("origy")->second, &origy[0]));
-  NC_SAFE_CALL(nc_get_var_double(ncid, varIDmap.find("origz")->second, &origz[0]));
+  NC_SAFE_CALL(
+      nc_get_var_double(ncid, varIDmap.find("origx")->second, &origx[0]));
+  NC_SAFE_CALL(
+      nc_get_var_double(ncid, varIDmap.find("origy")->second, &origy[0]));
+  NC_SAFE_CALL(
+      nc_get_var_double(ncid, varIDmap.find("origz")->second, &origz[0]));
 
   NC_SAFE_CALL(nc_get_var_float(ncid, varIDmap.find("dx")->second, &dx[0]));
   NC_SAFE_CALL(nc_get_var_float(ncid, varIDmap.find("dy")->second, &dy[0]));
@@ -399,22 +422,31 @@ void GCAMorphUtils::Read(GCAM **dst, string fName) const
   NC_SAFE_CALL(nc_get_var_float(ncid, varIDmap.find("ody")->second, &ody[0]));
   NC_SAFE_CALL(nc_get_var_float(ncid, varIDmap.find("odz")->second, &odz[0]));
 
-  NC_SAFE_CALL(nc_get_var_float(ncid, varIDmap.find("origArea")->second, &origArea[0]));
-  NC_SAFE_CALL(nc_get_var_float(ncid, varIDmap.find("origArea1")->second, &origArea1[0]));
-  NC_SAFE_CALL(nc_get_var_float(ncid, varIDmap.find("origArea2")->second, &origArea2[0]));
+  NC_SAFE_CALL(
+      nc_get_var_float(ncid, varIDmap.find("origArea")->second, &origArea[0]));
+  NC_SAFE_CALL(nc_get_var_float(ncid, varIDmap.find("origArea1")->second,
+                                &origArea1[0]));
+  NC_SAFE_CALL(nc_get_var_float(ncid, varIDmap.find("origArea2")->second,
+                                &origArea2[0]));
 
   NC_SAFE_CALL(nc_get_var_float(ncid, varIDmap.find("area")->second, &area[0]));
-  NC_SAFE_CALL(nc_get_var_float(ncid, varIDmap.find("area1")->second, &area1[0]));
-  NC_SAFE_CALL(nc_get_var_float(ncid, varIDmap.find("area2")->second, &area2[0]));
+  NC_SAFE_CALL(
+      nc_get_var_float(ncid, varIDmap.find("area1")->second, &area1[0]));
+  NC_SAFE_CALL(
+      nc_get_var_float(ncid, varIDmap.find("area2")->second, &area2[0]));
 
-  NC_SAFE_CALL(nc_get_var_text(ncid, varIDmap.find("invalid")->second, &invalid[0]));
+  NC_SAFE_CALL(
+      nc_get_var_text(ncid, varIDmap.find("invalid")->second, &invalid[0]));
 
   NC_SAFE_CALL(nc_get_var_int(ncid, varIDmap.find("label")->second, &label[0]));
-  NC_SAFE_CALL(nc_get_var_float(ncid, varIDmap.find("labelDist")->second, &labelDist[0]));
-  NC_SAFE_CALL(nc_get_var_int(ncid, varIDmap.find("status")->second, &status[0]));
+  NC_SAFE_CALL(nc_get_var_float(ncid, varIDmap.find("labelDist")->second,
+                                &labelDist[0]));
+  NC_SAFE_CALL(
+      nc_get_var_int(ncid, varIDmap.find("status")->second, &status[0]));
 
   NC_SAFE_CALL(nc_get_var_float(ncid, varIDmap.find("mean")->second, &mean[0]));
-  NC_SAFE_CALL(nc_get_var_float(ncid, varIDmap.find("variance")->second, &variance[0]));
+  NC_SAFE_CALL(
+      nc_get_var_float(ncid, varIDmap.find("variance")->second, &variance[0]));
 
   // Unpack into the GCA_MORPH structure
   for (int i = 0; i < (*dst)->width; i++) {
@@ -459,8 +491,7 @@ void GCAMorphUtils::Read(GCAM **dst, string fName) const
           gcamn.gc = alloc_gcs(1, 0, 1);
           gcamn.gc->means[0] = mean.at(i1d);
           gcamn.gc->covars[0] = variance.at(i1d);
-        }
-        else {
+        } else {
           gcamn.gc = NULL;
         }
       }
@@ -468,8 +499,10 @@ void GCAMorphUtils::Read(GCAM **dst, string fName) const
   }
 
   // Fetch the scalars
-  NC_SAFE_CALL(nc_get_var_double(ncid, scalarIDmap.find("exp_k")->second, &((*dst)->exp_k)));
-  NC_SAFE_CALL(nc_get_var_int(ncid, scalarIDmap.find("neg")->second, &((*dst)->neg)));
+  NC_SAFE_CALL(nc_get_var_double(ncid, scalarIDmap.find("exp_k")->second,
+                                 &((*dst)->exp_k)));
+  NC_SAFE_CALL(
+      nc_get_var_int(ncid, scalarIDmap.find("neg")->second, &((*dst)->neg)));
 
   NC_SAFE_CALL(nc_close(ncid));
 
@@ -482,4 +515,6 @@ static GCAMorphUtils myGCAMutils;
 
 // ======================================================================
 
-void WriteGCAMoneInput(const GCAM *src, const char *fName) { myGCAMutils.Write(src, fName); }
+void WriteGCAMoneInput(const GCAM *src, const char *fName) {
+  myGCAMutils.Write(src, fName);
+}

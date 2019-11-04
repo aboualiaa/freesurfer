@@ -32,10 +32,8 @@
 #include <QSettings>
 #include <QDebug>
 
-DialogSaveScreenshot::DialogSaveScreenshot(QWidget *parent) :
-  QDialog(parent),
-  ui(new Ui::DialogSaveScreenshot)
-{
+DialogSaveScreenshot::DialogSaveScreenshot(QWidget *parent)
+    : QDialog(parent), ui(new Ui::DialogSaveScreenshot) {
   ui->setupUi(this);
   //  QSettings settings;
   //  ui->lineEditFileName->setText(settings.value("ScreenShot/LastSavedFile").toString());
@@ -43,19 +41,16 @@ DialogSaveScreenshot::DialogSaveScreenshot(QWidget *parent) :
 #ifdef Q_OS_MAC
   ui->checkBoxAutoTrim->hide();
 #endif
-//  qDebug() << m_strLastDir;
+  //  qDebug() << m_strLastDir;
 }
 
-DialogSaveScreenshot::~DialogSaveScreenshot()
-{
+DialogSaveScreenshot::~DialogSaveScreenshot() {
   //  QSettings settings;
   //  settings.setValue("ScreenShot/LastSavedFile", GetFileName());
   delete ui;
 }
 
-
-QString DialogSaveScreenshot::GetFileName()
-{
+QString DialogSaveScreenshot::GetFileName() {
   QString filename = ui->lineEditFileName->text().trimmed();
   if (!filename.isEmpty())
     return QFileInfo(QDir::current(), filename).absoluteFilePath();
@@ -63,64 +58,61 @@ QString DialogSaveScreenshot::GetFileName()
     return "";
 }
 
-void DialogSaveScreenshot::SetSettings( SettingsScreenshot s )
-{
-  ui->checkBoxAntiAliasing->setChecked( s.AntiAliasing );
-  ui->checkBoxHideCursor->setChecked( s.HideCursor );
-  ui->checkBoxHideAnnotation->setChecked( s.HideCoords );
-  ui->spinBoxMagnification->setValue( s.Magnification );
-  ui->checkBoxAutoTrim->setChecked( s.AutoTrim );
-  ui->checkBoxHideScaleBar->setChecked( s.HideScaleBar );
+void DialogSaveScreenshot::SetSettings(SettingsScreenshot s) {
+  ui->checkBoxAntiAliasing->setChecked(s.AntiAliasing);
+  ui->checkBoxHideCursor->setChecked(s.HideCursor);
+  ui->checkBoxHideAnnotation->setChecked(s.HideCoords);
+  ui->spinBoxMagnification->setValue(s.Magnification);
+  ui->checkBoxAutoTrim->setChecked(s.AutoTrim);
+  ui->checkBoxHideScaleBar->setChecked(s.HideScaleBar);
 }
 
-SettingsScreenshot DialogSaveScreenshot::GetSettings()
-{
+SettingsScreenshot DialogSaveScreenshot::GetSettings() {
   SettingsScreenshot s;
-  s.AntiAliasing  = ui->checkBoxAntiAliasing->isChecked();
-  s.HideCursor    = ui->checkBoxHideCursor->isChecked();
-  s.HideCoords    = ui->checkBoxHideAnnotation->isChecked();
+  s.AntiAliasing = ui->checkBoxAntiAliasing->isChecked();
+  s.HideCursor = ui->checkBoxHideCursor->isChecked();
+  s.HideCoords = ui->checkBoxHideAnnotation->isChecked();
   s.Magnification = ui->spinBoxMagnification->value();
-  s.AutoTrim  = ui->checkBoxAutoTrim->isChecked();
-  s.HideScaleBar  = ui->checkBoxHideScaleBar->isChecked();
+  s.AutoTrim = ui->checkBoxAutoTrim->isChecked();
+  s.HideScaleBar = ui->checkBoxHideScaleBar->isChecked();
 
   return s;
 }
 
-void DialogSaveScreenshot::OnOpen()
-{
+void DialogSaveScreenshot::OnOpen() {
   QString dir = m_strLastDir;
-  if (!GetFileName().isEmpty())
-  {
+  if (!GetFileName().isEmpty()) {
     dir = QFileInfo(GetFileName()).absolutePath();
   }
-  QString fn = QFileDialog::getSaveFileName( this, "Save Screenshot", dir, "All Files (*.*)" );
-  if ( !fn.isEmpty() )
-  {
+  QString fn = QFileDialog::getSaveFileName(this, "Save Screenshot", dir,
+                                            "All Files (*.*)");
+  if (!fn.isEmpty()) {
     ui->lineEditFileName->setText(MyUtils::Win32PathProof(fn));
-    ui->lineEditFileName->setCursorPosition(ui->lineEditFileName->text().size());
+    ui->lineEditFileName->setCursorPosition(
+        ui->lineEditFileName->text().size());
   }
 }
 
-void DialogSaveScreenshot::OnSave()
-{
-  if ( GetFileName().isEmpty() )
-  {
+void DialogSaveScreenshot::OnSave() {
+  if (GetFileName().isEmpty()) {
     QMessageBox::warning(this, "Error", "Please enter file name to be saved.");
     return;
   }
 
-  MainWindow* mainwnd = MainWindow::GetMainWindow();
+  MainWindow *mainwnd = MainWindow::GetMainWindow();
   mainwnd->SetScreenShotSettings(GetSettings());
-  if (!mainwnd->GetMainView()->
-      SaveScreenShot(GetFileName(), ui->checkBoxAntiAliasing, ui->spinBoxMagnification->value(), ui->checkBoxAutoTrim->isChecked()))
-  {
-    QMessageBox::warning(this, "Error", "Failed to save screenshot. Please make sure the directory exists and writable.");
+  if (!mainwnd->GetMainView()->SaveScreenShot(
+          GetFileName(), ui->checkBoxAntiAliasing,
+          ui->spinBoxMagnification->value(),
+          ui->checkBoxAutoTrim->isChecked())) {
+    QMessageBox::warning(this, "Error",
+                         "Failed to save screenshot. Please make sure the "
+                         "directory exists and writable.");
     return;
   }
   m_strLastDir = QFileInfo(GetFileName()).absolutePath();
 
-  if (!ui->checkBoxKeepWindow->isChecked())
-  {
+  if (!ui->checkBoxKeepWindow->isChecked()) {
     hide();
   }
 }

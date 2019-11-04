@@ -12,11 +12,8 @@
 #include "glutint.h"
 
 /* CENTRY */
-void APIENTRY
-glutWarpPointer(int x, int y)
-{
-  XWarpPointer(__glutDisplay, None, __glutCurrentWindow->win,
-               0, 0, 0, 0, x, y);
+void APIENTRY glutWarpPointer(int x, int y) {
+  XWarpPointer(__glutDisplay, None, __glutCurrentWindow->win, 0, 0, 0, 0, x, y);
   XFlush(__glutDisplay);
 }
 

@@ -27,72 +27,57 @@
  *
  */
 
-#include <string.h>
-#include <errno.h>
-#include <assert.h>
+#include <cstring>
+#include <cerrno>
+#include <cassert>
 #include <sys/stat.h>
 
 #include "QdecContrast.h"
-#include <stdio.h> // printf
-
+#include <cstdio> // printf
 
 // Constructors/Destructors
 //
 
-QdecContrast::QdecContrast ( vector< double > iaVector,
-                             string isName,
-                             string isQuestion )
-{
-  assert( iaVector.size() );
+QdecContrast::QdecContrast(vector<double> iaVector, string isName,
+                           string isQuestion) {
+  assert(iaVector.size());
   this->maVector = iaVector;
   this->msName = isName;
   this->msQuestion = isQuestion;
 }
 
-QdecContrast::~QdecContrast ( )
-{ }
+QdecContrast::~QdecContrast() {}
 
 //
 // Methods
 //
 
+/**
+ * @return string
+ */
+string QdecContrast::GetName() { return this->msName; }
 
 /**
  * @return string
  */
-string QdecContrast::GetName ( )
-{
-  return this->msName;
-}
-
+string QdecContrast::GetQuestion() { return this->msQuestion; }
 
 /**
  * @return string
  */
-string QdecContrast::GetQuestion ( )
-{
-  return this->msQuestion;
-}
-
-
-/**
- * @return string
- */
-string QdecContrast::GetContrastStr ( )
-{
+string QdecContrast::GetContrastStr() {
   string contrast = "";
-  for (unsigned int i=0; i < this->maVector.size();)
-  {
+  for (unsigned int i = 0; i < this->maVector.size();) {
     char tmpstr[1000];
-    sprintf(tmpstr,"% 2.3f",this->maVector[i]);
+    sprintf(tmpstr, "% 2.3f", this->maVector[i]);
     contrast += strdup(tmpstr);
-    if (++i < this->maVector.size()) contrast += "  ";
+    if (++i < this->maVector.size())
+      contrast += "  ";
   }
   contrast += ";\n";
 
   return contrast;
 }
-
 
 /**
  * Writes the contrast vector to a .mat file, which is readable by matlab, and
@@ -100,49 +85,40 @@ string QdecContrast::GetContrastStr ( )
  * @return int
  * @param string ifnWorkingDir
  */
-int QdecContrast::WriteDotMatFile ( string ifnWorkingDir )
-{
+int QdecContrast::WriteDotMatFile(string ifnWorkingDir) {
   string dirName = ifnWorkingDir + "/contrasts/";
-  int err = mkdir( dirName.c_str(), 0777);
-  if( err != 0 && errno != EEXIST )
-  {
-    fprintf( stderr,
-             "ERROR: QdecContrast::WriteDotMatFile: "
-             "could not create directory %s\n",
-             dirName.c_str());
-    return(-1);
+  int err = mkdir(dirName.c_str(), 0777);
+  if (err != 0 && errno != EEXIST) {
+    fprintf(stderr,
+            "ERROR: QdecContrast::WriteDotMatFile: "
+            "could not create directory %s\n",
+            dirName.c_str());
+    return (-1);
   }
 
-  this->mfnDotMatFileName = dirName; 
+  this->mfnDotMatFileName = dirName;
   this->mfnDotMatFileName += this->GetName();
   this->mfnDotMatFileName += ".mat";
 
-  FILE* fp = fopen( this->mfnDotMatFileName.c_str(), "w");
-  if( ! fp )
-  {
-    fprintf( stderr,
-             "ERROR: QdecContrast::WriteDotMatFile: "
-             "could not create file %s\n",
-             this->mfnDotMatFileName.c_str());
-    return(-2);
+  FILE *fp = fopen(this->mfnDotMatFileName.c_str(), "w");
+  if (!fp) {
+    fprintf(stderr,
+            "ERROR: QdecContrast::WriteDotMatFile: "
+            "could not create file %s\n",
+            this->mfnDotMatFileName.c_str());
+    return (-2);
   }
 
-  for(unsigned int i=0; i < this->maVector.size(); i++)
-  {
-    fprintf( fp, "%+4.5f ", this->maVector[i] );
+  for (unsigned int i = 0; i < this->maVector.size(); i++) {
+    fprintf(fp, "%+4.5f ", this->maVector[i]);
   }
-  fprintf( fp, "\n" );
-  fclose( fp );
+  fprintf(fp, "\n");
+  fclose(fp);
 
   return 0;
 }
 
-
 /**
  * @return string
  */
-string QdecContrast::GetDotMatFileName ( )
-{
-  return this->mfnDotMatFileName;
-}
-
+string QdecContrast::GetDotMatFileName() { return this->mfnDotMatFileName; }

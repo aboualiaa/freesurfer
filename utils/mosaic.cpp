@@ -55,17 +55,17 @@
 
 **************************************************************/
 
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #ifndef Darwin
 #include <malloc.h>
 #else
 #include "proto.h"
 #endif
 
-#include "math.h"
+#include <cmath>
 
 #include "mosaic.h"
 
@@ -81,9 +81,8 @@
         an integer multiple of the number of columns/rows
         in the image
 --------------------------------------------------------*/
-int VolSS2MosSS(
-    int cvol, int rvol, int svol, int ncvol, int nrvol, int ncmos, int nrmos, int *cmos, int *rmos, int *OutOfBounds)
-{
+int VolSS2MosSS(int cvol, int rvol, int svol, int ncvol, int nrvol, int ncmos,
+                int nrmos, int *cmos, int *rmos, int *OutOfBounds) {
   int nctmos;
   // int nrtmos;
   int ctmos, rtmos;
@@ -93,8 +92,7 @@ int VolSS2MosSS(
             "ERROR: VolSS2MosSS: number of columns in the mosaic (%d) \n"
             "is not an integer multiple of the number of columns in \n"
             "the image (%d)\n",
-            ncmos,
-            ncvol);
+            ncmos, ncvol);
     return (1);
   }
 
@@ -103,8 +101,7 @@ int VolSS2MosSS(
             "ERROR: VolSS2MosSS: number of row in the mosaic (%d) \n"
             "is not an integer multiple of the number of rows in \n"
             "the image (%d)\n",
-            nrmos,
-            nrvol);
+            nrmos, nrvol);
     return (1);
   }
 
@@ -119,7 +116,7 @@ int VolSS2MosSS(
   *cmos = ctmos * ncvol + cvol;
   *rmos = rtmos * nrvol + rvol;
 
-  if (OutOfBounds != NULL) {
+  if (OutOfBounds != nullptr) {
     if (*cmos < 0 || *cmos > (ncmos - 1) || *rmos < 0 || *rmos > (nrmos - 1))
       *OutOfBounds = 1;
     else
@@ -138,18 +135,8 @@ int VolSS2MosSS(
         an integer multiple of the number of columns/rows
         in the image
 --------------------------------------------------------*/
-int MosSS2VolSS(int cmos,
-                int rmos,
-                int ncmos,
-                int nrmos,
-                int ncvol,
-                int nrvol,
-                int nsvol,
-                int *cvol,
-                int *rvol,
-                int *svol,
-                int *OutOfBounds)
-{
+int MosSS2VolSS(int cmos, int rmos, int ncmos, int nrmos, int ncvol, int nrvol,
+                int nsvol, int *cvol, int *rvol, int *svol, int *OutOfBounds) {
   int nctmos;
   // int nrtmos;
   int ctmos, rtmos;
@@ -159,8 +146,7 @@ int MosSS2VolSS(int cmos,
             "ERROR: MosSS2Vol: number of columns in the mosaic (%d) \n"
             "is not an integer multiple of the number of columns in \n"
             "the image (%d)\n",
-            ncmos,
-            ncvol);
+            ncmos, ncvol);
     return (1);
   }
 
@@ -169,8 +155,7 @@ int MosSS2VolSS(int cmos,
             "ERROR: MosSS2Vol: number of row in the mosaic (%d) \n"
             "is not an integer multiple of the number of rows in \n"
             "the image (%d)\n",
-            nrmos,
-            nrvol);
+            nrmos, nrvol);
     return (1);
   }
 
@@ -186,8 +171,9 @@ int MosSS2VolSS(int cmos,
   *rvol = rmos - rtmos * nrvol;
   *svol = ctmos + rtmos * nctmos;
 
-  if (OutOfBounds != NULL) {
-    if (*cvol < 0 || *cvol > (ncvol - 1) || *rvol < 0 || *rvol > (nrvol - 1) || *svol < 0 || *svol > (nsvol - 1))
+  if (OutOfBounds != nullptr) {
+    if (*cvol < 0 || *cvol > (ncvol - 1) || *rvol < 0 || *rvol > (nrvol - 1) ||
+        *svol < 0 || *svol > (nsvol - 1))
       *OutOfBounds = 1;
     else
       *OutOfBounds = 0;
@@ -214,8 +200,7 @@ int MosSS2VolSS(int cmos,
   CheckMosaic(void) - this is just a diagnostic that prints
   info to stdout.
   ----------------------------------------------------------*/
-int CheckMosaic(void)
-{
+int CheckMosaic() {
   int cvol, rvol, svol, ncvol, nrvol, nsvol;
   int ncmos, nrmos, cmos, rmos;
   int cvol2, rvol2, svol2;
@@ -233,54 +218,28 @@ int CheckMosaic(void)
   for (svol = 0; svol < nsvol; svol++) {
     for (rvol = 0; rvol < nrvol; rvol++) {
       for (cvol = 0; cvol < ncvol; cvol++) {
-        VolSS2MosSS(cvol, rvol, svol, ncvol, nrvol, ncmos, nrmos, &cmos, &rmos, &oob);
-        MosSS2VolSS(cmos, rmos, ncmos, nrmos, ncvol, nrvol, nsvol, &cvol2, &rvol2, &svol2, &oob);
+        VolSS2MosSS(cvol, rvol, svol, ncvol, nrvol, ncmos, nrmos, &cmos, &rmos,
+                    &oob);
+        MosSS2VolSS(cmos, rmos, ncmos, nrmos, ncvol, nrvol, nsvol, &cvol2,
+                    &rvol2, &svol2, &oob);
         ok = 0;
-        if (cvol == cvol2 && rvol == rvol2 && svol == svol2) ok = 1;
-        printf("%5d  %2d %2d %2d   %3d %3d    %2d %2d %2d  %d  %d\n",
-               n,
-               cvol,
-               rvol,
-               svol,
-               cmos,
-               rmos,
-               cvol2,
-               rvol2,
-               svol2,
-               oob,
-               ok);
+        if (cvol == cvol2 && rvol == rvol2 && svol == svol2)
+          ok = 1;
+        printf("%5d  %2d %2d %2d   %3d %3d    %2d %2d %2d  %d  %d\n", n, cvol,
+               rvol, svol, cmos, rmos, cvol2, rvol2, svol2, oob, ok);
         n++;
       }
     }
   }
   printf("-----------------------------------\n");
   VolSS2MosSS(0, 0, 11, ncvol, nrvol, ncmos, nrmos, &cmos, &rmos, &oob);
-  printf("%5d  %2d %2d %2d   %3d %3d    %2d %2d %2d  %d  %d\n",
-         n,
-         cvol,
-         rvol,
-         svol,
-         cmos,
-         rmos,
-         cvol2,
-         rvol2,
-         svol2,
-         oob,
-         ok);
+  printf("%5d  %2d %2d %2d   %3d %3d    %2d %2d %2d  %d  %d\n", n, cvol, rvol,
+         svol, cmos, rmos, cvol2, rvol2, svol2, oob, ok);
 
-  MosSS2VolSS(cmos, rmos, ncmos, nrmos, ncvol, nrvol, nsvol, &cvol2, &rvol2, &svol2, &oob);
-  printf("%5d  %2d %2d %2d   %3d %3d    %2d %2d %2d  %d  %d\n",
-         n,
-         cvol,
-         rvol,
-         svol,
-         cmos,
-         rmos,
-         cvol2,
-         rvol2,
-         svol2,
-         oob,
-         ok);
+  MosSS2VolSS(cmos, rmos, ncmos, nrmos, ncvol, nrvol, nsvol, &cvol2, &rvol2,
+              &svol2, &oob);
+  printf("%5d  %2d %2d %2d   %3d %3d    %2d %2d %2d  %d  %d\n", n, cvol, rvol,
+         svol, cmos, rmos, cvol2, rvol2, svol2, oob, ok);
 
   return (0);
 }

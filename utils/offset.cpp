@@ -37,11 +37,11 @@
 /*-----------------------------------------------------
                     INCLUDE FILES
 -------------------------------------------------------*/
-#include <math.h>
+#include <cmath>
 #include <memory.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <unistd.h> /* for unlink */
 
 #include "hips.h"
@@ -69,16 +69,17 @@
            Description:
 ----------------------------------------------------------------------*/
 #define MAX_STEPS 30
-IMAGE *ImageCalculateOffset(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Ioffset)
-{
-  static IMAGE *Iorient = NULL, *Idir = NULL;
+IMAGE *ImageCalculateOffset(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Ioffset) {
+  static IMAGE *Iorient = nullptr, *Idir = nullptr;
   Timer then;
   int msec;
 
-  if (Gdiag & DIAG_TIMER) then.reset();
+  if (Gdiag & DIAG_TIMER)
+    then.reset();
   Iorient = ImageOffsetOrientation(Ix, Iy, wsize, Iorient);
 
-  if ((Gdiag & DIAG_WRITE) && (Gdiag & DIAG_VERBOSE)) ImageWrite(Iorient, "orient.hipl");
+  if ((Gdiag & DIAG_WRITE) && (Gdiag & DIAG_VERBOSE))
+    ImageWrite(Iorient, "orient.hipl");
 
   if (Gdiag & DIAG_TIMER) {
     msec = then.milliseconds();
@@ -88,7 +89,8 @@ IMAGE *ImageCalculateOffset(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Ioffset)
 
   Idir = ImageOffsetDirection(Ix, Iy, wsize, Iorient, Idir);
 
-  if ((Gdiag & DIAG_WRITE) && (Gdiag & DIAG_VERBOSE)) ImageWrite(Idir, "dir.hipl");
+  if ((Gdiag & DIAG_WRITE) && (Gdiag & DIAG_VERBOSE))
+    ImageWrite(Idir, "dir.hipl");
 
   if (Gdiag & DIAG_TIMER) {
     msec = then.milliseconds();
@@ -96,7 +98,8 @@ IMAGE *ImageCalculateOffset(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Ioffset)
   }
 
   Ioffset = ImageOffsetMagnitude(Idir, Ioffset, MAX_STEPS);
-  if ((Gdiag & DIAG_WRITE) && (Gdiag & DIAG_VERBOSE)) ImageWrite(Ioffset, "offset.hipl");
+  if ((Gdiag & DIAG_WRITE) && (Gdiag & DIAG_VERBOSE))
+    ImageWrite(Ioffset, "offset.hipl");
 
   return (Ioffset);
 }
@@ -107,21 +110,24 @@ IMAGE *ImageCalculateOffset(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Ioffset)
 ----------------------------------------------------------------------*/
 #define NS_FSCALE 100000.0f /* to scale to approx. same range as new stuff */
 
-IMAGE *ImageCalculateNitShiOffset(IMAGE *Ix, IMAGE *Iy, int wsize, float mu, float c, IMAGE *Ioffset)
-{
+IMAGE *ImageCalculateNitShiOffset(IMAGE *Ix, IMAGE *Iy, int wsize, float mu,
+                                  float c, IMAGE *Ioffset) {
   int x0, y0, rows, cols, x, y, whalf, x_plus_off, y_plus_off;
   float vx, vy, vsq, c1, *g, *xpix, *ypix;
-  static float *gaussian = NULL;
+  static float *gaussian = nullptr;
   static int w = 0;
   float gauss, fxpix, fypix, dot_product;
   int xc, yc;
 
   if ((Gdiag & DIAG_SHOW) && (Gdiag & DIAG_VERBOSE))
-    fprintf(stderr, "ImageCalculateNitshiOffset: mu = %2.4f, c = %2.4f, wsize = %d\n", mu, c, wsize);
+    fprintf(stderr,
+            "ImageCalculateNitshiOffset: mu = %2.4f, c = %2.4f, wsize = %d\n",
+            mu, c, wsize);
   rows = Ix->rows;
   cols = Ix->cols;
 
-  if (!Ioffset) Ioffset = ImageAlloc(rows, cols, PFFLOAT, 2);
+  if (!Ioffset)
+    Ioffset = ImageAlloc(rows, cols, PFFLOAT, 2);
 
   mu *= mu;
   vsq = 0.0f; /* prevent compiler warning */
@@ -137,7 +143,7 @@ IMAGE *ImageCalculateNitShiOffset(IMAGE *Ix, IMAGE *Iy, int wsize, float mu, flo
   /* create a local gaussian window */
   if (wsize != w) {
     free(gaussian);
-    gaussian = NULL;
+    gaussian = nullptr;
     w = wsize;
   }
 
@@ -152,14 +158,16 @@ IMAGE *ImageCalculateNitShiOffset(IMAGE *Ix, IMAGE *Iy, int wsize, float mu, flo
       yc = y - whalf;
       for (x = 0; x < wsize; x++, g++) {
         xc = x - whalf;
-        *g = (float)exp(-36.0 * sqrt((double)(xc * xc + yc * yc)) / (double)den);
+        *g =
+            (float)exp(-36.0 * sqrt((double)(xc * xc + yc * yc)) / (double)den);
         norm += *g;
       }
     }
 
     /* normalize gaussian */
     for (g = gaussian, y = 0; y < wsize; y++) {
-      for (x = 0; x < wsize; x++, g++) *g /= norm;
+      for (x = 0; x < wsize; x++, g++)
+        *g /= norm;
     }
   }
 
@@ -183,7 +191,8 @@ IMAGE *ImageCalculateNitShiOffset(IMAGE *Ix, IMAGE *Iy, int wsize, float mu, flo
 
         for (x = -whalf; x <= whalf; x++, g++) {
           xc = x0 + x;
-          if ((xc < 0) || (xc >= cols)) continue;
+          if ((xc < 0) || (xc >= cols))
+            continue;
 
           fxpix = *IMAGEFpix(Ix, xc, yc);
           fypix = *IMAGEFpix(Iy, xc, yc);
@@ -217,7 +226,8 @@ IMAGE *ImageCalculateNitShiOffset(IMAGE *Ix, IMAGE *Iy, int wsize, float mu, flo
     }
   }
 
-  if ((Gdiag & DIAG_WRITE) && (Gdiag & DIAG_VERBOSE)) ImageWrite(Ioffset, "nitshi_offset.hipl");
+  if ((Gdiag & DIAG_WRITE) && (Gdiag & DIAG_VERBOSE))
+    ImageWrite(Ioffset, "nitshi_offset.hipl");
   return (Ioffset);
 }
 /*----------------------------------------------------------------------
@@ -228,14 +238,15 @@ IMAGE *ImageCalculateNitShiOffset(IMAGE *Ix, IMAGE *Iy, int wsize, float mu, flo
              surfaces in offset direction, then modifying offset distance
              to be the distance to the isopotential surface.
 ----------------------------------------------------------------------*/
-IMAGE *ImageNormalizeOffsetDistances(IMAGE *Isrc, IMAGE *Idst, int maxsteps)
-{
+IMAGE *ImageNormalizeOffsetDistances(IMAGE *Isrc, IMAGE *Idst, int maxsteps) {
   float *src_xpix, *src_ypix, *dst_xpix, *dst_ypix, slope, xf, yf, dot;
   int x0, y0, rows, cols, delta, i;
   int x, y;
   float dx, dy, odx, ody;
 
-  if (!Idst) Idst = ImageAlloc(Isrc->rows, Isrc->cols, Isrc->pixel_format, Isrc->num_frame);
+  if (!Idst)
+    Idst =
+        ImageAlloc(Isrc->rows, Isrc->cols, Isrc->pixel_format, Isrc->num_frame);
 
   rows = Isrc->rows;
   cols = Isrc->cols;
@@ -247,43 +258,50 @@ IMAGE *ImageNormalizeOffsetDistances(IMAGE *Isrc, IMAGE *Idst, int maxsteps)
 
   /* for each point in the image */
   for (y0 = 0; y0 < rows; y0++) {
-    for (x0 = 0; x0 < cols; x0++, src_xpix++, src_ypix++, dst_xpix++, dst_ypix++) {
+    for (x0 = 0; x0 < cols;
+         x0++, src_xpix++, src_ypix++, dst_xpix++, dst_ypix++) {
       /*
             search for the first point in the offset direction who's dot product
             with the current offset vector is below some threshold.
       */
       dx = *src_xpix;
       dy = *src_ypix;
-      if (FZERO(dx) && (FZERO(dy))) continue;
+      if (FZERO(dx) && (FZERO(dy)))
+        continue;
 
       if (fabs(dx) > fabs(dy)) /* use unit steps in x direction */
       {
         delta = nint(dx / (float)fabs(dx));
         slope = delta * dy / dx;
-        for (i = 0, yf = (float)y0 + slope, x = x0 + delta; i <= maxsteps; x += delta, yf += slope, i++) {
+        for (i = 0, yf = (float)y0 + slope, x = x0 + delta; i <= maxsteps;
+             x += delta, yf += slope, i++) {
           y = nint(yf);
-          if (y <= 0 || y >= (rows - 1) || x <= 0 || x >= (cols - 1)) break;
+          if (y <= 0 || y >= (rows - 1) || x <= 0 || x >= (cols - 1))
+            break;
 
           odx = *IMAGEFpix(Isrc, x, y);
           ody = *IMAGEFseq_pix(Isrc, x, y, 1);
           dot = odx * dx + ody * dy;
-          if (dot <= 0) break;
+          if (dot <= 0)
+            break;
         }
         x -= delta;
         y = nint(yf - slope);
-      }
-      else /* use unit steps in y direction */
+      } else /* use unit steps in y direction */
       {
         delta = nint(dy / (float)fabs(dy));
         slope = delta * dx / dy;
-        for (i = 0, xf = (float)x0 + slope, y = y0 + delta; i < maxsteps; y += delta, xf += slope, i++) {
+        for (i = 0, xf = (float)x0 + slope, y = y0 + delta; i < maxsteps;
+             y += delta, xf += slope, i++) {
           x = nint(xf);
-          if (y <= 0 || y >= (rows - 1) || x <= 0 || x >= (cols - 1)) break;
+          if (y <= 0 || y >= (rows - 1) || x <= 0 || x >= (cols - 1))
+            break;
 
           odx = *IMAGEFpix(Isrc, x, y);
           ody = *IMAGEFseq_pix(Isrc, x, y, 1);
           dot = odx * dx + ody * dy;
-          if (dot <= 0) break;
+          if (dot <= 0)
+            break;
         }
         y -= delta;
         x = nint(xf - slope);
@@ -314,16 +332,18 @@ static float avg[] =
   } ;
 #endif
 
-IMAGE *ImageSmoothOffsets(IMAGE *Isrc, IMAGE *Idst, int wsize)
-{
+IMAGE *ImageSmoothOffsets(IMAGE *Isrc, IMAGE *Idst, int wsize) {
 #if 0
   ImageConvolve3x3(Isrc, avg, Idst) ;
 #else
-  float *src_xpix, *src_ypix, *dst_xpix, *dst_ypix, slope, dx, dy, f, xf, yf, *wdx, *wdy, *wphase, *wmag, dist, mag;
+  float *src_xpix, *src_ypix, *dst_xpix, *dst_ypix, slope, dx, dy, f, xf, yf,
+      *wdx, *wdy, *wphase, *wmag, dist, mag;
   int x0, y0, rows, cols, x = 0, y, delta, i, whalf, *wx, *wy;
 
   wsize = 5;
-  if (!Idst) Idst = ImageAlloc(Isrc->rows, Isrc->cols, Isrc->pixel_format, Isrc->num_frame);
+  if (!Idst)
+    Idst =
+        ImageAlloc(Isrc->rows, Isrc->cols, Isrc->pixel_format, Isrc->num_frame);
 
   ImageCopy(Isrc, Idst);
   whalf = (wsize - 1) / 2;
@@ -349,7 +369,8 @@ IMAGE *ImageSmoothOffsets(IMAGE *Isrc, IMAGE *Idst, int wsize)
 
   /* for each point in the image */
   for (y0 = 0; y0 < rows; y0++) {
-    for (x0 = 0; x0 < cols; x0++, src_xpix++, src_ypix++, dst_ypix++, dst_xpix++) {
+    for (x0 = 0; x0 < cols;
+         x0++, src_xpix++, src_ypix++, dst_ypix++, dst_xpix++) {
       /* fill the offset vector array */
       dx = *src_xpix;
       dy = *src_ypix;
@@ -384,8 +405,7 @@ IMAGE *ImageSmoothOffsets(IMAGE *Isrc, IMAGE *Idst, int wsize)
             wphase[i] = (float)latan2((double)dy, (double)dx);
           }
         }
-      }
-      else /* use unit steps in y direction */
+      } else /* use unit steps in y direction */
       {
         delta = nint(dy / (float)fabs(dy));
         slope = delta * dx / dy; /* orthogonal slope */
@@ -501,8 +521,7 @@ neighbor's diirection is not bracketed by them, then modify it.
            Description:
               apply an offset vector to a filtered image.
 ----------------------------------------------------------------------*/
-IMAGE *ImageApplyOffset(IMAGE *Isrc, IMAGE *Ioffset, IMAGE *Idst)
-{
+IMAGE *ImageApplyOffset(IMAGE *Isrc, IMAGE *Ioffset, IMAGE *Idst) {
   int x, y, rows, cols, dx, dy;
   float *dst, *src, *dx_pix, *dy_pix;
   IMAGE *Iout, *Iin;
@@ -510,7 +529,8 @@ IMAGE *ImageApplyOffset(IMAGE *Isrc, IMAGE *Ioffset, IMAGE *Idst)
   rows = Isrc->rows;
   cols = Isrc->cols;
 
-  if (!Idst) Idst = ImageAlloc(rows, cols, PFFLOAT, 1);
+  if (!Idst)
+    Idst = ImageAlloc(rows, cols, PFFLOAT, 1);
 
   if (Idst->pixel_format != PFFLOAT)
     Iout = ImageAlloc(rows, cols, PFFLOAT, 1);
@@ -519,11 +539,11 @@ IMAGE *ImageApplyOffset(IMAGE *Isrc, IMAGE *Ioffset, IMAGE *Idst)
   if (Isrc->pixel_format != PFFLOAT) {
     Iin = ImageAlloc(rows, cols, PFFLOAT, 1);
     ImageCopy(Isrc, Iin);
-  }
-  else
+  } else
     Iin = Isrc;
 
-  if (!ImageCheckSize(Isrc, Idst, 0, 0, 0)) ErrorReturn(NULL, (ERROR_SIZE, "ImageApplyOffset: dst not big enough"));
+  if (!ImageCheckSize(Isrc, Idst, 0, 0, 0))
+    ErrorReturn(NULL, (ERROR_SIZE, "ImageApplyOffset: dst not big enough"));
 
   dst = IMAGEFpix(Iout, 0, 0);
   dx_pix = IMAGEFpix(Ioffset, 0, 0);
@@ -538,7 +558,8 @@ IMAGE *ImageApplyOffset(IMAGE *Isrc, IMAGE *Ioffset, IMAGE *Idst)
     }
   }
 
-  if (Iin != Isrc) ImageFree(&Iin);
+  if (Iin != Isrc)
+    ImageFree(&Iin);
   if (Iout != Idst) {
     ImageCopy(Iout, Idst);
     ImageFree(&Iout);
@@ -552,8 +573,7 @@ IMAGE *ImageApplyOffset(IMAGE *Isrc, IMAGE *Ioffset, IMAGE *Idst)
            Description:
               use an offset vector field to specify edge locations.
 ----------------------------------------------------------------------*/
-IMAGE *ImageOffsetMedialAxis(IMAGE *Ioffset, IMAGE *Iedge)
-{
+IMAGE *ImageOffsetMedialAxis(IMAGE *Ioffset, IMAGE *Iedge) {
   int x, y, rows, cols, dx, dy;
   float *dx_pix, *dy_pix;
   UCHAR *edge;
@@ -562,7 +582,8 @@ IMAGE *ImageOffsetMedialAxis(IMAGE *Ioffset, IMAGE *Iedge)
   rows = Ioffset->rows;
   cols = Ioffset->cols;
 
-  if (!Iedge) Iedge = ImageAlloc(rows, cols, PFBYTE, 1);
+  if (!Iedge)
+    Iedge = ImageAlloc(rows, cols, PFBYTE, 1);
 
   if (Iedge->pixel_format != PFBYTE)
     Iout = ImageAlloc(rows, cols, PFBYTE, 1);
@@ -600,11 +621,11 @@ IMAGE *ImageOffsetMedialAxis(IMAGE *Ioffset, IMAGE *Iedge)
 
            Description:
 ----------------------------------------------------------------------*/
-IMAGE *ImageCalculateOffsetDirection(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Ioffset)
-{
+IMAGE *ImageCalculateOffsetDirection(IMAGE *Ix, IMAGE *Iy, int wsize,
+                                     IMAGE *Ioffset) {
   int x0, y0, rows, cols, x, y, whalf;
   float vx, vy, *g, *xpix, *ypix;
-  static float *gaussian = NULL;
+  static float *gaussian = nullptr;
   static int w = 0;
   float gauss, fxpix, fypix, dot_product;
   int xc, yc;
@@ -612,14 +633,15 @@ IMAGE *ImageCalculateOffsetDirection(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Iof
   rows = Ix->rows;
   cols = Ix->cols;
 
-  if (!Ioffset) Ioffset = ImageAlloc(rows, cols, PFFLOAT, 2);
+  if (!Ioffset)
+    Ioffset = ImageAlloc(rows, cols, PFFLOAT, 2);
 
   whalf = (wsize - 1) / 2;
 
   /* create a local gaussian window */
   if (wsize != w) {
     free(gaussian);
-    gaussian = NULL;
+    gaussian = nullptr;
     w = wsize;
   }
 
@@ -634,14 +656,16 @@ IMAGE *ImageCalculateOffsetDirection(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Iof
       yc = y - whalf;
       for (x = 0; x < wsize; x++, g++) {
         xc = x - whalf;
-        *g = (float)exp(-36.0 * sqrt((double)(xc * xc + yc * yc)) / (double)den);
+        *g =
+            (float)exp(-36.0 * sqrt((double)(xc * xc + yc * yc)) / (double)den);
         norm += *g;
       }
     }
 
     /* normalize gaussian */
     for (g = gaussian, y = 0; y < wsize; y++) {
-      for (x = 0; x < wsize; x++, g++) *g /= norm;
+      for (x = 0; x < wsize; x++, g++)
+        *g /= norm;
     }
   }
 
@@ -665,7 +689,8 @@ IMAGE *ImageCalculateOffsetDirection(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Iof
 
         for (x = -whalf; x <= whalf; x++, g++) {
           xc = x0 + x;
-          if ((xc < 0) || (xc >= cols)) continue;
+          if ((xc < 0) || (xc >= cols))
+            continue;
 
           fxpix = *IMAGEFpix(Ix, xc, yc);
           fypix = *IMAGEFpix(Iy, xc, yc);
@@ -705,15 +730,15 @@ IMAGE *ImageCalculateOffsetDirection(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Iof
 #define MEDIAN_INDEX ((3 * 3 - 1) / 2)
 static int compare_sort_array(const void *pf1, const void *pf2);
 
-IMAGE *ImageOffsetScale(IMAGE *Isrc, IMAGE *Idst)
-{
-  static IMAGE *Ioffset = NULL, *Ioffset2 = NULL, *Ix = NULL, *Iy = NULL, *Ismooth = NULL;
-  static IMAGE *Igauss = NULL;
+IMAGE *ImageOffsetScale(IMAGE *Isrc, IMAGE *Idst) {
+  static IMAGE *Ioffset = nullptr, *Ioffset2 = nullptr, *Ix = nullptr,
+               *Iy = nullptr, *Ismooth = nullptr;
+  static IMAGE *Igauss = nullptr;
   int srows, scols, drows, dcols, xs, ys;
   int x0, y0, x, y, ystep, xstep, maxsteps, i, idx, idy;
-  float vx, vy, *g, *xpix, *ypix, dx, dy, ox, oy, delta, slope, xf, yf, odx, ody, *dpix, *spix, sort_array[3 * 3],
-      *sptr;
-  static float *gaussian = NULL;
+  float vx, vy, *g, *xpix, *ypix, dx, dy, ox, oy, delta, slope, xf, yf, odx,
+      ody, *dpix, *spix, sort_array[3 * 3], *sptr;
+  static float *gaussian = nullptr;
   float gauss, fxpix, fypix, dot_product;
   int xc, yc;
 
@@ -744,11 +769,12 @@ IMAGE *ImageOffsetScale(IMAGE *Isrc, IMAGE *Idst)
     Ioffset = ImageAlloc(drows, dcols, PFFLOAT, 2);
     Ioffset2 = ImageAlloc(drows, dcols, PFFLOAT, 2);
   }
-  if (!Igauss) Igauss = ImageGaussian1d(SMOOTH_SIGMA, 5);
+  if (!Igauss)
+    Igauss = ImageGaussian1d(SMOOTH_SIGMA, 5);
 
   ImageConvolveGaussian(Isrc, Igauss, Ismooth, 0);
   /* ImageWrite(Ismooth, "smooth.hipl") ;*/
-  ImageSobel(Ismooth, NULL, Ix, Iy);
+  ImageSobel(Ismooth, nullptr, Ix, Iy);
 
   /* now calculate offset image */
   if (!gaussian) /* allocate a gaussian bump */
@@ -762,14 +788,16 @@ IMAGE *ImageOffsetScale(IMAGE *Isrc, IMAGE *Idst)
       yc = y - WHALF;
       for (x = 0; x < WSIZE; x++, g++) {
         xc = x - WHALF;
-        *g = (float)exp(-36.0 * sqrt((double)(xc * xc + yc * yc)) / (double)den);
+        *g =
+            (float)exp(-36.0 * sqrt((double)(xc * xc + yc * yc)) / (double)den);
         norm += *g;
       }
     }
 
     /* normalize gaussian */
     for (g = gaussian, y = 0; y < WSIZE; y++) {
-      for (x = 0; x < WSIZE; x++, g++) *g /= norm;
+      for (x = 0; x < WSIZE; x++, g++)
+        *g /= norm;
     }
   }
 
@@ -783,7 +811,8 @@ IMAGE *ImageOffsetScale(IMAGE *Isrc, IMAGE *Idst)
     x and y are local window coordinates (i.e. -1 .. 1)
   */
   for (y0 = nint(0.5 * (double)ystep); y0 < srows; y0 += ystep) {
-    for (x0 = nint(0.5 * (double)xstep); x0 < scols; x0 += xstep, xpix++, ypix++) {
+    for (x0 = nint(0.5 * (double)xstep); x0 < scols;
+         x0 += xstep, xpix++, ypix++) {
       /*
         x and y are in window coordinates, while xc and yc are in image
         coordinates.
@@ -800,7 +829,8 @@ IMAGE *ImageOffsetScale(IMAGE *Isrc, IMAGE *Idst)
 
         for (x = -WHALF; x <= WHALF; x++, g++) {
           xc = x0 + x;
-          if ((xc < 0) || (xc >= scols)) continue;
+          if ((xc < 0) || (xc >= scols))
+            continue;
 
           fxpix = *IMAGEFpix(Ix, xc, yc);
           fypix = *IMAGEFpix(Iy, xc, yc);
@@ -832,7 +862,8 @@ IMAGE *ImageOffsetScale(IMAGE *Isrc, IMAGE *Idst)
   xpix = IMAGEFpix(Ioffset2, 0, 0);
   ypix = IMAGEFseq_pix(Ioffset2, 0, 0, 1);
   for (ys = 0, y0 = nint(0.5 * (double)ystep); y0 < srows; y0 += ystep, ys++) {
-    for (xs = 0, x0 = nint(0.5 * (double)xstep); x0 < scols; x0 += xstep, xpix++, ypix++, xs++) {
+    for (xs = 0, x0 = nint(0.5 * (double)xstep); x0 < scols;
+         x0 += xstep, xpix++, ypix++, xs++) {
       ox = *xpix; /* initial offset direction */
       oy = *ypix;
 
@@ -852,30 +883,35 @@ IMAGE *ImageOffsetScale(IMAGE *Isrc, IMAGE *Idst)
       {
         delta = nint(ox / (float)fabs(ox));
         slope = delta * oy / ox;
-        for (i = 0, yf = (float)y0 + slope, x = x0 + delta; i <= maxsteps; x += delta, yf += slope, i++) {
+        for (i = 0, yf = (float)y0 + slope, x = x0 + delta; i <= maxsteps;
+             x += delta, yf += slope, i++) {
           y = nint(yf);
-          if (y <= 0 || y >= (srows - 1) || x <= 0 || x >= (scols - 1)) break;
+          if (y <= 0 || y >= (srows - 1) || x <= 0 || x >= (scols - 1))
+            break;
 
           odx = *IMAGEFpix(Ix, x, y);
           ody = *IMAGEFpix(Iy, x, y);
           dot_product = odx * dx + ody * dy;
-          if (dot_product <= 0) break;
+          if (dot_product <= 0)
+            break;
         }
         x -= delta;
         y = nint(yf - slope);
-      }
-      else /* use unit steps in y direction */
+      } else /* use unit steps in y direction */
       {
         delta = nint(oy / (float)fabs(oy));
         slope = delta * ox / oy;
-        for (i = 0, xf = (float)x0 + slope, y = y0 + delta; i < maxsteps; y += delta, xf += slope, i++) {
+        for (i = 0, xf = (float)x0 + slope, y = y0 + delta; i < maxsteps;
+             y += delta, xf += slope, i++) {
           x = nint(xf);
-          if (y <= 0 || y >= (srows - 1) || x <= 0 || x >= (scols - 1)) break;
+          if (y <= 0 || y >= (srows - 1) || x <= 0 || x >= (scols - 1))
+            break;
 
           odx = *IMAGEFpix(Ix, x, y);
           ody = *IMAGEFpix(Iy, x, y);
           dot_product = odx * dx + ody * dy;
-          if (dot_product <= 0) break;
+          if (dot_product <= 0)
+            break;
         }
         y -= delta;
         x = nint(xf - slope);
@@ -897,7 +933,8 @@ IMAGE *ImageOffsetScale(IMAGE *Isrc, IMAGE *Idst)
 
   /* apply median filter */
   for (y0 = nint(0.5 * (double)ystep); y0 < srows; y0 += ystep) {
-    for (x0 = nint(0.5 * (double)xstep); x0 < scols; x0 += xstep, xpix++, ypix++) {
+    for (x0 = nint(0.5 * (double)xstep); x0 < scols;
+         x0 += xstep, xpix++, ypix++) {
       idx = nint(*xpix); /*  offset direction */
       idy = nint(*ypix);
 
@@ -943,8 +980,7 @@ IMAGE *ImageOffsetScale(IMAGE *Isrc, IMAGE *Idst)
   return (Idst);
 }
 
-static int compare_sort_array(const void *pf1, const void *pf2)
-{
+static int compare_sort_array(const void *pf1, const void *pf2) {
   float f1, f2;
 
   f1 = *(float *)pf1;
@@ -963,9 +999,9 @@ static int compare_sort_array(const void *pf1, const void *pf2)
 
            Description:
 ----------------------------------------------------------------------*/
-IMAGE *ImageOffsetOrientation(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Iorient)
-{
-  if (!Iorient) Iorient = ImageAlloc(Ix->rows, Ix->cols, PFFLOAT, 2);
+IMAGE *ImageOffsetOrientation(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Iorient) {
+  if (!Iorient)
+    Iorient = ImageAlloc(Ix->rows, Ix->cols, PFFLOAT, 2);
   Iorient->num_frame = 1;
   ImageMeanFilter(Ix, 3, Iorient);
   Iorient->image += Iorient->sizeimage;
@@ -980,15 +1016,17 @@ IMAGE *ImageOffsetOrientation(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Iorient)
 
            Description:
 ----------------------------------------------------------------------*/
-IMAGE *ImageOffsetDirection(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Iorient, IMAGE *Ioffset)
-{
+IMAGE *ImageOffsetDirection(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Iorient,
+                            IMAGE *Ioffset) {
   int x0, y0, rows, cols, x, y, whalf, xc, yc, yoff, off;
-  float *xpix, *ypix, dx, dy, *or_xpix, *or_ypix, *oxpix, *oypix, dir, ox, oy, dot;
+  float *xpix, *ypix, dx, dy, *or_xpix, *or_ypix, *oxpix, *oypix, dir, ox, oy,
+      dot;
 
   rows = Ix->rows;
   cols = Ix->cols;
 
-  if (!Ioffset) Ioffset = ImageAlloc(rows, cols, PFFLOAT, 2);
+  if (!Ioffset)
+    Ioffset = ImageAlloc(rows, cols, PFFLOAT, 2);
 
   if (!ImageCheckSize(Ix, Ioffset, 0, 0, 2)) {
     ImageFree(&Ioffset);
@@ -1018,18 +1056,21 @@ IMAGE *ImageOffsetDirection(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Iorient, IMA
       for (y = -whalf; y <= whalf; y++) {
         /* reflect across the boundary */
         yc = y + y0;
-        if ((yc < 0) || (yc >= rows)) continue;
+        if ((yc < 0) || (yc >= rows))
+          continue;
 
         yoff = y * cols;
         for (x = -whalf; x <= whalf; x++) {
           xc = x0 + x;
-          if ((xc < 0) || (xc >= cols)) continue;
+          if ((xc < 0) || (xc >= cols))
+            continue;
 
           off = yoff + x;
           dx = *(xpix + off);
           dy = *(ypix + off);
           dot = dx * ox + dy * oy;
-          if (dot < 0.0f) dot = 0.0f;
+          if (dot < 0.0f)
+            dot = 0.0f;
           dir += (x * ox + y * oy) * dot;
         }
       }
@@ -1052,15 +1093,17 @@ IMAGE *ImageOffsetDirection(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Iorient, IMA
 
            Description:
 ----------------------------------------------------------------------*/
-IMAGE *ImageOffsetDirectionMap(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Iorient, IMAGE *Idir, IMAGE *Ioffset)
-{
+IMAGE *ImageOffsetDirectionMap(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Iorient,
+                               IMAGE *Idir, IMAGE *Ioffset) {
   int x0, y0, rows, cols, x, y, whalf, xc, yc, yoff, off;
-  float *xpix, *ypix, dx, dy, *or_xpix, *or_ypix, *oxpix, *oypix, dir, ox, oy, dot;
+  float *xpix, *ypix, dx, dy, *or_xpix, *or_ypix, *oxpix, *oypix, dir, ox, oy,
+      dot;
 
   rows = Ix->rows;
   cols = Ix->cols;
 
-  if (!Ioffset) Ioffset = ImageAlloc(rows, cols, PFFLOAT, 2);
+  if (!Ioffset)
+    Ioffset = ImageAlloc(rows, cols, PFFLOAT, 2);
 
   if (!ImageCheckSize(Ix, Ioffset, 0, 0, 2)) {
     ImageFree(&Ioffset);
@@ -1090,18 +1133,21 @@ IMAGE *ImageOffsetDirectionMap(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Iorient, 
       for (y = -whalf; y <= whalf; y++) {
         /* reflect across the boundary */
         yc = y + y0;
-        if ((yc < 0) || (yc >= rows)) continue;
+        if ((yc < 0) || (yc >= rows))
+          continue;
 
         yoff = y * cols;
         for (x = -whalf; x <= whalf; x++) {
           xc = x0 + x;
-          if ((xc < 0) || (xc >= cols)) continue;
+          if ((xc < 0) || (xc >= cols))
+            continue;
 
           off = yoff + x;
           dx = *(xpix + off);
           dy = *(ypix + off);
           dot = dx * ox + dy * oy;
-          if (dot < 0.0f) dot = 0.0f;
+          if (dot < 0.0f)
+            dot = 0.0f;
           dir += (x * ox + y * oy) * dot;
         }
       }
@@ -1134,12 +1180,14 @@ IMAGE *ImageOffsetDirectionMap(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Iorient, 
 ----------------------------------------------------------------------*/
 #define FSCALE 100.0f
 
-IMAGE *ImageOffsetMagnitude(IMAGE *Isrc, IMAGE *Idst, int maxsteps)
-{
-  int rows, cols, x, y, ax, ay, sx, sy, x1, y1, dx, dy, odx, ody, d, xn, yn, steps, dot = 0, xold, yold;
+IMAGE *ImageOffsetMagnitude(IMAGE *Isrc, IMAGE *Idst, int maxsteps) {
+  int rows, cols, x, y, ax, ay, sx, sy, x1, y1, dx, dy, odx, ody, d, xn, yn,
+      steps, dot = 0, xold, yold;
   float *src_xpix, *src_ypix, *dst_xpix, *dst_ypix, *oxpix, *oypix;
 
-  if (!Idst) Idst = ImageAlloc(Isrc->rows, Isrc->cols, Isrc->pixel_format, Isrc->num_frame);
+  if (!Idst)
+    Idst =
+        ImageAlloc(Isrc->rows, Isrc->cols, Isrc->pixel_format, Isrc->num_frame);
 
   rows = Isrc->rows;
   cols = Isrc->cols;
@@ -1171,20 +1219,22 @@ IMAGE *ImageOffsetMagnitude(IMAGE *Isrc, IMAGE *Idst, int maxsteps)
           ody = nint(*oypix * FSCALE);
           dot = odx * dx + ody * dy;
 
-          if (dot <= 0) break;
+          if (dot <= 0)
+            break;
           if (d >= 0) /* move in y direction */
           {
             yn = y + sy;
-            if (yn < 0 || yn >= rows) break;
+            if (yn < 0 || yn >= rows)
+              break;
             xn = x;
             oxpix += (sy * cols);
             oypix += (sy * cols);
             d -= ax;
-          }
-          else /* move in x direction */
+          } else /* move in x direction */
           {
             xn = x + sx;
-            if (xn < 0 || xn >= cols) break;
+            if (xn < 0 || xn >= cols)
+              break;
             yn = y;
             oxpix += sx;
             oypix += sx;
@@ -1196,8 +1246,7 @@ IMAGE *ImageOffsetMagnitude(IMAGE *Isrc, IMAGE *Idst, int maxsteps)
           x = xn;
           y = yn;
         }
-      }
-      else /* y dominant */
+      } else /* y dominant */
       {
         d = ax - (ay >> 1);
         for (steps = 0; steps < maxsteps; steps++) {
@@ -1209,16 +1258,17 @@ IMAGE *ImageOffsetMagnitude(IMAGE *Isrc, IMAGE *Idst, int maxsteps)
           if (d >= 0) /* move only in x direction */
           {
             xn = x + sx;
-            if (xn < 0 || xn >= cols) break;
+            if (xn < 0 || xn >= cols)
+              break;
             yn = y;
             oxpix += sx;
             oypix += sx;
             d -= ay;
-          }
-          else /* only move in y direction */
+          } else /* only move in y direction */
           {
             yn = y + sy;
-            if (yn < 0 || yn >= rows) break;
+            if (yn < 0 || yn >= rows)
+              break;
             xn = x;
             oypix += (sy * cols);
             oxpix += (sy * cols);
@@ -1252,15 +1302,17 @@ IMAGE *ImageOffsetMagnitude(IMAGE *Isrc, IMAGE *Idst, int maxsteps)
            Description:
               calculate direction using Nitzberg-Shiota formula
 ----------------------------------------------------------------------*/
-IMAGE *ImageNitshiOffsetDirection(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Iorient, IMAGE *Ioffset)
-{
+IMAGE *ImageNitshiOffsetDirection(IMAGE *Ix, IMAGE *Iy, int wsize,
+                                  IMAGE *Iorient, IMAGE *Ioffset) {
   int x0, y0, rows, cols, x, y, whalf, xc, yc, yoff, off;
-  float *xpix, *ypix, dx, dy, *or_xpix, *or_ypix, *oxpix, *oypix, dir, dot, ox, oy, dirx, diry;
+  float *xpix, *ypix, dx, dy, *or_xpix, *or_ypix, *oxpix, *oypix, dir, dot, ox,
+      oy, dirx, diry;
 
   rows = Ix->rows;
   cols = Ix->cols;
 
-  if (!Ioffset) Ioffset = ImageAlloc(rows, cols, PFFLOAT, 2);
+  if (!Ioffset)
+    Ioffset = ImageAlloc(rows, cols, PFFLOAT, 2);
 
   if (!ImageCheckSize(Ix, Ioffset, 0, 0, 2)) {
     ImageFree(&Ioffset);
@@ -1292,12 +1344,14 @@ IMAGE *ImageNitshiOffsetDirection(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Iorien
       for (y = -whalf; y <= whalf; y++) {
         /* reflect across the boundary */
         yc = y + y0;
-        if ((yc < 0) || (yc >= rows)) continue;
+        if ((yc < 0) || (yc >= rows))
+          continue;
 
         yoff = y * cols;
         for (x = -whalf; x <= whalf; x++) {
           xc = x0 + x;
-          if ((xc < 0) || (xc >= cols)) continue;
+          if ((xc < 0) || (xc >= cols))
+            continue;
 
           off = yoff + x;
           dx = *(xpix + off);
@@ -1330,9 +1384,10 @@ IMAGE *ImageNitshiOffsetDirection(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Iorien
               only calculate directions at points along search vector.
 ----------------------------------------------------------------------*/
 
-static int imageOffsetDirection(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Iorient, int x0, int y0);
-static int imageOffsetDirection(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Iorient, int x0, int y0)
-{
+static int imageOffsetDirection(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Iorient,
+                                int x0, int y0);
+static int imageOffsetDirection(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Iorient,
+                                int x0, int y0) {
   int rows, cols, x, y, whalf, xc, yc, yoff, off, d;
   float *xpix, *ypix, dx, dy, *or_xpix, *or_ypix, dir, ox, oy;
 
@@ -1360,12 +1415,14 @@ static int imageOffsetDirection(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Iorient,
   for (y = -whalf; y <= whalf; y++) {
     /* reflect across the boundary */
     yc = y + y0;
-    if ((yc < 0) || (yc >= rows)) continue;
+    if ((yc < 0) || (yc >= rows))
+      continue;
 
     yoff = y * cols;
     for (x = -whalf; x <= whalf; x++) {
       xc = x0 + x;
-      if ((xc < 0) || (xc >= cols)) continue;
+      if ((xc < 0) || (xc >= cols))
+        continue;
 
       off = yoff + x;
       dx = *(xpix + off);
@@ -1384,24 +1441,28 @@ static int imageOffsetDirection(IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Iorient,
   return (d);
 }
 
-IMAGE *ImageOffsetDirectionMagnitude(IMAGE *Isrc, IMAGE *Ix, IMAGE *Iy, int wsize, IMAGE *Idst, int maxsteps)
-{
-  int rows, cols, x, y, ax, ay, sx, sy, x1, y1, dx, dy, odx, ody, d, xn, yn, steps, dir, dot;
+IMAGE *ImageOffsetDirectionMagnitude(IMAGE *Isrc, IMAGE *Ix, IMAGE *Iy,
+                                     int wsize, IMAGE *Idst, int maxsteps) {
+  int rows, cols, x, y, ax, ay, sx, sy, x1, y1, dx, dy, odx, ody, d, xn, yn,
+      steps, dir, dot;
   float *src_xpix, *src_ypix, *dst_xpix, *dst_ypix, *oxpix, *oypix, fdir;
-  byte *calculated;
-  static IMAGE *Icalculated = NULL;
+  hips_byte *calculated;
+  static IMAGE *Icalculated = nullptr;
 
   rows = Isrc->rows;
   cols = Isrc->cols;
 
-  if (!Icalculated || (rows != Icalculated->rows || cols != Icalculated->cols)) {
-    if (Icalculated) ImageFree(&Icalculated);
+  if (!Icalculated ||
+      (rows != Icalculated->rows || cols != Icalculated->cols)) {
+    if (Icalculated)
+      ImageFree(&Icalculated);
     Icalculated = ImageAlloc(rows, cols, PFBYTE, 1);
-  }
-  else
+  } else
     ImageClear(Icalculated);
 
-  if (!Idst) Idst = ImageAlloc(Isrc->rows, Isrc->cols, Isrc->pixel_format, Isrc->num_frame);
+  if (!Idst)
+    Idst =
+        ImageAlloc(Isrc->rows, Isrc->cols, Isrc->pixel_format, Isrc->num_frame);
 
   src_xpix = IMAGEFpix(Isrc, 0, 0);
   src_ypix = IMAGEFseq_pix(Isrc, 0, 0, 1);
@@ -1444,27 +1505,28 @@ IMAGE *ImageOffsetDirectionMagnitude(IMAGE *Isrc, IMAGE *Ix, IMAGE *Iy, int wsiz
           odx = nint(*IMAGEFpix(Idst, x, y) * FSCALE);
           ody = nint(*IMAGEFseq_pix(Idst, x, y, 1) * FSCALE);
           dot = odx * dx + ody * dy;
-          if (dot <= 0) break;
+          if (dot <= 0)
+            break;
           if (d >= 0) {
             yn = y + sy;
-            if (yn < 0 || yn >= rows) break;
+            if (yn < 0 || yn >= rows)
+              break;
             oxpix += (sy * cols);
             oypix += (sy * cols);
             d -= ax;
-          }
-          else
+          } else
             yn = y;
           oxpix += sx;
           oypix += sx;
           xn = x + sx;
-          if (xn < 0 || xn >= cols) break;
+          if (xn < 0 || xn >= cols)
+            break;
 
           x = xn;
           y = yn;
           d += ay;
         }
-      }
-      else /* y dominant */
+      } else /* y dominant */
       {
         d = ax - (ay >> 1);
         for (steps = 0; steps < maxsteps; steps++) {
@@ -1478,18 +1540,20 @@ IMAGE *ImageOffsetDirectionMagnitude(IMAGE *Isrc, IMAGE *Ix, IMAGE *Iy, int wsiz
           odx = nint(*IMAGEFpix(Idst, x, y) * FSCALE);
           ody = nint(*IMAGEFseq_pix(Idst, x, y, 1) * FSCALE);
           dot = odx * dx + ody * dy;
-          if (dot <= 0) break;
+          if (dot <= 0)
+            break;
           if (d >= 0) {
             xn = x + sx;
-            if (xn < 0 || xn >= cols) break;
+            if (xn < 0 || xn >= cols)
+              break;
             oxpix += sx;
             oypix += sx;
             d -= ay;
-          }
-          else
+          } else
             xn = x;
           yn = y + sy;
-          if (yn < 0 || yn >= rows) break;
+          if (yn < 0 || yn >= rows)
+            break;
 
           x = xn;
           y = yn;
@@ -1885,8 +1949,8 @@ ImageSmoothOffsets(IMAGE *Isrc, IMAGE *Idst, int wsize)
            Description:
               apply an offset vector to a filtered image.
 ----------------------------------------------------------------------*/
-IMAGE *ImageFilterMinMax(IMAGE *Imin, IMAGE *Imax, IMAGE *Idir, IMAGE *Ioffset, IMAGE *Idst)
-{
+IMAGE *ImageFilterMinMax(IMAGE *Imin, IMAGE *Imax, IMAGE *Idir, IMAGE *Ioffset,
+                         IMAGE *Idst) {
   int x, y, rows, cols, dx, dy, dir;
   float *dst, src, *dx_pix, *dy_pix, *dir_pix;
   IMAGE *Iout;
@@ -1894,14 +1958,16 @@ IMAGE *ImageFilterMinMax(IMAGE *Imin, IMAGE *Imax, IMAGE *Idir, IMAGE *Ioffset, 
   rows = Imin->rows;
   cols = Imin->cols;
 
-  if (!Idst) Idst = ImageAlloc(rows, cols, PFFLOAT, 1);
+  if (!Idst)
+    Idst = ImageAlloc(rows, cols, PFFLOAT, 1);
 
   if (Idst->pixel_format != PFFLOAT)
     Iout = ImageAlloc(rows, cols, PFFLOAT, 1);
   else
 
     Iout = Idst;
-  if (!ImageCheckSize(Imin, Idst, 0, 0, 0)) ErrorReturn(NULL, (ERROR_SIZE, "ImageApplyOffset: dst not big enough"));
+  if (!ImageCheckSize(Imin, Idst, 0, 0, 0))
+    ErrorReturn(NULL, (ERROR_SIZE, "ImageApplyOffset: dst not big enough"));
 
   dst = IMAGEFpix(Iout, 0, 0);
   dir_pix = IMAGEFpix(Idir, 0, 0);
@@ -1910,7 +1976,8 @@ IMAGE *ImageFilterMinMax(IMAGE *Imin, IMAGE *Imax, IMAGE *Idir, IMAGE *Ioffset, 
 
   for (y = 0; y < rows; y++) {
     for (x = 0; x < cols; x++) {
-      if (x == 7 && y == 50) DiagBreak();
+      if (x == 7 && y == 50)
+        DiagBreak();
 
       dir = (int)*dir_pix++;
       dx = (int)*dx_pix++;
@@ -1920,7 +1987,9 @@ IMAGE *ImageFilterMinMax(IMAGE *Imin, IMAGE *Imax, IMAGE *Idir, IMAGE *Ioffset, 
       else if (dir < 0)
         src = *IMAGEFpix(Imin, x + dx, y + dy);
       else
-        src = (*IMAGEFpix(Imin, x + dx, y + dy) + *IMAGEFpix(Imax, x + dx, y + dy)) / 2;
+        src = (*IMAGEFpix(Imin, x + dx, y + dy) +
+               *IMAGEFpix(Imax, x + dx, y + dy)) /
+              2;
       *dst++ = src;
     }
   }

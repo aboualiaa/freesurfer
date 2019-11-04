@@ -29,72 +29,69 @@
 #include "BrushProperty.h"
 #include <QSettings>
 
-ToolWindowROIEdit::ToolWindowROIEdit(QWidget *parent) :
-  QWidget(parent),
-  ui(new Ui::ToolWindowROIEdit)
-{
+ToolWindowROIEdit::ToolWindowROIEdit(QWidget *parent)
+    : QWidget(parent), ui(new Ui::ToolWindowROIEdit) {
   ui->setupUi(this);
-  this->setWindowFlags( Qt::Tool | Qt::WindowTitleHint | Qt::CustomizeWindowHint );
-  QActionGroup* ag = new QActionGroup(this);
-  ag->addAction( ui->actionFill );
-  ag->addAction( ui->actionFreeHand );
-  ag->addAction( ui->actionLiveWire );
-  ag->addAction( ui->actionPolyLine );
-  ag->setExclusive( true );
-  ui->actionFill->setData( Interactor2DROIEdit::EM_Fill );
-  ui->actionFreeHand->setData( Interactor2DROIEdit::EM_Freehand );
-  ui->actionLiveWire->setData( Interactor2DROIEdit::EM_Livewire );
-  ui->actionPolyLine->setData( Interactor2DROIEdit::EM_Polyline );
-  connect( ag, SIGNAL(triggered(QAction*)), this, SLOT(OnEditMode(QAction*)) );
-  MainWindow* wnd = MainWindow::GetMainWindow();
-  connect( ui->spinBoxBrushSize, SIGNAL(valueChanged(int)), wnd->GetBrushProperty(), SLOT(SetBrushSize(int)));
+  this->setWindowFlags(Qt::Tool | Qt::WindowTitleHint |
+                       Qt::CustomizeWindowHint);
+  QActionGroup *ag = new QActionGroup(this);
+  ag->addAction(ui->actionFill);
+  ag->addAction(ui->actionFreeHand);
+  ag->addAction(ui->actionLiveWire);
+  ag->addAction(ui->actionPolyLine);
+  ag->setExclusive(true);
+  ui->actionFill->setData(Interactor2DROIEdit::EM_Fill);
+  ui->actionFreeHand->setData(Interactor2DROIEdit::EM_Freehand);
+  ui->actionLiveWire->setData(Interactor2DROIEdit::EM_Livewire);
+  ui->actionPolyLine->setData(Interactor2DROIEdit::EM_Polyline);
+  connect(ag, SIGNAL(triggered(QAction *)), this, SLOT(OnEditMode(QAction *)));
+  MainWindow *wnd = MainWindow::GetMainWindow();
+  connect(ui->spinBoxBrushSize, SIGNAL(valueChanged(int)),
+          wnd->GetBrushProperty(), SLOT(SetBrushSize(int)));
 
   UpdateWidgets();
 }
 
-ToolWindowROIEdit::~ToolWindowROIEdit()
-{
+ToolWindowROIEdit::~ToolWindowROIEdit() {
   QSettings settings;
-  settings.setValue("ToolWindowROIEdit/Position", pos()-this->parentWidget()->pos());
+  settings.setValue("ToolWindowROIEdit/Position",
+                    pos() - this->parentWidget()->pos());
 
   delete ui;
 }
 
-void ToolWindowROIEdit::showEvent(QShowEvent* event)
-{
+void ToolWindowROIEdit::showEvent(QShowEvent *event) {
   Q_UNUSED(event);
   static bool bFirstTime = true;
-  if ( bFirstTime )
-  {
-    this->move( parentWidget()->pos() + QPoint(20,100) );
+  if (bFirstTime) {
+    this->move(parentWidget()->pos() + QPoint(20, 100));
     bFirstTime = false;
   }
 }
 
-void ToolWindowROIEdit::UpdateWidgets( )
-{
-  QList<QWidget*> allwidgets = this->findChildren<QWidget*>();
-  for ( int i = 0; i < allwidgets.size(); i++ )
-  {
-    allwidgets[i]->blockSignals( true );
+void ToolWindowROIEdit::UpdateWidgets() {
+  QList<QWidget *> allwidgets = this->findChildren<QWidget *>();
+  for (int i = 0; i < allwidgets.size(); i++) {
+    allwidgets[i]->blockSignals(true);
   }
 
-  MainWindow* wnd = MainWindow::GetMainWindow();
-  RenderView2D* view = (RenderView2D*)wnd->GetRenderView( 0 );
-  ui->actionFill->setChecked( view->GetAction() == Interactor2DROIEdit::EM_Fill );
-  ui->actionLiveWire->setChecked( view->GetAction() == Interactor2DROIEdit::EM_Livewire );
-  ui->actionFreeHand->setChecked( view->GetAction() == Interactor2DROIEdit::EM_Freehand );
-  ui->actionPolyLine->setChecked( view->GetAction() == Interactor2DROIEdit::EM_Polyline );
-  ui->spinBoxBrushSize->setValue( wnd->GetBrushProperty()->GetBrushSize() );
+  MainWindow *wnd = MainWindow::GetMainWindow();
+  RenderView2D *view = (RenderView2D *)wnd->GetRenderView(0);
+  ui->actionFill->setChecked(view->GetAction() == Interactor2DROIEdit::EM_Fill);
+  ui->actionLiveWire->setChecked(view->GetAction() ==
+                                 Interactor2DROIEdit::EM_Livewire);
+  ui->actionFreeHand->setChecked(view->GetAction() ==
+                                 Interactor2DROIEdit::EM_Freehand);
+  ui->actionPolyLine->setChecked(view->GetAction() ==
+                                 Interactor2DROIEdit::EM_Polyline);
+  ui->spinBoxBrushSize->setValue(wnd->GetBrushProperty()->GetBrushSize());
 
-  for ( int i = 0; i < allwidgets.size(); i++ )
-  {
-    allwidgets[i]->blockSignals( false );
+  for (int i = 0; i < allwidgets.size(); i++) {
+    allwidgets[i]->blockSignals(false);
   }
 }
 
-void ToolWindowROIEdit::OnEditMode(QAction *act)
-{
-  MainWindow::GetMainWindow()->SetAction( act->data().toInt() );
+void ToolWindowROIEdit::OnEditMode(QAction *act) {
+  MainWindow::GetMainWindow()->SetAction(act->data().toInt());
   UpdateWidgets();
 }

@@ -7,8 +7,7 @@ namespace Ui {
 class DialogLoadSurfaceOverlay;
 }
 
-class DialogLoadSurfaceOverlay : public QDialog
-{
+class DialogLoadSurfaceOverlay : public QDialog {
   Q_OBJECT
 
 public:
@@ -18,10 +17,7 @@ public:
   QString GetFileName();
   QString GetRegistration();
 
-  void SetLastDir(const QString& dir)
-  {
-    m_strLastDir = dir;
-  }
+  void SetLastDir(const QString &dir) { m_strLastDir = dir; }
 
 protected slots:
   void OnOK();

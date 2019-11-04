@@ -1,12 +1,10 @@
-#ifndef  MINC_FILES_H
-#define  MINC_FILES_H
+#ifndef MINC_FILES_H
+#define MINC_FILES_H
 
 /*
- * Original Author: David MacDonald, modified to compile within freesurfer/utils by Bevin Brett
- * CVS Revision Info:
- *    $Author: Brett $
- *    $Date: 2017/11/01 12:46:00 $
- *    $Revision: 1.00 $
+ * Original Author: David MacDonald, modified to compile within freesurfer/utils
+ * by Bevin Brett CVS Revision Info: $Author: Brett $ $Date: 2017/11/01 12:46:00
+ * $ $Revision: 1.00 $
  *
  * Copyright © 2017 The General Hospital Corporation (Boston, MA) "MGH"
  *
@@ -32,109 +30,79 @@
               make no representations about the suitability of this
               software for any purpose.  It is provided "as is" without
               express or implied warranty.
-@VERSION    : $Header: /private-cvsroot/minc/volume_io/Include/volume_io/files.h,v 1.8.2.2 2005/03/31 17:39:49 bert Exp $
+@VERSION    : $Header:
+/private-cvsroot/minc/volume_io/Include/volume_io/files.h,v 1.8.2.2 2005/03/31
+17:39:49 bert Exp $
 ---------------------------------------------------------------------------- */
 
 /* ----------------------------- MNI Header -----------------------------------
 @NAME       : files.h
-@INPUT      : 
-@OUTPUT     : 
-@RETURNS    : 
+@INPUT      :
+@OUTPUT     :
+@RETURNS    :
 @DESCRIPTION: Types for use with the general file io routines of the library.
-@METHOD     : 
-@GLOBALS    : 
-@CALLS      : 
+@METHOD     :
+@GLOBALS    :
+@CALLS      :
 @CREATED    : 1993            David MacDonald
-@MODIFIED   : 
+@MODIFIED   :
 ---------------------------------------------------------------------------- */
 
-#include  <stdio.h>
+#include <stdio.h>
 
 #include "minc_volume_io.h"
 
-typedef int VIO_BOOL;	// Note - this is written to and read from files, so can't be changed to bool or other types
-#define VIO_TRUE  1
+typedef int VIO_BOOL; // Note - this is written to and read from files, so can't
+                      // be changed to bool or other types
+#define VIO_TRUE 1
 #define VIO_FALSE 0
 
-typedef  enum  { ASCII_FORMAT, BINARY_FORMAT }          VIO_File_formats;
-typedef  enum  { READ_FILE, WRITE_FILE, APPEND_FILE }   VIO_IO_types;
+typedef enum { ASCII_FORMAT, BINARY_FORMAT } VIO_File_formats;
+typedef enum { READ_FILE, WRITE_FILE, APPEND_FILE } VIO_IO_types;
 
-VIO_Status  input_character(
-    FILE *file,
-    char *ch );
+VIO_Status input_character(FILE *file, char *ch);
 
-VIO_Status  input_nonwhite_character(
-    FILE   *file,
-    char   *ch );
+VIO_Status input_nonwhite_character(FILE *file, char *ch);
 
-VIO_Status  input_string(
-    FILE    *file,
-    char*   *str,
-    char    termination_char );
-   
-VIO_Status  input_double(
-    FILE   *file,
-    double *d );
+VIO_Status input_string(FILE *file, char **str, char termination_char);
 
-VIO_Status  input_int(
-    FILE  *file,
-    int   *i );
-    
-VIO_Status  input_newline(
-    FILE *file );
+VIO_Status input_double(FILE *file, double *d);
 
-VIO_Status  io_int(
-    FILE            *file,
-    VIO_IO_types    io_flag,
-    VIO_File_formats format,
-    int             *i );
+VIO_Status input_int(FILE *file, int *i);
 
-VIO_Status  unget_character(
-    FILE  *file,
-    char  ch );
-    
-VIO_Status  io_binary_data(
-    FILE            *file,
-    VIO_IO_types     io_flag,
-    void            *data,
-    size_t           element_size,
-    int              n );
+VIO_Status input_newline(FILE *file);
 
-char*  expand_filename(
-    const char*  filename );
+VIO_Status io_int(FILE *file, VIO_IO_types io_flag, VIO_File_formats format,
+                  int *i);
 
-char*  extract_directory(
-    const char*    filename );
+VIO_Status unget_character(FILE *file, char ch);
 
-char*  get_absolute_filename(
-    const char*    filename,		// expands and prepends path if necessary
-    const char*    directory );
-    
-VIO_Status  open_file(
-    const char*        filename,
-    VIO_IO_types       io_type,
-    VIO_File_formats   file_format,
-    FILE             **file );
-    
-VIO_Status open_file_with_default_suffix(
-    const char*        filename,
-    const char*        default_suffix,
-    VIO_IO_types       io_type,
-    VIO_File_formats   file_format,
-    FILE             **file );
+VIO_Status io_binary_data(FILE *file, VIO_IO_types io_flag, void *data,
+                          size_t element_size, int n);
 
-VIO_Status  set_file_position(
-    FILE     *file,
-    long     byte_position );
-    
-VIO_Status  close_file(
-    FILE     *file );
+char *expand_filename(const char *filename);
 
-VIO_Status  copy_file(
-    const char*  src,
-    const char*  dest );
+char *extract_directory(const char *filename);
 
-void  remove_file(
-    const char*  filename );
+char *get_absolute_filename(
+    const char *filename, // expands and prepends path if necessary
+    const char *directory);
+
+VIO_Status open_file(const char *filename, VIO_IO_types io_type,
+                     VIO_File_formats file_format, FILE **file);
+
+VIO_Status open_file_with_default_suffix(const char *filename,
+                                         const char *default_suffix,
+                                         VIO_IO_types io_type,
+                                         VIO_File_formats file_format,
+                                         FILE **file);
+
+VIO_Status set_file_position(FILE *file, long byte_position);
+
+VIO_Status close_file(FILE *file);
+
+VIO_Status copy_file(const char *src, const char *dest);
+
+void remove_file(const char *filename);
 
 #endif

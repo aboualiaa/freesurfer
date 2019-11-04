@@ -32,7 +32,6 @@
  *
  */
 
-
 /*=========================================================================
 
   Module:    $RCSfile: vtkKWRGBATransferFunctionEditor.h,v $
@@ -77,18 +76,20 @@ class vtkRGBATransferFunction;
 class vtkKWEntryWithLabel;
 class vtkKWMenuButton;
 
-class KWWidgets_EXPORT vtkKWRGBATransferFunctionEditor : public vtkKWParameterValueHermiteFunctionEditor {
+class KWWidgets_EXPORT vtkKWRGBATransferFunctionEditor
+    : public vtkKWParameterValueHermiteFunctionEditor {
 public:
-  static vtkKWRGBATransferFunctionEditor* New();
-  vtkTypeRevisionMacro(vtkKWRGBATransferFunctionEditor,vtkKWParameterValueHermiteFunctionEditor);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  static vtkKWRGBATransferFunctionEditor *New();
+  vtkTypeRevisionMacro(vtkKWRGBATransferFunctionEditor,
+                       vtkKWParameterValueHermiteFunctionEditor);
+  void PrintSelf(ostream &os, vtkIndent indent);
 
   // Description:
   // Get/Set the function
   // Note that the whole parameter range is automatically reset to the
   // function range.
   vtkGetObjectMacro(RGBATransferFunction, vtkRGBATransferFunction);
-  virtual void SetRGBATransferFunction(vtkRGBATransferFunction*);
+  virtual void SetRGBATransferFunction(vtkRGBATransferFunction *);
 
   // Description:
   // Set/Get a point color. Those methodes do not trigger any commands/events.
@@ -110,7 +111,7 @@ public:
   // Get/Set a specific function to display in the color ramp. If not
   // specified, the RGBATransferFunction will be used.
   vtkGetObjectMacro(ColorRampTransferFunction, vtkRGBATransferFunction);
-  virtual void SetColorRampTransferFunction(vtkRGBATransferFunction*);
+  virtual void SetColorRampTransferFunction(vtkRGBATransferFunction *);
 
   // Description:
   // Set/Get the color ramp height (in pixels).
@@ -122,45 +123,42 @@ public:
   // in the canvas itself.
   // The ColorRampVisibility parameter still has to be On for the ramp to be
   // displayed.
-  //BTX
-  enum {
-    ColorRampPositionDefault = 10,
-    ColorRampPositionCanvas
-  };
-  //ETX
+  // BTX
+  enum { ColorRampPositionDefault = 10, ColorRampPositionCanvas };
+  // ETX
   virtual void SetColorRampPosition(int);
   vtkGetMacro(ColorRampPosition, int);
   virtual void SetColorRampPositionToDefault() {
     this->SetColorRampPosition(
-      vtkKWRGBATransferFunctionEditor::ColorRampPositionDefault);
+        vtkKWRGBATransferFunctionEditor::ColorRampPositionDefault);
   };
   virtual void SetColorRampPositionToCanvas() {
     this->SetColorRampPosition(
-      vtkKWRGBATransferFunctionEditor::ColorRampPositionCanvas);
+        vtkKWRGBATransferFunctionEditor::ColorRampPositionCanvas);
   };
 
   // Description:
   // Set/Get the color ramp outline style.
-  //BTX
+  // BTX
   enum {
     ColorRampOutlineStyleNone = 0,
     ColorRampOutlineStyleSolid,
     ColorRampOutlineStyleSunken
   };
-  //ETX
+  // ETX
   virtual void SetColorRampOutlineStyle(int);
   vtkGetMacro(ColorRampOutlineStyle, int);
   virtual void SetColorRampOutlineStyleToNone() {
     this->SetColorRampOutlineStyle(
-      vtkKWRGBATransferFunctionEditor::ColorRampOutlineStyleNone);
+        vtkKWRGBATransferFunctionEditor::ColorRampOutlineStyleNone);
   };
   virtual void SetColorRampOutlineStyleToSolid() {
     this->SetColorRampOutlineStyle(
-      vtkKWRGBATransferFunctionEditor::ColorRampOutlineStyleSolid);
+        vtkKWRGBATransferFunctionEditor::ColorRampOutlineStyleSolid);
   };
   virtual void SetColorRampOutlineStyleToSunken() {
     this->SetColorRampOutlineStyle(
-      vtkKWRGBATransferFunctionEditor::ColorRampOutlineStyleSunken);
+        vtkKWRGBATransferFunctionEditor::ColorRampOutlineStyleSunken);
   };
 
   // Description:
@@ -210,12 +208,12 @@ public:
   // Freesurfer style heatscale, there are six points: a positive min,
   // mid, and max, with a symmetrical triplet on the negative side. If
   // you don't set these functions, the editor will behave normally.
-  void SetPointCountMinimum ( int min );
-  void SetPointCountMaximum ( int max );
-  void SetPointSymmetry ( int id1, int id2 );
+  void SetPointCountMinimum(int min);
+  void SetPointCountMaximum(int max);
+  void SetPointSymmetry(int id1, int id2);
 
   // Description:
-  void SetPointSticky ( int id1, int id2 );
+  void SetPointSticky(int id1, int id2);
 
   // Description:
   // Callbacks. Internal, do not use.
@@ -240,8 +238,7 @@ protected:
   virtual int GetFunctionPointValues(int id, double *values);
   virtual int SetFunctionPointValues(int id, const double *values);
   virtual int InterpolateFunctionPointValues(double parameter, double *values);
-  virtual int AddFunctionPoint(
-    double parameter, const double *values, int *id);
+  virtual int AddFunctionPoint(double parameter, const double *values, int *id);
   virtual int SetFunctionPoint(int id, double parameter, const double *values);
   virtual int RemoveFunctionPoint(int id);
   virtual int GetFunctionPointMidPoint(int id, double *pos);
@@ -251,8 +248,9 @@ protected:
 
   // Description:
   // Higher-level methods to manipulate the function.
-  virtual int  MoveFunctionPointInColorSpace(
-    int id, double parameter, const double *values, int colorspace);
+  virtual int MoveFunctionPointInColorSpace(int id, double parameter,
+                                            const double *values,
+                                            int colorspace);
 
   virtual void UpdatePointEntries(int id);
 
@@ -269,9 +267,9 @@ protected:
 
   // GUI
 
-  vtkKWMenuButton   *ColorSpaceOptionMenu;
+  vtkKWMenuButton *ColorSpaceOptionMenu;
   vtkKWEntryWithLabel *ValueEntries[3];
-  vtkKWLabel        *ColorRamp;
+  vtkKWLabel *ColorRamp;
 
   // Description:
   // Redraw
@@ -283,9 +281,10 @@ protected:
 
   // Description:
   // Redraw the histogram
-  //BTX
-  virtual void UpdateHistogramImageDescriptor(vtkKWHistogram::ImageDescriptor*);
-  //ETX
+  // BTX
+  virtual void
+  UpdateHistogramImageDescriptor(vtkKWHistogram::ImageDescriptor *);
+  // ETX
 
   // Description:
   // Pack the widget
@@ -296,9 +295,10 @@ protected:
   // Redraw the color ramp
   virtual void RedrawColorRamp();
   virtual int IsColorRampUpToDate();
-  virtual void GetColorRampOutlineSunkenColors(
-    unsigned char bg_rgb[3], unsigned char ds_rgb[3], unsigned char ls_rgb[3],
-    unsigned char hl_rgb[3]);
+  virtual void GetColorRampOutlineSunkenColors(unsigned char bg_rgb[3],
+                                               unsigned char ds_rgb[3],
+                                               unsigned char ls_rgb[3],
+                                               unsigned char hl_rgb[3]);
 
   // Description:
   // Update the entries label (depending on the color space)
@@ -319,22 +319,22 @@ protected:
   // Redraw the histogram
   virtual void RedrawHistogram();
 
-  void UpdateSymmetricalPointsTo ( int id );
-  void UpdateStickyPointsTo ( int id, double delta );
+  void UpdateSymmetricalPointsTo(int id);
+  void UpdateStickyPointsTo(int id, double delta);
 
   int PointCountMinimum;
   int PointCountMaximum;
-  //BTX
-  std::map<int,int> PointSymmetry;
-  std::map<int,int> PointSticky;
+  // BTX
+  std::map<int, int> PointSymmetry;
+  std::map<int, int> PointSticky;
   int UpdateDepth;
   int DontUpdateSticky;
-  //ETX
+  // ETX
 
 private:
-  vtkKWRGBATransferFunctionEditor(const vtkKWRGBATransferFunctionEditor&); // Not implemented
-  void operator=(const vtkKWRGBATransferFunctionEditor&); // Not implemented
+  vtkKWRGBATransferFunctionEditor(
+      const vtkKWRGBATransferFunctionEditor &);            // Not implemented
+  void operator=(const vtkKWRGBATransferFunctionEditor &); // Not implemented
 };
 
 #endif
-

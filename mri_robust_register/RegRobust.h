@@ -31,75 +31,64 @@
 #define RegRobust_H
 
 #include "Registration.h"
-#include <vcl_iostream.h>
+#include <iostream>
 
 // forward declaration
-template<class T> class RegistrationStep;
+template <class T> class RegistrationStep;
 
 /** \class RegRobust
- * \brief Class for robust registration 
+ * \brief Class for robust registration
  */
-class RegRobust: public Registration
-{
-  template<class T> friend class RegistrationStep;
+class RegRobust : public Registration {
+  template <class T> friend class RegistrationStep;
+
 public:
-  RegRobust() :
-      Registration(), sat(-1), wlimit(0.16), mri_weights(NULL), mri_hweights(
-          NULL), mri_indexing(NULL)
-  {
-  }
-  
+  RegRobust()
+      : Registration(), sat(-1), wlimit(0.16), mri_weights(nullptr),
+        mri_hweights(nullptr), mri_indexing(nullptr) {}
+
   virtual ~RegRobust();
-  virtual MRI * getHalfWayGeom()
-  {
-    return mri_weights;
-  }
-  
+  virtual MRI *getHalfWayGeom() { return mri_weights; }
+
   virtual void clear();
   //! Return the weights in target space
-  virtual MRI * getWeights()
-  {
-    return mri_weights;
-  }
-  
+  virtual MRI *getWeights() { return mri_weights; }
 
   double estimateIScale(MRI *mriS, MRI *mriT);
-  //! Estimate saturation parameter (higher sensitivity to outliers if sat small)
+  //! Estimate saturation parameter (higher sensitivity to outliers if sat
+  //! small)
   double findSaturation();
   //! Set saturation parameter
-  void setSaturation(double d)
-  {
-    sat = d;
-  }
-  
+  void setSaturation(double d) { sat = d; }
+
   //! Set weight limit for saturation estimation
-  void setWLimit(double d)
-  {
-    wlimit = d;
-  }
+  void setWLimit(double d) { wlimit = d; }
 
   //! Get Name of Registration class
-  virtual std::string getClassName() {return "RegRobust";}
-  
+  virtual std::string getClassName() { return "RegRobust"; }
+
 protected:
-  virtual void computeIterativeRegistrationFull(int n, double epsit, MRI * mriS,
-      MRI* mriT, const vnl_matrix<double> &Minit, double iscaleinit);
+  virtual void computeIterativeRegistrationFull(int n, double epsit, MRI *mriS,
+                                                MRI *mriT,
+                                                const vnl_matrix<double> &Minit,
+                                                double iscaleinit);
   //! To call the actual registration step
-  template<class T> void iterativeRegistrationHelper(int nmax, double epsit,
-      MRI * mriS, MRI* mriT, const vnl_matrix<double>& m, double scaleinit);
+  template <class T>
+  void iterativeRegistrationHelper(int nmax, double epsit, MRI *mriS, MRI *mriT,
+                                   const vnl_matrix<double> &m,
+                                   double scaleinit);
 
 private:
   void findSatMultiRes(const vnl_matrix<double> &mi, double scaleinit);
-  double wcheck; // set from computeRegistrationStepW
+  double wcheck;     // set from computeRegistrationStepW
   double wchecksqrt; // set from computeRegistrationStepW
 
   // PRIVATE DATA
   double sat;
   double wlimit;
-  MRI * mri_weights;
-  MRI * mri_hweights;
-  MRI * mri_indexing;
-
+  MRI *mri_weights;
+  MRI *mri_hweights;
+  MRI *mri_indexing;
 };
 
 /** This is a template function to avoid code duplication.
@@ -107,17 +96,18 @@ private:
  Retruns 4x4 matrix Mfinal and iscalefinal (class member).
  The caller needs to retrieve any really final transform with getFinalVox2Vox.
  */
-template<class T>
-void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI * mriS,
-    MRI* mriT, const vnl_matrix<double>& m, double scaleinit)
-{
+template <class T>
+void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI *mriS,
+                                            MRI *mriT,
+                                            const vnl_matrix<double> &m,
+                                            double scaleinit) {
   if (!mriS)
     mriS = mri_source;
   if (!mriT)
     mriT = mri_target;
 
   assert(mriS && mriT);
-  assert(nmax>0);
+  assert(nmax > 0);
 
   std::pair<vnl_matrix_fixed<double, 4, 4>, double> cmd(
       vnl_matrix_fixed<double, 4, 4>(), 0.0);
@@ -144,22 +134,22 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI * mriS,
     iscalefinal = iscaleinit;
   fmd.second = log(iscalefinal);
 
-  if (verbose > 1)
-  {
+  if (verbose > 1) {
     std::cout << "   - initial iscale: " << iscalefinal << std::endl;
     std::cout << "   - initial transform:\n";
-    vnl_matlab_print(vcl_cout,fmd.first,"Minit",vnl_matlab_print_format_long);
+    vnl_matlab_print(std::cout, fmd.first, "Minit",
+                     vnl_matlab_print_format_long);
     std::cout << std::endl;
   }
 
-  //std::cout << "mris width " << mriS->width << std::endl;
-  MRI* mri_Swarp = NULL;
-  MRI* mri_Twarp = NULL;
+  // std::cout << "mris width " << mriS->width << std::endl;
+  MRI *mri_Swarp = nullptr;
+  MRI *mri_Twarp = nullptr;
   vnl_matrix_fixed<double, 4, 4> mh2;
   vnl_matrix_fixed<double, 4, 4> mh;
   vnl_matrix_fixed<double, 4, 4> mhi;
   mhi.set_identity();
-//  vnl_matrix_fixed<double , 4, 4> mi;
+  //  vnl_matrix_fixed<double , 4, 4> mi;
 
   double diff = 100.0;
   double idiff = 0.0;
@@ -169,18 +159,18 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI * mriS,
 
   // here create RegistrationStep of the specific type: double or float:
   RegistrationStep<T> RStep(*this);
-  RStep.setFloatSVD(true); // even with double, use float for SVD to save some memory
+  RStep.setFloatSVD(
+      true); // even with double, use float for SVD to save some memory
   T tt;
 
   converged = false;
-  while (!converged && i <= nmax)
-  {
+  while (!converged && i <= nmax) {
     if (verbose > 0)
       std::cout << " Iteration(" << typeid(tt).name() << "): " << i
-          << std::endl;
+                << std::endl;
     if (verbose == 1 && subsamplesize > 0)
-      if (mriS->width > subsamplesize && mriS->height > subsamplesize
-          && (mriS->depth > subsamplesize || mriS->depth == 1))
+      if (mriS->width > subsamplesize && mriS->height > subsamplesize &&
+          (mriS->depth > subsamplesize || mriS->depth == 1))
         std::cout << " (subsample " << subsamplesize << ") " << std::flush;
     if (verbose > 1)
       std::cout << std::endl;
@@ -188,11 +178,10 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI * mriS,
     // map source (and if symmetric also target) to new space for next iteration
     // get mri_?warp and half way maps (mh, mhi):
     mapToNewSpace(fmd.first, iscalefinal, mriS, mriT, mri_Swarp, mri_Twarp, mh,
-        mhi);
+                  mhi);
 
-    if (debug > 0)
-    {
-      // write hw images before next registration step: 
+    if (debug > 0) {
+      // write hw images before next registration step:
       MRIwrite(mri_Swarp, (name + "-mriS-hw.mgz").c_str());
       MRIwrite(mri_Twarp, (name + "-mriT-hw.mgz").c_str());
       char ch;
@@ -215,35 +204,33 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI * mriS,
     // ==========================================================================
 
     // store M and d
-    if (verbose > 1)
-    {
+    if (verbose > 1) {
       std::cout << "   - recieved matrix update " << std::endl;
-      vnl_matlab_print(vcl_cout,cmd.first,"Mupdate",vnl_matlab_print_format_long);
+      vnl_matlab_print(std::cout, cmd.first, "Mupdate",
+                       vnl_matlab_print_format_long);
       std::cout << std::endl;
       std::cout << "   - store old transform" << std::endl;
-      vnl_matlab_print(vcl_cout,fmd.first,"Mold",vnl_matlab_print_format_long);
-      std::cout <<  std::endl;
+      vnl_matlab_print(std::cout, fmd.first, "Mold",
+                       vnl_matlab_print_format_long);
+      std::cout << std::endl;
     }
     vnl_matrix_fixed<double, 4, 4> fmdtmp(fmd.first);
-    if (symmetry)
-    {
+    if (symmetry) {
       mh2 = vnl_inverse(mhi); // M = mh2 * mh
       // new M = mh2 * cm * mh
       fmd.first = (mh2 * cmd.first) * mh;
-    }
-    else
+    } else
       fmd.first = cmd.first * fmd.first; // was '* mh' which should be the same
-    if (verbose > 1)
-    {
+    if (verbose > 1) {
       std::cout << "   - updated full transform" << std::endl;
-      vnl_matlab_print(vcl_cout,fmd.first,"Mnew",vnl_matlab_print_format_long);
-      std::cout <<  std::endl;
+      vnl_matlab_print(std::cout, fmd.first, "Mnew",
+                       vnl_matlab_print_format_long);
+      std::cout << std::endl;
     }
 
     // ISCALECHANGE:
-    if (iscale)
-    {
-      fmd.second -= cmd.second; // adjust log
+    if (iscale) {
+      fmd.second -= cmd.second;      // adjust log
       iscalefinal = exp(fmd.second); // compute full factor (source to target)
       idiff = fabs(cmd.second);
       std::ostringstream istar;
@@ -251,7 +238,7 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI * mriS,
         istar << " <= " << ieps << "  :-)";
       if (verbose > 0)
         std::cout << "     -- intensity log diff: abs(" << cmd.second << ") "
-            << istar.str() << std::endl;
+                  << istar.str() << std::endl;
     }
 
     if (!rigid)
@@ -260,7 +247,7 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI * mriS,
       diff = sqrt(MyMatrix::RigidTransDistSq(fmd.first, fmdtmp));
     if (verbose > 1)
       std::cout << "     -- old diff. to prev. transform: " << diff
-          << std::endl;
+                << std::endl;
     diff = sqrt(MyMatrix::AffineTransDistSq(fmd.first, fmdtmp, 100));
     std::ostringstream star;
     if (diff <= epsit)
@@ -269,16 +256,14 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI * mriS,
       star << " max it: " << nmax << " reached!";
     if (verbose > 0)
       std::cout << "     -- diff. to prev. transform: " << diff << star.str()
-          << std::endl;
-    //std::cout << " intens: " << fmd.second << std::endl;
+                << std::endl;
+    // std::cout << " intens: " << fmd.second << std::endl;
     i++;
     converged = (diff <= epsit && idiff <= ieps);
 
-    if (debug > 0)
-    {
+    if (debug > 0) {
       // write weights
-      if (costfun == ROB)
-      {
+      if (costfun == ROB) {
         if (mri_hweights)
           MRIfree(&mri_hweights);
         assert(RStep.getWeights());
@@ -298,20 +283,18 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI * mriS,
 
   if (mri_hweights)
     MRIfree(&mri_hweights);
-  if (costfun == ROB)
-  {
+  if (costfun == ROB) {
     assert(RStep.getWeights());
     mri_hweights = MRIcopy(RStep.getWeights(), NULL);
   }
 
   //   DEBUG OUTPUT
-  if (debug > 0)
-  {
+  if (debug > 0) {
     // write weights and warped images after last step:
 
     MRIwrite(mri_Swarp, (name + "-mriS-mapped.mgz").c_str());
     MRIwrite(mri_Twarp, (name + "-mriT-mapped.mgz").c_str());
-    MRI* salign = MRIclone(mriS, NULL);
+    MRI *salign = MRIclone(mriS, nullptr);
     salign = MyMRI::MRIlinearTransform(mri_Swarp, salign, cmd.first);
     MRIwrite(salign, (name + "-mriS-align.mgz").c_str());
     MRIfree(&salign);
@@ -320,37 +303,39 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI * mriS,
   // store weights (mapped to target space):
   if (mri_weights)
     MRIfree(&mri_weights);
-  if (mri_hweights)
-  {
-    if (debug > 0)
-    {
+  if (mri_hweights) {
+    if (debug > 0) {
       // in the half-way space:
       std::string n = name + std::string("-mriS-weights.mgz");
       MRIwrite(mri_hweights, n.c_str());
     }
     // remove negative weights (markers) set to 1
-   /* int x, y, z;
-    for (z = 0; z < mri_hweights->depth; z++)
-      for (x = 0; x < mri_hweights->width; x++)
-        for (y = 0; y < mri_hweights->height; y++)
-        {
-          if (MRIFvox(mri_hweights,x,y,z) < 0) MRIFvox(mri_hweights,x,y,z) = 1;
-        }*/
+    /* int x, y, z;
+     for (z = 0; z < mri_hweights->depth; z++)
+       for (x = 0; x < mri_hweights->width; x++)
+         for (y = 0; y < mri_hweights->height; y++)
+         {
+           if (MRIFvox(mri_hweights,x,y,z) < 0) MRIFvox(mri_hweights,x,y,z) = 1;
+         }*/
 
     mri_weights = MRIalloc(mriT->width, mriT->height, mriT->depth, MRI_FLOAT);
     MRIcopyHeader(mriT, mri_weights);
     mri_weights->type = MRI_FLOAT;
-    mri_weights->outside_val = 1; 
-    if (symmetry && ! iscaleonly)
+    mri_weights->outside_val = 1;
+    if (symmetry && !iscaleonly)
       mri_weights = MyMRI::MRIlinearTransform(mri_hweights, mri_weights, mh2);
     else
       mri_weights = MRIcopy(mri_hweights, mri_weights);
   }
 
-  //vnl_matlab_print(vcl_cerr,fmd.first,"fmd",vnl_matlab_print_format_long);std::cerr << std::endl;
-  //vnl_matlab_print(vcl_cerr,cmd.first,"cmd",vnl_matlab_print_format_long);std::cerr << std::endl;
-  //vnl_matlab_print(vcl_cerr,mh,"mov1hw",vnl_matlab_print_format_long);std::cerr << std::endl;
-  //vnl_matlab_print(vcl_cerr,mhi,"dst1hw",vnl_matlab_print_format_long);std::cerr << std::endl;
+  // vnl_matlab_print(std::cerr,fmd.first,"fmd",vnl_matlab_print_format_long);std::cerr
+  // << std::endl;
+  // vnl_matlab_print(std::cerr,cmd.first,"cmd",vnl_matlab_print_format_long);std::cerr
+  // << std::endl;
+  // vnl_matlab_print(std::cerr,mh,"mov1hw",vnl_matlab_print_format_long);std::cerr
+  // << std::endl;
+  // vnl_matlab_print(std::cerr,mhi,"dst1hw",vnl_matlab_print_format_long);std::cerr
+  // << std::endl;
 
   // adjust half way maps to new midpoint based on final transform
   if (verbose > 1)
@@ -363,15 +348,15 @@ void RegRobust::iterativeRegistrationHelper(int nmax, double epsit, MRI * mriS,
   mov2weights = ch;
   dst2weights = chi;
 
-  //vnl_matlab_print(vcl_cerr,mov2weights,"mov2hw",vnl_matlab_print_format_long);std::cerr << std::endl;
-  //vnl_matlab_print(vcl_cerr,dst2weights,"dst2hw",vnl_matlab_print_format_long);std::cerr << std::endl;
+  // vnl_matlab_print(std::cerr,mov2weights,"mov2hw",vnl_matlab_print_format_long);std::cerr
+  // << std::endl;
+  // vnl_matlab_print(std::cerr,dst2weights,"dst2hw",vnl_matlab_print_format_long);std::cerr
+  // << std::endl;
 
   MRIfree(&mri_Twarp);
   MRIfree(&mri_Swarp);
 
   Mfinal = fmd.first;
-
 }
 
 #endif
-

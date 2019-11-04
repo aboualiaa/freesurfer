@@ -25,11 +25,11 @@
 /*-----------------------------------------------------
                     INCLUDE FILES
 -------------------------------------------------------*/
-#include <math.h>
+#include <cmath>
 #include <memory.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include "const.h"
 #include "diag.h"
@@ -46,17 +46,18 @@
                     STATIC PROTOTYPES
 -------------------------------------------------------*/
 
-static int regionCornerCoords(MRI_REGION *r, int which_corner, int *px, int *py, int *pz);
+static int regionCornerCoords(MRI_REGION *r, int which_corner, int *px, int *py,
+                              int *pz);
 
 /*-----------------------------------------------------
                     GLOBAL FUNCTIONS
 -------------------------------------------------------*/
-MRI_REGION *REGIONalloc(void)
-{
+MRI_REGION *REGIONalloc() {
   MRI_REGION *r;
 
   r = (MRI_REGION *)calloc(1, sizeof(MRI_REGION));
-  if (!r) ErrorExit(ERROR_NO_MEMORY, "REGIONalloc: could not allocate region");
+  if (!r)
+    ErrorExit(ERROR_NO_MEMORY, "REGIONalloc: could not allocate region");
 
   return (r);
 }
@@ -73,9 +74,10 @@ MRI_REGION *REGIONalloc(void)
           finding the portion of an advancing window which is
           new.
 ------------------------------------------------------*/
-MRI_REGION *REGIONsubtract(MRI_REGION *reg1, MRI_REGION *reg2, MRI_REGION *rdst)
-{
-  int x1_start, x1_end, x2_end, y1_start, y1_end, y2_end, z1_start, z1_end, z2_end;
+MRI_REGION *REGIONsubtract(MRI_REGION *reg1, MRI_REGION *reg2,
+                           MRI_REGION *rdst) {
+  int x1_start, x1_end, x2_end, y1_start, y1_end, y2_end, z1_start, z1_end,
+      z2_end;
 
   x1_start = reg1->x;
   x1_end = reg1->x + reg1->dx - 1;
@@ -83,7 +85,8 @@ MRI_REGION *REGIONsubtract(MRI_REGION *reg1, MRI_REGION *reg2, MRI_REGION *rdst)
 
   rdst->x = MAX(x1_start, x2_end);
   rdst->dx = x1_end - rdst->x + 1;
-  if (rdst->dx < 0) rdst->dx = 0;
+  if (rdst->dx < 0)
+    rdst->dx = 0;
 
   y1_start = reg1->y;
   y1_end = reg1->y + reg1->dy - 1;
@@ -91,7 +94,8 @@ MRI_REGION *REGIONsubtract(MRI_REGION *reg1, MRI_REGION *reg2, MRI_REGION *rdst)
 
   rdst->y = MAX(y1_start, y2_end);
   rdst->dy = y1_end - rdst->y + 1;
-  if (rdst->dy < 0) rdst->dy = 0;
+  if (rdst->dy < 0)
+    rdst->dy = 0;
 
   z1_start = reg1->z;
   z1_end = reg1->z + reg1->dz - 1;
@@ -99,7 +103,8 @@ MRI_REGION *REGIONsubtract(MRI_REGION *reg1, MRI_REGION *reg2, MRI_REGION *rdst)
 
   rdst->z = MAX(z1_start, z2_end);
   rdst->dz = z1_end - rdst->z + 1;
-  if (rdst->dz < 0) rdst->dz = 0;
+  if (rdst->dz < 0)
+    rdst->dz = 0;
 
   return (rdst);
 }
@@ -110,7 +115,9 @@ MRI_REGION *REGIONsubtract(MRI_REGION *reg1, MRI_REGION *reg2, MRI_REGION *rdst)
 
         Description
 ------------------------------------------------------*/
-MRI_REGION *REGIONadd(MRI_REGION *reg1, MRI_REGION *reg2, MRI_REGION *rdst) { return (rdst); }
+MRI_REGION *REGIONadd(MRI_REGION *reg1, MRI_REGION *reg2, MRI_REGION *rdst) {
+  return (rdst);
+}
 /*-----------------------------------------------------
         Parameters:
 
@@ -118,8 +125,7 @@ MRI_REGION *REGIONadd(MRI_REGION *reg1, MRI_REGION *reg2, MRI_REGION *rdst) { re
 
         Description
 ------------------------------------------------------*/
-MRI_REGION *REGIONclear(MRI_REGION *r)
-{
+MRI_REGION *REGIONclear(MRI_REGION *r) {
   memset(r, 0, sizeof(*r));
   return (r);
 }
@@ -130,9 +136,9 @@ MRI_REGION *REGIONclear(MRI_REGION *r)
 
         Description
 ------------------------------------------------------*/
-MRI_REGION *REGIONcopy(MRI_REGION *rsrc, MRI_REGION *rdst)
-{
-  if (!rdst) rdst = REGIONalloc();
+MRI_REGION *REGIONcopy(MRI_REGION *rsrc, MRI_REGION *rdst) {
+  if (!rdst)
+    rdst = REGIONalloc();
 
   memmove(rdst, rsrc, sizeof(*rsrc));
   return (rdst);
@@ -144,8 +150,8 @@ MRI_REGION *REGIONcopy(MRI_REGION *rsrc, MRI_REGION *rdst)
 
         Description
 ------------------------------------------------------*/
-MRI_REGION *REGIONintersect(MRI_REGION *reg1, MRI_REGION *reg2, MRI_REGION *rdst)
-{
+MRI_REGION *REGIONintersect(MRI_REGION *reg1, MRI_REGION *reg2,
+                            MRI_REGION *rdst) {
   int x2, y2, z2;
 
   rdst->x = MAX(reg1->x, reg2->x);
@@ -167,7 +173,9 @@ MRI_REGION *REGIONintersect(MRI_REGION *reg1, MRI_REGION *reg2, MRI_REGION *rdst
 
         Description
 ------------------------------------------------------*/
-MRI_REGION *REGIONunion(MRI_REGION *reg1, MRI_REGION *reg2, MRI_REGION *rdst) { return (rdst); }
+MRI_REGION *REGIONunion(MRI_REGION *reg1, MRI_REGION *reg2, MRI_REGION *rdst) {
+  return (rdst);
+}
 /*-----------------------------------------------------
         Parameters:
 
@@ -175,17 +183,19 @@ MRI_REGION *REGIONunion(MRI_REGION *reg1, MRI_REGION *reg2, MRI_REGION *rdst) { 
 
         Description
 ------------------------------------------------------*/
-int REGIONinside(MRI_REGION *reg, int x, int y, int z)
-{
+int REGIONinside(MRI_REGION *reg, int x, int y, int z) {
   int x1, y1, z1;
 
   x1 = reg->x + reg->dx - 1;
   y1 = reg->y + reg->dy - 1;
   z1 = reg->z + reg->dz - 1;
 
-  if (x < reg->x || x > x1 || y < reg->y || y > y1 || z < reg->z || z > z1) return (REGION_OUTSIDE);
+  if (x < reg->x || x > x1 || y < reg->y || y > y1 || z < reg->z || z > z1)
+    return (REGION_OUTSIDE);
 
-  if ((x == reg->x || x == x1) && (y == reg->y || y == y1) && (z == reg->z || z == z1)) return (REGION_ON_BORDER);
+  if ((x == reg->x || x == x1) && (y == reg->y || y == y1) &&
+      (z == reg->z || z == z1))
+    return (REGION_ON_BORDER);
 
   return (REGION_INSIDE);
 }
@@ -196,8 +206,7 @@ int REGIONinside(MRI_REGION *reg, int x, int y, int z)
 
         Description
 ------------------------------------------------------*/
-MRI_REGION *REGIONexpand(MRI_REGION *rsrc, MRI_REGION *rdst, int n)
-{
+MRI_REGION *REGIONexpand(MRI_REGION *rsrc, MRI_REGION *rdst, int n) {
   rdst->x = rsrc->x - n;
   rdst->y = rsrc->y - n;
   rdst->z = rsrc->z - n;
@@ -213,14 +222,14 @@ MRI_REGION *REGIONexpand(MRI_REGION *rsrc, MRI_REGION *rdst, int n)
 
         Description
 ------------------------------------------------------*/
-float REGIONminCornerDistance(MRI_REGION *r1, MRI_REGION *r2)
-{
+float REGIONminCornerDistance(MRI_REGION *r1, MRI_REGION *r2) {
   float min_dist = 10000.0f, dist, dx, dy, dz;
   int i, j, x0 = 0, y0 = 0, z0 = 0, x1 = 0, y1 = 0, z1 = 0;
   MRI_REGION r3;
 
   REGIONintersect(r1, r2, &r3);
-  if (r3.dx > 0 && r3.dy > 0) return (0.0);
+  if (r3.dx > 0 && r3.dy > 0)
+    return (0.0);
 
   for (i = 0; i < 8; i++) /* each corner of r1 */
   {
@@ -232,7 +241,8 @@ float REGIONminCornerDistance(MRI_REGION *r1, MRI_REGION *r2)
       dy = (float)(y1 - y0);
       dz = (float)(z1 - z0);
       dist = sqrt(dx * dx + dy * dy + dz * dz);
-      if (dist < min_dist) min_dist = dist;
+      if (dist < min_dist)
+        min_dist = dist;
     }
   }
   return (min_dist);
@@ -244,49 +254,49 @@ float REGIONminCornerDistance(MRI_REGION *r1, MRI_REGION *r2)
 
         Description
 ------------------------------------------------------*/
-static int regionCornerCoords(MRI_REGION *r, int which_corner, int *px, int *py, int *pz)
-{
+static int regionCornerCoords(MRI_REGION *r, int which_corner, int *px, int *py,
+                              int *pz) {
   switch (which_corner) {
-    case 0:
-      *px = r->x;
-      *py = r->y;
-      *pz = r->z;
-      break;
-    case 1:
-      *px = r->x + r->dx - 1;
-      *py = r->y;
-      *pz = r->z;
-      break;
-    case 2:
-      *px = r->x;
-      *py = r->y + r->dy - 1;
-      *pz = r->z;
-      break;
-    case 3:
-      *px = r->x;
-      *py = r->y;
-      *pz = r->z + r->dz - 1;
-      break;
-    case 4:
-      *px = r->x + r->dx - 1;
-      *py = r->y + r->dy - 1;
-      *pz = r->z;
-      break;
-    case 5:
-      *px = r->x + r->dx - 1;
-      *py = r->y;
-      *pz = r->z + r->dz - 1;
-      break;
-    case 6:
-      *px = r->x;
-      *py = r->y + r->dy - 1;
-      *pz = r->z + r->dz - 1;
-      break;
-    case 7:
-      *px = r->x + r->dx - 1;
-      *py = r->y + r->dy - 1;
-      *pz = r->z + r->dz - 1;
-      break;
+  case 0:
+    *px = r->x;
+    *py = r->y;
+    *pz = r->z;
+    break;
+  case 1:
+    *px = r->x + r->dx - 1;
+    *py = r->y;
+    *pz = r->z;
+    break;
+  case 2:
+    *px = r->x;
+    *py = r->y + r->dy - 1;
+    *pz = r->z;
+    break;
+  case 3:
+    *px = r->x;
+    *py = r->y;
+    *pz = r->z + r->dz - 1;
+    break;
+  case 4:
+    *px = r->x + r->dx - 1;
+    *py = r->y + r->dy - 1;
+    *pz = r->z;
+    break;
+  case 5:
+    *px = r->x + r->dx - 1;
+    *py = r->y;
+    *pz = r->z + r->dz - 1;
+    break;
+  case 6:
+    *px = r->x;
+    *py = r->y + r->dy - 1;
+    *pz = r->z + r->dz - 1;
+    break;
+  case 7:
+    *px = r->x + r->dx - 1;
+    *py = r->y + r->dy - 1;
+    *pz = r->z + r->dz - 1;
+    break;
   }
   return (NO_ERROR);
 }
@@ -299,8 +309,7 @@ static int regionCornerCoords(MRI_REGION *r, int which_corner, int *px, int *py,
   region->{dx,dy,dz} is the size of the box such that a loop would run
   for(c=region->x; c < region->x+region->dx; c++)
 */
-MRI_REGION *REGIONgetBoundingBox(MRI *mask, int npad)
-{
+MRI_REGION *REGIONgetBoundingBox(MRI *mask, int npad) {
   int c, r, s;
   int cmin, cmax, rmin, rmax, smin, smax;
   MRI_REGION *region;
@@ -313,13 +322,20 @@ MRI_REGION *REGIONgetBoundingBox(MRI *mask, int npad)
     for (r = 0; r < mask->height; r++) {
       for (s = 0; s < mask->depth; s++) {
         v = MRIgetVoxVal(mask, c, r, s, 0);
-        if (iszero(v)) continue;
-        if (cmin > c) cmin = c;
-        if (rmin > r) rmin = r;
-        if (smin > s) smin = s;
-        if (cmax < c) cmax = c;
-        if (rmax < r) rmax = r;
-        if (smax < s) smax = s;
+        if (iszero(v))
+          continue;
+        if (cmin > c)
+          cmin = c;
+        if (rmin > r)
+          rmin = r;
+        if (smin > s)
+          smin = s;
+        if (cmax < c)
+          cmax = c;
+        if (rmax < r)
+          rmax = r;
+        if (smax < s)
+          smax = s;
       }
     }
   }
@@ -340,77 +356,77 @@ MRI_REGION *REGIONgetBoundingBox(MRI *mask, int npad)
   have nrows=ncols and nslices to be odd. This is a customization
   to accomodate the STIR PET simulator
 */
-MRI_REGION *REGIONgetBoundingBoxEqOdd(MRI *mask, int npad)
-{
+MRI_REGION *REGIONgetBoundingBoxEqOdd(MRI *mask, int npad) {
   MRI_REGION *region;
-  int dxy,delta, delta1, delta2, isodd;
+  int dxy, delta, delta1, delta2, isodd;
 
   region = REGIONgetBoundingBox(mask, npad);
   isodd = (region->dz % 2);
 
-  if(region->dx == region->dy && isodd) 
-    return(region);
+  if (region->dx == region->dy && isodd)
+    return (region);
 
-  if(!isodd){
-    if(region->dz < mask->depth){
+  if (!isodd) {
+    if (region->dz < mask->depth) {
       // Add 1 to dz to make it odd
-      region->dz += 1; 
-    }
-    else if(region->z > 0){
+      region->dz += 1;
+    } else if (region->z > 0) {
       // Remove 1 from z and add 1 to dz to make it odd
       region->z -= 1;
-      region->dz += 1; 
-    }
-    else {
-      printf("ERROR: REGIONgetBoundingBoxEqOdd(): cannot make z odd: z=%d, dz=%d, nz=%d\n",
-	     region->z,region->dz,mask->depth);
-      return(NULL);
+      region->dz += 1;
+    } else {
+      printf("ERROR: REGIONgetBoundingBoxEqOdd(): cannot make z odd: z=%d, "
+             "dz=%d, nz=%d\n",
+             region->z, region->dz, mask->depth);
+      return (nullptr);
     }
   }
-  if(region->dx == region->dy)
-    return(region);
+  if (region->dx == region->dy)
+    return (region);
 
   // If it gets here, then dx != dy
-  dxy = MAX(region->dx,region->dy);
-  if(region->x + dxy <= mask->width && region->y + dxy <= mask->height){
+  dxy = MAX(region->dx, region->dy);
+  if (region->x + dxy <= mask->width && region->y + dxy <= mask->height) {
     region->dx = dxy;
     region->dy = dxy;
-    return(region);
+    return (region);
   }
   // Divide the difference into two (maybe equal) parts
-  delta = fabs(region->dx-region->dy);
-  delta1 = delta/2;
+  delta = fabs(region->dx - region->dy);
+  delta1 = delta / 2;
   delta2 = delta - delta1;
-  if(region->dx < region->dy){
+  if (region->dx < region->dy) {
     // reduce the x start by half the difference
-    if(region->x - delta1 > 0 && region->x + region->dx + delta2 <= mask->width){
-      region->x  -= delta1;
+    if (region->x - delta1 > 0 &&
+        region->x + region->dx + delta2 <= mask->width) {
+      region->x -= delta1;
       region->dx += delta;
-      return(region);
+      return (region);
     }
   }
-  if(region->dy < region->dx){
+  if (region->dy < region->dx) {
     // reduce the y start by half the difference
-    if(region->y - delta1 > 0 && region->y + region->dy + delta2 <= mask->height){
-      region->y  -= delta1;
+    if (region->y - delta1 > 0 &&
+        region->y + region->dy + delta2 <= mask->height) {
+      region->y -= delta1;
       region->dy += delta;
-      return(region);
+      return (region);
     }
   }
 
   // More can be done, eg, making the padding asymmetric.
   printf("ERROR: REGIONgetBoundingBoxEqOdd(): cannot make x=y\n");
-  printf("Volume size: %d %d %d, Region: ",mask->width,mask->height,mask->depth);
-  REGIONprint(stdout,region);
-  return(NULL);
+  printf("Volume size: %d %d %d, Region: ", mask->width, mask->height,
+         mask->depth);
+  REGIONprint(stdout, region);
+  return (nullptr);
 }
 
 /*!
   \fn int REGIONprint(FILE *fp, MRI_REGION *r)
   \brief Prints REGION struct.
 */
-int REGIONprint(FILE *fp, MRI_REGION *r)
-{
+int REGIONprint(FILE *fp, MRI_REGION *r) {
   fprintf(fp, "%d %d %d  %d %d %d\n", r->x, r->y, r->z, r->dx, r->dy, r->dz);
   return (0);
 }

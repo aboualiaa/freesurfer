@@ -26,15 +26,13 @@
 
 #include <QDialog>
 
-namespace Ui
-{
+namespace Ui {
 class DialogNewVolume;
 }
 
 class LayerMRI;
 
-class DialogNewVolume : public QDialog
-{
+class DialogNewVolume : public QDialog {
   Q_OBJECT
 
 public:
@@ -42,16 +40,16 @@ public:
   ~DialogNewVolume();
 
   QString GetVolumeName();
-  void SetVolumeName( const QString& name );
+  void SetVolumeName(const QString &name);
 
   bool GetCopyVoxel();
-  void SetCopyVoxel( bool bVoxel );
+  void SetCopyVoxel(bool bVoxel);
 
   int GetVoxelDataOption();
 
   int GetDataType();
 
-  LayerMRI* GetTemplate();
+  LayerMRI *GetTemplate();
 
 protected slots:
   void OnOK();

@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <assert.h>
-#include <string.h>  /* Some FD_ZERO macros use memset without
+#include <string.h> /* Some FD_ZERO macros use memset without
 prototyping memset. */
 
 /* Much of the following #ifdef logic to include the proper
@@ -17,55 +17,55 @@ prototyping memset. */
    from the X11R6.3 version of <X11/Xpoll.h>. */
 
 #if !defined(_WIN32)
-# ifdef __sgi
-#  include <bstring.h>    /* prototype for bzero used by FD_ZERO */
-# endif
-# if (defined(SVR4) || defined(CRAY) || defined(AIXV3)) && !defined(FD_SETSIZE)
-#  include <sys/select.h> /* select system call interface */
-#  ifdef luna
-#   include <sysent.h>
-#  endif
-# endif
+#ifdef __sgi
+#include <bstring.h> /* prototype for bzero used by FD_ZERO */
+#endif
+#if (defined(SVR4) || defined(CRAY) || defined(AIXV3)) && !defined(FD_SETSIZE)
+#include <sys/select.h> /* select system call interface */
+#ifdef luna
+#include <sysent.h>
+#endif
+#endif
 /* AIX 4.2 fubar-ed <sys/select.h>, so go to heroic measures to get it */
-# if defined(AIXV4) && !defined(NFDBITS)
-#  include <sys/select.h>
-# endif
+#if defined(AIXV4) && !defined(NFDBITS)
+#include <sys/select.h>
+#endif
 #endif /* !_WIN32 */
 
 #include <sys/types.h>
 
 #if !defined(_WIN32)
-# if defined(__vms) && ( __VMS_VER < 70000000 )
-#  include <sys/time.h>
-# else
-#  ifndef __vms
-#   include <sys/time.h>
-#  endif
-# endif
-# include <unistd.h>
-# include <X11/Xlib.h>
-# include <X11/keysym.h>
+#if defined(__vms) && (__VMS_VER < 70000000)
+#include <sys/time.h>
 #else
-# ifdef __CYGWIN32__
-#  include <sys/time.h>
-# else
-#  include <sys/timeb.h>
-# endif
-# ifdef __hpux
+#ifndef __vms
+#include <sys/time.h>
+#endif
+#endif
+#include <unistd.h>
+#include <X11/Xlib.h>
+#include <X11/keysym.h>
+#else
+#ifdef __CYGWIN32__
+#include <sys/time.h>
+#else
+#include <sys/timeb.h>
+#endif
+#ifdef __hpux
 /* XXX Bert Gijsbers <bert@mc.bio.uva.nl> reports that HP-UX
 needs different keysyms for the End, Insert, and Delete keys
 to work on an HP 715.  It would be better if HP generated
 standard keysyms for standard keys. */
-#  include <X11/HPkeysym.h>
-# endif
+#include <X11/HPkeysym.h>
+#endif
 #endif /* !_WIN32 */
 
-#if defined(__vms) && ( __VMS_VER < 70000000 )
+#if defined(__vms) && (__VMS_VER < 70000000)
 #include <ssdef.h>
 #include <psldef.h>
 extern int SYS$CLREF(int efn);
 extern int SYS$SETIMR(unsigned int efn, struct timeval *timeout, void *ast,
-                        unsigned int request_id, unsigned int flags);
+                      unsigned int request_id, unsigned int flags);
 extern int SYS$WFLOR(unsigned int efn, unsigned int mask);
 extern int SYS$CANTIM(unsigned int request_id, unsigned int mode);
 #endif /* __vms, VMs 6.2 or earlier */
@@ -83,31 +83,28 @@ GLUTwindow *__glutWindowWorkList = NULL;
 GLUTmenu *__glutMappedMenu;
 GLUTmenu *__glutCurrentMenu = NULL;
 
-void (*__glutUpdateInputDeviceMaskFunc) (GLUTwindow *);
+void (*__glutUpdateInputDeviceMaskFunc)(GLUTwindow *);
 #if !defined(_WIN32)
-void (*__glutMenuItemEnterOrLeave)(GLUTmenuItem * item, int num, int type) = NULL;
+void (*__glutMenuItemEnterOrLeave)(GLUTmenuItem *item, int num,
+                                   int type) = NULL;
 void (*__glutFinishMenu)(Window win, int x, int y);
-void (*__glutPaintMenu)(GLUTmenu * menu);
-void (*__glutStartMenu)(GLUTmenu * menu, GLUTwindow * window, int x, int y, int x_win, int y_win);
-GLUTmenu * (*__glutGetMenuByNum)(int menunum);
-GLUTmenuItem * (*__glutGetMenuItem)(GLUTmenu * menu, Window win, int *which);
-GLUTmenu * (*__glutGetMenu)(Window win);
+void (*__glutPaintMenu)(GLUTmenu *menu);
+void (*__glutStartMenu)(GLUTmenu *menu, GLUTwindow *window, int x, int y,
+                        int x_win, int y_win);
+GLUTmenu *(*__glutGetMenuByNum)(int menunum);
+GLUTmenuItem *(*__glutGetMenuItem)(GLUTmenu *menu, Window win, int *which);
+GLUTmenu *(*__glutGetMenu)(Window win);
 #endif
 
 Atom __glutMotifHints = None;
 /* Modifier mask of ~0 implies not in core input callback. */
-unsigned int __glutModifierMask = (unsigned int) ~0;
+unsigned int __glutModifierMask = (unsigned int)~0;
 int __glutWindowDamaged = 0;
 
-void APIENTRY
-glutIdleFunc(GLUTidleCB idleFunc)
-{
-  __glutIdleFunc = idleFunc;
-}
+void APIENTRY glutIdleFunc(GLUTidleCB idleFunc) { __glutIdleFunc = idleFunc; }
 
-void APIENTRY
-glutTimerFunc(unsigned int interval, GLUTtimerCB timerFunc, int value)
-{
+void APIENTRY glutTimerFunc(unsigned int interval, GLUTtimerCB timerFunc,
+                            int value) {
   GLUTtimer *timer, *other;
   GLUTtimer **prevptr;
   struct timeval now;
@@ -115,25 +112,22 @@ glutTimerFunc(unsigned int interval, GLUTtimerCB timerFunc, int value)
   if (!timerFunc)
     return;
 
-  if (freeTimerList)
-  {
+  if (freeTimerList) {
     timer = freeTimerList;
     freeTimerList = timer->next;
-  }
-  else
-  {
-    timer = (GLUTtimer *) malloc(sizeof(GLUTtimer));
+  } else {
+    timer = (GLUTtimer *)malloc(sizeof(GLUTtimer));
     if (!timer)
       __glutFatalError("out of memory.");
   }
 
   timer->func = timerFunc;
-#if defined(__vms) && ( __VMS_VER < 70000000 )
+#if defined(__vms) && (__VMS_VER < 70000000)
   /* VMS time is expressed in units of 100 ns */
   timer->timeout.val = interval * TICKS_PER_MILLISECOND;
 #else
-  timer->timeout.tv_sec = (int) interval / 1000;
-  timer->timeout.tv_usec = (int) (interval % 1000) * 1000;
+  timer->timeout.tv_sec = (int)interval / 1000;
+  timer->timeout.tv_usec = (int)(interval % 1000) * 1000;
 #endif
   timer->value = value;
   timer->next = NULL;
@@ -141,29 +135,25 @@ glutTimerFunc(unsigned int interval, GLUTtimerCB timerFunc, int value)
   ADD_TIME(timer->timeout, timer->timeout, now);
   prevptr = &__glutTimerList;
   other = *prevptr;
-  while (other && IS_AFTER(other->timeout, timer->timeout))
-  {
+  while (other && IS_AFTER(other->timeout, timer->timeout)) {
     prevptr = &other->next;
     other = *prevptr;
   }
   timer->next = other;
 #ifdef SUPPORT_FORTRAN
-  __glutNewTimer = timer;  /* for Fortran binding! */
+  __glutNewTimer = timer; /* for Fortran binding! */
 #endif
   *prevptr = timer;
 }
 
-void
-handleTimeouts(void)
-{
+void handleTimeouts(void) {
   struct timeval now;
   GLUTtimer *timer;
 
   /* Assumption is that __glutTimerList is already determined
      to be non-NULL. */
   GETTIMEOFDAY(&now);
-  while (IS_AT_OR_AFTER(__glutTimerList->timeout, now))
-  {
+  while (IS_AT_OR_AFTER(__glutTimerList->timeout, now)) {
     timer = __glutTimerList;
     timer->func(timer->value);
     __glutTimerList = timer->next;
@@ -174,16 +164,11 @@ handleTimeouts(void)
   }
 }
 
-void
-__glutPutOnWorkList(GLUTwindow * window, int workMask)
-{
-  if (window->workMask)
-  {
+void __glutPutOnWorkList(GLUTwindow *window, int workMask) {
+  if (window->workMask) {
     /* Already on list; just OR in new workMask. */
     window->workMask |= workMask;
-  }
-  else
-  {
+  } else {
     /* Update work mask and add to window work list. */
     window->workMask = workMask;
     /* Assert that if the window does not have a
@@ -195,26 +180,22 @@ __glutPutOnWorkList(GLUTwindow * window, int workMask)
   }
 }
 
-void
-__glutPostRedisplay(GLUTwindow * window, int layerMask)
-{
-  int shown = (layerMask & (GLUT_REDISPLAY_WORK | GLUT_REPAIR_WORK)) ?
-              window->shownState : window->overlay->shownState;
+void __glutPostRedisplay(GLUTwindow *window, int layerMask) {
+  int shown = (layerMask & (GLUT_REDISPLAY_WORK | GLUT_REPAIR_WORK))
+                  ? window->shownState
+                  : window->overlay->shownState;
 
   /* Post a redisplay if the window is visible (or the
      visibility of the window is unknown, ie. window->visState
      == -1) _and_ the layer is known to be shown. */
-  if (window->visState != GLUT_HIDDEN
-      && window->visState != GLUT_FULLY_COVERED && shown)
-  {
+  if (window->visState != GLUT_HIDDEN &&
+      window->visState != GLUT_FULLY_COVERED && shown) {
     __glutPutOnWorkList(window, layerMask);
   }
 }
 
 /* CENTRY */
-void APIENTRY
-glutPostRedisplay(void)
-{
+void APIENTRY glutPostRedisplay(void) {
   __glutPostRedisplay(__glutCurrentWindow, GLUT_REDISPLAY_WORK);
 }
 
@@ -222,9 +203,7 @@ glutPostRedisplay(void)
    glutSetWindow call (entailing an expensive OpenGL context switch),
    particularly useful when multiple windows need redisplays posted at
    the same times.  See also glutPostWindowOverlayRedisplay. */
-void APIENTRY
-glutPostWindowRedisplay(int win)
-{
+void APIENTRY glutPostWindowRedisplay(int win) {
   __glutPostRedisplay(__glutWindowList[win - 1], GLUT_REDISPLAY_WORK);
 }
 
@@ -237,22 +216,16 @@ static GLUTeventParser *eventParserList = NULL;
    extension support code uses an event parser for handling X
    Input extension events.  */
 
-void
-__glutRegisterEventParser(GLUTeventParser * parser)
-{
+void __glutRegisterEventParser(GLUTeventParser *parser) {
   parser->next = eventParserList;
   eventParserList = parser;
 }
 
-static void
-markWindowHidden(GLUTwindow * window)
-{
-  if (GLUT_HIDDEN != window->visState)
-  {
+static void markWindowHidden(GLUTwindow *window) {
+  if (GLUT_HIDDEN != window->visState) {
     GLUTwindow *child;
 
-    if (window->windowStatus)
-    {
+    if (window->windowStatus) {
       window->visState = GLUT_HIDDEN;
       __glutSetWindow(window);
       window->windowStatus(GLUT_HIDDEN);
@@ -260,8 +233,7 @@ markWindowHidden(GLUTwindow * window)
     /* An unmap is only reported on a single window; its
        descendents need to know they are no longer visible. */
     child = window->children;
-    while (child)
-    {
+    while (child) {
       markWindowHidden(child);
       child = child->siblings;
     }
@@ -270,25 +242,19 @@ markWindowHidden(GLUTwindow * window)
 
 #if !defined(_WIN32)
 
-static void
-purgeStaleWindow(Window win)
-{
+static void purgeStaleWindow(Window win) {
   GLUTstale **pEntry = &__glutStaleWindowList;
   GLUTstale *entry = __glutStaleWindowList;
 
   /* Tranverse singly-linked stale window list look for the
      window ID. */
-  while (entry)
-  {
-    if (entry->win == win)
-    {
+  while (entry) {
+    if (entry->win == win) {
       /* Found it; delete it. */
       *pEntry = entry->next;
       free(entry);
       return;
-    }
-    else
-    {
+    } else {
       pEntry = &entry->next;
       entry = *pEntry;
     }
@@ -303,34 +269,25 @@ purgeStaleWindow(Window win)
    and then immediately get dropped into the idle func (after
    returning from the signal handler).  The idea is to make
    GLUT's main loop reliably interruptible by signals. */
-static int
-interruptibleXNextEvent(Display * dpy, XEvent * event)
-{
+static int interruptibleXNextEvent(Display *dpy, XEvent *event) {
   fd_set fds;
   int rc;
 
   /* Flush X protocol since XPending does not do this
      implicitly. */
   XFlush(__glutDisplay);
-  for (;;)
-  {
-    if (XPending(__glutDisplay))
-    {
+  for (;;) {
+    if (XPending(__glutDisplay)) {
       XNextEvent(dpy, event);
       return 1;
     }
     FD_ZERO(&fds);
     FD_SET(__glutConnectionFD, &fds);
-    rc = select(__glutConnectionFD + 1, &fds,
-                NULL, NULL, NULL);
-    if (rc < 0)
-    {
-      if (errno == EINTR)
-      {
+    rc = select(__glutConnectionFD + 1, &fds, NULL, NULL, NULL);
+    if (rc < 0) {
+      if (errno == EINTR) {
         return 0;
-      }
-      else
-      {
+      } else {
         __glutFatalError("select error.");
       }
     }
@@ -339,17 +296,14 @@ interruptibleXNextEvent(Display * dpy, XEvent * event)
 
 #endif
 
-static void
-processEventsAndTimeouts(void)
-{
-  do
-  {
+static void processEventsAndTimeouts(void) {
+  do {
 #if defined(_WIN32)
     MSG event;
 
     if (!GetMessage(&event, NULL, 0, 0)) /* bail if no more messages */
       exit(0);
-    TranslateMessage(&event);  /* translate virtual-key messages */
+    TranslateMessage(&event); /* translate virtual-key messages */
     DispatchMessage(&event);  /* call the window proc */
     /* see win32_event.c for event (message) processing procedures */
 #else
@@ -362,19 +316,15 @@ processEventsAndTimeouts(void)
     int gotEvent, width, height;
 
     gotEvent = interruptibleXNextEvent(__glutDisplay, &event);
-    if (gotEvent)
-    {
-      switch (event.type)
-      {
+    if (gotEvent) {
+      switch (event.type) {
       case MappingNotify:
-        XRefreshKeyboardMapping((XMappingEvent *) & event);
+        XRefreshKeyboardMapping((XMappingEvent *)&event);
         break;
       case ConfigureNotify:
         window = __glutGetWindow(event.xconfigure.window);
-        if (window)
-        {
-          if (window->win != event.xconfigure.window)
-          {
+        if (window) {
+          if (window->win != event.xconfigure.window) {
             /* Ignore ConfigureNotify sent to the overlay
             planes. GLUT could get here because overlays
             select for StructureNotify events to receive
@@ -383,10 +333,8 @@ processEventsAndTimeouts(void)
           }
           width = event.xconfigure.width;
           height = event.xconfigure.height;
-          if (width != window->width || height != window->height)
-          {
-            if (window->overlay)
-            {
+          if (width != window->width || height != window->height) {
+            if (window->overlay) {
               XResizeWindow(__glutDisplay, window->overlay->win, width, height);
             }
             window->width = width;
@@ -409,120 +357,90 @@ processEventsAndTimeouts(void)
         break;
       case Expose:
         /* compress expose events */
-        while (XEventsQueued(__glutDisplay, QueuedAfterReading)
-               > 0)
-        {
+        while (XEventsQueued(__glutDisplay, QueuedAfterReading) > 0) {
           XPeekEvent(__glutDisplay, &ahead);
           if (ahead.type != Expose ||
-              ahead.xexpose.window != event.xexpose.window)
-          {
+              ahead.xexpose.window != event.xexpose.window) {
             break;
           }
           XNextEvent(__glutDisplay, &event);
         }
-        if (event.xexpose.count == 0)
-        {
+        if (event.xexpose.count == 0) {
           GLUTmenu *menu;
 
-          if (__glutMappedMenu &&
-              (__glutGetMenu) &&
-              (menu = __glutGetMenu(event.xexpose.window)))
-          {
+          if (__glutMappedMenu && (__glutGetMenu) &&
+              (menu = __glutGetMenu(event.xexpose.window))) {
             __glutPaintMenu(menu);
-          }
-          else
-          {
+          } else {
             window = __glutGetWindow(event.xexpose.window);
-            if (window)
-            {
-              if (window->win == event.xexpose.window)
-              {
+            if (window) {
+              if (window->win == event.xexpose.window) {
                 __glutPostRedisplay(window, GLUT_REPAIR_WORK);
-              }
-              else if (window->overlay && window->overlay->win == event.xexpose.window)
-              {
+              } else if (window->overlay &&
+                         window->overlay->win == event.xexpose.window) {
                 __glutPostRedisplay(window, GLUT_OVERLAY_REPAIR_WORK);
               }
             }
           }
-        }
-        else
-        {
+        } else {
           /* there are more exposes to read; wait to redisplay */
         }
         break;
       case ButtonPress:
       case ButtonRelease:
-        if (__glutMappedMenu && event.type == ButtonRelease
-            && mappedMenuButton == event.xbutton.button)
-        {
+        if (__glutMappedMenu && event.type == ButtonRelease &&
+            mappedMenuButton == event.xbutton.button) {
           /* Menu is currently popped up and its button is
           released. */
-          __glutFinishMenu(event.xbutton.window, event.xbutton.x, event.xbutton.y);
-        }
-        else
-        {
+          __glutFinishMenu(event.xbutton.window, event.xbutton.x,
+                           event.xbutton.y);
+        } else {
           window = __glutGetWindow(event.xbutton.window);
-          if (window)
-          {
+          if (window) {
             GLUTmenu *menu;
             int menuNum;
 
             menuNum = window->menu[event.xbutton.button - 1];
             /* Make sure that __glutGetMenuByNum is only called if there
             really is a menu present. */
-            if ((menuNum > 0) && 
-                (__glutGetMenuByNum) &&
-                (menu = __glutGetMenuByNum(menuNum)))
-            {
-              if (event.type == ButtonPress && !__glutMappedMenu)
-              {
-                __glutStartMenu(menu, window,
-                                event.xbutton.x_root, event.xbutton.y_root,
-                                event.xbutton.x, event.xbutton.y);
+            if ((menuNum > 0) && (__glutGetMenuByNum) &&
+                (menu = __glutGetMenuByNum(menuNum))) {
+              if (event.type == ButtonPress && !__glutMappedMenu) {
+                __glutStartMenu(menu, window, event.xbutton.x_root,
+                                event.xbutton.y_root, event.xbutton.x,
+                                event.xbutton.y);
                 mappedMenuButton = event.xbutton.button;
-              }
-              else
-              {
+              } else {
                 /* Ignore a release of a button with a menu
                 attatched to it when no menu is popped up,
                 or ignore a press when another menu is
                 already popped up. */
               }
-            }
-            else if (window->mouse)
-            {
+            } else if (window->mouse) {
               __glutSetWindow(window);
               __glutModifierMask = event.xbutton.state;
               window->mouse(event.xbutton.button - 1,
-                            event.type == ButtonRelease ?
-                            GLUT_UP : GLUT_DOWN,
+                            event.type == ButtonRelease ? GLUT_UP : GLUT_DOWN,
                             event.xbutton.x, event.xbutton.y);
               __glutModifierMask = ~0;
-            }
-            else
-            {
+            } else {
               /* Stray mouse events.  Ignore. */
             }
-          }
-          else
-          {
+          } else {
             /* Window might have been destroyed and all the
             events for the window may not yet be received. */
           }
         }
         break;
       case MotionNotify:
-        if (!__glutMappedMenu)
-        {
+        if (!__glutMappedMenu) {
           window = __glutGetWindow(event.xmotion.window);
-          if (window)
-          {
+          if (window) {
             /* If motion function registered _and_ buttons held
-            * down, call motion function...  */
-            if (window->motion && event.xmotion.state &
-                (Button1Mask | Button2Mask | Button3Mask))
-            {
+             * down, call motion function...  */
+            if (window->motion &&
+                event.xmotion.state &
+                    (Button1Mask | Button2Mask | Button3Mask)) {
               __glutSetWindow(window);
               window->motion(event.xmotion.x, event.xmotion.y);
             }
@@ -531,17 +449,12 @@ processEventsAndTimeouts(void)
             function...  */
             else if (window->passive &&
                      ((event.xmotion.state &
-                       (Button1Mask | Button2Mask | Button3Mask)) ==
-                      0))
-            {
+                       (Button1Mask | Button2Mask | Button3Mask)) == 0)) {
               __glutSetWindow(window);
-              window->passive(event.xmotion.x,
-                              event.xmotion.y);
+              window->passive(event.xmotion.x, event.xmotion.y);
             }
           }
-        }
-        else
-        {
+        } else {
           /* Motion events are thrown away when a pop up menu
           is active. */
         }
@@ -549,16 +462,12 @@ processEventsAndTimeouts(void)
       case KeyPress:
       case KeyRelease:
         window = __glutGetWindow(event.xkey.window);
-        if (!window)
-        {
+        if (!window) {
           break;
         }
-        if (event.type == KeyPress)
-        {
+        if (event.type == KeyPress) {
           keyboard = window->keyboard;
-        }
-        else
-        {
+        } else {
 
           /* If we are ignoring auto repeated keys for this window,
           check if the next event in the X event queue is a KeyPress
@@ -566,16 +475,13 @@ processEventsAndTimeouts(void)
           key being released.  The X11 protocol will send auto
           repeated keys as such KeyRelease/KeyPress pairs. */
 
-          if (window->ignoreKeyRepeat)
-          {
-            if (XEventsQueued(__glutDisplay, QueuedAfterReading))
-            {
+          if (window->ignoreKeyRepeat) {
+            if (XEventsQueued(__glutDisplay, QueuedAfterReading)) {
               XPeekEvent(__glutDisplay, &ahead);
-              if (ahead.type == KeyPress
-                  && ahead.xkey.window == event.xkey.window
-                  && ahead.xkey.keycode == event.xkey.keycode
-                  && ahead.xkey.time == event.xkey.time)
-              {
+              if (ahead.type == KeyPress &&
+                  ahead.xkey.window == event.xkey.window &&
+                  ahead.xkey.keycode == event.xkey.keycode &&
+                  ahead.xkey.time == event.xkey.time) {
                 /* Pop off the repeated KeyPress and ignore
                 the auto repeated KeyRelease/KeyPress pair. */
                 XNextEvent(__glutDisplay, &event);
@@ -585,33 +491,25 @@ processEventsAndTimeouts(void)
           }
           keyboard = window->keyboardUp;
         }
-        if (keyboard)
-        {
+        if (keyboard) {
           char tmp[1];
           int rc;
 
-          rc = XLookupString(&event.xkey, tmp, sizeof(tmp),
-                             NULL, NULL);
-          if (rc)
-          {
+          rc = XLookupString(&event.xkey, tmp, sizeof(tmp), NULL, NULL);
+          if (rc) {
             __glutSetWindow(window);
             __glutModifierMask = event.xkey.state;
-            keyboard(tmp[0],
-                     event.xkey.x, event.xkey.y);
+            keyboard(tmp[0], event.xkey.x, event.xkey.y);
             __glutModifierMask = ~0;
             break;
           }
         }
-        if (event.type == KeyPress)
-        {
+        if (event.type == KeyPress) {
           special = window->special;
-        }
-        else
-        {
+        } else {
           special = window->specialUp;
         }
-        if (special)
-        {
+        if (special) {
           KeySym ks;
           int key;
 
@@ -619,41 +517,40 @@ processEventsAndTimeouts(void)
           in place in case compiling against an older pre-X11R6
           X11/keysymdef.h file. */
 #ifndef XK_KP_Home
-#define XK_KP_Home              0xFF95
+#define XK_KP_Home 0xFF95
 #endif
 #ifndef XK_KP_Left
-#define XK_KP_Left              0xFF96
+#define XK_KP_Left 0xFF96
 #endif
 #ifndef XK_KP_Up
-#define XK_KP_Up                0xFF97
+#define XK_KP_Up 0xFF97
 #endif
 #ifndef XK_KP_Right
-#define XK_KP_Right             0xFF98
+#define XK_KP_Right 0xFF98
 #endif
 #ifndef XK_KP_Down
-#define XK_KP_Down              0xFF99
+#define XK_KP_Down 0xFF99
 #endif
 #ifndef XK_KP_Prior
-#define XK_KP_Prior             0xFF9A
+#define XK_KP_Prior 0xFF9A
 #endif
 #ifndef XK_KP_Next
-#define XK_KP_Next              0xFF9B
+#define XK_KP_Next 0xFF9B
 #endif
 #ifndef XK_KP_End
-#define XK_KP_End               0xFF9C
+#define XK_KP_End 0xFF9C
 #endif
 #ifndef XK_KP_Insert
-#define XK_KP_Insert            0xFF9E
+#define XK_KP_Insert 0xFF9E
 #endif
 #ifndef XK_KP_Delete
-#define XK_KP_Delete            0xFF9F
+#define XK_KP_Delete 0xFF9F
 #endif
 
-          ks = XLookupKeysym((XKeyEvent *) & event, 0);
+          ks = XLookupKeysym((XKeyEvent *)&event, 0);
           /* XXX Verbose, but makes no assumptions about keysym
           layout. */
-          switch (ks)
-          {
+          switch (ks) {
             /* *INDENT-OFF* */
             /* function keys */
           case XK_F1:
@@ -745,7 +642,7 @@ processEventsAndTimeouts(void)
           case XK_KP_Delete: /* Introduced in X11R6. */
             /* The Delete character is really an ASCII key. */
             __glutSetWindow(window);
-            keyboard(127,  /* ASCII Delete character. */
+            keyboard(127, /* ASCII Delete character. */
                      event.xkey.x, event.xkey.y);
             goto skip;
           default:
@@ -755,16 +652,14 @@ processEventsAndTimeouts(void)
           __glutModifierMask = event.xkey.state;
           special(key, event.xkey.x, event.xkey.y);
           __glutModifierMask = ~0;
-skip:
-          ;
+        skip:;
         }
         break;
       case EnterNotify:
       case LeaveNotify:
         if (event.xcrossing.mode != NotifyNormal ||
             event.xcrossing.detail == NotifyNonlinearVirtual ||
-            event.xcrossing.detail == NotifyVirtual)
-        {
+            event.xcrossing.detail == NotifyVirtual) {
 
           /* Careful to ignore Enter/LeaveNotify events that
           come from the pop-up menu pointer grab and ungrab.
@@ -775,26 +670,21 @@ skip:
 
           break;
         }
-        if (__glutMappedMenu && __glutGetMenuItem)
-        {
+        if (__glutMappedMenu && __glutGetMenuItem) {
           GLUTmenuItem *item;
           int num;
 
-          item = __glutGetMenuItem(__glutMappedMenu,
-                                   event.xcrossing.window, &num);
-          if (item)
-          {
+          item =
+              __glutGetMenuItem(__glutMappedMenu, event.xcrossing.window, &num);
+          if (item) {
             __glutMenuItemEnterOrLeave(item, num, event.type);
             break;
           }
         }
         window = __glutGetWindow(event.xcrossing.window);
-        if (window)
-        {
-          if (window->entry)
-          {
-            if (event.type == EnterNotify)
-            {
+        if (window) {
+          if (window->entry) {
+            if (event.type == EnterNotify) {
 
               /* With overlays established, X can report two
               enter events for both the overlay and normal
@@ -802,8 +692,7 @@ skip:
               callback if we reported one without an
               intervening leave. */
 
-              if (window->entryState != EnterNotify)
-              {
+              if (window->entryState != EnterNotify) {
                 int num = window->num;
                 Window xid = window->win;
 
@@ -811,15 +700,12 @@ skip:
                 __glutSetWindow(window);
                 window->entry(GLUT_ENTERED);
 
-                if (__glutMappedMenu)
-                {
+                if (__glutMappedMenu) {
 
                   /* Do not generate any passive motion events
                   when menus are in use. */
 
-                }
-                else
-                {
+                } else {
 
                   /* An EnterNotify event can result in a
                   "compound" callback if a passive motion
@@ -829,18 +715,14 @@ skip:
                   entry callback. */
 
                   window = __glutWindowList[num];
-                  if (window && window->passive && window->win == xid)
-                  {
+                  if (window && window->passive && window->win == xid) {
                     __glutSetWindow(window);
                     window->passive(event.xcrossing.x, event.xcrossing.y);
                   }
                 }
               }
-            }
-            else
-            {
-              if (window->entryState != LeaveNotify)
-              {
+            } else {
+              if (window->entryState != LeaveNotify) {
 
                 /* When an overlay is established for a window
                 already mapped and with the pointer in it,
@@ -854,12 +736,10 @@ skip:
                 the overlay, not an actual leave from the
                 GLUT window. */
 
-                if (XEventsQueued(__glutDisplay, QueuedAfterReading))
-                {
+                if (XEventsQueued(__glutDisplay, QueuedAfterReading)) {
                   XPeekEvent(__glutDisplay, &ahead);
                   if (ahead.type == EnterNotify &&
-                      __glutGetWindow(ahead.xcrossing.window) == window)
-                  {
+                      __glutGetWindow(ahead.xcrossing.window) == window) {
                     XNextEvent(__glutDisplay, &event);
                     break;
                   }
@@ -869,9 +749,7 @@ skip:
                 window->entry(GLUT_LEFT);
               }
             }
-          }
-          else if (window->passive)
-          {
+          } else if (window->passive) {
             __glutSetWindow(window);
             window->passive(event.xcrossing.x, event.xcrossing.y);
           }
@@ -885,10 +763,8 @@ skip:
         delivered when a window is unmapped (for the window
         or its children). */
         window = __glutGetWindow(event.xunmap.window);
-        if (window)
-        {
-          if (window->win != event.xconfigure.window)
-          {
+        if (window) {
+          if (window->win != event.xconfigure.window) {
             /* Ignore UnmapNotify sent to the overlay planes.
             GLUT could get here because overlays select for
             StructureNotify events to receive DestroyNotify.
@@ -900,18 +776,15 @@ skip:
         break;
       case VisibilityNotify:
         window = __glutGetWindow(event.xvisibility.window);
-        if (window)
-        {
+        if (window) {
           /* VisibilityUnobscured+1 = GLUT_FULLY_RETAINED,
           VisibilityPartiallyObscured+1 =
           GLUT_PARTIALLY_RETAINED, VisibilityFullyObscured+1
           =  GLUT_FULLY_COVERED. */
           int visState = event.xvisibility.state + 1;
 
-          if (visState != window->visState)
-          {
-            if (window->windowStatus)
-            {
+          if (visState != window->visState) {
+            if (window->windowStatus) {
               window->visState = visState;
               __glutSetWindow(window);
               window->windowStatus(visState);
@@ -941,8 +814,7 @@ skip:
         all GLUT programs to support X Input event handling.
         */
         parser = eventParserList;
-        while (parser)
-        {
+        while (parser) {
           if (parser->func(&event))
             break;
           parser = parser->next;
@@ -951,30 +823,20 @@ skip:
       }
     }
 #endif /* _WIN32 */
-    if (__glutTimerList)
-    {
+    if (__glutTimerList) {
       handleTimeouts();
     }
-  }
-  while (XPending(__glutDisplay));
+  } while (XPending(__glutDisplay));
 }
 
-static void
-waitForSomething(void)
-{
-#if defined(__vms) && ( __VMS_VER < 70000000 )
-  static struct timeval zerotime =
-    {
-      0
-    };
+static void waitForSomething(void) {
+#if defined(__vms) && (__VMS_VER < 70000000)
+  static struct timeval zerotime = {0};
   unsigned int timer_efn;
 #define timer_id 'glut' /* random :-) number */
   unsigned int wait_mask;
 #else
-  static struct timeval zerotime =
-    {
-      0, 0
-    };
+  static struct timeval zerotime = {0, 0};
 #if !defined(_WIN32)
   fd_set fds;
 #endif
@@ -987,8 +849,7 @@ waitForSomething(void)
   /* Flush X protocol since XPending does not do this
      implicitly. */
   XFlush(__glutDisplay);
-  if (XPending(__glutDisplay))
-  {
+  if (XPending(__glutDisplay)) {
     /* It is possible (but quite rare) that XFlush may have
        needed to wait for a writable X connection file
        descriptor, and in the process, may have had to read off
@@ -1000,32 +861,27 @@ waitForSomething(void)
        select. */
     goto immediatelyHandleXinput;
   }
-#if defined(__vms) && ( __VMS_VER < 70000000 )
+#if defined(__vms) && (__VMS_VER < 70000000)
   timeout = __glutTimerList->timeout;
   GETTIMEOFDAY(&now);
   wait_mask = 1 << (__glutConnectionFD & 31);
-  if (IS_AFTER(now, timeout))
-  {
+  if (IS_AFTER(now, timeout)) {
     /* We need an event flag for the timer. */
     /* XXX The `right' way to do this is to use LIB$GET_EF, but
        since it needs to be in the same cluster as the EFN for
        the display, we will have hack it. */
     timer_efn = __glutConnectionFD - 1;
-    if ((timer_efn / 32) != (__glutConnectionFD / 32))
-    {
+    if ((timer_efn / 32) != (__glutConnectionFD / 32)) {
       timer_efn = __glutConnectionFD + 1;
     }
     rc = SYS$CLREF(timer_efn);
     rc = SYS$SETIMR(timer_efn, &timeout, NULL, timer_id, 0);
     wait_mask |= 1 << (timer_efn & 31);
-  }
-  else
-  {
+  } else {
     timer_efn = 0;
   }
   rc = SYS$WFLOR(__glutConnectionFD, wait_mask);
-  if (timer_efn != 0 && SYS$CLREF(timer_efn) == SS$_WASCLR)
-  {
+  if (timer_efn != 0 && SYS$CLREF(timer_efn) == SS$_WASCLR) {
     rc = SYS$CANTIM(timer_id, PSL$C_USER);
   }
   /* XXX There does not seem to be checking of "rc" in the code
@@ -1037,17 +893,13 @@ waitForSomething(void)
 #endif
   timeout = __glutTimerList->timeout;
   GETTIMEOFDAY(&now);
-  if (IS_AFTER(now, timeout))
-  {
+  if (IS_AFTER(now, timeout)) {
     TIMEDELTA(waittime, timeout, now);
-  }
-  else
-  {
+  } else {
     waittime = zerotime;
   }
 #if !defined(_WIN32)
-  rc = select(__glutConnectionFD + 1, &fds,
-              NULL, NULL, &waittime);
+  rc = select(__glutConnectionFD + 1, &fds, NULL, NULL, &waittime);
   if (rc < 0 && errno != EINTR)
     __glutFatalError("select error.");
 #else
@@ -1069,52 +921,37 @@ waitForSomething(void)
      even if select returned with 0 (indicating a timeout);
      otherwise we risk starving X event processing by continous
      timeouts. */
-  if (XPending(__glutDisplay))
-  {
-immediatelyHandleXinput:
+  if (XPending(__glutDisplay)) {
+  immediatelyHandleXinput:
     processEventsAndTimeouts();
-  }
-  else
-  {
+  } else {
     if (__glutTimerList)
       handleTimeouts();
   }
 }
 
-static void
-idleWait(void)
-{
-  if (XPending(__glutDisplay))
-  {
+static void idleWait(void) {
+  if (XPending(__glutDisplay)) {
     processEventsAndTimeouts();
-  }
-  else
-  {
-    if (__glutTimerList)
-    {
+  } else {
+    if (__glutTimerList) {
       handleTimeouts();
     }
   }
   /* Make sure idle func still exists! */
-  if (__glutIdleFunc)
-  {
+  if (__glutIdleFunc) {
     __glutIdleFunc();
   }
 }
 
 static GLUTwindow **beforeEnd;
 
-static GLUTwindow *
-processWindowWorkList(GLUTwindow * window)
-{
+static GLUTwindow *processWindowWorkList(GLUTwindow *window) {
   int workMask;
 
-  if (window->prevWorkWin)
-  {
+  if (window->prevWorkWin) {
     window->prevWorkWin = processWindowWorkList(window->prevWorkWin);
-  }
-  else
-  {
+  } else {
     beforeEnd = &window->prevWorkWin;
   }
 
@@ -1141,40 +978,37 @@ processWindowWorkList(GLUTwindow * window)
      individually one by one. This saves about 25 MIPS
      instructions in the common redisplay only case. */
   if (workMask & (GLUT_EVENT_MASK_WORK | GLUT_DEVICE_MASK_WORK |
-                  GLUT_CONFIGURE_WORK | GLUT_COLORMAP_WORK | GLUT_MAP_WORK))
-  {
+                  GLUT_CONFIGURE_WORK | GLUT_COLORMAP_WORK | GLUT_MAP_WORK)) {
 #if !defined(_WIN32)
     /* Be sure to set event mask BEFORE map window is done. */
-    if (workMask & GLUT_EVENT_MASK_WORK)
-    {
+    if (workMask & GLUT_EVENT_MASK_WORK) {
       long eventMask;
 
       /* Make sure children are not propogating events this
          window is selecting for.  Be sure to do this before
          enabling events on the children's parent. */
-      if (window->children)
-      {
+      if (window->children) {
         GLUTwindow *child = window->children;
         unsigned long attribMask = CWDontPropagate;
         XSetWindowAttributes wa;
 
-        wa.do_not_propagate_mask = window->eventMask & GLUT_DONT_PROPAGATE_FILTER_MASK;
-        if (window->eventMask & GLUT_HACK_STOP_PROPAGATE_MASK)
-        {
-          wa.event_mask = child->eventMask | (window->eventMask & GLUT_HACK_STOP_PROPAGATE_MASK);
+        wa.do_not_propagate_mask =
+            window->eventMask & GLUT_DONT_PROPAGATE_FILTER_MASK;
+        if (window->eventMask & GLUT_HACK_STOP_PROPAGATE_MASK) {
+          wa.event_mask = child->eventMask |
+                          (window->eventMask & GLUT_HACK_STOP_PROPAGATE_MASK);
           attribMask |= CWEventMask;
         }
-        do
-        {
-          XChangeWindowAttributes(__glutDisplay, child->win,
-                                  attribMask, &wa);
+        do {
+          XChangeWindowAttributes(__glutDisplay, child->win, attribMask, &wa);
           child = child->siblings;
-        }
-        while (child);
+        } while (child);
       }
       eventMask = window->eventMask;
-      if (window->parent && window->parent->eventMask & GLUT_HACK_STOP_PROPAGATE_MASK)
-        eventMask |= (window->parent->eventMask & GLUT_HACK_STOP_PROPAGATE_MASK);
+      if (window->parent &&
+          window->parent->eventMask & GLUT_HACK_STOP_PROPAGATE_MASK)
+        eventMask |=
+            (window->parent->eventMask & GLUT_HACK_STOP_PROPAGATE_MASK);
       XSelectInput(__glutDisplay, window->win, eventMask);
       if (window->overlay)
         XSelectInput(__glutDisplay, window->overlay->win,
@@ -1182,47 +1016,41 @@ processWindowWorkList(GLUTwindow * window)
     }
 #endif /* !_WIN32 */
     /* Be sure to set device mask BEFORE map window is done. */
-    if (workMask & GLUT_DEVICE_MASK_WORK)
-    {
+    if (workMask & GLUT_DEVICE_MASK_WORK) {
       __glutUpdateInputDeviceMaskFunc(window);
     }
     /* Be sure to configure window BEFORE map window is done. */
-    if (workMask & GLUT_CONFIGURE_WORK)
-    {
+    if (workMask & GLUT_CONFIGURE_WORK) {
 #if defined(_WIN32)
       RECT changes;
       POINT point;
-      UINT flags = SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOOWNERZORDER
-                   | SWP_NOSENDCHANGING | SWP_NOSIZE | SWP_NOZORDER;
+      UINT flags = SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOOWNERZORDER |
+                   SWP_NOSENDCHANGING | SWP_NOSIZE | SWP_NOZORDER;
 
       GetClientRect(window->win, &changes);
 
       /* If this window is a toplevel window, translate the 0,0 client
          coordinate into a screen coordinate for proper placement. */
-      if (!window->parent)
-      {
+      if (!window->parent) {
         point.x = 0;
         point.y = 0;
         ClientToScreen(window->win, &point);
         changes.left = point.x;
         changes.top = point.y;
       }
-      if (window->desiredConfMask & (CWX | CWY))
-      {
+      if (window->desiredConfMask & (CWX | CWY)) {
         changes.left = window->desiredX;
         changes.top = window->desiredY;
         flags &= ~SWP_NOMOVE;
       }
-      if (window->desiredConfMask & (CWWidth | CWHeight))
-      {
+      if (window->desiredConfMask & (CWWidth | CWHeight)) {
         changes.right = changes.left + window->desiredWidth;
         changes.bottom = changes.top + window->desiredHeight;
         flags &= ~SWP_NOSIZE;
         /* XXX If overlay exists, resize the overlay here, ie.
            if (window->overlay) ... */
       }
-      if (window->desiredConfMask & CWStackMode)
-      {
+      if (window->desiredConfMask & CWStackMode) {
         flags &= ~SWP_NOZORDER;
         /* XXX Overlay support might require something special here. */
       }
@@ -1233,27 +1061,24 @@ processWindowWorkList(GLUTwindow * window)
          area of the window.  Only do this to top level windows
          that are not in game mode (since game mode windows do
          not have any decorations). */
-      if (!window->parent && window != __glutGameModeWindow)
-      {
-        AdjustWindowRect(&changes,
-                         WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
-                         FALSE);
+      if (!window->parent && window != __glutGameModeWindow) {
+        AdjustWindowRect(
+            &changes, WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
+            FALSE);
       }
 
       /* Do the repositioning, moving, and push/pop. */
       SetWindowPos(window->win,
                    window->desiredStack == Above ? HWND_TOP : HWND_NOTOPMOST,
-                   changes.left, changes.top,
-                   changes.right - changes.left, changes.bottom - changes.top,
-                   flags);
+                   changes.left, changes.top, changes.right - changes.left,
+                   changes.bottom - changes.top, flags);
 
       /* Zero out the mask. */
       window->desiredConfMask = 0;
 
       /* This hack causes the window to go back to the right position
          when it is taken out of fullscreen mode. */
-      if (workMask & GLUT_FULL_SCREEN_WORK)
-      {
+      if (workMask & GLUT_FULL_SCREEN_WORK) {
         window->desiredConfMask |= CWX | CWY;
         window->desiredX = point.x;
         window->desiredY = point.y;
@@ -1263,27 +1088,23 @@ processWindowWorkList(GLUTwindow * window)
 
       changes.x = window->desiredX;
       changes.y = window->desiredY;
-      if (window->desiredConfMask & (CWWidth | CWHeight))
-      {
+      if (window->desiredConfMask & (CWWidth | CWHeight)) {
         changes.width = window->desiredWidth;
         changes.height = window->desiredHeight;
         if (window->overlay)
           XResizeWindow(__glutDisplay, window->overlay->win,
                         window->desiredWidth, window->desiredHeight);
-        if (__glutMotifHints != None)
-        {
-          if (workMask & GLUT_FULL_SCREEN_WORK)
-          {
+        if (__glutMotifHints != None) {
+          if (workMask & GLUT_FULL_SCREEN_WORK) {
             MotifWmHints hints;
 
             hints.flags = MWM_HINTS_DECORATIONS;
-            hints.decorations = 0;  /* Absolutely no
-            decorations. */
-            XChangeProperty(__glutDisplay, window->win,
-                            __glutMotifHints, __glutMotifHints, 32,
-                            PropModeReplace, (unsigned char *) &hints, 4);
-            if (workMask & GLUT_MAP_WORK)
-            {
+            hints.decorations = 0; /* Absolutely no
+           decorations. */
+            XChangeProperty(__glutDisplay, window->win, __glutMotifHints,
+                            __glutMotifHints, 32, PropModeReplace,
+                            (unsigned char *)&hints, 4);
+            if (workMask & GLUT_MAP_WORK) {
               /* Handle case where glutFullScreen is called
               before the first time that the window is
               mapped. Some window managers will randomly or
@@ -1305,52 +1126,41 @@ processWindowWorkList(GLUTwindow * window)
               hints.height = window->desiredHeight;
               XSetWMNormalHints(__glutDisplay, window->win, &hints);
             }
-          }
-          else
-          {
+          } else {
             XDeleteProperty(__glutDisplay, window->win, __glutMotifHints);
           }
         }
       }
-      if (window->desiredConfMask & CWStackMode)
-      {
+      if (window->desiredConfMask & CWStackMode) {
         changes.stack_mode = window->desiredStack;
         /* Do not let glutPushWindow push window beneath the
         underlay. */
-        if (window->parent && window->parent->overlay
-            && window->desiredStack == Below)
-        {
+        if (window->parent && window->parent->overlay &&
+            window->desiredStack == Below) {
           changes.stack_mode = Above;
           changes.sibling = window->parent->overlay->win;
           window->desiredConfMask |= CWSibling;
         }
       }
-      XConfigureWindow(__glutDisplay, window->win,
-                       window->desiredConfMask, &changes);
+      XConfigureWindow(__glutDisplay, window->win, window->desiredConfMask,
+                       &changes);
       window->desiredConfMask = 0;
 #endif
     }
 #if !defined(_WIN32)
     /* Be sure to establish the colormaps BEFORE map window is
        done. */
-    if (workMask & GLUT_COLORMAP_WORK)
-    {
+    if (workMask & GLUT_COLORMAP_WORK) {
       __glutEstablishColormapsProperty(window);
     }
 #endif
-    if (workMask & GLUT_MAP_WORK)
-    {
-      switch (window->desiredMapState)
-      {
+    if (workMask & GLUT_MAP_WORK) {
+      switch (window->desiredMapState) {
       case WithdrawnState:
-        if (window->parent)
-        {
+        if (window->parent) {
           XUnmapWindow(__glutDisplay, window->win);
-        }
-        else
-        {
-          XWithdrawWindow(__glutDisplay, window->win,
-                          __glutScreen);
+        } else {
+          XWithdrawWindow(__glutDisplay, window->win, __glutScreen);
         }
         window->shownState = 0;
         break;
@@ -1359,7 +1169,7 @@ processWindowWorkList(GLUTwindow * window)
         window->shownState = 1;
         break;
 #ifdef _WIN32
-      case GameModeState:  /* Not an Xlib value. */
+      case GameModeState: /* Not an Xlib value. */
         ShowWindow(window->win, SW_SHOW);
         window->shownState = 1;
         break;
@@ -1371,10 +1181,9 @@ processWindowWorkList(GLUTwindow * window)
       }
     }
   }
-  if (workMask & (GLUT_REDISPLAY_WORK | GLUT_OVERLAY_REDISPLAY_WORK | GLUT_REPAIR_WORK | GLUT_OVERLAY_REPAIR_WORK))
-  {
-    if (window->forceReshape)
-    {
+  if (workMask & (GLUT_REDISPLAY_WORK | GLUT_OVERLAY_REDISPLAY_WORK |
+                  GLUT_REPAIR_WORK | GLUT_OVERLAY_REPAIR_WORK)) {
+    if (window->forceReshape) {
       /* Guarantee that before a display callback is generated
          for a window, a reshape callback must be generated. */
       __glutSetWindow(window);
@@ -1399,8 +1208,7 @@ processWindowWorkList(GLUTwindow * window)
        window (or overlay) may be destroyed (or removed) when the
        callback returns. */
 
-    if (window->overlay && window->overlay->display)
-    {
+    if (window->overlay && window->overlay->display) {
       int num = window->num;
       Window xid = window->overlay ? window->overlay->win : None;
 
@@ -1410,14 +1218,11 @@ processWindowWorkList(GLUTwindow * window)
          display callback registered, we simply use the
          standard display callback. */
 
-      if (workMask & (GLUT_REDISPLAY_WORK | GLUT_REPAIR_WORK))
-      {
-        if (__glutMesaSwapHackSupport)
-        {
-          if (window->usedSwapBuffers)
-          {
-            if ((workMask & (GLUT_REPAIR_WORK | GLUT_REDISPLAY_WORK)) == GLUT_REPAIR_WORK)
-            {
+      if (workMask & (GLUT_REDISPLAY_WORK | GLUT_REPAIR_WORK)) {
+        if (__glutMesaSwapHackSupport) {
+          if (window->usedSwapBuffers) {
+            if ((workMask & (GLUT_REPAIR_WORK | GLUT_REDISPLAY_WORK)) ==
+                GLUT_REPAIR_WORK) {
               SWAP_BUFFERS_WINDOW(window);
               goto skippedDisplayCallback1;
             }
@@ -1435,15 +1240,12 @@ processWindowWorkList(GLUTwindow * window)
         window->display();
         __glutWindowDamaged = 0;
 
-skippedDisplayCallback1:
-        ;
+      skippedDisplayCallback1:;
       }
-      if (workMask & (GLUT_OVERLAY_REDISPLAY_WORK | GLUT_OVERLAY_REPAIR_WORK))
-      {
+      if (workMask & (GLUT_OVERLAY_REDISPLAY_WORK | GLUT_OVERLAY_REPAIR_WORK)) {
         window = __glutWindowList[num];
-        if (window && window->overlay &&
-            window->overlay->win == xid && window->overlay->display)
-        {
+        if (window && window->overlay && window->overlay->win == xid &&
+            window->overlay->display) {
 
           /* Render to overlay. */
 #ifdef _WIN32
@@ -1455,45 +1257,38 @@ skippedDisplayCallback1:
           __glutSetWindow(window);
           window->overlay->display();
           __glutWindowDamaged = 0;
-        }
-        else
-        {
+        } else {
           /* Overlay may have since been destroyed or the
              overlay callback may have been disabled during
              normal display callback. */
         }
       }
-    }
-    else
-    {
-      if (__glutMesaSwapHackSupport)
-      {
-        if (!window->overlay && window->usedSwapBuffers)
-        {
-          if ((workMask & (GLUT_REPAIR_WORK | GLUT_REDISPLAY_WORK)) == GLUT_REPAIR_WORK)
-          {
+    } else {
+      if (__glutMesaSwapHackSupport) {
+        if (!window->overlay && window->usedSwapBuffers) {
+          if ((workMask & (GLUT_REPAIR_WORK | GLUT_REDISPLAY_WORK)) ==
+              GLUT_REPAIR_WORK) {
             SWAP_BUFFERS_WINDOW(window);
             goto skippedDisplayCallback2;
           }
         }
       }
       /* Render to normal plane (and possibly overlay). */
-      __glutWindowDamaged = (workMask & (GLUT_OVERLAY_REPAIR_WORK | GLUT_REPAIR_WORK));
+      __glutWindowDamaged =
+          (workMask & (GLUT_OVERLAY_REPAIR_WORK | GLUT_REPAIR_WORK));
       __glutSetWindow(window);
       window->usedSwapBuffers = 0;
       window->display();
       __glutWindowDamaged = 0;
 
-skippedDisplayCallback2:
-      ;
+    skippedDisplayCallback2:;
     }
   }
   /* Combine workMask with window->workMask to determine what
      finish and debug work there is. */
   workMask |= window->workMask;
 
-  if (workMask & GLUT_FINISH_WORK)
-  {
+  if (workMask & GLUT_FINISH_WORK) {
     /* Finish work makes sure a glFinish gets done to indirect
        rendering contexts.  Indirect contexts tend to have much
        longer latency because lots of OpenGL extension requests
@@ -1503,66 +1298,49 @@ skippedDisplayCallback2:
     __glutSetWindow(window);
     glFinish();
   }
-  if (workMask & GLUT_DEBUG_WORK)
-  {
+  if (workMask & GLUT_DEBUG_WORK) {
     __glutSetWindow(window);
     glutReportErrors();
   }
   /* Strip out dummy, finish, and debug work bits. */
   window->workMask &= ~(GLUT_DUMMY_WORK | GLUT_FINISH_WORK | GLUT_DEBUG_WORK);
-  if (window->workMask)
-  {
+  if (window->workMask) {
     /* Leave on work list. */
     return window;
-  }
-  else
-  {
+  } else {
     /* Remove current window from work list. */
     return window->prevWorkWin;
   }
 }
 
 /* CENTRY */
-void APIENTRY
-glutMainLoop(void)
-{
+void APIENTRY glutMainLoop(void) {
 #if !defined(_WIN32)
   if (!__glutDisplay)
     __glutFatalUsage("main loop entered with out proper initialization.");
 #endif
   if (!__glutWindowListSize)
-    __glutFatalUsage(
-      "main loop entered with no windows created.");
-  for (;;)
-  {
-    if (__glutWindowWorkList)
-    {
+    __glutFatalUsage("main loop entered with no windows created.");
+  for (;;) {
+    if (__glutWindowWorkList) {
       GLUTwindow *remainder, *work;
 
       work = __glutWindowWorkList;
       __glutWindowWorkList = NULL;
-      if (work)
-      {
+      if (work) {
         remainder = processWindowWorkList(work);
-        if (remainder)
-        {
+        if (remainder) {
           *beforeEnd = __glutWindowWorkList;
           __glutWindowWorkList = remainder;
         }
       }
     }
-    if (__glutIdleFunc || __glutWindowWorkList)
-    {
+    if (__glutIdleFunc || __glutWindowWorkList) {
       idleWait();
-    }
-    else
-    {
-      if (__glutTimerList)
-      {
+    } else {
+      if (__glutTimerList) {
         waitForSomething();
-      }
-      else
-      {
+      } else {
         processEventsAndTimeouts();
       }
     }

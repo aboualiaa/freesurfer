@@ -5,14 +5,13 @@
 #include <cuda_runtime.h>
 
 namespace kvl {
-  namespace cuda {
-    class CUDAException : public std::runtime_error {
-    public:
-      cudaError errorCode;
+namespace cuda {
+class CUDAException : public std::runtime_error {
+public:
+  cudaError errorCode;
 
-      CUDAException(const cudaError error) : errorCode(error),
-					     runtime_error(cudaGetErrorString(errorCode)) {}
-      
-    };
-  }
-}
+  CUDAException(const cudaError error)
+      : errorCode(error), runtime_error(cudaGetErrorString(errorCode)) {}
+};
+} // namespace cuda
+} // namespace kvl

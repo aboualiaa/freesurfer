@@ -23,5 +23,4 @@
  *
  */
 
-
 #include "Interactor3DNavigate.h"

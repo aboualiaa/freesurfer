@@ -23,27 +23,23 @@
  *
  */
 
-#include <string.h>
+#include <cstring>
 #include <stdexcept>
 #include <sstream>
 #include <iostream>
 
 #include "QdecSubject.h"
 
-
 // Constructors/Destructors
 //
 
-QdecSubject::QdecSubject ( string isId, vector< QdecFactor* > iFactors )
-{
+QdecSubject::QdecSubject(string isId, vector<QdecFactor *> iFactors) {
   msId = isId;
   mFactors = iFactors;
 }
 
-QdecSubject::~QdecSubject ( )
-{
-  while (mFactors.size() != 0)
-  {
+QdecSubject::~QdecSubject() {
+  while (mFactors.size() != 0) {
     delete mFactors.back();
     mFactors.pop_back();
   }
@@ -53,14 +49,10 @@ QdecSubject::~QdecSubject ( )
  * @return string
  * @param  isFactorName
  */
-string QdecSubject::GetDiscreteFactorValue (const char* isFactorName )
-{
-  for (unsigned int i=0; i < mFactors.size(); i++)
-  {
-    if (mFactors[i]->IsDiscrete())
-    {
-      if ( 0 == strcmp( mFactors[i]->GetFactorName().c_str(), isFactorName ) )
-      {
+string QdecSubject::GetDiscreteFactorValue(const char *isFactorName) {
+  for (unsigned int i = 0; i < mFactors.size(); i++) {
+    if (mFactors[i]->IsDiscrete()) {
+      if (0 == strcmp(mFactors[i]->GetFactorName().c_str(), isFactorName)) {
         return mFactors[i]->GetDiscreteValue();
       }
     }
@@ -68,89 +60,76 @@ string QdecSubject::GetDiscreteFactorValue (const char* isFactorName )
 
   stringstream ssErr;
   ssErr << "ERROR: QdecSubject::GetDiscreteFactor failure: could not find "
-    "factor name: " << isFactorName << " for subject " << this->GetId();
-  //cerr << ssErr.str() << endl;
-  throw runtime_error( ssErr.str().c_str() );
-  return NULL;
+           "factor name: "
+        << isFactorName << " for subject " << this->GetId();
+  // cerr << ssErr.str() << endl;
+  throw runtime_error(ssErr.str().c_str());
+  return nullptr;
 }
-
 
 /**
  * @return double
  * @param  isFactorName
  */
-double QdecSubject::GetContinuousFactorValue (const char* isFactorName )
-{
-  for (unsigned int i=0; i < mFactors.size(); i++)
-  {
-    if ( 0 == strcmp( mFactors[i]->GetFactorName().c_str(), isFactorName ) )
-    {
+double QdecSubject::GetContinuousFactorValue(const char *isFactorName) {
+  for (unsigned int i = 0; i < mFactors.size(); i++) {
+    if (0 == strcmp(mFactors[i]->GetFactorName().c_str(), isFactorName)) {
       return mFactors[i]->GetContinuousValue();
     }
   }
 
   stringstream ssErr;
   ssErr << "ERROR: QdecSubject::GetContinuousFactor failure: could not find "
-    "factor name: " << isFactorName << " for subject " << this->GetId();
-  //cerr << ssErr.str() << endl;
-  throw runtime_error( ssErr.str().c_str() );
+           "factor name: "
+        << isFactorName << " for subject " << this->GetId();
+  // cerr << ssErr.str() << endl;
+  throw runtime_error(ssErr.str().c_str());
   return 0.0;
 }
-
 
 /**
  * @return vector < QdecFactor* >
  */
-vector < QdecFactor* > QdecSubject::GetContinuousFactors ( )
-{
-  vector < QdecFactor* > factors;
-  for (unsigned int i=0; i < mFactors.size(); i++)
-  {
-    if (mFactors[i]->IsContinuous())
-    {
-      factors.push_back( mFactors[i] );
+vector<QdecFactor *> QdecSubject::GetContinuousFactors() {
+  vector<QdecFactor *> factors;
+  for (unsigned int i = 0; i < mFactors.size(); i++) {
+    if (mFactors[i]->IsContinuous()) {
+      factors.push_back(mFactors[i]);
     }
   }
 
   return factors;
 }
 
-
 /**
  * @return QdecFactor
  */
-QdecFactor* QdecSubject::GetFactor ( const char* isFactorName )
-{
-  for (unsigned int i=0; i < mFactors.size(); i++)
-  {
-    if ( 0 == strcmp( mFactors[i]->GetFactorName().c_str(), isFactorName ) )
-    {
+QdecFactor *QdecSubject::GetFactor(const char *isFactorName) {
+  for (unsigned int i = 0; i < mFactors.size(); i++) {
+    if (0 == strcmp(mFactors[i]->GetFactorName().c_str(), isFactorName)) {
       return mFactors[i];
     }
   }
 
   stringstream ssErr;
   ssErr << "ERROR: QdecSubject::GetFactor failure: could not find "
-    "factor name: " << isFactorName << " for subject " << this->GetId();
-  //cerr << ssErr.str() << endl;
-  throw runtime_error( ssErr.str().c_str() );
-  return NULL;
+           "factor name: "
+        << isFactorName << " for subject " << this->GetId();
+  // cerr << ssErr.str() << endl;
+  throw runtime_error(ssErr.str().c_str());
+  return nullptr;
 }
-
 
 /**
  * @param  isFactorName
  */
-void QdecSubject::DeleteFactor ( const char* isFactorName )
-{
-  vector<QdecFactor*>::iterator iter = mFactors.begin() ; 
-  while( iter != mFactors.end() )
-  {
-    QdecFactor* factor = *iter;
+void QdecSubject::DeleteFactor(const char *isFactorName) {
+  vector<QdecFactor *>::iterator iter = mFactors.begin();
+  while (iter != mFactors.end()) {
+    QdecFactor *factor = *iter;
     string factorName = factor->GetFactorName();
-    if ( 0 == strcmp( factorName.c_str(), isFactorName ) )
-    {
-      mFactors.erase( iter );
+    if (0 == strcmp(factorName.c_str(), isFactorName)) {
+      mFactors.erase(iter);
       return;
     }
     ++iter;

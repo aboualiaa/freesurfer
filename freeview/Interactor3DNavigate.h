@@ -28,14 +28,9 @@
 
 #include "Interactor3D.h"
 
-class Interactor3DNavigate : public Interactor3D
-{
+class Interactor3DNavigate : public Interactor3D {
 public:
-  Interactor3DNavigate( QObject* parent ) : Interactor3D( parent )
-  {}
-
+  Interactor3DNavigate(QObject *parent) : Interactor3D(parent) {}
 };
 
 #endif
-
-

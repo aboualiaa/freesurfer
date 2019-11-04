@@ -28,8 +28,7 @@
 #include "UIUpdateHelper.h"
 #include "WidgetHistogram.h"
 
-namespace Ui
-{
+namespace Ui {
 class WindowConfigureOverlay;
 }
 
@@ -39,8 +38,7 @@ class SurfaceLabel;
 class SurfaceOverlayProperty;
 class QAbstractButton;
 
-class WindowConfigureOverlay : public QWidget, public UIUpdateHelper
-{
+class WindowConfigureOverlay : public QWidget, public UIUpdateHelper {
   Q_OBJECT
 
 public:
@@ -48,36 +46,33 @@ public:
   ~WindowConfigureOverlay();
 
   void showEvent(QShowEvent *);
-  void resizeEvent(QResizeEvent* e);
+  void resizeEvent(QResizeEvent *e);
 
 signals:
   void ActiveFrameChanged(int nframe);
-  void MaskLoadRequested(const QString& filename);
+  void MaskLoadRequested(const QString &filename);
   void OverlayChanged();
 
 public slots:
   void UpdateGraph(bool bApply = false);
-  void UpdateGraphAndApply()
-  {
-    UpdateGraph(true);
-  }
+  void UpdateGraphAndApply() { UpdateGraph(true); }
   void UpdateUI();
   void OnCurrentVertexChanged();
   void OnFrameChanged(int nFrame);
-  void LoadLabelMask(const QString& fn);
+  void LoadLabelMask(const QString &fn);
 
 protected slots:
-  void OnActiveSurfaceChanged(Layer* layer);
-  void OnClicked( QAbstractButton* btn );
-  void OnSliderOpacity( int nVal );
-  void OnSpinBoxOpacity( double dVal );
+  void OnActiveSurfaceChanged(Layer *layer);
+  void OnClicked(QAbstractButton *btn);
+  void OnSliderOpacity(int nVal);
+  void OnSpinBoxOpacity(double dVal);
   void OnButtonAdd();
-  bool UpdateOverlayProperty( SurfaceOverlayProperty* p );
+  bool UpdateOverlayProperty(SurfaceOverlayProperty *p);
   void UpdateThresholdChanges();
   void OnHistogramMouseButtonPressed(int button, double value);
   void OnHistogramMarkerChanged();
   void OnSmoothChanged();
-  void OnTextThresholdChanged(const QString& strg);
+  void OnTextThresholdChanged(const QString &strg);
   void OnApply();
   void OnCheckComputeCorrelation(bool bChecked);
   void OnComboCorrelationVolume(int n);
@@ -86,7 +81,7 @@ protected slots:
   void CheckApply(bool bChecked);
   void OnComboMask(int n);
   void OnCheckInverseMask(bool bChecked);
-  void OnSurfaceLabelAdded(SurfaceLabel* label);
+  void OnSurfaceLabelAdded(SurfaceLabel *label);
   void OnCheckAutoFrameByVertex(bool bChecked);
   void OnCheckUseNonZeroVertices(bool bChecked);
   void OnComboOverlayChanged(int n);
@@ -96,10 +91,10 @@ protected slots:
 private:
   Ui::WindowConfigureOverlay *ui;
 
-  LineMarkers   m_markers;    // custom gradient markers
-  LayerSurface* m_layerSurface;
-  float*        m_fDataCache;
-  double        m_dSavedOffset;
+  LineMarkers m_markers; // custom gradient markers
+  LayerSurface *m_layerSurface;
+  float *m_fDataCache;
+  double m_dSavedOffset;
 };
 
 #endif // WINDOWCONFIGUREOVERLAY_H

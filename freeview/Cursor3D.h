@@ -35,48 +35,38 @@ class vtkRenderer;
 class vtkActor;
 class RenderView3D;
 
-class Cursor3D : public QObject
-{
+class Cursor3D : public QObject {
   Q_OBJECT
 public:
-  Cursor3D( RenderView3D* view );
+  Cursor3D(RenderView3D *view);
   virtual ~Cursor3D();
 
-  void SetPosition( double* pos );
+  void SetPosition(double *pos);
 
-  double* GetPosition();
-  void GetPosition( double* pos );
+  double *GetPosition();
+  void GetPosition(double *pos);
 
-  void GetColor( double* rgb );
-  void SetColor( double r, double g, double b );
+  void GetColor(double *rgb);
+  void SetColor(double r, double g, double b);
 
   QColor GetColor();
 
   void Update();
 
-  void AppendActor( vtkRenderer* renderer );
+  void AppendActor(vtkRenderer *renderer);
 
-  void Show( bool bShow = true );
+  void Show(bool bShow = true);
 
-  void Hide()
-  {
-      Show(false);
-  }
+  void Hide() { Show(false); }
 
   bool IsShown();
 
-  int GetSize()
-  {
-    return m_nSize;
-  }
+  int GetSize() { return m_nSize; }
 
-  int GetThickness()
-  {
-    return m_nThickness;
-  }
+  int GetThickness() { return m_nThickness; }
 
 public slots:
-  void SetColor( const QColor& color );
+  void SetColor(const QColor &color);
   void RebuildActor(double scale = -1);
   void SetSize(int nSize);
   void SetThickness(int nThickness);
@@ -85,17 +75,14 @@ Q_SIGNALS:
   void Updated();
 
 private:
-
   vtkSmartPointer<vtkActor> m_actorCursor;
 
-  RenderView3D* m_view;
+  RenderView3D *m_view;
 
-  double  m_dPosition[3];
-  int     m_nSize;
-  int     m_nThickness;
-  double  m_dScale;
+  double m_dPosition[3];
+  int m_nSize;
+  int m_nThickness;
+  double m_dScale;
 };
 
 #endif
-
-

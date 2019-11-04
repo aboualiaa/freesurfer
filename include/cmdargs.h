@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:09 $
@@ -23,16 +23,16 @@
  *
  */
 
-
 // cmdargs.h - include file for cmdargs.c (used for
 //   handling command-line arguments)
 // $Id: cmdargs.h,v 1.5 2011/03/02 00:04:09 nicks Exp $
 
-
 #ifndef CMDARGS_H
 #define CMDARGS_H
 
-const char * CMDSrcVersion(void);
+#include <cstdio>
+
+const char *CMDSrcVersion();
 void CMDargNErr(char *option, int n);
 int CMDsingleDash(char *flag);
 int CMDisFlag(char *flag);

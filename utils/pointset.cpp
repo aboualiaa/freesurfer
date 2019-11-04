@@ -2,13 +2,11 @@
 
 #include "pointset.h"
 
-
 /// Writes pointset to a JSON file
 /// TODO: support the .dat output format as well and
 /// use json.h instead of hard-coding this stuff
 
-bool PointSet::save(std::string filename)
-{
+bool PointSet::save(std::string filename) {
   std::ofstream jsonfile;
   jsonfile.open(filename);
 
@@ -16,7 +14,7 @@ bool PointSet::save(std::string filename)
   jsonfile << "    \"data_type\": \"fs_pointset\",\n";
   jsonfile << "    \"points\": [\n";
 
-  for (const Point& point : points) {
+  for (const Point &point : points) {
     jsonfile << "        {\n";
     jsonfile << "            \"coordinates\": {\n";
     jsonfile << "                \"x\": " << point.x << ",\n";
@@ -24,7 +22,7 @@ bool PointSet::save(std::string filename)
     jsonfile << "                \"z\": " << point.z << "\n";
     jsonfile << "            },\n";
     jsonfile << "            \"legacy_stat\": 1\n";
-    
+
     // the Qt json loader requires EXACT comma syntax
     if (&point == &points.back()) {
       jsonfile << "        }\n";
@@ -43,12 +41,11 @@ bool PointSet::save(std::string filename)
 }
 
 // Save in control point format, v6 compatible
-bool PointSet::save_as_ctrlpoint(std::string filename)
-{
+bool PointSet::save_as_ctrlpoint(std::string filename) {
   std::ofstream ctrpfile;
   ctrpfile.open(filename);
 
-  for (const Point& point : points)
+  for (const Point &point : points)
     ctrpfile << point.x << " " << point.y << " " << point.z << "\n";
   ctrpfile << "info\n";
   ctrpfile << "numpoints" << points.size() << "\n";
@@ -58,4 +55,3 @@ bool PointSet::save_as_ctrlpoint(std::string filename)
 
   return true;
 }
-

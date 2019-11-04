@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:40 $
@@ -22,7 +22,6 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
-
 
 ////SVM-LIB////////////////////////////////////////////////////////////////
 //
@@ -53,118 +52,93 @@
 #ifndef __SVM_KERNEL_H__
 #define __SVM_KERNEL_H__
 
-#include <stdio.h>
+#include <cstdio>
 #include <iostream>
-#include <math.h>
+#include <cmath>
 
 #include "svm-kernel-param.h"
 
-
 class Kernel {
-  KernelParam* _p;
+  KernelParam *_p;
 
   // This function checks if the pointer has been set and prints an error
   // message if it's still null.
   bool isDefined() const {
-    if ( _p == NULL ) {
+    if (_p == nullptr) {
       std::cerr << "Kerel error: attempting to use a kernel that has not "
-      << "been defined yet.\n";
+                << "been defined yet.\n";
       return false;
     }
     return true;
   }
 
-
 public:
-
   // Constructors and destructors
-  Kernel(): _p(NULL) {};
+  Kernel() : _p(nullptr){};
 
-  Kernel(const char *paramString):  _p(NULL) {
-    parse(paramString);
-  }
+  Kernel(const char *paramString) : _p(nullptr) { parse(paramString); }
 
-  Kernel(const Kernel& kernel): _p(NULL) {
-    parse(kernel.getString());
-  }
+  Kernel(const Kernel &kernel) : _p(nullptr) { parse(kernel.getString()); }
 
-  Kernel& operator = (const Kernel& kernel) {
+  Kernel &operator=(const Kernel &kernel) {
     parse(kernel.getString());
     return *this;
   }
 
-  ~Kernel() {
-    delete _p;
-  };
-
-
-
+  ~Kernel() { delete _p; };
 
   // Kernel type
   int type() const {
-    if ( !isDefined() )
+    if (!isDefined())
       return NO_KERNEL;
     return _p->type();
   }
 
   // Compute value
-  double operator() (const SvmReal* v1, const SvmReal* v2, int n) const {
-    if ( !isDefined() )
+  double operator()(const SvmReal *v1, const SvmReal *v2, int n) const {
+    if (!isDefined())
       return 0;
 
-    return _p->operator()(v1,v2,n);
+    return _p->operator()(v1, v2, n);
   }
 
-  double operator() (SvmReal dist) const {
-    if ( !isDefined() )
+  double operator()(SvmReal dist) const {
+    if (!isDefined())
       return 0;
     return _p->operator()(dist);
   }
 
-
   // Compute derivatives
 
-  SvmReal d10(int index, const SvmReal* x, const SvmReal* y, int n) const {
-    if ( !isDefined() )
+  SvmReal d10(int index, const SvmReal *x, const SvmReal *y, int n) const {
+    if (!isDefined())
       return 0;
-    return _p->d10(index,x,y,n);
+    return _p->d10(index, x, y, n);
   }
 
-  bool d10(SvmReal* res, const SvmReal* x, const SvmReal* y, int n) const {
-    if ( !isDefined() )
+  bool d10(SvmReal *res, const SvmReal *x, const SvmReal *y, int n) const {
+    if (!isDefined())
       return false;
-    _p->d10(res,x,y,n);
+    _p->d10(res, x, y, n);
     return true;
   }
 
-
-
   // I/O
 
-  bool parse (const char* paramString);
-  const char* getString() const {
-    if ( !isDefined() )
+  bool parse(const char *paramString);
+  const char *getString() const {
+    if (!isDefined())
       return "No kernel";
     return _p->getString();
   }
 
-  bool read (FILE *f, bool binary = false);
-  bool write (FILE *f, bool binary = false) const {
-    if ( !isDefined() )
+  bool read(FILE *f, bool binary = false);
+  bool write(FILE *f, bool binary = false) const {
+    if (!isDefined())
       return false;
     _p->write(f);
     return true;
   }
 };
 
-
-
-
 #endif // __SVM_KERNEL_H__
-
-
-
-
-
-
-

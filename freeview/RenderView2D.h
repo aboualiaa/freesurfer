@@ -41,111 +41,83 @@ class Interactor2DVolumeCrop;
 class LayerMRI;
 class LayerLineProfile;
 
-class RenderView2D : public RenderView
-{
+class RenderView2D : public RenderView {
   //    friend class Interactor2D;
 
   Q_OBJECT
 public:
-  RenderView2D( QWidget* parent );
+  RenderView2D(QWidget *parent);
 
-  void SetViewPlane( int nPlane );
+  void SetViewPlane(int nPlane);
 
-  int GetViewPlane()
-  {
-    return m_nViewPlane;
-  }
+  int GetViewPlane() { return m_nViewPlane; }
 
   void UpdateViewByWorldCoordinate();
 
-  Contour2D* GetContour2D()
-  {
-    return m_contour2D;
-  }
+  Contour2D *GetContour2D() { return m_contour2D; }
 
-  Cursor2D* GetCursor2D()
-  {
-    return m_cursor2D;
-  }
+  Cursor2D *GetCursor2D() { return m_cursor2D; }
 
-  Annotation2D* GetAnnotation2D()
-  {
-    return m_annotation2D;
-  }
+  Annotation2D *GetAnnotation2D() { return m_annotation2D; }
 
-  void UpdateMouseRASPosition( int posX, int posY );
-  void UpdateCursorRASPosition( int posX, int posY, bool bSnapToVertex = false );
-  void MoveSlice( int nStep );
+  void UpdateMouseRASPosition(int posX, int posY);
+  void UpdateCursorRASPosition(int posX, int posY, bool bSnapToVertex = false);
+  void MoveSlice(int nStep);
 
-  void SetInteractionMode( int nMode );
+  void SetInteractionMode(int nMode);
 
-  void MousePositionToRAS( int posX, int posY, double* pos );
-  LayerMRI* GetFirstNonLabelVolume();
+  void MousePositionToRAS(int posX, int posY, double *pos);
+  LayerMRI *GetFirstNonLabelVolume();
 
-  void StartSelection( int nX, int nY );
-  void UpdateSelection( int nX, int nY );
+  void StartSelection(int nX, int nY);
+  void UpdateSelection(int nX, int nY);
 
-  Region2D* GetRegion( int nX, int nY, int* index_out = NULL );
-  void AddRegion( Region2D* region );
-  void DeleteRegion( Region2D* region );
+  Region2D *GetRegion(int nX, int nY, int *index_out = NULL);
+  void AddRegion(Region2D *region);
+  void DeleteRegion(Region2D *region);
 
-  void EmitZooming()
-  {
-    emit Zooming(this);
-  }
+  void EmitZooming() { emit Zooming(this); }
 
-  void EmitRegionSelected(Region2D* reg)
-  {
-    emit RegionSelected(reg);
-  }
+  void EmitRegionSelected(Region2D *reg) { emit RegionSelected(reg); }
 
   bool GetShowCoordinateAnnotation();
 
-  void ZoomAtCursor( int nX, int nY, double factor);
+  void ZoomAtCursor(int nX, int nY, double factor);
 
-  bool SetSliceNumber( int nNum );
+  bool SetSliceNumber(int nNum);
 
-  Interactor2DNavigate* GetInteractorNavigate()
-  {
-    return m_interactorNavigate;
-  }
+  Interactor2DNavigate *GetInteractorNavigate() { return m_interactorNavigate; }
 
-  void TriggerContextMenu( QMouseEvent* event );
+  void TriggerContextMenu(QMouseEvent *event);
 
   bool PickLineProfile(int x, int y);
 
-  bool GetAutoScaleText()
-  {
-    return m_bAutoScaleText;
-  }
+  bool GetAutoScaleText() { return m_bAutoScaleText; }
 
-  int GetTextSize()
-  {
-    return m_nTextSize;
-  }
+  int GetTextSize() { return m_nTextSize; }
 
 public slots:
   void RefreshAllActors(bool bForScreenShot = false);
   void StopSelection();
   void UpdateAnnotation();
   void Update2DOverlay();
-  void ShowCoordinateAnnotation( bool bShow );
+  void ShowCoordinateAnnotation(bool bShow);
   void CenterAtCursor();
   void SetAutoScaleText(bool b);
   void SetTextSize(int nsize);
 
 signals:
-  void RegionSelected( Region2D* );
-  void RegionRemoved( Region2D* );
-  void Zooming(RenderView2D* view);
-  void LineProfileIdPicked(LayerLineProfile* lp, int nId);
+  void RegionSelected(Region2D *);
+  void RegionRemoved(Region2D *);
+  void Zooming(RenderView2D *view);
+  void LineProfileIdPicked(LayerLineProfile *lp, int nId);
   void CursorLocationClicked();
 
 protected slots:
   virtual void OnSlicePositionChanged(bool bCenterView = false);
-  void SyncZoomTo(RenderView2D* view);
+  void SyncZoomTo(RenderView2D *view);
   void OnDuplicateRegion();
-  void OnInteractorError(const QString& msg);
+  void OnInteractorError(const QString &msg);
   void OnCopyVoxelValue();
 
 protected:
@@ -154,22 +126,22 @@ protected:
 
 private:
   int m_nViewPlane;
-  double    m_dPreSlicePosition;
-  Cursor2D*       m_cursor2D;
-  Contour2D*      m_contour2D;
-  Annotation2D*   m_annotation2D;
-  Region2DRectangle*    m_selection2D;
-  QList<Region2D*>      m_regions;
+  double m_dPreSlicePosition;
+  Cursor2D *m_cursor2D;
+  Contour2D *m_contour2D;
+  Annotation2D *m_annotation2D;
+  Region2DRectangle *m_selection2D;
+  QList<Region2D *> m_regions;
 
-  Interactor2DNavigate*   m_interactorNavigate;
-  Interactor2DMeasure*    m_interactorMeasure;
-  Interactor2DVoxelEdit*  m_interactorVoxelEdit;
-  Interactor2DROIEdit*    m_interactorROIEdit;
-  Interactor2DPointSetEdit*   m_interactorPointSetEdit;
-  Interactor2DVolumeCrop* m_interactorVolumeCrop;
+  Interactor2DNavigate *m_interactorNavigate;
+  Interactor2DMeasure *m_interactorMeasure;
+  Interactor2DVoxelEdit *m_interactorVoxelEdit;
+  Interactor2DROIEdit *m_interactorROIEdit;
+  Interactor2DPointSetEdit *m_interactorPointSetEdit;
+  Interactor2DVolumeCrop *m_interactorVolumeCrop;
 
-  bool      m_bAutoScaleText;
-  int       m_nTextSize;
+  bool m_bAutoScaleText;
+  int m_nTextSize;
 };
 
 #endif // RENDERVIEW2D_H

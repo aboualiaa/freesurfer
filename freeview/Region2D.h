@@ -34,53 +34,46 @@ class RenderView2D;
 class vtkRenderer;
 class vtkTextActor;
 
-class Region2D : public QObject
-{
+class Region2D : public QObject {
   Q_OBJECT
 public:
-  Region2D( RenderView2D* view );
+  Region2D(RenderView2D *view);
   virtual ~Region2D();
 
-  virtual void Offset( int nX, int nY ) = 0;
+  virtual void Offset(int nX, int nY) = 0;
 
-  virtual void UpdatePoint( int nIndex, int nX, int nY ) = 0;
+  virtual void UpdatePoint(int nIndex, int nX, int nY) = 0;
 
-  virtual bool Contains( int nX, int nY, int* nPointIndex = NULL ) = 0;
+  virtual bool Contains(int nX, int nY, int *nPointIndex = NULL) = 0;
 
-  virtual void Highlight( bool bHighlight = true ) { Q_UNUSED(bHighlight); }
+  virtual void Highlight(bool bHighlight = true) { Q_UNUSED(bHighlight); }
 
-  virtual void AppendProp( vtkRenderer* renderer ) = 0;
+  virtual void AppendProp(vtkRenderer *renderer) = 0;
 
-  virtual void Show( bool bshow );
+  virtual void Show(bool bshow);
 
   virtual void Update() {}
 
   virtual void UpdateStats();
 
-  virtual void UpdateSlicePosition( int nPlane, double pos );
+  virtual void UpdateSlicePosition(int nPlane, double pos);
 
-  virtual void GetWorldPoint( int nIndex, double* pt ) = 0;
+  virtual void GetWorldPoint(int nIndex, double *pt) = 0;
 
   virtual QString DataToString() = 0;
 
-  virtual Region2D* ObjectFromString(RenderView2D* view, const QString& text) = 0;
+  virtual Region2D *ObjectFromString(RenderView2D *view,
+                                     const QString &text) = 0;
 
-  Region2D* Duplicate(RenderView2D* view = NULL)
-  {
-    return ObjectFromString((view?view:m_view), DataToString());
+  Region2D *Duplicate(RenderView2D *view = NULL) {
+    return ObjectFromString((view ? view : m_view), DataToString());
   }
 
-  QString GetShortStats()
-  {
-    return m_strShortStats;
-  }
+  QString GetShortStats() { return m_strShortStats; }
 
-  QStringList GetLongStats()
-  {
-    return m_strsLongStats;
-  }
+  QStringList GetLongStats() { return m_strsLongStats; }
 
-  vtkTextActor* GetTextActor();
+  vtkTextActor *GetTextActor();
 
   void SetTextSize(int nsize);
 
@@ -90,12 +83,10 @@ signals:
   void StatsUpdated();
 
 protected:
-  RenderView2D* m_view;
-  QString       m_strShortStats;
-  QStringList   m_strsLongStats;
+  RenderView2D *m_view;
+  QString m_strShortStats;
+  QStringList m_strsLongStats;
   vtkSmartPointer<vtkTextActor> m_actorText;
 };
 
 #endif
-
-

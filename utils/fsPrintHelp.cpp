@@ -25,12 +25,12 @@
 
 //-------------------------------------------------------------------
 
-#include <ctype.h>
+#include <cctype>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/xinclude.h>
 #include <libxml/xmlIO.h>
-#include <string.h>
+#include <cstring>
 
 static void printName(xmlNodePtr cur);
 static void printContents(xmlDocPtr doc, xmlNodePtr cur);
@@ -43,7 +43,7 @@ int outputHelpDoc(const xmlDocPtr doc)
   xmlNodePtr cur = xmlDocGetRootElement(doc);
 
   // Catches the error of passing a blank document
-  if (cur == NULL) {
+  if (cur == nullptr) {
     fprintf(stderr, "Empty document.\n");
     xmlFreeDoc(doc);
     return -1;
@@ -51,7 +51,8 @@ int outputHelpDoc(const xmlDocPtr doc)
 
   // Catches the error of passing a document with a different root tag
   if (!tagNameIs("help", cur)) {
-    fprintf(stderr, "Document id of the wrong type!  The root node is not help.\n");
+    fprintf(stderr,
+            "Document id of the wrong type!  The root node is not help.\n");
     xmlFreeDoc(doc);
     return -1;
   }
@@ -62,25 +63,25 @@ int outputHelpDoc(const xmlDocPtr doc)
 
   int exampleNum = 1;
   // Outputs the file
-  while (cur != NULL) {
+  while (cur != nullptr) {
     // Outputs the arugments of the file
     if (tagNameIs("arguments", cur)) {
       xmlNodePtr argumentType;
       argumentType = cur->xmlChildrenNode;
-      while (argumentType != NULL) {
+      while (argumentType != nullptr) {
         if (!tagNameIs("text", argumentType)) {
           printName(argumentType);
           printf(" ARGUMENTS");
           xmlNodePtr argumentElement;
           argumentElement = argumentType->xmlChildrenNode;
           int first = 1;
-          while (argumentElement != NULL) {
+          while (argumentElement != nullptr) {
             if (!tagNameIs("text", argumentElement)) {
-              if (tagNameIs("intro", argumentElement) || tagNameIs("argument", argumentElement)) {
+              if (tagNameIs("intro", argumentElement) ||
+                  tagNameIs("argument", argumentElement)) {
                 if (first == 1) {
                   first = 0;
-                }
-                else {
+                } else {
                   printf("\n");
                 }
               }
@@ -103,13 +104,13 @@ int outputHelpDoc(const xmlDocPtr doc)
         xmlNodePtr outputElement;
         outputElement = cur->xmlChildrenNode;
         int first = 1;
-        while (outputElement != NULL) {
+        while (outputElement != nullptr) {
           if (!tagNameIs("text", outputElement)) {
-            if (tagNameIs("intro", outputElement) || tagNameIs("output", outputElement)) {
+            if (tagNameIs("intro", outputElement) ||
+                tagNameIs("output", outputElement)) {
               if (first == 1) {
                 first = 0;
-              }
-              else {
+              } else {
                 printf("\n");
               }
             }
@@ -117,8 +118,7 @@ int outputHelpDoc(const xmlDocPtr doc)
           }
           outputElement = outputElement->next;
         }
-      }
-      else {
+      } else {
         printContents(doc, cur);
       }
     }
@@ -127,16 +127,15 @@ int outputHelpDoc(const xmlDocPtr doc)
 
   printf("\n\n\n");
 
-  return 0;  // success
+  return 0; // success
 }
 
-static int FileExists(const char *fname)
-{
+static int FileExists(const char *fname) {
   FILE *fp = fopen(fname, "r");
   if (fp) {
     fclose(fp);
   }
-  return (fp != NULL);
+  return (fp != nullptr);
 }
 
 int outputHelp(const char *name)
@@ -146,7 +145,7 @@ int outputHelp(const char *name)
   char *fname = (char *)name;
 
   // Checks for the .xml file name
-  if (name == NULL) {
+  if (name == nullptr) {
     fprintf(stderr, "No filename passed.\n");
     return -1;
   }
@@ -155,10 +154,11 @@ int outputHelp(const char *name)
     // assume just the program name was specified, and try to find
     // its associated installed .help.xml file in the freesurfer install dir
     char *fshome = getenv("FREESURFER_HOME");
-    if (NULL == fshome) {
+    if (nullptr == fshome) {
       return -1;
     }
-    char *fullname = (char *)malloc(strlen(name) + strlen(fshome) + strlen("/docs/xml/.help.xml") + 1);
+    char *fullname = (char *)malloc(strlen(name) + strlen(fshome) +
+                                    strlen("/docs/xml/.help.xml") + 1);
     strcpy(fullname, fshome);
     strcat(fullname, "/docs/xml/");
     strcat(fullname, name);
@@ -169,7 +169,7 @@ int outputHelp(const char *name)
   // Opens the .xml file given as an argument
   doc = xmlParseFile(fname);
   // Catches an error in parsing the file
-  if (doc == NULL) {
+  if (doc == nullptr) {
     fprintf(stderr, "Document not parsed successfully. \n");
     return -1;
   }
@@ -183,7 +183,7 @@ int outputHelpXml(const unsigned char *text, unsigned int size)
   xmlDocPtr doc;
 
   // Checks if really passed:
-  if (text == NULL) {
+  if (text == nullptr) {
     fprintf(stderr, "No xml string passed.\n");
     return -1;
   }
@@ -191,7 +191,7 @@ int outputHelpXml(const unsigned char *text, unsigned int size)
   // Parses the .xml file given as an argument
   doc = xmlParseMemory((char *)text, size);
   // Catches an error in parsing the file
-  if (doc == NULL) {
+  if (doc == nullptr) {
     fprintf(stderr, "Document not parsed successfully. \n");
     return -1;
   }
@@ -200,8 +200,7 @@ int outputHelpXml(const unsigned char *text, unsigned int size)
 }
 
 // Changes a string to upper case
-static void toUpperCase(char *c)
-{
+static void toUpperCase(char *c) {
   int i;
   for (i = 0; *(c + i) != '\0'; i++) {
     *(c + i) = toupper(*(c + i));
@@ -209,21 +208,19 @@ static void toUpperCase(char *c)
 }
 
 // Replaces the first underscore or dash in a string with a space
-static void replaceUnderscore(char *c)
-{
+static void replaceUnderscore(char *c) {
   char *pos = strchr(c, '_');
-  if (pos != NULL) {
+  if (pos != nullptr) {
     *pos = ' ';
   }
   pos = strchr(c, '-');
-  if (pos != NULL) {
+  if (pos != nullptr) {
     *pos = ' ';
   }
 }
 
 // Prints the name of a tag in the correct format
-static void printName(xmlNodePtr cur)
-{
+static void printName(xmlNodePtr cur) {
   char *n = (char *)malloc(strlen((char *)cur->name) + 1);
   strcpy(n, (char *)cur->name);
   toUpperCase(n);
@@ -234,8 +231,7 @@ static void printName(xmlNodePtr cur)
 // Prints the text of a tag in the correct format
 // at most FSPRINT_MAX_CHARS characters per line with the correct number of tabs
 #define FSPRINT_MAX_CHARS 78
-static void printContents(xmlDocPtr doc, xmlNodePtr cur)
-{
+static void printContents(xmlDocPtr doc, xmlNodePtr cur) {
   xmlChar *contents;
   contents = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
   unsigned int i = 0, j;
@@ -249,20 +245,22 @@ static void printContents(xmlDocPtr doc, xmlNodePtr cur)
     if (*(contents + i) == ' ') {
       i++;
     }
-    for (j = i; j < FSPRINT_MAX_CHARS - tabNum * 8 + i && j < strlen((char *)contents) &&
-                (wrdLen((char *)(contents + j)) > FSPRINT_MAX_CHARS - tabNum * 8 ||
-                 (unsigned)wrdLen((char *)(contents + j)) <= FSPRINT_MAX_CHARS - tabNum * 8 + i - j);
+    for (j = i;
+         j < FSPRINT_MAX_CHARS - tabNum * 8 + i &&
+         j < strlen((char *)contents) &&
+         (wrdLen((char *)(contents + j)) > FSPRINT_MAX_CHARS - tabNum * 8 ||
+          (unsigned)wrdLen((char *)(contents + j)) <=
+              FSPRINT_MAX_CHARS - tabNum * 8 + i - j);
          j++) {
       if (*(contents + j) == '\n') {
         j++;
         break;
-      }
-      else if (wrdLen((char *)(contents + j)) > FSPRINT_MAX_CHARS - tabNum * 8) {
+      } else if (wrdLen((char *)(contents + j)) >
+                 FSPRINT_MAX_CHARS - tabNum * 8) {
         for (; j < FSPRINT_MAX_CHARS - tabNum * 8 + i; j++) {
           printf("%c", *(contents + j));
         }
-      }
-      else {
+      } else {
         printf("%c", *(contents + j));
       }
     }
@@ -272,13 +270,14 @@ static void printContents(xmlDocPtr doc, xmlNodePtr cur)
 }
 
 // Checks if the name of the tag is the same as the string parameter
-static int tagNameIs(const char *c, xmlNodePtr cur) { return !(xmlStrcasecmp(cur->name, (const xmlChar *)c)); }
+static int tagNameIs(const char *c, xmlNodePtr cur) {
+  return !(xmlStrcasecmp(cur->name, (const xmlChar *)c));
+}
 
 // Counts the number of chars until the next space, dash, underscore, slash,
 // or end of the string
 // Used to keep a word from running on two lines
-static int wrdLen(char *c)
-{
+static int wrdLen(char *c) {
   unsigned int i;
   for (i = 0; i < strlen(c); i++) {
     if (*(c + i) == ' ' || *(c + i) == '_' || *(c + i) == '/') {
@@ -290,9 +289,8 @@ static int wrdLen(char *c)
 
 #ifdef BUILD_MAIN
 //-------------------------------------------------------------------
-int main(int argc, char *argv[])
-{
-  if (argv[1] == NULL) {
+int main(int argc, char *argv[]) {
+  if (argv[1] == nullptr) {
     // assuming input is being piped (ie 'cat somefile.help.xml | fsPrintHelp')
     argv[1] = "/dev/stdin";
   }

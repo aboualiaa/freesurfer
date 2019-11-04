@@ -31,8 +31,7 @@
 #include <stdlib.h>
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 #include <mri.h>
@@ -47,8 +46,7 @@ const char *Progname = "i2rtest";
 
 using namespace std;
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   string command;
 
   int width, height, depth;
@@ -62,10 +60,10 @@ int main(int argc, char *argv[])
     filename = argv[1];
 
   MRI *mri;
-  mri = MRIread(const_cast<char *> ( filename.c_str() ));
+  mri = MRIread(const_cast<char *>(filename.c_str()));
 
   width = mri->width;
-  height= mri->height;
+  height = mri->height;
   depth = mri->depth;
 
   xsize = mri->xsize;
@@ -78,17 +76,19 @@ int main(int argc, char *argv[])
 
   cout << "input file = " << filename.c_str() << endl;
   cout << "Input data ------------------------------------------------" << endl;
-  cout << "width= " << width << "  height= " << height << "  depth= " << depth << endl;
-  cout << "xsize= " << xsize << "  ysize = " << ysize  << "  zsize= " << zsize << endl;
-  cout << "c_r  = " << c_r   << "  c_a   = " << c_a    << "  c_s  = " << c_s << endl;
+  cout << "width= " << width << "  height= " << height << "  depth= " << depth
+       << endl;
+  cout << "xsize= " << xsize << "  ysize = " << ysize << "  zsize= " << zsize
+       << endl;
+  cout << "c_r  = " << c_r << "  c_a   = " << c_a << "  c_s  = " << c_s << endl;
   cout << "ras_good_flag = " << mri->ras_good_flag << endl;
   cout << endl;
 
   MATRIX *m = extract_i_to_r(mri);
   VECTOR *c = VectorAlloc(4, MATRIX_REAL);
-  c->rptr[1][1] = ((double) width)/2.;
-  c->rptr[2][1] = ((double) height)/2.;
-  c->rptr[3][1] = ((double) depth)/2.;
+  c->rptr[1][1] = ((double)width) / 2.;
+  c->rptr[2][1] = ((double)height) / 2.;
+  c->rptr[3][1] = ((double)depth) / 2.;
   c->rptr[4][1] = 1.;
 
   // check the definition
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
   double C_a = C->rptr[2][1];
   double C_s = C->rptr[3][1];
   cout << "Calculated values are" << endl;
-  cout << "C_r  = " << C_r   << "  C_a   = " << C_a    << "  C_s  = " << C_s << endl;
+  cout << "C_r  = " << C_r << "  C_a   = " << C_a << "  C_s  = " << C_s << endl;
 
   MatrixFree(&m);
   VectorFree(&c);
@@ -111,10 +111,12 @@ int main(int argc, char *argv[])
   double crdiff = C_r - c_r;
   double cadiff = C_a - c_a;
   double csdiff = C_s - c_s;
-  if ( crdiff > tolerance || cadiff > tolerance || csdiff > tolerance )
-  {
-    cout << "***********************Error in extract_i_to_r()*********************** " << endl;
-    cout << "cr diff = " << crdiff << "  ca diff = " << cadiff << "   cs diff = " << csdiff << endl;
+  if (crdiff > tolerance || cadiff > tolerance || csdiff > tolerance) {
+    cout << "***********************Error in "
+            "extract_i_to_r()*********************** "
+         << endl;
+    cout << "cr diff = " << crdiff << "  ca diff = " << cadiff
+         << "   cs diff = " << csdiff << endl;
     return -1;
   }
   cout << "No problem found." << endl;

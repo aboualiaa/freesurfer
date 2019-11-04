@@ -33,27 +33,25 @@
  *     as the return value is positive, else unpredictable.
  * The value of @outlen after return is the number of octets consumed.
  */
-int
-docbEncodeEntities(unsigned char *out ATTRIBUTE_UNUSED,
-                   int *outlen ATTRIBUTE_UNUSED,
-                   const unsigned char *in ATTRIBUTE_UNUSED,
-                   int *inlen ATTRIBUTE_UNUSED,
-                   int quoteChar ATTRIBUTE_UNUSED)
-{
-    static int deprecated = 0;
+int docbEncodeEntities(unsigned char *out ATTRIBUTE_UNUSED,
+                       int *outlen ATTRIBUTE_UNUSED,
+                       const unsigned char *in ATTRIBUTE_UNUSED,
+                       int *inlen ATTRIBUTE_UNUSED,
+                       int quoteChar ATTRIBUTE_UNUSED) {
+  static int deprecated = 0;
 
-    if (!deprecated) {
-        xmlGenericError(xmlGenericErrorContext,
-                        "docbEncodeEntities() deprecated function reached\n");
-        deprecated = 1;
-    }
-    return(-1);
+  if (!deprecated) {
+    xmlGenericError(xmlGenericErrorContext,
+                    "docbEncodeEntities() deprecated function reached\n");
+    deprecated = 1;
+  }
+  return (-1);
 }
 
 /**
  * docbParseDocument:
  * @ctxt:  an SGML parser context
- * 
+ *
  * parse an SGML document (and build a tree if using the standard SAX
  * interface).
  *
@@ -61,17 +59,15 @@ docbEncodeEntities(unsigned char *out ATTRIBUTE_UNUSED,
  *                as a result of the parsing.
  */
 
-int
-docbParseDocument(docbParserCtxtPtr ctxt ATTRIBUTE_UNUSED)
-{
-    static int deprecated = 0;
+int docbParseDocument(docbParserCtxtPtr ctxt ATTRIBUTE_UNUSED) {
+  static int deprecated = 0;
 
-    if (!deprecated) {
-        xmlGenericError(xmlGenericErrorContext,
-                        "docbParseDocument() deprecated function reached\n");
-        deprecated = 1;
-    }
-    return (xmlParseDocument(ctxt));
+  if (!deprecated) {
+    xmlGenericError(xmlGenericErrorContext,
+                    "docbParseDocument() deprecated function reached\n");
+    deprecated = 1;
+  }
+  return (xmlParseDocument(ctxt));
 }
 
 /**
@@ -82,17 +78,15 @@ docbParseDocument(docbParserCtxtPtr ctxt ATTRIBUTE_UNUSED)
  * document in ctxt->myDoc is not freed.
  */
 
-void
-docbFreeParserCtxt(docbParserCtxtPtr ctxt ATTRIBUTE_UNUSED)
-{
-    static int deprecated = 0;
+void docbFreeParserCtxt(docbParserCtxtPtr ctxt ATTRIBUTE_UNUSED) {
+  static int deprecated = 0;
 
-    if (!deprecated) {
-        xmlGenericError(xmlGenericErrorContext,
-                        "docbFreeParserCtxt() deprecated function reached\n");
-        deprecated = 1;
-    }
-    xmlFreeParserCtxt(ctxt);
+  if (!deprecated) {
+    xmlGenericError(xmlGenericErrorContext,
+                    "docbFreeParserCtxt() deprecated function reached\n");
+    deprecated = 1;
+  }
+  xmlFreeParserCtxt(ctxt);
 }
 
 /**
@@ -106,21 +100,18 @@ docbFreeParserCtxt(docbParserCtxtPtr ctxt ATTRIBUTE_UNUSED)
  *
  * Returns zero if no error, the xmlParserErrors otherwise.
  */
-int
-docbParseChunk(docbParserCtxtPtr ctxt ATTRIBUTE_UNUSED,
-               const char *chunk ATTRIBUTE_UNUSED,
-	       int size ATTRIBUTE_UNUSED,
-               int terminate ATTRIBUTE_UNUSED)
-{
-    static int deprecated = 0;
+int docbParseChunk(docbParserCtxtPtr ctxt ATTRIBUTE_UNUSED,
+                   const char *chunk ATTRIBUTE_UNUSED,
+                   int size ATTRIBUTE_UNUSED, int terminate ATTRIBUTE_UNUSED) {
+  static int deprecated = 0;
 
-    if (!deprecated) {
-        xmlGenericError(xmlGenericErrorContext,
-                        "docbParseChunk() deprecated function reached\n");
-        deprecated = 1;
-    }
+  if (!deprecated) {
+    xmlGenericError(xmlGenericErrorContext,
+                    "docbParseChunk() deprecated function reached\n");
+    deprecated = 1;
+  }
 
-    return (xmlParseChunk(ctxt, chunk, size, terminate));
+  return (xmlParseChunk(ctxt, chunk, size, terminate));
 }
 
 /**
@@ -139,89 +130,83 @@ docbParseChunk(docbParserCtxtPtr ctxt ATTRIBUTE_UNUSED,
  *
  * Returns the new parser context or NULL
  */
-docbParserCtxtPtr
-docbCreatePushParserCtxt(docbSAXHandlerPtr sax ATTRIBUTE_UNUSED,
-                         void *user_data ATTRIBUTE_UNUSED,
-                         const char *chunk ATTRIBUTE_UNUSED,
-			 int size ATTRIBUTE_UNUSED,
-			 const char *filename ATTRIBUTE_UNUSED,
-                         xmlCharEncoding enc ATTRIBUTE_UNUSED)
-{
-    static int deprecated = 0;
+docbParserCtxtPtr docbCreatePushParserCtxt(
+    docbSAXHandlerPtr sax ATTRIBUTE_UNUSED, void *user_data ATTRIBUTE_UNUSED,
+    const char *chunk ATTRIBUTE_UNUSED, int size ATTRIBUTE_UNUSED,
+    const char *filename ATTRIBUTE_UNUSED,
+    xmlCharEncoding enc ATTRIBUTE_UNUSED) {
+  static int deprecated = 0;
 
-    if (!deprecated) {
-        xmlGenericError(xmlGenericErrorContext,
-                        "docbParseChunk() deprecated function reached\n");
-        deprecated = 1;
-    }
+  if (!deprecated) {
+    xmlGenericError(xmlGenericErrorContext,
+                    "docbParseChunk() deprecated function reached\n");
+    deprecated = 1;
+  }
 
-    return(xmlCreatePushParserCtxt(sax, user_data, chunk, size, filename));
+  return (xmlCreatePushParserCtxt(sax, user_data, chunk, size, filename));
 }
 
 /**
  * docbSAXParseDoc:
  * @cur:  a pointer to an array of xmlChar
- * @encoding:  a free form C string describing the SGML document encoding, or NULL
+ * @encoding:  a free form C string describing the SGML document encoding, or
+ * NULL
  * @sax:  the SAX handler block
- * @userData: if using SAX, this pointer will be provided on callbacks. 
+ * @userData: if using SAX, this pointer will be provided on callbacks.
  *
  * parse an SGML in-memory document and build a tree.
  * It use the given SAX function block to handle the parsing callback.
  * If sax is NULL, fallback to the default DOM tree building routines.
- * 
+ *
  * Returns the resulting document tree
  */
 
-docbDocPtr
-docbSAXParseDoc(xmlChar * cur ATTRIBUTE_UNUSED,
-                const char *encoding ATTRIBUTE_UNUSED,
-		docbSAXHandlerPtr sax ATTRIBUTE_UNUSED,
-                void *userData ATTRIBUTE_UNUSED)
-{
-    static int deprecated = 0;
+docbDocPtr docbSAXParseDoc(xmlChar *cur ATTRIBUTE_UNUSED,
+                           const char *encoding ATTRIBUTE_UNUSED,
+                           docbSAXHandlerPtr sax ATTRIBUTE_UNUSED,
+                           void *userData ATTRIBUTE_UNUSED) {
+  static int deprecated = 0;
 
-    if (!deprecated) {
-        xmlGenericError(xmlGenericErrorContext,
-                        "docbParseChunk() deprecated function reached\n");
-        deprecated = 1;
-    }
+  if (!deprecated) {
+    xmlGenericError(xmlGenericErrorContext,
+                    "docbParseChunk() deprecated function reached\n");
+    deprecated = 1;
+  }
 
-    return (xmlSAXParseMemoryWithData(sax, (const char *)cur,
-			  xmlStrlen((const xmlChar *) cur), 0,  userData));
+  return (xmlSAXParseMemoryWithData(
+      sax, (const char *)cur, xmlStrlen((const xmlChar *)cur), 0, userData));
 }
 
 /**
  * docbParseDoc:
  * @cur:  a pointer to an array of xmlChar
- * @encoding:  a free form C string describing the SGML document encoding, or NULL
+ * @encoding:  a free form C string describing the SGML document encoding, or
+ * NULL
  *
  * parse an SGML in-memory document and build a tree.
- * 
+ *
  * Returns the resulting document tree
  */
 
-docbDocPtr
-docbParseDoc(xmlChar * cur ATTRIBUTE_UNUSED,
-             const char *encoding ATTRIBUTE_UNUSED)
-{
-    static int deprecated = 0;
+docbDocPtr docbParseDoc(xmlChar *cur ATTRIBUTE_UNUSED,
+                        const char *encoding ATTRIBUTE_UNUSED) {
+  static int deprecated = 0;
 
-    if (!deprecated) {
-        xmlGenericError(xmlGenericErrorContext,
-                        "docbParseChunk() deprecated function reached\n");
-        deprecated = 1;
-    }
+  if (!deprecated) {
+    xmlGenericError(xmlGenericErrorContext,
+                    "docbParseChunk() deprecated function reached\n");
+    deprecated = 1;
+  }
 
-    return (xmlParseDoc(cur));
+  return (xmlParseDoc(cur));
 }
-
 
 /**
  * docbCreateFileParserCtxt:
  * @filename:  the filename
  * @encoding:  the SGML document encoding, or NULL
  *
- * Create a parser context for a file content. 
+ * Create a parser context for a file content.
  * Automatic support for ZLIB/Compress compressed document is provided
  * by default if found at compile-time.
  *
@@ -229,25 +214,25 @@ docbParseDoc(xmlChar * cur ATTRIBUTE_UNUSED,
  */
 docbParserCtxtPtr
 docbCreateFileParserCtxt(const char *filename ATTRIBUTE_UNUSED,
-                         const char *encoding ATTRIBUTE_UNUSED)
-{
-    static int deprecated = 0;
+                         const char *encoding ATTRIBUTE_UNUSED) {
+  static int deprecated = 0;
 
-    if (!deprecated) {
-        xmlGenericError(xmlGenericErrorContext,
-                        "docbCreateFileParserCtxt() deprecated function reached\n");
-        deprecated = 1;
-    }
+  if (!deprecated) {
+    xmlGenericError(xmlGenericErrorContext,
+                    "docbCreateFileParserCtxt() deprecated function reached\n");
+    deprecated = 1;
+  }
 
-    return (xmlCreateFileParserCtxt(filename));
+  return (xmlCreateFileParserCtxt(filename));
 }
 
 /**
  * docbSAXParseFile:
  * @filename:  the filename
- * @encoding:  a free form C string describing the SGML document encoding, or NULL
+ * @encoding:  a free form C string describing the SGML document encoding, or
+ * NULL
  * @sax:  the SAX handler block
- * @userData: if using SAX, this pointer will be provided on callbacks. 
+ * @userData: if using SAX, this pointer will be provided on callbacks.
  *
  * parse an SGML file and build a tree. Automatic support for ZLIB/Compress
  * compressed document is provided by default if found at compile-time.
@@ -257,21 +242,19 @@ docbCreateFileParserCtxt(const char *filename ATTRIBUTE_UNUSED,
  * Returns the resulting document tree
  */
 
-docbDocPtr
-docbSAXParseFile(const char *filename ATTRIBUTE_UNUSED,
-                 const char *encoding ATTRIBUTE_UNUSED,
-                 docbSAXHandlerPtr sax ATTRIBUTE_UNUSED,
-		 void *userData ATTRIBUTE_UNUSED)
-{
-    static int deprecated = 0;
+docbDocPtr docbSAXParseFile(const char *filename ATTRIBUTE_UNUSED,
+                            const char *encoding ATTRIBUTE_UNUSED,
+                            docbSAXHandlerPtr sax ATTRIBUTE_UNUSED,
+                            void *userData ATTRIBUTE_UNUSED) {
+  static int deprecated = 0;
 
-    if (!deprecated) {
-        xmlGenericError(xmlGenericErrorContext,
-                        "docbSAXParseFile() deprecated function reached\n");
-        deprecated = 1;
-    }
+  if (!deprecated) {
+    xmlGenericError(xmlGenericErrorContext,
+                    "docbSAXParseFile() deprecated function reached\n");
+    deprecated = 1;
+  }
 
-    return (xmlSAXParseFileWithData(sax, filename, 0, userData));
+  return (xmlSAXParseFileWithData(sax, filename, 0, userData));
 }
 
 /**
@@ -286,19 +269,17 @@ docbSAXParseFile(const char *filename ATTRIBUTE_UNUSED,
  * Returns the resulting document tree
  */
 
-docbDocPtr
-docbParseFile(const char *filename ATTRIBUTE_UNUSED,
-              const char *encoding ATTRIBUTE_UNUSED)
-{
-    static int deprecated = 0;
+docbDocPtr docbParseFile(const char *filename ATTRIBUTE_UNUSED,
+                         const char *encoding ATTRIBUTE_UNUSED) {
+  static int deprecated = 0;
 
-    if (!deprecated) {
-        xmlGenericError(xmlGenericErrorContext,
-                        "docbParseFile() deprecated function reached\n");
-        deprecated = 1;
-    }
+  if (!deprecated) {
+    xmlGenericError(xmlGenericErrorContext,
+                    "docbParseFile() deprecated function reached\n");
+    deprecated = 1;
+  }
 
-    return (xmlParseFile(filename));
+  return (xmlParseFile(filename));
 }
 #define bottom_DOCBparser
 #include "elfgcchack.h"

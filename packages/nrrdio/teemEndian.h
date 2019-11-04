@@ -22,7 +22,6 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-
 /*
 ** the end result of this is that the source file which includes
 ** this can be sure that TEEM_ENDIAN is set, and can be sure that
@@ -30,11 +29,11 @@
 */
 
 #ifndef TEEM_ENDIAN
-#  error TEEM_ENDIAN not defined, see architecture-specific .mk file or check compilation options
+#error TEEM_ENDIAN not defined, see architecture-specific .mk file or check compilation options
 #elif TEEM_ENDIAN == 1234
-#  /* okay, its little endian */
+#/* okay, its little endian */
 #elif TEEM_ENDIAN == 4321
-#  /* okay, its big endian */
+#/* okay, its big endian */
 #else
 #  error TEEM_ENDIAN not set to 1234 (little endian) or 4321 (big endian), see architecture-specific .mk file or check compilation options
 #endif

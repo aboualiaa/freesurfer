@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:09 $
@@ -22,7 +22,6 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
-
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -46,66 +45,66 @@
 #define RGB_SIZE 500
 
 static char vcid[] =
-  "$Id: histo_segment.c,v 1.2 2011/03/02 00:04:09 nicks Exp $";
+    "$Id: histo_segment.c,v 1.2 2011/03/02 00:04:09 nicks Exp $";
 
 #if 0
 static int write_snapshot(MRI *mri, MRI *mri_src, MRI *mri_dst, MATRIX *m, char *base, int n, int level, DENSITY *density, MRI *mri_seg) ;
 int main(int argc, char *argv[]) ;
 #endif
-static int  get_option(int argc, char *argv[]) ;
-static void usage_exit(void) ;
-static void print_usage(void) ;
-static void print_help(void) ;
-static void print_version(void) ;
+static int get_option(int argc, char *argv[]);
+static void usage_exit(void);
+static void print_usage(void);
+static void print_help(void);
+static void print_version(void);
 
-const char *Progname ;
+const char *Progname;
 
-int
-main(int argc, char *argv[]) {
-  char        **av ;
-  int         ac, nargs ;
-  MRI         *mri_nissl, *mri_seg ;
-  MRI_SEGMENTATION *mriseg ;
-  double      thresh, min_neuron_area ;
-
+int main(int argc, char *argv[]) {
+  char **av;
+  int ac, nargs;
+  MRI *mri_nissl, *mri_seg;
+  MRI_SEGMENTATION *mriseg;
+  double thresh, min_neuron_area;
 
   /* rkt: check for and handle version tag */
-  nargs = handle_version_option (argc, argv, "$Id: histo_segment.c,v 1.2 2011/03/02 00:04:09 nicks Exp $", "$Name:  $");
+  nargs = handle_version_option(
+      argc, argv, "$Id: histo_segment.c,v 1.2 2011/03/02 00:04:09 nicks Exp $",
+      "$Name:  $");
   if (nargs && argc - nargs == 1)
-    exit (0);
+    exit(0);
   argc -= nargs;
 
-  Progname = argv[0] ;
-  ErrorInit(NULL, NULL, NULL) ;
-  DiagInit(NULL, NULL, NULL) ;
+  Progname = argv[0];
+  ErrorInit(NULL, NULL, NULL);
+  DiagInit(NULL, NULL, NULL);
 
-  ac = argc ;
-  av = argv ;
-  for ( ; argc > 1 && ISOPTION(*argv[1]) ; argc--, argv++) {
-    nargs = get_option(argc, argv) ;
-    argc -= nargs ;
-    argv += nargs ;
+  ac = argc;
+  av = argv;
+  for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
+    nargs = get_option(argc, argv);
+    argc -= nargs;
+    argv += nargs;
   }
 
   if (argc < 4)
-    usage_exit() ;
+    usage_exit();
 
-  mri_nissl = MRIread(argv[1]) ;
+  mri_nissl = MRIread(argv[1]);
   if (mri_nissl == NULL)
-    ErrorExit(ERROR_BADPARM, "%s: could not open Nissl image %s...\n", argv[1]) ;
+    ErrorExit(ERROR_BADPARM, "%s: could not open Nissl image %s...\n", argv[1]);
 
-  thresh = atof(argv[2]) ;
-  min_neuron_area = atof(argv[3]) ;
-  mriseg = MRIsegment(mri_nissl, 0, thresh) ;
-  MRIremoveSmallSegments(mriseg, min_neuron_area) ;
-  mri_seg = MRIsegmentToImage(mri_nissl, NULL, mriseg, -1) ;
+  thresh = atof(argv[2]);
+  min_neuron_area = atof(argv[3]);
+  mriseg = MRIsegment(mri_nissl, 0, thresh);
+  MRIremoveSmallSegments(mriseg, min_neuron_area);
+  mri_seg = MRIsegmentToImage(mri_nissl, NULL, mriseg, -1);
   //  MRIbinarize(mri_seg, mri_seg, 0, 0, 1) ;
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
-    MRIwrite(mri_seg, "s.mgz") ;
+    MRIwrite(mri_seg, "s.mgz");
 
-  MRIwrite(mri_seg, argv[4]) ;
-  exit(0) ;
-  return(0) ;  /* for ansi */
+  MRIwrite(mri_seg, argv[4]);
+  exit(0);
+  return (0); /* for ansi */
 }
 
 /*----------------------------------------------------------------------
@@ -113,73 +112,69 @@ main(int argc, char *argv[]) {
 
            Description:
 ----------------------------------------------------------------------*/
-static int
-get_option(int argc, char *argv[]) {
-  int  nargs = 0 ;
-  char *option ;
+static int get_option(int argc, char *argv[]) {
+  int nargs = 0;
+  char *option;
 
-  option = argv[1] + 1 ;            /* past '-' */
+  option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "-help"))
-    print_help() ;
+    print_help();
   else if (!stricmp(option, "-version"))
-    print_version() ;
+    print_version();
   else if (!stricmp(option, "out_like") || !stricmp(option, "ol")) {
 #if 0
     out_like_fname = argv[2] ;
     nargs = 1 ;
     printf("shaping output to be like %s...\n", out_like_fname) ;
 #endif
-  }else switch (toupper(*option)) {
-  case 'V':
-    Gdiag_no = atoi(argv[2]) ;
-    nargs = 1 ;
-    break ;
-  case '?':
-  case 'U':
-    print_usage() ;
-    exit(1) ;
-    break ;
+  } else
+    switch (toupper(*option)) {
+    case 'V':
+      Gdiag_no = atoi(argv[2]);
+      nargs = 1;
+      break;
+    case '?':
+    case 'U':
+      print_usage();
+      exit(1);
+      break;
     default:
-      fprintf(stderr, "unknown option %s\n", argv[1]) ;
-      exit(1) ;
-      break ;
-  }
+      fprintf(stderr, "unknown option %s\n", argv[1]);
+      exit(1);
+      break;
+    }
 
-  return(nargs) ;
+  return (nargs);
 }
 
-static void
-usage_exit(void) {
+static void usage_exit(void) {
   //  print_usage() ; // print_help _calls print_usage
-  print_help() ;
-  exit(1) ;
+  print_help();
+  exit(1);
 }
 
-static void
-print_usage(void) {
+static void print_usage(void) {
   fprintf(stderr,
-          "usage: %s [options] <Nissl image> <max intensity> <max area> <output segmented image>\n",
-          Progname) ;
+          "usage: %s [options] <Nissl image> <max intensity> <max area> "
+          "<output segmented image>\n",
+          Progname);
 }
 
-static void
-print_help(void) {
-  print_usage() ;
-  fprintf(stderr,
-          "\nThis program align a histological slice with a block face image\n") ;
-  fprintf(stderr, "-out_like <reference volume> - set out_volume parameters\n") ;
+static void print_help(void) {
+  print_usage();
+  fprintf(
+      stderr,
+      "\nThis program align a histological slice with a block face image\n");
+  fprintf(stderr, "-out_like <reference volume> - set out_volume parameters\n");
   fprintf(stderr, "-I                           - invert transform "
-          "coordinates\n") ;
-  exit(1) ;
+                  "coordinates\n");
+  exit(1);
 }
 
-
-static void
-print_version(void) {
-  fprintf(stderr, "%s\n", vcid) ;
-  exit(1) ;
+static void print_version(void) {
+  fprintf(stderr, "%s\n", vcid);
+  exit(1);
 }
-
 
 #if 0
 /*-----------------------------------------------------

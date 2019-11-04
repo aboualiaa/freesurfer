@@ -32,63 +32,48 @@
 class LayerPropertyDTI;
 class vtkDataArray;
 
-class LayerDTI : public LayerMRI
-{
+class LayerDTI : public LayerMRI {
   Q_OBJECT
 public:
-  LayerDTI( LayerMRI* ref, QObject* parent = NULL );
+  LayerDTI(LayerMRI *ref, QObject *parent = NULL);
   virtual ~LayerDTI();
 
   bool LoadDTIFromFile();
 
-  void SetVectorFileName( const QString& filename )
-  {
+  void SetVectorFileName(const QString &filename) {
     m_sVectorFileName = filename;
   }
 
-  QString GetVectorFileName()
-  {
-    return m_sVectorFileName;
-  }
+  QString GetVectorFileName() { return m_sVectorFileName; }
 
-  void SetEigenvalueFileName( const QString& filename )
-  {
+  void SetEigenvalueFileName(const QString &filename) {
     m_sEigenvalueFileName = filename;
   }
 
-  QString GetEigenvalueFileName()
-  {
-    return m_sEigenvalueFileName;
+  QString GetEigenvalueFileName() { return m_sEigenvalueFileName; }
+
+  inline LayerPropertyDTI *GetProperty() {
+    return (LayerPropertyDTI *)mProperty;
   }
 
-  inline LayerPropertyDTI* GetProperty()
-  {
-    return (LayerPropertyDTI*)mProperty;
-  }
+  bool GetVectorValue(double *pos_in, double *v_out);
 
-  bool GetVectorValue( double* pos_in, double* v_out );
-
-  int GetNumberOfFrames()
-  {
-    return 1;
-  }
+  int GetNumberOfFrames() { return 1; }
 
 protected:
-  bool DoRotate( std::vector<RotationElement>& rotations );
+  bool DoRotate(std::vector<RotationElement> &rotations);
   void DoRestore();
   void UpdateColorMap();
   void InitializeDTIColorMap();
 
-  virtual void UpdateVectorActor( int nPlane );
+  virtual void UpdateVectorActor(int nPlane);
 
-  FSVolume*  m_vectorSource;
-  QString  m_sVectorFileName;
+  FSVolume *m_vectorSource;
+  QString m_sVectorFileName;
 
-  FSVolume*  m_eigenvalueSource;   // eigen values
+  FSVolume *m_eigenvalueSource; // eigen values
   QString m_sEigenvalueFileName;
-  vtkDataArray* m_vectorData;
+  vtkDataArray *m_vectorData;
 };
 
 #endif
-
-

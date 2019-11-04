@@ -9,8 +9,7 @@ class WindowLayerInfo;
 
 class Layer;
 
-class WindowLayerInfo : public QWidget
-{
+class WindowLayerInfo : public QWidget {
   Q_OBJECT
 
 public:
@@ -18,12 +17,12 @@ public:
   ~WindowLayerInfo();
 
 public slots:
-  void UpdateInfo(Layer* layer);
+  void UpdateInfo(Layer *layer);
 
 private:
   void Clear();
-  void AddLine(const QString& name, const QString& value);
-  void SetCaption(const QString& text);
+  void AddLine(const QString &name, const QString &value);
+  void SetCaption(const QString &text);
 
   Ui::WindowLayerInfo *ui;
 };

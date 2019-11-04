@@ -38,38 +38,36 @@ static void fh_insertrootlist(struct fibheap *, struct fibheap_el *);
 static void fh_removerootlist(struct fibheap *, struct fibheap_el *);
 static void fh_consolidate(struct fibheap *);
 static void fh_heaplink(struct fibheap *h, struct fibheap_el *y,
-			struct fibheap_el *x);
+                        struct fibheap_el *x);
 static void fh_cut(struct fibheap *, struct fibheap_el *, struct fibheap_el *);
 static void fh_cascading_cut(struct fibheap *, struct fibheap_el *);
 static struct fibheap_el *fh_extractminel(struct fibheap *);
 static void fh_checkcons(struct fibheap *h);
 static void fh_destroyheap(struct fibheap *h);
 static int fh_compare(struct fibheap *h, struct fibheap_el *a,
-			struct fibheap_el *b);
+                      struct fibheap_el *b);
 static int fh_comparedata(struct fibheap *h, int key, void *data,
-			struct fibheap_el *b);
+                          struct fibheap_el *b);
 static void fh_insertel(struct fibheap *h, struct fibheap_el *x);
 static void fh_deleteel(struct fibheap *h, struct fibheap_el *x);
 
-static struct fibheap_el *fhe_newelem(void);
+static struct fibheap_el *fhe_newelem();
 static void fhe_initelem(struct fibheap_el *);
 static void fhe_insertafter(struct fibheap_el *a, struct fibheap_el *b);
 static void fhe_insertbefore(struct fibheap_el *a, struct fibheap_el *b);
 static struct fibheap_el *fhe_remove(struct fibheap_el *a);
-#define	fhe_destroy(x)	free((x))
+#define fhe_destroy(x) free((x))
 
 /*
  * general functions
  */
-static int ceillog2(unsigned int n)
-{
-	int x = 0;
-	while (n > 1) 
-	{
-		x++;
-		n /= 2;
-	}
-	return x;
+static int ceillog2(unsigned int n) {
+  int x = 0;
+  while (n > 1) {
+    x++;
+    n /= 2;
+  }
+  return x;
 }
 
 #endif /* _FIBPRIV_H_ */

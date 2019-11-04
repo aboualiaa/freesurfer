@@ -18,18 +18,19 @@
  * application.
  *
  * QVTKOpenGLNativeWidget extends QOpenGLWidget to make it work with a
- * vtkGenericOpenGLRenderWindow. This is akin to QVTKWidget except it uses Qt to create and
- * manage the OpenGL context using QOpenGLWidget (added in Qt 5.4).
+ * vtkGenericOpenGLRenderWindow. This is akin to QVTKWidget except it uses Qt to
+ * create and manage the OpenGL context using QOpenGLWidget (added in Qt 5.4).
  *
- * While QVTKOpenGLNativeWidget is intended to be a replacement for QVTKWidget when
- * using Qt 5, there are a few difference between QVTKOpenGLNativeWidget and
- * QVTKWidget.
+ * While QVTKOpenGLNativeWidget is intended to be a replacement for QVTKWidget
+ * when using Qt 5, there are a few difference between QVTKOpenGLNativeWidget
+ * and QVTKWidget.
  *
- * Unlike QVTKWidget, QVTKOpenGLNativeWidget only works with vtkGenericOpenGLRenderWindow.
- * This is necessary since QOpenGLWidget wants to take over the window management as
- * well as the OpenGL context creation. Getting that to work reliably with
- * vtkXRenderWindow or vtkWin32RenderWindow (and other platform specific
- * vtkRenderWindow subclasses) was tricky and fraught with issues.
+ * Unlike QVTKWidget, QVTKOpenGLNativeWidget only works with
+ * vtkGenericOpenGLRenderWindow. This is necessary since QOpenGLWidget wants to
+ * take over the window management as well as the OpenGL context creation.
+ * Getting that to work reliably with vtkXRenderWindow or vtkWin32RenderWindow
+ * (and other platform specific vtkRenderWindow subclasses) was tricky and
+ * fraught with issues.
  *
  * Since QVTKOpenGLNativeWidget uses QOpenGLWidget to create the OpenGL context,
  * it uses QSurfaceFormat (set using `QOpenGLWidget::setFormat` or
@@ -59,22 +60,22 @@
  *
  * @section OpenGLContext OpenGL Context
  *
- * In QOpenGLWidget (superclass for QVTKOpenGLNativeWidget), all rendering happens in a
- * framebuffer object. Thus, care must be taken in the rendering code to never
- * directly re-bind the default framebuffer i.e. ID 0.
+ * In QOpenGLWidget (superclass for QVTKOpenGLNativeWidget), all rendering
+ * happens in a framebuffer object. Thus, care must be taken in the rendering
+ * code to never directly re-bind the default framebuffer i.e. ID 0.
  *
- * QVTKOpenGLNativeWidget creates an internal QOpenGLFramebufferObject, independent of the
- * one created by superclass, for vtkRenderWindow to do the rendering in. This
- * explicit double-buffering is useful in avoiding temporary back-buffer only
- * renders done in VTK (e.g. when making selections) from destroying the results
- * composed on screen.
+ * QVTKOpenGLNativeWidget creates an internal QOpenGLFramebufferObject,
+ * independent of the one created by superclass, for vtkRenderWindow to do the
+ * rendering in. This explicit double-buffering is useful in avoiding temporary
+ * back-buffer only renders done in VTK (e.g. when making selections) from
+ * destroying the results composed on screen.
  *
  * @section RenderAndPaint Handling Render and Paint.
  *
- * QWidget subclasses (including `QOpenGLWidget` and `QVTKOpenGLNativeWidget`) display
- * their contents on the screen in `QWidget::paint` in response to a paint event.
- * `QOpenGLWidget` subclasses are expected to do OpenGL rendering in
- * `QOpenGLWidget::paintGL`. QWidget can receive paint events for various
+ * QWidget subclasses (including `QOpenGLWidget` and `QVTKOpenGLNativeWidget`)
+ * display their contents on the screen in `QWidget::paint` in response to a
+ * paint event. `QOpenGLWidget` subclasses are expected to do OpenGL rendering
+ * in `QOpenGLWidget::paintGL`. QWidget can receive paint events for various
  * reasons including widget getting focus/losing focus, some other widget on
  * the UI e.g. QProgressBar in status bar updating, etc.
  *
@@ -93,8 +94,8 @@
  *
  * There may still be occasions when we may have to render in `paint` for
  * example if the window was resized or Qt had to recreate the OpenGL context.
- * In those cases, `QVTKOpenGLNativeWidget::paintGL` can request a render by calling
- * `QVTKOpenGLNativeWidget::renderVTK`.
+ * In those cases, `QVTKOpenGLNativeWidget::paintGL` can request a render by
+ * calling `QVTKOpenGLNativeWidget::renderVTK`.
  *
  * @section Caveats
  * QVTKOpenGLNativeWidget only supports **OpenGL2** rendering backend.
@@ -121,12 +122,13 @@ class QVTKInteractorAdapter;
 class QVTKOpenGLNativeWidgetObserver;
 class vtkGenericOpenGLRenderWindow;
 
-class VTKGUISUPPORTQT_EXPORT QVTKOpenGLNativeWidget : public QOpenGLWidget
-{
+class VTKGUISUPPORTQT_EXPORT QVTKOpenGLNativeWidget : public QOpenGLWidget {
   Q_OBJECT
   typedef QOpenGLWidget Superclass;
+
 public:
-  QVTKOpenGLNativeWidget(QWidget* parent = Q_NULLPTR, Qt::WindowFlags f = Qt::WindowFlags());
+  QVTKOpenGLNativeWidget(QWidget *parent = Q_NULLPTR,
+                         Qt::WindowFlags f = Qt::WindowFlags());
   ~QVTKOpenGLNativeWidget() override;
 
   //@{
@@ -135,35 +137,40 @@ public:
    * GetRenderWindow() creates and returns a new vtkGenericOpenGLRenderWindow
    * if it is not already provided.
    */
-  void SetRenderWindow(vtkGenericOpenGLRenderWindow* win);
-  void SetRenderWindow(vtkRenderWindow* win);
-  virtual vtkRenderWindow* GetRenderWindow();
+  void SetRenderWindow(vtkGenericOpenGLRenderWindow *win);
+  void SetRenderWindow(vtkRenderWindow *win);
+  virtual vtkRenderWindow *GetRenderWindow();
   //@}
 
   /**
    * Get the QEvent to VTK events translator.
    */
-  virtual QVTKInteractorAdapter* GetInteractorAdapter() { return this->InteractorAdapter; }
+  virtual QVTKInteractorAdapter *GetInteractorAdapter() {
+    return this->InteractorAdapter;
+  }
 
   /**
-   * Get the QVTKInteractor that was either created by default or set by the user.
+   * Get the QVTKInteractor that was either created by default or set by the
+   * user.
    */
-  virtual QVTKInteractor* GetInteractor();
+  virtual QVTKInteractor *GetInteractor();
 
   /**
    * Sets up vtkRenderWindow ivars using QSurfaceFormat.
    */
-  static void copyFromFormat(const QSurfaceFormat& format, vtkRenderWindow* win);
+  static void copyFromFormat(const QSurfaceFormat &format,
+                             vtkRenderWindow *win);
 
   /**
    * Using the vtkRenderWindow, setup QSurfaceFormat.
    */
-  static void copyToFormat(vtkRenderWindow* win, QSurfaceFormat& format);
+  static void copyToFormat(vtkRenderWindow *win, QSurfaceFormat &format);
 
   /**
    * Returns a typical QSurfaceFormat suitable for most applications using
-   * QVTKOpenGLNativeWidget. Note that this is not the QSurfaceFormat that gets used
-   * if none is specified. That is set using `QSurfaceFormat::setDefaultFormat`.
+   * QVTKOpenGLNativeWidget. Note that this is not the QSurfaceFormat that gets
+   * used if none is specified. That is set using
+   * `QSurfaceFormat::setDefaultFormat`.
    */
   static QSurfaceFormat defaultFormat();
 
@@ -180,9 +187,10 @@ public:
 
 signals:
   /**
-   * This signal will be emitted whenever a mouse event occurs within the QVTK window.
+   * This signal will be emitted whenever a mouse event occurs within the QVTK
+   * window.
    */
-  void mouseEvent(QMouseEvent* event);
+  void mouseEvent(QMouseEvent *event);
 
 protected slots:
   /**
@@ -208,25 +216,25 @@ private slots:
    * callback for changing the cursor. Called when vtkGenericOpenGLRenderWindow
    * fires the CursorChangedEvent.
    */
-  void cursorChangedCallback(vtkObject* caller, unsigned long vtk_event,
-    void* client_data, void* call_data);
+  void cursorChangedCallback(vtkObject *caller, unsigned long vtk_event,
+                             void *client_data, void *call_data);
 
 protected:
-  bool event(QEvent* evt) Q_DECL_OVERRIDE;
+  bool event(QEvent *evt) Q_DECL_OVERRIDE;
   void initializeGL() Q_DECL_OVERRIDE;
   void resizeGL(int w, int h) Q_DECL_OVERRIDE;
   void paintGL() Q_DECL_OVERRIDE;
 
-  void mousePressEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
-  void mouseMoveEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
-  void mouseReleaseEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
-  void mouseDoubleClickEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
+  void mousePressEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
+  void mouseMoveEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
+  void mouseReleaseEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
+  void mouseDoubleClickEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
 
   /**
-   * This method is called to indicate that vtkRenderWindow needs to reinitialize
-   * itself before the next render (done in QVTKOpenGLNativeWidget::paintGL).
-   * This is needed when the context gets recreated
-   * or the default FrameBufferObject gets recreated, for example.
+   * This method is called to indicate that vtkRenderWindow needs to
+   * reinitialize itself before the next render (done in
+   * QVTKOpenGLNativeWidget::paintGL). This is needed when the context gets
+   * recreated or the default FrameBufferObject gets recreated, for example.
    */
   void requireRenderWindowInitialization();
 
@@ -239,9 +247,10 @@ protected:
    * rendering.
    *
    * Default implementation never returns false. However, subclasses can return
-   * false to indicate to QVTKOpenGLNativeWidget that it cannot generate a reasonable
-   * image to be displayed in QVTKOpenGLNativeWidget. In which case, the `paintGL`
-   * call will return leaving the `defaultFramebufferObject` untouched.
+   * false to indicate to QVTKOpenGLNativeWidget that it cannot generate a
+   * reasonable image to be displayed in QVTKOpenGLNativeWidget. In which case,
+   * the `paintGL` call will return leaving the `defaultFramebufferObject`
+   * untouched.
    *
    * Since by default `QOpenGLWidget::UpdateBehavior` is set to
    * QOpenGLWidget::PartialUpdate, this means whatever was rendered in the frame
@@ -254,7 +263,7 @@ protected:
 
 protected:
   vtkSmartPointer<vtkGenericOpenGLRenderWindow> RenderWindow;
-  QVTKInteractorAdapter* InteractorAdapter;
+  QVTKInteractorAdapter *InteractorAdapter;
 
   bool EnableHiDPI;
   int OriginalDPI;
@@ -270,12 +279,12 @@ private:
    */
   void windowFrameEventCallback();
 
-  QOpenGLFramebufferObject* FBO;
+  QOpenGLFramebufferObject *FBO;
   bool InPaintGL;
   bool DoVTKRenderInPaintGL;
   vtkNew<QVTKOpenGLNativeWidgetObserver> Observer;
   friend class QVTKOpenGLNativeWidgetObserver;
-  QOpenGLDebugLogger* Logger;
+  QOpenGLDebugLogger *Logger;
 };
 
 #endif

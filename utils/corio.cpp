@@ -53,10 +53,10 @@
   row, col, and slice.
 
 */
-#include <errno.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cerrno>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
 #include <strings.h>
 #include <unistd.h>
 extern int errno;
@@ -64,43 +64,41 @@ extern int errno;
 #include "corio.h"
 
 /*-------------------------------------*/
-unsigned char **alloc_cor(void)
-{
+unsigned char **alloc_cor() {
   unsigned char **COR;
   int n;
 
   COR = (unsigned char **)calloc(256, sizeof(unsigned char *));
-  if (COR == NULL) {
+  if (COR == nullptr) {
     fprintf(stderr, "alloc_cor(): could not alloc unsigned char **\n");
-    return (NULL);
+    return (nullptr);
   }
 
   for (n = 0; n < 256; n++) {
     COR[n] = (unsigned char *)calloc(256 * 256, sizeof(unsigned char));
-    if (COR[n] == NULL) {
+    if (COR[n] == nullptr) {
       fprintf(stderr, "alloc_cor(): could not alloc slice %d\n", n);
-      return (NULL);
+      return (nullptr);
     }
   }
   return (COR);
 }
 /*-------------------------------------*/
-int free_cor(unsigned char ***pppCOR)
-{
+int free_cor(unsigned char ***pppCOR) {
   int n;
   unsigned char **COR;
 
   COR = *pppCOR;
 
-  for (n = 0; n < 256; n++) free(COR[n]);
+  for (n = 0; n < 256; n++)
+    free(COR[n]);
   free(COR);
 
   return (0);
 }
 
 /*-------------------------------------*/
-unsigned char **ld_cor(char *cordir)
-{
+unsigned char **ld_cor(char *cordir) {
   unsigned char **COR;
   int n;
   char fname[1000];
@@ -108,7 +106,8 @@ unsigned char **ld_cor(char *cordir)
   int nread, n_to_be_read = 256 * 256;
 
   COR = alloc_cor();
-  if (COR == NULL) return (NULL);
+  if (COR == nullptr)
+    return (nullptr);
 
   for (n = 0; n < 256; n++) {
     /*fprintf(stderr,"%3d ",n);
@@ -116,11 +115,11 @@ unsigned char **ld_cor(char *cordir)
 
     sprintf(fname, "%s/COR-%03d", cordir, n + 1);
     fp = fopen(fname, "r");
-    if (fp == NULL) {
+    if (fp == nullptr) {
       perror("ld_cor()");
       fprintf(stderr, "Could not open %s\n", fname);
       free_cor(&COR);
-      return (NULL);
+      return (nullptr);
     }
 
     nread = fread(COR[n], sizeof(unsigned char), n_to_be_read, fp);
@@ -130,20 +129,19 @@ unsigned char **ld_cor(char *cordir)
       fprintf(stderr, "Error reading %s\n", fname);
       fprintf(stderr, "nread = %d, n-to-be-read = %d\n", nread, n_to_be_read);
       free_cor(&COR);
-      return (NULL);
+      return (nullptr);
     }
   }
   return (COR);
 }
 /*-------------------------------------------------*/
-int cordir_iswritable(char *cordir)
-{
+int cordir_iswritable(char *cordir) {
   char tmpstr[2000];
   FILE *fp;
 
   sprintf(tmpstr, "%s/junk-tmp.huh", cordir);
   fp = fopen(tmpstr, "w");
-  if (fp == NULL) {
+  if (fp == nullptr) {
     perror("");
     fprintf(stderr, "Cannot write to %s\n", cordir);
     return (0);
@@ -155,14 +153,14 @@ int cordir_iswritable(char *cordir)
 }
 
 /*-------------------------------------------------*/
-int sv_cor(unsigned char **COR, char *cordir)
-{
+int sv_cor(unsigned char **COR, char *cordir) {
   int n;
   char fname[1000];
   FILE *fp;
   int nwritten, n_to_be_written = 256 * 256;
 
-  if (!cordir_iswritable(cordir)) return (1);
+  if (!cordir_iswritable(cordir))
+    return (1);
 
   for (n = 0; n < 256; n++) {
     /*fprintf(stderr,"%3d ",n);
@@ -170,7 +168,7 @@ int sv_cor(unsigned char **COR, char *cordir)
 
     sprintf(fname, "%s/COR-%03d", cordir, n + 1);
     fp = fopen(fname, "w");
-    if (fp == NULL) {
+    if (fp == nullptr) {
       perror("sv_cor()");
       fprintf(stderr, "Could not open %s\n", fname);
       return (1);
@@ -181,7 +179,8 @@ int sv_cor(unsigned char **COR, char *cordir)
     if (nwritten != n_to_be_written) {
       perror("sv_cor()");
       fprintf(stderr, "Error writing %s\n", fname);
-      fprintf(stderr, "nwriten = %d, n-to-be-written = %d\n", nwritten, n_to_be_written);
+      fprintf(stderr, "nwriten = %d, n-to-be-written = %d\n", nwritten,
+              n_to_be_written);
       return (1);
     }
   }
@@ -189,7 +188,7 @@ int sv_cor(unsigned char **COR, char *cordir)
   /* write the COR-.info file */
   sprintf(fname, "%s/COR-.info", cordir);
   fp = fopen(fname, "w");
-  if (fp == NULL) {
+  if (fp == nullptr) {
     perror("sv_cor()");
     fprintf(stderr, "Could not open %s\n", fname);
     return (1);
@@ -216,8 +215,7 @@ int sv_cor(unsigned char **COR, char *cordir)
   return (0);
 }
 /*-------------------------------------------------*/
-unsigned char getcorval(unsigned char **COR, int row, int col, int slc)
-{
+unsigned char getcorval(unsigned char **COR, int row, int col, int slc) {
   if (col < 0 || col > 255) {
     fprintf(stderr, "getcorval: col = %d, out of bounds\n", col);
     return (0);
@@ -234,8 +232,8 @@ unsigned char getcorval(unsigned char **COR, int row, int col, int slc)
   return (*(COR[slc] + col + row * 256));
 }
 /*-------------------------------------------------*/
-int setcorval(unsigned char val, unsigned char **COR, int row, int col, int slc)
-{
+int setcorval(unsigned char val, unsigned char **COR, int row, int col,
+              int slc) {
   if (col < 0 || col > 255) {
     fprintf(stderr, "setcorval: col = %d, out of bounds\n", col);
     return (1);

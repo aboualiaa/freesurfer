@@ -29,45 +29,32 @@
 #include <QObject>
 #include "CommonDataStruct.h"
 
-
-
 #include "mri.h"
-
 
 class LayerMRI;
 class QTimer;
 
-class VolumeFilter : public QObject
-{
+class VolumeFilter : public QObject {
   Q_OBJECT
 public:
-  VolumeFilter( LayerMRI* input = 0, LayerMRI* output = 0, QObject* parent = 0 );
+  VolumeFilter(LayerMRI *input = 0, LayerMRI *output = 0, QObject *parent = 0);
   virtual ~VolumeFilter();
 
   bool Update();
 
   bool ReadyToUpdate();
 
-  void SetInputOutputVolumes( LayerMRI* input, LayerMRI* output );
+  void SetInputOutputVolumes(LayerMRI *input, LayerMRI *output);
 
-  MRI* CreateMRIFromVolume( LayerMRI* layer );
+  MRI *CreateMRIFromVolume(LayerMRI *layer);
 
-  void MapMRIToVolume( MRI* mri, LayerMRI* layer );
+  void MapMRIToVolume(MRI *mri, LayerMRI *layer);
 
-  int GetKernelSize()
-  {
-    return m_nKernelSize;
-  }
+  int GetKernelSize() { return m_nKernelSize; }
 
-  void SetKernelSize( int nKernelSize )
-  {
-    m_nKernelSize = nKernelSize;
-  }
+  void SetKernelSize(int nKernelSize) { m_nKernelSize = nKernelSize; }
 
-  LayerMRI* GetVolumeInput()
-  {
-    return m_volumeInput;
-  }
+  LayerMRI *GetVolumeInput() { return m_volumeInput; }
 
   virtual QString GetName() = 0;
 
@@ -82,13 +69,11 @@ protected slots:
 protected:
   virtual bool Execute() = 0;
 
-  int         m_nKernelSize;
-  LayerMRI*   m_volumeInput;
-  LayerMRI*   m_volumeOutput;
-  int         m_nTimerCount;
-  QTimer*     m_timerProgress;
+  int m_nKernelSize;
+  LayerMRI *m_volumeInput;
+  LayerMRI *m_volumeOutput;
+  int m_nTimerCount;
+  QTimer *m_timerProgress;
 };
 
 #endif
-
-

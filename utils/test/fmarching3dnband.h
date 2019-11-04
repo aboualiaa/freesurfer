@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:55 $
@@ -23,7 +23,6 @@
  *
  */
 
-
 /*****************************************************/
 /*          File: fmarching3d.h                      */
 /*   Purpose: Header file for fmarching3d functions  */
@@ -39,11 +38,9 @@
 #define NBAND 2
 #define FAWAY 3
 
-
-float ReCompute(float,float,float,float,float,float,unsigned char,unsigned char,
-                unsigned char,unsigned char,unsigned char,unsigned char);
-void fmarching3d(MRI *, MRI *,  float Thred);
+float ReCompute(float, float, float, float, float, float, unsigned char,
+                unsigned char, unsigned char, unsigned char, unsigned char,
+                unsigned char);
+void fmarching3d(MRI *, MRI *, float Thred);
 
 #endif
-
-

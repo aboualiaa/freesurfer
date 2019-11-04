@@ -24,9 +24,9 @@
 
 #include "fastmarching.h"
 
-MRI *MRIextractDistanceMap(MRI *mri_src, MRI *mri_dst, int label, float max_distance, int mode, MRI *mri_mask)
-{
-  MRI *mri_distance = NULL;
+MRI *MRIextractDistanceMap(MRI *mri_src, MRI *mri_dst, int label,
+                           float max_distance, int mode, MRI *mri_mask) {
+  MRI *mri_distance = nullptr;
 
   // int  free_mri = 0 ;
 
@@ -38,51 +38,50 @@ MRI *MRIextractDistanceMap(MRI *mri_src, MRI *mri_dst, int label, float max_dist
 
   // make sure that the max distance is greater than 0
   if (max_distance <= 0) {
-    max_distance = 2 * MAX(MAX(mri_src->width, mri_src->height), mri_src->depth);
+    max_distance =
+        2 * MAX(MAX(mri_src->width, mri_src->height), mri_src->depth);
   }
 
-  if (mri_dst == NULL) {
-    mri_dst = MRIalloc(mri_src->width, mri_src->height, mri_src->depth, MRI_FLOAT);
+  if (mri_dst == nullptr) {
+    mri_dst =
+        MRIalloc(mri_src->width, mri_src->height, mri_src->depth, MRI_FLOAT);
     MRIcopyHeader(mri_src, mri_dst);
   }
 
   mri_distance = mri_dst;
 
   // make sure that the member variables are all the same
-  if (mri_dst->width != mri_src->width || mri_dst->height != mri_src->height || mri_dst->depth != mri_src->depth ||
-      mri_dst->type != MRI_FLOAT) {
+  if (mri_dst->width != mri_src->width || mri_dst->height != mri_src->height ||
+      mri_dst->depth != mri_src->depth || mri_dst->type != MRI_FLOAT) {
     if (mri_dst->width != mri_src->width)
       fprintf(stderr,
               "ERROR : incompatible structure with mri_src:\n"
               "mri_dst->width=%d != mri_src->width=%d\n",
-              mri_dst->width,
-              mri_src->width);
+              mri_dst->width, mri_src->width);
 
     if (mri_dst->height != mri_src->height)
       fprintf(stderr,
               "ERROR : incompatible structure with mri_src:\n"
               "mri_dst->height=%d != mri_src->height=%d\n",
-              mri_dst->height,
-              mri_src->height);
+              mri_dst->height, mri_src->height);
 
     if (mri_dst->depth != mri_src->depth)
       fprintf(stderr,
               "ERROR : incompatible structure with mri_src:\n"
               "mri_dst->depth=%d != mri_src->depth=%d\n",
-              mri_dst->depth,
-              mri_src->depth);
+              mri_dst->depth, mri_src->depth);
 
     if (mri_dst->type != MRI_FLOAT)
       fprintf(stderr,
               "ERROR : incompatible structure with mri_dst:\n"
               "mri_dst->type=%d != MRI_FLOAT\n",
               mri_dst->type);
-  }
-  else {
+  } else {
     // set values to zero
     for (int z = 0; z < mri_dst->depth; z++)
       for (int y = 0; y < mri_dst->height; y++)
-        for (int x = 0; x < mri_dst->width; x++) MRIFvox(mri_dst, x, y, z) = 0.0f;
+        for (int x = 0; x < mri_dst->width; x++)
+          MRIFvox(mri_dst, x, y, z) = 0.0f;
 
     const int outside = 1;
     const int inside = 2;
@@ -92,14 +91,14 @@ MRI *MRIextractDistanceMap(MRI *mri_src, MRI *mri_dst, int label, float max_dist
     const int bothUnsigned = 4;
 
     if (mode == outside || mode == both || mode == bothUnsigned) {
-      FastMarching< +1 > fastmarching_out(mri_distance, mri_mask);
+      FastMarching<+1> fastmarching_out(mri_distance, mri_mask);
       fastmarching_out.SetLimit(max_distance);
       fastmarching_out.InitFromMRI(mri_src, label);
       fastmarching_out.Run(max_distance);
     }
 
     if (mode == inside || mode == both || mode == bothUnsigned) {
-      FastMarching< -1 > fastmarching_in(mri_distance, mri_mask);
+      FastMarching<-1> fastmarching_in(mri_distance, mri_mask);
       fastmarching_in.SetLimit(-max_distance);
       fastmarching_in.InitFromMRI(mri_src, label);
       fastmarching_in.Run(-max_distance);
@@ -110,7 +109,8 @@ MRI *MRIextractDistanceMap(MRI *mri_src, MRI *mri_dst, int label, float max_dist
       for (int z = 0; z < mri_distance->depth; z++)
         for (int y = 0; y < mri_distance->height; y++)
           for (int x = 0; x < mri_distance->width; x++)
-            MRIFvox(mri_distance, x, y, z) = fabs(MRIFvox(mri_distance, x, y, z));
+            MRIFvox(mri_distance, x, y, z) =
+                fabs(MRIFvox(mri_distance, x, y, z));
     }
   }
 

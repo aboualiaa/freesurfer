@@ -52,28 +52,27 @@
 #ifndef CTN_THREADS_IS_IN
 #define CTN_THREADS_IS_IN 1
 
-#ifdef  __cplusplus
-extern "C"
-{
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-  /* Define the function prototypes for this set of routines.
-  ** The first set defines initialization routines for using these
-  ** services as a user or provider.
-  */
-  CONDITION THR_Init(void);
-  CONDITION  THR_Shutdown(void);
-  CONDITION  THR_ObtainMutex(int fac);
-  CONDITION  THR_ReleaseMutex(int fac);
+/* Define the function prototypes for this set of routines.
+** The first set defines initialization routines for using these
+** services as a user or provider.
+*/
+CONDITION THR_Init(void);
+CONDITION THR_Shutdown(void);
+CONDITION THR_ObtainMutex(int fac);
+CONDITION THR_ReleaseMutex(int fac);
 
 #define THR_ObtainMutexA(a) EEE;
 #define THR_ReleaseMutexA(a) FFF;
 
-#define THR_NORMAL   FORM_COND(FAC_THR, SEV_SUCC, 1)
-#define THR_GENERICFAILURE  FORM_COND(FAC_THR, SEV_ERROR, 2)
-#define THR_NOTINITIALIZED  FORM_COND(FAC_THR, SEV_ERROR, 3)
+#define THR_NORMAL FORM_COND(FAC_THR, SEV_SUCC, 1)
+#define THR_GENERICFAILURE FORM_COND(FAC_THR, SEV_ERROR, 2)
+#define THR_NOTINITIALIZED FORM_COND(FAC_THR, SEV_ERROR, 3)
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 }
 #endif
 

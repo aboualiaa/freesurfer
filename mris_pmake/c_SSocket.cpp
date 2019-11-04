@@ -25,12 +25,12 @@
 #include <iostream>
 using namespace std;
 
-#include <string.h>
+#include <cstring>
 #include <strings.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <unistd.h>
-#include <errno.h>
+#include <cerrno>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -58,25 +58,21 @@ using namespace std;
 //-----------------------------------------------------------
 
 void c_SSocket::debug_push(string astr_currentProc) {
-  if (stackDepth_get() >= SSTACKDEPTH-1) {
-    cout << "Current stackDepth:\t" << stackDepth_get()             << endl;
-    cout << "stackdepth limit:\t"   << SSTACKDEPTH                  << endl;
-    for (int i=0; i<SSTACKDEPTH; i++)
-      cout << "Stack depth: " << i << "\t" << str_proc_get(i)      << endl;
+  if (stackDepth_get() >= SSTACKDEPTH - 1) {
+    cout << "Current stackDepth:\t" << stackDepth_get() << endl;
+    cout << "stackdepth limit:\t" << SSTACKDEPTH << endl;
+    for (int i = 0; i < SSTACKDEPTH; i++)
+      cout << "Stack depth: " << i << "\t" << str_proc_get(i) << endl;
     error("Out of str_proc stack depth");
   }
-  stackDepth_set(stackDepth_get()+1);
+  stackDepth_set(stackDepth_get() + 1);
   str_proc_set(stackDepth_get(), astr_currentProc);
 }
 
-void c_SSocket::debug_pop() {
-  stackDepth--;
-}
+void c_SSocket::debug_pop() { stackDepth--; }
 
-void
-c_SSocket::error(
-  string  astr_msg  /* = ""  Error message */,
-  int  code  /* = 1  Error ID  */) {
+void c_SSocket::error(string astr_msg /* = ""  Error message */,
+                      int code /* = 1  Error ID  */) {
 
   extern int errno;
 
@@ -84,17 +80,15 @@ c_SSocket::error(
   cerr << "\tSSocket `" << str_name << "' (id: " << id << ")\n";
   cerr << "\tCurrent function: " << str_obj << "::" << str_proc_get() << "\n";
   cerr << "\t" << astr_msg << "\n";
-  //cerr << "\t" << "System errno:\t" << errno << endl;
+  // cerr << "\t" << "System errno:\t" << errno << endl;
   perror("Error returned from system");
   print();
   cerr << "Throwing exception to (this) with code " << code << "\n\n";
   throw(this);
 }
 
-void
-c_SSocket::warn(
-  string astr_msg /* = ""  Warning message */,
-  int  code  /* = 1  Warning code  */) {
+void c_SSocket::warn(string astr_msg /* = ""  Warning message */,
+                     int code /* = 1  Warning code  */) {
   if (warnings) {
     cerr << "\nWarning.\n";
     cerr << "\tSSocket `" << str_name << "' (id: " << id << ")\n";
@@ -103,18 +97,17 @@ c_SSocket::warn(
   }
 }
 
-void
-c_SSocket::function_trace(
-  string  astr_msg /* = ""  Trace message */,
-  string  astr_separator /* = ""  Separator message */) {
+void c_SSocket::function_trace(
+    string astr_msg /* = ""  Trace message */,
+    string astr_separator /* = ""  Separator message */) {
   int i;
-  string              str_tab                 = "";
-  static string       str_objectName          = "";
-  static string       str_funcName            = "";
+  string str_tab = "";
+  static string str_objectName = "";
+  static string str_funcName = "";
 
-  if (verbosity>=stackDepth) {
+  if (verbosity >= stackDepth) {
     cerr << astr_separator;
-    for (i=0; i<stackDepth; i++)
+    for (i = 0; i < stackDepth; i++)
       str_tab += "    ";
     if (str_objectName != str_name)
       cerr << "\nSSocket `" << str_name_get() << "' (id: " << id << ")" << endl;
@@ -124,18 +117,15 @@ c_SSocket::function_trace(
     }
     cerr << "\n" << str_tab << astr_msg << endl;
   }
-  str_objectName      = str_name_get();
-  str_funcName        = str_proc_get();
+  str_objectName = str_name_get();
+  str_funcName = str_proc_get();
 }
 
-void
-c_SSocket::core_construct(
-  string          astr_name       /* = "unnamed" */,
-  int             a_id            /* = -1  */,
-  int             a_verbosity     /* = 0  */,
-  int             a_warnings      /* = 0  */,
-  int             a_stackDepth    /* = 0  */,
-  string          astr_proc       /* = "noproc" */) {
+void c_SSocket::core_construct(string astr_name /* = "unnamed" */,
+                               int a_id /* = -1  */, int a_verbosity /* = 0  */,
+                               int a_warnings /* = 0  */,
+                               int a_stackDepth /* = 0  */,
+                               string astr_proc /* = "noproc" */) {
   //
   // ARGS
   // astr_name  in              name of object
@@ -149,8 +139,8 @@ c_SSocket::core_construct(
   //  Common core statements for all constructors
   //
 
-  str_name    = astr_name;
-  id  = a_id;
+  str_name = astr_name;
+  id = a_id;
   verbosity = a_verbosity;
   warnings = a_warnings;
   stackDepth = a_stackDepth;
@@ -159,10 +149,8 @@ c_SSocket::core_construct(
   str_obj = "C_SSocket";
 }
 
-c_SSocket::c_SSocket(
-  int a_protocol,
-  string astr_name  /* = "Unnamed SSocket" */,
-  int  a_id   /* = 0   */) {
+c_SSocket::c_SSocket(int a_protocol, string astr_name /* = "Unnamed SSocket" */,
+                     int a_id /* = 0   */) {
   //
   // Constructor
   //
@@ -177,14 +165,13 @@ c_SSocket::c_SSocket(
   debug_push("c_SSocket");
 
   int sock;
-  sock  = socket(AF_INET, a_protocol, 0);
+  sock = socket(AF_INET, a_protocol, 0);
   protocol = a_protocol;
   if (sock < 0)
     error("Problem creating socket");
   sockID = sock;
   debug_pop();
 }
-
 
 c_SSocket::c_SSocket(const c_SSocket &c_SSocket) {
   //
@@ -196,10 +183,9 @@ c_SSocket::c_SSocket(const c_SSocket &c_SSocket) {
   error("Copy constructor not yet defined");
 
   debug_pop();
-
 }
 
-c_SSocket & c_SSocket::operator=(const c_SSocket & c_SSocket) {
+c_SSocket &c_SSocket::operator=(const c_SSocket &c_SSocket) {
   //
   // Overloaded (=) operator
   //
@@ -213,18 +199,18 @@ c_SSocket & c_SSocket::operator=(const c_SSocket & c_SSocket) {
   debug_pop();
 }
 
-c_SSocket::~c_SSocket(void) {
+c_SSocket::~c_SSocket() {
   shutdown(sockID, 0);
   close(sockID);
 }
 
-void
-c_SSocket::print() {
-  cout << "Socket object name:\t"    << str_name  << endl;
-  cout << "Socket object id:\t" << id   << endl;
+void c_SSocket::print() {
+  cout << "Socket object name:\t" << str_name << endl;
+  cout << "Socket object id:\t" << id << endl;
   cout << "Socket object type:\t" << str_obj << endl;
-  cout << "Socket protocol:\t" << ((protocol == SOCK_DGRAM) ? "Datagram" : "Stream") << endl;
-  cout << "Socket ID:\t\t"  << sockID  << endl;
+  cout << "Socket protocol:\t"
+       << ((protocol == SOCK_DGRAM) ? "Datagram" : "Stream") << endl;
+  cout << "Socket ID:\t\t" << sockID << endl;
 }
 
 //
@@ -233,11 +219,11 @@ c_SSocket::print() {
 /////***
 //
 
-c_SSocket_UDP::c_SSocket_UDP(
-  string astr_name   /* = "Unnamed SSocket" */,
-  int  aid    /* = 0   */) :
+c_SSocket_UDP::c_SSocket_UDP(string astr_name /* = "Unnamed SSocket" */,
+                             int aid /* = 0   */)
+    :
 
-    c_SSocket(SOCK_DGRAM, astr_name, aid) {
+      c_SSocket(SOCK_DGRAM, astr_name, aid) {
   //
   // ARGS
   // astr_name  in  name of object variable
@@ -263,8 +249,7 @@ c_SSocket_UDP::~c_SSocket_UDP() {
   //
 }
 
-void
-c_SSocket_UDP::print() {
+void c_SSocket_UDP::print() {
   //
   // DESC
   // Simple info print method
@@ -273,10 +258,7 @@ c_SSocket_UDP::print() {
   c_SSocket::print();
 }
 
-int
-c_SSocket_UDP::sendStr(
-  string astr_text,
-  bool ab_localecho /* = false */
+int c_SSocket_UDP::sendStr(string astr_text, bool ab_localecho /* = false */
 ) {
   //
   // ARGS
@@ -297,8 +279,8 @@ c_SSocket_UDP::sendStr(
 
   int ret;
 
-  ret = sendto(sockID, astr_text.c_str(), astr_text.length()+1, 0,
-               (struct sockaddr*) &STsin_name, sizeof(STsin_name));
+  ret = sendto(sockID, astr_text.c_str(), astr_text.length() + 1, 0,
+               (struct sockaddr *)&STsin_name, sizeof(STsin_name));
 
   if (ret < 0)
     error("Some error occurred while writing on stream socket");
@@ -310,10 +292,8 @@ c_SSocket_UDP::sendStr(
   return ret;
 }
 
-int
-c_SSocket_UDP::sendFile(
-  string astr_filename,
-  bool ab_localecho /* = false */
+int c_SSocket_UDP::sendFile(string astr_filename,
+                            bool ab_localecho /* = false */
 ) {
   //
   // ARGS
@@ -344,14 +324,14 @@ c_SSocket_UDP::sendFile(
 
   debug_push("sendStr");
 
-  FILE*  pFILE_stream;
-  char  pch_filebuf[1024];
+  FILE *pFILE_stream;
+  char pch_filebuf[1024];
   char ch;
-  int  i = 0;
-  int  ret;
+  int i = 0;
+  int ret;
 
   strcpy(pch_filebuf, "");
-  if ( (pFILE_stream=fopen(astr_filename.c_str(), "r")) == NULL) {
+  if ((pFILE_stream = fopen(astr_filename.c_str(), "r")) == nullptr) {
     warn("Error opening file");
     return 0;
   }
@@ -360,18 +340,16 @@ c_SSocket_UDP::sendFile(
     pch_filebuf[i++] = ch;
   }
   pch_filebuf[i] = '\0';
-  ret = sendStr(pch_filebuf, 0);
+  ret = sendStr(pch_filebuf, false);
 
   debug_pop();
 
   return ret;
 }
 
-int
-c_SSocket_UDP::recv_timeout(
-  string&   astr_payload,
-  struct sockaddr*  apST_saFrom /* = NULL */,
-  int*    ap_fromLen      /* = NULL */) {
+int c_SSocket_UDP::recv_timeout(string &astr_payload,
+                                struct sockaddr *apST_saFrom /* = NULL */,
+                                int *ap_fromLen /* = NULL */) {
   //
   // ARGS
   //  astr_payload out payload received
@@ -402,8 +380,8 @@ c_SSocket_UDP::recv_timeout(
 
   debug_push("recv_timeout");
 
-  int   rval = 0;
-  static char* pch_buf = new char[readBufSize];
+  int rval = 0;
+  static char *pch_buf = new char[readBufSize];
 
   astr_payload = "";
 
@@ -412,14 +390,14 @@ c_SSocket_UDP::recv_timeout(
   STtval_timeout.tv_sec = timeoutSec;
   STtval_timeout.tv_usec = timeoutUsec;
 
-  if (select(sockID+1, &fd_ready, NULL, NULL, &STtval_timeout) < 0)
+  if (select(sockID + 1, &fd_ready, nullptr, nullptr, &STtval_timeout) < 0)
     error("Problem with `select' system call");
 
   if (FD_ISSET(sockID, &fd_ready)) {
     rval = read(sockID, pch_buf, readBufSize);
     if (rval < 0)
       error("Problem reading Datagram packet");
-    else if (rval>0) {
+    else if (rval > 0) {
       astr_payload += pch_buf;
       bzero(pch_buf, sizeof(*pch_buf));
       debug_pop();
@@ -431,11 +409,9 @@ c_SSocket_UDP::recv_timeout(
   return rval;
 }
 
-int
-c_SSocket_UDP::recv_nonblocking(
-  string&   astr_payload,
-  struct sockaddr*  apST_saFrom /* = NULL */,
-  int*    ap_fromLen      /* = NULL */) {
+int c_SSocket_UDP::recv_nonblocking(string &astr_payload,
+                                    struct sockaddr *apST_saFrom /* = NULL */,
+                                    int *ap_fromLen /* = NULL */) {
   //
   // ARGS
   //  astr_payload out payload received
@@ -466,8 +442,8 @@ c_SSocket_UDP::recv_nonblocking(
 
   debug_push("recv_nonblocking");
 
-  static int   rval;
-  static char* pch_buf = new char[readBufSize];
+  static int rval;
+  static char *pch_buf = new char[readBufSize];
 
   astr_payload = "";
 
@@ -477,7 +453,7 @@ c_SSocket_UDP::recv_nonblocking(
     close(sockID);
     debug_pop();
     return 0;
-  } else if (rval>0) {
+  } else if (rval > 0) {
     astr_payload += pch_buf;
     debug_pop();
     return rval;
@@ -487,11 +463,9 @@ c_SSocket_UDP::recv_nonblocking(
   return rval;
 }
 
-int
-c_SSocket_UDP::recv(
-  string&   astr_msg,
-  struct sockaddr*  apST_saFrom /* = NULL */,
-  int*   ap_fromLen      /* = NULL */
+int c_SSocket_UDP::recv(string &astr_msg,
+                        struct sockaddr *apST_saFrom /* = NULL */,
+                        int *ap_fromLen /* = NULL */
 ) {
   //
   // ARGS
@@ -526,18 +500,13 @@ c_SSocket_UDP::recv(
   int rval;
 
   if (timeoutSec || timeoutUsec)
-    rval = recv_timeout( astr_msg,
-                         apST_saFrom,
-                         ap_fromLen);
+    rval = recv_timeout(astr_msg, apST_saFrom, ap_fromLen);
   else
-    rval = recv_nonblocking( astr_msg,
-                             apST_saFrom,
-                             ap_fromLen);
+    rval = recv_nonblocking(astr_msg, apST_saFrom, ap_fromLen);
 
   debug_pop();
   return rval;
 }
-
 
 //
 //\\\***
@@ -546,11 +515,10 @@ c_SSocket_UDP::recv(
 //
 
 c_SSocket_UDP_transmit::c_SSocket_UDP_transmit(
-  string astr_remoteHostName,
-  int a_port,
-  string astr_name   /* = "Unnamed SSocket" */,
-  int  aid    /* = 0   */
-) : c_SSocket_UDP(astr_name, aid) {
+    string astr_remoteHostName, int a_port,
+    string astr_name /* = "Unnamed SSocket" */, int aid /* = 0   */
+    )
+    : c_SSocket_UDP(astr_name, aid) {
   //
   // ARGS
   // astr_remoteHostName in  name of host to transmit to
@@ -565,17 +533,17 @@ c_SSocket_UDP_transmit::c_SSocket_UDP_transmit(
   str_obj = "c_SSocket_UDP_transmit";
   debug_push(str_obj);
 
-  port  = a_port;
+  port = a_port;
   str_remoteHostName = astr_remoteHostName;
 
-  SThost_hp       = new (struct hostent);
-  SThost_hp           = gethostbyname(astr_remoteHostName.c_str());
-  if (SThost_hp == NULL)
+  SThost_hp = new (struct hostent);
+  SThost_hp = gethostbyname(astr_remoteHostName.c_str());
+  if (SThost_hp == nullptr)
     error(astr_remoteHostName + ": unknown host");
   bzero(&STsin_name, sizeof(STsin_name));
   bcopy(SThost_hp->h_addr, &STsin_name.sin_addr, SThost_hp->h_length);
   STsin_name.sin_family = SThost_hp->h_addrtype;
-  STsin_name.sin_port   = htons(port);
+  STsin_name.sin_port = htons(port);
 
   debug_pop();
 }
@@ -586,11 +554,10 @@ c_SSocket_UDP_transmit::~c_SSocket_UDP_transmit() {
   //
 }
 
-void
-c_SSocket_UDP_transmit::print() {
+void c_SSocket_UDP_transmit::print() {
   c_SSocket_UDP::print();
-  cout << "Remote host:\t\t"  << str_remoteHostName << endl;
-  cout << "Using port:\t\t"   << port   << endl;
+  cout << "Remote host:\t\t" << str_remoteHostName << endl;
+  cout << "Using port:\t\t" << port << endl;
 }
 
 //
@@ -600,13 +567,12 @@ c_SSocket_UDP_transmit::print() {
 //
 
 c_SSocket_UDP_receive::c_SSocket_UDP_receive(
-  int a_port   /* = 1701    */,
-  int a_timeoutSec /* = 0     */,
-  int a_timeoutUsec /* = 0     */,
-  string astr_name  /* = "Unnamed SSocket_UDP_receive" */,
-  int  aid   /* = 0     */) :
+    int a_port /* = 1701    */, int a_timeoutSec /* = 0     */,
+    int a_timeoutUsec /* = 0     */,
+    string astr_name /* = "Unnamed SSocket_UDP_receive" */, int aid /* = 0 */)
+    :
 
-    c_SSocket_UDP(astr_name, aid) {
+      c_SSocket_UDP(astr_name, aid) {
   //
   // ARGS
   //  a_port  in port to listen on
@@ -633,9 +599,9 @@ c_SSocket_UDP_receive::c_SSocket_UDP_receive(
   int length;
 
   // Name socket using wildcards
-  STsin_name.sin_family         = AF_INET;
-  STsin_name.sin_addr.s_addr    = INADDR_ANY;
-  STsin_name.sin_port           = htons(port);
+  STsin_name.sin_family = AF_INET;
+  STsin_name.sin_addr.s_addr = INADDR_ANY;
+  STsin_name.sin_port = htons(port);
 
 #if 0
   if (bind(sockID, (struct sockaddr *)&STsin_name, sizeof(STsin_name))) {
@@ -649,20 +615,18 @@ c_SSocket_UDP_receive::c_SSocket_UDP_receive(
   // Find assigned port
   length = sizeof(STsin_name);
 #if defined __linux__ || defined __sun__ || defined Darwin
-  if (getsockname(sockID,  (struct sockaddr *) &STsin_name,
-                  (socklen_t *)  &length))
+  if (getsockname(sockID, (struct sockaddr *)&STsin_name, (socklen_t *)&length))
     error("Problem getting socket name");
 #else
-  if (getsockname(sockID,  (struct sockaddr *) &STsin_name,
-                  (int *)   &length))
+  if (getsockname(sockID, (struct sockaddr *)&STsin_name, (int *)&length))
     error("Problem getting socket name");
 #endif // __linux__ || __sun__
 
   port = ntohs(STsin_name.sin_port);
 
   // If timeout is zero, set socket to be non-blocking
-  if (!(timeoutSec||timeoutUsec))
-    if (fcntl(sockID, F_SETFL, O_NONBLOCK)<0)
+  if (!(timeoutSec || timeoutUsec))
+    if (fcntl(sockID, F_SETFL, O_NONBLOCK) < 0)
       error("Problem with fcntl on socket");
 
   debug_pop();
@@ -676,8 +640,7 @@ c_SSocket_UDP_receive::~c_SSocket_UDP_receive() {
 
 void c_SSocket_UDP_receive::print() {
   c_SSocket_UDP::print();
-  cout << "timeoutSec:\t\t"   << timeoutSec  << endl;
-  cout << "timeoutUsec:\t\t"   << timeoutUsec  << endl;
-  cout << "Using port:\t\t"   << port  << endl;
+  cout << "timeoutSec:\t\t" << timeoutSec << endl;
+  cout << "timeoutUsec:\t\t" << timeoutUsec << endl;
+  cout << "Using port:\t\t" << port << endl;
 }
-

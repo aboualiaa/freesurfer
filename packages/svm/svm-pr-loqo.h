@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:40 $
@@ -23,10 +23,8 @@
  *
  */
 
-
 #ifndef __SVM_PR_LOQO_H__
 #define __SVM_PR_LOQO_H__
-
 
 /*
  * File:        pr_loqo.h
@@ -54,17 +52,17 @@
 
 /* status outputs */
 
-#define STILL_RUNNING               0
-#define OPTIMAL_SOLUTION            1
-#define SUBOPTIMAL_SOLUTION         2
-#define ITERATION_LIMIT             3
-#define PRIMAL_INFEASIBLE           4
-#define DUAL_INFEASIBLE             5
-#define PRIMAL_AND_DUAL_INFEASIBLE  6
-#define INCONSISTENT                7
-#define PRIMAL_UNBOUNDED            8
-#define DUAL_UNBOUNDED              9
-#define TIME_LIMIT                  10
+#define STILL_RUNNING 0
+#define OPTIMAL_SOLUTION 1
+#define SUBOPTIMAL_SOLUTION 2
+#define ITERATION_LIMIT 3
+#define PRIMAL_INFEASIBLE 4
+#define DUAL_INFEASIBLE 5
+#define PRIMAL_AND_DUAL_INFEASIBLE 6
+#define INCONSISTENT 7
+#define PRIMAL_UNBOUNDED 8
+#define DUAL_UNBOUNDED 9
+#define TIME_LIMIT 10
 
 /*
  * solve the quadratic programming problem
@@ -106,10 +104,8 @@
  */
 
 int pr_loqo(int n, int m, double c[], double h_x[], double a[], double b[],
-            double l[], double u[], double primal[], double dual[],
-            int verb, double sigfig_max, int counter_max,
-            double margin, double bound, int restart);
-
-
+            double l[], double u[], double primal[], double dual[], int verb,
+            double sigfig_max, int counter_max, double margin, double bound,
+            int restart);
 
 #endif //  __SVM_PR_LOQO_H__

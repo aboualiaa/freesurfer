@@ -28,16 +28,14 @@
 #include <QWidget>
 #include <QList>
 
-namespace Ui
-{
+namespace Ui {
 class ToolWindowMeasure;
 }
 
 class Region2D;
 class SurfaceRegion;
 
-class ToolWindowMeasure : public QWidget, public UIUpdateHelper
-{
+class ToolWindowMeasure : public QWidget, public UIUpdateHelper {
   Q_OBJECT
 
 public:
@@ -47,12 +45,12 @@ public:
   QString GetLabelStats();
 
 public slots:
-  void SetRegion(Region2D* reg = 0);
-  void SetSurfaceRegion( SurfaceRegion* reg = 0 );
+  void SetRegion(Region2D *reg = 0);
+  void SetSurfaceRegion(SurfaceRegion *reg = 0);
 
 protected slots:
   void OnIdle();
-  void OnAction(QAction* act);
+  void OnAction(QAction *act);
   void UpdateWidgets();
 
   void OnLoad();
@@ -63,7 +61,7 @@ protected slots:
   void OnExport();
   void OnSpinBoxId(int val);
   void OnSpinBoxGroup(int val);
-  void OnColorGroup( const QColor& color );
+  void OnColorGroup(const QColor &color);
 
 protected:
   virtual void showEvent(QShowEvent *);
@@ -71,11 +69,11 @@ protected:
 private:
   Ui::ToolWindowMeasure *ui;
 
-  QList<QWidget*> m_widgets2D;
-  QList<QWidget*> m_widgets3D;
-  Region2D*       m_region;
-  SurfaceRegion*  m_surfaceRegion;
-  bool            m_bToUpdateWidgets;
+  QList<QWidget *> m_widgets2D;
+  QList<QWidget *> m_widgets3D;
+  Region2D *m_region;
+  SurfaceRegion *m_surfaceRegion;
+  bool m_bToUpdateWidgets;
 };
 
 #endif // TOOLWINDOWMEASURE_H

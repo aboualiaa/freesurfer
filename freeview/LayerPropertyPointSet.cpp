@@ -27,7 +27,6 @@
  *
  */
 
-
 #include "LayerPropertyPointSet.h"
 #include "vtkRGBAColorTransferFunction.h"
 #include "LayerMRI.h"
@@ -39,11 +38,10 @@
 #include <QSettings>
 #include <QDebug>
 
-//using namespace std;
+// using namespace std;
 
-LayerPropertyPointSet::LayerPropertyPointSet (QObject* parent) :
-  LayerProperty(parent)
-{
+LayerPropertyPointSet::LayerPropertyPointSet(QObject *parent)
+    : LayerProperty(parent) {
   mOpacity = 0.7;
   mRGB[0] = 1;
   mRGB[1] = 0.1;
@@ -72,30 +70,30 @@ LayerPropertyPointSet::LayerPropertyPointSet (QObject* parent) :
 
   m_lutHeatScale = vtkSmartPointer<vtkRGBAColorTransferFunction>::New();
 
-  connect(this, SIGNAL(SnapToVoxelCenterChanged(bool)), this, SIGNAL(PropertyChanged()));
-  connect(this, SIGNAL(SplineVisibilityChanged(bool)), this, SIGNAL(PropertyChanged()));
+  connect(this, SIGNAL(SnapToVoxelCenterChanged(bool)), this,
+          SIGNAL(PropertyChanged()));
+  connect(this, SIGNAL(SplineVisibilityChanged(bool)), this,
+          SIGNAL(PropertyChanged()));
   connect(this, SIGNAL(ColorMapChanged()), this, SIGNAL(PropertyChanged()));
-  connect(this, SIGNAL(OpacityChanged(double)), this, SIGNAL(PropertyChanged()));
+  connect(this, SIGNAL(OpacityChanged(double)), this,
+          SIGNAL(PropertyChanged()));
   connect(this, SIGNAL(RadiusChanged(double)), this, SIGNAL(PropertyChanged()));
-  connect(this, SIGNAL(SplineRadiusChanged(double)), this, SIGNAL(PropertyChanged()));
+  connect(this, SIGNAL(SplineRadiusChanged(double)), this,
+          SIGNAL(PropertyChanged()));
 
   LoadSettings();
 }
 
-LayerPropertyPointSet::~LayerPropertyPointSet ()
-{
-  for ( size_t i = 0; i < m_scalarSets.size(); i++ )
-  {
-    if ( m_scalarSets[i].dValue )
-    {
+LayerPropertyPointSet::~LayerPropertyPointSet() {
+  for (size_t i = 0; i < m_scalarSets.size(); i++) {
+    if (m_scalarSets[i].dValue) {
       delete[] m_scalarSets[i].dValue;
     }
   }
   SaveSettings();
 }
 
-void LayerPropertyPointSet::LoadSettings()
-{
+void LayerPropertyPointSet::LoadSettings() {
   QSettings s;
   QVariantMap map = s.value("DataSettings/PointSet").toMap();
   if (map.contains("Radius"))
@@ -106,8 +104,7 @@ void LayerPropertyPointSet::LoadSettings()
     m_bShowSpline = map["ShowSpline"].toBool();
 }
 
-void LayerPropertyPointSet::SaveSettings()
-{
+void LayerPropertyPointSet::SaveSettings() {
   QSettings s;
   QVariantMap map = s.value("DataSettings/PointSet").toMap();
   map["Radius"] = m_dRadius;
@@ -117,32 +114,35 @@ void LayerPropertyPointSet::SaveSettings()
   s.sync();
 }
 
-void LayerPropertyPointSet::SetColorMapChanged ()
-{
-  switch ( m_nColorMap )
-  {
+void LayerPropertyPointSet::SetColorMapChanged() {
+  switch (m_nColorMap) {
   case SolidColor:
     break;
   case HeatScale:
     m_lutHeatScale->RemoveAllPoints();
     /*
-    m_lutHeatScale->AddRGBAPoint( -m_dHeatScaleMax + m_dHeatScaleOffset, 0, 1, 1, 1 );
-    m_lutHeatScale->AddRGBAPoint( -m_dHeatScaleMid + m_dHeatScaleOffset, 0, 0, 1, 1 );
-    m_lutHeatScale->AddRGBAPoint( -m_dHeatScaleMin + m_dHeatScaleOffset, 0, 0, 1, 0 );
+    m_lutHeatScale->AddRGBAPoint( -m_dHeatScaleMax + m_dHeatScaleOffset, 0, 1,
+    1, 1 ); m_lutHeatScale->AddRGBAPoint( -m_dHeatScaleMid + m_dHeatScaleOffset,
+    0, 0, 1, 1 ); m_lutHeatScale->AddRGBAPoint( -m_dHeatScaleMin +
+    m_dHeatScaleOffset, 0, 0, 1, 0 );
     */
-    m_lutHeatScale->AddRGBAPoint(  m_dHeatScaleMin - 1e-12 + m_dHeatScaleOffset, 0, 0, 0, 0 );
-    m_lutHeatScale->AddRGBAPoint(  m_dHeatScaleMin + m_dHeatScaleOffset, 1, 0, 0, 1 );
-    m_lutHeatScale->AddRGBAPoint(  m_dHeatScaleMid + m_dHeatScaleOffset, 1, 0.5, 0, 1 );
-    m_lutHeatScale->AddRGBAPoint(  m_dHeatScaleMax + m_dHeatScaleOffset, 1, 1, 0, 1 );
+    m_lutHeatScale->AddRGBAPoint(m_dHeatScaleMin - 1e-12 + m_dHeatScaleOffset,
+                                 0, 0, 0, 0);
+    m_lutHeatScale->AddRGBAPoint(m_dHeatScaleMin + m_dHeatScaleOffset, 1, 0, 0,
+                                 1);
+    m_lutHeatScale->AddRGBAPoint(m_dHeatScaleMid + m_dHeatScaleOffset, 1, 0.5,
+                                 0, 1);
+    m_lutHeatScale->AddRGBAPoint(m_dHeatScaleMax + m_dHeatScaleOffset, 1, 1, 0,
+                                 1);
     /* mHeatScaleTable->AddRGBAPoint(  mHeatScaleMinThreshold, 0, 0, 0, 0 );
-     mHeatScaleTable->AddRGBAPoint(  mHeatScaleMinThreshold+0.0001, 0, 0, 0, 1 );
-     for ( int i = 0; i < n; i++ )
-      mHeatScaleTable->AddRGBAPoint( mHeatScaleMinThreshold +0.0001+ i*(mHeatScaleMidThreshold-mHeatScaleMinThreshold)/n,
-                1.0*i/n, 0, 0, 1 );
+     mHeatScaleTable->AddRGBAPoint(  mHeatScaleMinThreshold+0.0001, 0, 0, 0, 1
+     ); for ( int i = 0; i < n; i++ ) mHeatScaleTable->AddRGBAPoint(
+     mHeatScaleMinThreshold +0.0001+
+     i*(mHeatScaleMidThreshold-mHeatScaleMinThreshold)/n, 1.0*i/n, 0, 0, 1 );
      mHeatScaleTable->AddRGBAPoint(  mHeatScaleMidThreshold, 1, 0, 0, 1 );
      for ( int i = 0; i < n; i++ )
-      mHeatScaleTable->AddRGBAPoint( mHeatScaleMidThreshold + i*(mHeatScaleMaxThreshold-mHeatScaleMidThreshold)/n,
-                1, 1.0*i/n, 0, 1 );
+      mHeatScaleTable->AddRGBAPoint( mHeatScaleMidThreshold +
+     i*(mHeatScaleMaxThreshold-mHeatScaleMidThreshold)/n, 1, 1.0*i/n, 0, 1 );
      mHeatScaleTable->AddRGBAPoint(  mHeatScaleMaxThreshold, 1, 1, 0, 1 );*/
     m_lutHeatScale->Build();
     break;
@@ -152,13 +152,11 @@ void LayerPropertyPointSet::SetColorMapChanged ()
   emit ColorMapChanged();
 }
 
-vtkRGBAColorTransferFunction* LayerPropertyPointSet::GetHeatScaleLUT()
-{
+vtkRGBAColorTransferFunction *LayerPropertyPointSet::GetHeatScaleLUT() {
   return m_lutHeatScale;
 }
 
-void LayerPropertyPointSet::SetColor ( double r, double g, double b )
-{
+void LayerPropertyPointSet::SetColor(double r, double g, double b) {
   mRGB[0] = r;
   mRGB[1] = g;
   mRGB[2] = b;
@@ -166,97 +164,76 @@ void LayerPropertyPointSet::SetColor ( double r, double g, double b )
   emit ColorChanged();
 }
 
-void LayerPropertyPointSet::SetSplineColor ( double r, double g, double b )
-{
+void LayerPropertyPointSet::SetSplineColor(double r, double g, double b) {
   mRGBSpline[0] = r;
   mRGBSpline[1] = g;
   mRGBSpline[2] = b;
   this->SetColorMapChanged();
 }
 
-double LayerPropertyPointSet::GetOpacity() const
-{
-  return mOpacity;
-}
+double LayerPropertyPointSet::GetOpacity() const { return mOpacity; }
 
-void LayerPropertyPointSet::SetOpacity( double opacity )
-{
-  if ( mOpacity != opacity )
-  {
+void LayerPropertyPointSet::SetOpacity(double opacity) {
+  if (mOpacity != opacity) {
     mOpacity = opacity;
-    if ( mOpacity >= 1 )
-    {
-      mOpacity = 0.99999;  // strange vtk behavior. If set to 1, it will be transparent!
+    if (mOpacity >= 1) {
+      mOpacity =
+          0.99999; // strange vtk behavior. If set to 1, it will be transparent!
     }
-    emit OpacityChanged( opacity );
+    emit OpacityChanged(opacity);
   }
 }
 
-void LayerPropertyPointSet::SetRadius( double r )
-{
-  if ( m_dRadius != r )
-  {
+void LayerPropertyPointSet::SetRadius(double r) {
+  if (m_dRadius != r) {
     m_dRadius = r;
-    emit RadiusChanged( r );
+    emit RadiusChanged(r);
   }
 }
 
-void LayerPropertyPointSet::SetSplineRadius( double r )
-{
-  if ( m_dSplineRadius != r )
-  {
+void LayerPropertyPointSet::SetSplineRadius(double r) {
+  if (m_dSplineRadius != r) {
     m_dSplineRadius = r;
-    emit SplineRadiusChanged( r );
+    emit SplineRadiusChanged(r);
   }
 }
 
-void LayerPropertyPointSet::SetColorMap( int map )
-{
-  if ( m_nColorMap != map )
-  {
+void LayerPropertyPointSet::SetColorMap(int map) {
+  if (m_nColorMap != map) {
     m_nColorMap = map;
     this->SetColorMapChanged();
   }
 }
 
-void LayerPropertyPointSet::SetHeatScaleMin( double dValue )
-{
-  if ( m_dHeatScaleMin != dValue )
-  {
+void LayerPropertyPointSet::SetHeatScaleMin(double dValue) {
+  if (m_dHeatScaleMin != dValue) {
     m_dHeatScaleMin = dValue;
     this->SetColorMapChanged();
   }
 }
 
-void LayerPropertyPointSet::SetHeatScaleMid( double dValue )
-{
-  if ( m_dHeatScaleMid != dValue )
-  {
+void LayerPropertyPointSet::SetHeatScaleMid(double dValue) {
+  if (m_dHeatScaleMid != dValue) {
     m_dHeatScaleMid = dValue;
     this->SetColorMapChanged();
   }
 }
 
-void LayerPropertyPointSet::SetHeatScaleMax( double dValue )
-{
-  if ( m_dHeatScaleMax != dValue )
-  {
+void LayerPropertyPointSet::SetHeatScaleMax(double dValue) {
+  if (m_dHeatScaleMax != dValue) {
     m_dHeatScaleMax = dValue;
     this->SetColorMapChanged();
   }
 }
 
-void LayerPropertyPointSet::SetHeatScaleOffset( double dValue )
-{
-  if ( m_dHeatScaleOffset != dValue )
-  {
+void LayerPropertyPointSet::SetHeatScaleOffset(double dValue) {
+  if (m_dHeatScaleOffset != dValue) {
     m_dHeatScaleOffset = dValue;
     this->SetColorMapChanged();
   }
 }
 
-void LayerPropertyPointSet::SetScalarToStat()
-{
+void LayerPropertyPointSet::SetScalarToStat() {
   SaveHeatscaleSettings();
   m_nScalarType = ScalarStat;
   if (!RestoreHeatscaleSettings("stat"))
@@ -265,10 +242,8 @@ void LayerPropertyPointSet::SetScalarToStat()
   emit ScalarChanged();
 }
 
-void LayerPropertyPointSet::SetScalarLayer( LayerMRI* layer )
-{
-  if ( m_nScalarType != ScalarLayer || m_layerScalar != layer )
-  {
+void LayerPropertyPointSet::SetScalarLayer(LayerMRI *layer) {
+  if (m_nScalarType != ScalarLayer || m_layerScalar != layer) {
     SaveHeatscaleSettings();
     m_layerScalar = layer;
     m_nScalarType = ScalarLayer;
@@ -279,10 +254,8 @@ void LayerPropertyPointSet::SetScalarLayer( LayerMRI* layer )
   }
 }
 
-void LayerPropertyPointSet::SetScalarSet( int n )
-{
-  if ( n < (int)m_scalarSets.size() && n >= 0 )
-  {
+void LayerPropertyPointSet::SetScalarSet(int n) {
+  if (n < (int)m_scalarSets.size() && n >= 0) {
     SaveHeatscaleSettings();
     m_nScalarType = ScalarSet;
     m_nScalarSet = n;
@@ -293,15 +266,13 @@ void LayerPropertyPointSet::SetScalarSet( int n )
   }
 }
 
-void LayerPropertyPointSet::SaveHeatscaleSettings()
-{
+void LayerPropertyPointSet::SaveHeatscaleSettings() {
   QString name = "stat";
   if (m_nScalarType == ScalarSet && m_nScalarSet >= 0)
     name = m_scalarSets[m_nScalarSet].strName;
   else if (m_nScalarType == ScalarLayer && m_layerScalar)
     name = m_layerScalar->GetName();
-  if (!name.isEmpty())
-  {
+  if (!name.isEmpty()) {
     QVariantMap map;
     map["Min"] = m_dHeatScaleMin;
     map["Mid"] = m_dHeatScaleMid;
@@ -311,12 +282,10 @@ void LayerPropertyPointSet::SaveHeatscaleSettings()
   }
 }
 
-bool LayerPropertyPointSet::RestoreHeatscaleSettings(const QString &name)
-{
+bool LayerPropertyPointSet::RestoreHeatscaleSettings(const QString &name) {
   if (!m_mapHeatscaleSettings.contains(name))
     return false;
-  else
-  {
+  else {
     QVariantMap map = m_mapHeatscaleSettings[name].toMap();
     m_dHeatScaleMin = map["Min"].toDouble();
     m_dHeatScaleMid = map["Mid"].toDouble();
@@ -326,71 +295,54 @@ bool LayerPropertyPointSet::RestoreHeatscaleSettings(const QString &name)
   }
 }
 
-void LayerPropertyPointSet::UpdateScalarValues()
-{
+void LayerPropertyPointSet::UpdateScalarValues() {
   double fMin = GetScalarMinValue();
   double fMax = GetScalarMaxValue();
   m_dHeatScaleMin = fMin;
-  m_dHeatScaleMid = ( fMax - fMin ) / 2;
+  m_dHeatScaleMid = (fMax - fMin) / 2;
   m_dHeatScaleMax = fMax;
   m_dHeatScaleOffset = 0;
 }
 
-double LayerPropertyPointSet::GetScalarMinValue()
-{
+double LayerPropertyPointSet::GetScalarMinValue() {
   double min = 0;
-  if ( (m_nScalarType == ScalarLayer) && m_layerScalar )
-  {
+  if ((m_nScalarType == ScalarLayer) && m_layerScalar) {
     min = m_layerScalar->GetSourceVolume()->GetMinValue();
-  }
-  else if ( m_nScalarType == ScalarSet )
-  {
+  } else if (m_nScalarType == ScalarSet) {
     min = GetActiveScalarSet().dMin;
-  }
-  else
-  {
+  } else {
     min = m_dStatMin;
   }
 
   return min;
 }
 
-double LayerPropertyPointSet::GetScalarMaxValue()
-{
+double LayerPropertyPointSet::GetScalarMaxValue() {
   double max = 1;
-  if ( (m_nScalarType == ScalarLayer) && m_layerScalar )
-  {
+  if ((m_nScalarType == ScalarLayer) && m_layerScalar) {
     max = m_layerScalar->GetSourceVolume()->GetMaxValue();
-  }
-  else if ( m_nScalarType == ScalarSet )
-  {
+  } else if (m_nScalarType == ScalarSet) {
     max = GetActiveScalarSet().dMax;
-  }
-  else
-  {
+  } else {
     max = m_dStatMax;
   }
 
   return max;
 }
 
-bool LayerPropertyPointSet::LoadScalarsFromFile( const QString& filename )
-{
+bool LayerPropertyPointSet::LoadScalarsFromFile(const QString &filename) {
   QFile file(filename);
-  if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-  {
+  if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
     cerr << qPrintable(file.errorString()) << "\n";
     return false;
   }
 
   QTextStream in(&file);
   std::vector<double> values;
-  while (!in.atEnd())
-  {
-    QStringList strgs = in.readLine().split( " ", QString::SkipEmptyParts );
-    for ( int i = 0; i < strgs.size(); i++ )
-    {
-      values.push_back( strgs[i].toDouble() );
+  while (!in.atEnd()) {
+    QStringList strgs = in.readLine().split(" ", QString::SkipEmptyParts);
+    for (int i = 0; i < strgs.size(); i++) {
+      values.push_back(strgs[i].toDouble());
     }
   }
 
@@ -399,53 +351,42 @@ bool LayerPropertyPointSet::LoadScalarsFromFile( const QString& filename )
   sv.dValue = new double[sv.nNum];
   sv.dMin = 1e8;
   sv.dMax = -1e8;
-  for ( int i = 0; i < sv.nNum; i++ )
-  {
+  for (int i = 0; i < sv.nNum; i++) {
     sv.dValue[i] = values[i];
-    if ( sv.dValue[i] < sv.dMin )
-    {
+    if (sv.dValue[i] < sv.dMin) {
       sv.dMin = sv.dValue[i];
-    }
-    else if ( sv.dValue[i] > sv.dMax )
-    {
+    } else if (sv.dValue[i] > sv.dMax) {
       sv.dMax = sv.dValue[i];
     }
   }
   sv.strName = filename;
 
-  if ( sv.nNum < 2 )
-  {
+  if (sv.nNum < 2) {
     return false;
   }
 
-  m_scalarSets.push_back( sv );
-  SetScalarSet( m_scalarSets.size() - 1 );
+  m_scalarSets.push_back(sv);
+  SetScalarSet(m_scalarSets.size() - 1);
   SetColorMap(LayerPropertyPointSet::HeatScale);
 
   return true;
 }
 
-void LayerPropertyPointSet::SetSnapToVoxelCenter( bool bSnag )
-{
+void LayerPropertyPointSet::SetSnapToVoxelCenter(bool bSnag) {
   m_bSnapToVoxelCenter = bSnag;
 
-  emit SnapToVoxelCenterChanged( bSnag );
+  emit SnapToVoxelCenterChanged(bSnag);
 }
 
-void LayerPropertyPointSet::SetShowSpline( bool bSpline )
-{
+void LayerPropertyPointSet::SetShowSpline(bool bSpline) {
   m_bShowSpline = bSpline;
 
-  emit SplineVisibilityChanged( bSpline );
+  emit SplineVisibilityChanged(bSpline);
 }
 
-void LayerPropertyPointSet::SetType( int nType )
-{
-  m_nType = nType;
-}
+void LayerPropertyPointSet::SetType(int nType) { m_nType = nType; }
 
-void LayerPropertyPointSet::SetStatRange(double dMin, double dMax)
-{
+void LayerPropertyPointSet::SetStatRange(double dMin, double dMax) {
   m_dStatMin = dMin;
   m_dStatMax = dMax;
   UpdateScalarValues();

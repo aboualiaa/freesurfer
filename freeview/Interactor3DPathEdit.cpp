@@ -6,33 +6,32 @@
 #include "RenderView3D.h"
 #include <QDebug>
 
-Interactor3DPathEdit::Interactor3DPathEdit(QObject* parent) :
-  Interactor3D(parent)
-{
+Interactor3DPathEdit::Interactor3DPathEdit(QObject *parent)
+    : Interactor3D(parent) {}
 
-}
-
-bool Interactor3DPathEdit::ProcessMouseDownEvent( QMouseEvent* event, RenderView* renderview )
-{
+bool Interactor3DPathEdit::ProcessMouseDownEvent(QMouseEvent *event,
+                                                 RenderView *renderview) {
   m_bEditAttempted = false;
-  if (event->button() == Qt::LeftButton && event->modifiers() != (Qt::ShiftModifier | Qt::ControlModifier))
-  {
+  if (event->button() == Qt::LeftButton &&
+      event->modifiers() != (Qt::ShiftModifier | Qt::ControlModifier)) {
     m_bEditAttempted = true;
   }
 
-  return Interactor3D::ProcessMouseDownEvent( event, renderview );
+  return Interactor3D::ProcessMouseDownEvent(event, renderview);
 }
 
-//bool Interactor3DPathEdit::ProcessMouseMoveEvent( QMouseEvent* event, RenderView* renderview )
+// bool Interactor3DPathEdit::ProcessMouseMoveEvent( QMouseEvent* event,
+// RenderView* renderview )
 //{
 //  RenderView3D* view = ( RenderView3D* )renderview;
 //  if (m_bEditing)
 //  {
-//    LayerROI* roi = (LayerROI*)MainWindow::GetMainWindow()->GetActiveLayer("ROI");
-//    if (roi && roi->GetMappedSurface())
+//    LayerROI* roi =
+//    (LayerROI*)MainWindow::GetMainWindow()->GetActiveLayer("ROI"); if (roi &&
+//    roi->GetMappedSurface())
 //    {
-//      int nvo = view->PickCurrentSurfaceVertex(event->x(), event->y(), roi->GetMappedSurface());
-//      if (nvo >= 0)
+//      int nvo = view->PickCurrentSurfaceVertex(event->x(), event->y(),
+//      roi->GetMappedSurface()); if (nvo >= 0)
 //      {
 //        if (m_nPrevVertex >= 0 && m_nPrevVertex != nvo)
 //        {
@@ -41,7 +40,8 @@ bool Interactor3DPathEdit::ProcessMouseDownEvent( QMouseEvent* event, RenderView
 //          {
 //            QList<int> seeds;
 //            seeds << m_nPrevVertex << nvo;
-//            roi->EditVertex(surf->FindPath(seeds), !(event->modifiers() & Qt::ShiftModifier));
+//            roi->EditVertex(surf->FindPath(seeds), !(event->modifiers() &
+//            Qt::ShiftModifier));
 //          }
 //        }
 //        else
@@ -57,24 +57,19 @@ bool Interactor3DPathEdit::ProcessMouseDownEvent( QMouseEvent* event, RenderView
 //  return ret;
 //}
 
-bool Interactor3DPathEdit::ProcessMouseUpEvent( QMouseEvent* event, RenderView* renderview )
-{
-  RenderView3D* view = ( RenderView3D* )renderview;
-  if (m_bEditAttempted && qAbs(event->x() - this->m_nPressedPosX) < 2
-      && qAbs(event->y() - this->m_nPressedPosY) < 2)
-  {
-    LayerSurface* surf = (LayerSurface*)MainWindow::GetMainWindow()->GetActiveLayer("Surface");
-    if (surf)
-    {
+bool Interactor3DPathEdit::ProcessMouseUpEvent(QMouseEvent *event,
+                                               RenderView *renderview) {
+  RenderView3D *view = (RenderView3D *)renderview;
+  if (m_bEditAttempted && qAbs(event->x() - this->m_nPressedPosX) < 2 &&
+      qAbs(event->y() - this->m_nPressedPosY) < 2) {
+    LayerSurface *surf =
+        (LayerSurface *)MainWindow::GetMainWindow()->GetActiveLayer("Surface");
+    if (surf) {
       int nvo = view->PickCurrentSurfaceVertex(event->x(), event->y(), surf);
-      if (nvo >= 0)
-      {
-        if (event->modifiers() == Qt::ShiftModifier)
-        {
+      if (nvo >= 0) {
+        if (event->modifiers() == Qt::ShiftModifier) {
           surf->RemovePathPoint(nvo);
-        }
-        else
-        {
+        } else {
           int nPath = -1;
           if (event->modifiers() & Qt::ControlModifier)
             nPath = surf->FindPathAt(nvo);

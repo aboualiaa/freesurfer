@@ -33,8 +33,7 @@
 #include "label.h"
 
 #undef SIGN
-#define SIGN(x) (((x)>0)? 1.0 : -1.0 )
-
+#define SIGN(x) (((x) > 0) ? 1.0 : -1.0)
 
 #ifdef SURFCLUSTER_SRC
 int FixSurfClusterArea = 1;
@@ -43,40 +42,40 @@ extern int FixSurfClusterArea;
 #endif
 
 /* Surface Cluster Summary */
-typedef struct
-{
-  int   clusterno;
-  int   nmembers; //  number of vertices;
+typedef struct {
+  int clusterno;
+  int nmembers; //  number of vertices;
   float area;
   float weightvtx;  // vertex weighted weight
   float weightarea; // area   weighted weight
   float maxval;
-  int   vtxmaxval;
-  float x,y,z;
-  float xxfm,yxfm,zxfm;
-  float cx,cy,cz; // centroid
-  float cxxfm,cyxfm,czxfm; // centroid
-  double pval_clusterwise; // from cluster simulation
+  int vtxmaxval;
+  float x, y, z;
+  float xxfm, yxfm, zxfm;
+  float cx, cy, cz;            // centroid
+  float cxxfm, cyxfm, czxfm;   // centroid
+  double pval_clusterwise;     // from cluster simulation
   double pval_clusterwise_low; // from cluster simulation
-  double pval_clusterwise_hi; // from cluster simulation
-}
-SURFCLUSTERSUM, SCS;
+  double pval_clusterwise_hi;  // from cluster simulation
+} SURFCLUSTERSUM, SCS;
 
 SCS *sclustMapSurfClusters(MRI_SURFACE *Surf, float thmin, float thmax,
                            int thsign, float minarea, int *nClusters,
                            MATRIX *XFM, MRI *fwhmmap);
 int sclustGrowSurfCluster(int ClustNo, int SeedVtx, MRI_SURFACE *Surf,
                           float thmin, float thmax, int thsign);
-float sclustSurfaceArea(int ClusterNo, MRI_SURFACE *Surf, int *nvtxs) ;
+float sclustSurfaceArea(int ClusterNo, MRI_SURFACE *Surf, int *nvtxs);
 float sclustWeight(int ClusterNo, MRI_SURFACE *Surf, MRI *mri, int UseArea);
-float sclustSurfaceMax(int ClusterNo, MRI_SURFACE *Surf, int *vtxmax) ;
-int sclustSurfaceCentroid(const int ClusterNo, const MRI_SURFACE *Surf, double *xyz);
+float sclustSurfaceMax(int ClusterNo, MRI_SURFACE *Surf, int *vtxmax);
+int sclustSurfaceCentroid(const int ClusterNo, const MRI_SURFACE *Surf,
+                          double *xyz);
 float sclustZeroSurfaceClusterNo(int ClusterNo, MRI_SURFACE *Surf);
 float sclustZeroSurfaceNonClusters(MRI_SURFACE *Surf);
 float sclustSetSurfaceValToClusterNo(MRI_SURFACE *Surf);
 float sclustSetSurfaceValToCWP(MRI_SURFACE *Surf, SCS *scs);
 float sclustCountClusters(MRI_SURFACE *Surf);
-SCS *SurfClusterSummary(MRI_SURFACE *Surf, MATRIX *T, int *nClusters, MRI *fwhmmap);
+SCS *SurfClusterSummary(MRI_SURFACE *Surf, MATRIX *T, int *nClusters,
+                        MRI *fwhmmap);
 SCS *SurfClusterSummaryOld(MRI_SURFACE *Surf, MATRIX *T, int *nClusters);
 int DumpSurfClusterSum(FILE *fp, SCS *scs, int nClusters);
 SCS *SortSurfClusterSum(SCS *scs, int nClusters);
@@ -84,13 +83,12 @@ int sclustReMap(MRI_SURFACE *Surf, int nClusters, SCS *scs_sorted);
 double sclustMaxClusterArea(SURFCLUSTERSUM *scs, int nClusters);
 int sclustMaxClusterCount(SURFCLUSTERSUM *scs, int nClusters);
 float sclustMaxClusterWeightVtx(SURFCLUSTERSUM *scs, int nClusters, int thsign);
-SCS *sclustPruneByCWPval(SCS *ClusterList, int nclusters, 
-			 double cwpvalthresh,int *nPruned, 
-			 MRIS *surf);
+SCS *sclustPruneByCWPval(SCS *ClusterList, int nclusters, double cwpvalthresh,
+                         int *nPruned, MRIS *surf);
 int sclustAnnot(MRIS *surf, int NClusters);
-int sclustGrowByDist(MRIS *surf, int seedvtxno, double dthresh, 
-		     int shape, int vtxno, int *vtxlist);
-const char *sculstSrcVersion(void);
+int sclustGrowByDist(MRIS *surf, int seedvtxno, double dthresh, int shape,
+                     int vtxno, int *vtxlist);
+const char *sculstSrcVersion();
 int sclustSaveAsPointSet(char *fname, SCS *scslist, int NClusters, MRIS *surf);
 
 #endif

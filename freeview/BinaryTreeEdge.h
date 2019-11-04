@@ -5,32 +5,32 @@
 
 class BinaryTreeNode;
 
-class BinaryTreeEdge : public QGraphicsItem
-{
+class BinaryTreeEdge : public QGraphicsItem {
 public:
-    BinaryTreeEdge(BinaryTreeNode *sourceNode, BinaryTreeNode *destNode);
+  BinaryTreeEdge(BinaryTreeNode *sourceNode, BinaryTreeNode *destNode);
 
-    BinaryTreeNode *sourceNode() const;
-    BinaryTreeNode *destNode() const;
+  BinaryTreeNode *sourceNode() const;
+  BinaryTreeNode *destNode() const;
 
-    void adjust();
+  void adjust();
 
-    enum { Type = UserType + 2 };
-    int type() const { return Type; }
+  enum { Type = UserType + 2 };
+  int type() const { return Type; }
 
-    void SetHighlighted(bool bHighlight);
+  void SetHighlighted(bool bHighlight);
 
 protected:
-    QRectF boundingRect() const;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+  QRectF boundingRect() const;
+  void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+             QWidget *widget);
 
 private:
-    BinaryTreeNode *source, *dest;
+  BinaryTreeNode *source, *dest;
 
-    QPointF sourcePoint;
-    QPointF destPoint;
-    qreal arrowSize;
-    bool  m_bHighlighted;
+  QPointF sourcePoint;
+  QPointF destPoint;
+  qreal arrowSize;
+  bool m_bHighlighted;
 };
 
 #endif // BINARYTREEEDGE_H

@@ -29,20 +29,18 @@
 #endif
 #include <string>
 
-extern "C"
-{
+extern "C" {
 #include "mri.h"
 #include "gcamorph.h"
 #include "transform.h"
 #include "error.h"
 #include "utils.h"
-const char *Progname="testm3d";
+const char *Progname = "testm3d";
 }
 
 using namespace std;
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   cout << "m3d file: ";
   string infile;
   cin >> infile;
@@ -53,28 +51,28 @@ int main(int argc, char *argv[])
 
   printf("Try 1 *************************************************\n");
   printf("before loading the transform : heap usage %d\n", getMemoryUsed());
-  TRANSFORM *transform=0;
+  TRANSFORM *transform = 0;
   cout << "reading transform file " << infile.c_str() << endl;
-  transform = TransformRead(const_cast<char *> (infile.c_str()));
+  transform = TransformRead(const_cast<char *>(infile.c_str()));
   if (!transform)
     ErrorExit(ERROR_NOFILE, "%s: could not read transform from file %s",
-              Progname, const_cast<char *> (infile.c_str()));
+              Progname, const_cast<char *>(infile.c_str()));
   printf("after loading the transform : heap usage %d\n", getMemoryUsed());
   TransformFree(&transform);
   printf("after freeing transform : heap usage %d\n", getMemoryUsed());
 
   printf("Try 2 *************************************************\n");
   printf("before loading the transform : heap usage %d\n", getMemoryUsed());
-  transform=0;
+  transform = 0;
   cout << "reading transform file " << infile.c_str() << endl;
-  transform = TransformRead(const_cast<char *> (infile.c_str()));
+  transform = TransformRead(const_cast<char *>(infile.c_str()));
   if (!transform)
     ErrorExit(ERROR_NOFILE, "%s: could not read transform from file %s",
-              Progname, const_cast<char *> (infile.c_str()));
+              Progname, const_cast<char *>(infile.c_str()));
 
   printf("before loading mri : heap usage %d\n", getMemoryUsed());
   cout << "reading mri file " << mrifile.c_str() << endl;
-  MRI *mri = MRIread(const_cast<char *> (mrifile.c_str()));
+  MRI *mri = MRIread(const_cast<char *>(mrifile.c_str()));
 
   printf("after  loading mri : heap usage %d\n", getMemoryUsed());
 

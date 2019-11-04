@@ -30,52 +30,34 @@
 
 class LayerMRI;
 
-class VolumeFilterThreshold : public VolumeFilter
-{
+class VolumeFilterThreshold : public VolumeFilter {
 public:
-  VolumeFilterThreshold( LayerMRI* input = 0, LayerMRI* output = 0, QObject* parent = 0 );
+  VolumeFilterThreshold(LayerMRI *input = 0, LayerMRI *output = 0,
+                        QObject *parent = 0);
 
-  void SetReplaceIn( bool val )
-  {
-    m_bReplaceIn = val;
-  }
+  void SetReplaceIn(bool val) { m_bReplaceIn = val; }
 
-  void SetReplaceOut( bool val )
-  {
-    m_bReplaceOut = val;
-  }
+  void SetReplaceOut(bool val) { m_bReplaceOut = val; }
 
-  void SetThreshold( double* th )
-  {
+  void SetThreshold(double *th) {
     m_dThreshold[0] = th[0];
     m_dThreshold[1] = th[1];
   }
 
-  void SetInValue( double val)
-  {
-    m_dInValue = val;
-  }
+  void SetInValue(double val) { m_dInValue = val; }
 
-  void SetOutValue(double val)
-  {
-    m_dOutValue = val;
-  }
+  void SetOutValue(double val) { m_dOutValue = val; }
 
-  QString GetName()
-  {
-    return "Threshold";
-  }
+  QString GetName() { return "Threshold"; }
 
 protected:
   bool Execute();
 
-  bool    m_bReplaceIn;
-  bool    m_bReplaceOut;
-  double  m_dThreshold[2];
-  double  m_dInValue;
-  double  m_dOutValue;
+  bool m_bReplaceIn;
+  bool m_bReplaceOut;
+  double m_dThreshold[2];
+  double m_dInValue;
+  double m_dOutValue;
 };
 
 #endif
-
-

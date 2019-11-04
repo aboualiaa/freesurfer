@@ -31,7 +31,7 @@
  * Analysis Centre (CIPAC).
  * @sa
  * vtkNIFTIImageReader, vtkNIFTIImageWriter
-*/
+ */
 
 #ifndef vtkNIFTIImageHeader_h
 #define vtkNIFTIImageHeader_h
@@ -43,10 +43,8 @@ struct nifti_1_header;
 struct nifti_2_header;
 
 //----------------------------------------------------------------------------
-class VTKIOIMAGE_EXPORT vtkNIFTIImageHeader : public vtkObject
-{
+class VTKIOIMAGE_EXPORT vtkNIFTIImageHeader : public vtkObject {
 public:
-
   /**
    * NIFTI intent codes.
    */
@@ -163,10 +161,7 @@ public:
   /**
    * NIFTI header sizes.
    */
-  enum HeaderSizeEnum {
-    NIFTI1HeaderSize = 348,
-    NIFTI2HeaderSize = 540
-  };
+  enum HeaderSizeEnum { NIFTI1HeaderSize = 348, NIFTI2HeaderSize = 540 };
 
   //@{
   /**
@@ -179,7 +174,7 @@ public:
   /**
    * Print information about this object.
    */
-  void PrintSelf(ostream& os, vtkIndent indent) override;
+  void PrintSelf(ostream &os, vtkIndent indent) override;
 
   /**
    * Get the magic number for the NIFTI file as a null-terminated string.
@@ -205,16 +200,14 @@ public:
    * Get the nth dimension of the data, where GetDim(0) returns the
    * number of dimensions that are defined for the file.
    */
-  vtkTypeInt64 GetDim(int i) {
-    return (i < 0 || i > 7 ? 0 : this->Dim[i]); }
+  vtkTypeInt64 GetDim(int i) { return (i < 0 || i > 7 ? 0 : this->Dim[i]); }
 
   /**
    * Get the sample spacing in the nth dimension. If GetPixDim(0) is
    * negative, then the quaternion for the qform describes the correct
    * orientation only after the slice ordering has been reversed.
    */
-  double GetPixDim(int i) {
-    return (i < 0 || i > 7 ? 0.0 : this->PixDim[i]); }
+  double GetPixDim(int i) { return (i < 0 || i > 7 ? 0.0 : this->PixDim[i]); }
 
   //@{
   /**
@@ -439,8 +432,8 @@ protected:
   void SetStringValue(char *x, const char *y, size_t n);
 
 private:
-  vtkNIFTIImageHeader(const vtkNIFTIImageHeader&) = delete;
-  void operator=(const vtkNIFTIImageHeader&) = delete;
+  vtkNIFTIImageHeader(const vtkNIFTIImageHeader &) = delete;
+  void operator=(const vtkNIFTIImageHeader &) = delete;
 };
 //#include "vtkNIFTIImageHeader.cxx"
 #endif // vtkNIFTIImageHeader_h

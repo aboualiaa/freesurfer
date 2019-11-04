@@ -48,29 +48,24 @@
 ** Status:  $State: Exp $
 */
 
-#ifdef  __cplusplus
-extern "C"
-{
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 #define LST_KEYS 1 /* Private defs override public ones */
-  typedef struct lst_node
-  {
-    struct lst_node *next; /* next node in list  */
-    struct lst_node *previous; /* previous node  */
-    void *data;   /* node data   */
-  }
-  LST_NODE, *LST_NODEPTR;
+typedef struct lst_node {
+  struct lst_node *next;     /* next node in list  */
+  struct lst_node *previous; /* previous node  */
+  void *data;                /* node data   */
+} LST_NODE, *LST_NODEPTR;
 
-  typedef struct lst_head
-  {
-    LST_NODE *head;  /* points at first node */
-    LST_NODE *tail;  /* points at last node  */
-    LST_NODE *current;  /* "    "  " node   */
-    unsigned long count; /* # of nodes in list   */
-  }
-  LST_HEAD, *LST_HEADPTR;
+typedef struct lst_head {
+  LST_NODE *head;      /* points at first node */
+  LST_NODE *tail;      /* points at last node  */
+  LST_NODE *current;   /* "    "  " node   */
+  unsigned long count; /* # of nodes in list   */
+} LST_HEAD, *LST_HEADPTR;
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 }
 #endif

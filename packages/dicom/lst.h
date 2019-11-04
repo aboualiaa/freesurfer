@@ -52,53 +52,50 @@
 #ifndef LST_IS_IN
 #define LST_IS_IN
 
-#ifdef  __cplusplus
-extern "C"
-{
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-#define LST_K_BEFORE  0x00000000
-#define LST_K_AFTER  0xFFFFFFFF
+#define LST_K_BEFORE 0x00000000
+#define LST_K_AFTER 0xFFFFFFFF
 
 #ifndef LST_KEYS
-  typedef void LST_HEAD;
-  typedef void LST_NODE;
+typedef void LST_HEAD;
+typedef void LST_NODE;
 #endif
 
-  typedef unsigned long LST_END;
+typedef unsigned long LST_END;
 
-  LST_HEAD *LST_Create(void);
-  CONDITION LST_Destroy(LST_HEAD ** list);
-  CONDITION LST_Enqueue(LST_HEAD ** list, LST_NODE * node);
-  CONDITION LST_Push(LST_HEAD ** list, LST_NODE * node);
-  LST_NODE *LST_Dequeue(LST_HEAD ** list);
-  LST_NODE *LST_Pop(LST_HEAD ** list);
-  unsigned long LST_Count(LST_HEAD ** list);
-  LST_NODE *LST_Head(LST_HEAD ** list);
-  LST_NODE *LST_Current(LST_HEAD ** list);
-  LST_NODE *LST_Tail(LST_HEAD ** list);
-  CONDITION LST_Insert(LST_HEAD ** list, LST_NODE * node, LST_END where);
-  LST_NODE *LST_Remove(LST_HEAD ** list, LST_END dir);
-  LST_NODE *LST_Next(LST_HEAD ** list);
-  LST_NODE *LST_Previous(LST_HEAD ** list);
-  LST_NODE *LST_Position(LST_HEAD ** list, LST_NODE * node);
-  CONDITION LST_Sort(LST_HEAD ** list, size_t nodeSize, int (*compare) ());
-  LST_NODE *LST_Index(LST_HEAD ** list, int index);
-  char *LST_Message(CONDITION cond);
+LST_HEAD *LST_Create(void);
+CONDITION LST_Destroy(LST_HEAD **list);
+CONDITION LST_Enqueue(LST_HEAD **list, LST_NODE *node);
+CONDITION LST_Push(LST_HEAD **list, LST_NODE *node);
+LST_NODE *LST_Dequeue(LST_HEAD **list);
+LST_NODE *LST_Pop(LST_HEAD **list);
+unsigned long LST_Count(LST_HEAD **list);
+LST_NODE *LST_Head(LST_HEAD **list);
+LST_NODE *LST_Current(LST_HEAD **list);
+LST_NODE *LST_Tail(LST_HEAD **list);
+CONDITION LST_Insert(LST_HEAD **list, LST_NODE *node, LST_END where);
+LST_NODE *LST_Remove(LST_HEAD **list, LST_END dir);
+LST_NODE *LST_Next(LST_HEAD **list);
+LST_NODE *LST_Previous(LST_HEAD **list);
+LST_NODE *LST_Position(LST_HEAD **list, LST_NODE *node);
+CONDITION LST_Sort(LST_HEAD **list, size_t nodeSize, int (*compare)());
+LST_NODE *LST_Index(LST_HEAD **list, int index);
+char *LST_Message(CONDITION cond);
 
 #define LST_Top(x) LST_Head((x))
 #define LST_Front(x) LST_Head((x))
 
-#define LST_NORMAL  /* Normal return from LST package */ \
- FORM_COND(FAC_LST, SEV_SUCC, 1)
-#define LST_LISTNOTEMPTY /* Attempt to destroy list with elements */ \
- FORM_COND(FAC_LST, SEV_ERROR, 3)
-#define LST_BADEND  /* */ \
- FORM_COND(FAC_LST, SEV_ERROR, 5)
-#define LST_NOCURRENT /* */ \
- FORM_COND(FAC_LST, SEV_ERROR, 7)
+#define LST_NORMAL /* Normal return from LST package */                        \
+  FORM_COND(FAC_LST, SEV_SUCC, 1)
+#define LST_LISTNOTEMPTY /* Attempt to destroy list with elements */           \
+  FORM_COND(FAC_LST, SEV_ERROR, 3)
+#define LST_BADEND /* */ FORM_COND(FAC_LST, SEV_ERROR, 5)
+#define LST_NOCURRENT /* */ FORM_COND(FAC_LST, SEV_ERROR, 7)
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 }
 #endif
 

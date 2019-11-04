@@ -34,34 +34,33 @@
 #include <vtkDataArray.h>
 #include <vtkImageShiftScale.h>
 
-VolumeFilterSobel::VolumeFilterSobel( LayerMRI* input, LayerMRI* output, QObject* parent ) :
-  VolumeFilter( input, output, parent ),
-  m_bSmoothing( false ),
-  m_dSD( 1.0 )
-{
-}
+VolumeFilterSobel::VolumeFilterSobel(LayerMRI *input, LayerMRI *output,
+                                     QObject *parent)
+    : VolumeFilter(input, output, parent), m_bSmoothing(false), m_dSD(1.0) {}
 
-bool VolumeFilterSobel::Execute()
-{
+bool VolumeFilterSobel::Execute() {
   TriggerFakeProgress(50);
-  vtkSmartPointer<vtkImageSobel3D> filter = vtkSmartPointer<vtkImageSobel3D>::New();
+  vtkSmartPointer<vtkImageSobel3D> filter =
+      vtkSmartPointer<vtkImageSobel3D>::New();
 #if VTK_MAJOR_VERSION > 5
-  filter->SetInputData( m_volumeInput->GetImageData() );
+  filter->SetInputData(m_volumeInput->GetImageData());
 #else
-  filter->SetInput( m_volumeInput->GetImageData() );
+  filter->SetInput(m_volumeInput->GetImageData());
 #endif
-  vtkSmartPointer<vtkImageMagnitude> mag = vtkSmartPointer<vtkImageMagnitude>::New();
+  vtkSmartPointer<vtkImageMagnitude> mag =
+      vtkSmartPointer<vtkImageMagnitude>::New();
   mag->SetInputConnection(filter->GetOutputPort());
   mag->Update();
-  double* orig_range = m_volumeInput->GetImageData()->GetPointData()->GetScalars()->GetRange();
-  vtkImageData* img = mag->GetOutput();
-  double* range = img->GetPointData()->GetScalars()->GetRange();
-  double scale = orig_range[1]/range[1];
-  if (scale < 0)
-  {
+  double *orig_range =
+      m_volumeInput->GetImageData()->GetPointData()->GetScalars()->GetRange();
+  vtkImageData *img = mag->GetOutput();
+  double *range = img->GetPointData()->GetScalars()->GetRange();
+  double scale = orig_range[1] / range[1];
+  if (scale < 0) {
     scale = -scale;
   }
-  vtkSmartPointer<vtkImageShiftScale> scaler = vtkSmartPointer<vtkImageShiftScale>::New();
+  vtkSmartPointer<vtkImageShiftScale> scaler =
+      vtkSmartPointer<vtkImageShiftScale>::New();
 #if VTK_MAJOR_VERSION > 5
   scaler->SetInputData(img);
 #else
@@ -71,8 +70,7 @@ bool VolumeFilterSobel::Execute()
   scaler->SetScale(scale);
   scaler->SetOutputScalarType(m_volumeInput->GetImageData()->GetScalarType());
   scaler->Update();
-  m_volumeOutput->GetImageData()->DeepCopy( scaler->GetOutput() );
+  m_volumeOutput->GetImageData()->DeepCopy(scaler->GetOutput());
 
   return true;
 }
-

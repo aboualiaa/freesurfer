@@ -26,17 +26,15 @@
 
 #include <QDialog>
 
-namespace Ui
-{
+namespace Ui {
 class DialogSaveVolume;
 }
 
-class DialogSaveVolume : public QDialog
-{
+class DialogSaveVolume : public QDialog {
   Q_OBJECT
 
 public:
-  explicit DialogSaveVolume(QWidget *parent = 0, const QString& filepath = "");
+  explicit DialogSaveVolume(QWidget *parent = 0, const QString &filepath = "");
   ~DialogSaveVolume();
 
   QString GetFileName();

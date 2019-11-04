@@ -2,8 +2,8 @@
  * @file  mris_compute_volume_fractions.c
  * @brief Computes accurate volume fractions remaining within a surface
  *
- * This program computes an accurate estimate of the fraction of the volume 
- * remaining wihtin a surface. 
+ * This program computes an accurate estimate of the fraction of the volume
+ * remaining wihtin a surface.
  */
 /*
  * Original Author: Ender Konukoglu
@@ -24,9 +24,8 @@
  *
  */
 
-
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <unistd.h>
 #include <sys/utsname.h>
 
@@ -40,58 +39,65 @@
 #include "mrisurf.h"
 #include "mris_compVolFrac.h"
 
-static int  parse_commandline(int argc, char **argv);
-static void check_options(void);
-static void print_usage(void) ;
-static void usage_exit(void);
-static void print_help(void) ;
-static void print_version(void) ;
+static int parse_commandline(int argc, char **argv);
+static void check_options();
+static void print_usage();
+static void usage_exit();
+static void print_help();
+static void print_version();
 static void dump_options(FILE *fp);
 
-static char vcid[] = "$Id: mris_compute_volume_fractions.c,v 1.4 2013/05/17 15:19:06 enderk Exp $";
-const char *Progname = NULL;
+static char vcid[] = "$Id: mris_compute_volume_fractions.c,v 1.4 2013/05/17 "
+                     "15:19:06 enderk Exp $";
+const char *Progname = nullptr;
 char *cmdline, cwd[2000];
-int debug=0;
-int checkoptsonly=0;
+int debug = 0;
+int checkoptsonly = 0;
 struct utsname uts;
 
-char *VolFile=NULL;
-char *SurfFile = NULL;
-char *OutFile = NULL;
+char *VolFile = nullptr;
+char *SurfFile = nullptr;
+char *OutFile = nullptr;
 double Accuracy = -1000.0;
 int main(int argc, char *argv[]) {
-  
+
   printf("working!\n");
   int nargs;
 
-  nargs = handle_version_option (argc, argv, vcid, "$Name:  $");
+  nargs = handle_version_option(argc, argv, vcid, "$Name:  $");
 
-  if (nargs && argc - nargs == 1) exit (0);
+  if (nargs && argc - nargs == 1)
+    exit(0);
 
   argc -= nargs;
 
-  cmdline = argv2cmdline(argc,argv);
+  cmdline = argv2cmdline(argc, argv);
   uname(&uts);
-  getcwd(cwd,2000);
+  getcwd(cwd, 2000);
 
-  Progname = argv[0] ;
-  argc --;
+  Progname = argv[0];
+  argc--;
   argv++;
-  ErrorInit(NULL, NULL, NULL) ;
-  DiagInit(NULL, NULL, NULL) ;
-  if (argc == 0) usage_exit();
-  
+  ErrorInit(NULL, NULL, NULL);
+  DiagInit(nullptr, nullptr, nullptr);
+  if (argc == 0)
+    usage_exit();
+
   parse_commandline(argc, argv);
-  
+
   check_options();
-  if (checkoptsonly) return(0);
-  
+  if (checkoptsonly)
+    return (0);
+
   dump_options(stdout);
-  volFraction v;v.frac = 0.0; v.err = 0.0;
-  MRI* mri = MRIread(VolFile);
-  MRI_SURFACE* mris = MRISread(SurfFile);    
+  volFraction v;
+  v.frac = 0.0;
+  v.err = 0.0;
+  MRI *mri = MRIread(VolFile);
+  MRI_SURFACE *mris = MRISread(SurfFile);
   printf("running the computation...\n");
-  MRI* mri_fractions = MRIcomputeVolumeFractionFromSurface(mris, Accuracy, mri, NULL);
+  MRI *mri_fractions =
+      MRIcomputeVolumeFractionFromSurface(mris, Accuracy, mri, nullptr);
   printf("computation is finished...\n");
   MRIwrite(mri_fractions, OutFile);
 
@@ -99,77 +105,88 @@ int main(int argc, char *argv[]) {
 }
 
 static int parse_commandline(int argc, char **argv) {
-  int  nargc , nargsused;
-  char **pargv, *option ;
+  int nargc, nargsused;
+  char **pargv, *option;
 
-  if (argc < 1) usage_exit();
+  if (argc < 1)
+    usage_exit();
 
-  nargc   = argc;
+  nargc = argc;
   pargv = argv;
   while (nargc > 0) {
 
     option = pargv[0];
-    if (debug) printf("%d %s\n",nargc,option);
+    if (debug)
+      printf("%d %s\n", nargc, option);
     nargc -= 1;
     pargv += 1;
 
     nargsused = 0;
 
-    if (!strcasecmp(option, "--help"))  print_help() ;
-    else if (!strcasecmp(option, "--version")) print_version() ;
-    else if (!strcasecmp(option, "--debug"))   debug = 1;
-    else if (!strcasecmp(option, "--checkopts"))   checkoptsonly = 1;
-    else if (!strcasecmp(option, "--nocheckopts")) checkoptsonly = 0;
+    if (!strcasecmp(option, "--help"))
+      print_help();
+    else if (!strcasecmp(option, "--version"))
+      print_version();
+    else if (!strcasecmp(option, "--debug"))
+      debug = 1;
+    else if (!strcasecmp(option, "--checkopts"))
+      checkoptsonly = 1;
+    else if (!strcasecmp(option, "--nocheckopts"))
+      checkoptsonly = 0;
 
     else if (!strcasecmp(option, "--vol")) {
-      if (nargc < 1) CMDargNErr(option,1);
+      if (nargc < 1)
+        CMDargNErr(option, 1);
       VolFile = pargv[0];
       nargsused = 1;
-    } 
-    else if (!strcasecmp(option, "--surf")){
-      if (nargc < 1) CMDargNErr(option,1);
+    } else if (!strcasecmp(option, "--surf")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
       SurfFile = pargv[0];
       nargsused = 1;
-    }
-    else if (!strcasecmp(option, "--acc")){
-      if (nargc < 1) CMDargNErr(option,1);
-      Accuracy = atof(pargv[0]); 
-      nargsused = 1; 
-    }
-    else if (!strcasecmp(option, "--out")){
-      if (nargc < 1) CMDargNErr(option,1);
+    } else if (!strcasecmp(option, "--acc")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
+      Accuracy = atof(pargv[0]);
+      nargsused = 1;
+    } else if (!strcasecmp(option, "--out")) {
+      if (nargc < 1)
+        CMDargNErr(option, 1);
       OutFile = pargv[0];
       nargsused = 1;
-    }
-    else {
-      fprintf(stderr,"ERROR: Option %s unknown\n",option);
+    } else {
+      fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (CMDsingleDash(option))
-        fprintf(stderr,"       Did you really mean -%s ?\n",option);
+        fprintf(stderr, "       Did you really mean -%s ?\n", option);
       exit(-1);
     }
     nargc -= nargsused;
     pargv += nargsused;
   }
-  return(0);
+  return (0);
 }
-/* -- Doxygen markup starts on the line below (this line not needed for Doxygen) -- */
+/* -- Doxygen markup starts on the line below (this line not needed for Doxygen)
+ * -- */
 /*!
 \fn static void usage_exit(void)
 \brief Prints usage and exits
 */
-/* ------ Doxygen markup ends on the line above  (this line not needed for Doxygen) -- */
-static void usage_exit(void) {
-  print_usage() ;
-  exit(1) ;
+/* ------ Doxygen markup ends on the line above  (this line not needed for
+ * Doxygen) -- */
+static void usage_exit() {
+  print_usage();
+  exit(1);
 }
-/* -- Doxygen markup starts on the line below (this line not needed for Doxygen) -- */
+/* -- Doxygen markup starts on the line below (this line not needed for Doxygen)
+ * -- */
 /*!
 \fn static void print_usage(void)
 \brief Prints usage and returns (does not exit)
 */
-/* ------ Doxygen markup ends on the line above  (this line not needed for Doxygen) -- */
-static void print_usage(void) {
-  printf("USAGE: %s \n",Progname) ;
+/* ------ Doxygen markup ends on the line above  (this line not needed for
+ * Doxygen) -- */
+static void print_usage() {
+  printf("USAGE: %s \n", Progname);
   printf("\n");
   printf("   --vol volume_file : volume \n");
   printf("   --surf surface_file: surface\n");
@@ -181,58 +198,66 @@ static void print_usage(void) {
   printf("   --help      print out information on how to use this program\n");
   printf("   --version   print out version and exit\n");
   printf("\n");
-  printf("%s\n", vcid) ;
+  printf("%s\n", vcid);
   printf("\n");
 }
-/* -- Doxygen markup starts on the line below (this line not needed for Doxygen) -- */
+/* -- Doxygen markup starts on the line below (this line not needed for Doxygen)
+ * -- */
 /*!
 \fn static void print_help(void)
 \brief Prints help and exits
 */
-/* ------ Doxygen markup ends on the line above  (this line not needed for Doxygen) -- */
-static void print_help(void) {
-  print_usage() ;
+/* ------ Doxygen markup ends on the line above  (this line not needed for
+ * Doxygen) -- */
+static void print_help() {
+  print_usage();
   printf("WARNING: this program is not yet tested!\n");
-  exit(1) ;
+  exit(1);
 }
-/* -- Doxygen markup starts on the line below (this line not needed for Doxygen) -- */
+/* -- Doxygen markup starts on the line below (this line not needed for Doxygen)
+ * -- */
 /*!
 \fn static void print_version(void)
 \brief Prints version and exits
 */
-/* ------ Doxygen markup ends on the line above  (this line not needed for Doxygen) -- */
-static void print_version(void) {
-  printf("%s\n", vcid) ;
-  exit(1) ;
+/* ------ Doxygen markup ends on the line above  (this line not needed for
+ * Doxygen) -- */
+static void print_version() {
+  printf("%s\n", vcid);
+  exit(1);
 }
-/* -- Doxygen markup starts on the line below (this line not needed for Doxygen) -- */
+/* -- Doxygen markup starts on the line below (this line not needed for Doxygen)
+ * -- */
 /*!
 \fn static void check_options(void)
 \brief Checks command-line options
 */
-/* ------ Doxygen markup ends on the line above  (this line not needed for Doxygen) -- */
-static void check_options(void) {
-  if(VolFile == NULL || SurfFile == NULL || Accuracy < 0 || OutFile == NULL)
-    {
-      print_usage(); 
-      exit(1);
-    }
-    
+/* ------ Doxygen markup ends on the line above  (this line not needed for
+ * Doxygen) -- */
+static void check_options() {
+  if (VolFile == nullptr || SurfFile == nullptr || Accuracy < 0 ||
+      OutFile == nullptr) {
+    print_usage();
+    exit(1);
+  }
+
   return;
 }
 
-/* -- Doxygen markup starts on the line below (this line not needed for Doxygen) -- */
+/* -- Doxygen markup starts on the line below (this line not needed for Doxygen)
+ * -- */
 /*!
 \fn static void dump_options(FILE *fp)
 \brief Prints command-line options to the given file pointer
 \param FILE *fp - file pointer
 */
-/* ------ Doxygen markup ends on the line above  (this line not needed for Doxygen) -- */
+/* ------ Doxygen markup ends on the line above  (this line not needed for
+ * Doxygen) -- */
 static void dump_options(FILE *fp) {
-  fprintf(fp,"\n");
-  fprintf(fp,"%s\n",vcid);
-  fprintf(fp,"Working Directory: %s\n",cwd);
-  fprintf(fp,"cmdline: %s\n",cmdline);
+  fprintf(fp, "\n");
+  fprintf(fp, "%s\n", vcid);
+  fprintf(fp, "Working Directory: %s\n", cwd);
+  fprintf(fp, "cmdline: %s\n", cmdline);
   /*
   fprintf(fp,"sysname:  %s\n",uts.sysname);
   fprintf(fp,"hostname: %s\n",uts.nodename);
@@ -241,4 +266,3 @@ static void dump_options(FILE *fp) {
   */
   return;
 }
-

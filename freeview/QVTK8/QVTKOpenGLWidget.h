@@ -23,7 +23,7 @@
 class QSurfaceFormat;
 class QOpenGLContext;
 
-//class QVTKInteractor;
+// class QVTKInteractor;
 class QVTKInteractorAdapter;
 class QVTKOpenGLWindow;
 class vtkGenericOpenGLRenderWindow;
@@ -81,41 +81,42 @@ class vtkRenderWindowInteractor;
  *
  * @sa QVTKOpenGLWindow QVTKOpenGLNativeWidget
  */
-class VTKGUISUPPORTQT_EXPORT QVTKOpenGLWidget : public QWidget
-{
+class VTKGUISUPPORTQT_EXPORT QVTKOpenGLWidget : public QWidget {
   Q_OBJECT
   typedef QWidget Superclass;
+
 public:
-  QVTKOpenGLWidget(QWidget* parent = Q_NULLPTR,
-    Qt::WindowFlags f = Qt::WindowFlags());
-  QVTKOpenGLWidget(QOpenGLContext *shareContext, QWidget* parent = Q_NULLPTR,
-    Qt::WindowFlags f = Qt::WindowFlags());
-  QVTKOpenGLWidget(vtkGenericOpenGLRenderWindow* w,
-    QWidget* parent = Q_NULLPTR, Qt::WindowFlags f = Qt::WindowFlags());
-  QVTKOpenGLWidget(vtkGenericOpenGLRenderWindow* w, QOpenGLContext *shareContext,
-    QWidget* parent = Q_NULLPTR, Qt::WindowFlags f = Qt::WindowFlags());
+  QVTKOpenGLWidget(QWidget *parent = Q_NULLPTR,
+                   Qt::WindowFlags f = Qt::WindowFlags());
+  QVTKOpenGLWidget(QOpenGLContext *shareContext, QWidget *parent = Q_NULLPTR,
+                   Qt::WindowFlags f = Qt::WindowFlags());
+  QVTKOpenGLWidget(vtkGenericOpenGLRenderWindow *w, QWidget *parent = Q_NULLPTR,
+                   Qt::WindowFlags f = Qt::WindowFlags());
+  QVTKOpenGLWidget(vtkGenericOpenGLRenderWindow *w,
+                   QOpenGLContext *shareContext, QWidget *parent = Q_NULLPTR,
+                   Qt::WindowFlags f = Qt::WindowFlags());
   ~QVTKOpenGLWidget() override;
 
   /**
    * Set the VTK render window for the internal QVTKOpenGLWindow.
    */
-  void SetRenderWindow(vtkGenericOpenGLRenderWindow* win);
-  void SetRenderWindow(vtkRenderWindow* win);
+  void SetRenderWindow(vtkGenericOpenGLRenderWindow *win);
+  void SetRenderWindow(vtkRenderWindow *win);
 
   /**
    * Get the VTK render window from the internal QVTKOpenGLWindow.
    */
-  virtual vtkRenderWindow* GetRenderWindow();
+  virtual vtkRenderWindow *GetRenderWindow();
 
   /**
    * Get the VTK render window interactor from the internal QVTKOpenGLWindow.
    */
-  virtual vtkRenderWindowInteractor* GetInteractor();
+  virtual vtkRenderWindowInteractor *GetInteractor();
 
   /**
    * Get the QEvent to VTK events translator.
    */
-  virtual QVTKInteractorAdapter* GetInteractorAdapter();
+  virtual QVTKInteractorAdapter *GetInteractorAdapter();
 
   /**
    * Returns a typical QSurfaceFormat suitable for most applications using
@@ -127,7 +128,7 @@ public:
   /**
    * Set the QSurfaceFormat used to create the OpenGL context.
    */
-  void setFormat(const QSurfaceFormat& format);
+  void setFormat(const QSurfaceFormat &format);
 
   /**
    * Enable or disable support for HiDPI displays.
@@ -154,7 +155,7 @@ public:
    * When this misbehavior gets fixed, events will be forwarded to this widget's
    * event() callback, that will then forward them back to the window.
    */
-  virtual bool testingEvent(QEvent* e);
+  virtual bool testingEvent(QEvent *e);
 
   /**
    * Expose internal QVTKOpenGLWindow::grabFramebuffer(). Renders and returns
@@ -164,34 +165,36 @@ public:
 
 signals:
   /**
-   * This signal will be emitted whenever a mouse event occurs within the QVTK window.
+   * This signal will be emitted whenever a mouse event occurs within the QVTK
+   * window.
    */
-  void mouseEvent(QMouseEvent* event);
+  void mouseEvent(QMouseEvent *event);
 
   /**
-   * This signal will be emitted whenever a resize event occurs within the QVTK window.
+   * This signal will be emitted whenever a resize event occurs within the QVTK
+   * window.
    */
   void resized();
 
   /**
    * Forward events to the internal QVTK window.
    */
-  void widgetEvent(QEvent* e);
+  void widgetEvent(QEvent *e);
 
 private slots:
   /**
    * called as a response to `QVTKOpenGLWindow::event` to forward the signal.
    */
-  void windowEvent(QEvent* event);
+  void windowEvent(QEvent *event);
 
 protected:
-  virtual void resizeEvent(QResizeEvent* event) Q_DECL_OVERRIDE;
-  virtual bool event(QEvent* e) Q_DECL_OVERRIDE;
+  virtual void resizeEvent(QResizeEvent *event) Q_DECL_OVERRIDE;
+  virtual bool event(QEvent *e) Q_DECL_OVERRIDE;
 
   bool EnableHiDPI = true;
 
 private:
-  QVTKOpenGLWindow* qVTKOpenGLWindowInternal;
+  QVTKOpenGLWindow *qVTKOpenGLWindowInternal;
 };
 
 #endif

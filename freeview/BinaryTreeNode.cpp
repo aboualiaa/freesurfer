@@ -17,30 +17,24 @@
 #define NODE_RADIUS 5
 
 BinaryTreeNode::BinaryTreeNode(BinaryTreeView *graphWidget)
-  : m_bHighlighted(false)
-{
+    : m_bHighlighted(false) {
   setFlag(ItemIsSelectable);
-  //setFlag(ItemIsMovable);
+  // setFlag(ItemIsMovable);
   setFlag(ItemSendsGeometryChanges);
   setCacheMode(DeviceCoordinateCache);
-//  setZValue(-1);
+  //  setZValue(-1);
   setAcceptHoverEvents(true);
   setCursor(Qt::PointingHandCursor);
 }
 
-void BinaryTreeNode::addEdge(BinaryTreeEdge *edge)
-{
+void BinaryTreeNode::addEdge(BinaryTreeEdge *edge) {
   edgeList << edge;
   edge->adjust();
 }
 
-QList<BinaryTreeEdge *> BinaryTreeNode::edges() const
-{
-  return edgeList;
-}
+QList<BinaryTreeEdge *> BinaryTreeNode::edges() const { return edgeList; }
 
-bool BinaryTreeNode::advance()
-{
+bool BinaryTreeNode::advance() {
   if (newPos == pos())
     return false;
 
@@ -48,55 +42,51 @@ bool BinaryTreeNode::advance()
   return true;
 }
 
-QRectF BinaryTreeNode::boundingRect() const
-{
+QRectF BinaryTreeNode::boundingRect() const {
   qreal adjust = 2;
-  return QRectF( -NODE_RADIUS - adjust, -NODE_RADIUS - adjust, NODE_RADIUS*2 + adjust, NODE_RADIUS*2 + adjust);
+  return QRectF(-NODE_RADIUS - adjust, -NODE_RADIUS - adjust,
+                NODE_RADIUS * 2 + adjust, NODE_RADIUS * 2 + adjust);
 }
 
-QPainterPath BinaryTreeNode::shape() const
-{
+QPainterPath BinaryTreeNode::shape() const {
   QPainterPath path;
-  path.addEllipse(-NODE_RADIUS-1, -NODE_RADIUS-1, NODE_RADIUS*2+2, NODE_RADIUS*2+2);
+  path.addEllipse(-NODE_RADIUS - 1, -NODE_RADIUS - 1, NODE_RADIUS * 2 + 2,
+                  NODE_RADIUS * 2 + 2);
   return path;
 }
 
-void BinaryTreeNode::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *)
-{
-//  painter->setPen(Qt::NoPen);
-//  painter->setBrush(Qt::darkGray);
-//  painter->drawEllipse(-3.5, -3.5, 5, 5);
+void BinaryTreeNode::paint(QPainter *painter,
+                           const QStyleOptionGraphicsItem *option, QWidget *) {
+  //  painter->setPen(Qt::NoPen);
+  //  painter->setBrush(Qt::darkGray);
+  //  painter->drawEllipse(-3.5, -3.5, 5, 5);
 
   QRadialGradient gradient(-3, -3, 10);
-  gradient.setColorAt(0, m_bHighlighted?QColor(Qt::red).lighter() : Qt::yellow);
-  gradient.setColorAt(1, m_bHighlighted?Qt::red : Qt::darkYellow);
+  gradient.setColorAt(0,
+                      m_bHighlighted ? QColor(Qt::red).lighter() : Qt::yellow);
+  gradient.setColorAt(1, m_bHighlighted ? Qt::red : Qt::darkYellow);
 
   painter->setBrush(gradient);
 
-  painter->setPen(QPen(m_bHighlighted?Qt::darkRed:Qt::black, 0));
-  //painter->drawEllipse(-10, -10, 20, 20);
-  painter->drawEllipse(-NODE_RADIUS, -NODE_RADIUS, NODE_RADIUS*2, NODE_RADIUS*2);
+  painter->setPen(QPen(m_bHighlighted ? Qt::darkRed : Qt::black, 0));
+  // painter->drawEllipse(-10, -10, 20, 20);
+  painter->drawEllipse(-NODE_RADIUS, -NODE_RADIUS, NODE_RADIUS * 2,
+                       NODE_RADIUS * 2);
 }
 
-void BinaryTreeNode::mousePressEvent(QGraphicsSceneMouseEvent *event)
-{
+void BinaryTreeNode::mousePressEvent(QGraphicsSceneMouseEvent *event) {
   QGraphicsItem::mousePressEvent(event);
 }
 
-void BinaryTreeNode::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
-{
+void BinaryTreeNode::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
   QGraphicsItem::mouseReleaseEvent(event);
 }
 
-void BinaryTreeNode::SetHighlighted(bool bHighlight, bool whole_branch)
-{
+void BinaryTreeNode::SetHighlighted(bool bHighlight, bool whole_branch) {
   m_bHighlighted = bHighlight;
-  if (whole_branch)
-  {
-    foreach (BinaryTreeEdge* edge, edgeList)
-    {
-      if (edge->destNode() && edge->destNode() != this)
-      {
+  if (whole_branch) {
+    foreach (BinaryTreeEdge *edge, edgeList) {
+      if (edge->destNode() && edge->destNode() != this) {
         edge->destNode()->SetHighlighted(bHighlight, whole_branch);
         edge->SetHighlighted(bHighlight);
       }
@@ -104,4 +94,3 @@ void BinaryTreeNode::SetHighlighted(bool bHighlight, bool whole_branch)
   }
   update();
 }
-

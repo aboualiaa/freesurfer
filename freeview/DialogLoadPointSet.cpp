@@ -29,70 +29,50 @@
 #include <QFileDialog>
 #include <QFileInfo>
 
-DialogLoadPointSet::DialogLoadPointSet(QWidget *parent) :
-  QDialog(parent),
-  ui(new Ui::DialogLoadPointSet)
-{
+DialogLoadPointSet::DialogLoadPointSet(QWidget *parent)
+    : QDialog(parent), ui(new Ui::DialogLoadPointSet) {
   ui->setupUi(this);
 }
 
-DialogLoadPointSet::~DialogLoadPointSet()
-{
-  delete ui;
-}
+DialogLoadPointSet::~DialogLoadPointSet() { delete ui; }
 
-void DialogLoadPointSet::OnOK()
-{
-  if ( GetFileNames().isEmpty() )
-  {
-    QMessageBox::warning(
-          this, "Error",
-          "Point set file name can not be empty." );
+void DialogLoadPointSet::OnOK() {
+  if (GetFileNames().isEmpty()) {
+    QMessageBox::warning(this, "Error",
+                         "Point set file name can not be empty.");
     return;
   }
   accept();
 }
 
-void DialogLoadPointSet::OnButtonOpen()
-{
+void DialogLoadPointSet::OnButtonOpen() {
   QStringList fns = QFileDialog::getOpenFileNames(
-        this,
-        "Select point set files",
-        m_strLastDir,
-        "All files (*)" );
-  if ( !fns.isEmpty())
-  {
+      this, "Select point set files", m_strLastDir, "All files (*)");
+  if (!fns.isEmpty()) {
     m_strLastDir = QFileInfo(fns[0]).canonicalPath();
-    for (int i = 0; i < fns.size(); i++)
-    {
+    for (int i = 0; i < fns.size(); i++) {
       fns[i] = MyUtils::Win32PathProof(fns[i]);
     }
-    ui->lineEditFileName->setText( fns.join(";") );
-    ui->lineEditFileName->setCursorPosition(ui->lineEditFileName->text().size());
+    ui->lineEditFileName->setText(fns.join(";"));
+    ui->lineEditFileName->setCursorPosition(
+        ui->lineEditFileName->text().size());
   }
 }
 
-int DialogLoadPointSet::GetPointSetType()
-{
-  if (ui->radioButtonControlPoint->isChecked() )
-  {
+int DialogLoadPointSet::GetPointSetType() {
+  if (ui->radioButtonControlPoint->isChecked()) {
     return LayerPropertyPointSet::ControlPoint;
-  }
-  else if ( ui->radioButtonWayPoint->isChecked() )
-  {
+  } else if (ui->radioButtonWayPoint->isChecked()) {
     return LayerPropertyPointSet::WayPoint;
-  }
-  else
-  {
+  } else {
     return -1;
   }
 }
 
-QStringList DialogLoadPointSet::GetFileNames()
-{
-  QStringList fns = ui->lineEditFileName->text().trimmed().split(";", QString::SkipEmptyParts);
-  for (int i = 0; i < fns.size(); i++)
-  {
+QStringList DialogLoadPointSet::GetFileNames() {
+  QStringList fns = ui->lineEditFileName->text().trimmed().split(
+      ";", QString::SkipEmptyParts);
+  for (int i = 0; i < fns.size(); i++) {
     fns[i] = MyUtils::CygwinPathProof(fns[i]);
   }
   return fns;

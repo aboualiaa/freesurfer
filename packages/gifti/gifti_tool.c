@@ -11,7 +11,8 @@ static char *g_history[] = {
     "history (of gifti_tool):\n"
     "\n",
     "0.0  28 Dec, 2007\n"
-    "     (Rick Reynolds of the National Institutes of Health, SSCC/DIRP/NIMH)\n"
+    "     (Rick Reynolds of the National Institutes of Health, "
+    "SSCC/DIRP/NIMH)\n"
     "     - initial version\n"
     "0.1  03 Jan, 2008: changed structure of program\n",
     "     - can do one of display, write or test (more to come)\n"
@@ -26,7 +27,8 @@ static char *g_history[] = {
     "       (modification takes place at dataset read time)\n"
     "     - reformatted help output\n"
     "0.3  16 Jan, 2008:\n",
-    "     - added options -gifti_zlib, -gifti_test, -mod_to_float, -no_updates\n"
+    "     - added options -gifti_zlib, -gifti_test, -mod_to_float, "
+    "-no_updates\n"
     "0.4  18 Mar, 2008: added comparison options\n",
     "     - added -compare_gifti, -compare_data, -compare_verb\n"
     "0.5  24 Mar, 2008: -compare_data is now separate from -compare_gifti\n",
@@ -41,8 +43,7 @@ static char *g_history[] = {
 static char g_version[] = "gifti_tool version 1.3, 24 December 2009";
 
 /* globals: verbosity, for now */
-typedef struct
-{
+typedef struct {
   int verb;
 } gt_globs;
 gt_globs G = {1};
@@ -60,8 +61,7 @@ static int process_opts(int argc, char *argv[], gt_opts *opts);
 static int show_version(void);
 
 /* the main event */
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   gt_opts opts;
   int rv = 0;
 
@@ -95,8 +95,7 @@ int main(int argc, char *argv[])
  *         0 : success, continue
  *        -1 : failure, terminate
  */
-static int process_opts(int argc, char *argv[], gt_opts *opts)
-{
+static int process_opts(int argc, char *argv[], gt_opts *opts) {
   int ac, c;
 
   if (argc <= 1) {
@@ -109,29 +108,24 @@ static int process_opts(int argc, char *argv[], gt_opts *opts)
     if (!strcmp(argv[ac], "-help")) {
       show_help();
       return 1;
-    }
-    else if (!strcmp(argv[ac], "-hist")) {
+    } else if (!strcmp(argv[ac], "-hist")) {
       show_hist();
       return 1;
-    }
-    else if (!strcmp(argv[ac], "-ver")) {
+    } else if (!strcmp(argv[ac], "-ver")) {
       show_version();
       return 1;
-    }
-    else if (!strcmp(argv[ac], "-gifti_dtd_url")) {
+    } else if (!strcmp(argv[ac], "-gifti_dtd_url")) {
       gifti_disp_dtd_url();
       return 1;
-    }
-    else if (!strcmp(argv[ac], "-gifti_hist")) {
+    } else if (!strcmp(argv[ac], "-gifti_hist")) {
       gifti_disp_lib_hist();
       return 1;
-    }
-    else if (!strcmp(argv[ac], "-gifti_ver")) {
+    } else if (!strcmp(argv[ac], "-gifti_ver")) {
       gifti_disp_lib_version();
       return 1;
-    }
-    else if (!strcmp(argv[ac], "-gifti_zlib")) {
-      printf("library compiled %s ZLIB\n", GIFTI_COMP_WITH_ZLIB ? "with" : "without");
+    } else if (!strcmp(argv[ac], "-gifti_zlib")) {
+      printf("library compiled %s ZLIB\n",
+             GIFTI_COMP_WITH_ZLIB ? "with" : "without");
       return 1;
     }
 
@@ -147,8 +141,7 @@ static int process_opts(int argc, char *argv[], gt_opts *opts)
     else if (!strcmp(argv[ac], "-approx_gifti")) {
       opts->approx_gifti = 1;
       opts->gt_compare = 1;
-    }
-    else if (!strcmp(argv[ac], "-b64_check")) {
+    } else if (!strcmp(argv[ac], "-b64_check")) {
       ac++;
       CHECK_NEXT_OPT(ac, argc, "-b64_check");
       if (!strcmp(argv[ac], "NONE"))
@@ -165,52 +158,49 @@ static int process_opts(int argc, char *argv[], gt_opts *opts)
         fprintf(stderr, "** invalid parm to -b64_check: %s\n", argv[ac]);
         return -1;
       }
-    }
-    else if (!strcmp(argv[ac], "-buf_size")) {
+    } else if (!strcmp(argv[ac], "-buf_size")) {
       ac++;
       CHECK_NEXT_OPT(ac, argc, "-buf_size");
       opts->buf_size = atoi(argv[ac]);
       /* compare options */
-    }
-    else if (!strcmp(argv[ac], "-compare_data")) {
+    } else if (!strcmp(argv[ac], "-compare_data")) {
       opts->comp_data = 1;
       opts->gt_compare = 1;
-    }
-    else if (!strcmp(argv[ac], "-compare_gifti")) {
+    } else if (!strcmp(argv[ac], "-compare_gifti")) {
       opts->comp_gifti = 1;
       opts->gt_compare = 1;
-    }
-    else if (!strcmp(argv[ac], "-compare_verb")) {
+    } else if (!strcmp(argv[ac], "-compare_verb")) {
       ac++;
       CHECK_NEXT_OPT(ac, argc, "-compare_verb");
       opts->comp_verb = atoi(argv[ac]);
       /* copy options */
-    }
-    else if (!strcmp(argv[ac], "-copy_gifti_meta")) {
+    } else if (!strcmp(argv[ac], "-copy_gifti_meta")) {
       opts->copy_gim_meta = 1;
       ac++;
       CHECK_NEXT_OPT(ac, argc, "-copy_gifti_meta");
-      if (add_to_str_list(&opts->gim_meta, argv[ac])) return -1;
-    }
-    else if (!strcmp(argv[ac], "-copy_DA_meta")) {
+      if (add_to_str_list(&opts->gim_meta, argv[ac]))
+        return -1;
+    } else if (!strcmp(argv[ac], "-copy_DA_meta")) {
       opts->copy_DA_meta = 1;
       ac++;
       CHECK_NEXT_OPT(ac, argc, "-copy_DA_meta");
-      if (add_to_str_list(&opts->DA_meta, argv[ac])) return -1;
-    }
-    else if (!strcmp(argv[ac], "-DA_index_list")) {
+      if (add_to_str_list(&opts->DA_meta, argv[ac]))
+        return -1;
+    } else if (!strcmp(argv[ac], "-DA_index_list")) {
       ac++;
       for (c = 0; (ac < argc) && (argv[ac][0] != '-'); ac++, c++)
-        if (add_to_int_list(&opts->DAlist, atoi(argv[ac]))) return -1;
-      if (G.verb > 1) fprintf(stderr, "+d have %d DA indices\n", c);
+        if (add_to_int_list(&opts->DAlist, atoi(argv[ac])))
+          return -1;
+      if (G.verb > 1)
+        fprintf(stderr, "+d have %d DA indices\n", c);
       if (opts->DAlist.len == 0) {
         fprintf(stderr, "** no DA indices with -DA_index_list'\n");
         return -1;
       }
       /* and back up if we've looked too far */
-      if (ac < argc && argv[ac][0] == '-') ac--;
-    }
-    else if (!strcmp(argv[ac], "-encoding")) {
+      if (ac < argc && argv[ac][0] == '-')
+        ac--;
+    } else if (!strcmp(argv[ac], "-encoding")) {
       ac++;
       CHECK_NEXT_OPT(ac, argc, "-encoding");
       if (!strcmp(argv[ac], "ASCII"))
@@ -223,94 +213,96 @@ static int process_opts(int argc, char *argv[], gt_opts *opts)
         fprintf(stderr, "** invalid parm to -encoding: %s\n", argv[ac]);
         return -1;
       }
-    }
-    else if (!strcmp(argv[ac], "-gifti_test")) {
+    } else if (!strcmp(argv[ac], "-gifti_test")) {
       opts->gt_test = 1;
-    }
-    else if (!strcmp(argv[ac], "-indent")) {
+    } else if (!strcmp(argv[ac], "-indent")) {
       ac++;
       CHECK_NEXT_OPT(ac, argc, "-indent");
       opts->indent = atoi(argv[ac]);
-    }
-    else if (!strncmp(argv[ac], "-infile", 7)) { /* maybe infiles... */
+    } else if (!strncmp(argv[ac], "-infile", 7)) { /* maybe infiles... */
       ac++;
       for (c = 0; (ac < argc) && (argv[ac][0] != '-'); ac++, c++)
-        if (add_to_str_list(&opts->infiles, argv[ac])) return -1;
-      if (G.verb > 1) fprintf(stderr, "+d have %d infile names\n", c);
+        if (add_to_str_list(&opts->infiles, argv[ac]))
+          return -1;
+      if (G.verb > 1)
+        fprintf(stderr, "+d have %d infile names\n", c);
       if (opts->infiles.len == 0) {
         fprintf(stderr, "** no filenames with '-infiles'\n");
         return -1;
       }
       /* and back up if we've looked too far */
-      if (ac < argc && argv[ac][0] == '-') ac--;
-    }
-    else if (!strcmp(argv[ac], "-mod_add_data")) {
+      if (ac < argc && argv[ac][0] == '-')
+        ac--;
+    } else if (!strcmp(argv[ac], "-mod_add_data")) {
       opts->mod_add_data = 1;
-    }
-    else if (!strcmp(argv[ac], "-mod_DA_atr")) {
+    } else if (!strcmp(argv[ac], "-mod_DA_atr")) {
       opts->mod_DA_atr = 1;
       ac++;
       if (ac > argc - 2 || argv[ac][0] == '-' || argv[ac + 1][0] == '-') {
         fprintf(stderr, "** option -mod_DA_atr requires 2 arguments\n");
         return -1;
       }
-      if (add_to_str_list(&opts->DA_atrs, argv[ac]) || add_to_str_list(&opts->DA_atrs, argv[ac + 1])) return -1;
+      if (add_to_str_list(&opts->DA_atrs, argv[ac]) ||
+          add_to_str_list(&opts->DA_atrs, argv[ac + 1]))
+        return -1;
       ac++; /* and consume last arg */
-    }
-    else if (!strcmp(argv[ac], "-mod_DA_meta")) {
+    } else if (!strcmp(argv[ac], "-mod_DA_meta")) {
       opts->mod_DA_meta = 1;
       ac++;
       if (ac > argc - 2 || argv[ac][0] == '-' || argv[ac + 1][0] == '-') {
         fprintf(stderr, "** option -mod_DA_meta requires 2 arguments\n");
         return -1;
       }
-      if (add_to_str_list(&opts->DA_meta, argv[ac]) || add_to_str_list(&opts->DA_meta, argv[ac + 1])) return -1;
+      if (add_to_str_list(&opts->DA_meta, argv[ac]) ||
+          add_to_str_list(&opts->DA_meta, argv[ac + 1]))
+        return -1;
       ac++; /* and consume last arg */
-    }
-    else if (!strcmp(argv[ac], "-mod_DAs")) {
+    } else if (!strcmp(argv[ac], "-mod_DAs")) {
       ac++;
       for (c = 0; (ac < argc) && (argv[ac][0] != '-'); ac++, c++)
-        if (add_to_int_list(&opts->DAmodlist, atoi(argv[ac]))) return -1;
-      if (G.verb > 1) fprintf(stderr, "+d have %d DA mod indices\n", c);
+        if (add_to_int_list(&opts->DAmodlist, atoi(argv[ac])))
+          return -1;
+      if (G.verb > 1)
+        fprintf(stderr, "+d have %d DA mod indices\n", c);
       if (opts->DAmodlist.len == 0) {
         fprintf(stderr, "** no DA indices with '-mod_DAs'\n");
         return -1;
       }
       /* and back up if we've looked too far */
-      if (ac < argc && argv[ac][0] == '-') ac--;
-    }
-    else if (!strcmp(argv[ac], "-mod_gim_atr")) {
+      if (ac < argc && argv[ac][0] == '-')
+        ac--;
+    } else if (!strcmp(argv[ac], "-mod_gim_atr")) {
       opts->mod_gim_atr = 1;
       ac++;
       if (ac > argc - 2 || argv[ac][0] == '-' || argv[ac + 1][0] == '-') {
         fprintf(stderr, "** option -mod_gim_atr requires 2 args\n");
         return -1;
       }
-      if (add_to_str_list(&opts->gim_atrs, argv[ac]) || add_to_str_list(&opts->gim_atrs, argv[ac + 1])) return -1;
+      if (add_to_str_list(&opts->gim_atrs, argv[ac]) ||
+          add_to_str_list(&opts->gim_atrs, argv[ac + 1]))
+        return -1;
       ac++; /* and consume last arg */
-    }
-    else if (!strcmp(argv[ac], "-mod_gim_meta")) {
+    } else if (!strcmp(argv[ac], "-mod_gim_meta")) {
       opts->mod_gim_meta = 1;
       ac++;
       if (ac > argc - 2 || argv[ac][0] == '-' || argv[ac + 1][0] == '-') {
         fprintf(stderr, "** option -mod_gim_meta requires 2 args\n");
         return -1;
       }
-      if (add_to_str_list(&opts->gim_meta, argv[ac]) || add_to_str_list(&opts->gim_meta, argv[ac + 1])) return -1;
+      if (add_to_str_list(&opts->gim_meta, argv[ac]) ||
+          add_to_str_list(&opts->gim_meta, argv[ac + 1]))
+        return -1;
       ac++; /* and consume last arg */
-    }
-    else if (!strcmp(argv[ac], "-mod_to_float")) {
+    } else if (!strcmp(argv[ac], "-mod_to_float")) {
       opts->mod_to_float = 1;
-    }
-    else if (!strcmp(argv[ac], "-new_dset")) {
-      if (add_to_str_list(&opts->infiles, "MAKE_IM")) return -1;
-    }
-    else if (!strcmp(argv[ac], "-new_numDA")) {
+    } else if (!strcmp(argv[ac], "-new_dset")) {
+      if (add_to_str_list(&opts->infiles, "MAKE_IM"))
+        return -1;
+    } else if (!strcmp(argv[ac], "-new_numDA")) {
       ac++;
       CHECK_NEXT_OPT(ac, argc, "-new_numDA");
       opts->new_numDA = atol(argv[ac]);
-    }
-    else if (!strcmp(argv[ac], "-new_intent")) {
+    } else if (!strcmp(argv[ac], "-new_intent")) {
       ac++;
       CHECK_NEXT_OPT(ac, argc, "-new_intent");
       opts->new_intent = gifti_intent_from_string(argv[ac]);
@@ -318,8 +310,7 @@ static int process_opts(int argc, char *argv[], gt_opts *opts)
         fprintf(stderr, "** invalid intent '%s'\n", argv[ac]);
         return -1;
       }
-    }
-    else if (!strcmp(argv[ac], "-new_dtype")) {
+    } else if (!strcmp(argv[ac], "-new_dtype")) {
       ac++;
       CHECK_NEXT_OPT(ac, argc, "-new_dtype");
       opts->new_dtype = gifti_str2datatype(argv[ac]);
@@ -327,97 +318,95 @@ static int process_opts(int argc, char *argv[], gt_opts *opts)
         fprintf(stderr, "** invalid datatype '%s'\n", argv[ac]);
         return -1;
       }
-    }
-    else if (!strcmp(argv[ac], "-new_ndim")) {
+    } else if (!strcmp(argv[ac], "-new_ndim")) {
       ac++;
       CHECK_NEXT_OPT(ac, argc, "-new_ndim");
       opts->new_ndim = atol(argv[ac]);
-    }
-    else if (!strcmp(argv[ac], "-new_dims")) {
+    } else if (!strcmp(argv[ac], "-new_dims")) {
       ac++;
-      for (c = 0; ac < argc && c < GIFTI_DARRAY_DIM_LEN && argv[ac][0] != '-'; ac++, c++)
+      for (c = 0; ac < argc && c < GIFTI_DARRAY_DIM_LEN && argv[ac][0] != '-';
+           ac++, c++)
         opts->new_dims[c] = atol(argv[ac]);
       if (c < GIFTI_DARRAY_DIM_LEN) {
-        fprintf(stderr, "** -new_dims have only %d of %d dims\n", c, GIFTI_DARRAY_DIM_LEN);
+        fprintf(stderr, "** -new_dims have only %d of %d dims\n", c,
+                GIFTI_DARRAY_DIM_LEN);
         return -1;
       }
       ac--; /* You've gone too far, go to your room! */
-    }
-    else if (!strcmp(argv[ac], "-new_data")) {
+    } else if (!strcmp(argv[ac], "-new_data")) {
       opts->new_data = 1;
-    }
-    else if (!strcmp(argv[ac], "-no_data")) {
+    } else if (!strcmp(argv[ac], "-no_data")) {
       opts->dstore = 0;
-    }
-    else if (!strcmp(argv[ac], "-no_updates")) {
+    } else if (!strcmp(argv[ac], "-no_updates")) {
       opts->update_ok = 0;
-    }
-    else if (!strcmp(argv[ac], "-read_DAs")) {
+    } else if (!strcmp(argv[ac], "-read_DAs")) {
       ac++;
       for (c = 0; (ac < argc) && (argv[ac][0] != '-'); ac++, c++)
-        if (add_to_int_list(&opts->DAlistr, atoi(argv[ac]))) return -1;
-      if (G.verb > 1) fprintf(stderr, "+d have %d DA indices names\n", c);
+        if (add_to_int_list(&opts->DAlistr, atoi(argv[ac])))
+          return -1;
+      if (G.verb > 1)
+        fprintf(stderr, "+d have %d DA indices names\n", c);
       if (opts->DAlistr.len == 0) {
         fprintf(stderr, "** no DA indices with -read_DAs'\n");
         return -1;
       }
       /* and back up if we've looked too far */
-      if (ac < argc && argv[ac][0] == '-') ac--;
-    }
-    else if (!strcmp(argv[ac], "-set_extern_filelist")) {
+      if (ac < argc && argv[ac][0] == '-')
+        ac--;
+    } else if (!strcmp(argv[ac], "-set_extern_filelist")) {
       opts->set_extern = 1;
       ac++;
       for (c = 0; (ac < argc) && (argv[ac][0] != '-'); ac++, c++)
-        if (add_to_str_list(&opts->ext_files, argv[ac])) return -1;
-      if (G.verb > 1) fprintf(stderr, "+d have %d external files\n", c);
+        if (add_to_str_list(&opts->ext_files, argv[ac]))
+          return -1;
+      if (G.verb > 1)
+        fprintf(stderr, "+d have %d external files\n", c);
       if (opts->ext_files.len == 0) {
         fprintf(stderr, "** no external files with -set_extern_filelist\n");
         return -1;
       }
       /* and back up if we've looked too far */
-      if (ac < argc && argv[ac][0] == '-') ac--;
-    }
-    else if (!strcmp(argv[ac], "-show_gifti")) {
+      if (ac < argc && argv[ac][0] == '-')
+        ac--;
+    } else if (!strcmp(argv[ac], "-show_gifti")) {
       opts->gt_display = 1;
       opts->show_gifti = 1;
-    }
-    else if (!strcmp(argv[ac], "-write_1D")) {
+    } else if (!strcmp(argv[ac], "-write_1D")) {
       ac++;
       CHECK_NEXT_OPT(ac, argc, "-write_1D");
       opts->ofile_1D = argv[ac];
-    }
-    else if (!strcmp(argv[ac], "-write_asc")) {
+    } else if (!strcmp(argv[ac], "-write_asc")) {
       ac++;
       CHECK_NEXT_OPT(ac, argc, "-write_asc");
       opts->ofile_asc = argv[ac];
-    }
-    else if (!strcmp(argv[ac], "-write_gifti")) {
+    } else if (!strcmp(argv[ac], "-write_gifti")) {
       ac++;
       CHECK_NEXT_OPT(ac, argc, "-write_gifti");
       opts->ofile_gifti = argv[ac];
-    }
-    else if (!strcmp(argv[ac], "-zlevel")) {
+    } else if (!strcmp(argv[ac], "-zlevel")) {
       ac++;
       CHECK_NEXT_OPT(ac, argc, "-zlevel");
       opts->zlevel = atoi(argv[ac]);
-    }
-    else {
+    } else {
       fprintf(stderr, "** unknown option: '%s'\n", argv[ac]);
       return 1;
     }
   }
 
   /* flat whether we are modifying input data */
-  opts->gt_modify = opts->mod_add_data || opts->mod_gim_atr || opts->mod_gim_meta || opts->mod_DA_atr ||
+  opts->gt_modify = opts->mod_add_data || opts->mod_gim_atr ||
+                    opts->mod_gim_meta || opts->mod_DA_atr ||
                     opts->mod_DA_meta || opts->mod_to_float;
 
   /* flag whether we have a copying operation */
   opts->gt_copy = opts->copy_gim_meta || opts->copy_DA_meta;
 
   /* flag whether we have a general write operation (only if not copying) */
-  if (!opts->gt_copy) opts->gt_write = opts->ofile_1D || opts->ofile_asc || opts->ofile_gifti;
+  if (!opts->gt_copy)
+    opts->gt_write = opts->ofile_1D || opts->ofile_asc || opts->ofile_gifti;
 
-  if (G.verb > 3) disp_gt_opts("options read: ", opts, stderr);
+  if (G.verb > 3)
+    disp_gt_opts("options read: ", opts, stderr);
 
   /* be sure we have something to read */
   if (opts->infiles.len <= 0) {
@@ -442,28 +431,41 @@ static int process_opts(int argc, char *argv[], gt_opts *opts)
   /* apply any XML user options
    * (non-zero defaults: verb, zlevel -1)
    */
-  if (opts->verb != 1) gifti_set_verb(opts->verb);
-  if (opts->indent != -1) gifti_set_indent(opts->indent);
-  if (opts->buf_size) gifti_set_xml_buf_size(opts->buf_size);
-  if (opts->b64_check) gifti_set_b64_check(opts->b64_check);
-  if (opts->update_ok != -1) gifti_set_update_ok(opts->update_ok);
-  if (opts->zlevel != -1) gifti_set_zlevel(opts->zlevel);
+  if (opts->verb != 1)
+    gifti_set_verb(opts->verb);
+  if (opts->indent != -1)
+    gifti_set_indent(opts->indent);
+  if (opts->buf_size)
+    gifti_set_xml_buf_size(opts->buf_size);
+  if (opts->b64_check)
+    gifti_set_b64_check(opts->b64_check);
+  if (opts->update_ok != -1)
+    gifti_set_update_ok(opts->update_ok);
+  if (opts->zlevel != -1)
+    gifti_set_zlevel(opts->zlevel);
 
   return 0;
 }
 
-static int free_gt_opts(gt_opts *opts)
-{
-  if (opts->DAlist.len > 0 && opts->DAlist.list) free(opts->DAlist.list);
-  if (opts->DAlistr.len > 0 && opts->DAlistr.list) free(opts->DAlistr.list);
-  if (opts->DAmodlist.len > 0 && opts->DAmodlist.list) free(opts->DAmodlist.list);
+static int free_gt_opts(gt_opts *opts) {
+  if (opts->DAlist.len > 0 && opts->DAlist.list)
+    free(opts->DAlist.list);
+  if (opts->DAlistr.len > 0 && opts->DAlistr.list)
+    free(opts->DAlistr.list);
+  if (opts->DAmodlist.len > 0 && opts->DAmodlist.list)
+    free(opts->DAmodlist.list);
 
-  if (opts->gim_atrs.len > 0 && opts->gim_atrs.list) free(opts->gim_atrs.list);
-  if (opts->gim_meta.len > 0 && opts->gim_meta.list) free(opts->gim_meta.list);
-  if (opts->DA_atrs.len > 0 && opts->DA_atrs.list) free(opts->DA_atrs.list);
-  if (opts->DA_meta.len > 0 && opts->DA_meta.list) free(opts->DA_meta.list);
+  if (opts->gim_atrs.len > 0 && opts->gim_atrs.list)
+    free(opts->gim_atrs.list);
+  if (opts->gim_meta.len > 0 && opts->gim_meta.list)
+    free(opts->gim_meta.list);
+  if (opts->DA_atrs.len > 0 && opts->DA_atrs.list)
+    free(opts->DA_atrs.list);
+  if (opts->DA_meta.len > 0 && opts->DA_meta.list)
+    free(opts->DA_meta.list);
 
-  if (opts->infiles.len > 0 && opts->infiles.list) free(opts->infiles.list);
+  if (opts->infiles.len > 0 && opts->infiles.list)
+    free(opts->infiles.list);
 
   opts->DAlist.len = 0;
   opts->DAlist.list = NULL;
@@ -487,8 +489,7 @@ static int free_gt_opts(gt_opts *opts)
   return 0;
 }
 
-int gt_display(gt_opts *opts)
-{
+int gt_display(gt_opts *opts) {
   gifti_image *gim;
   int c, rv = 0;
 
@@ -503,10 +504,10 @@ int gt_display(gt_opts *opts)
   for (c = 0; c < opts->infiles.len; c++) {
     gim = gt_read_dataset(opts, opts->infiles.list[c]);
     if (!gim) {
-      fprintf(stderr, "** gt_display: failed to read '%s'\n", opts->infiles.list[c]);
+      fprintf(stderr, "** gt_display: failed to read '%s'\n",
+              opts->infiles.list[c]);
       rv = 1;
-    }
-    else
+    } else
       gifti_free_image(gim);
   }
 
@@ -514,8 +515,7 @@ int gt_display(gt_opts *opts)
 }
 
 /* compare gifti structures and/or included data */
-int gt_compare(gt_opts *opts)
-{
+int gt_compare(gt_opts *opts) {
   gifti_image *gimA;
   gifti_image *gimB;
   int rv0 = 0, rv1 = 0;
@@ -537,11 +537,13 @@ int gt_compare(gt_opts *opts)
   if (opts->comp_gifti || opts->comp_data) {
     if (opts->comp_gifti) {
       rv0 = gifti_compare_gifti_images(gimA, gimB, 0, opts->comp_verb);
-      if (!rv0 && opts->comp_verb > 0) printf("++ no differences between gifti_images\n");
+      if (!rv0 && opts->comp_verb > 0)
+        printf("++ no differences between gifti_images\n");
     }
     if (opts->comp_data) {
       rv1 = gifti_compare_gifti_data(gimA, gimB, opts->comp_verb);
-      if (!rv1 && opts->comp_verb > 0) printf("++ no data differences between gifti_images\n");
+      if (!rv1 && opts->comp_verb > 0)
+        printf("++ no data differences between gifti_images\n");
     }
 
     rv0 |= rv1;
@@ -550,7 +552,8 @@ int gt_compare(gt_opts *opts)
   if (opts->approx_gifti) {
     /* return value of approx is opposite that of compare */
     rv0 = gifti_approx_gifti_images(gimA, gimB, 1, opts->comp_verb);
-    if (rv0 && opts->comp_verb > 0) printf("++ gifti_images are approximately equal\n");
+    if (rv0 && opts->comp_verb > 0)
+      printf("++ gifti_images are approximately equal\n");
     rv0 = !rv0; /* invert return value for exit status */
   }
 
@@ -561,8 +564,7 @@ int gt_compare(gt_opts *opts)
 }
 
 /* copy MetaData between GIFTI elements or some DataArray elements */
-int gt_copy(gt_opts *opts)
-{
+int gt_copy(gt_opts *opts) {
   gifti_image *src;
   gifti_image *dest;
   char **names;
@@ -582,7 +584,8 @@ int gt_copy(gt_opts *opts)
   dest = gt_read_dataset(opts, opts->infiles.list[1]);
 
   /* if we fail to read or the metadata is not valid, bail */
-  if (!src || !dest || !gifti_valid_nvpairs(&src->meta, 1) || !gifti_valid_nvpairs(&dest->meta, 1)) {
+  if (!src || !dest || !gifti_valid_nvpairs(&src->meta, 1) ||
+      !gifti_valid_nvpairs(&dest->meta, 1)) {
     gifti_free_image(src);
     gifti_free_image(dest);
     return -1;
@@ -593,11 +596,12 @@ int gt_copy(gt_opts *opts)
     /* if ALL, copy everything, else get what's in the list */
     if (opts->gim_meta.len == 1 && !strcmp(opts->gim_meta.list[0], "ALL")) {
       names = src->meta.name;
-      for (c = 0; c < src->meta.length; c++) rv |= gifti_copy_gifti_meta(dest, src, names[c]);
-    }
-    else {
+      for (c = 0; c < src->meta.length; c++)
+        rv |= gifti_copy_gifti_meta(dest, src, names[c]);
+    } else {
       names = opts->gim_meta.list;
-      for (c = 0; c < opts->gim_meta.len; c++) rv |= gifti_copy_gifti_meta(dest, src, names[c]);
+      for (c = 0; c < opts->gim_meta.len; c++)
+        rv |= gifti_copy_gifti_meta(dest, src, names[c]);
     }
   }
 
@@ -605,21 +609,21 @@ int gt_copy(gt_opts *opts)
     /* if ALL, copy everything, else get what's in the list */
     if (opts->DA_meta.len == 1 && !strcmp(opts->DA_meta.list[0], "ALL")) {
       if (src->numDA != dest->numDA || src->numDA <= 0) {
-        fprintf(stderr, "** bad numDA for DA MD copy, %d, %d\n", src->numDA, dest->numDA);
+        fprintf(stderr, "** bad numDA for DA MD copy, %d, %d\n", src->numDA,
+                dest->numDA);
         rv = 1;
-      }
-      else if (!src->darray || !dest->darray) {
+      } else if (!src->darray || !dest->darray) {
         fprintf(stderr, "** invalid darray pointers for copy\n");
         rv = 1;
+      } else { /* all seems well, copy all meta from src to dest */
+        for (c = 0; c < src->numDA; c++)
+          rv |= gifti_copy_all_DA_meta(dest->darray[c], src->darray[c]);
       }
-      else { /* all seems well, copy all meta from src to dest */
-        for (c = 0; c < src->numDA; c++) rv |= gifti_copy_all_DA_meta(dest->darray[c], src->darray[c]);
-      }
-    }
-    else {
+    } else {
       names = opts->DA_meta.list;
       for (c = 0; c < opts->DA_meta.len; c++)
-        rv |= gifti_copy_DA_meta_many(dest, src, names[c], opts->DAlist.list, opts->DAlist.len);
+        rv |= gifti_copy_DA_meta_many(dest, src, names[c], opts->DAlist.list,
+                                      opts->DAlist.len);
     }
   }
 
@@ -631,8 +635,7 @@ int gt_copy(gt_opts *opts)
   return rv;
 }
 
-int gt_test(gt_opts *opts)
-{
+int gt_test(gt_opts *opts) {
   gifti_image *gim;
   int c, rv = 0;
 
@@ -645,10 +648,10 @@ int gt_test(gt_opts *opts)
   for (c = 0; c < opts->infiles.len; c++) {
     gim = gt_read_dataset(opts, opts->infiles.list[c]);
     if (!gim) {
-      fprintf(stderr, "** gt_test: failed to read '%s'\n", opts->infiles.list[c]);
+      fprintf(stderr, "** gt_test: failed to read '%s'\n",
+              opts->infiles.list[c]);
       rv = 1;
-    }
-    else
+    } else
       gifti_free_image(gim);
   }
 
@@ -663,8 +666,7 @@ int gt_test(gt_opts *opts)
  *
  * input: there can be only one (immortal?  Sean Connery?)
  */
-int gt_write(gt_opts *opts)
-{
+int gt_write(gt_opts *opts) {
   gifti_image *gim;
   int rv;
 
@@ -690,30 +692,32 @@ int gt_write(gt_opts *opts)
 }
 
 /* apply encoding, and allow other formats */
-int gt_write_dataset(gt_opts *opts, gifti_image *gim)
-{
+int gt_write_dataset(gt_opts *opts, gifti_image *gim) {
   int c;
 
   if (!gim) {
-    if (opts->verb) fprintf(stderr, "** trying to write NULL dataset\n");
+    if (opts->verb)
+      fprintf(stderr, "** trying to write NULL dataset\n");
     return 1;
   }
 
   if (opts->verb > 1)
-    fprintf(stderr,
-            "++ gt_write_dataset: gim %s, 1D %s, asc %s\n",
+    fprintf(stderr, "++ gt_write_dataset: gim %s, 1D %s, asc %s\n",
             G_CHECK_NULL_STR(opts->ofile_gifti),
             G_CHECK_NULL_STR(opts->ofile_1D),
             G_CHECK_NULL_STR(opts->ofile_asc));
 
   /* possibly adjust encoding */
-  if (opts->encoding > GIFTI_ENCODING_UNDEF && opts->encoding <= GIFTI_ENCODING_MAX)
+  if (opts->encoding > GIFTI_ENCODING_UNDEF &&
+      opts->encoding <= GIFTI_ENCODING_MAX)
     for (c = 0; c < gim->numDA; c++) {
       /* when modifying enconding, if we are changing _from_ external,
          then clear the external filename and offset */
-      if (gim->darray[c]->encoding == GIFTI_ENCODING_EXTBIN && opts->encoding != GIFTI_ENCODING_EXTBIN) {
+      if (gim->darray[c]->encoding == GIFTI_ENCODING_EXTBIN &&
+          opts->encoding != GIFTI_ENCODING_EXTBIN) {
         if (gim->darray[c]->ext_fname) {
-          if (opts->verb > 2) fprintf(stderr, "-- deleting ext_fname\n");
+          if (opts->verb > 2)
+            fprintf(stderr, "-- deleting ext_fname\n");
           free(gim->darray[c]->ext_fname);
           gim->darray[c]->ext_fname = NULL;
         }
@@ -721,7 +725,8 @@ int gt_write_dataset(gt_opts *opts, gifti_image *gim)
       }
 
       /* actually make the user-requested change */
-      if (gim->darray[c]->encoding) gim->darray[c]->encoding = opts->encoding;
+      if (gim->darray[c]->encoding)
+        gim->darray[c]->encoding = opts->encoding;
     }
 
   if (opts->ofile_gifti) {
@@ -731,12 +736,16 @@ int gt_write_dataset(gt_opts *opts, gifti_image *gim)
         fprintf(stderr, "** no file list to set as external\n");
         return 1;
       }
-      if (gifti_set_extern_filelist(gim, opts->ext_files.len, opts->ext_files.list)) return 1;
+      if (gifti_set_extern_filelist(gim, opts->ext_files.len,
+                                    opts->ext_files.list))
+        return 1;
     }
     gifti_write_image(gim, opts->ofile_gifti, opts->dstore);
   }
-  if (opts->ofile_1D) write_1D_file(gim->darray, gim->numDA, opts->ofile_1D, 1);
-  if (opts->ofile_asc) write_as_asc(gim, opts->ofile_asc);
+  if (opts->ofile_1D)
+    write_1D_file(gim->darray, gim->numDA, opts->ofile_1D, 1);
+  if (opts->ofile_asc)
+    write_as_asc(gim, opts->ofile_asc);
 
   return 0;
 }
@@ -757,8 +766,7 @@ int gt_write_dataset(gt_opts *opts, gifti_image *gim)
  * Note that the DA list selection requires reading the dataset twice,
  * first to compute the number of DA elements.
  */
-gifti_image *gt_read_dataset(gt_opts *opts, char *fname)
-{
+gifti_image *gt_read_dataset(gt_opts *opts, char *fname) {
   gifti_image *gim;
   char *fcopy = NULL, *iptr, *infile = fname;
   int *dalist = NULL, numDA = -1;
@@ -770,18 +778,21 @@ gifti_image *gt_read_dataset(gt_opts *opts, char *fname)
 
   /* first case, create a new image (fname == MAKE_IM) */
   if (!strcmp(fname, "MAKE_IM")) {
-    if (opts->verb > 1) fprintf(stderr, "++ creating new GIFTI dataset\n");
+    if (opts->verb > 1)
+      fprintf(stderr, "++ creating new GIFTI dataset\n");
 
-    gim = gifti_create_image(
-        opts->new_numDA, opts->new_intent, opts->new_dtype, opts->new_ndim, opts->new_dims, opts->new_data);
+    gim = gifti_create_image(opts->new_numDA, opts->new_intent, opts->new_dtype,
+                             opts->new_ndim, opts->new_dims, opts->new_data);
 
     if (opts->gt_modify && gt_modify_dset(opts, gim)) {
-      if (opts->verb > 1) fprintf(stderr, "** bad modification to new dset, failing...\n");
+      if (opts->verb > 1)
+        fprintf(stderr, "** bad modification to new dset, failing...\n");
       gifti_free_image(gim);
       return NULL;
     }
 
-    if (opts->show_gifti) gifti_disp_gifti_image("dset MAKE_IM :", gim, 1);
+    if (opts->show_gifti)
+      gifti_disp_gifti_image("dset MAKE_IM :", gim, 1);
 
     return gim;
   }
@@ -793,7 +804,8 @@ gifti_image *gt_read_dataset(gt_opts *opts, char *fname)
     infile = fcopy; /* store for later */
     iptr = strchr(fcopy, '[');
 
-    if (opts->verb > 2) fprintf(stderr, "-- getting DA list from %s\n", iptr);
+    if (opts->verb > 2)
+      fprintf(stderr, "-- getting DA list from %s\n", iptr);
     *iptr = '\0'; /* don't need the char, but want terminated filename */
 
     /* read dataset just for numDA */
@@ -820,18 +832,23 @@ gifti_image *gt_read_dataset(gt_opts *opts, char *fname)
   if (dalist && numDA > 0)
     gim = gifti_read_da_list(infile, opts->dstore, dalist + 1, dalist[0]);
   else
-    gim = gifti_read_da_list(infile, opts->dstore, opts->DAlistr.list, opts->DAlistr.len);
+    gim = gifti_read_da_list(infile, opts->dstore, opts->DAlistr.list,
+                             opts->DAlistr.len);
 
   /* possibly make modifications */
-  if (opts->gt_modify) gt_modify_dset(opts, gim);
+  if (opts->gt_modify)
+    gt_modify_dset(opts, gim);
 
   /* regardless of success, check to free data and return */
-  if (dalist) free(dalist);
-  if (fcopy) free(fcopy);
+  if (dalist)
+    free(dalist);
+  if (fcopy)
+    free(fcopy);
 
   if (opts->show_gifti) {
     fcopy = (char *)malloc((strlen(fname) + 32) * sizeof(char));
-    if (!fcopy) return gim; /* forget it */
+    if (!fcopy)
+      return gim; /* forget it */
     sprintf(fcopy, "dset '%s' :", fname);
 
     gifti_disp_gifti_image(fcopy, gim, 1);
@@ -850,8 +867,7 @@ gifti_image *gt_read_dataset(gt_opts *opts, char *fname)
 
 /* init any options that should not default to 0 (so 0 means something,
  * or the default is non-zero) */
-static int init_opts(gt_opts *opts)
-{
+static int init_opts(gt_opts *opts) {
   memset(opts, 0, sizeof(gt_opts));
 
   /* gt_* should init to 0 */
@@ -875,11 +891,11 @@ static int init_opts(gt_opts *opts)
   return 0;
 }
 
-static int disp_gt_opts(char *mesg, gt_opts *opts, FILE *stream)
-{
+static int disp_gt_opts(char *mesg, gt_opts *opts, FILE *stream) {
   FILE *fp = stream ? stream : stdout;
 
-  if (mesg) fputs(mesg, fp);
+  if (mesg)
+    fputs(mesg, fp);
 
   fprintf(fp,
           "gt_opts struct:\n"
@@ -894,18 +910,12 @@ static int disp_gt_opts(char *mesg, gt_opts *opts, FILE *stream)
           "    new_dtype     : %d\n"
           "    new_ndim      : %d\n"
           "    new_dims [%d]  : ",
-          opts->gt_compare,
-          opts->gt_display,
-          opts->gt_write,
-          opts->gt_modify,
-          opts->gt_test,
-          opts->new_numDA,
-          opts->new_intent,
-          opts->new_dtype,
-          opts->new_ndim,
-          GIFTI_DARRAY_DIM_LEN);
+          opts->gt_compare, opts->gt_display, opts->gt_write, opts->gt_modify,
+          opts->gt_test, opts->new_numDA, opts->new_intent, opts->new_dtype,
+          opts->new_ndim, GIFTI_DARRAY_DIM_LEN);
 
-  gifti_disp_raw_data(opts->new_dims, NIFTI_TYPE_INT32, GIFTI_DARRAY_DIM_LEN, 1, fp);
+  gifti_disp_raw_data(opts->new_dims, NIFTI_TYPE_INT32, GIFTI_DARRAY_DIM_LEN, 1,
+                      fp);
   fprintf(fp,
           "    new_data      : %d\n"
           "\n"
@@ -932,26 +942,12 @@ static int disp_gt_opts(char *mesg, gt_opts *opts, FILE *stream)
           "    ofile_1D      : %s\n"
           "    ofile_asc     : %s\n"
           "    ofile_gifti   : %s\n\n",
-          opts->new_data,
-          opts->mod_add_data,
-          opts->mod_gim_atr,
-          opts->mod_gim_meta,
-          opts->mod_DA_atr,
-          opts->mod_DA_meta,
-          opts->mod_to_float,
-          opts->comp_data,
-          opts->comp_verb,
-          opts->verb,
-          opts->indent,
-          opts->buf_size,
-          opts->b64_check,
-          opts->update_ok,
-          opts->zlevel,
-          opts->dstore,
-          opts->encoding,
-          opts->show_gifti,
-          G_CHECK_NULL_STR(opts->ofile_1D),
-          G_CHECK_NULL_STR(opts->ofile_asc),
+          opts->new_data, opts->mod_add_data, opts->mod_gim_atr,
+          opts->mod_gim_meta, opts->mod_DA_atr, opts->mod_DA_meta,
+          opts->mod_to_float, opts->comp_data, opts->comp_verb, opts->verb,
+          opts->indent, opts->buf_size, opts->b64_check, opts->update_ok,
+          opts->zlevel, opts->dstore, opts->encoding, opts->show_gifti,
+          G_CHECK_NULL_STR(opts->ofile_1D), G_CHECK_NULL_STR(opts->ofile_asc),
           G_CHECK_NULL_STR(opts->ofile_gifti));
 
   /* DataArray index list */
@@ -959,21 +955,24 @@ static int disp_gt_opts(char *mesg, gt_opts *opts, FILE *stream)
   if (opts->DAlist.len <= 0 || !opts->DAlist.list)
     fprintf(fp, "<empty>\n");
   else
-    gifti_disp_raw_data(opts->DAlist.list, NIFTI_TYPE_INT32, opts->DAlist.len, 1, fp);
+    gifti_disp_raw_data(opts->DAlist.list, NIFTI_TYPE_INT32, opts->DAlist.len,
+                        1, fp);
 
   /* DataArray index list */
   fprintf(fp, "    DAlistr[%d]    : ", opts->DAlistr.len);
   if (opts->DAlistr.len <= 0 || !opts->DAlistr.list)
     fprintf(fp, "<empty>\n");
   else
-    gifti_disp_raw_data(opts->DAlistr.list, NIFTI_TYPE_INT32, opts->DAlistr.len, 1, fp);
+    gifti_disp_raw_data(opts->DAlistr.list, NIFTI_TYPE_INT32, opts->DAlistr.len,
+                        1, fp);
 
   /* DataArray modification list */
   fprintf(fp, "    DAmodlist[%d]  : ", opts->DAmodlist.len);
   if (opts->DAmodlist.len <= 0 || !opts->DAmodlist.list)
     fprintf(fp, "<empty>\n");
   else
-    gifti_disp_raw_data(opts->DAmodlist.list, NIFTI_TYPE_INT32, opts->DAmodlist.len, 1, fp);
+    gifti_disp_raw_data(opts->DAmodlist.list, NIFTI_TYPE_INT32,
+                        opts->DAmodlist.len, 1, fp);
 
   show_str_list("    gim_atrs ", &opts->gim_atrs, fp);
   show_str_list("    gim_meta ", &opts->gim_meta, fp);
@@ -985,8 +984,7 @@ static int disp_gt_opts(char *mesg, gt_opts *opts, FILE *stream)
   return 0;
 }
 
-static int show_str_list(const char *mesg, gt_str_list *list, FILE *fp)
-{
+static int show_str_list(const char *mesg, gt_str_list *list, FILE *fp) {
   FILE *stream = fp ? fp : stdout;
   int c;
 
@@ -1001,35 +999,35 @@ static int show_str_list(const char *mesg, gt_str_list *list, FILE *fp)
   }
 
   fprintf(stream, "[%d] : ", list->len);
-  for (c = 0; c < list->len; c++) fprintf(stream, "%s ", list->list[c]);
+  for (c = 0; c < list->len; c++)
+    fprintf(stream, "%s ", list->list[c]);
   fputc('\n', stream);
 
   return 0;
 }
 
-static int show_hist(void)
-{
+static int show_hist(void) {
   int c, len = sizeof(g_history) / sizeof(char *);
-  for (c = 0; c < len; c++) fputs(g_history[c], stdout);
+  for (c = 0; c < len; c++)
+    fputs(g_history[c], stdout);
   putchar('\n');
   return 0;
 }
 
-static int show_version(void)
-{
+static int show_version(void) {
   puts(g_version);
   return 0;
 }
 
-static int show_help()
-{
+static int show_help() {
   printf(
       "------------------------------------------------------------\n"
       "gifti_tool  - create, display, modify or compare GIFTI datasets\n"
       "\n"
       "  general examples:\n"
       "\n"
-      "    1. read in a GIFTI dataset (set verbose level?  show GIFTI dataset?)\n"
+      "    1. read in a GIFTI dataset (set verbose level?  show GIFTI "
+      "dataset?)\n"
       "\n"
       "         gifti_tool -infile dset.gii\n"
       "         gifti_tool -infile dset.gii -verb 3\n"
@@ -1067,8 +1065,10 @@ static int show_help()
       "      a. - the dataset has 3 DataArray elements\n"
       "         - the data will be of type 'short' (NIFTI_TYPE_INT16)\n"
       "         - the intent codes will reflect a t-test\n"
-      "         - the data will be 2-dimensional (per DataArray), 5 by 2 shorts\n"
-      "         - memory will be allocated for the data (a modification option)\n"
+      "         - the data will be 2-dimensional (per DataArray), 5 by 2 "
+      "shorts\n"
+      "         - memory will be allocated for the data (a modification "
+      "option)\n"
       "         - the result will be written to created.gii\n"
       "\n"
       "         gifti_tool -new_dset                                \\\n"
@@ -1078,7 +1078,8 @@ static int show_help()
       "                    -mod_add_data -write_gifti created.gii\n"
       "\n"
       "      b. - the dataset has 12 DataArray elements (40 floats each)\n"
-      "         - the data is partitioned over 2 files (so 6*40 floats in each)\n"
+      "         - the data is partitioned over 2 files (so 6*40 floats in "
+      "each)\n"
       "\n"
       "           ** Note: since dataset creation does not add data (without\n"
       "                    -mod_add_data), this operation will not create or\n"
@@ -1102,7 +1103,8 @@ static int show_help()
       "         - read created.gii, and write to first_mod.gii\n"
       "\n"
       "         gifti_tool -mod_gim_atr Version 1.0                       \\\n"
-      "                    -mod_gim_meta Date \"`date`\"                    \\\n"
+      "                    -mod_gim_meta Date \"`date`\"                    "
+      "\\\n"
       "                    -mod_gim_meta Description 'modified surface'   \\\n"
       "                    -mod_DA_atr Intent NIFTI_INTENT_FTEST          \\\n"
       "                    -mod_DA_meta Name 'same name for all DAs'      \\\n"
@@ -1124,14 +1126,16 @@ static int show_help()
       "                    -write_gifti extern.gii\n"
       "\n");
   printf(
-      "      d. convert a POINTSET/TRIANGLE Base64 format dataset to one where\n"
+      "      d. convert a POINTSET/TRIANGLE Base64 format dataset to one "
+      "where\n"
       "         to one where the data is external (raw binary):\n"
       "\n"
       "           gifti_tool -infiles inflated.gii                     \\\n"
       "                      -set_extern_filelist points.data tri.data \\\n"
       "                      -write_gifti inflated.external.gii\n"
       "\n"
-      "      e. convert a 5 run time series dataset from internal Base64 format\n"
+      "      e. convert a 5 run time series dataset from internal Base64 "
+      "format\n"
       "         to one where the data is external (raw binary):\n"
       "\n"
       "         as one external file:\n"
@@ -1174,7 +1178,8 @@ static int show_help()
       "         - copy MetaData named 'Label' per DataArray element\n"
       "         - only apply DataArray copies to indices 0, 3 and 6\n"
       "         - first input file is the source, second is the destination\n"
-      "         - write the modified 'destination.gii' dataset to meta_copy.gii\n"
+      "         - write the modified 'destination.gii' dataset to "
+      "meta_copy.gii\n"
       "\n"
       "         gifti_tool -copy_gifti_meta ALL                   \\\n"
       "                    -copy_DA_meta Label                    \\\n"
@@ -1182,7 +1187,8 @@ static int show_help()
       "                    -infiles source.gii destination.gii    \\\n"
       "                    -write_gifti meta_copy.gii\n"
       "\n"
-      "----------------------------------------------------------------------\n");
+      "----------------------------------------------------------------------"
+      "\n");
   printf(
       "\n"
       "  (all warranties are void in Montana, and after 4 pm on Tuesdays)\n"
@@ -1191,7 +1197,8 @@ static int show_help()
       "  informational options:\n"
       "\n"
       "     -help             : display this help\n"
-      "     -hist             : display the modification history of gifti_tool\n"
+      "     -hist             : display the modification history of "
+      "gifti_tool\n"
       "     -ver              : display the gifti_tool version\n"
       "     -gifti_hist       : display thd modification history of gifticlib\n"
       "     -gifti_ver        : display gifticlib version\n"
@@ -1236,7 +1243,8 @@ static int show_help()
       "           copying a given MetaData element from the source dataset\n"
       "           to the destination dataset.\n"
       "\n"
-      "           Note that this differs from -read_DAs, which specifies which\n"
+      "           Note that this differs from -read_DAs, which specifies "
+      "which\n"
       "           DataArray elements to even read in.  Both options could be\n"
       "           used in the same command, such as if one wanted to copy the\n"
       "           'Name' MetaData from index 17 of a source dataset into the\n"
@@ -1264,7 +1272,8 @@ static int show_help()
       "           e.g. -input run1.gii run2.gii\n"
       "           e.g. -input MAKE_IM                 (create a new image)\n"
       "           e.g. -input run1.gii'[3,4,5]'       (read DAs 3,4,5    )\n"
-      "           e.g. -input run1.gii'[0..16(2)]'    (read evens from 0 to 16)\n"
+      "           e.g. -input run1.gii'[0..16(2)]'    (read evens from 0 to "
+      "16)\n"
       "           e.g. -input run1.gii'[4..$]'        (read all but 0..3)\n"
       "\n"
       "           There are 2 special ways to specify input.  One is via the\n"
@@ -1273,15 +1282,19 @@ static int show_help()
       "\n"
       "               (refer to options: -new_*)\n"
       "\n"
-      "           The other special way is to specify which DataArray elements\n"
-      "           should be read in, using AFNI-style syntax within '[]'.  The\n"
+      "           The other special way is to specify which DataArray "
+      "elements\n"
+      "           should be read in, using AFNI-style syntax within '[]'.  "
+      "The\n"
       "           quotes prevent the shell from interpreting the brackets.\n"
       "\n"
       "           DataArray indices are zero-based.\n"
       "\n"
       "           The list of DAs can be comma-delimited, and can use '..' or\n"
-      "           '-' to specify a range, and a value in parentheses to be used\n"
-      "           as a step.  The '$' character means the last index (numDA-1).\n"
+      "           '-' to specify a range, and a value in parentheses to be "
+      "used\n"
+      "           as a step.  The '$' character means the last index "
+      "(numDA-1).\n"
       "\n");
   printf(
       "     -no_data          : do not read in data\n"
@@ -1291,8 +1304,10 @@ static int show_help()
       "\n"
       "     -no_updates       : do not allow the library to modify metadata\n"
       "\n"
-      "           By default, the library may update some metadata fields, such\n"
-      "           as 'gifticlib-version'.  The -no_updates option will prevent\n"
+      "           By default, the library may update some metadata fields, "
+      "such\n"
+      "           as 'gifticlib-version'.  The -no_updates option will "
+      "prevent\n"
       "           that operation.\n"
       "\n"
       "     -read_DAs s0 ...  : read DataArray list indices s0,... from input\n"
@@ -1343,29 +1358,36 @@ static int show_help()
       "           Data is normally stored within the XML file as numerical\n"
       "           text or Base64 encoded raw or compressed data.\n"
       "\n"
-      "           With use of this option, users can set to have data stored in\n"
-      "           external binary files (neither encoded nor compressed) upon a\n"
+      "           With use of this option, users can set to have data stored "
+      "in\n"
+      "           external binary files (neither encoded nor compressed) upon "
+      "a\n"
       "           write operation.\n"
       "\n"
-      "           External file storage is subject to a couple of restrictions:\n"
+      "           External file storage is subject to a couple of "
+      "restrictions:\n"
       "\n"
       "             - GIFTI requires that they are in the same directory\n"
       "\n"
-      "             - the library allows multiple DataArrays per file, but each\n"
+      "             - the library allows multiple DataArrays per file, but "
+      "each\n"
       "               DataArray within the same file must have the same size\n"
       "               (this is a gifticlib limit, not a GIFTI limit)\n"
       "\n"
       "                 OK : equal data in 1 file\n"
       "                 OK : equal data in k files, numDA is multiple of k\n"
-      "                 BAD: equal data in k files, numDA is NOT multiple of k\n"
+      "                 BAD: equal data in k files, numDA is NOT multiple of "
+      "k\n"
       "                 OK : points/triangles in 2 files\n"
       "                 BAD: points/triangles in 1 file (sizes differ)\n"
       "\n"
       "           The most basic use of this option is to convert data from\n"
       "           internal to external.  See examples 5d and 5e.\n"
       "\n"
-      "           Note that one can also create a GIFTI dataset out of nothing\n"
-      "           and use this option to point to existing external data files.\n"
+      "           Note that one can also create a GIFTI dataset out of "
+      "nothing\n"
+      "           and use this option to point to existing external data "
+      "files.\n"
       "           This would help conversion from other dataset formats.  See\n"
       "           example 5c.\n"
       "\n"
@@ -1380,7 +1402,8 @@ static int show_help()
       "           Currently, all DAs need to be of the same datatype.  This\n"
       "           restriction could be lifted if there is interest.\n"
       "\n"
-      "     -write_asc   DSET : write out geometry to FreeSurfer style ASC file\n"
+      "     -write_asc   DSET : write out geometry to FreeSurfer style ASC "
+      "file\n"
       "\n"
       "           e.g. -write_asc pial.asc\n"
       "\n"
@@ -1400,7 +1423,8 @@ static int show_help()
       "           LEVEL values are noteworthy:\n"
       "\n"
       "              -1   : specify to use the default of zlib (currently 6)\n"
-      "               0   : no compression (but still needs a few extra bytes)\n"
+      "               0   : no compression (but still needs a few extra "
+      "bytes)\n"
       "               1   : fastest but weakest compression\n"
       "               6   : default (good speed/compression trade-off)\n"
       "               9   : slowest but strongest compression\n"
@@ -1424,13 +1448,15 @@ static int show_help()
       "           e.g. -mod_DA_atr Intent NIFTI_INTENT_ZSCORE\n"
       "\n"
       "           This option will set the DataArray attribute corresponding\n"
-      "           to NAME to the value, VALUE.  Attribute name=value pairs are\n"
+      "           to NAME to the value, VALUE.  Attribute name=value pairs "
+      "are\n"
       "           specified in the gifti DTD (see -gifti_dtd_url).\n"
       "\n"
       "           One NAME=VALUE pair can be specified per -mod_DA_atr\n"
       "           option.  Multiple -mod_DA_atr options can be used.\n"
       "\n"
-      "     -mod_DA_meta NAME VALUE : set the NAME=VALUE pair in DA's MetaData\n"
+      "     -mod_DA_meta NAME VALUE : set the NAME=VALUE pair in DA's "
+      "MetaData\n"
       "\n"
       "           e.g. -mod_DA_meta Description 'the best dataset, ever'\n"
       "\n"
@@ -1449,14 +1475,17 @@ static int show_help()
       "\n"
       "           Note that the indices are zero-based, 0 .. numDA-1.\n"
       "\n"
-      "     -mod_gim_atr  NAME VALUE : set the GIFTI NAME=VALUE attribute pair\n"
+      "     -mod_gim_atr  NAME VALUE : set the GIFTI NAME=VALUE attribute "
+      "pair\n"
       "\n"
       "           e.g. -mod_gim_atr Version 3.141592\n"
       "\n"
-      "           Set the GIFTI element attribute corresponding to NAME to the\n"
+      "           Set the GIFTI element attribute corresponding to NAME to "
+      "the\n"
       "           value, VALUE.\n"
       "\n"
-      "           Given that numDA is computed and version will rarely change,\n"
+      "           Given that numDA is computed and version will rarely "
+      "change,\n"
       "           this option will probably not feel much love.\n"
       "\n"
       "     -mod_gim_meta NAME VALUE : add this pair to the GIFTI MetaData\n"
@@ -1481,7 +1510,8 @@ static int show_help()
       "  creation (new dataset) options\n"
       "\n"
       "     -new_dset         : create a new GIFTI dataset\n"
-      "     -new_numDA  NUMDA : new dataset will have NUMDA DataArray elements\n"
+      "     -new_numDA  NUMDA : new dataset will have NUMDA DataArray "
+      "elements\n"
       "                         e.g. -new_numDA 3\n"
       "     -new_intent INTENT: DA elements will have intent INTENT\n"
       "                         e.g. -new_intent NIFTI_INTENT_FTEST\n"
@@ -1498,19 +1528,24 @@ static int show_help()
       "\n"
       "     -approx_gifti            : approximate comparison of GIFTI dsets\n"
       "\n"
-      "           This compares all data elements of the two GIFTI structures.\n"
+      "           This compares all data elements of the two GIFTI "
+      "structures.\n"
       "           The attributes, MetaData, etc. are ignored if they do not\n"
       "           pertain directly to the data.\n"
       "\n"
       "           The comparisons allow for small, fractional differences,\n"
       "           which depend on the datatype.\n"
       "\n"
-      "     -compare_gifti           : specifies to compare two GIFTI datasets\n"
+      "     -compare_gifti           : specifies to compare two GIFTI "
+      "datasets\n"
       "\n"
       "           This compares all elements of the two GIFTI structures.\n"
-      "           The attributes, LabelTabels, MetaData are compared, and then\n"
-      "           each of the included DataArray elements.  All sub-structures\n"
-      "           of the DataArrays are compared, except for the actual 'data',\n"
+      "           The attributes, LabelTabels, MetaData are compared, and "
+      "then\n"
+      "           each of the included DataArray elements.  All "
+      "sub-structures\n"
+      "           of the DataArrays are compared, except for the actual "
+      "'data',\n"
       "           which requires the '-compare_data' flag.\n"
       "\n"
       "           There must be exactly 2 input datasets to use this option.\n"
@@ -1520,7 +1555,8 @@ static int show_help()
       "\n"
       "           Data comparison is done per DataArray element.\n"
       "\n"
-      "           Comparing data is a separate operation from comparing GIFTI.\n"
+      "           Comparing data is a separate operation from comparing "
+      "GIFTI.\n"
       "           Neither implies the other.\n"
       "\n"
       "     -compare_verb LEVEL      : set the verbose level of comparisons\n"
@@ -1559,26 +1595,25 @@ static int show_help()
       "\n"
       "           see also -DA_index_list\n"
       "\n");
-  printf(
-      "------------------------------------------------------------\n"
-      "see the GIfTI community web site at:\n"
-      "\n"
-      "           http://www.nitrc.org/projects/gifti\n"
-      "\n"
-      "R Reynolds, National Institutes of Health\n"
-      "------------------------------------------------------------\n");
+  printf("------------------------------------------------------------\n"
+         "see the GIfTI community web site at:\n"
+         "\n"
+         "           http://www.nitrc.org/projects/gifti\n"
+         "\n"
+         "R Reynolds, National Institutes of Health\n"
+         "------------------------------------------------------------\n");
   return 0;
 }
 
-int write_as_asc(gifti_image *gim, char *prefix)
-{
+int write_as_asc(gifti_image *gim, char *prefix) {
   giiDataArray *dac; /* coords */
   giiDataArray *dat; /* triangles */
 
   fprintf(stderr, "-- trying to write data with prefix '%s'\n", prefix);
 
   /* write surface file, *.1D */
-  if ((dac = gifti_find_DA(gim, NIFTI_INTENT_POINTSET, 0)) && (dat = gifti_find_DA(gim, NIFTI_INTENT_TRIANGLE, 0)))
+  if ((dac = gifti_find_DA(gim, NIFTI_INTENT_POINTSET, 0)) &&
+      (dat = gifti_find_DA(gim, NIFTI_INTENT_TRIANGLE, 0)))
     (void)write_surf_file(dac, dat, prefix, 1);
   else {
     fprintf(stderr, "** failed to find coordinate/triangle structs\n");
@@ -1590,8 +1625,7 @@ int write_as_asc(gifti_image *gim, char *prefix)
 
 /* if dlist contains 1 element, write out as 2-D list,
    else each DA must have only 1 dimension */
-int write_1D_file(giiDataArray **dlist, int len, char *prefix, int add_suf)
-{
+int write_1D_file(giiDataArray **dlist, int len, char *prefix, int add_suf) {
   giiDataArray *da;
   FILE *fp;
   char *name = prefix;
@@ -1611,27 +1645,29 @@ int write_1D_file(giiDataArray **dlist, int len, char *prefix, int add_suf)
     da = dlist[0];
     if (gifti_DA_rows_cols(da, &rows, &cols)) {
       fprintf(stderr, "** bad return from rows_cols, failing...\n");
-      if (nbuf) free(nbuf);
+      if (nbuf)
+        free(nbuf);
       return 1;
     }
 
     if (!(fp = fopen(name, "w"))) {
       fprintf(stderr, "** failed to open '%s' for 'w'\n", name);
-      if (nbuf) free(nbuf);
+      if (nbuf)
+        free(nbuf);
       return 1;
     }
 
     fprintf(stderr, "++ 1D write, RxC = %lld x %lld\n", rows, cols);
     if (da->ind_ord == GIFTI_IND_ORD_COL_MAJOR) {
       fprintf(stderr, "-- writing data rows in reverse order\n");
-      for (c = rows - 1; c >= 0; c--) ewrite_data_line(da->data, da->datatype, c, cols, 0, 0, fp);
-    }
-    else {
+      for (c = rows - 1; c >= 0; c--)
+        ewrite_data_line(da->data, da->datatype, c, cols, 0, 0, fp);
+    } else {
       fprintf(stderr, "-- writing data rows in normal order\n");
-      for (c = 0; c < rows; c++) ewrite_data_line(da->data, da->datatype, c, cols, 0, 0, fp);
+      for (c = 0; c < rows; c++)
+        ewrite_data_line(da->data, da->datatype, c, cols, 0, 0, fp);
     }
-  }
-  else { /* write da->nvals lines of 'num values */
+  } else { /* write da->nvals lines of 'num values */
     void **vlist = (void **)malloc(len * sizeof(void *));
     int fail = 0;
 
@@ -1643,19 +1679,20 @@ int write_1D_file(giiDataArray **dlist, int len, char *prefix, int add_suf)
       if (!vlist[c]) {
         fprintf(stderr, "** DA[%lld] has no data, bailing...\n", c);
         fail = 1;
-      }
-      else if (dlist[c]->nvals != dlist[0]->nvals) {
-        fprintf(stderr, "** d[%lld] has %lld vals, but d[0] has %lld\n", c, dlist[c]->nvals, dlist[0]->nvals);
+      } else if (dlist[c]->nvals != dlist[0]->nvals) {
+        fprintf(stderr, "** d[%lld] has %lld vals, but d[0] has %lld\n", c,
+                dlist[c]->nvals, dlist[0]->nvals);
         fail = 1;
-      }
-      else if (dlist[c]->datatype != dlist[0]->datatype) {
-        fprintf(stderr, "** d[%lld] has type %d, but d[0] has %d\n", c, dlist[c]->datatype, dlist[0]->datatype);
+      } else if (dlist[c]->datatype != dlist[0]->datatype) {
+        fprintf(stderr, "** d[%lld] has type %d, but d[0] has %d\n", c,
+                dlist[c]->datatype, dlist[0]->datatype);
         fail = 1;
       }
 
       if (fail) {
         free(vlist);
-        if (nbuf) free(nbuf);
+        if (nbuf)
+          free(nbuf);
         return 1;
       }
     }
@@ -1663,26 +1700,31 @@ int write_1D_file(giiDataArray **dlist, int len, char *prefix, int add_suf)
     /* good to go */
     if (!(fp = fopen(name, "w"))) {
       fprintf(stderr, "** failed to open '%s' for 'w'\n", name);
-      if (nbuf) free(nbuf);
+      if (nbuf)
+        free(nbuf);
       return 1;
     }
 
-    if (G.verb > 1) fprintf(stderr, "++ 1D write many, RxC = %lld x %d\n", dlist[0]->nvals, len);
+    if (G.verb > 1)
+      fprintf(stderr, "++ 1D write many, RxC = %lld x %d\n", dlist[0]->nvals,
+              len);
     ewrite_many_lines(vlist, dlist[0]->datatype, len, dlist[0]->nvals, 0, fp);
 
     free(vlist);
   }
 
-  if (G.verb > 1) fprintf(stderr, "++ 1D write, apparent success\n");
+  if (G.verb > 1)
+    fprintf(stderr, "++ 1D write, apparent success\n");
 
-  if (nbuf) free(nbuf);
+  if (nbuf)
+    free(nbuf);
   fclose(fp);
 
   return 0;
 }
 
-int write_surf_file(giiDataArray *dc, giiDataArray *dt, char *prefix, int add_suf)
-{
+int write_surf_file(giiDataArray *dc, giiDataArray *dt, char *prefix,
+                    int add_suf) {
   giiDataArray *da;
   FILE *fp;
   char *name = prefix;
@@ -1698,27 +1740,28 @@ int write_surf_file(giiDataArray *dc, giiDataArray *dt, char *prefix, int add_su
 
   if (!(fp = fopen(name, "w"))) {
     fprintf(stderr, "** failed to open '%s' for 'w'\n", name);
-    if (nbuf) free(nbuf);
+    if (nbuf)
+      free(nbuf);
     return 1;
   }
 
   /* note the number of rows and columns */
   if (gifti_DA_rows_cols(dc, &crows, &ccols)) {
     fclose(fp);
-    if (nbuf) free(nbuf);
+    if (nbuf)
+      free(nbuf);
     return 1;
-  }
-  else if (gifti_DA_rows_cols(dt, &trows, &tcols)) {
+  } else if (gifti_DA_rows_cols(dt, &trows, &tcols)) {
     fclose(fp);
-    if (nbuf) free(nbuf);
+    if (nbuf)
+      free(nbuf);
     return 1;
   }
 
   fprintf(fp,
           "#!ascii version of surface\n"
           "%lld %lld\n",
-          crows,
-          trows);
+          crows, trows);
 
   /* write out the coordinates */
 
@@ -1728,11 +1771,12 @@ int write_surf_file(giiDataArray *dc, giiDataArray *dt, char *prefix, int add_su
 
   if (da->ind_ord == GIFTI_IND_ORD_COL_MAJOR) {
     fprintf(stderr, "-- writing coord rows in reverse order\n");
-    for (c = rows - 1; c >= 0; c--) ewrite_data_line(da->data, da->datatype, c, cols, 0, 1, fp);
-  }
-  else {
+    for (c = rows - 1; c >= 0; c--)
+      ewrite_data_line(da->data, da->datatype, c, cols, 0, 1, fp);
+  } else {
     fprintf(stderr, "-- writing coord rows in normal order\n");
-    for (c = 0; c < rows; c++) ewrite_data_line(da->data, da->datatype, c, cols, 0, 1, fp);
+    for (c = 0; c < rows; c++)
+      ewrite_data_line(da->data, da->datatype, c, cols, 0, 1, fp);
   }
 
   /* write out the triangles */
@@ -1743,11 +1787,12 @@ int write_surf_file(giiDataArray *dc, giiDataArray *dt, char *prefix, int add_su
 
   if (da->ind_ord == GIFTI_IND_ORD_COL_MAJOR) {
     fprintf(stderr, "-- writing triangle rows in reverse order\n");
-    for (c = rows - 1; c >= 0; c--) ewrite_data_line(da->data, da->datatype, c, cols, 0, 1, fp);
-  }
-  else {
+    for (c = rows - 1; c >= 0; c--)
+      ewrite_data_line(da->data, da->datatype, c, cols, 0, 1, fp);
+  } else {
     fprintf(stderr, "-- writing triangle rows in normal order\n");
-    for (c = 0; c < rows; c++) ewrite_data_line(da->data, da->datatype, c, cols, 0, 1, fp);
+    for (c = 0; c < rows; c++)
+      ewrite_data_line(da->data, da->datatype, c, cols, 0, 1, fp);
   }
 
   fclose(fp);
@@ -1755,13 +1800,14 @@ int write_surf_file(giiDataArray *dc, giiDataArray *dt, char *prefix, int add_su
   return 0;
 }
 
-int ewrite_data_line(void *data, int type, int row, int cols, int spaces, int trail0, FILE *fp)
-{
+int ewrite_data_line(void *data, int type, int row, int cols, int spaces,
+                     int trail0, FILE *fp) {
   int c;
   if (!data || row < 0 || cols <= 0 || !fp) {
     static int show = 1;
     if (show) {
-      fprintf(stderr, "** write data line: bad inputs (%p,%d,%d,%p)\n", data, row, cols, (void *)fp);
+      fprintf(stderr, "** write data line: bad inputs (%p,%d,%d,%p)\n", data,
+              row, cols, (void *)fp);
       show = 0;
     }
     return 1;
@@ -1769,85 +1815,101 @@ int ewrite_data_line(void *data, int type, int row, int cols, int spaces, int tr
 
   fprintf(fp, "%*s", spaces, "");
   switch (type) {
-    default:
-      fprintf(stderr, "** write_data_line, unknown type %d\n", type);
-      return -1;
-    case NIFTI_TYPE_UINT8: {
-      unsigned char *ptr = (unsigned char *)data + row * cols;
-      for (c = 0; c < cols; c++) fprintf(fp, "%u ", ptr[c]);
-      break;
-    }
-    case NIFTI_TYPE_INT16: {
-      short *ptr = (short *)data + row * cols;
-      for (c = 0; c < cols; c++) fprintf(fp, "%d ", ptr[c]);
-      break;
-    }
-    case NIFTI_TYPE_INT32: {
-      int *ptr = (int *)data + row * cols;
-      for (c = 0; c < cols; c++) fprintf(fp, "%d ", ptr[c]);
-      break;
-    }
-    case NIFTI_TYPE_FLOAT32: {
-      float *ptr = (float *)data + row * cols;
-      for (c = 0; c < cols; c++) fprintf(fp, "%f ", ptr[c]);
-      break;
-    }
-    case NIFTI_TYPE_COMPLEX64: {
-      float *ptr = (float *)data + row * cols;
-      for (c = 0; c < 2 * cols; c += 2) fprintf(fp, "%f %f   ", ptr[c], ptr[c + 1]);
-      break;
-    }
-    case NIFTI_TYPE_FLOAT64: {
-      double *ptr = (double *)data + row * cols;
-      for (c = 0; c < cols; c++) fprintf(fp, "%f ", ptr[c]);
-      break;
-    }
-    case NIFTI_TYPE_RGB24: {
-      unsigned char *ptr = (unsigned char *)data + row * cols;
-      for (c = 0; c < 3 * cols; c += 3) fprintf(fp, "%u %u %u   ", ptr[c], ptr[c + 1], ptr[c + 2]);
-      break;
-    }
-    case NIFTI_TYPE_INT8: {
-      char *ptr = (char *)data + row * cols;
-      for (c = 0; c < cols; c++) fprintf(fp, "%d ", ptr[c]);
-      break;
-    }
-    case NIFTI_TYPE_UINT16: {
-      unsigned short *ptr = (unsigned short *)data + row * cols;
-      for (c = 0; c < cols; c++) fprintf(fp, "%u ", ptr[c]);
-      break;
-    }
-    case NIFTI_TYPE_UINT32: { /* NIFTI_TYPE_UINT32 */
-      unsigned int *ptr = (unsigned int *)data + row * cols;
-      for (c = 0; c < cols; c++) fprintf(fp, "%u ", ptr[c]);
-      break;
-    }
-    case NIFTI_TYPE_INT64: {
-      long long *ptr = (long long *)data + row * cols;
-      for (c = 0; c < cols; c++) fprintf(fp, "%lld ", ptr[c]);
-      break;
-    }
-    case NIFTI_TYPE_UINT64: {
-      unsigned long long *ptr = (unsigned long long *)data + row * cols;
-      for (c = 0; c < cols; c++) fprintf(fp, "%llu ", ptr[c]);
-      break;
-    }
-    case NIFTI_TYPE_FLOAT128: {
-      fprintf(stderr, "** ewrite_data_line, won't write %s\n", gifti_datatype2str(type));
-      break;
-    }
-    case NIFTI_TYPE_COMPLEX128: {
-      double *ptr = (double *)data + row * cols;
-      for (c = 0; c < 2 * cols; c += 2) fprintf(fp, "%f %f   ", ptr[c], ptr[c + 1]);
-      break;
-    }
-    case NIFTI_TYPE_COMPLEX256: {
-      fprintf(stderr, "** ewrite_data_line, won't write %s\n", gifti_datatype2str(type));
-      break;
-    }
+  default:
+    fprintf(stderr, "** write_data_line, unknown type %d\n", type);
+    return -1;
+  case NIFTI_TYPE_UINT8: {
+    unsigned char *ptr = (unsigned char *)data + row * cols;
+    for (c = 0; c < cols; c++)
+      fprintf(fp, "%u ", ptr[c]);
+    break;
+  }
+  case NIFTI_TYPE_INT16: {
+    short *ptr = (short *)data + row * cols;
+    for (c = 0; c < cols; c++)
+      fprintf(fp, "%d ", ptr[c]);
+    break;
+  }
+  case NIFTI_TYPE_INT32: {
+    int *ptr = (int *)data + row * cols;
+    for (c = 0; c < cols; c++)
+      fprintf(fp, "%d ", ptr[c]);
+    break;
+  }
+  case NIFTI_TYPE_FLOAT32: {
+    float *ptr = (float *)data + row * cols;
+    for (c = 0; c < cols; c++)
+      fprintf(fp, "%f ", ptr[c]);
+    break;
+  }
+  case NIFTI_TYPE_COMPLEX64: {
+    float *ptr = (float *)data + row * cols;
+    for (c = 0; c < 2 * cols; c += 2)
+      fprintf(fp, "%f %f   ", ptr[c], ptr[c + 1]);
+    break;
+  }
+  case NIFTI_TYPE_FLOAT64: {
+    double *ptr = (double *)data + row * cols;
+    for (c = 0; c < cols; c++)
+      fprintf(fp, "%f ", ptr[c]);
+    break;
+  }
+  case NIFTI_TYPE_RGB24: {
+    unsigned char *ptr = (unsigned char *)data + row * cols;
+    for (c = 0; c < 3 * cols; c += 3)
+      fprintf(fp, "%u %u %u   ", ptr[c], ptr[c + 1], ptr[c + 2]);
+    break;
+  }
+  case NIFTI_TYPE_INT8: {
+    char *ptr = (char *)data + row * cols;
+    for (c = 0; c < cols; c++)
+      fprintf(fp, "%d ", ptr[c]);
+    break;
+  }
+  case NIFTI_TYPE_UINT16: {
+    unsigned short *ptr = (unsigned short *)data + row * cols;
+    for (c = 0; c < cols; c++)
+      fprintf(fp, "%u ", ptr[c]);
+    break;
+  }
+  case NIFTI_TYPE_UINT32: { /* NIFTI_TYPE_UINT32 */
+    unsigned int *ptr = (unsigned int *)data + row * cols;
+    for (c = 0; c < cols; c++)
+      fprintf(fp, "%u ", ptr[c]);
+    break;
+  }
+  case NIFTI_TYPE_INT64: {
+    long long *ptr = (long long *)data + row * cols;
+    for (c = 0; c < cols; c++)
+      fprintf(fp, "%lld ", ptr[c]);
+    break;
+  }
+  case NIFTI_TYPE_UINT64: {
+    unsigned long long *ptr = (unsigned long long *)data + row * cols;
+    for (c = 0; c < cols; c++)
+      fprintf(fp, "%llu ", ptr[c]);
+    break;
+  }
+  case NIFTI_TYPE_FLOAT128: {
+    fprintf(stderr, "** ewrite_data_line, won't write %s\n",
+            gifti_datatype2str(type));
+    break;
+  }
+  case NIFTI_TYPE_COMPLEX128: {
+    double *ptr = (double *)data + row * cols;
+    for (c = 0; c < 2 * cols; c += 2)
+      fprintf(fp, "%f %f   ", ptr[c], ptr[c + 1]);
+    break;
+  }
+  case NIFTI_TYPE_COMPLEX256: {
+    fprintf(stderr, "** ewrite_data_line, won't write %s\n",
+            gifti_datatype2str(type));
+    break;
+  }
   }
 
-  if (trail0) fputs(" 0", fp); /* maybe write trailing zero */
+  if (trail0)
+    fputs(" 0", fp); /* maybe write trailing zero */
 
   fputc('\n', fp);
 
@@ -1855,118 +1917,131 @@ int ewrite_data_line(void *data, int type, int row, int cols, int spaces, int tr
 }
 
 /* write out as cols by rows (else we'd use ewrite_data_line) */
-int ewrite_many_lines(void **data, int type, long long cols, long long rows, int spaces, FILE *fp)
-{
+int ewrite_many_lines(void **data, int type, long long cols, long long rows,
+                      int spaces, FILE *fp) {
   long long r, c;
 
-  if (!data || rows == 0 || cols == 0 || !fp) return 1;
+  if (!data || rows == 0 || cols == 0 || !fp)
+    return 1;
 
   fprintf(fp, "%*s", spaces, "");
   switch (type) {
-    default:
-      fprintf(stderr, "** write_data_line, unknown type %d\n", type);
-      return -1;
-    case NIFTI_TYPE_UINT8: {
-      unsigned char **ptr = (unsigned char **)data;
-      for (r = 0; r < rows; r++) {
-        for (c = 0; c < cols; c++) fprintf(fp, "%u ", ptr[c][r]);
-        fputc('\n', fp);
-      }
-      break;
+  default:
+    fprintf(stderr, "** write_data_line, unknown type %d\n", type);
+    return -1;
+  case NIFTI_TYPE_UINT8: {
+    unsigned char **ptr = (unsigned char **)data;
+    for (r = 0; r < rows; r++) {
+      for (c = 0; c < cols; c++)
+        fprintf(fp, "%u ", ptr[c][r]);
+      fputc('\n', fp);
     }
-    case NIFTI_TYPE_INT16: {
-      short **ptr = (short **)data;
-      for (r = 0; r < rows; r++) {
-        for (c = 0; c < cols; c++) fprintf(fp, "%d ", ptr[c][r]);
-        fputc('\n', fp);
-      }
-      break;
+    break;
+  }
+  case NIFTI_TYPE_INT16: {
+    short **ptr = (short **)data;
+    for (r = 0; r < rows; r++) {
+      for (c = 0; c < cols; c++)
+        fprintf(fp, "%d ", ptr[c][r]);
+      fputc('\n', fp);
     }
-    case NIFTI_TYPE_INT32: {
-      int **ptr = (int **)data;
-      for (r = 0; r < rows; r++) {
-        for (c = 0; c < cols; c++) fprintf(fp, "%d ", ptr[c][r]);
-        fputc('\n', fp);
-      }
-      break;
+    break;
+  }
+  case NIFTI_TYPE_INT32: {
+    int **ptr = (int **)data;
+    for (r = 0; r < rows; r++) {
+      for (c = 0; c < cols; c++)
+        fprintf(fp, "%d ", ptr[c][r]);
+      fputc('\n', fp);
     }
-    case NIFTI_TYPE_FLOAT32: {
-      float **ptr = (float **)data;
-      for (r = 0; r < rows; r++) {
-        for (c = 0; c < cols; c++) fprintf(fp, "%f ", ptr[c][r]);
-        fputc('\n', fp);
-      }
-      break;
+    break;
+  }
+  case NIFTI_TYPE_FLOAT32: {
+    float **ptr = (float **)data;
+    for (r = 0; r < rows; r++) {
+      for (c = 0; c < cols; c++)
+        fprintf(fp, "%f ", ptr[c][r]);
+      fputc('\n', fp);
     }
-    case NIFTI_TYPE_COMPLEX64: { /* process as float32 pairs */
-      float **ptr = (float **)data;
-      for (r = 0; r < 2 * rows; r += 2) {
-        for (c = 0; c < cols; c++) fprintf(fp, "%f %f  ", ptr[c][r], ptr[c][r + 1]);
-        fputc('\n', fp);
-      }
-      break;
+    break;
+  }
+  case NIFTI_TYPE_COMPLEX64: { /* process as float32 pairs */
+    float **ptr = (float **)data;
+    for (r = 0; r < 2 * rows; r += 2) {
+      for (c = 0; c < cols; c++)
+        fprintf(fp, "%f %f  ", ptr[c][r], ptr[c][r + 1]);
+      fputc('\n', fp);
     }
-    case NIFTI_TYPE_FLOAT64: {
-      double **ptr = (double **)data;
-      for (r = 0; r < rows; r++) {
-        for (c = 0; c < cols; c++) fprintf(fp, "%f ", ptr[c][r]);
-        fputc('\n', fp);
-      }
-      break;
+    break;
+  }
+  case NIFTI_TYPE_FLOAT64: {
+    double **ptr = (double **)data;
+    for (r = 0; r < rows; r++) {
+      for (c = 0; c < cols; c++)
+        fprintf(fp, "%f ", ptr[c][r]);
+      fputc('\n', fp);
     }
-    case NIFTI_TYPE_RGB24: { /* process as char triplets */
-      char **ptr = (char **)data;
-      for (r = 0; r < 3 * rows; r += 3) {
-        for (c = 0; c < cols; c++) fprintf(fp, "%u %u %u  ", ptr[c][r], ptr[c][r + 1], ptr[c][r + 2]);
-        fputc('\n', fp);
-      }
-      break;
+    break;
+  }
+  case NIFTI_TYPE_RGB24: { /* process as char triplets */
+    char **ptr = (char **)data;
+    for (r = 0; r < 3 * rows; r += 3) {
+      for (c = 0; c < cols; c++)
+        fprintf(fp, "%u %u %u  ", ptr[c][r], ptr[c][r + 1], ptr[c][r + 2]);
+      fputc('\n', fp);
     }
-    case NIFTI_TYPE_INT8: {
-      char **ptr = (char **)data;
-      for (r = 0; r < rows; r++) {
-        for (c = 0; c < cols; c++) fprintf(fp, "%d ", ptr[c][r]);
-        fputc('\n', fp);
-      }
-      break;
+    break;
+  }
+  case NIFTI_TYPE_INT8: {
+    char **ptr = (char **)data;
+    for (r = 0; r < rows; r++) {
+      for (c = 0; c < cols; c++)
+        fprintf(fp, "%d ", ptr[c][r]);
+      fputc('\n', fp);
     }
-    case NIFTI_TYPE_UINT16: {
-      unsigned short **ptr = (unsigned short **)data;
-      for (r = 0; r < rows; r++) {
-        for (c = 0; c < cols; c++) fprintf(fp, "%u ", ptr[c][r]);
-        fputc('\n', fp);
-      }
-      break;
+    break;
+  }
+  case NIFTI_TYPE_UINT16: {
+    unsigned short **ptr = (unsigned short **)data;
+    for (r = 0; r < rows; r++) {
+      for (c = 0; c < cols; c++)
+        fprintf(fp, "%u ", ptr[c][r]);
+      fputc('\n', fp);
     }
-    case NIFTI_TYPE_UINT32: {
-      unsigned int **ptr = (unsigned int **)data;
-      for (r = 0; r < rows; r++) {
-        for (c = 0; c < cols; c++) fprintf(fp, "%u ", ptr[c][r]);
-        fputc('\n', fp);
-      }
-      break;
+    break;
+  }
+  case NIFTI_TYPE_UINT32: {
+    unsigned int **ptr = (unsigned int **)data;
+    for (r = 0; r < rows; r++) {
+      for (c = 0; c < cols; c++)
+        fprintf(fp, "%u ", ptr[c][r]);
+      fputc('\n', fp);
     }
-    case NIFTI_TYPE_INT64: {
-      long long **ptr = (long long **)data;
-      for (r = 0; r < rows; r++) {
-        for (c = 0; c < cols; c++) fprintf(fp, "%lld ", ptr[c][r]);
-        fputc('\n', fp);
-      }
-      break;
+    break;
+  }
+  case NIFTI_TYPE_INT64: {
+    long long **ptr = (long long **)data;
+    for (r = 0; r < rows; r++) {
+      for (c = 0; c < cols; c++)
+        fprintf(fp, "%lld ", ptr[c][r]);
+      fputc('\n', fp);
     }
-    case NIFTI_TYPE_UINT64: {
-      unsigned long long **ptr = (unsigned long long **)data;
-      for (r = 0; r < rows; r++) {
-        for (c = 0; c < cols; c++) fprintf(fp, "%llu ", ptr[c][r]);
-        fputc('\n', fp);
-      }
-      break;
+    break;
+  }
+  case NIFTI_TYPE_UINT64: {
+    unsigned long long **ptr = (unsigned long long **)data;
+    for (r = 0; r < rows; r++) {
+      for (c = 0; c < cols; c++)
+        fprintf(fp, "%llu ", ptr[c][r]);
+      fputc('\n', fp);
     }
-      /* just forget these ...
-          case NIFTI_TYPE_FLOAT128:   { break; }
-          case NIFTI_TYPE_COMPLEX128: { break; }
-          case NIFTI_TYPE_COMPLEX256: { break; }
-      */
+    break;
+  }
+    /* just forget these ...
+        case NIFTI_TYPE_FLOAT128:   { break; }
+        case NIFTI_TYPE_COMPLEX128: { break; }
+        case NIFTI_TYPE_COMPLEX256: { break; }
+    */
   }
 
   return 0;
@@ -1976,9 +2051,9 @@ int ewrite_many_lines(void **data, int type, long long cols, long long rows, int
  * - only bother to alloc one pointer at a time (don't need efficiency here)
  * - return 0 on success
  *----------------------------------------------------------------------*/
-static int add_to_int_list(gt_int_list *ilist, int val)
-{
-  if (ilist->len == 0) ilist->list = NULL; /* just to be safe */
+static int add_to_int_list(gt_int_list *ilist, int val) {
+  if (ilist->len == 0)
+    ilist->list = NULL; /* just to be safe */
   ilist->len++;
   ilist->list = (int *)realloc(ilist->list, ilist->len * sizeof(int));
   if (!ilist->list) {
@@ -1996,13 +2071,14 @@ static int add_to_int_list(gt_int_list *ilist, int val)
  * - only bother to alloc one pointer at a time (don't need efficiency here)
  * - return 0 on success
  *----------------------------------------------------------------------*/
-static int add_to_str_list(gt_str_list *slist, char *str)
-{
-  if (slist->len == 0) slist->list = NULL; /* just to be safe */
+static int add_to_str_list(gt_str_list *slist, char *str) {
+  if (slist->len == 0)
+    slist->list = NULL; /* just to be safe */
   slist->len++;
   slist->list = (char **)realloc(slist->list, slist->len * sizeof(char *));
   if (!slist->list) {
-    fprintf(stderr, "** A2SL: failed to alloc %d (char *) elements\n", slist->len);
+    fprintf(stderr, "** A2SL: failed to alloc %d (char *) elements\n",
+            slist->len);
     return -1;
   }
 
@@ -2011,59 +2087,70 @@ static int add_to_str_list(gt_str_list *slist, char *str)
   return 0;
 }
 
-int gt_modify_dset(gt_opts *opts, gifti_image *gim)
-{
+int gt_modify_dset(gt_opts *opts, gifti_image *gim) {
   gt_int_list *ilist;
   int c, errs = 0;
 
-  if (!gim) return 0;
+  if (!gim)
+    return 0;
 
-  if (opts->verb > 2) fprintf(stderr, "-- starting modifications\n");
+  if (opts->verb > 2)
+    fprintf(stderr, "-- starting modifications\n");
 
   /* modify GIFTI attributes */
   if (opts->mod_gim_atr)
     for (c = 0; c < opts->gim_atrs.len - 1; c += 2) /* grab in pairs */
-      errs += gifti_str2attr_gifti(gim, opts->gim_atrs.list[c], opts->gim_atrs.list[c + 1]);
+      errs += gifti_str2attr_gifti(gim, opts->gim_atrs.list[c],
+                                   opts->gim_atrs.list[c + 1]);
 
   /* modify GIFTI MetaData (replacing any 'name' matches) */
   if (opts->mod_gim_meta)
     for (c = 0; c < opts->gim_meta.len - 1; c += 2) /* grab in pairs */
-      errs += gifti_add_to_meta(&gim->meta, opts->gim_meta.list[c], opts->gim_meta.list[c + 1], 1);
+      errs += gifti_add_to_meta(&gim->meta, opts->gim_meta.list[c],
+                                opts->gim_meta.list[c + 1], 1);
 
   /* modify DataArray attributes */
   if (opts->mod_DA_atr) {
     ilist = &opts->DAmodlist;
     if (ilist->list && ilist->len > 0) {
-      if (!gifti_valid_int_list(ilist->list, ilist->len, 0, gim->numDA - 1, 1)) {
+      if (!gifti_valid_int_list(ilist->list, ilist->len, 0, gim->numDA - 1,
+                                1)) {
         fprintf(stderr, "** invalid DAmodlist\n");
         return 1;
       }
 
       /* apply to list */
       for (c = 0; c < opts->DAmodlist.len; c++)
-        errs += gifti_set_DA_atrs(gim->darray[ilist->list[c]], (const char **)opts->DA_atrs.list, opts->DA_atrs.len, 0);
-    }
-    else /* apply to all DA elements */
+        errs += gifti_set_DA_atrs(gim->darray[ilist->list[c]],
+                                  (const char **)opts->DA_atrs.list,
+                                  opts->DA_atrs.len, 0);
+    } else /* apply to all DA elements */
       for (c = 0; c < gim->numDA; c++)
-        errs += gifti_set_DA_atrs(gim->darray[c], (const char **)opts->DA_atrs.list, opts->DA_atrs.len, 0);
+        errs +=
+            gifti_set_DA_atrs(gim->darray[c], (const char **)opts->DA_atrs.list,
+                              opts->DA_atrs.len, 0);
   }
 
   /* modify DataArray MetaData (replacing any 'name' matches) */
   if (opts->mod_DA_meta)
     for (c = 0; c < opts->DA_meta.len - 1; c += 2) /* grab in pairs */
-      errs += gifti_set_DA_meta(
-          gim, opts->DA_meta.list[c], opts->DA_meta.list[c + 1], opts->DAmodlist.list, opts->DAmodlist.len, 1);
+      errs += gifti_set_DA_meta(gim, opts->DA_meta.list[c],
+                                opts->DA_meta.list[c + 1], opts->DAmodlist.list,
+                                opts->DAmodlist.len, 1);
 
   /* for data manipulation functions, do not proceed if there there errors */
 
   /* if desired, convert any existing data to float */
-  if (!errs && opts->mod_to_float) errs += gifti_convert_to_float(gim);
+  if (!errs && opts->mod_to_float)
+    errs += gifti_convert_to_float(gim);
 
   /* do this last, in case data related attributes were modified */
   if (!errs && opts->mod_add_data)
-    if (gifti_alloc_DA_data(gim, opts->DAmodlist.list, opts->DAmodlist.len)) errs++;
+    if (gifti_alloc_DA_data(gim, opts->DAmodlist.list, opts->DAmodlist.len))
+      errs++;
 
-  if (opts->verb > 2) fprintf(stderr, "-- modifications done, %d errors\n", errs);
+  if (opts->verb > 2)
+    fprintf(stderr, "-- modifications done, %d errors\n", errs);
 
   return errs;
 }

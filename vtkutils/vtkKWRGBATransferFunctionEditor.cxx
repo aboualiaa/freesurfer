@@ -32,7 +32,6 @@
  *
  */
 
-
 /*=========================================================================
 
   Module:    $RCSfile: vtkKWRGBATransferFunctionEditor.cxx,v $
@@ -79,24 +78,26 @@ vtkCxxRevisionMacro(vtkKWRGBATransferFunctionEditor, "$Revision: 1.8 $");
 
 //----------------------------------------------------------------------------
 vtkKWRGBATransferFunctionEditor::vtkKWRGBATransferFunctionEditor() {
-  this->RGBATransferFunction          = NULL;
-  this->ColorRampTransferFunction      = NULL;
+  this->RGBATransferFunction = NULL;
+  this->ColorRampTransferFunction = NULL;
 
-  this->ComputePointColorFromValue     = 1;
+  this->ComputePointColorFromValue = 1;
   this->ComputeHistogramColorFromValue = 0;
-  this->ValueEntriesVisibility               = 1;
-  this->ColorSpaceOptionMenuVisibility       = 1;
-  this->ColorRampVisibility                  = 1;
-  this->ColorRampHeight                = 10;
-  this->LastRedrawColorRampTime        = 0;
-  this->ColorRampPosition              = vtkKWRGBATransferFunctionEditor::ColorRampPositionDefault;
-  this->ColorRampOutlineStyle          = vtkKWRGBATransferFunctionEditor::ColorRampOutlineStyleSolid;
+  this->ValueEntriesVisibility = 1;
+  this->ColorSpaceOptionMenuVisibility = 1;
+  this->ColorRampVisibility = 1;
+  this->ColorRampHeight = 10;
+  this->LastRedrawColorRampTime = 0;
+  this->ColorRampPosition =
+      vtkKWRGBATransferFunctionEditor::ColorRampPositionDefault;
+  this->ColorRampOutlineStyle =
+      vtkKWRGBATransferFunctionEditor::ColorRampOutlineStyleSolid;
 
-  this->ColorSpaceOptionMenu           = vtkKWMenuButton::New();
-  this->ColorRamp                      = vtkKWLabel::New();
+  this->ColorSpaceOptionMenu = vtkKWMenuButton::New();
+  this->ColorRamp = vtkKWLabel::New();
 
-  this->PointCountMinimum              = -1;
-  this->PointCountMaximum              = -1;
+  this->PointCountMinimum = -1;
+  this->PointCountMaximum = -1;
 
   int i;
   for (i = 0; i < VTK_KW_CTFE_NB_ENTRIES; i++) {
@@ -135,7 +136,7 @@ vtkKWRGBATransferFunctionEditor::~vtkKWRGBATransferFunctionEditor() {
 
 //----------------------------------------------------------------------------
 void vtkKWRGBATransferFunctionEditor::SetRGBATransferFunction(
-  vtkRGBATransferFunction *arg) {
+    vtkRGBATransferFunction *arg) {
   if (this->RGBATransferFunction == arg) {
     return;
   }
@@ -167,7 +168,7 @@ void vtkKWRGBATransferFunctionEditor::SetRGBATransferFunction(
 
 //----------------------------------------------------------------------------
 void vtkKWRGBATransferFunctionEditor::SetColorRampTransferFunction(
-  vtkRGBATransferFunction *arg) {
+    vtkRGBATransferFunction *arg) {
   if (this->ColorRampTransferFunction == arg) {
     return;
   }
@@ -196,25 +197,25 @@ int vtkKWRGBATransferFunctionEditor::HasFunction() {
 
 //----------------------------------------------------------------------------
 int vtkKWRGBATransferFunctionEditor::GetFunctionSize() {
-  return this->RGBATransferFunction ?
-         this->RGBATransferFunction->GetSize() : 0;
+  return this->RGBATransferFunction ? this->RGBATransferFunction->GetSize() : 0;
 }
 
 //----------------------------------------------------------------------------
 unsigned long vtkKWRGBATransferFunctionEditor::GetFunctionMTime() {
-  return this->RGBATransferFunction ?
-         this->RGBATransferFunction->GetMTime() : 0;
+  return this->RGBATransferFunction ? this->RGBATransferFunction->GetMTime()
+                                    : 0;
 }
 
 //----------------------------------------------------------------------------
 int vtkKWRGBATransferFunctionEditor::GetFunctionPointParameter(
-  int id, double *parameter) {
+    int id, double *parameter) {
   if (!this->HasFunction() || id < 0 || id >= this->GetFunctionSize()) {
     return 0;
   }
 
-  *parameter = this->RGBATransferFunction->GetDataPointer()[
-                 id * (1 + this->GetFunctionPointDimensionality())];
+  *parameter =
+      this->RGBATransferFunction
+          ->GetDataPointer()[id * (1 + this->GetFunctionPointDimensionality())];
 
   return 1;
 }
@@ -225,27 +226,27 @@ int vtkKWRGBATransferFunctionEditor::GetFunctionPointDimensionality() {
 }
 
 //----------------------------------------------------------------------------
-void vtkKWRGBATransferFunctionEditor::SetPointCountMinimum ( int min ) {
+void vtkKWRGBATransferFunctionEditor::SetPointCountMinimum(int min) {
   this->PointCountMinimum = min;
 }
 
-void vtkKWRGBATransferFunctionEditor::SetPointCountMaximum ( int max ) {
+void vtkKWRGBATransferFunctionEditor::SetPointCountMaximum(int max) {
   this->PointCountMaximum = max;
 }
 
-void vtkKWRGBATransferFunctionEditor::SetPointSymmetry ( int id1, int id2 ) {
+void vtkKWRGBATransferFunctionEditor::SetPointSymmetry(int id1, int id2) {
   this->PointSymmetry[id1] = id2;
   this->PointSymmetry[id2] = id1;
 }
 
-void vtkKWRGBATransferFunctionEditor::SetPointSticky ( int id1, int id2 ) {
+void vtkKWRGBATransferFunctionEditor::SetPointSticky(int id1, int id2) {
   this->PointSticky[id1] = id2;
   this->PointSticky[id2] = id1;
 }
 
 //----------------------------------------------------------------------------
-int vtkKWRGBATransferFunctionEditor::GetFunctionPointValues(
-  int id, double *values) {
+int vtkKWRGBATransferFunctionEditor::GetFunctionPointValues(int id,
+                                                            double *values) {
   if (!this->HasFunction() || id < 0 || id >= this->GetFunctionSize() ||
       !values) {
     return 0;
@@ -254,15 +255,15 @@ int vtkKWRGBATransferFunctionEditor::GetFunctionPointValues(
   int dim = this->GetFunctionPointDimensionality();
 
   memmove(values,
-         (this->RGBATransferFunction->GetDataPointer() + id * (1 + dim) + 1),
-         dim * sizeof(double));
+          (this->RGBATransferFunction->GetDataPointer() + id * (1 + dim) + 1),
+          dim * sizeof(double));
 
   return 1;
 }
 
 //----------------------------------------------------------------------------
 int vtkKWRGBATransferFunctionEditor::SetFunctionPointValues(
-  int id, const double *values) {
+    int id, const double *values) {
   double parameter;
   if (!values || !this->GetFunctionPointParameter(id, &parameter)) {
     return 0;
@@ -271,8 +272,8 @@ int vtkKWRGBATransferFunctionEditor::SetFunctionPointValues(
   // Clamp the paramater to the whole range, first three values (RGB)
   // to the whole value range, and the last value (alpha) to 0..1.
   vtkMath::ClampValue(&parameter, this->GetWholeParameterRange());
-  double clamped_values[
-    vtkKWParameterValueFunctionEditor::MaxFunctionPointDimensionality];
+  double clamped_values
+      [vtkKWParameterValueFunctionEditor::MaxFunctionPointDimensionality];
   vtkMath::ClampValues(values, 3, this->GetWholeValueRange(), clamped_values);
   double alphaRange[2] = {0, 1};
   vtkMath::ClampValues(&values[3], 1, alphaRange, &clamped_values[3]);
@@ -280,16 +281,16 @@ int vtkKWRGBATransferFunctionEditor::SetFunctionPointValues(
   // This is using the AddRGBAPoint function, but is actually just
   // adding a point with a value that is already present, so it's only
   // really setting the value.
-  this->RGBATransferFunction->AddRGBAPoint(
-    parameter,
-    clamped_values[0], clamped_values[1], clamped_values[2], clamped_values[3]);
+  this->RGBATransferFunction->AddRGBAPoint(parameter, clamped_values[0],
+                                           clamped_values[1], clamped_values[2],
+                                           clamped_values[3]);
 
   return 1;
 }
 
 //----------------------------------------------------------------------------
 int vtkKWRGBATransferFunctionEditor::InterpolateFunctionPointValues(
-  double parameter, double *values) {
+    double parameter, double *values) {
   if (!this->HasFunction() || !values) {
     return 0;
   }
@@ -300,8 +301,9 @@ int vtkKWRGBATransferFunctionEditor::InterpolateFunctionPointValues(
 }
 
 //----------------------------------------------------------------------------
-int vtkKWRGBATransferFunctionEditor::AddFunctionPoint(
-  double parameter, const double *values, int *id) {
+int vtkKWRGBATransferFunctionEditor::AddFunctionPoint(double parameter,
+                                                      const double *values,
+                                                      int *id) {
   if (!this->HasFunction() || !values || !id) {
     return 0;
   }
@@ -313,8 +315,8 @@ int vtkKWRGBATransferFunctionEditor::AddFunctionPoint(
 
   // Clamp the first three values (RGB) to the whole value range, and
   // the last value (alpha) to 0..1.
-  double clamped_values[
-    vtkKWParameterValueFunctionEditor::MaxFunctionPointDimensionality];
+  double clamped_values
+      [vtkKWParameterValueFunctionEditor::MaxFunctionPointDimensionality];
   vtkMath::ClampValues(values, 3, this->GetWholeValueRange(), clamped_values);
   double alphaRange[2] = {0, 1};
   vtkMath::ClampValues(&values[3], 1, alphaRange, &clamped_values[3]);
@@ -322,17 +324,16 @@ int vtkKWRGBATransferFunctionEditor::AddFunctionPoint(
   // Add the point
 
   int old_size = this->GetFunctionSize();
-  *id = this->RGBATransferFunction->
-    AddRGBAPoint( parameter, 
-		  clamped_values[0], clamped_values[1], clamped_values[2],
-		  clamped_values[3] );
-  
+  *id = this->RGBATransferFunction->AddRGBAPoint(
+      parameter, clamped_values[0], clamped_values[1], clamped_values[2],
+      clamped_values[3]);
+
   return (old_size != this->GetFunctionSize());
 }
 
 //----------------------------------------------------------------------------
-int vtkKWRGBATransferFunctionEditor::SetFunctionPoint(
-  int id, double parameter, const double *values) {
+int vtkKWRGBATransferFunctionEditor::SetFunctionPoint(int id, double parameter,
+                                                      const double *values) {
   if (!this->HasFunction() || !values) {
     return 0;
   }
@@ -344,10 +345,10 @@ int vtkKWRGBATransferFunctionEditor::SetFunctionPoint(
 
   // If this point is supposed to be symmetrical with something, make
   // sure it doesn't cross the symmetry point.
-  if ( this->PointSymmetry.find(id) != this->PointSymmetry.end() ) {
+  if (this->PointSymmetry.find(id) != this->PointSymmetry.end()) {
 
-    if ( (old_parameter < 0 && parameter >= 0) ||
-         (old_parameter > 0 && parameter <= 0) ) {
+    if ((old_parameter < 0 && parameter >= 0) ||
+        (old_parameter > 0 && parameter <= 0)) {
 
       return 0;
     }
@@ -362,8 +363,8 @@ int vtkKWRGBATransferFunctionEditor::SetFunctionPoint(
   // Clamp the paramater to the whole range, first three values (RGB)
   // to the whole value range, and the last value (alpha) to 0..1.
   vtkMath::ClampValue(&parameter, this->GetWholeParameterRange());
-  double clamped_values[
-    vtkKWParameterValueFunctionEditor::MaxFunctionPointDimensionality];
+  double clamped_values
+      [vtkKWParameterValueFunctionEditor::MaxFunctionPointDimensionality];
   vtkMath::ClampValues(values, 3, this->GetWholeValueRange(), clamped_values);
   double alphaRange[2] = {0, 1};
   vtkMath::ClampValues(&values[3], 1, alphaRange, &clamped_values[3]);
@@ -371,19 +372,20 @@ int vtkKWRGBATransferFunctionEditor::SetFunctionPoint(
   if (parameter != old_parameter) {
     this->RGBATransferFunction->RemovePoint(old_parameter);
   }
-  int new_id = this->RGBATransferFunction->
-    AddRGBAPoint( parameter,
-		  clamped_values[0], clamped_values[1], clamped_values[2], 
-		  clamped_values[3] );
+  int new_id = this->RGBATransferFunction->AddRGBAPoint(
+      parameter, clamped_values[0], clamped_values[1], clamped_values[2],
+      clamped_values[3]);
 
   if (new_id != id) {
-    vtkWarningMacro(<< "Setting a function point (id: " << id << ") parameter/values resulted in a different point (id:" << new_id << "). Inconsistent.");
+    vtkWarningMacro(<< "Setting a function point (id: " << id
+                    << ") parameter/values resulted in a different point (id:"
+                    << new_id << "). Inconsistent.");
     return 0;
   }
 
-  if( this->UpdateDepth < 3 ) {
-    UpdateSymmetricalPointsTo( id );
-    UpdateStickyPointsTo( id, parameter - old_parameter );
+  if (this->UpdateDepth < 3) {
+    UpdateSymmetricalPointsTo(id);
+    UpdateStickyPointsTo(id, parameter - old_parameter);
   }
 
   this->UpdateDepth--;
@@ -391,10 +393,10 @@ int vtkKWRGBATransferFunctionEditor::SetFunctionPoint(
   return 1;
 }
 
-void vtkKWRGBATransferFunctionEditor::UpdateSymmetricalPointsTo ( int id ) {
+void vtkKWRGBATransferFunctionEditor::UpdateSymmetricalPointsTo(int id) {
 
   // Set the symmetric point if available.
-  if ( this->PointSymmetry.find(id) != this->PointSymmetry.end() ) {
+  if (this->PointSymmetry.find(id) != this->PointSymmetry.end()) {
 
     int symmetric_id = this->PointSymmetry[id];
 
@@ -405,28 +407,29 @@ void vtkKWRGBATransferFunctionEditor::UpdateSymmetricalPointsTo ( int id ) {
     this->GetFunctionPointParameter(symmetric_id, &old_parameter);
 
     double new_parameter = -parameter;
-    
+
     double symmetric_values
-      [vtkKWParameterValueFunctionEditor::MaxFunctionPointDimensionality];
-    this->GetFunctionPointValues( symmetric_id, symmetric_values );
+        [vtkKWParameterValueFunctionEditor::MaxFunctionPointDimensionality];
+    this->GetFunctionPointValues(symmetric_id, symmetric_values);
 
     // Move the point.
-    this->MoveFunctionPointInColorSpace( symmetric_id, 
-					 new_parameter, symmetric_values,
-			 this->RGBATransferFunction->GetColorSpace());
+    this->MoveFunctionPointInColorSpace(
+        symmetric_id, new_parameter, symmetric_values,
+        this->RGBATransferFunction->GetColorSpace());
 
     // Set the sticky point if available.
-    UpdateStickyPointsTo( symmetric_id, new_parameter - old_parameter );
+    UpdateStickyPointsTo(symmetric_id, new_parameter - old_parameter);
   }
 }
 
-void vtkKWRGBATransferFunctionEditor::UpdateStickyPointsTo ( int id, double delta ) {
+void vtkKWRGBATransferFunctionEditor::UpdateStickyPointsTo(int id,
+                                                           double delta) {
 
-  if( this->DontUpdateSticky )
+  if (this->DontUpdateSticky)
     return;
 
   // Set the sticky point if available.
-  if ( this->PointSticky.find(id) != this->PointSticky.end() ) {
+  if (this->PointSticky.find(id) != this->PointSticky.end()) {
 
     int sticky_id = this->PointSticky[id];
 
@@ -437,24 +440,24 @@ void vtkKWRGBATransferFunctionEditor::UpdateStickyPointsTo ( int id, double delt
     this->GetFunctionPointParameter(sticky_id, &old_parameter);
 
     double new_parameter = old_parameter + delta;
-    if( sticky_id < id ) 
-      new_parameter = parameter-0.0001;
+    if (sticky_id < id)
+      new_parameter = parameter - 0.0001;
     else
-      new_parameter = parameter+0.0001;
+      new_parameter = parameter + 0.0001;
 
     double sticky_values
-      [vtkKWParameterValueFunctionEditor::MaxFunctionPointDimensionality];
-    this->GetFunctionPointValues( sticky_id, sticky_values );
+        [vtkKWParameterValueFunctionEditor::MaxFunctionPointDimensionality];
+    this->GetFunctionPointValues(sticky_id, sticky_values);
 
     // Move the point.
     this->DontUpdateSticky = true;
-    this->MoveFunctionPointInColorSpace( sticky_id, 
-					 new_parameter, sticky_values,
-			 this->RGBATransferFunction->GetColorSpace());
+    this->MoveFunctionPointInColorSpace(
+        sticky_id, new_parameter, sticky_values,
+        this->RGBATransferFunction->GetColorSpace());
     this->DontUpdateSticky = false;
 
     // Set the symmetrical point if available.
-    UpdateSymmetricalPointsTo( sticky_id );
+    UpdateSymmetricalPointsTo(sticky_id);
   }
 }
 
@@ -465,14 +468,14 @@ int vtkKWRGBATransferFunctionEditor::RemoveFunctionPoint(int id) {
   }
 
   // Make sure we aren't already at our max number of points.
-  if (this->RGBATransferFunction->GetSize() -1 < this->PointCountMinimum) {
+  if (this->RGBATransferFunction->GetSize() - 1 < this->PointCountMinimum) {
     return 0;
   }
 
-
   // Remove the point
-  double parameter = this->RGBATransferFunction->GetDataPointer()[
-                       id * (1 + this->GetFunctionPointDimensionality())];
+  double parameter =
+      this->RGBATransferFunction
+          ->GetDataPointer()[id * (1 + this->GetFunctionPointDimensionality())];
 
   int old_size = this->GetFunctionSize();
   this->RGBATransferFunction->RemovePoint(parameter);
@@ -480,8 +483,8 @@ int vtkKWRGBATransferFunctionEditor::RemoveFunctionPoint(int id) {
 }
 
 //----------------------------------------------------------------------------
-int vtkKWRGBATransferFunctionEditor::GetFunctionPointMidPoint(
-  int id, double *pos) {
+int vtkKWRGBATransferFunctionEditor::GetFunctionPointMidPoint(int id,
+                                                              double *pos) {
   if (id < 0 || id >= this->GetFunctionSize() || !pos) {
     return 0;
   }
@@ -490,8 +493,8 @@ int vtkKWRGBATransferFunctionEditor::GetFunctionPointMidPoint(
 }
 
 //----------------------------------------------------------------------------
-int vtkKWRGBATransferFunctionEditor::SetFunctionPointMidPoint(
-  int id, double pos) {
+int vtkKWRGBATransferFunctionEditor::SetFunctionPointMidPoint(int id,
+                                                              double pos) {
   if (id < 0 || id >= this->GetFunctionSize()) {
     return 0;
   }
@@ -507,7 +510,7 @@ int vtkKWRGBATransferFunctionEditor::SetFunctionPointMidPoint(
 
 //----------------------------------------------------------------------------
 int vtkKWRGBATransferFunctionEditor::GetFunctionPointSharpness(
-  int id, double *sharpness) {
+    int id, double *sharpness) {
   if (id < 0 || id >= this->GetFunctionSize() || !sharpness) {
     return 0;
   }
@@ -517,7 +520,7 @@ int vtkKWRGBATransferFunctionEditor::GetFunctionPointSharpness(
 
 //----------------------------------------------------------------------------
 int vtkKWRGBATransferFunctionEditor::SetFunctionPointSharpness(
-  int id, double sharpness) {
+    int id, double sharpness) {
   if (id < 0 || id >= this->GetFunctionSize()) {
     return 0;
   }
@@ -533,7 +536,7 @@ int vtkKWRGBATransferFunctionEditor::SetFunctionPointSharpness(
 
 //----------------------------------------------------------------------------
 int vtkKWRGBATransferFunctionEditor::MoveFunctionPointInColorSpace(
-  int id, double parameter, const double *values, int colorspace) {
+    int id, double parameter, const double *values, int colorspace) {
   // RGB space is native space, so use the superclass default implem
 
   if (colorspace == VTK_CTF_RGB) {
@@ -571,8 +574,7 @@ int vtkKWRGBATransferFunctionEditor::MoveFunctionPointInColorSpace(
 }
 
 //----------------------------------------------------------------------------
-void vtkKWRGBATransferFunctionEditor::UpdatePointEntries(
-  int id) {
+void vtkKWRGBATransferFunctionEditor::UpdatePointEntries(int id) {
   this->Superclass::UpdatePointEntries(id);
 
   if (!this->IsCreated()) {
@@ -597,7 +599,7 @@ void vtkKWRGBATransferFunctionEditor::UpdatePointEntries(
 
   for (i = 0; i < VTK_KW_CTFE_NB_ENTRIES; i++) {
     this->ValueEntries[i]->SetEnabled(
-      this->FunctionPointValueIsLocked(id) ? 0 : this->GetEnabled());
+        this->FunctionPointValueIsLocked(id) ? 0 : this->GetEnabled());
   }
 
   // Get the values in the right color space
@@ -610,15 +612,13 @@ void vtkKWRGBATransferFunctionEditor::UpdatePointEntries(
   }
 
   for (i = 0; i < VTK_KW_CTFE_NB_ENTRIES; i++) {
-    this->ValueEntries[i]->GetWidget()->SetValueAsFormattedDouble(
-      values[i], 2);
+    this->ValueEntries[i]->GetWidget()->SetValueAsFormattedDouble(values[i], 2);
   }
 }
 
 //----------------------------------------------------------------------------
 void vtkKWRGBATransferFunctionEditor::UpdatePointEntriesLabel() {
-  if (VTK_KW_CTFE_NB_ENTRIES != 3 ||
-      !this->RGBATransferFunction ||
+  if (VTK_KW_CTFE_NB_ENTRIES != 3 || !this->RGBATransferFunction ||
       (this->RGBATransferFunction->GetColorSpace() != VTK_CTF_HSV &&
        this->RGBATransferFunction->GetColorSpace() != VTK_CTF_RGB)) {
     for (int i = 0; i < VTK_KW_CTFE_NB_ENTRIES; i++) {
@@ -635,7 +635,8 @@ void vtkKWRGBATransferFunctionEditor::UpdatePointEntriesLabel() {
         this->ValueEntries[0]->GetLabel()->SetText(ks_("Color Space|Hue|H:"));
       }
       if (this->ValueEntries[1]) {
-        this->ValueEntries[1]->GetLabel()->SetText(ks_("Color Space|Saturation|S:"));
+        this->ValueEntries[1]->GetLabel()->SetText(
+            ks_("Color Space|Saturation|S:"));
       }
       if (this->ValueEntries[2]) {
         this->ValueEntries[2]->GetLabel()->SetText(ks_("Color Space|Value|V:"));
@@ -726,7 +727,7 @@ void vtkKWRGBATransferFunctionEditor::CreateColorSpaceOptionMenu() {
     this->ColorSpaceOptionMenu->SetPadY(1);
     this->ColorSpaceOptionMenu->IndicatorVisibilityOff();
     this->ColorSpaceOptionMenu->SetBalloonHelpString(
-      k_("Change the interpolation color space to RGB or HSV."));
+        k_("Change the interpolation color space to RGB or HSV."));
 
     const char callback[] = "ColorSpaceCallback";
 
@@ -761,8 +762,8 @@ void vtkKWRGBATransferFunctionEditor::CreateValueEntries() {
       this->ValueEntries[i]->SetParent(this->PointEntriesFrame);
       this->ValueEntries[i]->Create();
       this->ValueEntries[i]->GetWidget()->SetWidth(4);
-      this->ValueEntries[i]->GetWidget()->SetCommand(
-        this, "ValueEntriesCallback");
+      this->ValueEntries[i]->GetWidget()->SetCommand(this,
+                                                     "ValueEntriesCallback");
     }
 
     this->UpdatePointEntriesLabel();
@@ -796,10 +797,10 @@ void vtkKWRGBATransferFunctionEditor::Pack() {
 
   // Add the color space menu (in top left frame)
 
-  if (this->ColorSpaceOptionMenuVisibility &&
-      this->ColorSpaceOptionMenu && this->ColorSpaceOptionMenu->IsCreated()) {
+  if (this->ColorSpaceOptionMenuVisibility && this->ColorSpaceOptionMenu &&
+      this->ColorSpaceOptionMenu->IsCreated()) {
     tk_cmd << "pack " << this->ColorSpaceOptionMenu->GetWidgetName()
-    << " -side left -fill both -padx 0" << endl;
+           << " -side left -fill both -padx 0" << endl;
   }
 
   // Color ramp
@@ -812,33 +813,35 @@ void vtkKWRGBATransferFunctionEditor::Pack() {
     // row below. Otherwise get the current number of rows and insert
     // the ramp at the end
 
-    int show_pr =
-      (this->ParameterRangeVisibility &&
-       this->ParameterRange && this->ParameterRange->IsCreated()) ? 1 : 0;
+    int show_pr = (this->ParameterRangeVisibility && this->ParameterRange &&
+                   this->ParameterRange->IsCreated())
+                      ? 1
+                      : 0;
 
     int col, row, nb_cols;
     if (show_pr &&
         (this->ParameterRangePosition ==
          vtkKWParameterValueFunctionEditor::ParameterRangePositionBottom) &&
-        vtkKWTkUtilities::GetWidgetPositionInGrid(
-          this->ParameterRange, &col, &row)) {
-      tk_cmd << "grid " << this->ParameterRange->GetWidgetName()
-      << " -row " << row + 1 << endl;
+        vtkKWTkUtilities::GetWidgetPositionInGrid(this->ParameterRange, &col,
+                                                  &row)) {
+      tk_cmd << "grid " << this->ParameterRange->GetWidgetName() << " -row "
+             << row + 1 << endl;
     } else {
       col = 2;
-      if (!vtkKWTkUtilities::GetGridSize(
-            this->ColorRamp->GetParent(), &nb_cols, &row)) {
+      if (!vtkKWTkUtilities::GetGridSize(this->ColorRamp->GetParent(), &nb_cols,
+                                         &row)) {
         row = 2 + (this->ParameterTicksVisibility ? 1 : 0) +
-              (show_pr &&
-               (this->ParameterRangePosition ==
-                vtkKWParameterValueFunctionEditor::ParameterRangePositionTop)
-               ? 1 :0 );
+              (show_pr && (this->ParameterRangePosition ==
+                           vtkKWParameterValueFunctionEditor::
+                               ParameterRangePositionTop)
+                   ? 1
+                   : 0);
       }
     }
     tk_cmd << "grid " << this->ColorRamp->GetWidgetName()
-    << " -columnspan 2 -sticky w -padx 0 "
-    << " -pady " << (this->CanvasVisibility ? 2 : 0)
-    << " -column " << col << " -row " << row << endl;
+           << " -columnspan 2 -sticky w -padx 0 "
+           << " -pady " << (this->CanvasVisibility ? 2 : 0) << " -column "
+           << col << " -row " << row << endl;
   }
 
   tk_cmd << ends;
@@ -860,13 +863,12 @@ void vtkKWRGBATransferFunctionEditor::PackPointEntries() {
 
   // Value entries (in top right frame)
 
-  if (this->HasSelection() &&
-      this->ValueEntriesVisibility &&
+  if (this->HasSelection() && this->ValueEntriesVisibility &&
       this->PointEntriesVisibility) {
     for (int i = 0; i < VTK_KW_CTFE_NB_ENTRIES; i++) {
       if (this->ValueEntries[i] && this->ValueEntries[i]->IsCreated()) {
         tk_cmd << "pack " << this->ValueEntries[i]->GetWidgetName()
-        << " -side left -pady 0" << endl;
+               << " -side left -pady 0" << endl;
       }
     }
   }
@@ -918,20 +920,20 @@ void vtkKWRGBATransferFunctionEditor::UpdateEnableState() {
 //----------------------------------------------------------------------------
 void vtkKWRGBATransferFunctionEditor::ColorSpaceCallback() {
   if (this->RGBATransferFunction) {
-    const char * value = this->ColorSpaceOptionMenu->GetValue();
-    if ( strcmp(value, ks_("Color Space|RGB")) == 0) {
-      if ( this->RGBATransferFunction->GetColorSpace() != VTK_CTF_RGB ) {
-        this->RGBATransferFunction->SetColorSpace( VTK_CTF_RGB );
+    const char *value = this->ColorSpaceOptionMenu->GetValue();
+    if (strcmp(value, ks_("Color Space|RGB")) == 0) {
+      if (this->RGBATransferFunction->GetColorSpace() != VTK_CTF_RGB) {
+        this->RGBATransferFunction->SetColorSpace(VTK_CTF_RGB);
         this->Update();
         if (this->HasSelection()) {
           this->UpdatePointEntries(this->GetSelectedPoint());
         }
         this->InvokeFunctionChangedCommand();
       }
-    } else if ( strcmp(value, ks_("Color Space|HSV")) == 0) {
-      if ( this->RGBATransferFunction->GetColorSpace() != VTK_CTF_HSV ||
-           !this->RGBATransferFunction->GetHSVWrap() ) {
-        this->RGBATransferFunction->SetColorSpace( VTK_CTF_HSV );
+    } else if (strcmp(value, ks_("Color Space|HSV")) == 0) {
+      if (this->RGBATransferFunction->GetColorSpace() != VTK_CTF_HSV ||
+          !this->RGBATransferFunction->GetHSVWrap()) {
+        this->RGBATransferFunction->SetColorSpace(VTK_CTF_HSV);
         this->RGBATransferFunction->HSVWrapOn();
         this->Update();
         if (this->HasSelection()) {
@@ -939,10 +941,10 @@ void vtkKWRGBATransferFunctionEditor::ColorSpaceCallback() {
         }
         this->InvokeFunctionChangedCommand();
       }
-    } else if ( strcmp(value, ks_("Color Space|HSV (2)") ) == 0) {
-      if ( this->RGBATransferFunction->GetColorSpace() != VTK_CTF_HSV ||
-           this->RGBATransferFunction->GetHSVWrap() ) {
-        this->RGBATransferFunction->SetColorSpace( VTK_CTF_HSV );
+    } else if (strcmp(value, ks_("Color Space|HSV (2)")) == 0) {
+      if (this->RGBATransferFunction->GetColorSpace() != VTK_CTF_HSV ||
+          this->RGBATransferFunction->GetHSVWrap()) {
+        this->RGBATransferFunction->SetColorSpace(VTK_CTF_HSV);
         this->RGBATransferFunction->HSVWrapOff();
         this->Update();
         if (this->HasSelection()) {
@@ -982,8 +984,8 @@ void vtkKWRGBATransferFunctionEditor::ValueEntriesCallback(const char *) {
   unsigned long mtime = this->GetFunctionMTime();
 
   this->MoveFunctionPointInColorSpace(
-    this->GetSelectedPoint(),
-    parameter, values, this->RGBATransferFunction->GetColorSpace());
+      this->GetSelectedPoint(), parameter, values,
+      this->RGBATransferFunction->GetColorSpace());
 
   if (this->GetFunctionMTime() > mtime) {
     this->InvokePointChangedCommand(this->GetSelectedPoint());
@@ -992,8 +994,7 @@ void vtkKWRGBATransferFunctionEditor::ValueEntriesCallback(const char *) {
 }
 
 //----------------------------------------------------------------------------
-void vtkKWRGBATransferFunctionEditor::DoubleClickOnPointCallback(
-  int x, int y) {
+void vtkKWRGBATransferFunctionEditor::DoubleClickOnPointCallback(int x, int y) {
   this->Superclass::DoubleClickOnPointCallback(x, y);
 
   int id, c_x, c_y;
@@ -1011,12 +1012,9 @@ void vtkKWRGBATransferFunctionEditor::DoubleClickOnPointCallback(
   double rgb[3];
   if (!this->FunctionPointValueIsLocked(id) &&
       this->GetPointColorAsRGB(id, rgb) &&
-      vtkKWTkUtilities::QueryUserForColor(
-        this->GetApplication(),
-        this,
-        NULL,
-        rgb[0], rgb[1], rgb[2],
-        &rgb[0], &rgb[1], &rgb[2])) {
+      vtkKWTkUtilities::QueryUserForColor(this->GetApplication(), this, NULL,
+                                          rgb[0], rgb[1], rgb[2], &rgb[0],
+                                          &rgb[1], &rgb[2])) {
     unsigned long mtime = this->GetFunctionMTime();
 
     this->SetPointColorAsRGB(id, rgb);
@@ -1028,7 +1026,8 @@ void vtkKWRGBATransferFunctionEditor::DoubleClickOnPointCallback(
 }
 
 //----------------------------------------------------------------------------
-void vtkKWRGBATransferFunctionEditor::SetColorSpaceOptionMenuVisibility(int arg) {
+void vtkKWRGBATransferFunctionEditor::SetColorSpaceOptionMenuVisibility(
+    int arg) {
   if (this->ColorSpaceOptionMenuVisibility == arg) {
     return;
   }
@@ -1077,8 +1076,7 @@ void vtkKWRGBATransferFunctionEditor::SetColorRampVisibility(int arg) {
 void vtkKWRGBATransferFunctionEditor::SetColorRampPosition(int arg) {
   if (arg < vtkKWRGBATransferFunctionEditor::ColorRampPositionDefault) {
     arg = vtkKWRGBATransferFunctionEditor::ColorRampPositionDefault;
-  } else if (arg >
-             vtkKWRGBATransferFunctionEditor::ColorRampPositionCanvas) {
+  } else if (arg > vtkKWRGBATransferFunctionEditor::ColorRampPositionCanvas) {
     arg = vtkKWRGBATransferFunctionEditor::ColorRampPositionCanvas;
   }
 
@@ -1124,8 +1122,7 @@ void vtkKWRGBATransferFunctionEditor::SetColorRampOutlineStyle(int arg) {
 
 //----------------------------------------------------------------------------
 void vtkKWRGBATransferFunctionEditor::SetColorRampHeight(int arg) {
-  if (this->ColorRampHeight == arg ||
-      arg < VTK_KW_CTFE_COLOR_RAMP_HEIGHT_MIN) {
+  if (this->ColorRampHeight == arg || arg < VTK_KW_CTFE_COLOR_RAMP_HEIGHT_MIN) {
     return;
   }
 
@@ -1147,8 +1144,7 @@ void vtkKWRGBATransferFunctionEditor::SetValueEntriesVisibility(int arg) {
   // Make sure that if the entries have to be shown, we create it on the fly if
   // needed
 
-  if (this->ValueEntriesVisibility &&
-      this->PointEntriesVisibility &&
+  if (this->ValueEntriesVisibility && this->PointEntriesVisibility &&
       this->IsCreated()) {
     this->CreateValueEntries();
   }
@@ -1178,8 +1174,8 @@ int vtkKWRGBATransferFunctionEditor::GetPointColorAsRGB(int id, double rgb[3]) {
 }
 
 //----------------------------------------------------------------------------
-int vtkKWRGBATransferFunctionEditor::SetPointColorAsRGB(
-  int id, const double rgb[3]) {
+int vtkKWRGBATransferFunctionEditor::SetPointColorAsRGB(int id,
+                                                        const double rgb[3]) {
   double parameter;
   if (!this->GetFunctionPointParameter(id, &parameter)) {
     return 0;
@@ -1189,8 +1185,8 @@ int vtkKWRGBATransferFunctionEditor::SetPointColorAsRGB(
 }
 
 //----------------------------------------------------------------------------
-int vtkKWRGBATransferFunctionEditor::SetPointColorAsRGB(
-  int id, double r, double g, double b) {
+int vtkKWRGBATransferFunctionEditor::SetPointColorAsRGB(int id, double r,
+                                                        double g, double b) {
   double rgb[3];
   rgb[0] = r;
   rgb[1] = g;
@@ -1211,8 +1207,8 @@ int vtkKWRGBATransferFunctionEditor::GetPointColorAsHSV(int id, double hsv[3]) {
 }
 
 //----------------------------------------------------------------------------
-int vtkKWRGBATransferFunctionEditor::SetPointColorAsHSV(
-  int id, const double hsv[3]) {
+int vtkKWRGBATransferFunctionEditor::SetPointColorAsHSV(int id,
+                                                        const double hsv[3]) {
   double parameter;
   if (!this->GetFunctionPointParameter(id, &parameter)) {
     return 0;
@@ -1222,8 +1218,8 @@ int vtkKWRGBATransferFunctionEditor::SetPointColorAsHSV(
 }
 
 //----------------------------------------------------------------------------
-int vtkKWRGBATransferFunctionEditor::SetPointColorAsHSV(
-  int id, double h, double s, double v) {
+int vtkKWRGBATransferFunctionEditor::SetPointColorAsHSV(int id, double h,
+                                                        double s, double v) {
   double hsv[3];
   hsv[0] = h;
   hsv[1] = s;
@@ -1281,7 +1277,7 @@ void vtkKWRGBATransferFunctionEditor::RedrawFunctionDependentElements() {
 
 //----------------------------------------------------------------------------
 void vtkKWRGBATransferFunctionEditor::RedrawSinglePointDependentElements(
-  int id) {
+    int id) {
   this->Superclass::RedrawSinglePointDependentElements(id);
 
   // The histogram depends on the point too if we color by values
@@ -1299,19 +1295,19 @@ void vtkKWRGBATransferFunctionEditor::RedrawSinglePointDependentElements(
 int vtkKWRGBATransferFunctionEditor::IsColorRampUpToDate() {
   // Which function to use ?
 
-  vtkRGBATransferFunction *func =
-    this->ColorRampTransferFunction ?
-    this->ColorRampTransferFunction : this->RGBATransferFunction;
+  vtkRGBATransferFunction *func = this->ColorRampTransferFunction
+                                      ? this->ColorRampTransferFunction
+                                      : this->RGBATransferFunction;
 
-  return (func &&
-          this->ColorRampVisibility &&
-          this->LastRedrawColorRampTime < func->GetMTime()) ? 0 : 1;
+  return (func && this->ColorRampVisibility &&
+          this->LastRedrawColorRampTime < func->GetMTime())
+             ? 0
+             : 1;
 }
 
 //----------------------------------------------------------------------------
 void vtkKWRGBATransferFunctionEditor::RedrawColorRamp() {
-  if (!this->ColorRamp->IsCreated() ||
-      !this->GetFunctionSize() ||
+  if (!this->ColorRamp->IsCreated() || !this->GetFunctionSize() ||
       this->DisableRedraw) {
     return;
   }
@@ -1321,18 +1317,17 @@ void vtkKWRGBATransferFunctionEditor::RedrawColorRamp() {
   if (this->ColorRampVisibility) {
     // Which function to use ?
 
-    vtkRGBATransferFunction *func =
-      this->ColorRampTransferFunction ?
-      this->ColorRampTransferFunction : this->RGBATransferFunction;
+    vtkRGBATransferFunction *func = this->ColorRampTransferFunction
+                                        ? this->ColorRampTransferFunction
+                                        : this->RGBATransferFunction;
 
     this->LastRedrawColorRampTime = func->GetMTime();
 
     int bounds[2], margins[2];
     this->GetCanvasHorizontalSlidingBounds(p_v_range_ext, bounds, margins);
 
-    int in_canvas =
-      (this->ColorRampPosition ==
-       vtkKWRGBATransferFunctionEditor::ColorRampPositionCanvas);
+    int in_canvas = (this->ColorRampPosition ==
+                     vtkKWRGBATransferFunctionEditor::ColorRampPositionCanvas);
 
     // Create the image buffer
 
@@ -1354,7 +1349,7 @@ void vtkKWRGBATransferFunctionEditor::RedrawColorRamp() {
       img_offset_x = margins[0];
     }
 
-    unsigned char *img_buffer = new unsigned char [img_width * img_height * 3];
+    unsigned char *img_buffer = new unsigned char[img_width * img_height * 3];
 
     // Get the LUT for the parameter range and copy it in the first row
 
@@ -1440,8 +1435,8 @@ void vtkKWRGBATransferFunctionEditor::RedrawColorRamp() {
     if (this->ColorRampOutlineStyle ==
         vtkKWRGBATransferFunctionEditor::ColorRampOutlineStyleSolid) {
       memset(img_buffer + img_offset_x * 3, 0, table_width * 3);
-      memset(img_buffer + (img_width * (img_height - 1) + img_offset_x) * 3,
-             0, table_width * 3);
+      memset(img_buffer + (img_width * (img_height - 1) + img_offset_x) * 3, 0,
+             table_width * 3);
     } else if (this->ColorRampOutlineStyle ==
                vtkKWRGBATransferFunctionEditor::ColorRampOutlineStyleSunken) {
       // Sunken Outline: Part B
@@ -1467,7 +1462,8 @@ void vtkKWRGBATransferFunctionEditor::RedrawColorRamp() {
       *img_ptr++ = bg_rgb[2];
 
       // Sunken Outline: Part D
-      img_ptr = img_buffer + (img_width * (img_height - 2) + img_offset_x+1)*3;
+      img_ptr =
+          img_buffer + (img_width * (img_height - 2) + img_offset_x + 1) * 3;
       for (i = 0; i < table_width - 2; i++) {
         *img_ptr++ = bg_rgb[0];
         *img_ptr++ = bg_rgb[1];
@@ -1485,17 +1481,16 @@ void vtkKWRGBATransferFunctionEditor::RedrawColorRamp() {
 
     // Update the image
 
-    this->ColorRamp->SetImageToPixels(
-      img_buffer, img_width, img_height, 3);
+    this->ColorRamp->SetImageToPixels(img_buffer, img_width, img_height, 3);
 
-    delete [] img_buffer;
-    delete [] table;
+    delete[] img_buffer;
+    delete[] table;
   }
 
   // If the ramp has to be in the canvas, draw it now or remove it
 
   if (this->ColorRampPosition ==
-      vtkKWRGBATransferFunctionEditor::ColorRampPositionCanvas &&
+          vtkKWRGBATransferFunctionEditor::ColorRampPositionCanvas &&
       this->Canvas && this->Canvas->IsAlive()) {
     const char *canv = this->Canvas->GetWidgetName();
     ostrstream tk_cmd;
@@ -1506,16 +1501,16 @@ void vtkKWRGBATransferFunctionEditor::RedrawColorRamp() {
     if (!has_tag) {
       if (this->ColorRampVisibility) {
         vtksys_stl::string image_name(
-          this->ColorRamp->GetConfigurationOption("-image"));
+            this->ColorRamp->GetConfigurationOption("-image"));
         tk_cmd << canv << " create image 0 0 -anchor nw "
-        << " -image " << image_name.c_str()
-        << " -tags {" << VTK_KW_CTFE_COLOR_RAMP_TAG << "}" << endl;
-        tk_cmd << canv << " lower " << VTK_KW_CTFE_COLOR_RAMP_TAG
-        << " {" << vtkKWParameterValueFunctionEditor::FunctionTag
-        << "||" << vtkKWParameterValueFunctionEditor::FrameForegroundTag
-        << "||" << vtkKWParameterValueFunctionEditor::HistogramTag
-        << "||" << vtkKWParameterValueFunctionEditor::SecondaryHistogramTag
-        << "}" << endl;
+               << " -image " << image_name.c_str() << " -tags {"
+               << VTK_KW_CTFE_COLOR_RAMP_TAG << "}" << endl;
+        tk_cmd << canv << " lower " << VTK_KW_CTFE_COLOR_RAMP_TAG << " {"
+               << vtkKWParameterValueFunctionEditor::FunctionTag << "||"
+               << vtkKWParameterValueFunctionEditor::FrameForegroundTag << "||"
+               << vtkKWParameterValueFunctionEditor::HistogramTag << "||"
+               << vtkKWParameterValueFunctionEditor::SecondaryHistogramTag
+               << "}" << endl;
       }
     } else {
       if (!this->ColorRampVisibility) {
@@ -1532,12 +1527,12 @@ void vtkKWRGBATransferFunctionEditor::RedrawColorRamp() {
       double *v_v_range = this->GetVisibleValueRange();
       double *v_w_range = this->GetWholeValueRange();
 
-      double c_y = ceil(
-                     (v_w_range[1] - (v_v_range[1] + v_v_range[0]) * 0.5) * factors[1]
-                     - (double)this->ColorRampHeight * 0.5);
+      double c_y = ceil((v_w_range[1] - (v_v_range[1] + v_v_range[0]) * 0.5) *
+                            factors[1] -
+                        (double)this->ColorRampHeight * 0.5);
 
-      tk_cmd << canv << " coords " << VTK_KW_CTFE_COLOR_RAMP_TAG
-      << " " << p_v_range_ext[0] * factors[0] << " " << c_y << endl;
+      tk_cmd << canv << " coords " << VTK_KW_CTFE_COLOR_RAMP_TAG << " "
+             << p_v_range_ext[0] * factors[0] << " " << c_y << endl;
     }
 
     tk_cmd << ends;
@@ -1559,9 +1554,9 @@ void vtkKWRGBATransferFunctionEditor::RedrawHistogram() {
   if (this->ColorRampPosition ==
       vtkKWRGBATransferFunctionEditor::ColorRampPositionCanvas) {
     has_hist_tag =
-      this->CanvasHasTag(vtkKWParameterValueFunctionEditor::HistogramTag);
-    has_secondary_hist_tag =
-      this->CanvasHasTag(vtkKWParameterValueFunctionEditor::SecondaryHistogramTag);
+        this->CanvasHasTag(vtkKWParameterValueFunctionEditor::HistogramTag);
+    has_secondary_hist_tag = this->CanvasHasTag(
+        vtkKWParameterValueFunctionEditor::SecondaryHistogramTag);
   }
 
   this->Superclass::RedrawHistogram();
@@ -1575,20 +1570,23 @@ void vtkKWRGBATransferFunctionEditor::RedrawHistogram() {
 
   // If the primary histogram has just been created, raise or lower it
 
-  if (!has_hist_tag && has_hist_tag !=
-      this->CanvasHasTag(vtkKWParameterValueFunctionEditor::HistogramTag)) {
+  if (!has_hist_tag &&
+      has_hist_tag !=
+          this->CanvasHasTag(vtkKWParameterValueFunctionEditor::HistogramTag)) {
     tk_cmd << canv << " raise "
-    << vtkKWParameterValueFunctionEditor::HistogramTag
-    << " " << VTK_KW_CTFE_COLOR_RAMP_TAG << endl;
+           << vtkKWParameterValueFunctionEditor::HistogramTag << " "
+           << VTK_KW_CTFE_COLOR_RAMP_TAG << endl;
   }
 
   // If the secondary histogram has just been created, raise or lower it
 
-  if (!has_secondary_hist_tag && has_secondary_hist_tag !=
-      this->CanvasHasTag(vtkKWParameterValueFunctionEditor::SecondaryHistogramTag)) {
+  if (!has_secondary_hist_tag &&
+      has_secondary_hist_tag !=
+          this->CanvasHasTag(
+              vtkKWParameterValueFunctionEditor::SecondaryHistogramTag)) {
     tk_cmd << canv << " raise "
-    << vtkKWParameterValueFunctionEditor::SecondaryHistogramTag
-    << " " << VTK_KW_CTFE_COLOR_RAMP_TAG << endl;
+           << vtkKWParameterValueFunctionEditor::SecondaryHistogramTag << " "
+           << VTK_KW_CTFE_COLOR_RAMP_TAG << endl;
   }
 
   tk_cmd << ends;
@@ -1598,10 +1596,8 @@ void vtkKWRGBATransferFunctionEditor::RedrawHistogram() {
 
 //----------------------------------------------------------------------------
 void vtkKWRGBATransferFunctionEditor::GetColorRampOutlineSunkenColors(
-  unsigned char bg_rgb[3],
-  unsigned char ds_rgb[3],
-  unsigned char ls_rgb[3],
-  unsigned char hl_rgb[3]) {
+    unsigned char bg_rgb[3], unsigned char ds_rgb[3], unsigned char ls_rgb[3],
+    unsigned char hl_rgb[3]) {
   if (!this->ColorRamp || !this->ColorRamp->IsCreated()) {
     return;
   }
@@ -1640,7 +1636,7 @@ void vtkKWRGBATransferFunctionEditor::GetColorRampOutlineSunkenColors(
 
 //----------------------------------------------------------------------------
 void vtkKWRGBATransferFunctionEditor::UpdateHistogramImageDescriptor(
-  vtkKWHistogram::ImageDescriptor *desc) {
+    vtkKWHistogram::ImageDescriptor *desc) {
   this->Superclass::UpdateHistogramImageDescriptor(desc);
 
 #if 0
@@ -1654,21 +1650,23 @@ void vtkKWRGBATransferFunctionEditor::UpdateHistogramImageDescriptor(
 }
 
 //----------------------------------------------------------------------------
-void vtkKWRGBATransferFunctionEditor::PrintSelf(ostream& os, vtkIndent indent) {
-  this->Superclass::PrintSelf(os,indent);
+void vtkKWRGBATransferFunctionEditor::PrintSelf(ostream &os, vtkIndent indent) {
+  this->Superclass::PrintSelf(os, indent);
 
   os << indent << "ValueEntriesVisibility: "
-  << (this->ValueEntriesVisibility ? "On" : "Off") << endl;
+     << (this->ValueEntriesVisibility ? "On" : "Off") << endl;
 
   os << indent << "ColorSpaceOptionMenuVisibility: "
-  << (this->ColorSpaceOptionMenuVisibility ? "On" : "Off") << endl;
+     << (this->ColorSpaceOptionMenuVisibility ? "On" : "Off") << endl;
 
-  os << indent << "ColorRampVisibility: "
-  << (this->ColorRampVisibility ? "On" : "Off") << endl;
+  os << indent
+     << "ColorRampVisibility: " << (this->ColorRampVisibility ? "On" : "Off")
+     << endl;
 
   os << indent << "ColorRampHeight: " << this->ColorRampHeight << endl;
   os << indent << "ColorRampPosition: " << this->ColorRampPosition << endl;
-  os << indent << "ColorRampOutlineStyle: " << this->ColorRampOutlineStyle << endl;
+  os << indent << "ColorRampOutlineStyle: " << this->ColorRampOutlineStyle
+     << endl;
 
   os << indent << "RGBATransferFunction: ";
   if (this->RGBATransferFunction) {
@@ -1705,4 +1703,3 @@ void vtkKWRGBATransferFunctionEditor::PrintSelf(ostream& os, vtkIndent indent) {
     }
   }
 }
-

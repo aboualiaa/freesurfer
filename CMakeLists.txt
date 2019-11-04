@@ -1,16 +1,24 @@
 # project info
-project(freesurfer)
-cmake_minimum_required(VERSION 3.9)
+cmake_policy(SET CMP0048 NEW)
+project(freesurfer VERSION 7.0.0)
+cmake_minimum_required(VERSION 3.10.2) # preparing for itk5
 enable_language(C CXX Fortran)
 
+# enable std c++17
+set(CMAKE_CXX_STANDARD 17)
+
+set(FS_PACKAGES_DIR "/Users/aboualiaa/Downloads/packages")
 # a few build options
 option(MINIMAL "Only build core components" OFF)
 option(BUILD_GUIS "Build GUI tools" ON)
-option(BUILD_ATTIC "Build deprecated tools from the attic" OFF)
-option(INFANT_MODULE "Include infant recon-all" OFF)
-option(BUILD_DNG "Build Doug's testing tools" OFF)
+option(BUILD_ATTIC "Build deprecated tools from the attic" ON)
+option(INFANT_MODULE "Include infant recon-all" ON)
+option(BUILD_DNG "Build Doug's testing tools" ON)
 option(SUPPRESS_WARNINGS "Suppress some selected warnings" ON)
-option(PROFILING "Complile binaries for profiling with gprof" OFF)
+option(PROFILING "Compile binaries for profiling with gprof" OFF)
+option(CMAKE_EXPORT_COMPILE_COMMANDS OFF)
+
+option(BUILD_BOOST_TESTS ON)
 
 if(NOT APPLE)
   # linux-only build options
@@ -44,7 +52,7 @@ set(BUILD_STAMP "freesurfer-local-build-dev-${TODAY}" CACHE STRING "Distribution
 install(CODE "file(WRITE ${CMAKE_INSTALL_PREFIX}/build-stamp.txt ${BUILD_STAMP}\\n)")
 
 # set the default build type to 'Release' for optimization purposes
-if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "No build type selected - defaulting to Release")
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Default build type" FORCE)
 endif()
@@ -71,29 +79,29 @@ endif()
 # Additionally, alternative paths to package installs can be specified with the <PACKAGE>_DIR variables
 # Note: FS_PACKAGES_DIR can be defined in an environment variable
 
-if(NOT FS_PACKAGES_DIR)
-  if(NOT "$ENV{FS_PACKAGES_DIR}" STREQUAL "")
-    # check if FS_PACKAGES_DIR has been set 
-    set(FS_PACKAGES_DIR "$ENV{FS_PACKAGES_DIR}" CACHE INTERNAL "Copied from FS_PACKAGES_DIR environment variable")
-  elseif(EXISTS /usr/pubsw/packages)
-    # if the user is at Martinos, default to /usr/pubsw/packages
-    set(FS_PACKAGES_DIR /usr/pubsw/packages CACHE INTERNAL "Default Martinos packages dir")
-  else()
-    # setting FS_PACKAGES_DIR is required if the user is outside Martinos
-    if(APPLE)
-      set(FS_PACKAGES_URL "http://surfer.nmr.mgh.harvard.edu/pub/data/fspackages/prebuilt/osx10.11-packages.tar.gz")
-    else()
-      set(FS_PACKAGES_URL "http://surfer.nmr.mgh.harvard.edu/pub/data/fspackages/prebuilt/centos7-packages.tar.gz")
-    endif()
-    message(FATAL_ERROR "External FreeSurfer developers must provide a valid FS_PACKAGES_DIR path! "
-                        "Required FS dependencies can be built locally by running:\n"
-                        "    packages/build_packages.sh \"/desired/packages/install/dir\"\n"
-                        "Or they can be downloaded from here:\n"
-                        "    ${FS_PACKAGES_URL}\n"
-                        "After the dependencies have been setup, cmake should be configured with:\n"
-                        "    -DFS_PACKAGES_DIR=\"/path/to/fs-packages\"")
-  endif()
-endif()
+#if(NOT FS_PACKAGES_DIR)
+#  if(NOT "$ENV{FS_PACKAGES_DIR}" STREQUAL "")
+#    # check if FS_PACKAGES_DIR has been set
+#    set(FS_PACKAGES_DIR "$ENV{FS_PACKAGES_DIR}" CACHE INTERNAL "Copied from FS_PACKAGES_DIR environment variable")
+#  elseif(EXISTS /usr/pubsw/packages)
+#    # if the user is at Martinos, default to /usr/pubsw/packages
+#    set(FS_PACKAGES_DIR /usr/pubsw/packages CACHE INTERNAL "Default Martinos packages dir")
+#  else()
+#    # setting FS_PACKAGES_DIR is required if the user is outside Martinos
+#    if(APPLE)
+#      set(FS_PACKAGES_URL "http://surfer.nmr.mgh.harvard.edu/pub/data/fspackages/prebuilt/osx10.11-packages.tar.gz")
+#    else()
+#      set(FS_PACKAGES_URL "http://surfer.nmr.mgh.harvard.edu/pub/data/fspackages/prebuilt/centos7-packages.tar.gz")
+#    endif()
+#    message(FATAL_ERROR "External FreeSurfer developers must provide a valid FS_PACKAGES_DIR path! "
+#                        "Required FS dependencies can be built locally by running:\n"
+#                        "    packages/build_packages.sh \"/desired/packages/install/dir\"\n"
+#                        "Or they can be downloaded from here:\n"
+#                        "    ${FS_PACKAGES_URL}\n"
+#                        "After the dependencies have been setup, cmake should be configured with:\n"
+#                        "    -DFS_PACKAGES_DIR=\"/path/to/fs-packages\"")
+#  endif()
+#endif()
 
 # all custom find-modules are stored in the cmake subdir
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
@@ -117,10 +125,15 @@ find_package(Armadillo)
 # -------- petsc --------
 find_package(PETSC)
 
-# -------- itk --------
-set(ITK_DIR ${FS_PACKAGES_DIR}/itk/4.13.0 CACHE PATH "ITK install directory")
-find_package(ITK HINTS ${ITK_DIR} REQUIRED)
+# --- boost ---
+set(Boost_NO_BOOST_CMAKE ON) # TODO: remove after updating boost from 1.71
+set(Boost_USE_STATIC_LIBS ON)
+find_package(Boost COMPONENTS program_options unit_test_framework filesystem log)
 
+# -------- itk --------
+find_package(ITK)
+#find_package(HDF5)
+#set(ITKV4_COMPATIBILITY ON CACHE BOOL "Preparing for itk5 migration" FORCE)
 # -------- ann --------
 # ANN is only used by mris_resample
 find_package(ANN)
@@ -129,14 +142,35 @@ find_package(ANN)
 # only used by mris_decimate
 find_package(GTS)
 
+# -------- matlab --------
+set(Matlab_ROOT_DIR /Applications/Polyspace/R2019b.app)
+find_package(MATLAB)
+
+# -------- hpx --------
+set(HPX_IGNORE_COMPILER_COMPATIBILITY ON)
+find_package(HPX)
+
 # -------- openMP --------
-find_package(OpenMP)
-if(OPENMP_FOUND)
-  add_definitions(-DHAVE_OPENMP)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
-endif()
+#if(APPLE)
+#  if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+#    set(OpenMP_C "${CMAKE_C_COMPILER}")
+#    set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp -lomp -L/usr/local/Cellar/libomp/9.0.0/lib -I/usr/local/Cellar/libomp/9.0.0/include")
+#    set(OpenMP_C_LIB_NAMES "libomp" "libgomp" "libiomp5")
+#    set(OpenMP_libomp_LIBRARY ${OpenMP_C_LIB_NAMES})
+#    set(OpenMP_libgomp_LIBRARY ${OpenMP_C_LIB_NAMES})
+#    set(OpenMP_libiomp5_LIBRARY ${OpenMP_C_LIB_NAMES})
+#  endif()
+#  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+#    set(OpenMP_CXX "${CMAKE_CXX_COMPILER}")
+#    set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp -lomp -L/usr/local/Cellar/libomp/9.0.0/lib -I/usr/local/Cellar/libomp/9.0.0/include")
+#    set(OpenMP_CXX_LIB_NAMES "libomp" "libgomp" "libiomp5")
+#    set(OpenMP_libomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+#    set(OpenMP_libgomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+#    set(OpenMP_libiomp5_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+#  endif()
+#  set(CMAKE_EXE_LINKER_FLAGS "-Xpreprocessor -fopenmp -lomp -L/usr/local/Cellar/libomp/9.0.0/lib -I/usr/local/Cellar/libomp/9.0.0/include")
+#  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+#endif()
 
 # -------- openCV --------
 if(NOT APPLE)
@@ -166,8 +200,8 @@ if(BUILD_GUIS)
 endif()
 
 # -------- vtk --------
-set(VTK_DIR ${FS_PACKAGES_DIR}/vtk/7.1 CACHE PATH "VTK install directory")
-find_package(VTK HINTS ${VTK_DIR})
+#set(VTK_DIR ${FS_PACKAGES_DIR}/vtk/7.1 CACHE PATH "VTK install directory")
+find_package(VTK)# HINTS ${VTK_DIR})
 if(VTK_FOUND AND VTK_BUILD_SHARED_LIBS)
   # locate all shared vtk libraries
   if(${VTK_VERSION} LESS 7)
@@ -206,14 +240,48 @@ else()
   set(BYTEORDER 1234)
 endif()
 
-# enable std c++11
-set(CMAKE_CXX_STANDARD 11)
-
 # --------------------------------------------------
 #                  third-party code
 # --------------------------------------------------
+set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Suppressing benchmark's tests" FORCE)
 
 add_subdirectory(packages)
+#add_subdirectory(abseil-cpp)
+#add_subdirectory(googletest)
+#add_subdirectory(benchmark)
+#add_subdirectory(fmt)
+#add_subdirectory(GSL)
+#add_subdirectory(spdlog)
+
+# -------- openMP --------
+if(APPLE)
+  if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+    set(OpenMP_C "${CMAKE_C_COMPILER}")
+    set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp -lomp -L/usr/local/Cellar/libomp/9.0.0/lib -I/usr/local/Cellar/libomp/9.0.0/include")
+    set(OpenMP_C_LIB_NAMES "libomp" "libgomp" "libiomp5")
+    set(OpenMP_libomp_LIBRARY ${OpenMP_C_LIB_NAMES})
+    set(OpenMP_libgomp_LIBRARY ${OpenMP_C_LIB_NAMES})
+    set(OpenMP_libiomp5_LIBRARY ${OpenMP_C_LIB_NAMES})
+  endif()
+  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    set(OpenMP_CXX "${CMAKE_CXX_COMPILER}")
+    set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp -lomp -L/usr/local/Cellar/libomp/9.0.0/lib -I/usr/local/Cellar/libomp/9.0.0/include -L/usr/local/Cellar/hdf5/1.10.5_1/lib -L/usr/local/Cellar/szip/2.1.1_1/lib")
+    set(OpenMP_CXX_LIB_NAMES "libomp" "libgomp" "libiomp5")
+    set(OpenMP_libomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+    set(OpenMP_libgomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+    set(OpenMP_libiomp5_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+  endif()
+  set(CMAKE_EXE_LINKER_FLAGS "-Xpreprocessor -fopenmp -lomp -L/usr/local/Cellar/libomp/9.0.0/lib -I/usr/local/Cellar/libomp/9.0.0/include")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+endif()
+
+find_package(OpenMP)
+if(OPENMP_FOUND)
+  add_definitions(-DHAVE_OPENMP -D_OPENMP)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
+
 
 # --------------------------------------------------
 #                    setup python
@@ -237,7 +305,7 @@ if(DISTRIBUTE_FSPYTHON)
     # install the barebones python distribution
     INSTALL(DIRECTORY ${FSPYTHON_DIR}/bin ${FSPYTHON_DIR}/lib ${FSPYTHON_DIR}/include
       DESTINATION ${CMAKE_INSTALL_PREFIX}/python USE_SOURCE_PERMISSIONS
-    )
+      )
   else()
     message(FATAL_ERROR "Cannot find fspython distribution in FS_PACKAGES_DIR")
   endif()
@@ -257,13 +325,13 @@ endif()
 # --------------------------------------------------
 
 # warnings
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -Wno-absolute-value -Wno-sign-compare -Wno-write-strings -Wno-unused-result -Wno-unused-parameter")
-
 # clang complains about -Wno-unused-but-set-variable and says to use -Wno-unused-const-variable
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-const-variable -Wno-inconsistent-missing-override")
-else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-but-set-variable")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-everything -arch x86_64 -Wl,-w")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-everything -arch x86_64 -Wl,-w")
+else() # TODO: this only works for gcc, check for other compilers as well
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
 endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
@@ -271,7 +339,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 # linker options
 if(APPLE)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -dead_strip")
-  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc")
   endif()
 else()
@@ -295,10 +363,17 @@ add_subdirectory(distribution)
 # the top-level include dir contain the most commonly included freesurfer header files
 set(FS_INCLUDE_DIRS
   ${CMAKE_SOURCE_DIR}/include
+  ${CMAKE_SOURCE_DIR}/include/mri_tools
   ${CMAKE_SOURCE_DIR}/packages/minc
   ${CMAKE_SOURCE_DIR}/packages/netcdf
   ${CMAKE_SOURCE_DIR}/packages/nifti
-)
+  ${CMAKE_SOURCE_DIR}/packages/abseil-cpp/
+  ${CMAKE_SOURCE_DIR}/packages/benchmark/include/
+  ${CMAKE_SOURCE_DIR}/packages/fmt/include/
+  ${CMAKE_SOURCE_DIR}/packages/GSL/include
+  ${CMAKE_SOURCE_DIR}/packages/spdlog/include
+  /usr/local/include/aboualiaa
+  )
 
 # build the freesurfer static libraries
 add_subdirectories(utils)

@@ -30,7 +30,6 @@
 #include "gcamorph.h"
 
 ///! Writes a GCAM with one input defined
-void WriteGCAMoneInput( const GCAM* src, const char* fName );
-
+void WriteGCAMoneInput(const GCAM *src, const char *fName);
 
 #endif

@@ -22,7 +22,6 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-
 #include "NrrdIO.h"
 #include "teemEndian.h"
 
@@ -37,41 +36,19 @@ const int airMyEndian = 1234;
 const int airMyEndian = 4321;
 #endif
 
-char
-_airEndianStr[][AIR_STRLEN_SMALL] =
-  {
-    "(unknown endian)",
-    "little",
-    "big"
-  };
+char _airEndianStr[][AIR_STRLEN_SMALL] = {"(unknown endian)", "little", "big"};
 
-char
-_airEndianDesc[][AIR_STRLEN_MED] =
-  {
-    "unknown endianness",
-    "Intel and compatible",
-    "Everyone besides Intel and compatible"
-  };
+char _airEndianDesc[][AIR_STRLEN_MED] = {
+    "unknown endianness", "Intel and compatible",
+    "Everyone besides Intel and compatible"};
 
-int
-_airEndianVal[] =
-  {
+int _airEndianVal[] = {
     airEndianUnknown,
     airEndianLittle,
     airEndianBig,
-  };
+};
 
-const airEnum
-_airEndian =
-  {
-    "endian",
-    2,
-    _airEndianStr, _airEndianVal,
-    _airEndianDesc,
-    NULL, NULL,
-    AIR_FALSE
-  };
+const airEnum _airEndian = {"endian",       2,    _airEndianStr, _airEndianVal,
+                            _airEndianDesc, NULL, NULL,          AIR_FALSE};
 
-const airEnum *const
-airEndian = &_airEndian;
-
+const airEnum *const airEndian = &_airEndian;

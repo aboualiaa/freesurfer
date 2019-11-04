@@ -22,7 +22,6 @@
  *
  */
 
-
 #ifndef RFUTILS_H
 #define RFUTILS_H
 

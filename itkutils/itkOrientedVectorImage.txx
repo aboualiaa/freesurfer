@@ -12,8 +12,8 @@
   Portions of this code are covered under the VTK copyright.
   See VTKCopyright.txt or http://www.kitware.com/VTKCopyright.htm for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even 
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
@@ -22,44 +22,33 @@
 #include "itkOrientedVectorImage.h"
 #include "itkProcessObject.h"
 
-namespace itk
-{
+namespace itk {
 
 /**
  *
  */
-template<class TPixel, unsigned int VImageDimension>
-OrientedVectorImage<TPixel, VImageDimension>
-::OrientedVectorImage() 
-      : m_VectorLength( 0 )
-{
+template <class TPixel, unsigned int VImageDimension>
+OrientedVectorImage<TPixel, VImageDimension>::OrientedVectorImage()
+    : m_VectorLength(0) {
   m_Buffer = PixelContainer::New();
 }
 
-
 //----------------------------------------------------------------------------
-template<class TPixel, unsigned int VImageDimension>
-void 
-OrientedVectorImage<TPixel, VImageDimension>
-::Allocate()
-{
-  if ( m_VectorLength == 0 )
-    {
-    itkExceptionMacro( << "Cannot allocate VectorImage with VectorLength = 0");
-    }
-  
+template <class TPixel, unsigned int VImageDimension>
+void OrientedVectorImage<TPixel, VImageDimension>::Allocate() {
+  if (m_VectorLength == 0) {
+    itkExceptionMacro(<< "Cannot allocate VectorImage with VectorLength = 0");
+  }
+
   unsigned long num;
   this->ComputeOffsetTable();
   num = this->GetOffsetTable()[VImageDimension];
-  
+
   m_Buffer->Reserve(num * m_VectorLength);
 }
 
-template<class TPixel, unsigned int VImageDimension>
-void 
-OrientedVectorImage<TPixel, VImageDimension>
-::Initialize()
-{
+template <class TPixel, unsigned int VImageDimension>
+void OrientedVectorImage<TPixel, VImageDimension>::Initialize() {
   //
   // We don't modify ourselves because the "ReleaseData" methods depend upon
   // no modification when initialized.
@@ -74,110 +63,88 @@ OrientedVectorImage<TPixel, VImageDimension>
   m_Buffer = PixelContainer::New();
 }
 
-
-template<class TPixel, unsigned int VImageDimension>
-void 
-OrientedVectorImage<TPixel, VImageDimension>
-::FillBuffer(const PixelType& value)
-{
+template <class TPixel, unsigned int VImageDimension>
+void OrientedVectorImage<TPixel, VImageDimension>::FillBuffer(
+    const PixelType &value) {
   const unsigned long numberOfPixels =
-    this->GetBufferedRegion().GetNumberOfPixels();
+      this->GetBufferedRegion().GetNumberOfPixels();
 
   unsigned long ctr = 0;
-  for(unsigned int i=0; i<numberOfPixels; i++) 
-    {
-    for( VectorLengthType j=0; j<m_VectorLength; j++ )
-      {
+  for (unsigned int i = 0; i < numberOfPixels; i++) {
+    for (VectorLengthType j = 0; j < m_VectorLength; j++) {
       (*m_Buffer)[ctr++] = value[j];
-      }
     }
+  }
 }
 
-template<class TPixel, unsigned int VImageDimension>
-void 
-OrientedVectorImage<TPixel, VImageDimension>
-::SetPixelContainer(PixelContainer *container)
-{
-  if (m_Buffer != container)
-    {
+template <class TPixel, unsigned int VImageDimension>
+void OrientedVectorImage<TPixel, VImageDimension>::SetPixelContainer(
+    PixelContainer *container) {
+  if (m_Buffer != container) {
     m_Buffer = container;
     this->Modified();
-    }
+  }
 }
-    
-//----------------------------------------------------------------------------
-template<class TPixel, unsigned int VImageDimension>
-void 
-OrientedVectorImage<TPixel, VImageDimension>
-::Graft(const DataObject *data)
-{
-  // call the superclass' implementation
-  Superclass::Graft( data );
 
-  if ( data )
-    {
+//----------------------------------------------------------------------------
+template <class TPixel, unsigned int VImageDimension>
+void OrientedVectorImage<TPixel, VImageDimension>::Graft(
+    const DataObject *data) {
+  // call the superclass' implementation
+  Superclass::Graft(data);
+
+  if (data) {
     // Attempt to cast data to an Image
     const Self *imgData;
 
-    try
-      {
-      imgData = dynamic_cast< const Self *>( data );
-      }
-    catch( ... )
-      {
+    try {
+      imgData = dynamic_cast<const Self *>(data);
+    } catch (...) {
       return;
-      }
+    }
 
     // Copy from VectorImage< TPixel, dim >
-    if ( imgData )
-      {
+    if (imgData) {
       // Now copy anything remaining that is needed
-      this->SetPixelContainer( const_cast< PixelContainer *>
-                                    (imgData->GetPixelContainer()) );
-      }
-    else 
-      {
+      this->SetPixelContainer(
+          const_cast<PixelContainer *>(imgData->GetPixelContainer()));
+    } else {
       // pointer could not be cast back down
-      itkExceptionMacro( << "itk::VectorImage::Graft() cannot cast "
-                         << typeid(data).name() << " to "
-                         << typeid(const Self *).name() );
-      }
+      itkExceptionMacro(<< "itk::VectorImage::Graft() cannot cast "
+                        << typeid(data).name() << " to "
+                        << typeid(const Self *).name());
     }
+  }
 }
 
 //----------------------------------------------------------------------------
-template<class TPixel, unsigned int VImageDimension>
-unsigned int  
-OrientedVectorImage<TPixel, VImageDimension>
-::GetNumberOfComponentsPerPixel() const
-{
+template <class TPixel, unsigned int VImageDimension>
+unsigned int
+OrientedVectorImage<TPixel, VImageDimension>::GetNumberOfComponentsPerPixel()
+    const {
   return this->m_VectorLength;
 }
-  
+
 //----------------------------------------------------------------------------
-template<class TPixel, unsigned int VImageDimension>
-void
-OrientedVectorImage<TPixel, VImageDimension>
-::SetNumberOfComponentsPerPixel( unsigned int n )
-{
-  this->SetVectorLength( static_cast< VectorLengthType >(n) );
+template <class TPixel, unsigned int VImageDimension>
+void OrientedVectorImage<
+    TPixel, VImageDimension>::SetNumberOfComponentsPerPixel(unsigned int n) {
+  this->SetVectorLength(static_cast<VectorLengthType>(n));
 }
 
 /**
  *
  */
-template<class TPixel, unsigned int VImageDimension>
-void 
-OrientedVectorImage<TPixel, VImageDimension>
-::PrintSelf(std::ostream& os, Indent indent) const
-{
-  Superclass::PrintSelf(os,indent);
-  
+template <class TPixel, unsigned int VImageDimension>
+void OrientedVectorImage<TPixel, VImageDimension>::PrintSelf(
+    std::ostream &os, Indent indent) const {
+  Superclass::PrintSelf(os, indent);
+
   os << indent << "VectorLength: " << m_VectorLength << std::endl;
   os << indent << "PixelContainer: " << std::endl;
   m_Buffer->Print(os, indent.GetNextIndent());
 
-// m_Origin and m_Spacing are printed in the Superclass
+  // m_Origin and m_Spacing are printed in the Superclass
 }
 } // end namespace itk
 

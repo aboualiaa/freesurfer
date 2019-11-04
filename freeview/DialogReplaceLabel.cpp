@@ -27,47 +27,36 @@
 #include "ui_DialogReplaceLabel.h"
 #include <QMessageBox>
 
-DialogReplaceLabel::DialogReplaceLabel(QWidget *parent) :
-  QDialog(parent),
-  ui(new Ui::DialogReplaceLabel)
-{
+DialogReplaceLabel::DialogReplaceLabel(QWidget *parent)
+    : QDialog(parent), ui(new Ui::DialogReplaceLabel) {
   ui->setupUi(this);
 }
 
-DialogReplaceLabel::~DialogReplaceLabel()
-{
-  delete ui;
-}
+DialogReplaceLabel::~DialogReplaceLabel() { delete ui; }
 
-void DialogReplaceLabel::OnReplace()
-{
+void DialogReplaceLabel::OnReplace() {
   bool bOK;
   ui->lineEditOriginalValue->text().toDouble(&bOK);
-  if (!bOK)
-  {
+  if (!bOK) {
     QMessageBox::warning(this, "Error", "Please enter a valid original value.");
     return;
   }
   ui->lineEditNewValue->text().toDouble(&bOK);
-  if (!bOK)
-  {
+  if (!bOK) {
     QMessageBox::warning(this, "Error", "Please enter a valid new value.");
     return;
   }
   this->accept();
 }
 
-double DialogReplaceLabel::GetOriginalValue()
-{
+double DialogReplaceLabel::GetOriginalValue() {
   return ui->lineEditOriginalValue->text().toDouble();
 }
 
-double DialogReplaceLabel::GetNewValue()
-{
+double DialogReplaceLabel::GetNewValue() {
   return ui->lineEditNewValue->text().toDouble();
 }
 
-bool DialogReplaceLabel::ReplaceSingleSlice()
-{
+bool DialogReplaceLabel::ReplaceSingleSlice() {
   return ui->radioButtonCurrentSlice->isChecked();
 }

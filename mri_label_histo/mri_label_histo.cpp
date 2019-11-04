@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:22 $
@@ -23,11 +23,10 @@
  *
  */
 
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+#include <cctype>
 
 #include "mri.h"
 #include "macros.h"
@@ -40,129 +39,127 @@
 #include "timer.h"
 #include "version.h"
 
-int main(int argc, char *argv[]) ;
-static int get_option(int argc, char *argv[]) ;
+int main(int argc, char *argv[]);
+static int get_option(int argc, char *argv[]);
 
-const char *Progname ;
-static char *log_fname = NULL ;
-static void usage_exit(int code) ;
+const char *Progname;
+static char *log_fname = nullptr;
+static void usage_exit(int code);
 
-static int quiet = 0 ;
-static int all_flag = 0 ;
+static int quiet = 0;
+static int all_flag = 0;
 
-int
-main(int argc, char *argv[]) {
-  char   **av ;
-  int    label, ac, nargs ;
-  int          msec, minutes, seconds/*, wrong, total, correct*/ ;
-  Timer start ;
-  MRI    *mri_T1, *mri_labeled ;
-  FILE   *log_fp ;
-  HISTOGRAM *histo ;
+int main(int argc, char *argv[]) {
+  char **av;
+  int label, ac, nargs;
+  int msec, minutes, seconds /*, wrong, total, correct*/;
+  Timer start;
+  MRI *mri_T1, *mri_labeled;
+  FILE *log_fp;
+  HISTOGRAM *histo;
 
   /* rkt: check for and handle version tag */
-  nargs = handle_version_option (argc, argv, "$Id: mri_label_histo.c,v 1.5 2011/03/02 00:04:22 nicks Exp $", "$Name:  $");
+  nargs = handle_version_option(
+      argc, argv,
+      "$Id: mri_label_histo.c,v 1.5 2011/03/02 00:04:22 nicks Exp $",
+      "$Name:  $");
   if (nargs && argc - nargs == 1)
-    exit (0);
+    exit(0);
   argc -= nargs;
 
-  Progname = argv[0] ;
-  ErrorInit(NULL, NULL, NULL) ;
-  DiagInit(NULL, NULL, NULL) ;
+  Progname = argv[0];
+  ErrorInit(NULL, NULL, NULL);
+  DiagInit(nullptr, nullptr, nullptr);
 
-  start.reset() ;
+  start.reset();
 
-  ac = argc ;
-  av = argv ;
-  for ( ; argc > 1 && ISOPTION(*argv[1]) ; argc--, argv++) {
-    nargs = get_option(argc, argv) ;
-    argc -= nargs ;
-    argv += nargs ;
+  ac = argc;
+  av = argv;
+  for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
+    nargs = get_option(argc, argv);
+    argc -= nargs;
+    argv += nargs;
   }
 
   if (argc < 4)
-    usage_exit(1) ;
+    usage_exit(1);
 
-
-  mri_T1 = MRIread(argv[1]) ;
+  mri_T1 = MRIread(argv[1]);
   if (!mri_T1)
-    ErrorExit(ERROR_NOFILE, "%s: could not read volume from %s",Progname,
-              argv[1]) ;
-  mri_labeled = MRIread(argv[2]) ;
+    ErrorExit(ERROR_NOFILE, "%s: could not read volume from %s", Progname,
+              argv[1]);
+  mri_labeled = MRIread(argv[2]);
   if (!mri_labeled)
-    ErrorExit(ERROR_NOFILE, "%s: could not read volume from %s",Progname,
-              argv[2]) ;
+    ErrorExit(ERROR_NOFILE, "%s: could not read volume from %s", Progname,
+              argv[2]);
 
   if (log_fname) {
-    log_fp = fopen(log_fname, "a+") ;
+    log_fp = fopen(log_fname, "a+");
     if (!log_fp)
-      ErrorExit(ERROR_BADFILE, "%s: could not open %s for writing",
-                Progname, log_fname) ;
+      ErrorExit(ERROR_BADFILE, "%s: could not open %s for writing", Progname,
+                log_fname);
   } else
-    log_fp = NULL ;
+    log_fp = nullptr;
 
+  label = atoi(argv[3]);
+  printf("generating histogram for label %d...\n", label);
+  histo = MRIhistogramLabel(mri_T1, mri_labeled, label, 0);
 
-  label = atoi(argv[3]) ;
-  printf("generating histogram for label %d...\n", label) ;
-  histo = MRIhistogramLabel(mri_T1, mri_labeled, label, 0) ;
+  HISTOplot(histo, argv[4]);
 
-  HISTOplot(histo, argv[4]) ;
-
-  msec = start.milliseconds() ;
-  seconds = nint((float)msec/1000.0f) ;
-  minutes = seconds / 60 ;
-  seconds = seconds % 60 ;
+  msec = start.milliseconds();
+  seconds = nint((float)msec / 1000.0f);
+  minutes = seconds / 60;
+  seconds = seconds % 60;
 
   if (DIAG_VERBOSE_ON)
     fprintf(stderr, "overlap calculation took %d minutes and %d seconds.\n",
-            minutes, seconds) ;
+            minutes, seconds);
 
-  exit(0) ;
-  return(0) ;
+  exit(0);
+  return (0);
 }
 /*----------------------------------------------------------------------
             Parameters:
 
            Description:
 ----------------------------------------------------------------------*/
-static int
-get_option(int argc, char *argv[]) {
-  int  nargs = 0 ;
-  char *option ;
+static int get_option(int argc, char *argv[]) {
+  int nargs = 0;
+  char *option;
 
-  option = argv[1] + 1 ;            /* past '-' */
+  option = argv[1] + 1; /* past '-' */
   switch (toupper(*option)) {
   case 'Q':
-    quiet = 1 ;
-    break ;
+    quiet = 1;
+    break;
   case 'A':
-    all_flag = 1 ;
-    break ;
+    all_flag = 1;
+    break;
   case 'L':
-    log_fname = argv[2] ;
-    nargs = 1 ;
-    fprintf(stderr, "logging results to %s\n", log_fname) ;
-    break ;
+    log_fname = argv[2];
+    nargs = 1;
+    fprintf(stderr, "logging results to %s\n", log_fname);
+    break;
   case '?':
   case 'U':
-    usage_exit(0) ;
-    break ;
+    usage_exit(0);
+    break;
   default:
-    fprintf(stderr, "unknown option %s\n", argv[1]) ;
-    exit(1) ;
-    break ;
+    fprintf(stderr, "unknown option %s\n", argv[1]);
+    exit(1);
+    break;
   }
 
-  return(nargs) ;
+  return (nargs);
 }
 /*----------------------------------------------------------------------
             Parameters:
 
            Description:
 ----------------------------------------------------------------------*/
-static void
-usage_exit(int code) {
+static void usage_exit(int code) {
   printf("usage: %s [options] <T1 volume> <labeled volume> <label> <output>\n",
-         Progname) ;
-  exit(code) ;
+         Progname);
+  exit(code);
 }

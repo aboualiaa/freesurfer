@@ -23,11 +23,11 @@
  *
  */
 
-#include <ctype.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cctype>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include "MRIio_old.h" /*.H*/
 #include "cma.h"       /* using cma_label_to_name() */
@@ -43,7 +43,7 @@
 
 extern const char *Progname;
 
-#ifndef SQR  // BEVIN - the header files might include the one that defines SQR
+#ifndef SQR // BEVIN - the header files might include the one that defines SQR
 #define SQR(x) ((x) * (x))
 #endif
 
@@ -52,22 +52,19 @@ extern const char *Progname;
 #define FACEINCREASE 1.2
 #define VERTEXINCREASE 1.2
 
-typedef struct quad_face_type_
-{
+typedef struct quad_face_type_ {
   int imnr, i, j, f;
   int num;
   int v[4];
 } quad_face_type;
 
-typedef struct quad_vertex_type_
-{
+typedef struct quad_vertex_type_ {
   int imnr, i, j;
   int num;
   int f[9];
 } quad_vertex_type;
 
-typedef struct tesselation_parms_
-{
+typedef struct tesselation_parms_ {
   /*labeled volume*/
   MRI *mri;
 
@@ -118,14 +115,18 @@ static void allocateTesselation(tesselation_parms *parms);
 static void freeTesselation(tesselation_parms *parms);
 
 static int saveTesselation(tesselation_parms *parms);
-static void add_face(int imnr, int i, int j, int f, int prev_flag, tesselation_parms *parms);
+static void add_face(int imnr, int i, int j, int f, int prev_flag,
+                     tesselation_parms *parms);
 static int add_vertex(int imnr, int i, int j, tesselation_parms *parms);
-static int facep(int im0, int i0, int j0, int im1, int i1, int j1, tesselation_parms *parms);
-static void check_face(
-    int im0, int i0, int j0, int im1, int i1, int j1, int f, int n, int v_ind, int prev_flag, tesselation_parms *parms);
+static int facep(int im0, int i0, int j0, int im1, int i1, int j1,
+                 tesselation_parms *parms);
+static void check_face(int im0, int i0, int j0, int im1, int i1, int j1, int f,
+                       int n, int v_ind, int prev_flag,
+                       tesselation_parms *parms);
 static void make_surface(tesselation_parms *parms);
-static void check_face2(
-    int im0, int i0, int j0, int im1, int i1, int j1, int f, int n, int v_ind, int prev_flag, tesselation_parms *parms);
+static void check_face2(int im0, int i0, int j0, int im1, int i1, int j1, int f,
+                        int n, int v_ind, int prev_flag,
+                        tesselation_parms *parms);
 
 #if 0
 static void initImage(tesselation_parms *parms)
@@ -244,8 +245,7 @@ static void initImage(tesselation_parms *parms)
 
 /*initialization of tesselation_parms*/
 /*note that not all the fields are allocated*/
-static void initTesselationParms(tesselation_parms *parms)
-{
+static void initTesselationParms(tesselation_parms *parms) {
   int i, j, k, n;
   int depth, width, height;
   int *xmin, *ymin, *zmin, *xmax, *ymax, *zmax;
@@ -263,13 +263,17 @@ static void initTesselationParms(tesselation_parms *parms)
 
   /* allocate and initialize the image*/
   im = (unsigned char ***)malloc(sizeof(unsigned char **) * depth);
-  if (!im) ErrorExit(ERROR_NO_MEMORY, "MRIStesselate: could not allocate the image");
+  if (!im)
+    ErrorExit(ERROR_NO_MEMORY, "MRIStesselate: could not allocate the image");
   for (k = 0; k < depth; k++) {
     im[k] = (unsigned char **)malloc(height * sizeof(char *));
-    if (!im[k]) ErrorExit(ERROR_NO_MEMORY, "MRIStesselate: could not allocate the image");
+    if (!im[k])
+      ErrorExit(ERROR_NO_MEMORY, "MRIStesselate: could not allocate the image");
     for (j = 0; j < height; j++) {
       im[k][j] = (unsigned char *)calloc(width, sizeof(char));
-      if (!im[k][j]) ErrorExit(ERROR_NO_MEMORY, "MRIStesselate: could not allocate the image");
+      if (!im[k][j])
+        ErrorExit(ERROR_NO_MEMORY,
+                  "MRIStesselate: could not allocate the image");
     }
   }
   parms->im = im;
@@ -294,7 +298,8 @@ static void initTesselationParms(tesselation_parms *parms)
 
   for (k = 1; k < depth - 1; k++)
     for (j = 1; j < height - 1; j++)
-      for (i = 1; i < width - 1; i++) im[k][j][i] = MRIvox(mri, i, j, k);
+      for (i = 1; i < width - 1; i++)
+        im[k][j][i] = MRIvox(mri, i, j, k);
 
   for (k = 1; k < mri->depth - 1; k++)
     for (j = 1; j < mri->height - 1; j++)
@@ -302,13 +307,19 @@ static void initTesselationParms(tesselation_parms *parms)
         val = MRIvox(mri, i, j, k);
         for (n = 0; n < label_nbr; n++)
           if (val == labels[n] || (parms->all_flag && val)) {
-            if (i < xmin[n]) xmin[n] = i;
-            if (j < ymin[n]) ymin[n] = j;
-            if (k < zmin[n]) zmin[n] = k;
+            if (i < xmin[n])
+              xmin[n] = i;
+            if (j < ymin[n])
+              ymin[n] = j;
+            if (k < zmin[n])
+              zmin[n] = k;
 
-            if (i > xmax[n]) xmax[n] = i;
-            if (j > ymax[n]) ymax[n] = j;
-            if (k > zmax[n]) zmax[n] = k;
+            if (i > xmax[n])
+              xmax[n] = i;
+            if (j > ymax[n])
+              ymax[n] = j;
+            if (k > zmax[n])
+              zmax[n] = k;
           }
       }
 
@@ -332,8 +343,7 @@ static void initTesselationParms(tesselation_parms *parms)
   parms->all_flag = 0;
 }
 
-static int freeTesselationParms(tesselation_parms **parms)
-{
+static int freeTesselationParms(tesselation_parms **parms) {
   int j, k;
   tesselation_parms *tmp = *parms;
   int depth, width, height;
@@ -344,7 +354,8 @@ static int freeTesselationParms(tesselation_parms **parms)
   width = mri->width;
 
   for (k = 0; k < depth; k++) {
-    for (j = 0; j < height; j++) free(tmp->im[k][j]);
+    for (j = 0; j < height; j++)
+      free(tmp->im[k][j]);
     free(tmp->im[k]);
   }
   free(tmp->im);
@@ -360,28 +371,28 @@ static int freeTesselationParms(tesselation_parms **parms)
   return (NO_ERROR);
 }
 
-static void allocateTesselation(tesselation_parms *parms)
-{
+static void allocateTesselation(tesselation_parms *parms) {
   int imgsize = parms->imgsize;
   parms->face = (quad_face_type *)lcalloc(MAXFACES, sizeof(quad_face_type));
   parms->maxfaces = MAXFACES;
   parms->face_index_table0 = (int *)lcalloc(6 * imgsize, sizeof(int));
   parms->face_index_table1 = (int *)lcalloc(6 * imgsize, sizeof(int));
 
-  parms->vertex = (quad_vertex_type *)lcalloc(MAXVERTICES, sizeof(quad_vertex_type));
+  parms->vertex =
+      (quad_vertex_type *)lcalloc(MAXVERTICES, sizeof(quad_vertex_type));
   parms->maxvertices = MAXVERTICES;
   //  parms->vertex_index_table = (int *)lcalloc(8*imgsize,sizeof(int));
 
   parms->face_index = 0;
   parms->vertex_index = 0;
 
-  if ((!parms->face) || (!parms->face_index_table0) || (!parms->face_index_table1) || (!parms->vertex))
+  if ((!parms->face) || (!parms->face_index_table0) ||
+      (!parms->face_index_table1) || (!parms->vertex))
     //     || (!parms->vertex_index_table))
     ErrorExit(ERROR_NO_MEMORY, "MRIStesselate: local tesselation tables");
 }
 
-static void freeTesselation(tesselation_parms *parms)
-{
+static void freeTesselation(tesselation_parms *parms) {
   free(parms->face);
   free(parms->face_index_table0);
   free(parms->face_index_table1);
@@ -390,8 +401,7 @@ static void freeTesselation(tesselation_parms *parms)
   //  free(parms->vertex_index_table);
 }
 
-static int saveTesselation(tesselation_parms *parms)
-{
+static int saveTesselation(tesselation_parms *parms) {
   int vno, m, n, fno;
   quad_face_type *face2;
   FACE *face;
@@ -408,17 +418,16 @@ static int saveTesselation(tesselation_parms *parms)
   xx1 = parms->mri->xend;
   zz1 = parms->mri->zend;
 
-  MRIS *mris = MRISoverAlloc(
-                    parms->vertex_index, 2 * parms->face_index, 
-                    parms->vertex_index, 2 * parms->face_index);
+  MRIS *mris = MRISoverAlloc(parms->vertex_index, 2 * parms->face_index,
+                             parms->vertex_index, 2 * parms->face_index);
   mris->type = MRIS_BINARY_QUADRANGLE_FILE;
 
   /*first init vertices*/
   for (vno = 0; vno < mris->nvertices; vno++) {
-    VERTEX_TOPOLOGY * const vertex_topology = &mris->vertices_topology[vno];
+    VERTEX_TOPOLOGY *const vertex_topology = &mris->vertices_topology[vno];
 
-    quad_vertex_type const * const vertex2 = &parms->vertex[vno];
-    
+    quad_vertex_type const *const vertex2 = &parms->vertex[vno];
+
     i = vertex2->i;
     j = vertex2->j;
     imnr = vertex2->imnr;
@@ -438,10 +447,10 @@ static int saveTesselation(tesselation_parms *parms)
     y = yw;
     z = zw;
 
-    MRISsetXYZ(mris,vno, x, y, z);
+    MRISsetXYZ(mris, vno, x, y, z);
     vertex_topology->num = 0;
   }
-  
+
   /*then init faces by dividing each quadrant into two triangles*/
   for (m = 0; m < parms->face_index; m++) {
     int which;
@@ -465,8 +474,7 @@ static int saveTesselation(tesselation_parms *parms)
       mris->faces[fno + 1].v[0] = face2->v[2];
       mris->faces[fno + 1].v[1] = face2->v[3];
       mris->faces[fno + 1].v[2] = face2->v[1];
-    }
-    else {
+    } else {
       /* 1st triangle */
       mris->faces[fno].v[0] = face2->v[0];
       mris->faces[fno].v[1] = face2->v[1];
@@ -478,27 +486,32 @@ static int saveTesselation(tesselation_parms *parms)
       mris->faces[fno + 1].v[2] = face2->v[3];
     }
     for (n = 0; n < VERTICES_PER_FACE; n++) {
-      mris->vertices_topology[mris->faces[fno    ].v[n]].num++;
+      mris->vertices_topology[mris->faces[fno].v[n]].num++;
       mris->vertices_topology[mris->faces[fno + 1].v[n]].num++;
     }
   }
   /*allocate indices & faces for each vertex*/
   for (vno = 0; vno < mris->nvertices; vno++) {
-    mris->vertices_topology[vno].f = (int *)calloc(mris->vertices_topology[vno].num, sizeof(int));
+    mris->vertices_topology[vno].f =
+        (int *)calloc(mris->vertices_topology[vno].num, sizeof(int));
     if (!mris->vertices_topology[vno].f)
-      ErrorExit(
-          ERROR_NOMEMORY, "%s: could not allocate %d faces at %dth vertex", Progname, mris->vertices_topology[vno].num, vno);
-    mris->vertices_topology[vno].n = (uchar *)calloc(mris->vertices_topology[vno].num, sizeof(uchar));
+      ErrorExit(ERROR_NOMEMORY,
+                "%s: could not allocate %d faces at %dth vertex", Progname,
+                mris->vertices_topology[vno].num, vno);
+    mris->vertices_topology[vno].n =
+        (uchar *)calloc(mris->vertices_topology[vno].num, sizeof(uchar));
     if (!mris->vertices_topology[vno].n)
-      ErrorExit(
-          ERROR_NOMEMORY, "%s: could not allocate %d indices at %dth vertex", Progname, mris->vertices_topology[vno].num, vno);
+      ErrorExit(ERROR_NOMEMORY,
+                "%s: could not allocate %d indices at %dth vertex", Progname,
+                mris->vertices_topology[vno].num, vno);
     mris->vertices_topology[vno].num = 0;
   }
   /*init faces for each vertex*/
   for (fno = 0; fno < mris->nfaces; fno++) {
     face = &mris->faces[fno];
-    for (n = 0; n < VERTICES_PER_FACE; n++) 
-    	mris->vertices_topology[face->v[n]].f[mris->vertices_topology[face->v[n]].num++] = fno;
+    for (n = 0; n < VERTICES_PER_FACE; n++)
+      mris->vertices_topology[face->v[n]]
+          .f[mris->vertices_topology[face->v[n]].num++] = fno;
   }
 
   mrisCheckVertexFaceTopology(mris);
@@ -513,18 +526,25 @@ static int saveTesselation(tesselation_parms *parms)
 
     for (n = 0; n < mris->vertices_topology[vno].num; n++) {
       for (m = 0; m < VERTICES_PER_FACE; m++) {
-        if (mris->faces[mris->vertices_topology[vno].f[n]].v[m] == vno) mris->vertices_topology[vno].n[n] = m;
+        if (mris->faces[mris->vertices_topology[vno].f[n]].v[m] == vno)
+          mris->vertices_topology[vno].n[n] = m;
       }
     }
     x = mris->vertices[vno].x;
     y = mris->vertices[vno].y;
     z = mris->vertices[vno].z;
-    if (x > xhi) xhi = x;
-    if (x < xlo) xlo = x;
-    if (y > yhi) yhi = y;
-    if (y < ylo) ylo = y;
-    if (z > zhi) zhi = z;
-    if (z < zlo) zlo = z;
+    if (x > xhi)
+      xhi = x;
+    if (x < xlo)
+      xlo = x;
+    if (y > yhi)
+      yhi = y;
+    if (y < ylo)
+      ylo = y;
+    if (z > zhi)
+      zhi = z;
+    if (z < zlo)
+      zlo = z;
   }
   mris->xlo = xlo;
   mris->ylo = ylo;
@@ -550,8 +570,7 @@ static int saveTesselation(tesselation_parms *parms)
   return (NO_ERROR);
 }
 
-MRIS *MRISconcatenateQuadSurfaces(int number_of_labels, MRIS **mris_tab)
-{
+MRIS *MRISconcatenateQuadSurfaces(int number_of_labels, MRIS **mris_tab) {
   MRIS *mris;
   int nvertices, nfaces, n, count, countvnbr, vno, fno;
 
@@ -565,12 +584,11 @@ MRIS *MRISconcatenateQuadSurfaces(int number_of_labels, MRIS **mris_tab)
 
   for (n = 0, count = 0; n < number_of_labels; n++)
     for (vno = 0; vno < mris_tab[n]->nvertices; vno++, count++) {
-      MRISsetXYZ(mris,count, 
-        mris_tab[n]->vertices[vno].x,
-        mris_tab[n]->vertices[vno].y,
-        mris_tab[n]->vertices[vno].z);
+      MRISsetXYZ(mris, count, mris_tab[n]->vertices[vno].x,
+                 mris_tab[n]->vertices[vno].y, mris_tab[n]->vertices[vno].z);
       mris->vertices[count].curv = mris_tab[n]->vertices[vno].curv;
-      mris->vertices[count].val = (float)(n - number_of_labels / 2.) / number_of_labels;
+      mris->vertices[count].val =
+          (float)(n - number_of_labels / 2.) / number_of_labels;
     }
   for (n = 0, count = 0, countvnbr = 0; n < number_of_labels; n++) {
     for (fno = 0; fno < mris_tab[n]->nfaces; fno++, count++) {
@@ -586,53 +604,59 @@ MRIS *MRISconcatenateQuadSurfaces(int number_of_labels, MRIS **mris_tab)
   return mris;
 }
 
-static void reallocateVertices(tesselation_parms *parms)
-{
+static void reallocateVertices(tesselation_parms *parms) {
   quad_vertex_type *tmp;
   int k, n;
   int vertex_index = parms->vertex_index;
 
   parms->maxvertices = (int)(parms->maxvertices * VERTEXINCREASE);
-  tmp = (quad_vertex_type *)lcalloc(parms->maxvertices, sizeof(quad_vertex_type));
-  if (!tmp) ErrorExit(ERROR_NOMEMORY, "%s: max vertices %d exceeded", Progname, parms->maxvertices);
+  tmp =
+      (quad_vertex_type *)lcalloc(parms->maxvertices, sizeof(quad_vertex_type));
+  if (!tmp)
+    ErrorExit(ERROR_NOMEMORY, "%s: max vertices %d exceeded", Progname,
+              parms->maxvertices);
   for (k = 0; k < vertex_index; k++) {
     tmp[k].imnr = parms->vertex[k].imnr;
     tmp[k].i = parms->vertex[k].i;
     tmp[k].j = parms->vertex[k].j;
     tmp[k].num = parms->vertex[k].num;
-    for (n = 0; n < 9; n++) tmp[k].f[n] = parms->vertex[k].f[n];
+    for (n = 0; n < 9; n++)
+      tmp[k].f[n] = parms->vertex[k].f[n];
   }
   free(parms->vertex);
   parms->vertex = tmp;
 }
-static void reallocateFaces(tesselation_parms *parms)
-{
+static void reallocateFaces(tesselation_parms *parms) {
   quad_face_type *tmp;
   int k, n;
   int face_index = parms->face_index;
 
   parms->maxfaces = (int)(parms->maxfaces * FACEINCREASE);
   tmp = (quad_face_type *)lcalloc(parms->maxfaces, sizeof(quad_face_type));
-  if (!tmp) ErrorExit(ERROR_NOMEMORY, "%s: max faces %d exceeded", Progname, parms->maxfaces);
+  if (!tmp)
+    ErrorExit(ERROR_NOMEMORY, "%s: max faces %d exceeded", Progname,
+              parms->maxfaces);
   for (k = 0; k < face_index; k++) {
     tmp[k].imnr = parms->face[k].imnr;
     tmp[k].i = parms->face[k].i;
     tmp[k].j = parms->face[k].j;
     tmp[k].f = parms->face[k].f;
     tmp[k].num = parms->face[k].num;
-    for (n = 0; n < 4; n++) tmp[k].v[n] = parms->face[k].v[n];
+    for (n = 0; n < 4; n++)
+      tmp[k].v[n] = parms->face[k].v[n];
   }
 
   free(parms->face);
   parms->face = tmp;
 }
 
-static void add_face(int imnr, int i, int j, int f, int prev_flag, tesselation_parms *parms)
-{
+static void add_face(int imnr, int i, int j, int f, int prev_flag,
+                     tesselation_parms *parms) {
   int pack = f * parms->imgsize + i * parms->width + j;
   int face_index = parms->face_index;
 
-  if (face_index >= parms->maxfaces - 1) reallocateFaces(parms);
+  if (face_index >= parms->maxfaces - 1)
+    reallocateFaces(parms);
   if (prev_flag)
     parms->face_index_table0[pack] = face_index;
   else
@@ -645,12 +669,12 @@ static void add_face(int imnr, int i, int j, int f, int prev_flag, tesselation_p
   parms->face_index++;
 }
 
-static int add_vertex(int imnr, int i, int j, tesselation_parms *parms)
-{
+static int add_vertex(int imnr, int i, int j, tesselation_parms *parms) {
   //  int pack = i*(parms->width+1)+j;
   int vertex_index = parms->vertex_index;
 
-  if (vertex_index >= parms->maxvertices - 1) reallocateVertices(parms);
+  if (vertex_index >= parms->maxvertices - 1)
+    reallocateVertices(parms);
   //  parms->vertex_index_table[pack] = vertex_index;
   parms->vertex[vertex_index].imnr = imnr;
   parms->vertex[vertex_index].i = i;
@@ -659,28 +683,33 @@ static int add_vertex(int imnr, int i, int j, tesselation_parms *parms)
   return parms->vertex_index++;
 }
 
-static int facep(int im0, int i0, int j0, int im1, int i1, int j1, tesselation_parms *parms)
-{
+static int facep(int im0, int i0, int j0, int im1, int i1, int j1,
+                 tesselation_parms *parms) {
   unsigned char ***im = parms->im;
   int value = parms->current_label;
-  return (im0 >= parms->zmin && im0 <= parms->zmax && i0 >= parms->ymin && i0 <= parms->ymax && j0 >= parms->xmin &&
-          j0 <= parms->xmax && im1 >= parms->zmin && im1 <= parms->zmax && i1 >= parms->ymin && i1 <= parms->ymax &&
-          j1 >= parms->xmin && j1 <= parms->xmax && im[im0][i0][j0] != im[im1][i1][j1] &&
-          ((im[im0][i0][j0] == value || im[im1][i1][j1] == value) || parms->all_flag));
+  return (im0 >= parms->zmin && im0 <= parms->zmax && i0 >= parms->ymin &&
+          i0 <= parms->ymax && j0 >= parms->xmin && j0 <= parms->xmax &&
+          im1 >= parms->zmin && im1 <= parms->zmax && i1 >= parms->ymin &&
+          i1 <= parms->ymax && j1 >= parms->xmin && j1 <= parms->xmax &&
+          im[im0][i0][j0] != im[im1][i1][j1] &&
+          ((im[im0][i0][j0] == value || im[im1][i1][j1] == value) ||
+           parms->all_flag));
 }
 
-static void check_face(
-    int im0, int i0, int j0, int im1, int i1, int j1, int f, int n, int v_ind, int prev_flag, tesselation_parms *parms)
-{
+static void check_face(int im0, int i0, int j0, int im1, int i1, int j1, int f,
+                       int n, int v_ind, int prev_flag,
+                       tesselation_parms *parms) {
   int f_pack = f * parms->imgsize + i0 * parms->width + j0;
   int f_ind;
   unsigned char ***im = parms->im;
   int value = parms->current_label;
 
-  if ((im0 >= parms->zmin && im0 <= parms->zmax && i0 >= parms->ymin && i0 <= parms->ymax && j0 >= parms->xmin &&
-       j0 <= parms->xmax && im1 >= parms->zmin && im1 <= parms->zmax && i1 >= parms->ymin && i1 <= parms->ymax &&
-       j1 >= parms->xmin && j1 <= parms->xmax)) {
-    if ((parms->all_flag && ((im[im0][i0][j0] != im[im1][i1][j1]) && (im[im1][i1][j1] == 0))) ||
+  if ((im0 >= parms->zmin && im0 <= parms->zmax && i0 >= parms->ymin &&
+       i0 <= parms->ymax && j0 >= parms->xmin && j0 <= parms->xmax &&
+       im1 >= parms->zmin && im1 <= parms->zmax && i1 >= parms->ymin &&
+       i1 <= parms->ymax && j1 >= parms->xmin && j1 <= parms->xmax)) {
+    if ((parms->all_flag &&
+         ((im[im0][i0][j0] != im[im1][i1][j1]) && (im[im1][i1][j1] == 0))) ||
         (((im[im0][i0][j0] == value) && (im[im1][i1][j1] != value)))) {
       if (n == 0) {
         add_face(im0, i0, j0, f, prev_flag, parms);
@@ -690,14 +719,15 @@ static void check_face(
       else
         f_ind = parms->face_index_table1[f_pack];
       parms->face[f_ind].v[n] = v_ind;
-      if (parms->vertex[v_ind].num < 9) parms->vertex[v_ind].f[parms->vertex[v_ind].num++] = f_ind;
+      if (parms->vertex[v_ind].num < 9)
+        parms->vertex[v_ind].f[parms->vertex[v_ind].num++] = f_ind;
     }
   }
 }
 
-static void check_face2(
-    int im0, int i0, int j0, int im1, int i1, int j1, int f, int n, int v_ind, int prev_flag, tesselation_parms *parms)
-{
+static void check_face2(int im0, int i0, int j0, int im1, int i1, int j1, int f,
+                        int n, int v_ind, int prev_flag,
+                        tesselation_parms *parms) {
   int f_pack = f * parms->imgsize + i0 * parms->width + j0;
   int f_ind;
 
@@ -709,11 +739,11 @@ static void check_face2(
   else
     f_ind = parms->face_index_table1[f_pack];
   parms->face[f_ind].v[n] = v_ind;
-  if (parms->vertex[v_ind].num < 9) parms->vertex[v_ind].f[parms->vertex[v_ind].num++] = f_ind;
+  if (parms->vertex[v_ind].num < 9)
+    parms->vertex[v_ind].f[parms->vertex[v_ind].num++] = f_ind;
 }
 
-static void make_surface(tesselation_parms *parms)
-{
+static void make_surface(tesselation_parms *parms) {
   int imnr, i, j, f_pack, v_ind, f;
   int n;
 
@@ -728,50 +758,74 @@ static void make_surface(tesselation_parms *parms)
     parms->zmax = parms->kmax[parms->ind];
 
     if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
-      fprintf(stdout, "working on label %d (%s)\n", parms->current_label, cma_label_to_name(parms->current_label));
+      fprintf(stdout, "working on label %d (%s)\n", parms->current_label,
+              cma_label_to_name(parms->current_label));
 
     allocateTesselation(parms);
 
     for (imnr = parms->zmin; imnr <= parms->zmax; imnr++) {
-      if ((Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) && (parms->vertex_index || parms->face_index) && !(imnr % 10))
-        fprintf(stdout, "slice %d: %d vertices, %d faces\n", imnr, parms->vertex_index, parms->face_index);
+      if ((Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) &&
+          (parms->vertex_index || parms->face_index) && !(imnr % 10))
+        fprintf(stdout, "slice %d: %d vertices, %d faces\n", imnr,
+                parms->vertex_index, parms->face_index);
       for (i = parms->ymin; i <= parms->ymax; i++)
         for (j = parms->xmin; j <= parms->xmax; j++) {
           if (facep(imnr, i - 1, j - 1, imnr - 1, i - 1, j - 1, parms) ||
-              facep(imnr, i - 1, j, imnr - 1, i - 1, j, parms) || facep(imnr, i, j, imnr - 1, i, j, parms) ||
+              facep(imnr, i - 1, j, imnr - 1, i - 1, j, parms) ||
+              facep(imnr, i, j, imnr - 1, i, j, parms) ||
               facep(imnr, i, j - 1, imnr - 1, i, j - 1, parms) ||
               facep(imnr - 1, i, j - 1, imnr - 1, i - 1, j - 1, parms) ||
-              facep(imnr - 1, i, j, imnr - 1, i - 1, j, parms) || facep(imnr, i, j, imnr, i - 1, j, parms) ||
+              facep(imnr - 1, i, j, imnr - 1, i - 1, j, parms) ||
+              facep(imnr, i, j, imnr, i - 1, j, parms) ||
               facep(imnr, i, j - 1, imnr, i - 1, j - 1, parms) ||
               facep(imnr - 1, i - 1, j, imnr - 1, i - 1, j - 1, parms) ||
-              facep(imnr - 1, i, j, imnr - 1, i, j - 1, parms) || facep(imnr, i, j, imnr, i, j - 1, parms) ||
+              facep(imnr - 1, i, j, imnr - 1, i, j - 1, parms) ||
+              facep(imnr, i, j, imnr, i, j - 1, parms) ||
               facep(imnr, i - 1, j, imnr, i - 1, j - 1, parms)) {
             v_ind = add_vertex(imnr, i, j, parms);
-            check_face(imnr, i - 1, j - 1, imnr - 1, i - 1, j - 1, 0, 2, v_ind, 0, parms);
-            check_face(imnr, i - 1, j, imnr - 1, i - 1, j, 0, 3, v_ind, 0, parms);
+            check_face(imnr, i - 1, j - 1, imnr - 1, i - 1, j - 1, 0, 2, v_ind,
+                       0, parms);
+            check_face(imnr, i - 1, j, imnr - 1, i - 1, j, 0, 3, v_ind, 0,
+                       parms);
             check_face(imnr, i, j, imnr - 1, i, j, 0, 0, v_ind, 0, parms);
-            check_face(imnr, i, j - 1, imnr - 1, i, j - 1, 0, 1, v_ind, 0, parms);
-            check_face(imnr - 1, i, j - 1, imnr - 1, i - 1, j - 1, 2, 2, v_ind, 1, parms);
-            check_face(imnr - 1, i, j, imnr - 1, i - 1, j, 2, 1, v_ind, 1, parms);
+            check_face(imnr, i, j - 1, imnr - 1, i, j - 1, 0, 1, v_ind, 0,
+                       parms);
+            check_face(imnr - 1, i, j - 1, imnr - 1, i - 1, j - 1, 2, 2, v_ind,
+                       1, parms);
+            check_face(imnr - 1, i, j, imnr - 1, i - 1, j, 2, 1, v_ind, 1,
+                       parms);
             check_face(imnr, i, j, imnr, i - 1, j, 2, 0, v_ind, 0, parms);
-            check_face(imnr, i, j - 1, imnr, i - 1, j - 1, 2, 3, v_ind, 0, parms);
-            check_face(imnr - 1, i - 1, j, imnr - 1, i - 1, j - 1, 4, 2, v_ind, 1, parms);
-            check_face(imnr - 1, i, j, imnr - 1, i, j - 1, 4, 3, v_ind, 1, parms);
+            check_face(imnr, i, j - 1, imnr, i - 1, j - 1, 2, 3, v_ind, 0,
+                       parms);
+            check_face(imnr - 1, i - 1, j, imnr - 1, i - 1, j - 1, 4, 2, v_ind,
+                       1, parms);
+            check_face(imnr - 1, i, j, imnr - 1, i, j - 1, 4, 3, v_ind, 1,
+                       parms);
             check_face(imnr, i, j, imnr, i, j - 1, 4, 0, v_ind, 0, parms);
-            check_face(imnr, i - 1, j, imnr, i - 1, j - 1, 4, 1, v_ind, 0, parms);
+            check_face(imnr, i - 1, j, imnr, i - 1, j - 1, 4, 1, v_ind, 0,
+                       parms);
 
-            check_face(imnr - 1, i - 1, j - 1, imnr, i - 1, j - 1, 1, 2, v_ind, 1, parms);
-            check_face(imnr - 1, i - 1, j, imnr, i - 1, j, 1, 1, v_ind, 1, parms);
+            check_face(imnr - 1, i - 1, j - 1, imnr, i - 1, j - 1, 1, 2, v_ind,
+                       1, parms);
+            check_face(imnr - 1, i - 1, j, imnr, i - 1, j, 1, 1, v_ind, 1,
+                       parms);
             check_face(imnr - 1, i, j, imnr, i, j, 1, 0, v_ind, 1, parms);
-            check_face(imnr - 1, i, j - 1, imnr, i, j - 1, 1, 3, v_ind, 1, parms);
-            check_face(imnr - 1, i - 1, j - 1, imnr - 1, i, j - 1, 3, 2, v_ind, 1, parms);
-            check_face(imnr - 1, i - 1, j, imnr - 1, i, j, 3, 3, v_ind, 1, parms);
+            check_face(imnr - 1, i, j - 1, imnr, i, j - 1, 1, 3, v_ind, 1,
+                       parms);
+            check_face(imnr - 1, i - 1, j - 1, imnr - 1, i, j - 1, 3, 2, v_ind,
+                       1, parms);
+            check_face(imnr - 1, i - 1, j, imnr - 1, i, j, 3, 3, v_ind, 1,
+                       parms);
             check_face(imnr, i - 1, j, imnr, i, j, 3, 0, v_ind, 0, parms);
-            check_face(imnr, i - 1, j - 1, imnr, i, j - 1, 3, 1, v_ind, 0, parms);
-            check_face(imnr - 1, i - 1, j - 1, imnr - 1, i - 1, j, 5, 2, v_ind, 1, parms);
-            check_face(imnr - 1, i, j - 1, imnr - 1, i, j, 5, 1, v_ind, 1, parms);
+            check_face(imnr, i - 1, j - 1, imnr, i, j - 1, 3, 1, v_ind, 0,
+                       parms);
+            check_face(imnr - 1, i - 1, j - 1, imnr - 1, i - 1, j, 5, 2, v_ind,
+                       1, parms);
+            check_face(imnr - 1, i, j - 1, imnr - 1, i, j, 5, 1, v_ind, 1,
+                       parms);
             check_face(imnr, i, j - 1, imnr, i, j, 5, 0, v_ind, 0, parms);
-            check_face(imnr, i - 1, j - 1, imnr, i - 1, j, 5, 3, v_ind, 0, parms);
+            check_face(imnr, i - 1, j - 1, imnr, i - 1, j, 5, 3, v_ind, 0,
+                       parms);
           }
         }
 
@@ -789,8 +843,7 @@ static void make_surface(tesselation_parms *parms)
 
 typedef unsigned char CNBH[2][2][2];
 
-static int computeconnectedcomponents(CNBH *tab)
-{
+static int computeconnectedcomponents(CNBH *tab) {
   int i, j, k, a, b, c, ik, jk, kk, ct;
   int nvox, label, sum;
   int comp_table[12];
@@ -805,15 +858,19 @@ static int computeconnectedcomponents(CNBH *tab)
         if ((*tab)[i][j][k]) {
           for (nvox = 0, ik = -1; ik <= 1; ik++) {
             a = i + ik;
-            if (a < 0 || a >= 2) continue;
+            if (a < 0 || a >= 2)
+              continue;
             for (jk = -1; jk <= 1; jk++) {
               b = j + jk;
-              if (b < 0 || b >= 2) continue;
+              if (b < 0 || b >= 2)
+                continue;
               for (kk = -1; kk <= 1; kk++) {
                 sum = abs(ik) + abs(jk) + abs(kk);
-                if (sum > 1 || (!sum)) continue;
+                if (sum > 1 || (!sum))
+                  continue;
                 c = k + kk;
-                if (c < 0 || c >= 2) continue;
+                if (c < 0 || c >= 2)
+                  continue;
                 label = (*tab)[a][b][c];
                 if (label > 1) {
                   comp_table[label - 1] = 2;
@@ -822,14 +879,13 @@ static int computeconnectedcomponents(CNBH *tab)
               }
             }
           }
-          if (!nvox)  // find new basin!
+          if (!nvox) // find new basin!
           {
             for (ct = 1; comp_table[ct] && ct < 10; ct++)
               ;
-            (*tab)[i][j][k] = ct + 1;  // label the new basin
-            comp_table[ct] = 1;        // note that this number is taken
-          }
-          else {
+            (*tab)[i][j][k] = ct + 1; // label the new basin
+            comp_table[ct] = 1;       // note that this number is taken
+          } else {
             min_val = 11;
 
             // merging into the smallest value
@@ -848,7 +904,8 @@ static int computeconnectedcomponents(CNBH *tab)
                 for (x = 0; x < 2; x++)
                   for (y = 0; y < 2; y++)
                     for (z = 0; z < 2; z++)
-                      if ((*tab)[x][y][z] == ct + 1) (*tab)[x][y][z] = min_val + 1;
+                      if ((*tab)[x][y][z] == ct + 1)
+                        (*tab)[x][y][z] = min_val + 1;
                 // specify that this basin nbr
                 // doesn't exist anymore
                 comp_table[ct] = 0;
@@ -857,13 +914,13 @@ static int computeconnectedcomponents(CNBH *tab)
         }
 
   for (nvox = 0, ct = 1; ct < 10; ct++)
-    if (comp_table[ct]) nvox++;
+    if (comp_table[ct])
+      nvox++;
 
   return nvox;
 }
 
-static void make_surface_with_connectivity(tesselation_parms *parms)
-{
+static void make_surface_with_connectivity(tesselation_parms *parms) {
   int imnr, i, j, k, f_pack, v_ind, f, a, b, c, label, nlabels, comp, m;
   int n, slcx, slcy, slcz, indx, indy, indz;
   CNBH tab;
@@ -872,21 +929,21 @@ static void make_surface_with_connectivity(tesselation_parms *parms)
   MRI *mri, *mri_src = parms->mri;
 
   switch (parms->connectivity) {
-    case 1:
-      threshold = 0.510000f;
-      break;
-    case 2:
-      threshold = 0.26000f;
-      break;
-    case 3:
-      threshold = 0.751f;
-      break;
-    case 4:
-      threshold = 0.25f;
-      break;
-    default:
-      threshold = 0.5f;
-      break;
+  case 1:
+    threshold = 0.510000f;
+    break;
+  case 2:
+    threshold = 0.26000f;
+    break;
+  case 3:
+    threshold = 0.751f;
+    break;
+  case 4:
+    threshold = 0.25f;
+    break;
+  default:
+    threshold = 0.5f;
+    break;
   };
   step = 0.5f;
 
@@ -902,7 +959,8 @@ static void make_surface_with_connectivity(tesselation_parms *parms)
     parms->zmax = parms->kmax[parms->ind];
 
     if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
-      fprintf(stdout, "working on label %d (%s)\n", parms->current_label, cma_label_to_name(parms->current_label));
+      fprintf(stdout, "working on label %d (%s)\n", parms->current_label,
+              cma_label_to_name(parms->current_label));
 
     // init temporary MRI
     if (parms->all_flag)
@@ -927,8 +985,10 @@ static void make_surface_with_connectivity(tesselation_parms *parms)
 
     for (imnr = parms->zmin; imnr <= parms->zmax + 1; imnr++)
       for (slcz = -1; slcz < 1; slcz++) {
-        if ((Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) && (parms->vertex_index || parms->face_index) && !(imnr % 10))
-          fprintf(stdout, "slice %d: %d vertices, %d faces\n", imnr, parms->vertex_index, parms->face_index);
+        if ((Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) &&
+            (parms->vertex_index || parms->face_index) && !(imnr % 10))
+          fprintf(stdout, "slice %d: %d vertices, %d faces\n", imnr,
+                  parms->vertex_index, parms->face_index);
         for (i = parms->ymin; i <= parms->ymax + 1; i++)
           for (j = parms->xmin; j <= parms->xmax + 1; j++)
             for (slcy = -1; slcy < 1; slcy++)
@@ -955,7 +1015,8 @@ static void make_surface_with_connectivity(tesselation_parms *parms)
                 nlabels = computeconnectedcomponents(&tab);
 
                 for (m = 0; m < nlabels; m++) {
-                  if (tab[0][0][0] * tab[0][0][1] * tab[0][1][0] * tab[0][1][1] * tab[1][0][0] * tab[1][0][1] *
+                  if (tab[0][0][0] * tab[0][0][1] * tab[0][1][0] *
+                      tab[0][1][1] * tab[1][0][0] * tab[1][0][1] *
                       tab[1][1][0] * tab[1][1][1])
                     continue;
                   comp = m + 2;
@@ -976,58 +1037,83 @@ static void make_surface_with_connectivity(tesselation_parms *parms)
 
                   // for each component, we have to add a vertex
                   v_ind = add_vertex(indz, indy, indx, parms);
-                  // fprintf(stderr,"\n lab %d  Nbr = %d ",nlabels,parms->vertex_index);
+                  // fprintf(stderr,"\n lab %d  Nbr = %d
+                  // ",nlabels,parms->vertex_index);
 
                   // then check which faces are concerned
                   if ((tab[1][0][0] == comp) && (!tab[0][0][0]))
-                    check_face2(indz, indy - 1, indx - 1, indz - 1, indy - 1, indx - 1, 0, 2, v_ind, 0, parms);
+                    check_face2(indz, indy - 1, indx - 1, indz - 1, indy - 1,
+                                indx - 1, 0, 2, v_ind, 0, parms);
                   if ((tab[1][0][1] == comp) && (!tab[0][0][1]))
-                    check_face2(indz, indy - 1, indx, indz - 1, indy - 1, indx, 0, 3, v_ind, 0, parms);
+                    check_face2(indz, indy - 1, indx, indz - 1, indy - 1, indx,
+                                0, 3, v_ind, 0, parms);
                   if ((tab[1][1][1] == comp) && (!tab[0][1][1]))
-                    check_face2(indz, indy, indx, indz - 1, indy, indx, 0, 0, v_ind, 0, parms);
+                    check_face2(indz, indy, indx, indz - 1, indy, indx, 0, 0,
+                                v_ind, 0, parms);
                   if ((tab[1][1][0] == comp) && (!tab[0][1][0]))
-                    check_face2(indz, indy, indx - 1, indz - 1, indy, indx - 1, 0, 1, v_ind, 0, parms);
+                    check_face2(indz, indy, indx - 1, indz - 1, indy, indx - 1,
+                                0, 1, v_ind, 0, parms);
                   if ((tab[0][1][0] == comp) && (!tab[0][0][0]))
-                    check_face2(indz - 1, indy, indx - 1, indz - 1, indy - 1, indx - 1, 2, 2, v_ind, 1, parms);
+                    check_face2(indz - 1, indy, indx - 1, indz - 1, indy - 1,
+                                indx - 1, 2, 2, v_ind, 1, parms);
                   if ((tab[0][1][1] == comp) && (!tab[0][0][1]))
-                    check_face2(indz - 1, indy, indx, indz - 1, indy - 1, indx, 2, 1, v_ind, 1, parms);
+                    check_face2(indz - 1, indy, indx, indz - 1, indy - 1, indx,
+                                2, 1, v_ind, 1, parms);
                   if ((tab[1][1][1] == comp) && (!tab[1][0][1]))
-                    check_face2(indz, indy, indx, indz, indy - 1, indx, 2, 0, v_ind, 0, parms);
+                    check_face2(indz, indy, indx, indz, indy - 1, indx, 2, 0,
+                                v_ind, 0, parms);
                   if ((tab[1][1][0] == comp) && (!tab[1][0][0]))
-                    check_face2(indz, indy, indx - 1, indz, indy - 1, indx - 1, 2, 3, v_ind, 0, parms);
+                    check_face2(indz, indy, indx - 1, indz, indy - 1, indx - 1,
+                                2, 3, v_ind, 0, parms);
                   if ((tab[0][0][1] == comp) && (!tab[0][0][0]))
-                    check_face2(indz - 1, indy - 1, indx, indz - 1, indy - 1, indx - 1, 4, 2, v_ind, 1, parms);
+                    check_face2(indz - 1, indy - 1, indx, indz - 1, indy - 1,
+                                indx - 1, 4, 2, v_ind, 1, parms);
                   if ((tab[0][1][1] == comp) && (!tab[0][1][0]))
-                    check_face2(indz - 1, indy, indx, indz - 1, indy, indx - 1, 4, 3, v_ind, 1, parms);
+                    check_face2(indz - 1, indy, indx, indz - 1, indy, indx - 1,
+                                4, 3, v_ind, 1, parms);
                   if ((tab[1][1][1] == comp) && (!tab[1][1][0]))
-                    check_face2(indz, indy, indx, indz, indy, indx - 1, 4, 0, v_ind, 0, parms);
+                    check_face2(indz, indy, indx, indz, indy, indx - 1, 4, 0,
+                                v_ind, 0, parms);
                   if ((tab[1][0][1] == comp) && (!tab[1][0][0]))
-                    check_face2(indz, indy - 1, indx, indz, indy - 1, indx - 1, 4, 1, v_ind, 0, parms);
+                    check_face2(indz, indy - 1, indx, indz, indy - 1, indx - 1,
+                                4, 1, v_ind, 0, parms);
 
                   if ((tab[0][0][0] == comp) && (!tab[1][0][0]))
-                    check_face2(indz - 1, indy - 1, indx - 1, indz, indy - 1, indx - 1, 1, 2, v_ind, 1, parms);
+                    check_face2(indz - 1, indy - 1, indx - 1, indz, indy - 1,
+                                indx - 1, 1, 2, v_ind, 1, parms);
                   if ((tab[0][0][1] == comp) && (!tab[1][0][1]))
-                    check_face2(indz - 1, indy - 1, indx, indz, indy - 1, indx, 1, 1, v_ind, 1, parms);
+                    check_face2(indz - 1, indy - 1, indx, indz, indy - 1, indx,
+                                1, 1, v_ind, 1, parms);
                   if ((tab[0][1][1] == comp) && (!tab[1][1][1]))
-                    check_face2(indz - 1, indy, indx, indz, indy, indx, 1, 0, v_ind, 1, parms);
+                    check_face2(indz - 1, indy, indx, indz, indy, indx, 1, 0,
+                                v_ind, 1, parms);
                   if ((tab[0][1][0] == comp) && (!tab[1][1][0]))
-                    check_face2(indz - 1, indy, indx - 1, indz, indy, indx - 1, 1, 3, v_ind, 1, parms);
+                    check_face2(indz - 1, indy, indx - 1, indz, indy, indx - 1,
+                                1, 3, v_ind, 1, parms);
                   if ((tab[0][0][0] == comp) && (!tab[0][1][0]))
-                    check_face2(indz - 1, indy - 1, indx - 1, indz - 1, indy, indx - 1, 3, 2, v_ind, 1, parms);
+                    check_face2(indz - 1, indy - 1, indx - 1, indz - 1, indy,
+                                indx - 1, 3, 2, v_ind, 1, parms);
                   if ((tab[0][0][1] == comp) && (!tab[0][1][1]))
-                    check_face2(indz - 1, indy - 1, indx, indz - 1, indy, indx, 3, 3, v_ind, 1, parms);
+                    check_face2(indz - 1, indy - 1, indx, indz - 1, indy, indx,
+                                3, 3, v_ind, 1, parms);
                   if ((tab[1][0][1] == comp) && (!tab[1][1][1]))
-                    check_face2(indz, indy - 1, indx, indz, indy, indx, 3, 0, v_ind, 0, parms);
+                    check_face2(indz, indy - 1, indx, indz, indy, indx, 3, 0,
+                                v_ind, 0, parms);
                   if ((tab[1][0][0] == comp) && (!tab[1][1][0]))
-                    check_face2(indz, indy - 1, indx - 1, indz, indy, indx - 1, 3, 1, v_ind, 0, parms);
+                    check_face2(indz, indy - 1, indx - 1, indz, indy, indx - 1,
+                                3, 1, v_ind, 0, parms);
                   if ((tab[0][0][0] == comp) && (!tab[0][0][1]))
-                    check_face2(indz - 1, indy - 1, indx - 1, indz - 1, indy - 1, indx, 5, 2, v_ind, 1, parms);
+                    check_face2(indz - 1, indy - 1, indx - 1, indz - 1,
+                                indy - 1, indx, 5, 2, v_ind, 1, parms);
                   if ((tab[0][1][0] == comp) && (!tab[0][1][1]))
-                    check_face2(indz - 1, indy, indx - 1, indz - 1, indy, indx, 5, 1, v_ind, 1, parms);
+                    check_face2(indz - 1, indy, indx - 1, indz - 1, indy, indx,
+                                5, 1, v_ind, 1, parms);
                   if ((tab[1][1][0] == comp) && (!tab[1][1][1]))
-                    check_face2(indz, indy, indx - 1, indz, indy, indx, 5, 0, v_ind, 0, parms);
+                    check_face2(indz, indy, indx - 1, indz, indy, indx, 5, 0,
+                                v_ind, 0, parms);
                   if ((tab[1][0][0] == comp) && (!tab[1][0][1]))
-                    check_face2(indz, indy - 1, indx - 1, indz, indy - 1, indx, 5, 3, v_ind, 0, parms);
+                    check_face2(indz, indy - 1, indx - 1, indz, indy - 1, indx,
+                                5, 3, v_ind, 0, parms);
                 }
               }
         //     for (i=parms->xmin;i<=parms->xmax;i++)
@@ -1039,7 +1125,8 @@ static void make_surface_with_connectivity(tesselation_parms *parms)
             for (f = 0; f < 6; f++) {
               // indx=2*j+slcx+1; indy=2*i+slcy+1;
               f_pack = f * parms->imgsize + i * parms->width + j;
-              parms->face_index_table0[f_pack] = parms->face_index_table1[f_pack];
+              parms->face_index_table0[f_pack] =
+                  parms->face_index_table1[f_pack];
             }
       }
 
@@ -1047,33 +1134,35 @@ static void make_surface_with_connectivity(tesselation_parms *parms)
     freeTesselation(parms);
     for (k = parms->zmin; k <= parms->zmax; k++)
       for (j = parms->ymin; j <= parms->ymax; j++)
-        for (i = parms->xmin; i <= parms->xmax; i++) MRIvox(mri, i, j, k) = 0;
+        for (i = parms->xmin; i <= parms->xmax; i++)
+          MRIvox(mri, i, j, k) = 0;
   }
   MRIfree(&mri);
 }
 
-MRIS *MRIScreateSurfaceFromVolume(MRI *mri, int label, int connectivity)
-{
+MRIS *MRIScreateSurfaceFromVolume(MRI *mri, int label, int connectivity) {
   tesselation_parms *parms;
   MRIS **mris_table, *mris;
 
   parms = (tesselation_parms *)calloc(1, sizeof(tesselation_parms));
-  if (!parms) ErrorExit(ERROR_NOMEMORY, "tesselation parms\n");
+  if (!parms)
+    ErrorExit(ERROR_NOMEMORY, "tesselation parms\n");
   parms->mri = mri;
 
   /*init tesselation_parms structure*/
-  parms->number_of_labels = 1;  // only one single label
+  parms->number_of_labels = 1; // only one single label
   parms->label_values = (int *)malloc(sizeof(int));
   parms->label_values[0] = label;
   parms->ind = 0;
-  mris_table = (MRIS **)malloc(sizeof(MRIS *));  // final surface information
+  mris_table = (MRIS **)malloc(sizeof(MRIS *)); // final surface information
   parms->mris_table = mris_table;
-  if ((!parms->label_values) || (!mris_table)) ErrorExit(ERROR_NOMEMORY, "labels/surfaces tables\n");
+  if ((!parms->label_values) || (!mris_table))
+    ErrorExit(ERROR_NOMEMORY, "labels/surfaces tables\n");
 
   parms->connectivity = connectivity;
-  if (!label)  // if label==0 then all_flag mode
+  if (!label) // if label==0 then all_flag mode
     parms->all_flag = 1;
-  initTesselationParms(parms);  // final parms init
+  initTesselationParms(parms); // final parms init
 
   if (parms->connectivity > 0)
     make_surface_with_connectivity(parms);
@@ -1088,25 +1177,29 @@ MRIS *MRIScreateSurfaceFromVolume(MRI *mri, int label, int connectivity)
   return mris;
 }
 
-MRIS **MRIScreateSurfacesFromVolume(MRI *mri, int number_of_labels, int *labelvalues, int connectivity)
-{
+MRIS **MRIScreateSurfacesFromVolume(MRI *mri, int number_of_labels,
+                                    int *labelvalues, int connectivity) {
   tesselation_parms *parms;
   MRIS **mris_table;
 
-  if (!labelvalues) ErrorExit(ERROR_BADPARM, "int *labelvalues\n");
+  if (!labelvalues)
+    ErrorExit(ERROR_BADPARM, "int *labelvalues\n");
 
   parms = (tesselation_parms *)calloc(1, sizeof(tesselation_parms));
   parms->mri = mri;
-  if (!parms) ErrorExit(ERROR_NOMEMORY, "tesselation parms\n");
+  if (!parms)
+    ErrorExit(ERROR_NOMEMORY, "tesselation parms\n");
 
   /*init tesselation_parms structure*/
-  parms->number_of_labels = number_of_labels;  // label information
+  parms->number_of_labels = number_of_labels; // label information
   parms->label_values = labelvalues;
-  mris_table = (MRIS **)malloc(number_of_labels * sizeof(MRIS *));  // final surfaces information
-  if ((!parms->label_values) || (!mris_table)) ErrorExit(ERROR_NOMEMORY, "surfaces tables\n");
+  mris_table = (MRIS **)malloc(number_of_labels *
+                               sizeof(MRIS *)); // final surfaces information
+  if ((!parms->label_values) || (!mris_table))
+    ErrorExit(ERROR_NOMEMORY, "surfaces tables\n");
 
   parms->mris_table = mris_table;
-  initTesselationParms(parms);  // final parms init
+  initTesselationParms(parms); // final parms init
 
   parms->connectivity = connectivity;
   if (parms->connectivity > 0)

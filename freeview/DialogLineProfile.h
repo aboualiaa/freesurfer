@@ -10,8 +10,7 @@ class DialogLineProfile;
 class LayerLineProfile;
 class LayerPointSet;
 
-class DialogLineProfile : public QDialog
-{
+class DialogLineProfile : public QDialog {
   Q_OBJECT
 
 public:
@@ -21,7 +20,7 @@ public:
   double GetResolution();
   double GetSpacing();
   double GetOffset();
-  int    GetNumberOfSamples();
+  int GetNumberOfSamples();
 
 public slots:
   void UpdatePointSetList();
@@ -34,18 +33,18 @@ protected slots:
   void OnClear();
   void OnComboIsoLine(int sel);
   void OnSliderOpacity(int);
-  void OnEditRadius(const QString& strg);
-  void OnColorPicker(const QColor& color);
-  void OnLineProfileIdPicked(LayerLineProfile* lp, int nId);
+  void OnEditRadius(const QString &strg);
+  void OnColorPicker(const QColor &color);
+  void OnLineProfileIdPicked(LayerLineProfile *lp, int nId);
   void UpdateWidgets();
   void OnExportThickness();
 
 private:
-  bool Validate(LayerPointSet*& spline0, LayerPointSet* &spline1);
+  bool Validate(LayerPointSet *&spline0, LayerPointSet *&spline1);
 
   Ui::DialogLineProfile *ui;
 
-  LayerLineProfile*   m_lineProfile;
+  LayerLineProfile *m_lineProfile;
 };
 
 #endif // DIALOGLINEPROFILE_H

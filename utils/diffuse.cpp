@@ -24,8 +24,8 @@
  */
 
 #include <memory.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
 #include "const.h"
 #include "diag.h"
@@ -46,12 +46,13 @@ float sx[9] = {-0.25f, 0.0f, 0.25f, -0.5f, 0.0f, 0.5f, -0.25f, 0.0f, 0.25f};
 ----------------------------------------------------------------------*/
 #define g(I, k) exp((-1.0 / (k)) * fabs((double)(I)))
 #define LAMBDA 0.25
-int ImageDiffuse(IMAGE *inImage, IMAGE *outImage, double k, int niter, int which, double slope, KIMAGE *kimage)
-{
+int ImageDiffuse(IMAGE *inImage, IMAGE *outImage, double k, int niter,
+                 int which, double slope, KIMAGE *kimage) {
   IMAGE *fSrcImage, *fDstImage;
 
   if (outImage->pixel_format != inImage->pixel_format) {
-    fprintf(stderr, "ImageDiffuse: input and output image format must match.\n");
+    fprintf(stderr,
+            "ImageDiffuse: input and output image format must match.\n");
     exit(2);
   }
 
@@ -69,18 +70,18 @@ int ImageDiffuse(IMAGE *inImage, IMAGE *outImage, double k, int niter, int which
   ImageCopy(inImage, fSrcImage);
 
   switch (which) {
-    case DIFFUSE_PERONA:
-      ImageDiffusePerona(fSrcImage, fDstImage, k, niter, slope, kimage);
-      break;
-    case DIFFUSE_CURVATURE:
-      ImageDiffuseCurvature(fSrcImage, fDstImage, k, niter, slope, kimage);
-      break;
-    case DIFFUSE_HV:
-      ImageDiffuseHV(fSrcImage, fDstImage, k, niter, slope, kimage);
-      break;
-    default:
-      fprintf(stderr, "ImageDiffuse: unknown diffusion type %d\n", which);
-      break;
+  case DIFFUSE_PERONA:
+    ImageDiffusePerona(fSrcImage, fDstImage, k, niter, slope, kimage);
+    break;
+  case DIFFUSE_CURVATURE:
+    ImageDiffuseCurvature(fSrcImage, fDstImage, k, niter, slope, kimage);
+    break;
+  case DIFFUSE_HV:
+    ImageDiffuseHV(fSrcImage, fDstImage, k, niter, slope, kimage);
+    break;
+  default:
+    fprintf(stderr, "ImageDiffuse: unknown diffusion type %d\n", which);
+    break;
   }
 
   ImageCopy(fDstImage, outImage);
@@ -101,35 +102,41 @@ int ImageDiffuse(IMAGE *inImage, IMAGE *outImage, double k, int niter, int which
 #define KERNEL_MUL 0.125f
 #endif
 
-int ImageDiffuseCurvature(IMAGE *inImage, IMAGE *outImage, double A, int niter, double slope, KIMAGE *kimage)
-{
+int ImageDiffuseCurvature(IMAGE *inImage, IMAGE *outImage, double A, int niter,
+                          double slope, KIMAGE *kimage) {
   int x, y, i, rows, cols, *xE, *yN, *xW, *yS, ys, yn, xe, xw, ci;
   float c[9], fvals[9], dst_val;
   FILE *fp;
-  KIMAGE *ksrc = NULL;
-  static IMAGE *tmpImage = NULL, *gradImage = NULL;
+  KIMAGE *ksrc = nullptr;
+  static IMAGE *tmpImage = nullptr, *gradImage = nullptr;
 
   rows = inImage->rows;
   cols = inImage->cols;
 
-  if (kimage) ksrc = KernelImageClone(kimage);
+  if (kimage)
+    ksrc = KernelImageClone(kimage);
 
-  if ((outImage->pixel_format != inImage->pixel_format) || (outImage->pixel_format != PFFLOAT)) {
-    fprintf(stderr, "ImageDiffuseCurv: input and output image format must both be float.\n");
+  if ((outImage->pixel_format != inImage->pixel_format) ||
+      (outImage->pixel_format != PFFLOAT)) {
+    fprintf(stderr, "ImageDiffuseCurv: input and output image format must both "
+                    "be float.\n");
     exit(2);
   }
 
   if ((outImage->rows != inImage->rows) || (outImage->cols != inImage->cols)) {
-    fprintf(stderr, "ImageDiffuseCurv: input and output image sizes must match.\n");
+    fprintf(stderr,
+            "ImageDiffuseCurv: input and output image sizes must match.\n");
     exit(2);
   }
 
   if (!ImageCheckSize(inImage, tmpImage, 0, 0, 0)) {
-    if (tmpImage) ImageFree(&tmpImage);
+    if (tmpImage)
+      ImageFree(&tmpImage);
     tmpImage = ImageAlloc(inImage->rows, inImage->cols, PFFLOAT, 1);
   }
   if (!ImageCheckSize(inImage, gradImage, 0, 0, 0)) {
-    if (gradImage) ImageFree(&gradImage);
+    if (gradImage)
+      ImageFree(&gradImage);
     gradImage = ImageAlloc(inImage->rows, inImage->cols, PFFLOAT, 1);
   }
 
@@ -159,7 +166,7 @@ int ImageDiffuseCurvature(IMAGE *inImage, IMAGE *outImage, double A, int niter, 
     fp = fopen("diffuse.dat", "w") ;
   else
 #endif
-  fp = NULL;
+  fp = nullptr;
 
 #if FOUR_CONNECTED
   fvals[1] = c[1] = 0.0f;
@@ -174,7 +181,8 @@ int ImageDiffuseCurvature(IMAGE *inImage, IMAGE *outImage, double A, int niter, 
       fprintf(stdout, "iteration %d\n", i) ;
 #endif
 
-    if (kimage) KernelImageCopy(kimage, ksrc);
+    if (kimage)
+      KernelImageCopy(kimage, ksrc);
 
     ImageCurvature(tmpImage, (float)A, gradImage);
     for (x = 0; x < cols; x++) {
@@ -217,7 +225,8 @@ int ImageDiffuseCurvature(IMAGE *inImage, IMAGE *outImage, double A, int niter, 
 #endif
 
         c[0] = 1.0f;
-        for (ci = 1; ci <= 8; ci++) c[0] -= c[ci];
+        for (ci = 1; ci <= 8; ci++)
+          c[0] -= c[ci];
 
         if (kimage) /* track evolution of kernel */
         {
@@ -235,14 +244,16 @@ int ImageDiffuseCurvature(IMAGE *inImage, IMAGE *outImage, double A, int niter, 
 #endif
         }
 
-        for (dst_val = 0.0f, ci = 0; ci <= 8; ci++) dst_val += fvals[ci] * c[ci];
+        for (dst_val = 0.0f, ci = 0; ci <= 8; ci++)
+          dst_val += fvals[ci] * c[ci];
         *IMAGEFpix(outImage, x, y) = dst_val;
       }
     }
 
     ImageCopy(outImage, tmpImage);
     A = A + A * slope;
-    if (kimage) KernelImageNormalize(kimage);
+    if (kimage)
+      KernelImageNormalize(kimage);
   }
 
   free(xE);
@@ -250,7 +261,8 @@ int ImageDiffuseCurvature(IMAGE *inImage, IMAGE *outImage, double A, int niter, 
   free(yN);
   free(yS);
 
-  if (fp) fclose(fp);
+  if (fp)
+    fclose(fp);
 
   return (0);
 }
@@ -260,7 +272,8 @@ int ImageDiffuseCurvature(IMAGE *inImage, IMAGE *outImage, double A, int niter, 
            Description:
 ----------------------------------------------------------------------*/
 #if 0
-#define Chv(dx, dy, k) ((float)exp(-0.5f * SQR((float)(fabs(dx) - fabs(dy)) / k)))
+#define Chv(dx, dy, k)                                                         \
+  ((float)exp(-0.5f * SQR((float)(fabs(dx) - fabs(dy)) / k)))
 #else
 #define Chv(adx, ady, k) ((float)exp(-(float)SQR((adx - ady)) / k))
 #endif
@@ -294,20 +307,22 @@ static float ykernel[KSIZE * 3];
 
 #endif
 
-int ImageDiffuseHV(IMAGE *inImage, IMAGE *outImage, double k, int niter, double slope, KIMAGE *kimage)
-{
+int ImageDiffuseHV(IMAGE *inImage, IMAGE *outImage, double k, int niter,
+                   double slope, KIMAGE *kimage) {
   int x, y, i, rows, cols, *xE, *yN, *xW, *yS, ys, yn, xe, xw, ci;
   float c[9], fvals[9], dst_val;
   FILE *fp;
-  KIMAGE *ksrc = NULL;
-  static IMAGE *xImage = NULL, *yImage = NULL, *tmpImage;
+  KIMAGE *ksrc = nullptr;
+  static IMAGE *xImage = nullptr, *yImage = nullptr, *tmpImage;
   IMAGE xKernelImage, yKernelImage;
 
-  yKernelImage.cols = yKernelImage.ocols = xKernelImage.cols = xKernelImage.ocols = 3;
-  yKernelImage.cols = yKernelImage.ocols = xKernelImage.cols = xKernelImage.ocols = 3;
-  yKernelImage.image = yKernelImage.firstpix = (byte *)ykernel;
-  xKernelImage.image = xKernelImage.firstpix = (byte *)xkernel;
-  if (tmpImage == NULL) /* initialize kernels */
+  yKernelImage.cols = yKernelImage.ocols = xKernelImage.cols =
+      xKernelImage.ocols = 3;
+  yKernelImage.cols = yKernelImage.ocols = xKernelImage.cols =
+      xKernelImage.ocols = 3;
+  yKernelImage.image = yKernelImage.firstpix = (hips_byte *)ykernel;
+  xKernelImage.image = xKernelImage.firstpix = (hips_byte *)xkernel;
+  if (tmpImage == nullptr) /* initialize kernels */
   {
     int row, col;
     float *kptr;
@@ -341,9 +356,11 @@ int ImageDiffuseHV(IMAGE *inImage, IMAGE *outImage, double k, int niter, double 
   rows = inImage->rows;
   cols = inImage->cols;
 
-  if (kimage) ksrc = KernelImageClone(kimage);
+  if (kimage)
+    ksrc = KernelImageClone(kimage);
 
-  if ((outImage->pixel_format != inImage->pixel_format) || (outImage->pixel_format != PFFLOAT)) {
+  if ((outImage->pixel_format != inImage->pixel_format) ||
+      (outImage->pixel_format != PFFLOAT)) {
     fprintf(stderr,
             "ImageDiffuseHV: input and output image format must both be "
             "in float format.\n");
@@ -351,28 +368,30 @@ int ImageDiffuseHV(IMAGE *inImage, IMAGE *outImage, double k, int niter, double 
   }
 
   if ((outImage->rows != inImage->rows) || (outImage->cols != inImage->cols)) {
-    fprintf(stderr, "ImageDiffuseHV: input and output image sizes must match.\n");
+    fprintf(stderr,
+            "ImageDiffuseHV: input and output image sizes must match.\n");
     exit(2);
   }
 
   if (!ImageCheckSize(inImage, tmpImage, 0, 0, 0)) {
-    if (tmpImage) ImageFree(&tmpImage);
+    if (tmpImage)
+      ImageFree(&tmpImage);
     tmpImage = ImageAlloc(inImage->rows, inImage->cols, PFFLOAT, 1);
   }
 
   if (!ImageCheckSize(inImage, xImage, 0, 0, 0)) {
-    if (xImage) ImageFree(&xImage);
+    if (xImage)
+      ImageFree(&xImage);
     xImage = ImageAlloc(rows, cols, PFFLOAT, 1);
-  }
-  else {
+  } else {
     xImage->rows = rows;
     xImage->cols = cols;
   }
   if (!ImageCheckSize(inImage, yImage, 0, 0, 0)) {
-    if (yImage) ImageFree(&yImage);
+    if (yImage)
+      ImageFree(&yImage);
     yImage = ImageAlloc(rows, cols, PFFLOAT, 1);
-  }
-  else {
+  } else {
     yImage->rows = rows;
     yImage->cols = cols;
   }
@@ -403,7 +422,7 @@ int ImageDiffuseHV(IMAGE *inImage, IMAGE *outImage, double k, int niter, double 
     fp = fopen("diffuse.dat", "w") ;
   else
 #endif
-  fp = NULL;
+  fp = nullptr;
 
   for (i = 0; i < niter; i++) {
 #if 0
@@ -411,7 +430,8 @@ int ImageDiffuseHV(IMAGE *inImage, IMAGE *outImage, double k, int niter, double 
       fprintf(stdout, "iteration %d\n", i) ;
 #endif
 
-    if (kimage) KernelImageCopy(kimage, ksrc);
+    if (kimage)
+      KernelImageCopy(kimage, ksrc);
 
 #if 0
     ImageConvolve3x3(inImage, sx, xImage) ;
@@ -450,19 +470,28 @@ int ImageDiffuseHV(IMAGE *inImage, IMAGE *outImage, double k, int niter, double 
         fvals[8] = *IMAGEFpix(tmpImage, xe, ys);
 #endif
 
-        c[2] = KERNEL_MUL * Chv(*IMAGEFpix(xImage, x, yn), *IMAGEFpix(yImage, x, yn), k);
-        c[4] = KERNEL_MUL * Chv(*IMAGEFpix(xImage, xw, y), *IMAGEFpix(yImage, xw, y), k);
-        c[5] = KERNEL_MUL * Chv(*IMAGEFpix(xImage, xe, y), *IMAGEFpix(yImage, xe, y), k);
-        c[7] = KERNEL_MUL * Chv(*IMAGEFpix(xImage, x, ys), *IMAGEFpix(yImage, x, ys), k);
+        c[2] = KERNEL_MUL *
+               Chv(*IMAGEFpix(xImage, x, yn), *IMAGEFpix(yImage, x, yn), k);
+        c[4] = KERNEL_MUL *
+               Chv(*IMAGEFpix(xImage, xw, y), *IMAGEFpix(yImage, xw, y), k);
+        c[5] = KERNEL_MUL *
+               Chv(*IMAGEFpix(xImage, xe, y), *IMAGEFpix(yImage, xe, y), k);
+        c[7] = KERNEL_MUL *
+               Chv(*IMAGEFpix(xImage, x, ys), *IMAGEFpix(yImage, x, ys), k);
 #if !FOUR_CONNECTED
-        c[1] = KERNEL_MUL * Chv(*IMAGEFpix(xImage, xw, yn), *IMAGEFpix(yImage, xw, yn), k);
-        c[3] = KERNEL_MUL * Chv(*IMAGEFpix(xImage, xe, yn), *IMAGEFpix(yImage, xe, yn), k);
-        c[6] = KERNEL_MUL * Chv(*IMAGEFpix(xImage, xw, ys), *IMAGEFpix(yImage, xw, ys), k);
-        c[8] = KERNEL_MUL * Chv(*IMAGEFpix(xImage, xe, ys), *IMAGEFpix(yImage, xe, ys), k);
+        c[1] = KERNEL_MUL *
+               Chv(*IMAGEFpix(xImage, xw, yn), *IMAGEFpix(yImage, xw, yn), k);
+        c[3] = KERNEL_MUL *
+               Chv(*IMAGEFpix(xImage, xe, yn), *IMAGEFpix(yImage, xe, yn), k);
+        c[6] = KERNEL_MUL *
+               Chv(*IMAGEFpix(xImage, xw, ys), *IMAGEFpix(yImage, xw, ys), k);
+        c[8] = KERNEL_MUL *
+               Chv(*IMAGEFpix(xImage, xe, ys), *IMAGEFpix(yImage, xe, ys), k);
 #endif
 
         c[0] = 1.0f;
-        for (ci = 1; ci <= 8; ci++) c[0] -= c[ci];
+        for (ci = 1; ci <= 8; ci++)
+          c[0] -= c[ci];
 
         if (kimage) /* track evolution of kernel */
         {
@@ -480,14 +509,16 @@ int ImageDiffuseHV(IMAGE *inImage, IMAGE *outImage, double k, int niter, double 
 #endif
         }
 
-        for (dst_val = 0.0f, ci = 0; ci <= 8; ci++) dst_val += fvals[ci] * c[ci];
+        for (dst_val = 0.0f, ci = 0; ci <= 8; ci++)
+          dst_val += fvals[ci] * c[ci];
         *IMAGEFpix(outImage, x, y) = dst_val;
       }
     }
 
     ImageCopy(outImage, tmpImage);
     k = k + k * slope;
-    if (kimage) KernelImageNormalize(kimage);
+    if (kimage)
+      KernelImageNormalize(kimage);
   }
 
   free(xE);
@@ -495,7 +526,8 @@ int ImageDiffuseHV(IMAGE *inImage, IMAGE *outImage, double k, int niter, double 
   free(yN);
   free(yS);
 
-  if (fp) fclose(fp);
+  if (fp)
+    fclose(fp);
 
   return (0);
 }
@@ -508,20 +540,22 @@ int ImageDiffuseHV(IMAGE *inImage, IMAGE *outImage, double k, int niter, double 
 
 #define C(grad, k) ((float)exp(-0.5f * SQR((float)fabs((grad)) / k)))
 
-int ImageDiffusePerona(IMAGE *inImage, IMAGE *outImage, double k, int niter, double slope, KIMAGE *kimage)
-{
+int ImageDiffusePerona(IMAGE *inImage, IMAGE *outImage, double k, int niter,
+                       double slope, KIMAGE *kimage) {
   int x, y, i, rows, cols, *xE, *yN, *xW, *yS, ys, yn, xe, xw, ci;
   float c[9], fvals[9], dst_val;
   FILE *fp;
-  KIMAGE *ksrc = NULL;
-  static IMAGE *tmpImage = NULL, *gradImage = NULL;
+  KIMAGE *ksrc = nullptr;
+  static IMAGE *tmpImage = nullptr, *gradImage = nullptr;
 
   rows = inImage->rows;
   cols = inImage->cols;
 
-  if (kimage) ksrc = KernelImageClone(kimage);
+  if (kimage)
+    ksrc = KernelImageClone(kimage);
 
-  if ((outImage->pixel_format != inImage->pixel_format) || (outImage->pixel_format != PFFLOAT)) {
+  if ((outImage->pixel_format != inImage->pixel_format) ||
+      (outImage->pixel_format != PFFLOAT)) {
     fprintf(stderr,
             "ImageDiffusePerona: input and output image format must both be "
             "in float format.\n");
@@ -529,16 +563,19 @@ int ImageDiffusePerona(IMAGE *inImage, IMAGE *outImage, double k, int niter, dou
   }
 
   if ((outImage->rows != inImage->rows) || (outImage->cols != inImage->cols)) {
-    fprintf(stderr, "ImageDiffusePerona: input and output image sizes must match.\n");
+    fprintf(stderr,
+            "ImageDiffusePerona: input and output image sizes must match.\n");
     exit(2);
   }
 
   if (!ImageCheckSize(inImage, tmpImage, 0, 0, 0)) {
-    if (tmpImage) ImageFree(&tmpImage);
+    if (tmpImage)
+      ImageFree(&tmpImage);
     tmpImage = ImageAlloc(inImage->rows, inImage->cols, PFFLOAT, 1);
   }
   if (!ImageCheckSize(inImage, gradImage, 0, 0, 0)) {
-    if (gradImage) ImageFree(&gradImage);
+    if (gradImage)
+      ImageFree(&gradImage);
     gradImage = ImageAlloc(inImage->rows, inImage->cols, PFFLOAT, 1);
   }
 
@@ -568,7 +605,7 @@ int ImageDiffusePerona(IMAGE *inImage, IMAGE *outImage, double k, int niter, dou
     fp = fopen("diffuse.dat", "w") ;
   else
 #endif
-  fp = NULL;
+  fp = nullptr;
 
 #if FOUR_CONNECTED
   fvals[1] = c[1] = 0.0f;
@@ -582,9 +619,10 @@ int ImageDiffusePerona(IMAGE *inImage, IMAGE *outImage, double k, int niter, dou
       fprintf(stdout, "iteration %d\n", i) ;
 #endif
 
-    if (kimage) KernelImageCopy(kimage, ksrc);
+    if (kimage)
+      KernelImageCopy(kimage, ksrc);
 
-    ImageSobel(tmpImage, gradImage, NULL, NULL);
+    ImageSobel(tmpImage, gradImage, nullptr, nullptr);
 
     for (x = 0; x < cols; x++) {
       xe = xE[x];
@@ -625,7 +663,8 @@ int ImageDiffusePerona(IMAGE *inImage, IMAGE *outImage, double k, int niter, dou
 #endif
 
         c[0] = 1.0f;
-        for (ci = 1; ci <= 8; ci++) c[0] -= c[ci];
+        for (ci = 1; ci <= 8; ci++)
+          c[0] -= c[ci];
 
         if (kimage) /* track evolution of kernel */
         {
@@ -643,14 +682,16 @@ int ImageDiffusePerona(IMAGE *inImage, IMAGE *outImage, double k, int niter, dou
 #endif
         }
 
-        for (dst_val = 0.0f, ci = 0; ci <= 8; ci++) dst_val += fvals[ci] * c[ci];
+        for (dst_val = 0.0f, ci = 0; ci <= 8; ci++)
+          dst_val += fvals[ci] * c[ci];
         *IMAGEFpix(outImage, x, y) = dst_val;
       }
     }
 
     ImageCopy(outImage, tmpImage);
     k = k + k * slope;
-    if (kimage) KernelImageNormalize(kimage);
+    if (kimage)
+      KernelImageNormalize(kimage);
   }
 
   free(xE);
@@ -658,14 +699,15 @@ int ImageDiffusePerona(IMAGE *inImage, IMAGE *outImage, double k, int niter, dou
   free(yN);
   free(yS);
 
-  if (fp) fclose(fp);
+  if (fp)
+    fclose(fp);
 
   return (0);
 }
 #else
 
-int ImageDiffusePerona(IMAGE *inImage, IMAGE *outImage, double k, int niter, double slope, KIMAGE *kimage)
-{
+int ImageDiffusePerona(IMAGE *inImage, IMAGE *outImage, double k, int niter,
+                       double slope, KIMAGE *kimage) {
   UCHAR *csrc, *cdst;
   float *fsrc, *fdst, fcval, feval, fwval, fnval, fsval, fdval;
   int x, y, cval, eval, wval, nval, sval, i, dval;
@@ -673,8 +715,11 @@ int ImageDiffusePerona(IMAGE *inImage, IMAGE *outImage, double k, int niter, dou
   FILE *fp;
   static IMAGE *tmpImage = NULL;
 
-  if ((outImage->pixel_format != inImage->pixel_format) || (outImage->pixel_format != PFFLOAT)) {
-    fprintf(stderr, "ImageDiffuse: input and output image format must both be float.\n");
+  if ((outImage->pixel_format != inImage->pixel_format) ||
+      (outImage->pixel_format != PFFLOAT)) {
+    fprintf(
+        stderr,
+        "ImageDiffuse: input and output image format must both be float.\n");
     exit(2);
   }
 
@@ -684,7 +729,8 @@ int ImageDiffusePerona(IMAGE *inImage, IMAGE *outImage, double k, int niter, dou
   }
 
   if (!ImageCheckSize(inImage, tmpImage, 0, 0, 0)) {
-    if (tmpImage) ImageFree(&tmpImage);
+    if (tmpImage)
+      ImageFree(&tmpImage);
     tmpImage = ImageAlloc(inImage->rows, inImage->cols, PFFLOAT, 1);
   }
 
@@ -731,15 +777,21 @@ int ImageDiffusePerona(IMAGE *inImage, IMAGE *outImage, double k, int niter, dou
         gsval = g(deltaS, k);
         geval = g(deltaE, k);
         gwval = g(deltaW, k);
-        fdval = (float)(LAMBDA * (gnval * deltaN + gsval * deltaS + gwval * deltaW + geval * deltaE));
+        fdval = (float)(LAMBDA * (gnval * deltaN + gsval * deltaS +
+                                  gwval * deltaW + geval * deltaE));
 
         if (fp) {
           fprintf(fp, "(%d, %d) = %2.2f, del = %2.2f\n", x, y, fcval, fdval);
-          fprintf(fp, "N: (%2.2f) delta = %2.3lf, g = %2.3lf\n", fnval, deltaN, gnval);
-          fprintf(fp, "S: (%2.2f) delta = %2.3lf, g = %2.3lf\n", fsval, deltaS, gsval);
-          fprintf(fp, "W: (%2.2f) delta = %2.3lf, g = %2.3lf\n", fwval, deltaW, gwval);
-          fprintf(fp, "E: (%2.2f) delta = %2.3lf, g = %2.3lf\n", feval, deltaE, geval);
-          fprintf(fp, "val =  %2.2f + %2.2f = %2.2f\n\n", fcval, fdval, fcval + fdval);
+          fprintf(fp, "N: (%2.2f) delta = %2.3lf, g = %2.3lf\n", fnval, deltaN,
+                  gnval);
+          fprintf(fp, "S: (%2.2f) delta = %2.3lf, g = %2.3lf\n", fsval, deltaS,
+                  gsval);
+          fprintf(fp, "W: (%2.2f) delta = %2.3lf, g = %2.3lf\n", fwval, deltaW,
+                  gwval);
+          fprintf(fp, "E: (%2.2f) delta = %2.3lf, g = %2.3lf\n", feval, deltaE,
+                  geval);
+          fprintf(fp, "val =  %2.2f + %2.2f = %2.2f\n\n", fcval, fdval,
+                  fcval + fdval);
         }
 
         fcval = fcval + fdval;
@@ -750,7 +802,8 @@ int ImageDiffusePerona(IMAGE *inImage, IMAGE *outImage, double k, int niter, dou
     ImageCopy(outImage, tmpImage);
   }
 
-  if (fp) fclose(fp);
+  if (fp)
+    fclose(fp);
 
   return (0);
 }
@@ -760,27 +813,26 @@ int ImageDiffusePerona(IMAGE *inImage, IMAGE *outImage, double k, int niter, dou
 
            Description:
 ----------------------------------------------------------------------*/
-int ImageCurvature(IMAGE *inImage, float A, IMAGE *gradImage)
-{
-  static IMAGE *xImage = NULL, *yImage = NULL;
+int ImageCurvature(IMAGE *inImage, float A, IMAGE *gradImage) {
+  static IMAGE *xImage = nullptr, *yImage = nullptr;
   int x, y, rows, cols;
   float *xpix, *ypix, *gradpix, xval, yval, gval, Asq;
 
   rows = inImage->rows;
   cols = inImage->cols;
   if (!ImageCheckSize(inImage, xImage, 0, 0, 0)) {
-    if (xImage) ImageFree(&xImage);
+    if (xImage)
+      ImageFree(&xImage);
     xImage = ImageAlloc(rows, cols, PFFLOAT, 1);
-  }
-  else {
+  } else {
     xImage->rows = rows;
     xImage->cols = cols;
   }
   if (!ImageCheckSize(inImage, yImage, 0, 0, 0)) {
-    if (yImage) ImageFree(&yImage);
+    if (yImage)
+      ImageFree(&yImage);
     yImage = ImageAlloc(rows, cols, PFFLOAT, 1);
-  }
-  else {
+  } else {
     yImage->rows = rows;
     yImage->cols = cols;
   }

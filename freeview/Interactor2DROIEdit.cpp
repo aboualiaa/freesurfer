@@ -25,6 +25,5 @@
 
 #include "Interactor2DROIEdit.h"
 
-Interactor2DROIEdit::Interactor2DROIEdit(QObject* parent) :
-  Interactor2DVolumeEdit( "ROI", parent )
-{}
+Interactor2DROIEdit::Interactor2DROIEdit(QObject *parent)
+    : Interactor2DVolumeEdit("ROI", parent) {}

@@ -16,7 +16,7 @@
 #define QVTKOpenGLWindow_H
 
 #include "vtkGUISupportQtModule.h" // For export macro
-#include "vtkSmartPointer.h" // Required for smart pointer internal ivars.
+#include "vtkSmartPointer.h"       // Required for smart pointer internal ivars.
 #include <QOpenGLWindow>
 
 class QOffscreenSurface;
@@ -34,13 +34,13 @@ class vtkRenderWindow;
  * QVTKOpenGLWindow provides a way to display VTK data in a Qt OpenGL context.
  *
  * QVTKOpenGLWindow extends QOpenGLWindow to make it work with a
- * vtkGenericOpenGLRenderWindow. This is akin to QVTKOpenGLNativeWidget except the
- * OpenGL context is created and managed by QOpenGLWindow (added in Qt 5.4).
+ * vtkGenericOpenGLRenderWindow. This is akin to QVTKOpenGLNativeWidget except
+ * the OpenGL context is created and managed by QOpenGLWindow (added in Qt 5.4).
  *
  * While QVTKOpenGLWindow is intended to be a replacement for
  * QVTKOpenGLNativeWidget, there are a few difference between both.
- * Unlike QVTKOpenGLNativeWidget, QVTKOpenGLWindow can target multiple framebuffers
- * and thus allows for stereo-capable applications.
+ * Unlike QVTKOpenGLNativeWidget, QVTKOpenGLWindow can target multiple
+ * framebuffers and thus allows for stereo-capable applications.
  * QVTKOpenGLWindow API was adapted from deprecated QVTKWidget2.
  *
  * Since QVTKOpenGLWindow uses QOpenGLWindow to create the OpenGL context,
@@ -75,43 +75,45 @@ class vtkRenderWindow;
  *
  * @sa QVTKOpenGLWidget QVTKOpenGLNativeWidget QVTKWidget2
  */
-class VTKGUISUPPORTQT_EXPORT QVTKOpenGLWindow : public QOpenGLWindow
-{
+class VTKGUISUPPORTQT_EXPORT QVTKOpenGLWindow : public QOpenGLWindow {
   Q_OBJECT
   typedef QOpenGLWindow Superclass;
+
 public:
   QVTKOpenGLWindow();
 
-  QVTKOpenGLWindow(vtkGenericOpenGLRenderWindow* w,
-    QOpenGLContext *shareContext = QOpenGLContext::currentContext(),
-    UpdateBehavior updateBehavior = NoPartialUpdate,
-    QWindow *parent = Q_NULLPTR);
+  QVTKOpenGLWindow(
+      vtkGenericOpenGLRenderWindow *w,
+      QOpenGLContext *shareContext = QOpenGLContext::currentContext(),
+      UpdateBehavior updateBehavior = NoPartialUpdate,
+      QWindow *parent = Q_NULLPTR);
 
   QVTKOpenGLWindow(QOpenGLContext *shareContext,
-    UpdateBehavior updateBehavior = NoPartialUpdate,
-    QWindow *parent = Q_NULLPTR);
+                   UpdateBehavior updateBehavior = NoPartialUpdate,
+                   QWindow *parent = Q_NULLPTR);
 
   ~QVTKOpenGLWindow();
 
   /**
    * Set the VTK render window used for rendering.
    */
-  virtual void SetRenderWindow(vtkGenericOpenGLRenderWindow*);
+  virtual void SetRenderWindow(vtkGenericOpenGLRenderWindow *);
 
   /**
    * Get the VTK render window used for rendering.
    */
-  virtual vtkGenericOpenGLRenderWindow* GetRenderWindow();
+  virtual vtkGenericOpenGLRenderWindow *GetRenderWindow();
 
   /**
    * Sets up vtkRenderWindow ivars using QSurfaceFormat.
    */
-  static void copyFromFormat(const QSurfaceFormat& format, vtkRenderWindow* win);
+  static void copyFromFormat(const QSurfaceFormat &format,
+                             vtkRenderWindow *win);
 
   /**
    * Using the vtkRenderWindow, setup QSurfaceFormat.
    */
-  static void copyToFormat(vtkRenderWindow* win, QSurfaceFormat& format);
+  static void copyToFormat(vtkRenderWindow *win, QSurfaceFormat &format);
 
   /**
    * Returns a typical QSurfaceFormat suitable for most applications using
@@ -123,7 +125,7 @@ public:
   /**
    * Get the QEvent to VTK events translator.
    */
-  virtual QVTKInteractorAdapter* GetInteractorAdapter();
+  virtual QVTKInteractorAdapter *GetInteractorAdapter();
 
   /**
    * Enable or disable support for HiDPI displays.
@@ -134,14 +136,14 @@ public:
    * Process a QEvent and send it to the internal render window interactor
    * returns whether the event was recognized and processed
    */
-  bool ProcessEvent(QEvent* e);
+  bool ProcessEvent(QEvent *e);
 
 signals:
   /**
    * Signal emitted when a QMouseEvent has been receive, with the corresponding
    * event as argument.
    */
-  void windowEvent(QEvent* e);
+  void windowEvent(QEvent *e);
 
 public slots:
   /**
@@ -152,8 +154,8 @@ public slots:
   /**
    * slot called when vtk wants to know if the context is current
    */
-  virtual void IsCurrent(vtkObject* caller, unsigned long vtk_event,
-    void* client_data, void* call_data);
+  virtual void IsCurrent(vtkObject *caller, unsigned long vtk_event,
+                         void *client_data, void *call_data);
 
   /**
    * slot called when vtk wants to frame the window
@@ -173,31 +175,31 @@ public slots:
   /**
    * slot called when vtk wants to know if a window is direct
    */
-  virtual void IsDirect(vtkObject* caller, unsigned long vtk_event,
-    void* client_data, void* call_data);
+  virtual void IsDirect(vtkObject *caller, unsigned long vtk_event,
+                        void *client_data, void *call_data);
 
   /**
    * slot called when vtk wants to know if a window supports OpenGL
    */
-  virtual void SupportsOpenGL(vtkObject* caller, unsigned long vtk_event,
-    void* client_data, void* call_data);
+  virtual void SupportsOpenGL(vtkObject *caller, unsigned long vtk_event,
+                              void *client_data, void *call_data);
 
   /**
    * slot called when the stereo type of the render window changed
    */
-  virtual void UpdateStereoType(vtkObject* caller, unsigned long vtk_event,
-    void* client_data, void* call_data);
+  virtual void UpdateStereoType(vtkObject *caller, unsigned long vtk_event,
+                                void *client_data, void *call_data);
 
   /*
    * slot to change the cursor
    */
-  virtual void ChangeCursor(vtkObject* caller, unsigned long vtk_event,
-    void* client_data, void* call_data);
+  virtual void ChangeCursor(vtkObject *caller, unsigned long vtk_event,
+                            void *client_data, void *call_data);
 
   /**
    * slot to process events coming from the widget containing this window
    */
-  virtual void widgetEvent(QEvent* e);
+  virtual void widgetEvent(QEvent *e);
 
   /**
    * Returns true if the internal QOpenGLWindow's is valid, i.e. if OpenGL
@@ -223,17 +225,17 @@ protected:
    */
   virtual void initializeGL();
   virtual void paintGL();
-  virtual void moveEvent(QMoveEvent* event);
-  virtual bool event(QEvent* e);
-  virtual void mousePressEvent(QMouseEvent* event);
-  virtual void mouseMoveEvent(QMouseEvent* event);
-  virtual void mouseReleaseEvent(QMouseEvent* event);
-  virtual void mouseDoubleClickEvent(QMouseEvent* event);
-  virtual void keyPressEvent(QKeyEvent* event);
-  virtual void keyReleaseEvent(QKeyEvent* event);
-  virtual void enterEvent(QEvent*);
-  virtual void leaveEvent(QEvent*);
-  virtual void wheelEvent(QWheelEvent*);
+  virtual void moveEvent(QMoveEvent *event);
+  virtual bool event(QEvent *e);
+  virtual void mousePressEvent(QMouseEvent *event);
+  virtual void mouseMoveEvent(QMouseEvent *event);
+  virtual void mouseReleaseEvent(QMouseEvent *event);
+  virtual void mouseDoubleClickEvent(QMouseEvent *event);
+  virtual void keyPressEvent(QKeyEvent *event);
+  virtual void keyReleaseEvent(QKeyEvent *event);
+  virtual void enterEvent(QEvent *);
+  virtual void leaveEvent(QEvent *);
+  virtual void wheelEvent(QWheelEvent *);
 
 private:
   /**
@@ -247,10 +249,10 @@ private:
   /**
    * interaction binding
    */
-  QVTKInteractorAdapter* IrenAdapter;
+  QVTKInteractorAdapter *IrenAdapter;
   vtkSmartPointer<vtkEventQtSlotConnect> EventSlotConnector;
 
-  QOffscreenSurface* OffscreenSurface;
+  QOffscreenSurface *OffscreenSurface;
 };
 
 #endif // QVTKOpenGLWindow_H

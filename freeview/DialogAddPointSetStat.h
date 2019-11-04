@@ -7,8 +7,7 @@ namespace Ui {
 class DialogAddPointSetStat;
 }
 
-class DialogAddPointSetStat : public QDialog
-{
+class DialogAddPointSetStat : public QDialog {
   Q_OBJECT
 
 public:

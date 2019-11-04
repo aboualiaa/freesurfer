@@ -8,8 +8,7 @@ namespace Ui {
 class DialogCustomFill;
 }
 
-class DialogCustomFill : public QDialog
-{
+class DialogCustomFill : public QDialog {
   Q_OBJECT
 
 public:
@@ -17,7 +16,7 @@ public:
   ~DialogCustomFill();
 
 signals:
-  void CustomFillTriggered(const QVariantMap& options);
+  void CustomFillTriggered(const QVariantMap &options);
 
 public slots:
   void OnButtonFill();

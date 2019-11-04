@@ -41,43 +41,38 @@
 /** \class RegPowell
  * \brief Class for registration using Powell method
  */
-class RegPowell: public Registration
-{
+class RegPowell : public Registration {
 public:
-  RegPowell() :
-      Registration(),xtol(1e-5),ftol(1e-5)
-  {
-  }
+  RegPowell() : Registration(), xtol(1e-5), ftol(1e-5) {}
 
-  virtual ~RegPowell()
-  {
-  }
+  virtual ~RegPowell() {}
 
   //! Set the tolerance for Powell minimizer (both x and f tollerance)
-  void setTolerance(double tol) {xtol=tol;ftol=tol;}
-
-  //! The Powell way of doing iterative registration
-  virtual void computeIterativeRegistrationFull(int n, double epsit, MRI * mriS,
-      MRI* mriT, const vnl_matrix<double> &Minit, double iscaleinit);
-      
-  //! The static cost function for the Powell minimizer
-  static double costFunction(const vnl_vector<double> & p);
-
-  //! Return the half way geometry (here use target for now)
-  MRI * getHalfWayGeom()
-  {
-    return tcf;
+  void setTolerance(double tol) {
+    xtol = tol;
+    ftol = tol;
   }
 
+  //! The Powell way of doing iterative registration
+  virtual void computeIterativeRegistrationFull(int n, double epsit, MRI *mriS,
+                                                MRI *mriT,
+                                                const vnl_matrix<double> &Minit,
+                                                double iscaleinit);
+
+  //! The static cost function for the Powell minimizer
+  static double costFunction(const vnl_vector<double> &p);
+
+  //! Return the half way geometry (here use target for now)
+  MRI *getHalfWayGeom() { return tcf; }
+
   //! Get Name of Registration class
-  virtual std::string getClassName() {return "RegPowell";}
+  virtual std::string getClassName() { return "RegPowell"; }
 
 protected:
-
   virtual void setTransformation(bool is2d);
-  static RegPowell* tocurrent;
-  static MRI * scf;
-  static MRI * tcf;
+  static RegPowell *tocurrent;
+  static MRI *scf;
+  static MRI *tcf;
   static int pcount;
   static vnl_matrix_fixed<double, 4, 4> mh1;
   static vnl_matrix_fixed<double, 4, 4> mh2;
@@ -86,8 +81,6 @@ protected:
   static bool is2d;
   double xtol;
   double ftol;
-
 };
 
 #endif
-

@@ -24,7 +24,6 @@
  *
  */
 
-
 #include "vtkKWProgressDialog.h"
 #include "vtkKWApplication.h"
 #include "vtkKWDialog.h"
@@ -35,75 +34,69 @@
 
 using namespace std;
 
-//vtkStandardNewMacro( vtkKWProgressDialog );
-vtkCxxRevisionMacro( vtkKWProgressDialog, "$Revision: 1.3 $" );
+// vtkStandardNewMacro( vtkKWProgressDialog );
+vtkCxxRevisionMacro(vtkKWProgressDialog, "$Revision: 1.3 $");
 
-vtkKWProgressDialog* vtkKWProgressDialog::New () {
+vtkKWProgressDialog *vtkKWProgressDialog::New() {
 
   return new vtkKWProgressDialog();
 }
 
-vtkKWProgressDialog::vtkKWProgressDialog () :
-    mApplication( NULL ),
-    mDialog( NULL ),
-    mProgressGauge ( NULL ) {
+vtkKWProgressDialog::vtkKWProgressDialog()
+    : mApplication(NULL), mDialog(NULL), mProgressGauge(NULL) {
 
-  strncpy( msWindowTitle, "", sizeof(msWindowTitle) );
+  strncpy(msWindowTitle, "", sizeof(msWindowTitle));
 }
 
-vtkKWProgressDialog::~vtkKWProgressDialog () {}
+vtkKWProgressDialog::~vtkKWProgressDialog() {}
 
-void
-vtkKWProgressDialog::SetApplication ( vtkKWApplication* iApplication ) {
+void vtkKWProgressDialog::SetApplication(vtkKWApplication *iApplication) {
 
   mApplication = iApplication;
 }
 
-void
-vtkKWProgressDialog::SetWindowTitle ( const char* isTitle ) {
+void vtkKWProgressDialog::SetWindowTitle(const char *isTitle) {
 
-  strncpy( msWindowTitle, isTitle, sizeof(msWindowTitle) );
+  strncpy(msWindowTitle, isTitle, sizeof(msWindowTitle));
 }
 
-void
-vtkKWProgressDialog::Execute ( vtkObject* iCaller,
-			       unsigned long iEvent,
-			       void* iCallData ) {
+void vtkKWProgressDialog::Execute(vtkObject *iCaller, unsigned long iEvent,
+                                  void *iCallData) {
 
-  if ( iEvent == vtkCommand::ProgressEvent ) {
+  if (iEvent == vtkCommand::ProgressEvent) {
 
-    vtkAlgorithm* algo = (vtkAlgorithm*)iCaller;
-    double progress = *(double*)(iCallData);
+    vtkAlgorithm *algo = (vtkAlgorithm *)iCaller;
+    double progress = *(double *)(iCallData);
 
-    if ( 0 == progress ) {
+    if (0 == progress) {
 
-      if ( NULL == mDialog ) {
+      if (NULL == mDialog) {
 
-        mDialog = vtkKWDialog::New ();
-        mDialog->SetApplication( mApplication );
+        mDialog = vtkKWDialog::New();
+        mDialog->SetApplication(mApplication);
         mDialog->Create();
-        mDialog->SetTitle( msWindowTitle );
-        mDialog->SetSize( 400, 100 );
+        mDialog->SetTitle(msWindowTitle);
+        mDialog->SetSize(400, 100);
 
-        vtkKWLabel* label = vtkKWLabel::New();
-        label->SetParent( mDialog );
+        vtkKWLabel *label = vtkKWLabel::New();
+        label->SetParent(mDialog);
         label->Create();
-        label->SetText( algo->GetProgressText() );
+        label->SetText(algo->GetProgressText());
 
-        mProgressGauge = vtkKWProgressGauge::New ();
-        mProgressGauge->SetParent( mDialog );
+        mProgressGauge = vtkKWProgressGauge::New();
+        mProgressGauge->SetParent(mDialog);
         mProgressGauge->Create();
 
-        mDialog->Script( "pack %s %s -side top -expand yes",
-                         label->GetWidgetName(),
-                         mProgressGauge->GetWidgetName() );
+        mDialog->Script("pack %s %s -side top -expand yes",
+                        label->GetWidgetName(),
+                        mProgressGauge->GetWidgetName());
 
         mDialog->Display();
       }
 
-    } else if ( 1 == progress ) {
+    } else if (1 == progress) {
 
-      if ( mDialog && mProgressGauge ) {
+      if (mDialog && mProgressGauge) {
 
         mDialog->OK();
         mProgressGauge->Delete();
@@ -115,9 +108,8 @@ vtkKWProgressDialog::Execute ( vtkObject* iCaller,
 
     } else {
 
-      if ( mDialog && mProgressGauge )
-        mProgressGauge->SetValue( progress * 100.0 );
-
+      if (mDialog && mProgressGauge)
+        mProgressGauge->SetValue(progress * 100.0);
     }
   }
 }

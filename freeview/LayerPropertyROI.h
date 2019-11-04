@@ -34,67 +34,43 @@
 #include "LayerProperty.h"
 #include <QColor>
 
-
-
 #include "colortab.h"
-
 
 class vtkRGBAColorTransferFunction;
 
-class LayerPropertyROI : public LayerProperty
-{
+class LayerPropertyROI : public LayerProperty {
   Q_OBJECT
 public:
-  LayerPropertyROI ( QObject* parent = NULL );
-  ~LayerPropertyROI ();
+  LayerPropertyROI(QObject *parent = NULL);
+  ~LayerPropertyROI();
 
   double GetOpacity() const;
 
-  double* GetColor()
-  {
-    return mRGB;
-  }
-  void SetColor( double r, double g, double b );
+  double *GetColor() { return mRGB; }
+  void SetColor(double r, double g, double b);
 
-  double GetThreshold() const
-  {
-    return m_dThreshold;
-  }
+  double GetThreshold() const { return m_dThreshold; }
 
-  int GetColorCode()
-  {
-    return m_nColorCode;
-  }
+  int GetColorCode() { return m_nColorCode; }
 
-  double GetHeatscaleMin()
-  {
-    return m_dHeatscaleMin;
-  }
+  double GetHeatscaleMin() { return m_dHeatscaleMin; }
 
-  double GetHeatscaleMax()
-  {
-    return m_dHeatscaleMax;
-  }
+  double GetHeatscaleMax() { return m_dHeatscaleMax; }
 
-
-  vtkRGBAColorTransferFunction* GetLookupTable() const;
+  vtkRGBAColorTransferFunction *GetLookupTable() const;
 
   enum ColorCode { SolidColor = 0, Heatscale };
 
 public slots:
-  void SetOpacity( double opacity );
-  void SetColor( const QColor& c )
-  {
-    SetColor( c.redF(), c.greenF(), c.blueF() );
-  }
+  void SetOpacity(double opacity);
+  void SetColor(const QColor &c) { SetColor(c.redF(), c.greenF(), c.blueF()); }
   void SetThreshold(double th);
 
   void SetHeatscaleMin(double val);
   void SetHeatscaleMax(double val);
   void SetHeatscaleValues(double dMin, double dMax);
 
-  void SetValueRange(double range[2])
-  {
+  void SetValueRange(double range[2]) {
     m_dValueRange[0] = range[0];
     m_dValueRange[1] = range[1];
     SetColorMapChanged();
@@ -105,14 +81,14 @@ public slots:
   void UpdateLUTTable();
 
 signals:
-  void OpacityChanged( double opacity );
+  void OpacityChanged(double opacity);
   void ColorMapChanged();
   void ThresholdChanged(double th);
 
 private:
   void SetColorMapChanged();
 
-  //BTX
+  // BTX
 
   // Color tables --------------------------------------------------------
   vtkSmartPointer<vtkRGBAColorTransferFunction> mLUTTable;
@@ -121,7 +97,7 @@ private:
   double mOpacity;
   double mRGB[3];
   double m_dThreshold;
-  int    m_nColorCode;
+  int m_nColorCode;
 
   double m_dHeatscaleMin;
   double m_dHeatscaleMax;

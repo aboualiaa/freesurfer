@@ -37,25 +37,22 @@ class vtkTransformPolyDataFilter;
 
 class vtkArrowPipeline : public vtkObject {
 
- public:
-
-  static vtkArrowPipeline* New();
-  vtkTypeMacro( vtkArrowPipeline, vtkObject );
+public:
+  static vtkArrowPipeline *New();
+  vtkTypeMacro(vtkArrowPipeline, vtkObject);
 
   // Description:
   // Set the start and end points of the arrow.
-  void SetStartPoint ( double const* iPoint );
-  void SetEndPoint ( double const* iPoint );
-  void SetStartAndEndPoint ( double const* iStartPoint, 
-			     double const* iEndPoint );
+  void SetStartPoint(double const *iPoint);
+  void SetEndPoint(double const *iPoint);
+  void SetStartAndEndPoint(double const *iStartPoint, double const *iEndPoint);
   // Description:
   // Get a pointer to the actor.
-  vtkActor* GetActor () const;
+  vtkActor *GetActor() const;
 
- protected:
-
-  vtkArrowPipeline ();
-  virtual ~vtkArrowPipeline ();
+protected:
+  vtkArrowPipeline();
+  virtual ~vtkArrowPipeline();
 
   vtkSmartPointer<vtkLandmarkTransform> mTransform;
   vtkSmartPointer<vtkActor> mActor;
@@ -63,10 +60,9 @@ class vtkArrowPipeline : public vtkObject {
   double mStartPoint[3];
   double mEndPoint[3];
 
- private:
-  vtkArrowPipeline ( const vtkArrowPipeline& );
-  void operator= ( const vtkArrowPipeline& );
+private:
+  vtkArrowPipeline(const vtkArrowPipeline &);
+  void operator=(const vtkArrowPipeline &);
 };
-
 
 #endif

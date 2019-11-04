@@ -29,13 +29,12 @@
 #include <QDialog>
 
 namespace Ui {
-  class DialogReplaceLabel;
+class DialogReplaceLabel;
 }
 
 class LayerMRI;
 
-class DialogReplaceLabel : public QDialog
-{
+class DialogReplaceLabel : public QDialog {
   Q_OBJECT
 
 public:

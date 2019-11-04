@@ -26,10 +26,8 @@
 #include <QDebug>
 #include <QDesktopServices>
 
-FloatingStatusBar::FloatingStatusBar(QWidget *parent) :
-  QWidget(parent),
-  ui(new Ui::FloatingStatusBar)
-{
+FloatingStatusBar::FloatingStatusBar(QWidget *parent)
+    : QWidget(parent), ui(new Ui::FloatingStatusBar) {
   ui->setupUi(this);
   setWindowFlags(Qt::Tool | Qt::CustomizeWindowHint);
 #ifdef Q_OS_MAC
@@ -37,23 +35,16 @@ FloatingStatusBar::FloatingStatusBar(QWidget *parent) :
 #elif defined(Q_OS_LINUX)
   ui->frame->setFrameShape(QFrame::StyledPanel);
 #endif
-  m_timer = new QTimer( this );
+  m_timer = new QTimer(this);
   m_timer->setInterval(250);
-  connect( m_timer, SIGNAL(timeout()), this, SLOT(OnProgressTimer()));
+  connect(m_timer, SIGNAL(timeout()), this, SLOT(OnProgressTimer()));
 }
 
-FloatingStatusBar::~FloatingStatusBar()
-{
-  delete ui;
-}
+FloatingStatusBar::~FloatingStatusBar() { delete ui; }
 
-void FloatingStatusBar::SetProgress( int n )
-{
-  ui->progressBar->setValue( n );
-}
+void FloatingStatusBar::SetProgress(int n) { ui->progressBar->setValue(n); }
 
-void FloatingStatusBar::ShowProgress()
-{
+void FloatingStatusBar::ShowProgress() {
   ui->progressBar->show();
   ui->progressBar->setValue(0);
   this->show();
@@ -61,12 +52,11 @@ void FloatingStatusBar::ShowProgress()
   Reposition();
 }
 
-void FloatingStatusBar::Reposition()
-{
-  QWidget* p = parentWidget();
+void FloatingStatusBar::Reposition() {
+  QWidget *p = parentWidget();
   QSize s = p->size() - this->size();
 #ifdef Q_OS_MAC
-  this->move(p->geometry().topLeft() + QPoint(0, s.height()) + QPoint(1,-1));
+  this->move(p->geometry().topLeft() + QPoint(0, s.height()) + QPoint(1, -1));
 #elif defined(Q_CYGWIN_WIN)
   this->move(p->geometry().topLeft() + QPoint(0, s.height()) + QPoint(0, -6));
 #else
@@ -74,22 +64,16 @@ void FloatingStatusBar::Reposition()
 #endif
 }
 
-void FloatingStatusBar::HideProgress()
-{
+void FloatingStatusBar::HideProgress() {
   m_timer->stop();
   this->hide();
   ui->progressBar->hide();
 }
 
-void FloatingStatusBar::OnProgressTimer()
-{
-  if ( ui->progressBar->value() == 100 )
-  {
-    ui->progressBar->setValue( 50 );
-  }
-  else
-  {
-    ui->progressBar->setValue( ui->progressBar->value()+2 );
+void FloatingStatusBar::OnProgressTimer() {
+  if (ui->progressBar->value() == 100) {
+    ui->progressBar->setValue(50);
+  } else {
+    ui->progressBar->setValue(ui->progressBar->value() + 2);
   }
 }
-

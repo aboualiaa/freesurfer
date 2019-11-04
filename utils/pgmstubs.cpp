@@ -23,17 +23,17 @@
  *
  */
 
-void pgm_readpgminit(void) {}
-void pm_openr(void) {}
-void pgm_readpgmrow(void) {}
-void pm_close(void) {}
-void ppm_writeppminit(void) {}
-void ppm_writeppmrow(void) {}
-void pgm_writepgminit(void) {}
-void pgm_writepgmrow(void) {}
-void pbm_readpbm(void) {}
-void ppm_readppminit(void) {}
-void pm_allocrow(void) {}
-void ppm_readppmrow(void) {}
-void pbm_readpbminit(void) {}
-void ppm_readppmini(void) {}
+void pgm_readpgminit() {}
+void pm_openr() {}
+void pgm_readpgmrow() {}
+void pm_close() {}
+void ppm_writeppminit() {}
+void ppm_writeppmrow() {}
+void pgm_writepgminit() {}
+void pgm_writepgmrow() {}
+void pbm_readpbm() {}
+void ppm_readppminit() {}
+void pm_allocrow() {}
+void ppm_readppmrow() {}
+void pbm_readpbminit() {}
+void ppm_readppmini() {}

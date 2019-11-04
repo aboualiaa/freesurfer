@@ -35,25 +35,22 @@
 
 class vtkFreesurferLookupTable : public vtkLookupTable {
 
- public:
-  
-  static vtkFreesurferLookupTable* New();
-  vtkTypeMacro( vtkFreesurferLookupTable, vtkLookupTable );
+public:
+  static vtkFreesurferLookupTable *New();
+  vtkTypeMacro(vtkFreesurferLookupTable, vtkLookupTable);
 
   // Description:
   // Clears and sets its internal entries by reading a Freesurfer LUT
   // file.
-  void BuildFromCTAB ( COLOR_TABLE* iCtab, bool bClearZero = true );
+  void BuildFromCTAB(COLOR_TABLE *iCtab, bool bClearZero = true);
 
- protected:
-
+protected:
   vtkFreesurferLookupTable();
   virtual ~vtkFreesurferLookupTable();
 
 private:
-  vtkFreesurferLookupTable( const vtkFreesurferLookupTable& );
-  void operator=( const vtkFreesurferLookupTable& );
-
+  vtkFreesurferLookupTable(const vtkFreesurferLookupTable &);
+  void operator=(const vtkFreesurferLookupTable &);
 };
 
 #endif

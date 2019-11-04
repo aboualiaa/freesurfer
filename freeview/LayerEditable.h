@@ -29,57 +29,29 @@
 #include "Layer.h"
 #include <QString>
 
-class LayerEditable : public Layer
-{
+class LayerEditable : public Layer {
   Q_OBJECT
 public:
-  LayerEditable( QObject* parent = NULL );
+  LayerEditable(QObject *parent = NULL);
   virtual ~LayerEditable();
 
-  virtual bool HasUndo()
-  {
-    return false;
-  }
-  virtual bool HasRedo()
-  {
-    return false;
-  }
+  virtual bool HasUndo() { return false; }
+  virtual bool HasRedo() { return false; }
 
-  virtual void Undo()
-  {}
-  virtual void Redo()
-  {}
+  virtual void Undo() {}
+  virtual void Redo() {}
 
-  void ResetModified()
-  {
-    m_bModified = false;
-  }
+  void ResetModified() { m_bModified = false; }
 
-  bool IsModified()
-  {
-    return m_bModified;
-  }
+  bool IsModified() { return m_bModified; }
 
-  void SetEditable( bool bEditable = true )
-  {
-    m_bEditable = bEditable;
-  }
+  void SetEditable(bool bEditable = true) { m_bEditable = bEditable; }
 
-  bool IsEditable()
-  {
-    return m_bEditable;
-  }
+  bool IsEditable() { return m_bEditable; }
 
-  QString GetRegFileName()
-  {
-    return m_sRegFilename;
-  }
+  QString GetRegFileName() { return m_sRegFilename; }
 
-  void SetRegFileName( const QString& fn )
-  {
-    m_sRegFilename = fn;
-  }
-
+  void SetRegFileName(const QString &fn) { m_sRegFilename = fn; }
 
 Q_SIGNALS:
   void Modified();
@@ -88,15 +60,12 @@ public slots:
   virtual void SetModified();
 
 protected:
+  int m_nMaxUndoSteps;
+  bool m_bModified;
 
-  int   m_nMaxUndoSteps;
-  bool  m_bModified;
-
-  bool   m_bEditable;
+  bool m_bEditable;
 
   QString m_sRegFilename;
 };
 
 #endif
-
-

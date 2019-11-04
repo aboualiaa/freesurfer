@@ -7,49 +7,47 @@
 
 #include "datamodel/utils/itkPoistatsFilter.h" // dmri_poistats
 
-class CommandUpdate : public itk::Command
-{
+class CommandUpdate : public itk::Command {
 
 public:
   typedef CommandUpdate Self;
   typedef itk::Command Superclass;
   typedef itk::SmartPointer<Self> Pointer;
-  itkNewMacro( Self );
-  
-  typedef itk::DiffusionTensor3D< float > TensorPixelType;
-  typedef itk::Image< TensorPixelType, 3 > TensorImageType;
-  typedef itk::OrientedImage< float, 3 > OutputImageType;
-  typedef itk::PoistatsFilter< TensorImageType, OutputImageType > 
-    PoistatsFilterType;
-  typedef const PoistatsFilterType* PoistatsFilterPointer;
-//  typedef const PoistatsFilterType* PoistatsFilterPointer;
+  itkNewMacro(Self);
+
+  typedef itk::DiffusionTensor3D<float> TensorPixelType;
+  typedef itk::Image<TensorPixelType, 3> TensorImageType;
+  typedef itk::OrientedImage<float, 3> OutputImageType;
+  typedef itk::PoistatsFilter<TensorImageType, OutputImageType>
+      PoistatsFilterType;
+  typedef const PoistatsFilterType *PoistatsFilterPointer;
+  //  typedef const PoistatsFilterType* PoistatsFilterPointer;
 
   /** This is an itk callback */
-  void Execute( itk::Object *caller, const itk::EventObject & event );
-  
-  void Execute(const itk::Object * object, const itk::EventObject & event);
-  
-  void PostMessage( const std::string message );
+  void Execute(itk::Object *caller, const itk::EventObject &event);
 
-  void PostErrorMessage( const std::string message );
-  
-  static void WriteMessage( const std::string message, 
-    const std::string fileName );
+  void Execute(const itk::Object *object, const itk::EventObject &event);
 
-  itkGetMacro( OutputDirectory, std::string );
-  itkSetMacro( OutputDirectory, std::string );
+  void PostMessage(const std::string message);
 
-  itkGetMacro( LogFileName, std::string );
-  itkSetMacro( LogFileName, std::string );
-  
+  void PostErrorMessage(const std::string message);
+
+  static void WriteMessage(const std::string message,
+                           const std::string fileName);
+
+  itkGetMacro(OutputDirectory, std::string);
+  itkSetMacro(OutputDirectory, std::string);
+
+  itkGetMacro(LogFileName, std::string);
+  itkSetMacro(LogFileName, std::string);
+
 protected:
-  CommandUpdate() {};
+  CommandUpdate(){};
 
 private:
   std::string m_OutputDirectory;
-  
+
   std::string m_LogFileName;
-  
 };
 
 #endif /*COMMANDUPDATE_H_*/

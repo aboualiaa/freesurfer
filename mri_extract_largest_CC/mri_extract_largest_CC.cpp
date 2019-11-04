@@ -1,8 +1,10 @@
 /**
  * @file  mri_extract_largest_CC.c
- * @brief extract the largest connected component from a volume and write it into another volume
+ * @brief extract the largest connected component from a volume and write it
+ * into another volume
  *
- * extract the largest connected component from a volume and write it into another volume
+ * extract the largest connected component from a volume and write it into
+ * another volume
  */
 /*
  * Original Author: Florent Segonne
@@ -23,15 +25,14 @@
  *
  */
 
+// Extract the largest connected component of a binary segmentation
 
-//Extract the largest connected component of a binary segmentation
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+#include <cctype>
 #include <unistd.h>
-#include <string.h>
+#include <cstring>
 #include <sys/stat.h>
 
 #include "mri.h"
@@ -44,42 +45,44 @@
 #include "connectcomp.h"
 #include "mrisurf.h"
 
-static int lh_label = LH_LABEL ;
-static int rh_label = RH_LABEL ;
+static int lh_label = LH_LABEL;
+static int rh_label = RH_LABEL;
 
 void usage(int exit_val);
-static int get_option(int argc, char *argv[]) ;
+static int get_option(int argc, char *argv[]);
 
 static float threshold = 90;
 
 static char hemi[80] = "lh";
-static int inverse = 0 ;
+static int inverse = 0;
 
 const char *Progname;
-static MRI *mri_orig = NULL ;
+static MRI *mri_orig = nullptr;
 
 int main(int argc, char *argv[]) {
-  char   **av;
+  char **av;
   MRI *mri_seg;
   int ac, nargs;
 
   int x, y, z;
   int target_value = 255;
 
-
   Progname = argv[0];
 
-  nargs = handle_version_option (argc, argv, "$Id: mri_extract_largest_CC.c,v 1.9 2012/06/25 18:34:05 fischl Exp $", "$Name:  $");
-  argc -= nargs ;
+  nargs = handle_version_option(
+      argc, argv,
+      "$Id: mri_extract_largest_CC.c,v 1.9 2012/06/25 18:34:05 fischl Exp $",
+      "$Name:  $");
+  argc -= nargs;
   if (1 >= argc)
-    usage (0);
+    usage(0);
 
-  ac = argc ;
-  av = argv ;
-  for ( ; argc > 1 && ISOPTION(*argv[1]) ; argc--, argv++) {
-    nargs = get_option(argc, argv) ;
-    argc -= nargs ;
-    argv += nargs ;
+  ac = argc;
+  av = argv;
+  for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
+    nargs = get_option(argc, argv);
+    argc -= nargs;
+    argv += nargs;
   }
 
   if (argc != 3)
@@ -91,30 +94,28 @@ int main(int argc, char *argv[]) {
     target_value = rh_label;
   }
 
-  mri_seg = MRIread(argv[1]) ;
+  mri_seg = MRIread(argv[1]);
   if (!mri_seg)
-    ErrorExit(ERROR_BADPARM, "%s: could not read label volume %s",
-              Progname, argv[1]) ;
-  if (mri_orig == NULL)
-    mri_orig = MRIcopy(mri_seg, NULL) ;
+    ErrorExit(ERROR_BADPARM, "%s: could not read label volume %s", Progname,
+              argv[1]);
+  if (mri_orig == nullptr)
+    mri_orig = MRIcopy(mri_seg, nullptr);
 
   for (z = 0; z < mri_seg->depth; z++)
     for (y = 0; y < mri_seg->height; y++)
       for (x = 0; x < mri_seg->width; x++) {
-	if (inverse == 0)
-	{
-	  if (MRIgetVoxVal(mri_seg, x, y, z, 0) < threshold)
-	    MRIsetVoxVal(mri_seg, x, y, z, 0, 0);
-	  else
-	    MRIsetVoxVal(mri_seg, x, y, z, 0, 255);
-	}
-	else  // extract background
-	{
-	  if (MRIgetVoxVal(mri_seg, x, y, z, 0) > threshold)
-	    MRIsetVoxVal(mri_seg, x, y, z, 0, 0);
-	  else
-	    MRIsetVoxVal(mri_seg, x, y, z, 0, 255);
-	}
+        if (inverse == 0) {
+          if (MRIgetVoxVal(mri_seg, x, y, z, 0) < threshold)
+            MRIsetVoxVal(mri_seg, x, y, z, 0, 0);
+          else
+            MRIsetVoxVal(mri_seg, x, y, z, 0, 255);
+        } else // extract background
+        {
+          if (MRIgetVoxVal(mri_seg, x, y, z, 0) > threshold)
+            MRIsetVoxVal(mri_seg, x, y, z, 0, 0);
+          else
+            MRIsetVoxVal(mri_seg, x, y, z, 0, 255);
+        }
       }
 
   GetLargestCC6(mri_seg);
@@ -122,28 +123,24 @@ int main(int argc, char *argv[]) {
   for (z = 0; z < mri_seg->depth; z++)
     for (y = 0; y < mri_seg->height; y++)
       for (x = 0; x < mri_seg->width; x++) {
-	if (inverse == 0)
-	{
-	  if (MRIgetVoxVal(mri_seg, x, y, z, 0) > 0)
-	    MRIsetVoxVal(mri_seg, x, y, z, 0, target_value);
-	}
-	else
-	{
-	  if (MRIgetVoxVal(mri_seg, x, y, z, 0) == 0)
-	  {
-	    MRIsetVoxVal(mri_seg, x, y, z, 0, MRIgetVoxVal(mri_orig, x, y, z, 0));
-	  }
-	  else
-	    MRIsetVoxVal(mri_seg, x, y, z, 0, 0) ;
-	}
+        if (inverse == 0) {
+          if (MRIgetVoxVal(mri_seg, x, y, z, 0) > 0)
+            MRIsetVoxVal(mri_seg, x, y, z, 0, target_value);
+        } else {
+          if (MRIgetVoxVal(mri_seg, x, y, z, 0) == 0) {
+            MRIsetVoxVal(mri_seg, x, y, z, 0,
+                         MRIgetVoxVal(mri_orig, x, y, z, 0));
+          } else
+            MRIsetVoxVal(mri_seg, x, y, z, 0, 0);
+        }
       }
 
-  printf("writing output to %s\n", argv[2]) ;
+  printf("writing output to %s\n", argv[2]);
   MRIwrite(mri_seg, argv[2]);
 
   exit(0);
 
-}  /*  end main()  */
+} /*  end main()  */
 
 void usage(int exit_val) {
 
@@ -152,58 +149,61 @@ void usage(int exit_val) {
   fout = (exit_val ? stderr : stdout);
 
   fprintf(fout, "usage: %s <input vol> <output vol>\n", Progname);
-  fprintf(fout, "this program extracts the largest connected component of the input volume \n") ;
-  fprintf(fout, "\t Options are: \n") ;
-  fprintf(fout, "\t\t -T #: threshold for object \n") ;
-  fprintf(fout, "\t\t -hemi lh/rh: set the target value corresponding to lh (255) or rh (127) \n") ;
-  fprintf(fout, "\t\t -I : find the largest CC in the background\n") ;
-  fprintf(fout, "\t\t -O <orig volume> : clone values from <orig volume> into output (used with -I)\n") ;
+  fprintf(fout, "this program extracts the largest connected component of the "
+                "input volume \n");
+  fprintf(fout, "\t Options are: \n");
+  fprintf(fout, "\t\t -T #: threshold for object \n");
+  fprintf(fout, "\t\t -hemi lh/rh: set the target value corresponding to lh "
+                "(255) or rh (127) \n");
+  fprintf(fout, "\t\t -I : find the largest CC in the background\n");
+  fprintf(fout, "\t\t -O <orig volume> : clone values from <orig volume> into "
+                "output (used with -I)\n");
   exit(exit_val);
 
-}  /*  end usage()  */
-
+} /*  end usage()  */
 
 /*----------------------------------------------------------------------
             Parameters:
 
            Description:
 ----------------------------------------------------------------------*/
-static int
-get_option(int argc, char *argv[]) {
-  int  nargs = 0 ;
-  char *option ;
+static int get_option(int argc, char *argv[]) {
+  int nargs = 0;
+  char *option;
 
-  option = argv[1] + 1 ;            /* past '-' */
+  option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "T")) {
     threshold = atof(argv[2]);
     printf("threshold = %g\n", threshold);
     nargs = 1;
   } else if (!stricmp(option, "hemi")) {
-    strcpy(hemi,argv[2]);
+    strcpy(hemi, argv[2]);
     printf("hemisphere = %s\n", hemi);
     nargs = 1;
-  } else switch (toupper(*option)) {
-  case 'O':
-    mri_orig = MRIread(argv[2]) ;
-    if (mri_orig == NULL)
-      ErrorExit(ERROR_NOFILE, "%s: could not open orig volume %s", Progname, argv[2]) ;
-    nargs = 1 ;
-    break ;
-  case 'I':
-    inverse = 1 ;
-    printf("extracting CC from background instead of foreground\n") ;
-    break ;
+  } else
+    switch (toupper(*option)) {
+    case 'O':
+      mri_orig = MRIread(argv[2]);
+      if (mri_orig == nullptr)
+        ErrorExit(ERROR_NOFILE, "%s: could not open orig volume %s", Progname,
+                  argv[2]);
+      nargs = 1;
+      break;
+    case 'I':
+      inverse = 1;
+      printf("extracting CC from background instead of foreground\n");
+      break;
     case '?':
     case 'U':
-      usage(0) ;
-      break ;
+      usage(0);
+      break;
     default:
-      printf("unknown option %s\n", argv[1]) ;
-      exit(1) ;
-      break ;
+      printf("unknown option %s\n", argv[1]);
+      exit(1);
+      break;
     }
 
-  return(nargs) ;
+  return (nargs);
 }
 
 /*  EOF  */

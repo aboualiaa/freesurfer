@@ -37,34 +37,20 @@ Qt::KeyboardModifier Interactor::CONTROL_MODIFIER = Qt::ControlModifier;
 Qt::Key Interactor::CONTROL_KEY = Qt::Key_Control;
 #endif
 
-Interactor::Interactor( QObject* parent ) : QObject( parent )
-{
-  m_nAction = 0;
-}
+Interactor::Interactor(QObject *parent) : QObject(parent) { m_nAction = 0; }
 
-Interactor::~Interactor()
-{}
+Interactor::~Interactor() {}
 
-int Interactor::GetAction()
-{
-  return m_nAction;
-}
+int Interactor::GetAction() { return m_nAction; }
 
-void Interactor::SetAction( int nAction )
-{
-  m_nAction = nAction;
-}
+void Interactor::SetAction(int nAction) { m_nAction = nAction; }
 
-void Interactor::SetUseCommandControl(bool b)
-{
+void Interactor::SetUseCommandControl(bool b) {
 #ifdef Q_OS_MAC
-  if (b)
-  {
+  if (b) {
     CONTROL_MODIFIER = Qt::ControlModifier;
     CONTROL_KEY = Qt::Key_Control;
-  }
-  else
-  {
+  } else {
     CONTROL_MODIFIER = Qt::MetaModifier;
     CONTROL_KEY = Qt::Key_Meta;
   }
@@ -73,95 +59,83 @@ void Interactor::SetUseCommandControl(bool b)
 #endif
 }
 
-bool Interactor::ProcessMouseDownEvent( QMouseEvent* event, RenderView* view )
-{
-  if ( event->button() == Qt::RightButton && event->modifiers() == Qt::NoModifier) //!(event->modifiers() | Qt::AltModifier) )
+bool Interactor::ProcessMouseDownEvent(QMouseEvent *event, RenderView *view) {
+  if (event->button() == Qt::RightButton &&
+      event->modifiers() ==
+          Qt::NoModifier) //!(event->modifiers() | Qt::AltModifier) )
   {
     m_nDownPosX = event->x();
     m_nDownPosY = event->y();
   }
-  UpdateCursor( event, view );
+  UpdateCursor(event, view);
 
   return true;
 }
 
-bool Interactor::ProcessMouseUpEvent( QMouseEvent* event, RenderView* view )
-{
+bool Interactor::ProcessMouseUpEvent(QMouseEvent *event, RenderView *view) {
   view->releaseMouse();
-  if ( event->button() == Qt::RightButton && m_nDownPosX == event->x() && m_nDownPosY == event->y() )
-  {
-    view->TriggerContextMenu( event );
+  if (event->button() == Qt::RightButton && m_nDownPosX == event->x() &&
+      m_nDownPosY == event->y()) {
+    view->TriggerContextMenu(event);
+    return true;
+  } else {
+    UpdateCursor(event, view);
     return true;
   }
-  else
-  {
-    UpdateCursor( event, view );
-    return true;
-  }
 
   return true;
 }
 
-bool Interactor::ProcessMouseMoveEvent( QMouseEvent* event, RenderView* view )
-{
-  UpdateCursor( event, view );
+bool Interactor::ProcessMouseMoveEvent(QMouseEvent *event, RenderView *view) {
+  UpdateCursor(event, view);
 
   return true;
 }
 
-bool Interactor::ProcessKeyDownEvent( QKeyEvent* event, RenderView* view )
-{
-  UpdateCursor( event, view );
+bool Interactor::ProcessKeyDownEvent(QKeyEvent *event, RenderView *view) {
+  UpdateCursor(event, view);
 
   return true;
 }
 
-bool Interactor::ProcessKeyUpEvent( QKeyEvent* event, RenderView* view )
-{
-  UpdateCursor( event, view );
+bool Interactor::ProcessKeyUpEvent(QKeyEvent *event, RenderView *view) {
+  UpdateCursor(event, view);
 
   return true;
 }
 
-bool Interactor::ProcessMouseWheelEvent( QWheelEvent* event, RenderView* view )
-{
-  UpdateCursor( event, view );
+bool Interactor::ProcessMouseWheelEvent(QWheelEvent *event, RenderView *view) {
+  UpdateCursor(event, view);
 
   return true;
 }
 
-bool Interactor::ProcessMouseEnterEvent( QEvent* event, RenderView* view )
-{
-  UpdateCursor( event, view );
+bool Interactor::ProcessMouseEnterEvent(QEvent *event, RenderView *view) {
+  UpdateCursor(event, view);
 
   return true;
 }
 
-bool Interactor::ProcessMouseLeaveEvent( QEvent* event, RenderView* view )
-{
-  UpdateCursor( event, view );
+bool Interactor::ProcessMouseLeaveEvent(QEvent *event, RenderView *view) {
+  UpdateCursor(event, view);
 
   return true;
 }
 
-void Interactor::UpdateCursor( QEvent* event, QWidget* wnd )
-{
-  if ( (event->type() == QEvent::MouseButtonPress && ((QMouseEvent*)event)->button() == Qt::MidButton) ||
-       (event->type() == QEvent::MouseMove && ((QMouseEvent*)event)->buttons() & Qt::MidButton ))
-  {
-    wnd->setCursor( CursorFactory::CursorPan );
-  }
-  else if ((event->type() == QEvent::MouseButtonPress && ((QMouseEvent*)event)->button() == Qt::RightButton) ||
-           (event->type() == QEvent::MouseMove && ((QMouseEvent*)event)->buttons() & Qt::RightButton ))
-  {
-    wnd->setCursor( CursorFactory::CursorZoom );
-  }
-  else if ( event->type() == QEvent::Wheel )
-  {
-    wnd->setCursor( CursorFactory::CursorZoom );
-  }
-  else
-  {
+void Interactor::UpdateCursor(QEvent *event, QWidget *wnd) {
+  if ((event->type() == QEvent::MouseButtonPress &&
+       ((QMouseEvent *)event)->button() == Qt::MidButton) ||
+      (event->type() == QEvent::MouseMove &&
+       ((QMouseEvent *)event)->buttons() & Qt::MidButton)) {
+    wnd->setCursor(CursorFactory::CursorPan);
+  } else if ((event->type() == QEvent::MouseButtonPress &&
+              ((QMouseEvent *)event)->button() == Qt::RightButton) ||
+             (event->type() == QEvent::MouseMove &&
+              ((QMouseEvent *)event)->buttons() & Qt::RightButton)) {
+    wnd->setCursor(CursorFactory::CursorZoom);
+  } else if (event->type() == QEvent::Wheel) {
+    wnd->setCursor(CursorFactory::CursorZoom);
+  } else {
     wnd->unsetCursor();
   }
 }

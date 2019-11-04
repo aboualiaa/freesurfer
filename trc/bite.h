@@ -23,65 +23,63 @@
 #ifndef BITE_H
 #define BITE_H
 
-#include <vector>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <limits>
-#include <algorithm>
-#include <math.h>
 #include "mri.h"
+#include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <limits>
+#include <math.h>
+#include <string>
+#include <vector>
 
 class Bite {
-  public:
-    Bite(MRI *Dwi, MRI **Phi, MRI **Theta, MRI **F,
-         MRI **V0, MRI **F0, MRI *D0,
-         int CoordX, int CoordY, int CoordZ);
-    ~Bite();
+public:
+  Bite(MRI *Dwi, MRI **Phi, MRI **Theta, MRI **F, MRI **V0, MRI **F0, MRI *D0,
+       int CoordX, int CoordY, int CoordZ);
+  ~Bite();
 
-  private:
-    static int mNumDir, mNumB0, mNumTract, mNumBedpost;
-    static float mFminPath;
-    static std::vector<unsigned int> mBaselineImages;
-    static std::vector<float> mGradients,	// [3 x mNumDir]
-                              mBvalues;		// [mNumDir]
+private:
+  static int mNumDir, mNumB0, mNumTract, mNumBedpost;
+  static float mFminPath;
+  static std::vector<unsigned int> mBaselineImages;
+  static std::vector<float> mGradients, // [3 x mNumDir]
+      mBvalues;                         // [mNumDir]
 
-    int mCoordX, mCoordY, mCoordZ, mPathTract;
-    float mS0, mD, mLikelihood0, mLikelihood1, mPrior0, mPrior1;
-    std::vector<float> mDwi;			// [mNumDir]
-    std::vector<float> mPhiSamples;		// [mNumTract x mNumBedpost]
-    std::vector<float> mThetaSamples;		// [mNumTract x mNumBedpost]
-    std::vector<float> mFSamples;		// [mNumTract x mNumBedpost]
-    std::vector<float> mPhi;			// [mNumTract]
-    std::vector<float> mTheta;			// [mNumTract]
-    std::vector<float> mF;			// [mNumTract]
+  int mCoordX, mCoordY, mCoordZ, mPathTract;
+  float mS0, mD, mLikelihood0, mLikelihood1, mPrior0, mPrior1;
+  std::vector<float> mDwi;          // [mNumDir]
+  std::vector<float> mPhiSamples;   // [mNumTract x mNumBedpost]
+  std::vector<float> mThetaSamples; // [mNumTract x mNumBedpost]
+  std::vector<float> mFSamples;     // [mNumTract x mNumBedpost]
+  std::vector<float> mPhi;          // [mNumTract]
+  std::vector<float> mTheta;        // [mNumTract]
+  std::vector<float> mF;            // [mNumTract]
 
-  public:
-    static void SetStatic(const char *GradientFile, const char *BvalueFile,
-                          int NumTract, int NumBedpost, float FminPath);
-    static int GetNumTract();
-    static int GetNumDir();
-    static int GetNumB0();
-    static int GetNumBedpost();
-    static float GetLowBvalue();
+public:
+  static void SetStatic(const char *GradientFile, const char *BvalueFile,
+                        int NumTract, int NumBedpost, float FminPath);
+  static int GetNumTract();
+  static int GetNumDir();
+  static int GetNumB0();
+  static int GetNumBedpost();
+  static float GetLowBvalue();
 
-    void SampleParameters();
-    void ComputeLikelihoodOffPath();
-    void ComputeLikelihoodOnPath(float PathPhi, float PathTheta);
-    void ChoosePathTractAngle(float PathPhi, float PathTheta);
-    void ChoosePathTractLike(float PathPhi, float PathTheta);
-    void ComputePriorOffPath();
-    void ComputePriorOnPath();
-    bool IsAllFZero();
-    bool IsFZero();
-    bool IsThetaZero();
-    float GetLikelihoodOffPath();
-    float GetLikelihoodOnPath();
-    float GetPriorOffPath();
-    float GetPriorOnPath();
-    float GetPosteriorOffPath();
-    float GetPosteriorOnPath();
+  void SampleParameters();
+  void ComputeLikelihoodOffPath();
+  void ComputeLikelihoodOnPath(float PathPhi, float PathTheta);
+  void ChoosePathTractAngle(float PathPhi, float PathTheta);
+  void ChoosePathTractLike(float PathPhi, float PathTheta);
+  void ComputePriorOffPath();
+  void ComputePriorOnPath();
+  bool IsAllFZero();
+  bool IsFZero();
+  bool IsThetaZero();
+  float GetLikelihoodOffPath();
+  float GetLikelihoodOnPath();
+  float GetPriorOffPath();
+  float GetPriorOnPath();
+  float GetPosteriorOffPath();
+  float GetPosteriorOnPath();
 };
 
 #endif
-

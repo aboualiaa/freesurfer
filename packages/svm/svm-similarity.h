@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:40 $
@@ -23,7 +23,6 @@
  *
  */
 
-
 ////SVM-LIB////////////////////////////////////////////////////////////////
 //
 // Name: SvmSimilary
@@ -39,21 +38,16 @@
 
 #include "svm-vector-types.h"
 
-double Distance (const SvmReal* v1, const SvmReal* v2, int n);
-double Distance (const SvmRealVector& v1, const SvmRealVector& v2);
+double Distance(const SvmReal *v1, const SvmReal *v2, int n);
+double Distance(const SvmRealVector &v1, const SvmRealVector &v2);
 
-void Distance (double** dist, const SvmReal* const* data, int rows, int cols);
-void Distance (DoubleMatrix& dist, const SvmRealMatrix& data);
+void Distance(double **dist, const SvmReal *const *data, int rows, int cols);
+void Distance(DoubleMatrix &dist, const SvmRealMatrix &data);
 
+double Product(const SvmReal *v1, const SvmReal *v2, int n);
+double Product(const SvmRealVector &v1, const SvmRealVector &v2);
 
-double Product (const SvmReal* v1, const SvmReal* v2, int n);
-double Product (const SvmRealVector& v1, const SvmRealVector& v2);
-
-void Product (double** prod, const SvmReal* const* data, int rows, int cols);
-void Product (DoubleMatrix& prod, const SvmRealMatrix& data);
-
+void Product(double **prod, const SvmReal *const *data, int rows, int cols);
+void Product(DoubleMatrix &prod, const SvmRealMatrix &data);
 
 #endif // __SVM_SIMILARITY_H__
-
-
-

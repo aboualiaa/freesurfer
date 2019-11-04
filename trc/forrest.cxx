@@ -26,30 +26,18 @@ using namespace std;
 
 const int Forrest::mSampleStep = 2;
 
-Forrest::Forrest() : mNx(0), mNy(0), mNz(0), mNumTrain(0),
-                     mMask(0), mAseg(0), mOrient(0) {
-  int dirs[45] = { 0,  0,  0,
-                   1,  0,  0,
-                  -1,  0,  0,
-                   0,  1,  0,
-                   0, -1,  0,
-                   0,  0,  1,
-                   0,  0, -1,
-                   1,  1,  1,
-                  -1,  1,  1,
-                   1, -1,  1,
-                  -1, -1,  1,
-                   1,  1, -1,
-                  -1,  1, -1,
-                   1, -1, -1,
-                  -1, -1, -1 };
+Forrest::Forrest()
+    : mNx(0), mNy(0), mNz(0), mNumTrain(0), mMask(0), mAseg(0), mOrient(0) {
+  int dirs[45] = {0,  0,  0, 1, 0, 0,  -1, 0, 0,  0,  1,  0,  0,  -1, 0,
+                  0,  0,  1, 0, 0, -1, 1,  1, 1,  -1, 1,  1,  1,  -1, 1,
+                  -1, -1, 1, 1, 1, -1, -1, 1, -1, 1,  -1, -1, -1, -1, -1};
 
   // Directions in which to look for neighboring labels
   mNumLocal = 15;
-  mDirLocal.insert(mDirLocal.begin(), dirs, dirs+45);
+  mDirLocal.insert(mDirLocal.begin(), dirs, dirs + 45);
 
   mNumNear = 14;
-  mDirNear.insert(mDirNear.begin(), dirs+3, dirs+45);
+  mDirNear.insert(mDirNear.begin(), dirs + 3, dirs + 45);
 }
 
 Forrest::~Forrest() {
@@ -67,8 +55,7 @@ Forrest::~Forrest() {
 //
 void Forrest::ReadTestSubject(const char *TestDir, const char *MaskFile,
                               const char *AsegFile, const char *OrientFile) {
-  string dirname = string(TestDir) + "/",
-         fname;
+  string dirname = string(TestDir) + "/", fname;
 
   if (mMask)
     MRIfree(&mMask);
@@ -116,8 +103,7 @@ void Forrest::ReadTestSubject(const char *TestDir, const char *MaskFile,
 // Read data for training subjects
 //
 void Forrest::ReadTrainingSubjects(const char *TrainListFile,
-                                   const char *MaskFile,
-                                   const char *AsegFile,
+                                   const char *MaskFile, const char *AsegFile,
                                    const char *OrientFile,
                                    vector<char *> TractFileList) {
   string dirname;
@@ -135,7 +121,7 @@ void Forrest::ReadTrainingSubjects(const char *TrainListFile,
   mNumTrain = 0;
 
   for (vector<string>::const_iterator idir = dirlist.begin();
-                                      idir < dirlist.end(); idir++) {
+       idir < dirlist.end(); idir++) {
     int nx, ny, nz;
     MRI *maskvol = NULL, *asegvol = NULL, *orientvol = NULL;
     vector<MRI *> tractvols;
@@ -173,7 +159,7 @@ void Forrest::ReadTrainingSubjects(const char *TrainListFile,
     }
 
     for (vector<char *>::const_iterator ifile = TractFileList.begin();
-                                        ifile < TractFileList.end(); ifile++) {
+         ifile < TractFileList.end(); ifile++) {
       MRI *tractvol;
 
       fname = *idir + *ifile;
@@ -213,31 +199,25 @@ void Forrest::ReadTrainingSubjects(const char *TrainListFile,
 
               // Save local neighbor labels
               for (vector<int>::const_iterator idir = mDirLocal.begin();
-                                               idir < mDirLocal.end();
-                                               idir += 3) {
-                const int ix = ix0 + idir[0],
-                          iy = iy0 + idir[1],
+                   idir < mDirLocal.end(); idir += 3) {
+                const int ix = ix0 + idir[0], iy = iy0 + idir[1],
                           iz = iz0 + idir[2];
-                const float seg = MRIgetVoxVal(asegvol,
-                                              ((ix > -1 && ix < nx) ? ix : ix0),
-                                              ((iy > -1 && iy < ny) ? iy : iy0),
-                                              ((iz > -1 && iz < nz) ? iz : iz0),
-                                              0);
+                const float seg =
+                    MRIgetVoxVal(asegvol, ((ix > -1 && ix < nx) ? ix : ix0),
+                                 ((iy > -1 && iy < ny) ? iy : iy0),
+                                 ((iz > -1 && iz < nz) ? iz : iz0), 0);
 
-                mTrainAsegIdsLocal.push_back((unsigned int) seg);
+                mTrainAsegIdsLocal.push_back((unsigned int)seg);
               }
 
               // Save nearest neighbor labels
               for (vector<int>::const_iterator idir = mDirNear.begin();
-                                               idir < mDirNear.end();
-                                               idir += 3) {
-                int dist = 0, ix = ix0 + idir[0],
-                              iy = iy0 + idir[1],
-                              iz = iz0 + idir[2];
+                   idir < mDirNear.end(); idir += 3) {
+                int dist = 0, ix = ix0 + idir[0], iy = iy0 + idir[1],
+                    iz = iz0 + idir[2];
                 float seg = seg0;
 
-                while ((ix > -1) && (ix < nx) &&
-                       (iy > -1) && (iy < ny) &&
+                while ((ix > -1) && (ix < nx) && (iy > -1) && (iy < ny) &&
                        (iz > -1) && (iz < nz) && (seg == seg0)) {
                   seg = MRIgetVoxVal(asegvol, ix, iy, iz, 0);
                   dist++;
@@ -247,8 +227,8 @@ void Forrest::ReadTrainingSubjects(const char *TrainListFile,
                   iz += idir[2];
                 }
 
-                mTrainAsegIdsNear.push_back((unsigned int) seg);
-                //mTrainAsegDist.push_back(dist);
+                mTrainAsegIdsNear.push_back((unsigned int)seg);
+                // mTrainAsegDist.push_back(dist);
               }
             }
 
@@ -261,7 +241,7 @@ void Forrest::ReadTrainingSubjects(const char *TrainListFile,
 
             // Does this voxel belong to any tracts?
             for (vector<MRI *>::const_iterator ivol = tractvols.begin();
-                                               ivol < tractvols.end(); ivol++)
+                 ivol < tractvols.end(); ivol++)
               if (MRIgetVoxVal(*ivol, ix0, iy0, iz0, 0) > 0)
                 tractids.push_back(ivol - tractvols.begin() + 1);
 
@@ -279,9 +259,9 @@ void Forrest::ReadTrainingSubjects(const char *TrainListFile,
     if (orientvol)
       MRIfree(&orientvol);
 
-cout << "bla" << endl;
+    cout << "bla" << endl;
     for (vector<MRI *>::iterator ivol = tractvols.begin();
-                                 ivol < tractvols.end(); ivol++)
+         ivol < tractvols.end(); ivol++)
       MRIfree(&(*ivol));
   }
 }
@@ -304,8 +284,7 @@ int Forrest::GetNumTrain() { return mNumTrain; }
 // Check that a point is inside the mask
 //
 bool Forrest::IsInMask(int CoordX, int CoordY, int CoordZ) {
-  return (CoordX > -1) && (CoordX < mNx) &&
-         (CoordY > -1) && (CoordY < mNy) &&
+  return (CoordX > -1) && (CoordX < mNx) && (CoordY > -1) && (CoordY < mNy) &&
          (CoordZ > -1) && (CoordZ < mNz) &&
          (MRIgetVoxVal(mMask, CoordX, CoordY, CoordZ, 0) > 0);
 }
@@ -321,30 +300,26 @@ vector<unsigned int> Forrest::GetTestAseg(int CoordX, int CoordY, int CoordZ) {
 
     // Save local neighbor labels
     for (vector<int>::const_iterator idir = mDirLocal.begin();
-                                     idir < mDirLocal.end(); idir += 3) {
-      const int ix = CoordX + idir[0],
-                iy = CoordY + idir[1],
+         idir < mDirLocal.end(); idir += 3) {
+      const int ix = CoordX + idir[0], iy = CoordY + idir[1],
                 iz = CoordZ + idir[2];
-      const float seg = MRIgetVoxVal(mAseg,
-                                     ((ix > -1 && ix < mNx) ? ix : CoordX),
-                                     ((iy > -1 && iy < mNy) ? iy : CoordY),
-                                     ((iz > -1 && iz < mNz) ? iz : CoordZ),
-                                     0);
+      const float seg =
+          MRIgetVoxVal(mAseg, ((ix > -1 && ix < mNx) ? ix : CoordX),
+                       ((iy > -1 && iy < mNy) ? iy : CoordY),
+                       ((iz > -1 && iz < mNz) ? iz : CoordZ), 0);
 
-      testaseg.push_back((unsigned int) seg);
+      testaseg.push_back((unsigned int)seg);
     }
 
     // Save nearest neighbor labels
     for (vector<int>::const_iterator idir = mDirNear.begin();
-                                     idir < mDirNear.end(); idir += 3) {
-      int dist = 0, ix = CoordX + idir[0],
-                    iy = CoordY + idir[1],
-                    iz = CoordZ + idir[2];
+         idir < mDirNear.end(); idir += 3) {
+      int dist = 0, ix = CoordX + idir[0], iy = CoordY + idir[1],
+          iz = CoordZ + idir[2];
       float seg = seg0;
 
-      while ((ix > -1) && (ix < mNx) &&
-             (iy > -1) && (iy < mNy) &&
-             (iz > -1) && (iz < mNz) && (seg == seg0)) {
+      while ((ix > -1) && (ix < mNx) && (iy > -1) && (iy < mNy) && (iz > -1) &&
+             (iz < mNz) && (seg == seg0)) {
         seg = MRIgetVoxVal(mAseg, ix, iy, iz, 0);
         dist++;
 
@@ -353,7 +328,7 @@ vector<unsigned int> Forrest::GetTestAseg(int CoordX, int CoordY, int CoordZ) {
         iz += idir[2];
       }
 
-      testaseg.push_back((unsigned int) seg);
+      testaseg.push_back((unsigned int)seg);
     }
   }
 
@@ -388,7 +363,7 @@ vector<int> Forrest::GetTrainXyz(int SampleIndex) {
     exit(1);
   }
 
-  itrain = mTrainXyz.begin() + (SampleIndex-1) * 3;
+  itrain = mTrainXyz.begin() + (SampleIndex - 1) * 3;
   sample.insert(sample.end(), itrain, itrain + 3);
 
   return sample;
@@ -408,12 +383,12 @@ vector<unsigned int> Forrest::GetTrainAseg(int SampleIndex) {
   }
 
   if (!mTrainAsegIdsLocal.empty()) {
-    itrain = mTrainAsegIdsLocal.begin() + (SampleIndex-1) * mNumLocal;
+    itrain = mTrainAsegIdsLocal.begin() + (SampleIndex - 1) * mNumLocal;
     sample.insert(sample.end(), itrain, itrain + mNumLocal);
   }
 
   if (!mTrainAsegIdsNear.empty()) {
-    itrain = mTrainAsegIdsNear.begin() + (SampleIndex-1) * mNumNear;
+    itrain = mTrainAsegIdsNear.begin() + (SampleIndex - 1) * mNumNear;
     sample.insert(sample.end(), itrain, itrain + mNumNear);
   }
 
@@ -434,7 +409,7 @@ vector<float> Forrest::GetTrainOrient(int SampleIndex) {
   }
 
   if (!mTrainOrient.empty()) {
-    itrain = mTrainOrient.begin() + (SampleIndex-1) * 3;
+    itrain = mTrainOrient.begin() + (SampleIndex - 1) * 3;
     sample.insert(sample.end(), itrain, itrain + 3);
   }
 
@@ -453,4 +428,3 @@ vector<unsigned int> Forrest::GetTrainTractIds(int SampleIndex) {
 
   return mTrainTractIds[SampleIndex];
 }
-

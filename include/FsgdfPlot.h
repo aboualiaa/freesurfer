@@ -25,43 +25,38 @@
 #ifndef FSGDFPLOT_H
 #define FSGDFPLOT_H
 
- 
-
 #include "tix.h"
 #include "fsgdf_wrap.h"
 
 #if NEEDS_ITCL_ITK
 #ifndef Itcl_Init
-  int Itcl_Init(Tcl_Interp* interp);
+int Itcl_Init(Tcl_Interp *interp);
 #endif
 #ifndef Itk_Init
-  int Itk_Init(Tcl_Interp* interp);
+int Itk_Init(Tcl_Interp *interp);
 #endif
 #endif
 
 #ifndef Blt_Init
-  int Blt_Init ( Tcl_Interp* interp );
+int Blt_Init(Tcl_Interp *interp);
 #endif
 #ifndef Blt_SafeInit
-  int Blt_SafeInit ( Tcl_Interp* interp );
+int Blt_SafeInit(Tcl_Interp *interp);
 #endif
 
 #ifndef Tix_SafeInit
-  int Tix_SafeInit ( Tcl_Interp* interp );
+int Tix_SafeInit(Tcl_Interp *interp);
 #endif
 
-
-class FsgdfPlot
-{
+class FsgdfPlot {
 public:
-
   // Constructors/Destructors
   //
 
-  FsgdfPlot ( );
-  FsgdfPlot ( Tcl_Interp *iInterp );
+  FsgdfPlot();
+  FsgdfPlot(Tcl_Interp *iInterp);
 
-  virtual ~FsgdfPlot ( );
+  virtual ~FsgdfPlot();
 
   // public attribute accessor methods
   //
@@ -70,7 +65,7 @@ public:
    * @return
    * @param
    */
-  int ReadFile( const char* ifnGDFFile );
+  int ReadFile(const char *ifnGDFFile);
 
   /**
    * @return
@@ -94,25 +89,25 @@ public:
    * @return
    * @param
    */
-  int AddPoint( int inVertex );
+  int AddPoint(int inVertex);
 
   /**
    * @return
    * @param
    */
-  int SetPoint( int inVertex );
+  int SetPoint(int inVertex);
 
   /**
    * @return
    * @param
    */
-  int SetInfo( const char* isLabel );
+  int SetInfo(const char *isLabel);
 
   /**
    * @return
    * @param
    */
-  int SaveToPostscript( const char* ifnPostscript );
+  int SaveToPostscript(const char *ifnPostscript);
 
   /**
    * @return
@@ -127,7 +122,6 @@ public:
   int HideWindow();
 
 private:
-
   // private methods
   //
   int InitInterp();
@@ -138,7 +132,6 @@ private:
   int mGDFID;
   int mbGDFLoaded;
   Tcl_Interp *mInterp;
-
 };
 
 #endif // FSGDFPLOT_H

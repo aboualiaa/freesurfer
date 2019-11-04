@@ -34,19 +34,16 @@ using namespace std;
 
 #include "gcalinearnode.hpp"
 
-namespace Freesurfer
-{
+namespace Freesurfer {
 // ====================================================
-void GCAlinearNode::PrintStats(ostream &os) const
-{
+void GCAlinearNode::PrintStats(ostream &os) const {
   os << "Stats for GCAlinearNode" << endl;
   os << "  Exhumation time = " << exhumeTime << " ms" << endl;
   os << "  Inhumation time = " << inhumeTime << " ms" << endl;
 }
 
 // ==========================================
-void GCAlinearNode::Exhume(const GCA *const src)
-{
+void GCAlinearNode::Exhume(const GCA *const src) {
   /*!
     This method is responsible for extracting data from
     the source GCA, and packing into the linear arrays
@@ -58,7 +55,8 @@ void GCAlinearNode::Exhume(const GCA *const src)
   this->Allocate();
 
   // Array to hold label count at each node
-  vector< unsigned int > nLabelsNode(this->nodeTotalTraining.size(), numeric_limits< unsigned int >::max());
+  vector<unsigned int> nLabelsNode(this->nodeTotalTraining.size(),
+                                   numeric_limits<unsigned int>::max());
 
   // Handle the 3D data
   for (int ix = 0; ix < this->xDim; ix++) {
@@ -76,10 +74,12 @@ void GCAlinearNode::Exhume(const GCA *const src)
 
   // Compute 4D offsets
   this->offsets4D.at(0) = 0;
-  std::partial_sum(nLabelsNode.begin(), nLabelsNode.end(), ++(this->offsets4D.begin()));
+  std::partial_sum(nLabelsNode.begin(), nLabelsNode.end(),
+                   ++(this->offsets4D.begin()));
 
   // Array to hold directions for each GC1D
-  vector< unsigned int > nDirecAtGC1D(this->n4D, numeric_limits< unsigned int >::max());
+  vector<unsigned int> nDirecAtGC1D(this->n4D,
+                                    numeric_limits<unsigned int>::max());
 
   // Handle the 4D data
   for (int ix = 0; ix < this->xDim; ix++) {
@@ -88,7 +88,8 @@ void GCAlinearNode::Exhume(const GCA *const src)
         const GCA_NODE *const gcan = &(src->nodes[ix][iy][iz]);
 
         for (int iGC1D = 0; iGC1D < this->gc1dCount(ix, iy, iz); iGC1D++) {
-          nDirecAtGC1D.at(this->index4D(ix, iy, iz, iGC1D)) = this->gc1dNeighbourDim;
+          nDirecAtGC1D.at(this->index4D(ix, iy, iz, iGC1D)) =
+              this->gc1dNeighbourDim;
 
           // Deal with the label held inside each node
           this->labelsAtNode(ix, iy, iz, iGC1D) = gcan->labels[iGC1D];
@@ -112,10 +113,12 @@ void GCAlinearNode::Exhume(const GCA *const src)
   if (this->hasGibbsNeighbourhood) {
     // Compute 5D offsets
     this->offsets5D.at(0) = 0;
-    std::partial_sum(nDirecAtGC1D.begin(), nDirecAtGC1D.end(), ++(this->offsets5D.begin()));
+    std::partial_sum(nDirecAtGC1D.begin(), nDirecAtGC1D.end(),
+                     ++(this->offsets5D.begin()));
 
     // Array to hold labels for each direction at each GC1D
-    vector< unsigned int > nLabelsDirecAtGC1D(this->n5D, numeric_limits< unsigned int >::max());
+    vector<unsigned int> nLabelsDirecAtGC1D(
+        this->n5D, numeric_limits<unsigned int>::max());
 
     // Handle 5D data
     for (int ix = 0; ix < this->xDim; ix++) {
@@ -127,7 +130,8 @@ void GCAlinearNode::Exhume(const GCA *const src)
             const GC1D *const gc1d = &(gcan->gcs[iGC1D]);
 
             for (int iDirec = 0; iDirec < this->gc1dNeighbourDim; iDirec++) {
-              nLabelsDirecAtGC1D.at(this->index5D(ix, iy, iz, iGC1D, iDirec)) = gc1d->nlabels[iDirec];
+              nLabelsDirecAtGC1D.at(this->index5D(ix, iy, iz, iGC1D, iDirec)) =
+                  gc1d->nlabels[iDirec];
             }
           }
         }
@@ -136,7 +140,8 @@ void GCAlinearNode::Exhume(const GCA *const src)
 
     // Compute 6D offsets
     this->offsets6D.at(0) = 0;
-    std::partial_sum(nLabelsDirecAtGC1D.begin(), nLabelsDirecAtGC1D.end(), ++(this->offsets6D.begin()));
+    std::partial_sum(nLabelsDirecAtGC1D.begin(), nLabelsDirecAtGC1D.end(),
+                     ++(this->offsets6D.begin()));
 
     // Handle 6D data
     for (int ix = 0; ix < this->xDim; ix++) {
@@ -147,9 +152,14 @@ void GCAlinearNode::Exhume(const GCA *const src)
           for (int iGC1D = 0; iGC1D < this->gc1dCount(ix, iy, iz); iGC1D++) {
             const GC1D *const gc1d = &(gcan->gcs[iGC1D]);
             for (int iDirec = 0; iDirec < this->gc1dNeighbourDim; iDirec++) {
-              for (int iLabel = 0; iLabel < this->nLabelsAtNodeGC1Ddirection(ix, iy, iz, iGC1D, iDirec); iLabel++) {
-                this->labelsAtNodeGC1Ddirection(ix, iy, iz, iGC1D, iDirec, iLabel) = gc1d->labels[iDirec][iLabel];
-                this->labelPriorsAtNodeGC1Ddirection(ix, iy, iz, iGC1D, iDirec, iLabel) =
+              for (int iLabel = 0; iLabel < this->nLabelsAtNodeGC1Ddirection(
+                                                ix, iy, iz, iGC1D, iDirec);
+                   iLabel++) {
+                this->labelsAtNodeGC1Ddirection(ix, iy, iz, iGC1D, iDirec,
+                                                iLabel) =
+                    gc1d->labels[iDirec][iLabel];
+                this->labelPriorsAtNodeGC1Ddirection(ix, iy, iz, iGC1D, iDirec,
+                                                     iLabel) =
                     gc1d->label_priors[iDirec][iLabel];
               }
             }
@@ -165,15 +175,14 @@ void GCAlinearNode::Exhume(const GCA *const src)
 
 // ====================================================
 
-const_GCAnode GCAlinearNode::GetConstNode(const int ix, const int iy, const int iz) const
-{
+const_GCAnode GCAlinearNode::GetConstNode(const int ix, const int iy,
+                                          const int iz) const {
   return (const_GCAnode(ix, iy, iz, *this));
 }
 
 // ====================================================
 
-void GCAlinearNode::Inhume(GCA *dst) const
-{
+void GCAlinearNode::Inhume(GCA *dst) const {
   /*!
     Stores data back from the linear arrays into a GCA.
     This removes the existing node structure, and reallocates
@@ -205,7 +214,8 @@ void GCAlinearNode::Inhume(GCA *dst) const
     // Allocate pointer block
     dst->nodes[ix] = (GCA_NODE **)calloc(this->yDim, sizeof(GCA_NODE *));
     if (!(dst->nodes[ix])) {
-      cerr << __FUNCTION__ << ": dst->nodes[" << ix << "] allocation failed" << endl;
+      cerr << __FUNCTION__ << ": dst->nodes[" << ix << "] allocation failed"
+           << endl;
       exit(EXIT_FAILURE);
     }
 
@@ -230,7 +240,8 @@ void GCAlinearNode::Inhume(GCA *dst) const
         gcan->total_training = gln.totalTraining();
 
         // Allocate labels array
-        gcan->labels = (unsigned short *)calloc(gln.gc1dCount(), sizeof(unsigned short));
+        gcan->labels =
+            (unsigned short *)calloc(gln.gc1dCount(), sizeof(unsigned short));
         if (!(gcan->labels)) {
           cerr << __FUNCTION__ << ": dst->nodes"
                << "[" << ix << "]"
@@ -259,14 +270,14 @@ void GCAlinearNode::Inhume(GCA *dst) const
           GC1D *const gc1d = &(gcan->gcs[iGC1D]);
           const const_GCAnode_GC1D g1d = gln.GetConstGC1D(iGC1D);
 
-          gc1d->means = (float *)calloc(dst->ninputs,  // Always 1
+          gc1d->means = (float *)calloc(dst->ninputs, // Always 1
                                         sizeof(float));
           if (!(gc1d->means)) {
             cerr << __FUNCTION__ << ": Allocation failure of means" << endl;
             exit(EXIT_FAILURE);
           }
 
-          gc1d->covars = (float *)calloc(dst->ninputs,  // Always 1
+          gc1d->covars = (float *)calloc(dst->ninputs, // Always 1
                                          sizeof(float));
           if (!(gc1d->covars)) {
             cerr << __FUNCTION__ << ": Allocation failure of covars" << endl;
@@ -283,22 +294,26 @@ void GCAlinearNode::Inhume(GCA *dst) const
 
           if (this->hasGibbsNeighbourhood) {
             // Allocate the nlabels array
-            gc1d->nlabels = (short *)calloc(this->gc1dNeighbourDim,  // Always 6/GIBBS_NEIGHBORHOOD
-                                            sizeof(short));
+            gc1d->nlabels = (short *)calloc(
+                this->gc1dNeighbourDim, // Always 6/GIBBS_NEIGHBORHOOD
+                sizeof(short));
             if (!(gc1d->nlabels)) {
               cerr << __FUNCTION__ << ": Allocation failure of nlabels" << endl;
               exit(EXIT_FAILURE);
             }
 
             // Allocate pointers for label_priors
-            gc1d->label_priors = (float **)calloc(this->gc1dNeighbourDim, sizeof(float *));
+            gc1d->label_priors =
+                (float **)calloc(this->gc1dNeighbourDim, sizeof(float *));
             if (!(gc1d->label_priors)) {
-              cerr << __FUNCTION__ << ": Allocation failure of label_priors" << endl;
+              cerr << __FUNCTION__ << ": Allocation failure of label_priors"
+                   << endl;
               exit(EXIT_FAILURE);
             }
 
             // Allocate pointers for labels
-            gc1d->labels = (unsigned short **)calloc(this->gc1dNeighbourDim, sizeof(unsigned short *));
+            gc1d->labels = (unsigned short **)calloc(this->gc1dNeighbourDim,
+                                                     sizeof(unsigned short *));
             if (!(gc1d->labels)) {
               cerr << __FUNCTION__ << ": Allocation failure of labels" << endl;
               exit(EXIT_FAILURE);
@@ -309,21 +324,26 @@ void GCAlinearNode::Inhume(GCA *dst) const
               gc1d->nlabels[iDirec] = g1d.nLabels(iDirec);
 
               // Allocate the memory
-              gc1d->label_priors[iDirec] = (float *)calloc(gc1d->nlabels[iDirec], sizeof(float));
+              gc1d->label_priors[iDirec] =
+                  (float *)calloc(gc1d->nlabels[iDirec], sizeof(float));
               if (!(gc1d->label_priors[iDirec])) {
-                cerr << __FUNCTION__ << ": Allocation failure of label_priors" << endl;
+                cerr << __FUNCTION__ << ": Allocation failure of label_priors"
+                     << endl;
                 exit(EXIT_FAILURE);
               }
 
-              gc1d->labels[iDirec] = (unsigned short *)calloc(gc1d->nlabels[iDirec], sizeof(unsigned short));
+              gc1d->labels[iDirec] = (unsigned short *)calloc(
+                  gc1d->nlabels[iDirec], sizeof(unsigned short));
               if (!(gc1d->labels[iDirec])) {
-                cerr << __FUNCTION__ << ": Allocation failure of labels" << endl;
+                cerr << __FUNCTION__ << ": Allocation failure of labels"
+                     << endl;
                 exit(EXIT_FAILURE);
               }
 
               for (int iLabel = 0; iLabel < g1d.nLabels(iDirec); iLabel++) {
                 gc1d->labels[iDirec][iLabel] = g1d.labels(iDirec, iLabel);
-                gc1d->label_priors[iDirec][iLabel] = g1d.labelPriors(iDirec, iLabel);
+                gc1d->label_priors[iDirec][iLabel] =
+                    g1d.labelPriors(iDirec, iLabel);
               }
             }
           }
@@ -337,8 +357,7 @@ void GCAlinearNode::Inhume(GCA *dst) const
 
 // ====================================================
 
-void GCAlinearNode::Allocate(void)
-{
+void GCAlinearNode::Allocate() {
   /*!
     Allocates the main arrays according to
     the values stored in the dimension member
@@ -350,31 +369,32 @@ void GCAlinearNode::Allocate(void)
   const size_t nVoxels = this->xDim * this->yDim * this->zDim;
 
   // Allocate the offset arrays
-  this->offsets4D.resize(nVoxels + 1, numeric_limits< size_t >::max());
-  this->offsets5D.resize(this->n4D + 1, numeric_limits< size_t >::max());
-  this->offsets6D.resize(this->n5D + 1, numeric_limits< size_t >::max());
+  this->offsets4D.resize(nVoxels + 1, numeric_limits<size_t>::max());
+  this->offsets5D.resize(this->n4D + 1, numeric_limits<size_t>::max());
+  this->offsets6D.resize(this->n5D + 1, numeric_limits<size_t>::max());
 
   // Allocate the 3D arrays
-  this->nodeMaxLabels.resize(nVoxels, numeric_limits< int >::max());
-  this->nodeTotalTraining.resize(nVoxels, numeric_limits< int >::max());
+  this->nodeMaxLabels.resize(nVoxels, numeric_limits<int>::max());
+  this->nodeTotalTraining.resize(nVoxels, numeric_limits<int>::max());
 
   // Allocate the 4D arrays
-  this->nodeLabels.resize(this->n4D, numeric_limits< unsigned short >::max());
-  this->means.resize(this->n4D, numeric_limits< float >::quiet_NaN());
-  this->variances.resize(this->n4D, numeric_limits< float >::quiet_NaN());
-  this->nJustPriors.resize(this->n4D, numeric_limits< short >::max());
-  this->nTraining.resize(this->n4D, numeric_limits< int >::max());
-  this->regularised.resize(this->n4D, numeric_limits< char >::max());
+  this->nodeLabels.resize(this->n4D, numeric_limits<unsigned short>::max());
+  this->means.resize(this->n4D, numeric_limits<float>::quiet_NaN());
+  this->variances.resize(this->n4D, numeric_limits<float>::quiet_NaN());
+  this->nJustPriors.resize(this->n4D, numeric_limits<short>::max());
+  this->nTraining.resize(this->n4D, numeric_limits<int>::max());
+  this->regularised.resize(this->n4D, numeric_limits<char>::max());
 
   // Allocate the 6D arrays
-  this->gc1dDirecLabelPriors.resize(this->n6D, numeric_limits< float >::quiet_NaN());
-  this->gc1dDirecLabels.resize(this->n6D, numeric_limits< unsigned short >::max());
+  this->gc1dDirecLabelPriors.resize(this->n6D,
+                                    numeric_limits<float>::quiet_NaN());
+  this->gc1dDirecLabels.resize(this->n6D,
+                               numeric_limits<unsigned short>::max());
 }
 
 // ====================================================
 
-void GCAlinearNode::ExtractDims(const GCA *const src)
-{
+void GCAlinearNode::ExtractDims(const GCA *const src) {
   /*!
     Fills in the dimensions required from the given GCA.
     Does this by looping over all voxels, and finding the
@@ -404,11 +424,11 @@ void GCAlinearNode::ExtractDims(const GCA *const src)
           this->n5D += GIBBS_NEIGHBORHOOD;
 
           if (!(src->flags & GCA_NO_MRF)) {
-            for (unsigned int iNeighbour = 0; iNeighbour < GIBBS_NEIGHBORHOOD; iNeighbour++) {
+            for (unsigned int iNeighbour = 0; iNeighbour < GIBBS_NEIGHBORHOOD;
+                 iNeighbour++) {
               this->n6D += gc1d->nlabels[iNeighbour];
             }
-          }
-          else {
+          } else {
             this->hasGibbsNeighbourhood = false;
           }
         }
@@ -419,8 +439,7 @@ void GCAlinearNode::ExtractDims(const GCA *const src)
 
 // ====================================================
 
-void GCAlinearNode::ScorchNodes(GCA *targ) const
-{
+void GCAlinearNode::ScorchNodes(GCA *targ) const {
   /*!
     Deletes all of the node related things from
     a GCA, prior to inhumation of new data
@@ -440,8 +459,7 @@ void GCAlinearNode::ScorchNodes(GCA *targ) const
 
 // ###############################################################
 
-const_GCAnode_GC1D const_GCAnode::GetConstGC1D(const int iGC1D) const
-{
+const_GCAnode_GC1D const_GCAnode::GetConstGC1D(const int iGC1D) const {
   if ((iGC1D < 0) || (iGC1D >= this->myGC1Dcount)) {
     std::cerr << __FUNCTION__ << ": Out of range " << iGC1D << std::endl;
     abort();
@@ -451,4 +469,4 @@ const_GCAnode_GC1D const_GCAnode::GetConstGC1D(const int iGC1D) const
 
   return (gc1d);
 }
-}  // namespace Freesurfer
+} // namespace Freesurfer

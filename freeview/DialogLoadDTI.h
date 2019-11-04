@@ -26,13 +26,11 @@
 
 #include <QDialog>
 
-namespace Ui
-{
+namespace Ui {
 class DialogLoadDTI;
 }
 
-class DialogLoadDTI : public QDialog
-{
+class DialogLoadDTI : public QDialog {
   Q_OBJECT
 
 public:
@@ -46,12 +44,9 @@ public:
 
   bool IsToResample();
 
-  void SetLastDir( const QString& dir )
-  {
-    m_strLastDir = dir;
-  }
+  void SetLastDir(const QString &dir) { m_strLastDir = dir; }
 
-  void Initialize( bool bResample, bool bEnableCheckBox );
+  void Initialize(bool bResample, bool bEnableCheckBox);
 
 protected slots:
   void OnOK();

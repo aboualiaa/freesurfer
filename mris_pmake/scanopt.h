@@ -44,7 +44,7 @@
  *           colourValue2    =       Blue
  *
  *   Here, the presence of the equals character "=" links a token:value
- *   pair. This link character defaults to "=" but can be set to 
+ *   pair. This link character defaults to "=" but can be set to
  *   meaningful character.
  *
  *   If constructed with a filename argument (and assuming a valid file),
@@ -89,14 +89,13 @@ using namespace std;
 #ifndef __SCANOPT_H__
 #define __SCANOPT_H__
 
-const string    str_NONCOUPLET  = "< nonCouplet >";
-const int       C_scanopt_STACKDEPTH      = 64;
+const string str_NONCOUPLET = "< nonCouplet >";
+const int C_scanopt_STACKDEPTH = 64;
 
 typedef enum {
-  e_DesTag,               // --<token>    <val>
-  e_EquLink               // <token>  =   <val>
-}
-e_SCANOPT_tokType;
+  e_DesTag, // --<token>    <val>
+  e_EquLink // <token>  =   <val>
+} e_SCANOPT_tokType;
 
 class C_scanopt {
 
@@ -109,40 +108,37 @@ protected:
   // and str_proc[] variables are maintained by the debug_push|pop
   // methods
   //
-  string  str_obj;                  // name of object class
-  string  str_name;                 // name of object variable
-  int     id;                       // id of agent
-  int     iter;                     // current iteration in an
-                                    //+ arbitrary processing scheme
-  int     verbosity;                // debug related value for object
-  int     warnings;                 // show warnings (and warnings level)
-  int     stackDepth;               // current pseudo stack depth
-  string  str_proc[C_scanopt_STACKDEPTH];   // execution procedure stack
-
+  string str_obj;                        // name of object class
+  string str_name;                       // name of object variable
+  int id;                                // id of agent
+  int iter;                              // current iteration in an
+                                         //+ arbitrary processing scheme
+  int verbosity;                         // debug related value for object
+  int warnings;                          // show warnings (and warnings level)
+  int stackDepth;                        // current pseudo stack depth
+  string str_proc[C_scanopt_STACKDEPTH]; // execution procedure stack
 
 protected:
-  int                             argc;             // size of string vector
-  list<string>                    Lstr_body;        // string list containing
-                                                    //+ options and values
-  list<string>::iterator          Lstr_iter;        // an iterator to move over 
-                                                    //+ the list
+  int argc;                         // size of string vector
+  list<string> Lstr_body;           // string list containing
+                                    //+ options and values
+  list<string>::iterator Lstr_iter; // an iterator to move over
+                                    //+ the list
 
-  map<string, string>             map_opt;          // a map associating 
-                                                    //+ possible optName and 
-                                                    //+ optVal pairs
-  map<string, string>::iterator   map_iter;         // an iterator to move over the map
+  map<string, string> map_opt;            // a map associating
+                                          //+ possible optName and
+                                          //+ optVal pairs
+  map<string, string>::iterator map_iter; // an iterator to move over the map
 
-  string                          str_optDes;       // the "pattern" that defines
-                                                    //+ a string as an option.
-                                                    //+ Typically this will be
-                                                    //+ either "-" or "--".
-  string                          str_equ;          // The string for the
-                                                    //+ EquLink. Defaults to
-                                                    //+ "="
-  
+  string str_optDes; // the "pattern" that defines
+                     //+ a string as an option.
+                     //+ Typically this will be
+                     //+ either "-" or "--".
+  string str_equ;    // The string for the
+                     //+ EquLink. Defaults to
+                     //+ "="
 
-
-    // methods
+  // methods
 
 public:
   //
@@ -150,94 +146,78 @@ public:
   //
 
   // conventional constructor using passed command line args
-  C_scanopt(      int                     a_argc,
-                  char**                  appch_argv,
-                  string                  astr_optDes     = "--");
+  C_scanopt(int a_argc, char **appch_argv, string astr_optDes = "--");
 
   // constructor reading options from file
-  C_scanopt(      string                  astr_filename,
-                  e_SCANOPT_tokType       e_tokType       = e_DesTag,
-                  string                  astr_optDes     = "--",
-                  string                  astr_equ        = "=");
+  C_scanopt(string astr_filename, e_SCANOPT_tokType e_tokType = e_DesTag,
+            string astr_optDes = "--", string astr_equ = "=");
 
-  C_scanopt(      string                  astr_options,
-                  string                  astr_delimiter  = ";",
-                  e_SCANOPT_tokType       e_tokType       = e_EquLink,
-                  string                  astr_optDes     = "--",
-                  string                  astr_equ        = "=");
-                  
-  void    core_construct( string astr_name    = "unnamed",
-                          int a_id            = -1,
-                          int a_iter          = 0,
-                          int a_verbosity     = 0,
-                          int a_warnings      = 0,
-                          int a_stackDepth    = 0,
-                          string astr_proc    = "noproc");
+  C_scanopt(string astr_options, string astr_delimiter = ";",
+            e_SCANOPT_tokType e_tokType = e_EquLink, string astr_optDes = "--",
+            string astr_equ = "=");
+
+  void core_construct(string astr_name = "unnamed", int a_id = -1,
+                      int a_iter = 0, int a_verbosity = 0, int a_warnings = 0,
+                      int a_stackDepth = 0, string astr_proc = "noproc");
   ~C_scanopt();
 
   //
   // error / warn / print block
   //
-  void        debug_push(         string astr_currentProc);
-  void        debug_pop();
+  void debug_push(string astr_currentProc);
+  void debug_pop();
 
-  void        error(              string  astr_msg        = "Some error has occured",
-                                  int     code            = -1);
-  void        warn(               string astr_class = "C_scanopt::",
-                                  string astr_msg = "", int code = -1);
-  void        function_trace(     string astr_class,
-                                  string astr_msg,
-                                  string astr_separator);
-  void        function_trace(     string astr_msg) {
+  void error(string astr_msg = "Some error has occured", int code = -1);
+  void warn(string astr_class = "C_scanopt::", string astr_msg = "",
+            int code = -1);
+  void function_trace(string astr_class, string astr_msg,
+                      string astr_separator);
+  void function_trace(string astr_msg) {
     function_trace("C_scanopt", astr_msg, "");
   };
 
-    //
-    // access block
-    //
-    void    print();                        // print object
-    int     stackDepth_get()const {return stackDepth;};
-    void    stackDepth_set(int anum) {stackDepth = anum;};
-    int     iter_get()      const   {return iter;};
-    void    iter_set(int anum)      {iter = anum;};
-    int     id_get()        const   {return id;};
-    void    id_set(int anum)        {id = anum;};
-    int     verbosity_get() const   {return verbosity;};
-    void    verbosity_set(int anum) {verbosity = anum;};
-    int     warnings_get()  const   {return warnings;};
-    void    warnings_set(int anum)  {warnings = anum;};
-    string  str_obj_get()   const   {return str_obj;};
-    void    str_obj_set(string astr) {str_obj = astr;};
-    string  str_name_get()  const   {return str_name;};
-    void    str_name_set(string astr) {str_name = astr;};
-    string  str_proc_get()  const   {return str_proc[stackDepth_get()];};
-    void    str_proc_set(int depth, string astr) {str_proc[depth] = astr;};
-    int     argc_get()      const   {return argc;};
-    void    argc_set(int anum)      {argc = anum;};
-    string  str_optDes_get() const  {return str_optDes;};
-    void    str_optDes_set(string astr) {str_optDes = astr;};
-    string  str_equ_get() const  {return str_equ;};
-    void    str_equ_set(string astr) {str_equ = astr;};
+  //
+  // access block
+  //
+  void print(); // print object
+  int stackDepth_get() const { return stackDepth; };
+  void stackDepth_set(int anum) { stackDepth = anum; };
+  int iter_get() const { return iter; };
+  void iter_set(int anum) { iter = anum; };
+  int id_get() const { return id; };
+  void id_set(int anum) { id = anum; };
+  int verbosity_get() const { return verbosity; };
+  void verbosity_set(int anum) { verbosity = anum; };
+  int warnings_get() const { return warnings; };
+  void warnings_set(int anum) { warnings = anum; };
+  string str_obj_get() const { return str_obj; };
+  void str_obj_set(string astr) { str_obj = astr; };
+  string str_name_get() const { return str_name; };
+  void str_name_set(string astr) { str_name = astr; };
+  string str_proc_get() const { return str_proc[stackDepth_get()]; };
+  void str_proc_set(int depth, string astr) { str_proc[depth] = astr; };
+  int argc_get() const { return argc; };
+  void argc_set(int anum) { argc = anum; };
+  string str_optDes_get() const { return str_optDes; };
+  void str_optDes_set(string astr) { str_optDes = astr; };
+  string str_equ_get() const { return str_equ; };
+  void str_equ_set(string astr) { str_equ = astr; };
 
   //
   // miscellaneous block
   //
 private:
-  void    map_opt_build(
-    e_SCANOPT_tokType e_tokType = e_DesTag
-  );                // build option map
+  void
+  map_opt_build(e_SCANOPT_tokType e_tokType = e_DesTag); // build option map
 protected:
-  void    nullify();                      // "reset" structure to 0
+  void nullify(); // "reset" structure to 0
 public:
-  bool    scanFor(string  astr_target,    // the main purpose of the class
-                  string* apstr_value);
+  bool scanFor(string astr_target, // the main purpose of the class
+               string *apstr_value);
 };
 
-string 	str_trim(string		astr_toTrim);
-int     str_tokenize(
-            const string&       str,
-            vector<string>&     tokens,
-            const string&       delimiters = " " );
-
+string str_trim(string astr_toTrim);
+int str_tokenize(const string &str, vector<string> &tokens,
+                 const string &delimiters = " ");
 
 #endif //__SCANOPT_H__

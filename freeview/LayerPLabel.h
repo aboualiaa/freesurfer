@@ -33,45 +33,36 @@
 class FSVolume;
 class vtkImageData;
 
-class LayerPLabel : public LayerMRI
-{
+class LayerPLabel : public LayerMRI {
   Q_OBJECT
 public:
-  LayerPLabel( LayerMRI* ref, QObject* parent = NULL );
+  LayerPLabel(LayerMRI *ref, QObject *parent = NULL);
   virtual ~LayerPLabel();
 
   bool LoadVolumeFiles();
 
-  void SetVolumeFileNames( const QStringList& filenames )
-  {
+  void SetVolumeFileNames(const QStringList &filenames) {
     m_sFilenames = filenames;
   }
 
-  void SetFileNamePrefix( const QString& prefix )
-  {
-    m_sFilenamePrefix = prefix;
-  }
+  void SetFileNamePrefix(const QString &prefix) { m_sFilenamePrefix = prefix; }
 
-  void SetLUT( const QString& lut )
-  {
-    m_sLUT = lut;
-  }
+  void SetLUT(const QString &lut) { m_sLUT = lut; }
 
-  double GetVoxelValue(double* pos);
+  double GetVoxelValue(double *pos);
 
-  QString GetLabelName(double* pos);
+  QString GetLabelName(double *pos);
 
 protected:
-  //  bool DoRotate( std::vector<RotationElement>& rotations, wxWindow* wnd, wxCommandEvent& event );
+  //  bool DoRotate( std::vector<RotationElement>& rotations, wxWindow* wnd,
+  //  wxCommandEvent& event );
   void UpdateColorMap();
 
-  FSVolume*     m_volumeTemp;
-  QStringList   m_sFilenames;
-  QString       m_sFilenamePrefix;
-  QString       m_sLUT;
+  FSVolume *m_volumeTemp;
+  QStringList m_sFilenames;
+  QString m_sFilenamePrefix;
+  QString m_sLUT;
   vtkSmartPointer<vtkImageData> m_imageIndex;
 };
 
 #endif
-
-

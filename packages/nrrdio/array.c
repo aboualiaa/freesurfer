@@ -22,30 +22,23 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-
 #include "NrrdIO.h"
 
-void
-_airLenSet(airArray *a, unsigned int len)
-{
+void _airLenSet(airArray *a, unsigned int len) {
 
   a->len = len;
   /* printf("    HEY: len = %d\n", a->len); */
-  if (a->lenP)
-  {
+  if (a->lenP) {
     *(a->lenP) = len;
     /* printf("    HEY: *(a->lenP) = *(%lu) = %d\n",
        (unsigned long)a->lenP, *(a->lenP)); */
   }
 }
 
-void
-_airSetData(airArray *a, void *data)
-{
+void _airSetData(airArray *a, void *data) {
 
   a->data = data;
-  if (a->dataP)
-  {
+  if (a->dataP) {
     *(a->dataP) = data;
   }
 }
@@ -68,19 +61,16 @@ _airSetData(airArray *a, void *data)
 ** variable, if its address is passed- though in that case the
 ** correct value will over-write any other.
 */
-airArray *
-airArrayNew(void **dataP, unsigned int *lenP, size_t unit, unsigned int incr)
-{
+airArray *airArrayNew(void **dataP, unsigned int *lenP, size_t unit,
+                      unsigned int incr) {
   airArray *a;
 
-  if (unit<=0 || incr<=0)
-  {
+  if (unit <= 0 || incr <= 0) {
     return NULL;
   }
 
   a = (airArray *)calloc(1, sizeof(airArray));
-  if (!a)
-  {
+  if (!a) {
     return NULL;
   }
 
@@ -105,13 +95,10 @@ airArrayNew(void **dataP, unsigned int *lenP, size_t unit, unsigned int incr)
 **
 ** set callbacks to maintain array of structs
 */
-void
-airArrayStructCB(airArray *a,
-                 void (*initCB)(void *), void (*doneCB)(void *))
-{
+void airArrayStructCB(airArray *a, void (*initCB)(void *),
+                      void (*doneCB)(void *)) {
 
-  if (a)
-  {
+  if (a) {
     a->initCB = initCB;
     a->doneCB = doneCB;
     a->allocCB = NULL;
@@ -124,13 +111,10 @@ airArrayStructCB(airArray *a,
 **
 ** set callbacks to maintain array of pointers
 */
-void
-airArrayPointerCB(airArray *a,
-                  void *(*allocCB)(void), void *(*freeCB)(void *))
-{
+void airArrayPointerCB(airArray *a, void *(*allocCB)(void),
+                       void *(*freeCB)(void *)) {
 
-  if (a)
-  {
+  if (a) {
     a->initCB = NULL;
     a->doneCB = NULL;
     a->allocCB = allocCB;
@@ -150,36 +134,28 @@ airArrayPointerCB(airArray *a,
 ** conscientious users can look at NULL-ity of a->data to detect such
 ** an error.
 */
-void
-airArrayLenPreSet(airArray *a, unsigned int newlen)
-{
+void airArrayLenPreSet(airArray *a, unsigned int newlen) {
   unsigned int newsize;
   void *newdata;
 
-  if (!a)
-  {
+  if (!a) {
     return;
   }
 
-  if (newlen == 0)
-  {
+  if (newlen == 0) {
     /* there is no pre-set length, turn off noReallocWhenSmaller */
     a->noReallocWhenSmaller = AIR_FALSE;
-  }
-  else
-  {
-    newsize = (newlen-1)/a->incr + 1;
-    if (newsize > a->size)
-    {
-      newdata = calloc(newsize*a->incr, a->unit);
-      if (!newdata)
-      {
+  } else {
+    newsize = (newlen - 1) / a->incr + 1;
+    if (newsize > a->size) {
+      newdata = calloc(newsize * a->incr, a->unit);
+      if (!newdata) {
         free(a->data);
         _airSetData(a, NULL);
         return;
       }
-      memmove(newdata, a->data, AIR_MIN(a->len*a->unit,
-                                       newsize*a->incr*a->unit));
+      memmove(newdata, a->data,
+              AIR_MIN(a->len * a->unit, newsize * a->incr * a->unit));
       free(a->data);
       _airSetData(a, newdata);
       a->size = newsize;
@@ -207,68 +183,53 @@ airArrayLenPreSet(airArray *a, unsigned int newlen)
 ** Now conscientious users can look at NULL-ity of a->data to detect
 ** such an error.
 */
-void
-airArrayLenSet(airArray *a, unsigned int newlen)
-{
+void airArrayLenSet(airArray *a, unsigned int newlen) {
   unsigned int newsize;
   int ii;
   void *addr, *newdata;
 
-  if (!a)
-  {
+  if (!a) {
     /* user is a moron, what can you do */
     return;
   }
 
-  if (newlen == a->len)
-  {
+  if (newlen == a->len) {
     /* nothing to do */
     return;
   }
 
   /* call freeCB/doneCB on all the elements which are going bye-bye */
-  if (newlen < a->len && (a->freeCB || a->doneCB))
-  {
-    for (ii=a->len-1; ii>=(int)newlen; ii--)
-    {
-      addr = (char*)(a->data) + ii*a->unit;
-      if (a->freeCB)
-      {
-        (a->freeCB)(*((void**)addr));
-      }
-      else
-      {
+  if (newlen < a->len && (a->freeCB || a->doneCB)) {
+    for (ii = a->len - 1; ii >= (int)newlen; ii--) {
+      addr = (char *)(a->data) + ii * a->unit;
+      if (a->freeCB) {
+        (a->freeCB)(*((void **)addr));
+      } else {
         (a->doneCB)(addr);
       }
     }
   }
 
-  newsize = newlen ? (newlen-1)/a->incr + 1 : 0;
-  if (newsize != a->size)
-  {
+  newsize = newlen ? (newlen - 1) / a->incr + 1 : 0;
+  if (newsize != a->size) {
     /* we have to change the size of the array */
-    if (newsize)
-    {
+    if (newsize) {
       /* array should be bigger or smaller, but not zero-length */
-      if (newsize > a->size
-          || (newsize < a->size && !(a->noReallocWhenSmaller)) )
-      {
-        newdata = calloc(newsize*a->incr, a->unit);
-        if (!newdata)
-        {
+      if (newsize > a->size ||
+          (newsize < a->size && !(a->noReallocWhenSmaller))) {
+        newdata = calloc(newsize * a->incr, a->unit);
+        if (!newdata) {
           free(a->data);
           _airSetData(a, NULL);
           return;
         }
-        memmove(newdata, a->data, AIR_MIN(a->len*a->unit,
-                                         newsize*a->incr*a->unit));
+        memmove(newdata, a->data,
+                AIR_MIN(a->len * a->unit, newsize * a->incr * a->unit));
         free(a->data);
         _airSetData(a, newdata);
         a->size = newsize;
       }
-    }
-    else
-    {
+    } else {
       /* array should be zero-length */
       free(a->data);
       _airSetData(a, NULL);
@@ -279,17 +240,12 @@ airArrayLenSet(airArray *a, unsigned int newlen)
      and neither "size" nor "data" need to change */
 
   /* call allocCB/initCB on newly created elements */
-  if (newlen > a->len && (a->allocCB || a->initCB))
-  {
-    for (ii=newlen; ii<(int)(a->len); ii++)
-    {
-      addr = (char*)(a->data) + ii*a->unit;
-      if (a->allocCB)
-      {
-        *((void**)addr) = (a->allocCB)();
-      }
-      else
-      {
+  if (newlen > a->len && (a->allocCB || a->initCB)) {
+    for (ii = newlen; ii < (int)(a->len); ii++) {
+      addr = (char *)(a->data) + ii * a->unit;
+      if (a->allocCB) {
+        *((void **)addr) = (a->allocCB)();
+      } else {
         (a->initCB)(addr);
       }
     }
@@ -310,30 +266,23 @@ airArrayLenSet(airArray *a, unsigned int newlen)
 **                       segment (a->len before length was increased)
 ** no error, delta <= 0: return 0, and a->data unchanged
 */
-unsigned int
-airArrayLenIncr(airArray *a, int delta)
-{
+unsigned int airArrayLenIncr(airArray *a, int delta) {
   unsigned int oldlen, ret;
 
-  if (!a)
-  {
+  if (!a) {
     return 0;
   }
-  if (delta < 0 && (unsigned int)(-delta) > a->len)
-  {
+  if (delta < 0 && (unsigned int)(-delta) > a->len) {
     /* error: asked for newlength to be negative */
     airArrayLenSet(a, 0);
     return 0;
   }
   oldlen = a->len;
   airArrayLenSet(a, oldlen + delta);
-  if (!a->data)
-  {
+  if (!a->data) {
     /* allocation error */
     ret = 0;
-  }
-  else
-  {
+  } else {
     ret = (delta <= 0 ? 0 : oldlen);
   }
 
@@ -345,12 +294,9 @@ airArrayLenIncr(airArray *a, int delta)
 **
 ** free both the memory pointed to by the struct and the struct itself
 */
-airArray *
-airArrayNuke(airArray *a)
-{
+airArray *airArrayNuke(airArray *a) {
 
-  if (a)
-  {
+  if (a) {
     airArrayLenSet(a, 0);
     free(a);
   }
@@ -362,12 +308,9 @@ airArrayNuke(airArray *a)
 **
 ** frees just the struct, leaving the memory it points to untouched
 */
-airArray *
-airArrayNix(airArray *a)
-{
+airArray *airArrayNix(airArray *a) {
 
-  if (a)
-  {
+  if (a) {
     free(a);
   }
   return NULL;

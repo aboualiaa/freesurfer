@@ -30,20 +30,15 @@
 
 class LayerMRI;
 
-class VolumeFilterErode : public VolumeFilter
-{
+class VolumeFilterErode : public VolumeFilter {
 public:
-  VolumeFilterErode( LayerMRI* input = 0, LayerMRI* output = 0, QObject* parent = 0 );
+  VolumeFilterErode(LayerMRI *input = 0, LayerMRI *output = 0,
+                    QObject *parent = 0);
 
-  QString GetName()
-  {
-    return "Erode";
-  }
+  QString GetName() { return "Erode"; }
 
 protected:
   bool Execute();
 };
 
 #endif
-
-

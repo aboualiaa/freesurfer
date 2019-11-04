@@ -23,67 +23,65 @@
 #ifndef VIAL_H
 #define VIAL_H
 
-//define NO_CVS_UP_IN_HERE
+// define NO_CVS_UP_IN_HERE
 
 #ifndef NO_CVS_UP_IN_HERE
 // Needed for CVS - these must be included first or else they don't compile
 #include <cmath>
-#undef SEEK_SET
-#undef SEEK_END
-#undef SEEK_CUR
-#include <mpi.h>
+//#undef SEEK_SET
+//#undef SEEK_END
+//#undef SEEK_CUR
 #include "../fem_elastic/morph.h"
-#include "../fem_elastic/surf_utils.h"
 #include "../fem_elastic/morph_utils.h"
+#include "../fem_elastic/surf_utils.h"
 #include "gcamorph.h"
+#include <mpi.h>
 #endif
 
-#include <vector>
-#include <iostream>
-#include <fstream>
 #include "mri.h"
+#include <fstream>
+#include <iostream>
+#include <vector>
 
 class AffineReg {
-  public:
-    AffineReg();
-    AffineReg(std::vector<float> &InToOut);
-    ~AffineReg();
-    bool IsEmpty();
-    void ReadXfm(const char *XfmFile, const MRI *InRefVol, 
-                                      const MRI *OutRefVol);
-    void ApplyXfm(std::vector<float> &OutPoint,
-                  std::vector<float>::const_iterator InPoint);
-    void DecomposeXfm();
-    void PrintScale();
-    void PrintShear();
-    void PrintRotate();
-    std::vector<float> GetTranslate();
-    std::vector<float> GetRotate();
-    std::vector<float> GetShear();
-    std::vector<float> GetScale();
+public:
+  AffineReg();
+  AffineReg(std::vector<float> &InToOut);
+  ~AffineReg();
+  bool IsEmpty();
+  void ReadXfm(const char *XfmFile, const MRI *InRefVol, const MRI *OutRefVol);
+  void ApplyXfm(std::vector<float> &OutPoint,
+                std::vector<float>::const_iterator InPoint);
+  void DecomposeXfm();
+  void PrintScale();
+  void PrintShear();
+  void PrintRotate();
+  std::vector<float> GetTranslate();
+  std::vector<float> GetRotate();
+  std::vector<float> GetShear();
+  std::vector<float> GetScale();
 
-  private:
-    std::vector<float> mInToOut,				// [4 x 4]
-                       mInVoxelSize, mOutVoxelSize,		// [3]
-                       mTranslate, mRotate, mScale, mShear;	// [3]
+private:
+  std::vector<float> mInToOut,             // [4 x 4]
+      mInVoxelSize, mOutVoxelSize,         // [3]
+      mTranslate, mRotate, mScale, mShear; // [3]
 };
 
 #ifndef NO_CVS_UP_IN_HERE
 class NonlinReg {
-  public:
-    NonlinReg();
-    ~NonlinReg();
-    bool IsEmpty();
-    void ReadXfm(const char *XfmFile, MRI *OutRefVol);
-    void ApplyXfm(std::vector<float> &OutPoint,
-                  std::vector<float>::const_iterator InPoint);
-    void ApplyXfmInv(std::vector<float> &OutPoint,
-                     std::vector<float>::const_iterator InPoint);
+public:
+  NonlinReg();
+  ~NonlinReg();
+  bool IsEmpty();
+  void ReadXfm(const char *XfmFile, MRI *OutRefVol);
+  void ApplyXfm(std::vector<float> &OutPoint,
+                std::vector<float>::const_iterator InPoint);
+  void ApplyXfmInv(std::vector<float> &OutPoint,
+                   std::vector<float>::const_iterator InPoint);
 
-  private:
-    GCAM *mMorph;
+private:
+  GCAM *mMorph;
 };
 #endif
 
 #endif
-

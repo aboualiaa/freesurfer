@@ -17,24 +17,21 @@
 #if defined(_SGI_EXTRA_PREDEFINES) && !defined(NO_FAST_ATOMS)
 #include <X11/SGIFastAtom.h>
 #else
-#define XSGIFastInternAtom(dpy,string,fast_name,how) XInternAtom(dpy,string,how)
+#define XSGIFastInternAtom(dpy, string, fast_name, how)                        \
+  XInternAtom(dpy, string, how)
 #endif
 
 #include "glutint.h"
 
 /* CENTRY */
-void APIENTRY
-glutFullScreen(void)
-{
+void APIENTRY glutFullScreen(void) {
   assert(!__glutCurrentWindow->parent);
   IGNORE_IN_GAME_MODE();
 #if !defined(_WIN32)
-  if (__glutMotifHints == None)
-  {
+  if (__glutMotifHints == None) {
     __glutMotifHints = XSGIFastInternAtom(__glutDisplay, "_MOTIF_WM_HINTS",
                                           SGI_XA__MOTIF_WM_HINTS, 0);
-    if (__glutMotifHints == None)
-    {
+    if (__glutMotifHints == None) {
       __glutWarning("Could not intern X atom for _MOTIF_WM_HINTS.");
     }
   }

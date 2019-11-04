@@ -196,6 +196,7 @@ if(BUILD_GUIS AND VTK_FOUND AND PETSC_FOUND AND TARGET vtkutils)
   )
 
   # build the QVTKWidget utilities
+#  if(${VTK_MAJOR_VERSION} LESS 8 AND NOT EXISTS ${VTK_INCLUDE_DIRS}/QVTKWidget.h)
   if(${VTK_MAJOR_VERSION} LESS 7)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/QVTK5)
     set(SOURCES ${SOURCES} QVTK5/QVTKWidget.cxx QVTK5/QVTKPaintEngine.cxx)

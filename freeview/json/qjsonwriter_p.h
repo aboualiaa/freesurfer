@@ -56,17 +56,17 @@
 
 QT_BEGIN_NAMESPACE
 
-namespace QJsonPrivate
-{
+namespace QJsonPrivate {
 
-class Writer
-{
+class Writer {
 public:
-    static void objectToJson(const QJsonPrivate::Object *o, QByteArray &json, int indent, bool compact = false);
-    static void arrayToJson(const QJsonPrivate::Array *a, QByteArray &json, int indent, bool compact = false);
+  static void objectToJson(const QJsonPrivate::Object *o, QByteArray &json,
+                           int indent, bool compact = false);
+  static void arrayToJson(const QJsonPrivate::Array *a, QByteArray &json,
+                          int indent, bool compact = false);
 };
 
-}
+} // namespace QJsonPrivate
 
 QT_END_NAMESPACE
 

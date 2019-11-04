@@ -21,10 +21,10 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
-//TensorCubicSmoothing.h
+// TensorCubicSmoothing.h
 //
-//Created 7/17/2014
-//By: Benjamin Lewin
+// Created 7/17/2014
+// By: Benjamin Lewin
 //
 
 #ifndef TENSOR_CUBIC_SMOOTHING_INCLUDED
@@ -34,21 +34,21 @@
 
 #include "matrix3d.h"
 
-class TensorCubicSmoothing
-{
+class TensorCubicSmoothing {
 public:
-
   TensorCubicSmoothing();
-  //TensorCubicSmoothing(const Matrix &Bx, const Matrix &By,
+  // TensorCubicSmoothing(const Matrix &Bx, const Matrix &By,
   //  const Matrix &Bz, const Matrix &W, const Matrix &indexMap);
   ~TensorCubicSmoothing();
 
-  //Copy Constructor and Assignment overload
-  TensorCubicSmoothing(const TensorCubicSmoothing& other);
-  TensorCubicSmoothing& operator=(const TensorCubicSmoothing& other);
+  // Copy Constructor and Assignment overload
+  TensorCubicSmoothing(const TensorCubicSmoothing &other);
+  TensorCubicSmoothing &operator=(const TensorCubicSmoothing &other);
 
   /// takes in separable basis function in three dimensions and weights
-  /// and constructs the matrix AtWA by exploiting the seperability % then do AWA super fast and with sick indicing % then do AWA super fast and with sick indicing
+  /// and constructs the matrix AtWA by exploiting the seperability % then do
+  /// AWA super fast and with sick indicing % then do AWA super fast and with
+  /// sick indicing
   int constructAtWA(const vnl_matrix<float> &B2x, const vnl_matrix<float> &B2y,
                     const vnl_matrix<float> &B2z, const Matrix3d &W,
                     const vnl_vector<int> &indexMap);
@@ -59,9 +59,11 @@ public:
                     const vnl_matrix<float> &Bz, const Matrix3d &W,
                     const Matrix3d &r);
 
-  /// solves the non-linear system by means of least squares given regularization parameters
+  /// solves the non-linear system by means of least squares given
+  /// regularization parameters
   int solve(const Matrix3d &P, float lambda);
-  /// solves the non-linear system by means of least squares without regularization
+  /// solves the non-linear system by means of least squares without
+  /// regularization
   int solve();
 
   /// returns the solved coefficients
@@ -77,17 +79,14 @@ public:
                                   const vnl_matrix<float> &Bx,
                                   const vnl_matrix<float> &By,
                                   const vnl_matrix<float> &Bz);
-private:
 
+private:
   vnl_matrix<float> AtWA;
   /// 1d  vector
   vnl_vector<float> AtWr;
 
   /// coefficients  (vector)
   vnl_vector<float> coefficients;
-
 };
 
 #endif
-
-

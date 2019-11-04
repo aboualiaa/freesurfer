@@ -9,13 +9,11 @@
 #include "mri.h"
 #include "mri2.h"
 
-
 #include "mri_segcentroids.help.xml.h"
 static void printHelp(int exit_val) {
   outputHelpXml(mri_segcentroids_help_xml, mri_segcentroids_help_xml_len);
   exit(exit_val);
 }
-
 
 // structure to represent the centroid of each label
 struct Centroid {
@@ -23,7 +21,6 @@ struct Centroid {
   std::string labelname;
   float mass, x, y, z;
 };
-
 
 // command line inpute parser
 class InputParser {
@@ -42,10 +39,11 @@ public:
       // -----------------------
       //           --i
       // -----------------------
-      if (opt  == "--i") {
+      if (opt == "--i") {
         i++;
         if ((i >= argc) || (ISOPTION(*argv[i]))) {
-          std::cerr << "ERROR: must specify valid path to input segmentation after '--i'\n";
+          std::cerr << "ERROR: must specify valid path to input segmentation "
+                       "after '--i'\n";
           exit(1);
         }
         segfile = argv[i];
@@ -67,10 +65,11 @@ public:
       else if (opt == "--weights") {
         i++;
         if ((i >= argc) || (ISOPTION(*argv[i]))) {
-          std::cerr << "ERROR: must specify path to weight volume after '--weights'\n";
+          std::cerr << "ERROR: must specify path to weight volume after "
+                       "'--weights'\n";
           exit(1);
         }
-        weightsfile  = argv[i];
+        weightsfile = argv[i];
       }
       // -----------------------
       //         --reg
@@ -89,7 +88,8 @@ public:
       else if (opt == "--ctab") {
         i++;
         if ((i >= argc) || (ISOPTION(*argv[i]))) {
-          std::cerr << "ERROR: must specify path to color lookup table after '--ctab'\n";
+          std::cerr << "ERROR: must specify path to color lookup table after "
+                       "'--ctab'\n";
           exit(1);
         }
         ctabfile = argv[i];
@@ -130,7 +130,6 @@ public:
   }
 };
 
-
 int main(int argc, char **argv) {
 
   InputParser input(argc, argv);
@@ -153,7 +152,7 @@ int main(int argc, char **argv) {
   }
 
   // load weights volume
-  MRI *weights = NULL;
+  MRI *weights = nullptr;
   if (!input.weightsfile.empty()) {
     std::cerr << "using weights from  " << input.weightsfile << std::endl;
     weights = MRIread(input.weightsfile.c_str());
@@ -164,15 +163,16 @@ int main(int argc, char **argv) {
   }
 
   // use lta
-  LTA *lta = NULL;
+  LTA *lta = nullptr;
   if (!input.ltafile.empty()) {
     std::cerr << "using linear transform: " << input.ltafile << std::endl;
     lta = LTAreadEx(input.ltafile.c_str());
-    if (lta->type != LINEAR_RAS_TO_RAS) lta = LTAchangeType(lta, LINEAR_RAS_TO_RAS);
+    if (lta->type != LINEAR_RAS_TO_RAS)
+      lta = LTAchangeType(lta, LINEAR_RAS_TO_RAS);
   }
 
   // load colortable
-  COLOR_TABLE *ctab = NULL;
+  COLOR_TABLE *ctab = nullptr;
   if (!input.ctabfile.empty()) {
     ctab = CTABreadASCII(input.ctabfile.c_str());
     if (!ctab) {
@@ -181,40 +181,40 @@ int main(int argc, char **argv) {
     }
   }
 
-
   // -------------------- compute centroids --------------------
-
 
   std::map<int, Centroid> centroids;
   int numids, label_chars, id_chars, valid_id;
   char char_name[500];
   double x, y, z, wx, wy, wz, weight;
   float fx, fy, fz;
-  int max_id_chars = 2, max_label_chars = 10;  // used for table formatting
+  int max_id_chars = 2, max_label_chars = 10; // used for table formatting
 
   int *idlist = MRIsegIdList(seg, &numids, 0);
   std::vector<int> ids(idlist, idlist + numids);
 
-  for (int i = 0 ; i < numids; i++) {
+  for (int i = 0; i < numids; i++) {
     // create centroid for each label
     Centroid centroid = Centroid();
     centroid.id = ids[i];
 
-    if ((!input.include_zero) && (centroid.id == 0)) continue;
+    if ((!input.include_zero) && (centroid.id == 0))
+      continue;
 
     // get label name from color table
     if (ctab) {
       CTABisEntryValid(ctab, centroid.id, &valid_id);
       if (!valid_id) {
-        std::cerr << "WARNING: cannot find ID " << centroid.id
-                  << " in " << input.ctabfile << "... ignoring this label\n";
+        std::cerr << "WARNING: cannot find ID " << centroid.id << " in "
+                  << input.ctabfile << "... ignoring this label\n";
         continue;
       }
       CTABcopyName(ctab, centroid.id, char_name, sizeof(char_name));
       centroid.labelname = char_name;
       // this is for table column formatting
       label_chars = centroid.labelname.length();
-      if (label_chars > max_label_chars) max_label_chars = label_chars;
+      if (label_chars > max_label_chars)
+        max_label_chars = label_chars;
     }
 
     // this is also for table column formatting
@@ -223,25 +223,27 @@ int main(int argc, char **argv) {
     id_chars = ss.str().length();
     // the line below is only c++11 compatible :(
     // id_chars = (std::to_string(centroid.id).length());
-    if (id_chars > max_id_chars) max_id_chars = id_chars;
+    if (id_chars > max_id_chars)
+      max_id_chars = id_chars;
 
     centroid.mass = 0;
     centroids[centroid.id] = centroid;
   }
 
-  std::cout << "computing centers of mass for " << centroids.size() << " structures\n";
+  std::cout << "computing centers of mass for " << centroids.size()
+            << " structures\n";
 
   // iterate through voxels
   int voxid;
-  for (int col = 0 ; col < seg->width ; col++) {
-    for (int row = 0 ; row < seg->height ; row++) {
-      for (int slice = 0 ; slice < seg->depth ; slice++) {
+  for (int col = 0; col < seg->width; col++) {
+    for (int row = 0; row < seg->height; row++) {
+      for (int slice = 0; slice < seg->depth; slice++) {
         voxid = MRIgetVoxVal(seg, col, row, slice, 0);
         if (centroids.find(voxid) != centroids.end()) {
           MRIvoxelToWorld(seg, col, row, slice, &x, &y, &z);
           // apply voxel weighting if provided
           if (weights) {
-            MRIworldToVoxel(weights, x, y, z, &wx, &wy,& wz);
+            MRIworldToVoxel(weights, x, y, z, &wx, &wy, &wz);
             MRIsampleVolume(weights, wx, wy, wz, &weight);
           } else {
             weight = 1;
@@ -250,7 +252,9 @@ int main(int argc, char **argv) {
           if (lta) {
             // unfortunately, LTAworldToWorldEx only accepts floats
             LTAworldToWorldEx(lta, x, y, z, &fx, &fy, &fz);
-            x = fx; y = fy; z = fz;
+            x = fx;
+            y = fy;
+            z = fz;
           }
           centroids[voxid].x += x * weight;
           centroids[voxid].y += y * weight;
@@ -262,7 +266,8 @@ int main(int argc, char **argv) {
   }
 
   MRIfree(&seg);
-  if (lta) LTAfree(&lta);
+  if (lta)
+    LTAfree(&lta);
 
   // compute centers of mass
   std::map<int, Centroid>::iterator it;
@@ -273,13 +278,12 @@ int main(int argc, char **argv) {
     c->z /= c->mass;
   }
 
-
   // -------------------- write table --------------------
-
 
   std::ofstream tablefile(input.outfile);
   if (!tablefile.is_open()) {
-    std::cerr << "could not open writable file at " << input.outfile << std::endl;
+    std::cerr << "could not open writable file at " << input.outfile
+              << std::endl;
     exit(1);
   }
 
@@ -290,7 +294,8 @@ int main(int argc, char **argv) {
 
   // table header
 
-  if(input.ltafile.length()) tablefile << "# Reg " << input.ltafile << std::endl;
+  if (input.ltafile.length())
+    tablefile << "# Reg " << input.ltafile << std::endl;
   tablefile << std::setw(max_id_chars) << "# ID";
   if (ctab) {
     tablefile << std::left << "    " << std::setw(max_label_chars)
@@ -302,7 +307,8 @@ int main(int argc, char **argv) {
             << std::endl;
 
   int table_width = max_id_chars + (cwidth * 3) + 3;
-  if (ctab) table_width += max_label_chars + 4;
+  if (ctab)
+    table_width += max_label_chars + 4;
   tablefile << "# ";
   tablefile << std::string(table_width, '-') << std::endl;
 
@@ -314,13 +320,11 @@ int main(int argc, char **argv) {
 
     tablefile << std::setw(max_id_chars) << c.id;
     if (ctab) {
-      tablefile << std::left << "    " << std::setw(max_label_chars) 
+      tablefile << std::left << "    " << std::setw(max_label_chars)
                 << c.labelname << std::right;
     }
-    tablefile << " " << std::setw(cwidth) << c.x
-              << " " << std::setw(cwidth) << c.y
-              << " " << std::setw(cwidth) << c.z
-              << std::endl;
+    tablefile << " " << std::setw(cwidth) << c.x << " " << std::setw(cwidth)
+              << c.y << " " << std::setw(cwidth) << c.z << std::endl;
   }
 
   tablefile.close();

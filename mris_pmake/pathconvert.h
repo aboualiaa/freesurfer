@@ -28,16 +28,15 @@
  *
  */
 
-
 #ifndef __PATHCONVERT_H__
 #define __PATHCONVERT_H__
 
-#include <errno.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cerrno>
+#include <cstdlib>
+#include <cstring>
 #include <sys/param.h>
 
-char    *abs2rel __P((const char *, const char *, char *, size_t));
-char    *rel2abs __P((const char *, const char *, char *, size_t));
+char *abs2rel __P((const char *, const char *, char *, size_t));
+char *rel2abs __P((const char *, const char *, char *, size_t));
 
 #endif // __PATHCONVERT_H__

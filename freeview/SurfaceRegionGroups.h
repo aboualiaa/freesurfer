@@ -33,23 +33,20 @@
 class LayerMRI;
 class SurfaceRegion;
 
-class SurfaceRegionGroups : public QObject
-{
+class SurfaceRegionGroups : public QObject {
   Q_OBJECT
 public:
-  SurfaceRegionGroups( LayerMRI* owner );
+  SurfaceRegionGroups(LayerMRI *owner);
   virtual ~SurfaceRegionGroups();
 
-  QColor GetGroupColor( int nGroup );
-  void SetGroupColor( int nGroup, const QColor& color );
+  QColor GetGroupColor(int nGroup);
+  void SetGroupColor(int nGroup, const QColor &color);
 
-  int GetGroupIdRange( SurfaceRegion* reg );
+  int GetGroupIdRange(SurfaceRegion *reg);
 
 private:
-  LayerMRI*       m_mri;
-  QList<QColor>   m_colors;
+  LayerMRI *m_mri;
+  QList<QColor> m_colors;
 };
 
 #endif
-
-

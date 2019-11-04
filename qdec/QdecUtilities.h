@@ -36,17 +36,15 @@
 
 using namespace std;
 
-class QdecUtilities
-{
+class QdecUtilities {
 
 public:
-
   // Calls IsFileReadable and throws an error if it fails.
-  static void AssertFileIsReadable ( string const& ifn );
+  static void AssertFileIsReadable(string const &ifn);
 
   // Returns true if a file exists and is openable with read
   // permissions.
-  static bool IsFileReadable ( string const& ifn );
+  static bool IsFileReadable(string const &ifn);
 
   // extract the path name from a file name and return a pointer to it
   static const char *FileNamePath(const char *fname, const char *pathName);
@@ -54,10 +52,8 @@ public:
   // read the value of specified key from resource file .Qdecrc
   static const char *GetQdecrcResourceString(const char *key);
 
- private:
-
-  static const char *GetResourceString(const char *key, 
-                                       const char *filename);
+private:
+  static const char *GetResourceString(const char *key, const char *filename);
 };
 
 #endif

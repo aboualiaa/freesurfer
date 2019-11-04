@@ -7,11 +7,9 @@
 #include "WrapperPolyData.h"
 #include "tracer.h"
 
-
 // typedefs
 
 typedef std::vector<double> DoubleVector;
-
 
 typedef std::vector<DoubleVector> WrapperLineType;
 typedef std::vector<WrapperLineType> WrapperLineSetType;
@@ -21,11 +19,9 @@ typedef std::vector<WrapperLineType> WrapperLineSetType;
 compute profiles at a given spacing, after an initial offset
 
 */
-WrapperLineSetType
-ComputeProfiles(int offset,
-		double dspacing,
-		WrapperLineType& referenceLine,
-		const Tracer& tracer);
+WrapperLineSetType ComputeProfiles(int offset, double dspacing,
+                                   WrapperLineType &referenceLine,
+                                   const Tracer &tracer);
 
 /*
 
@@ -36,18 +32,11 @@ with the first point, the coordinates of the first
 point are provided
 
 */
-WrapperLineSetType
-ComputeIsolines(const DoubleVector& vec,
-		const Tracer& tracer,
-		double x0,
-		double y0);
+WrapperLineSetType ComputeIsolines(const DoubleVector &vec,
+                                   const Tracer &tracer, double x0, double y0);
 
-
-Tracer
-ComputeSolution(WrapperPolyData* wrapper,
-		int pad1, int pad2,
-		double dresolution,
-		int convergenceCriterion);
+Tracer ComputeSolution(WrapperPolyData *wrapper, int pad1, int pad2,
+                       double dresolution, int convergenceCriterion);
 
 int InitializePackage();
 int Finalize();

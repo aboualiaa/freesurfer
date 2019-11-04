@@ -30,7 +30,7 @@
  * Analysis Centre (CIPAC).
  * @sa
  * vtkNIFTIImageWriter, vtkNIFTIImageHeader
-*/
+ */
 
 #ifndef vtkNIFTIImageReader_h
 #define vtkNIFTIImageReader_h
@@ -44,8 +44,7 @@ class vtkMatrix4x4;
 struct nifti_1_header;
 
 //----------------------------------------------------------------------------
-class VTKIOIMAGE_EXPORT vtkNIFTIImageReader : public vtkImageReader2
-{
+class VTKIOIMAGE_EXPORT vtkNIFTIImageReader : public vtkImageReader2 {
 public:
   //@{
   /**
@@ -58,24 +57,24 @@ public:
   /**
    * Print information about this object.
    */
-  void PrintSelf(ostream& os, vtkIndent indent) override;
+  void PrintSelf(ostream &os, vtkIndent indent) override;
 
   /**
    * Valid extensions for this file type.
    */
-  const char* GetFileExtensions() override {
-    return ".nii .nii.gz .img .img.gz .hdr .hdr.gz"; }
+  const char *GetFileExtensions() override {
+    return ".nii .nii.gz .img .img.gz .hdr .hdr.gz";
+  }
 
   /**
    * Return a descriptive name that might be useful in a GUI.
    */
-  const char* GetDescriptiveName() override {
-    return "NIfTI"; }
+  const char *GetDescriptiveName() override { return "NIfTI"; }
 
   /**
    * Return true if this reader can read the given file.
    */
-  int CanReadFile(const char* filename) override;
+  int CanReadFile(const char *filename) override;
 
   //@{
   /**
@@ -173,16 +172,15 @@ protected:
   /**
    * Read the header information.
    */
-  int RequestInformation(
-    vtkInformation* request, vtkInformationVector** inputVector,
-    vtkInformationVector* outputVector) override;
+  int RequestInformation(vtkInformation *request,
+                         vtkInformationVector **inputVector,
+                         vtkInformationVector *outputVector) override;
 
   /**
    * Read the voxel data.
    */
-  int RequestData(
-    vtkInformation* request, vtkInformationVector** inputVector,
-    vtkInformationVector* outputVector) override;
+  int RequestData(vtkInformation *request, vtkInformationVector **inputVector,
+                  vtkInformationVector *outputVector) override;
 
   /**
    * Do a case-insensitive check for the given extension.
@@ -199,8 +197,8 @@ protected:
    * If the file exists, a new string is returned that must be
    * deleted by the caller.  Otherwise, the return value is nullptr.
    */
-  static char *ReplaceExtension(
-    const char *fname, const char *ext1, const char *ext2);
+  static char *ReplaceExtension(const char *fname, const char *ext1,
+                                const char *ext2);
 
   /**
    * Check the version of the header.
@@ -259,8 +257,8 @@ protected:
   bool PlanarRGB;
 
 private:
-  vtkNIFTIImageReader(const vtkNIFTIImageReader&) = delete;
-  void operator=(const vtkNIFTIImageReader&) = delete;
+  vtkNIFTIImageReader(const vtkNIFTIImageReader &) = delete;
+  void operator=(const vtkNIFTIImageReader &) = delete;
 };
 #include "vtkNIFTIImageReader.cxx"
 

@@ -4,10 +4,10 @@
 /* Written by Simon Josefsson. */
 
 /* Get size_t, FILE, ssize_t.  And getdelim, if available.  */
-# include <stddef.h>
-# include <stdio.h>
-# include <sys/types.h>
+#include <cstddef>
+#include <cstdio>
+#include <sys/types.h>
 
 #if !HAVE_DECL_GETDELIM
-ssize_t getdelim (char **lineptr, size_t *n, int delimiter, FILE *stream);
+ssize_t getdelim(char **lineptr, size_t *n, int delimiter, FILE *stream);
 #endif /* !HAVE_GETDELIM */

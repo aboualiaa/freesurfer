@@ -1,6 +1,6 @@
 /**
  * @file  label_border.c
- * @brief 
+ * @brief
  *
  * compute the boundary of a label
  */
@@ -23,7 +23,6 @@
  *
  */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -40,78 +39,76 @@
 #include "mrisurf.h"
 #include "version.h"
 
-int main(int argc, char *argv[]) ;
-static int get_option(int argc, char *argv[]) ;
-static void print_usage(void) ;
-static int  unmark_interior(MRI_SURFACE *mris) ;
+int main(int argc, char *argv[]);
+static int get_option(int argc, char *argv[]);
+static void print_usage(void);
+static int unmark_interior(MRI_SURFACE *mris);
 
-const char *Progname ;
+const char *Progname;
 
-static int verbose = 0 ;
-static int print_radius = 0 ;
+static int verbose = 0;
+static int print_radius = 0;
 
-static char subjects_dir[STRLEN] = "" ;
+static char subjects_dir[STRLEN] = "";
 
-
-
-int
-main(int argc, char *argv[]) {
-  int          ac, nargs ;
-  char         **av, *cp, surf_name[STRLEN], *hemi, *subject_name, *area_name,
-               *out_name ;
-  MRI_SURFACE  *mris ;
-  LABEL        *area ;
+int main(int argc, char *argv[]) {
+  int ac, nargs;
+  char **av, *cp, surf_name[STRLEN], *hemi, *subject_name, *area_name,
+      *out_name;
+  MRI_SURFACE *mris;
+  LABEL *area;
 
   /* rkt: check for and handle version tag */
-  nargs = handle_version_option (argc, argv, "$Id: label_border.c,v 1.2 2011/03/02 00:04:11 nicks Exp $", "$Name:  $");
+  nargs = handle_version_option(
+      argc, argv, "$Id: label_border.c,v 1.2 2011/03/02 00:04:11 nicks Exp $",
+      "$Name:  $");
   if (nargs && argc - nargs == 1)
-    exit (0);
+    exit(0);
   argc -= nargs;
 
-  Progname = argv[0] ;
-  ErrorInit(NULL, NULL, NULL) ;
-  DiagInit(NULL, NULL, NULL) ;
+  Progname = argv[0];
+  ErrorInit(NULL, NULL, NULL);
+  DiagInit(NULL, NULL, NULL);
 
   /* read in command-line options */
-  ac = argc ;
-  av = argv ;
-  for ( ; argc > 1 && ISOPTION(*argv[1]) ; argc--, argv++) {
-    nargs = get_option(argc, argv) ;
-    argc -= nargs ;
-    argv += nargs ;
+  ac = argc;
+  av = argv;
+  for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
+    nargs = get_option(argc, argv);
+    argc -= nargs;
+    argv += nargs;
   }
 
   if (argc < 5)
-    print_usage() ;
+    print_usage();
 
-  subject_name = argv[1] ;
-  hemi = argv[2] ;
-  area_name = argv[3] ;
-  out_name = argv[4] ;
+  subject_name = argv[1];
+  hemi = argv[2];
+  area_name = argv[3];
+  out_name = argv[4];
 
-  cp = getenv("SUBJECTS_DIR") ;
+  cp = getenv("SUBJECTS_DIR");
   if (!cp)
-    ErrorExit(ERROR_BADPARM, "no subjects directory in environment.\n") ;
-  strcpy(subjects_dir, cp) ;
-  sprintf(surf_name,"%s/%s/surf/%s.white",subjects_dir,subject_name,hemi);
-  fprintf(stderr, "reading %s...\n", surf_name) ;
-  mris = MRISread(surf_name) ;
+    ErrorExit(ERROR_BADPARM, "no subjects directory in environment.\n");
+  strcpy(subjects_dir, cp);
+  sprintf(surf_name, "%s/%s/surf/%s.white", subjects_dir, subject_name, hemi);
+  fprintf(stderr, "reading %s...\n", surf_name);
+  mris = MRISread(surf_name);
   if (!mris)
-    ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s\n",
-              surf_name) ;
+    ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s\n", surf_name);
 
   /*  read in the area names */
-  area = LabelRead(subject_name, area_name) ;
-  fprintf(stderr, "reading area %s\n", area_name) ;
-  MRISclearMarks(mris) ;
-  LabelMarkSurface(area, mris) ;
-  unmark_interior(mris) ;
-  LabelFree(&area) ;
-  area = LabelFromMarkedSurface(mris) ;
-  LabelWrite(area, out_name) ;
+  area = LabelRead(subject_name, area_name);
+  fprintf(stderr, "reading area %s\n", area_name);
+  MRISclearMarks(mris);
+  LabelMarkSurface(area, mris);
+  unmark_interior(mris);
+  LabelFree(&area);
+  area = LabelFromMarkedSurface(mris);
+  LabelWrite(area, out_name);
 
-  exit(0) ;
-  return(0) ;  /* ansi */
+  exit(0);
+  return (0); /* ansi */
 }
 
 /*----------------------------------------------------------------------
@@ -119,31 +116,30 @@ main(int argc, char *argv[]) {
 
            Description:
 ----------------------------------------------------------------------*/
-static int
-get_option(int argc, char *argv[]) {
-  int  nargs = 0 ;
-  char *option ;
+static int get_option(int argc, char *argv[]) {
+  int nargs = 0;
+  char *option;
 
-  option = argv[1] + 1 ;            /* past '-' */
+  option = argv[1] + 1; /* past '-' */
   switch (toupper(*option)) {
   case 'V':
-    verbose = !verbose ;
-    break ;
+    verbose = !verbose;
+    break;
   case 'R':
-    print_radius = 1 ;
-    break ;
+    print_radius = 1;
+    break;
   case '?':
   case 'U':
-    print_usage() ;
-    exit(1) ;
-    break ;
+    print_usage();
+    exit(1);
+    break;
   default:
-    fprintf(stderr, "unknown option %s\n", argv[1]) ;
-    exit(1) ;
-    break ;
+    fprintf(stderr, "unknown option %s\n", argv[1]);
+    exit(1);
+    break;
   }
 
-  return(nargs) ;
+  return (nargs);
 }
 #if 0
 static Transform *
@@ -162,48 +158,42 @@ load_transform(char *subject_name, General_transform *transform) {
 }
 #endif
 
-static void
-print_usage(void) {
-  printf("usage: %s <subject name> <hemi> <input label file> < output label file>\n",Progname);
-  exit(1) ;
+static void print_usage(void) {
+  printf("usage: %s <subject name> <hemi> <input label file> < output label "
+         "file>\n",
+         Progname);
+  exit(1);
 }
-static int
-unmark_interior(MRI_SURFACE *mris)
-{
-  int    vno, n, unmarked ;
+static int unmark_interior(MRI_SURFACE *mris) {
+  int vno, n, unmarked;
 
-  MRIScopyMarkedToMarked2(mris) ;
-  for (vno = 0 ; vno <mris->nvertices ; vno++)
-  {
-    VERTEX_TOPOLOGY const * const vt = &mris->vertices_topology[vno];
-    VERTEX                * const v  = &mris->vertices         [vno];
+  MRIScopyMarkedToMarked2(mris);
+  for (vno = 0; vno < mris->nvertices; vno++) {
+    VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
+    VERTEX *const v = &mris->vertices[vno];
     if (v->marked == 0)
-      continue ;
-    for (unmarked = n = 0 ; unmarked == 0 && n < vt->vnum ; n++)
-    {
-      VERTEX const * const vn = &mris->vertices[vt->v[n]] ;
+      continue;
+    for (unmarked = n = 0; unmarked == 0 && n < vt->vnum; n++) {
+      VERTEX const *const vn = &mris->vertices[vt->v[n]];
       if (vn->marked == 0)
-        unmarked = 1 ;
+        unmarked = 1;
     }
     if (unmarked == 0)
-      v->marked2 = 0 ;
+      v->marked2 = 0;
   }
-  MRIScopyMarked2ToMarked(mris) ;
+  MRIScopyMarked2ToMarked(mris);
 
-  if (print_radius)
-  {
-    double xc, yc ;
-    int    num ;
+  if (print_radius) {
+    double xc, yc;
+    int num;
 
-    for (xc = yc = 0.0, num = vno = 0 ; vno <mris->nvertices ; vno++)
-    {
-      VERTEX const * const v = &mris->vertices[vno] ;
+    for (xc = yc = 0.0, num = vno = 0; vno < mris->nvertices; vno++) {
+      VERTEX const *const v = &mris->vertices[vno];
       if (v->marked == 0)
-        continue ;
-      num++ ;
+        continue;
+      num++;
     }
   }
 
-  return(NO_ERROR) ;
+  return (NO_ERROR);
 }
-

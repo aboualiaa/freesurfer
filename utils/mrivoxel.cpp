@@ -25,11 +25,11 @@
 /*-----------------------------------------------------
                     INCLUDE FILES
 -------------------------------------------------------*/
-#include <math.h>
+#include <cmath>
 #include <memory.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include "diag.h"
 #include "error.h"
@@ -57,8 +57,7 @@
   of this funciton will be dependent on the volume orientation and
   volume resolution.
 */
-float MRIvoxelDx(MRI *mri, int x, int y, int z)
-{
+float MRIvoxelDx(MRI *mri, int x, int y, int z) {
   float left, right, dx;
   int xm1, xp1, ym1, yp1;
 
@@ -73,14 +72,14 @@ float MRIvoxelDx(MRI *mri, int x, int y, int z)
   // Sum the values within the slice-plane of the voxels
   // to the "left" of the target voxel, giving the
   // face neighbor twice the weight as the edge neighbors
-  left  = 2*MRIgetVoxVal(mri, xm1, y,   z, 0);
-  left +=   MRIgetVoxVal(mri, xm1, ym1, z, 0);
-  left +=   MRIgetVoxVal(mri, xm1, yp1, z, 0);
+  left = 2 * MRIgetVoxVal(mri, xm1, y, z, 0);
+  left += MRIgetVoxVal(mri, xm1, ym1, z, 0);
+  left += MRIgetVoxVal(mri, xm1, yp1, z, 0);
 
   // Same for the voxels to the "right"
-  right  = 2*MRIgetVoxVal(mri, xp1, y, z, 0);
-  right +=   MRIgetVoxVal(mri, xp1, ym1, z, 0);
-  right +=   MRIgetVoxVal(mri, xp1, yp1, z, 0);
+  right = 2 * MRIgetVoxVal(mri, xp1, y, z, 0);
+  right += MRIgetVoxVal(mri, xp1, ym1, z, 0);
+  right += MRIgetVoxVal(mri, xp1, yp1, z, 0);
 
   // Take the difference, divide by 8 because of 6 voxels, with two
   // weighted by x2
@@ -93,8 +92,7 @@ float MRIvoxelDx(MRI *mri, int x, int y, int z)
   by computing the difference between the face and edge neighbors
   both before and after the target voxel within the slice-plane.
 */
-float MRIvoxelDy(MRI *mri, int x, int y, int z)
-{
+float MRIvoxelDy(MRI *mri, int x, int y, int z) {
   float top, bottom, dy;
   int xm1, xp1, ym1, yp1;
 
@@ -123,8 +121,7 @@ float MRIvoxelDy(MRI *mri, int x, int y, int z)
   by computing the difference between the face and edge neighbors
   both before and after the target voxel within the row-plane.
 */
-float MRIvoxelDz(MRI *mri, int x, int y, int z)
-{
+float MRIvoxelDz(MRI *mri, int x, int y, int z) {
   float dz, top, bottom;
   // int width, depth;
   int xm1, xp1, zm1, zp1;
@@ -158,8 +155,8 @@ float MRIvoxelDz(MRI *mri, int x, int y, int z)
 
         Description
 ------------------------------------------------------*/
-float MRIvoxelGradient(MRI *mri, int x, int y, int z, float *pdx, float *pdy, float *pdz)
-{
+float MRIvoxelGradient(MRI *mri, int x, int y, int z, float *pdx, float *pdy,
+                       float *pdz) {
   float mag, dx, dy, dz;
 
   *pdx = dx = MRIvoxelDx(mri, x, y, z);
@@ -176,10 +173,11 @@ float MRIvoxelGradient(MRI *mri, int x, int y, int z, float *pdx, float *pdy, fl
 
         Description
 ------------------------------------------------------*/
-float MRIvoxelMean(const MRI *mri, int x0, int y0, int z0, int wsize, int frame)
-{
+float MRIvoxelMean(const MRI *mri, int x0, int y0, int z0, int wsize,
+                   int frame) {
   float mean, total;
-  int whalf, width, height, depth, x, y, z, npix, xmin, xmax, ymin, ymax, zmin, zmax;
+  int whalf, width, height, depth, x, y, z, npix, xmin, xmax, ymin, ymax, zmin,
+      zmax;
 
   whalf = wsize / 2;
   width = mri->width;
@@ -197,7 +195,8 @@ float MRIvoxelMean(const MRI *mri, int x0, int y0, int z0, int wsize, int frame)
 
   for (z = zmin; z <= zmax; z++) {
     for (y = ymin; y <= ymax; y++) {
-      for (x = xmin; x <= xmax; x++) total += MRIgetVoxVal(mri, x, y, z, frame);
+      for (x = xmin; x <= xmax; x++)
+        total += MRIgetVoxVal(mri, x, y, z, frame);
     }
   }
   if (npix > 0)
@@ -213,8 +212,7 @@ float MRIvoxelMean(const MRI *mri, int x0, int y0, int z0, int wsize, int frame)
 
         Description
 ------------------------------------------------------*/
-float MRIvoxelMin(MRI *mri, int x0, int y0, int z0, int wsize)
-{
+float MRIvoxelMin(MRI *mri, int x0, int y0, int z0, int wsize) {
   float min_val, val;
   int whalf, width, height, depth, x, y, z, xmin, xmax, ymin, ymax, zmin, zmax;
 
@@ -235,14 +233,14 @@ float MRIvoxelMin(MRI *mri, int x0, int y0, int z0, int wsize)
     for (y = ymin; y <= ymax; y++) {
       for (x = xmin; x <= xmax; x++) {
         val = MRIgetVoxVal(mri, x, y, z, 0);
-        if (val < min_val) min_val = val;
+        if (val < min_val)
+          min_val = val;
       }
     }
   }
   return (min_val);
 }
-float MRIvoxelMax(MRI *mri, int x0, int y0, int z0, int wsize)
-{
+float MRIvoxelMax(MRI *mri, int x0, int y0, int z0, int wsize) {
   float max_val, val;
   int whalf, width, height, depth, x, y, z, xmin, xmax, ymin, ymax, zmin, zmax;
 
@@ -263,7 +261,8 @@ float MRIvoxelMax(MRI *mri, int x0, int y0, int z0, int wsize)
     for (y = ymin; y <= ymax; y++) {
       for (x = xmin; x <= xmax; x++) {
         val = MRIgetVoxVal(mri, x, y, z, 0);
-        if (val > max_val) max_val = val;
+        if (val > max_val)
+          max_val = val;
       }
     }
   }
@@ -276,10 +275,10 @@ float MRIvoxelMax(MRI *mri, int x0, int y0, int z0, int wsize)
 
         Description
 ------------------------------------------------------*/
-float MRIvoxelStd(MRI *mri, int x0, int y0, int z0, float mean, int wsize)
-{
+float MRIvoxelStd(MRI *mri, int x0, int y0, int z0, float mean, int wsize) {
   float std, total, var;
-  int whalf, width, height, depth, x, y, z, npix, xmin, xmax, ymin, ymax, zmin, zmax;
+  int whalf, width, height, depth, x, y, z, npix, xmin, xmax, ymin, ymax, zmin,
+      zmax;
   BUFTYPE *psrc;
 
   whalf = wsize / 2;
@@ -314,35 +313,38 @@ float MRIvoxelStd(MRI *mri, int x0, int y0, int z0, float mean, int wsize)
 }
 /*!
   \fn float MRIvoxelDirection(MRI *mri, int x0, int y0, int z0, int wsize)
-  \param wsize - window size, typically 3 (ie, nearest face, edge, and corner neighbors)
+  \param wsize - window size, typically 3 (ie, nearest face, edge, and corner
+  neighbors)
 */
 #define MAX_WINDOW 7
 #define MAX_LEN (MAX_WINDOW * MAX_WINDOW * MAX_WINDOW)
-float MRIvoxelDirection(MRI *mri, int x0, int y0, int z0, int wsize)
-{
+float MRIvoxelDirection(MRI *mri, int x0, int y0, int z0, int wsize) {
   int whalf, width, height, depth, x, y, z, xmax, ymax, zmax;
-  float dx_win[MAX_LEN], dy_win[MAX_LEN], dz_win[MAX_LEN], dx, dy, dz, odx, ody, odz, *pdx, *pdy, *pdz, dir;
+  float dx_win[MAX_LEN], dy_win[MAX_LEN], dz_win[MAX_LEN], dx, dy, dz, odx, ody,
+      odz, *pdx, *pdy, *pdz, dir;
 
-  if(wsize > MAX_WINDOW) 
-    ErrorReturn(0.0f, (ERROR_BADPARM, "MRIvoxelDirection: window size %d too big", wsize));
+  if (wsize > MAX_WINDOW)
+    ErrorReturn(0.0f, (ERROR_BADPARM,
+                       "MRIvoxelDirection: window size %d too big", wsize));
 
   whalf = wsize / 2;
-  width  = mri->width;
+  width = mri->width;
   height = mri->height;
-  depth  = mri->depth;
+  depth = mri->depth;
 
-  zmax = MIN(depth  - 1, z0 + whalf);
+  zmax = MIN(depth - 1, z0 + whalf);
   ymax = MIN(height - 1, y0 + whalf);
-  xmax = MIN(width  - 1, x0 + whalf);
+  xmax = MIN(width - 1, x0 + whalf);
 
-  /* should do something smarter than this about border conditions */
-  #if 0
+/* should do something smarter than this about border conditions */
+#if 0
   memset(dx_win, 0, MAX_LEN*sizeof(float)) ;
   memset(dy_win, 0, MAX_LEN*sizeof(float)) ;
   memset(dz_win, 0, MAX_LEN*sizeof(float)) ;
-  #endif
+#endif
 
-  // For each voxel in the window, compute the intensity gradient in each direction
+  // For each voxel in the window, compute the intensity gradient in each
+  // direction
   pdx = dx_win;
   pdy = dy_win;
   pdz = dz_win;
@@ -373,13 +375,13 @@ float MRIvoxelDirection(MRI *mri, int x0, int y0, int z0, int wsize)
         dx = *pdx++;
         dy = *pdy++;
         dz = *pdz++;
-	/* x*odx is dx*di0/dx, where dx=x is the signed distance from
-  	   the center voxel to the current voxel and di0/dx=odx is the
-  	   itensity gradient WRT x at the center voxel */
-	/* dx*odx is (di/dx)*(di0/dx), the product of the intensity
-	   gradients WRT x at the current voxel and the center voxel.  */
-	/* Not sure what this is actually doing. Something like checking whether
-	   the gradients of neibhboring voxels point in the same direction.*/
+        /* x*odx is dx*di0/dx, where dx=x is the signed distance from
+           the center voxel to the current voxel and di0/dx=odx is the
+           itensity gradient WRT x at the center voxel */
+        /* dx*odx is (di/dx)*(di0/dx), the product of the intensity
+           gradients WRT x at the current voxel and the center voxel.  */
+        /* Not sure what this is actually doing. Something like checking whether
+           the gradients of neibhboring voxels point in the same direction.*/
         dir += (x * odx + y * ody + z * odz) * (dx * odx + dy * ody + dz * odz);
       }
     }
@@ -395,8 +397,8 @@ float MRIvoxelDirection(MRI *mri, int x0, int y0, int z0, int wsize)
 
         Description
 ------------------------------------------------------*/
-float MRIvoxelGradientDir2ndDerivative(MRI *mri, int x0, int y0, int z0, int wsize)
-{
+float MRIvoxelGradientDir2ndDerivative(MRI *mri, int x0, int y0, int z0,
+                                       int wsize) {
   int whalf;
   // int width, height, depth;
   float odx, ody, odz, len, d2I_dg2, xf, yf, zf, d;
@@ -411,7 +413,8 @@ float MRIvoxelGradientDir2ndDerivative(MRI *mri, int x0, int y0, int z0, int wsi
   ody = MRIvoxelDy(mri, x0, y0, z0);
   odz = MRIvoxelDz(mri, x0, y0, z0);
   len = sqrt(odx * odx + ody * ody + odz * odz);
-  if (FZERO(len)) return (0.0f);
+  if (FZERO(len))
+    return (0.0f);
   odx /= len;
   ody /= len;
   odz /= len;
@@ -437,8 +440,7 @@ float MRIvoxelGradientDir2ndDerivative(MRI *mri, int x0, int y0, int z0, int wsi
   return (d2I_dg2);
 }
 
-float MRIvoxelZscore(MRI *mri, int x, int y, int z, int wsize)
-{
+float MRIvoxelZscore(MRI *mri, int x, int y, int z, int wsize) {
   float mean, std, zscore, src;
 
   src = (float)MRIvox(mri, x, y, z);
@@ -460,8 +462,7 @@ float MRIvoxelZscore(MRI *mri, int x, int y, int z, int wsize)
         Description
 ------------------------------------------------------*/
 static int compare_sort_array(const void *pc1, const void *pc2);
-static int compare_sort_array(const void *pc1, const void *pc2)
-{
+static int compare_sort_array(const void *pc1, const void *pc2) {
   float c1, c2;
 
   c1 = *(float *)pc1;
@@ -475,12 +476,12 @@ static int compare_sort_array(const void *pc1, const void *pc2)
 
   return (0);
 }
-float MRIvoxelMedian(MRI *mri, int x0, int y0, int z0, int wsize)
-{
+float MRIvoxelMedian(MRI *mri, int x0, int y0, int z0, int wsize) {
   float median, val;
-  int whalf, width, height, depth, x, y, z, xmin, xmax, median_index, ymin, ymax, zmin, zmax, wcubed;
+  int whalf, width, height, depth, x, y, z, xmin, xmax, median_index, ymin,
+      ymax, zmin, zmax, wcubed;
   // int npix;
-  static float *sort_array = NULL;
+  static float *sort_array = nullptr;
   float *sptr;
 
   whalf = wsize / 2;

@@ -25,7 +25,6 @@
  *
  */
 
-
 // .NAME IconLoader - static interface for loading and setting icons
 // .SECTION Description
 // This class provides an enumeration of custom icons and can set the
@@ -47,12 +46,11 @@ class vtkKWPushButton;
 class IconLoader {
 
 public:
-
   // Description:
   // Initialize the class with a pointer to an application so it can
   // use its Sript() function to set icons.
-  static void Initialize ( vtkKWApplication* iApp );
-  static void ShutDown ();
+  static void Initialize(vtkKWApplication *iApp);
+  static void ShutDown();
 
   // Description:
   // Load the icons from a file. The file should be a list of three
@@ -63,50 +61,44 @@ public:
   // home IMAGEDIR/home.tif IMAGEDIR/home.gif
   // back /usr/share/tif/back.tif /usr/share/gif/back.gif
   // forwards ./forward.tif ./forward.gif
-  static int LoadIconsFromFile ( const char* ifn );
-  
+  static int LoadIconsFromFile(const char *ifn);
+
   // Description:
   // Call this to load icons at run time. The key is a string key (no
   // spaces) that can be used to refer to the icon later. A TIFF file
   // is used to load image data, and a GIF file will be loaded into
   // Tk. It will substitute IMAGEDIR/ in the filename with the
   // FREESURFER_HOME/lib/images/, or a static file name can be used.
-  static int LoadIcon ( const char* isKey,
-			 const char* ifnTIFF,
-			 const char* ifnGIF );
+  static int LoadIcon(const char *isKey, const char *ifnTIFF,
+                      const char *ifnGIF);
 
   // Description:
   // Set the icon for a vtkKWPushButton. Internally, it will load the
   // icon if not loaded from a .tif resource, extract the pixel data,
   // and set the vtkKWPushButton's image data. Can throw an exception
   // if inIcon is invalid.
-  static void SetPushButtonIcon ( const char* isKey,
-				  vtkKWPushButton* iButton );
+  static void SetPushButtonIcon(const char *isKey, vtkKWPushButton *iButton);
 
   // Description:
   // Set the icon for a vtkKWCheckButton. Internally, it will load the
   // icon if not loaded from a .tif resource, extract the pixel data,
   // and set the vtkKWPushButton's image data. Can throw an exception
   // if inIcon is invalid.
-  static void SetCheckButtonIcon ( const char* isKey,
-				   vtkKWCheckButton* iButton );
+  static void SetCheckButtonIcon(const char *isKey, vtkKWCheckButton *iButton);
 
   // Description:
   // Set the icon for a menu item. Interally, it will load the icon as
   // a Tk image, and set vtkKWMenu item's icon using that Tk image
   // name. Can throw an exception if inIcon is invalid.
-  static void SetMenuItemIcon ( const char* isKey,
-				vtkKWMenu* iMenu, int inItem );
+  static void SetMenuItemIcon(const char *isKey, vtkKWMenu *iMenu, int inItem);
 
 protected:
+  static vtkKWApplication *mApp;
 
-  static vtkKWApplication* mApp;
-
-  static std::map<std::string,bool> mabTkIconLoaded;
-  static std::map<std::string,unsigned char*> maTIFFData;
-  static std::map<std::string,int> maWidth;
-  static std::map<std::string,int> maHeight;
+  static std::map<std::string, bool> mabTkIconLoaded;
+  static std::map<std::string, unsigned char *> maTIFFData;
+  static std::map<std::string, int> maWidth;
+  static std::map<std::string, int> maHeight;
 };
-
 
 #endif

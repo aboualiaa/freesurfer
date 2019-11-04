@@ -4,7 +4,7 @@
  */
 /*
  * Original Author: Avi Z. Snyder, Washington University
- * 
+ *
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2007/05/05 00:00:06 $
@@ -14,8 +14,8 @@
  * Washington University, Mallinckrodt Institute of Radiology.
  * All Rights Reserved.
  *
- * This software may not be reproduced, copied, or distributed without 
- * written permission of Washington University. For further information 
+ * This software may not be reproduced, copied, or distributed without
+ * written permission of Washington University. For further information
  * contact A. Z. Snyder.
  *
  * General inquiries: freesurfer@nmr.mgh.harvard.edu
@@ -28,65 +28,71 @@
 #include <math.h>
 #include <endianio.h>
 
-void flipx (float *imgf, int *pnx, int* pny, int *pnz) {
-	float	*vector;
-	int	ix, iy, iz, vecdim, index;
+void flipx(float *imgf, int *pnx, int *pny, int *pnz) {
+  float *vector;
+  int ix, iy, iz, vecdim, index;
 
-	vecdim = *pnx;
-	if (!(vector = (float *) malloc (vecdim * sizeof (float)))) errm ("flipx");
+  vecdim = *pnx;
+  if (!(vector = (float *)malloc(vecdim * sizeof(float))))
+    errm("flipx");
 
-	for (iz = 0; iz < *pnz; iz++) {
-	for (iy = 0; iy < *pny; iy++) {
-		for (ix = 0; ix < *pnx; ix++) {
-			index = ix + *pnx*(iy + *pny*iz);
-			vector[ix] = imgf[index];
-		}
-		for (ix = 0; ix < *pnx; ix++) {
-			index = ix + *pnx*(iy + *pny*iz);
-			imgf[index] = vector[*pnx - 1 - ix];
-		}
-	}}
-	free (vector);
+  for (iz = 0; iz < *pnz; iz++) {
+    for (iy = 0; iy < *pny; iy++) {
+      for (ix = 0; ix < *pnx; ix++) {
+        index = ix + *pnx * (iy + *pny * iz);
+        vector[ix] = imgf[index];
+      }
+      for (ix = 0; ix < *pnx; ix++) {
+        index = ix + *pnx * (iy + *pny * iz);
+        imgf[index] = vector[*pnx - 1 - ix];
+      }
+    }
+  }
+  free(vector);
 }
 
-void flipy (float *imgf, int *pnx, int* pny, int *pnz) {
-	float	*vector;
-	int	ix, iy, iz, vecdim, index;
+void flipy(float *imgf, int *pnx, int *pny, int *pnz) {
+  float *vector;
+  int ix, iy, iz, vecdim, index;
 
-	vecdim = *pny;
-	if (!(vector = (float *) malloc (vecdim * sizeof (float)))) errm ("flipy");
+  vecdim = *pny;
+  if (!(vector = (float *)malloc(vecdim * sizeof(float))))
+    errm("flipy");
 
-	for (iz = 0; iz < *pnz; iz++) {
-	for (ix = 0; ix < *pnx; ix++) {
-		for (iy = 0; iy < *pny; iy++) {
-			index = ix + *pnx*(iy + *pny*iz);
-			vector[iy] = imgf[index];
-		}
-		for (iy = 0; iy < *pny; iy++) {
-			index = ix + *pnx*(iy + *pny*iz);
-			imgf[index] = vector[*pny - 1 - iy];
-		}
-	}}
-	free (vector);
+  for (iz = 0; iz < *pnz; iz++) {
+    for (ix = 0; ix < *pnx; ix++) {
+      for (iy = 0; iy < *pny; iy++) {
+        index = ix + *pnx * (iy + *pny * iz);
+        vector[iy] = imgf[index];
+      }
+      for (iy = 0; iy < *pny; iy++) {
+        index = ix + *pnx * (iy + *pny * iz);
+        imgf[index] = vector[*pny - 1 - iy];
+      }
+    }
+  }
+  free(vector);
 }
 
-void flipz (float *imgf, int *pnx, int* pny, int *pnz) {
-	float	*vector;
-	int	ix, iy, iz, vecdim, index;
+void flipz(float *imgf, int *pnx, int *pny, int *pnz) {
+  float *vector;
+  int ix, iy, iz, vecdim, index;
 
-	vecdim = *pnz;
-	if (!(vector = (float *) malloc (vecdim * sizeof (float)))) errm ("flipz");
+  vecdim = *pnz;
+  if (!(vector = (float *)malloc(vecdim * sizeof(float))))
+    errm("flipz");
 
-	for (iy = 0; iy < *pny; iy++) {
-	for (ix = 0; ix < *pnx; ix++) {
-		for (iz = 0; iz < *pnz; iz++) {
-			index = ix + *pnx*(iy + *pny*iz);
-			vector[iz] = imgf[index];
-		}
-		for (iz = 0; iz < *pnz; iz++) {
-			index = ix + *pnx*(iy + *pny*iz);
-			imgf[index] = vector[*pnz - 1 - iz];
-		}
-	}}
-	free (vector);
+  for (iy = 0; iy < *pny; iy++) {
+    for (ix = 0; ix < *pnx; ix++) {
+      for (iz = 0; iz < *pnz; iz++) {
+        index = ix + *pnx * (iy + *pny * iz);
+        vector[iz] = imgf[index];
+      }
+      for (iz = 0; iz < *pnz; iz++) {
+        index = ix + *pnx * (iy + *pny * iz);
+        imgf[index] = vector[*pnz - 1 - iz];
+      }
+    }
+  }
+  free(vector);
 }

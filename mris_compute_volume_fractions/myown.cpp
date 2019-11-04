@@ -1,11 +1,11 @@
 /**
  * @file  connectgraph.c
- * @brief Convert connectivity data to graphviz data format 
+ * @brief Convert connectivity data to graphviz data format
  *
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: enderk $
  *    $Date: 2013/01/18 22:30:27 $
@@ -22,7 +22,6 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
-
 
 /**
  * @file   myown.c

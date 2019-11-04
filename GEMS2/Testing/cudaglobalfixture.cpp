@@ -9,10 +9,10 @@
 CUDAGlobalFixture::CUDAGlobalFixture() {
   const int cudaDevice = 0;
   kvl::cuda::InitialiseCUDA(cudaDevice);
-  
+
   cudaDeviceProp properties;
-  CUDA_SAFE_CALL( cudaGetDeviceProperties(&properties, cudaDevice) );
-  
+  CUDA_SAFE_CALL(cudaGetDeviceProperties(&properties, cudaDevice));
+
   // It seems that we can't use BOOST_TEST_MESSAGE in the global fixture
-  std::cout <<  "CUDA Device : " << properties.name << std::endl;
+  std::cout << "CUDA Device : " << properties.name << std::endl;
 }

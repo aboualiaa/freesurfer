@@ -1,19 +1,16 @@
 #ifndef GIFTI_TOOL_H
 #define GIFTI_TOOL_H
 
-typedef struct
-{
+typedef struct {
   int len;
   char **list;
 } gt_str_list;
-typedef struct
-{
+typedef struct {
   int len;
   int *list;
 } gt_int_list;
 
-typedef struct
-{
+typedef struct {
   /* main action flags */
   int gt_compare; /* somehow compare 2 datasets           */
   int gt_copy;    /* copy things between 2 datasets       */
@@ -77,23 +74,23 @@ typedef struct
 } gt_opts;
 
 #undef CHECK_NEXT_OPT
-#define CHECK_NEXT_OPT(n, m, str)                                  \
-  do {                                                             \
-    if ((n) >= (m)) {                                              \
-      fprintf(stderr, "** option '%s': missing parameter\n", str); \
-      fprintf(stderr, "   consider: '-help' option\n");            \
-      return 1;                                                    \
-    }                                                              \
+#define CHECK_NEXT_OPT(n, m, str)                                              \
+  do {                                                                         \
+    if ((n) >= (m)) {                                                          \
+      fprintf(stderr, "** option '%s': missing parameter\n", str);             \
+      fprintf(stderr, "   consider: '-help' option\n");                        \
+      return 1;                                                                \
+    }                                                                          \
   } while (0)
 
 #undef CHECK_NEXT_OPT2
-#define CHECK_NEXT_OPT2(n, m, s1, s2)                                      \
-  do {                                                                     \
-    if ((n) >= (m)) {                                                      \
-      fprintf(stderr, "** option '%s': missing parameter '%s'\n", s1, s2); \
-      fprintf(stderr, "   consider: '-help' option\n");                    \
-      return 1;                                                            \
-    }                                                                      \
+#define CHECK_NEXT_OPT2(n, m, s1, s2)                                          \
+  do {                                                                         \
+    if ((n) >= (m)) {                                                          \
+      fprintf(stderr, "** option '%s': missing parameter '%s'\n", s1, s2);     \
+      fprintf(stderr, "   consider: '-help' option\n");                        \
+      return 1;                                                                \
+    }                                                                          \
   } while (0)
 
 /* protos */

@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:40 $
@@ -23,7 +23,6 @@
  *
  */
 
-
 ////SVM-LIB////////////////////////////////////////////////////////////////
 //
 // Name: vector-types
@@ -34,8 +33,6 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-
-
 #ifndef __SVM_VECTOR_TYPES_H__
 #define __SVM_VECTOR_TYPES_H__
 
@@ -43,15 +40,13 @@
 #include "svm-vector.h"
 #include "svm-matrix.h"
 
-typedef Vector<int> IntVector;
-typedef Vector<double> DoubleVector;
+using IntVector = Vector<int>;
+using DoubleVector = Vector<double>;
 
-typedef Matrix<int> IntMatrix;
-typedef Matrix<double> DoubleMatrix;
+using IntMatrix = Matrix<int>;
+using DoubleMatrix = Matrix<double>;
 
-
-typedef Vector<SvmReal> SvmRealVector;
-typedef Matrix<SvmReal> SvmRealMatrix;
-
+using SvmRealVector = Vector<SvmReal>;
+using SvmRealMatrix = Matrix<SvmReal>;
 
 #endif //  __SVM_VECTOR_TYPES_H__

@@ -34,10 +34,8 @@
 
 using namespace std;
 
-class QdecFactor
-{
+class QdecFactor {
 public:
-
   static const int qdecDiscreteFactorType = 1;
   static const int qdecContinuousFactorType = 2;
   static const int qdecIgnoreType = 3;
@@ -45,125 +43,136 @@ public:
   // Constructors/Destructors
   //
 
-  QdecFactor ( const char* isName, int iType );
-  QdecFactor ( const char* isName, int iType, 
-               const char* iValue,
-               vector< string > iLevelNames );
-  QdecFactor ( const char* isName, int iType, double iValue );  
-  QdecFactor ( const char* isName, int iType, const char* iValue );
-  QdecFactor ( const QdecFactor* iFactor ); //Copy constructor
+  QdecFactor(const char *isName, int iType);
+  QdecFactor(const char *isName, int iType, const char *iValue,
+             vector<string> iLevelNames);
+  QdecFactor(const char *isName, int iType, double iValue);
+  QdecFactor(const char *isName, int iType, const char *iValue);
+  QdecFactor(const QdecFactor *iFactor); // Copy constructor
 
-  virtual ~QdecFactor ( );
-
-  /**
-   * @return bool
-   */
-  bool IsDiscrete ( ) 
-  { if ( mType == qdecDiscreteFactorType ) return true; return false; };
-
-  /**
-   * 
-   */
-  void SetDiscrete ( ) { mType = qdecDiscreteFactorType; };
+  virtual ~QdecFactor();
 
   /**
    * @return bool
    */
-  bool IsContinuous ( ) 
-  { if ( mType == qdecContinuousFactorType ) return true; return false; };
+  bool IsDiscrete() {
+    if (mType == qdecDiscreteFactorType)
+      return true;
+    return false;
+  };
+
+  /**
+   *
+   */
+  void SetDiscrete() { mType = qdecDiscreteFactorType; };
 
   /**
    * @return bool
    */
-  bool Ignore ( ) 
-  { if ( mType == qdecIgnoreType ) return true; return false; };
+  bool IsContinuous() {
+    if (mType == qdecContinuousFactorType)
+      return true;
+    return false;
+  };
+
+  /**
+   * @return bool
+   */
+  bool Ignore() {
+    if (mType == qdecIgnoreType)
+      return true;
+    return false;
+  };
 
   /**
    * @return string
    */
-  string GetFactorName ( ) { return msName; };
+  string GetFactorName() { return msName; };
 
   /**
    * GetFactorTypeName() - returns the string name of the
    * type of the given factor: 'continuous' or 'discrete'
    * @return string
    */
-  string GetFactorTypeName ( );
+  string GetFactorTypeName();
 
   /**
    * @return int
    * @param  isLevelName
    */
-  void AddLevelName ( string isLevelName );
+  void AddLevelName(string isLevelName);
 
   /**
    *
    */
-  bool HaveDotLevelsFile ( ) { return mHaveDotLevelsFile; };
+  bool HaveDotLevelsFile() { return mHaveDotLevelsFile; };
 
   /**
    *
    */
-  void SetHaveDotLevelsFile ( ) { mHaveDotLevelsFile = true; };
-  
+  void SetHaveDotLevelsFile() { mHaveDotLevelsFile = true; };
+
   /**
    * @return vector< string >
    */
-  vector<string> GetLevelNames ( ) { return mLevelNames; };
+  vector<string> GetLevelNames() { return mLevelNames; };
 
   /**
    * Returns true if the given levelName is in our list of known level names
    * @return bool
    */
-  bool ValidLevelName ( const char* iLevelName );
+  bool ValidLevelName(const char *iLevelName);
 
   /**
    * @return int   Number of levels in this factor (assume its discrete)
    */
-  int GetNumberOfLevels ( ) { return this->mLevelNames.size(); }
+  int GetNumberOfLevels() { return this->mLevelNames.size(); }
 
   /**
    * Returns the value of the discrete factor stored in this instance
    * @return string
    */
-  string GetDiscreteValue ( ) 
-  { assert(mType == qdecDiscreteFactorType); return msDiscreteValue; };
+  string GetDiscreteValue() {
+    assert(mType == qdecDiscreteFactorType);
+    return msDiscreteValue;
+  };
 
   /**
    * Returns the value of the continuous factor stored in this instance.
    * If this is a discrete factor, then it returns the level number.
    * @return double
    */
-  double GetContinuousValue ( );
+  double GetContinuousValue();
 
   /**
-   * Returns the value as a continous even though its a  discrete factor, 
+   * Returns the value as a continous even though its a  discrete factor,
    * value is the level number of the specified discrete value
    * @return double
    */
-  double GetContinuousValue ( const char* isDiscreteValue );
+  double GetContinuousValue(const char *isDiscreteValue);
 
   /**
    * Returns the value of the 'ignore' factor stored in this instance
    * @return string
    */
-  string GetIgnoreValue ( ) 
-  { assert(mType == qdecIgnoreType); return msIgnoreValue; };
+  string GetIgnoreValue() {
+    assert(mType == qdecIgnoreType);
+    return msIgnoreValue;
+  };
 
   /**
    *
    * Returns true if this factor is an ordinal number (not a float)
    */
-  bool IsOrdinal( ) { return mOrdinal; }
+  bool IsOrdinal() { return mOrdinal; }
 
   /**
    *
    * Indicate this factor is an ordinal
    */
-  void SetOrdinal( ) { mOrdinal = true; };
+  void SetOrdinal() { mOrdinal = true; };
 
 private:
-
   // private attributes
   //
 
@@ -182,7 +191,7 @@ private:
 
   // Names of possible levels (for instance, if this factor is 'gender',
   // then the two possible names are 'Female' and 'Male').
-  vector< string > mLevelNames;
+  vector<string> mLevelNames;
 
   // true if user create a factor.levels file containing the valid level names
   bool mHaveDotLevelsFile;

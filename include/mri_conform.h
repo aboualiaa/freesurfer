@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: greve $
  *    $Date: 2015/03/24 17:25:41 $
@@ -23,14 +23,13 @@
  *
  */
 
-
 #ifndef MRI_CONFORM_H
 #define MRI_CONFORM_H
 
-
 MRI *MRIconform(MRI *mri);
 MATRIX *MRIgetConformMatrix(MRI *mri);
-MRI *MRIconformedTemplate(MRI *mri, int conform_width, double conform_size, int KeepDC);
+MRI *MRIconformedTemplate(MRI *mri, int conform_width, double conform_size,
+                          int KeepDC);
 
 /*  EOF  */
 

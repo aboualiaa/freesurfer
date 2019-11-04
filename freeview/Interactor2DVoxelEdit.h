@@ -28,21 +28,17 @@
 
 #include "Interactor2DVolumeEdit.h"
 
-class Interactor2DVoxelEdit : public Interactor2DVolumeEdit
-{
+class Interactor2DVoxelEdit : public Interactor2DVolumeEdit {
 public:
-  Interactor2DVoxelEdit( QObject* parent );
-  virtual ~Interactor2DVoxelEdit()
-  {}
+  Interactor2DVoxelEdit(QObject *parent);
+  virtual ~Interactor2DVoxelEdit() {}
 
   // return true if to have parent Interactor2D continue processing the event
   // return false to stop event from further processing
-  virtual bool ProcessMouseDownEvent( QMouseEvent* event, RenderView* view );
-  virtual bool ProcessMouseUpEvent( QMouseEvent* event, RenderView* view );
-  virtual bool ProcessKeyDownEvent( QKeyEvent* event, RenderView* view );
-  virtual bool ProcessKeyUpEvent( QKeyEvent* event, RenderView* view );
+  virtual bool ProcessMouseDownEvent(QMouseEvent *event, RenderView *view);
+  virtual bool ProcessMouseUpEvent(QMouseEvent *event, RenderView *view);
+  virtual bool ProcessKeyDownEvent(QKeyEvent *event, RenderView *view);
+  virtual bool ProcessKeyUpEvent(QKeyEvent *event, RenderView *view);
 };
 
 #endif
-
-

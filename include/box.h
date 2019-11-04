@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:09 $
@@ -23,26 +23,22 @@
  *
  */
 
-
 #ifndef BOX_H
 #define BOX_H
 
-typedef struct
-{
-  int  x0 ;
-  int  y0 ;
-  int  z0 ;
-  int  x1 ;
-  int  y1 ;
-  int  z1 ;
-  int  width ;
-  int  height ;
-  int  depth ;
-}
-BOX ;
+typedef struct {
+  int x0;
+  int y0;
+  int z0;
+  int x1;
+  int y1;
+  int z1;
+  int width;
+  int height;
+  int depth;
+} BOX;
 
-
-int   BoxPrint(BOX *box, FILE *fp) ;
-int   BoxExpand(BOX *box_src, BOX *box_dst, int dx, int dy, int dz) ;
+int BoxPrint(BOX *box, FILE *fp);
+int BoxExpand(BOX *box_src, BOX *box_dst, int dx, int dy, int dz);
 
 #endif

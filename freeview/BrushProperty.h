@@ -25,7 +25,6 @@
  *
  */
 
-
 #ifndef BrushProperty_h
 #define BrushProperty_h
 
@@ -35,72 +34,55 @@
 class LayerVolumeBase;
 class Layer;
 
-class BrushProperty : public QObject
-{
+class BrushProperty : public QObject {
   Q_OBJECT
 public:
-  BrushProperty(QObject* parent=0);
-  virtual ~BrushProperty ();
+  BrushProperty(QObject *parent = 0);
+  virtual ~BrushProperty();
 
-  int  GetBrushSize();
+  int GetBrushSize();
 
-  int  GetBrushTolerance();
+  int GetBrushTolerance();
 
-  LayerVolumeBase*  GetReferenceLayer();
+  LayerVolumeBase *GetReferenceLayer();
 
-  double* GetDrawRange();
-  void  SetDrawRange( double* range );
-  void  SetDrawRange( double low, double high );
+  double *GetDrawRange();
+  void SetDrawRange(double *range);
+  void SetDrawRange(double low, double high);
 
   bool GetDrawRangeEnabled();
 
-  double* GetExcludeRange();
-  void SetExcludeRange( double* range );
-  void  SetExcludeRange( double low, double high );
+  double *GetExcludeRange();
+  void SetExcludeRange(double *range);
+  void SetExcludeRange(double low, double high);
 
   bool GetExcludeRangeEnabled();
 
   bool GetDrawConnectedOnly();
 
-  double* GetEraseRange();
-  void  SetEraseRange( double* range );
-  void  SetEraseRange( double low, double high );
+  double *GetEraseRange();
+  void SetEraseRange(double *range);
+  void SetEraseRange(double low, double high);
 
   bool GetEraseRangeEnabled();
 
-  double* GetEraseExcludeRange();
-  void SetEraseExcludeRange( double* range );
-  void  SetEraseExcludeRange( double low, double high );
+  double *GetEraseExcludeRange();
+  void SetEraseExcludeRange(double *range);
+  void SetEraseExcludeRange(double low, double high);
 
   bool GetEraseExcludeRangeEnabled();
 
-  bool GetFill3D()
-  {
-    return m_bFill3D;
-  }
+  bool GetFill3D() { return m_bFill3D; }
 
-  double GetFillValue()
-  {
-    return m_dFillValue;
-  }
+  double GetFillValue() { return m_dFillValue; }
 
-  double GetEraseValue()
-  {
-    return m_dEraseValue;
-  }
+  double GetEraseValue() { return m_dEraseValue; }
 
-  bool GetCloning()
-  {
-    return m_bIsCloning;
-  }
+  bool GetCloning() { return m_bIsCloning; }
 
-  QVariantMap GetGeosSettings()
-  {
-    return m_mapGeos;
-  }
+  QVariantMap GetGeosSettings() { return m_mapGeos; }
 
-  void SetGeosSettings(const QString& name, const QVariant& val)
-  {
+  void SetGeosSettings(const QString &name, const QVariant &val) {
     m_mapGeos[name] = val;
   }
 
@@ -112,28 +94,22 @@ signals:
 public slots:
   void SetFillValue(double val);
   void SetEraseValue(double val);
-  void SetBrushSize( int nSize );
-  void SetBrushTolerance( int nTolerance );
-  void SetReferenceLayer( LayerVolumeBase* layer );
-  void SetDrawRangeEnabled( bool bEnable );
-  void SetExcludeRangeEnabled( bool bEnable );
-  void SetDrawConnectedOnly( bool bEnable );
-  void OnLayerRemoved(Layer* layer);
-  void SetFill3D(bool bVal)
-  {
-    m_bFill3D = bVal;
-  }
-  void SetCloning(bool bVal)
-  {
-    m_bIsCloning = bVal;
-  }
+  void SetBrushSize(int nSize);
+  void SetBrushTolerance(int nTolerance);
+  void SetReferenceLayer(LayerVolumeBase *layer);
+  void SetDrawRangeEnabled(bool bEnable);
+  void SetExcludeRangeEnabled(bool bEnable);
+  void SetDrawConnectedOnly(bool bEnable);
+  void OnLayerRemoved(Layer *layer);
+  void SetFill3D(bool bVal) { m_bFill3D = bVal; }
+  void SetCloning(bool bVal) { m_bIsCloning = bVal; }
 
-  void SetEraseRangeEnabled( bool bEnable );
-  void SetEraseExcludeRangeEnabled( bool bEnable );
+  void SetEraseRangeEnabled(bool bEnable);
+  void SetEraseExcludeRangeEnabled(bool bEnable);
 
 protected:
-  int  m_nBrushSize;
-  int  m_nBrushTolerance;
+  int m_nBrushSize;
+  int m_nBrushTolerance;
   double m_dDrawRange[2];
   bool m_bEnableDrawRange;
   double m_dExcludeRange[2];
@@ -143,7 +119,7 @@ protected:
   double m_dEraseExcludeRange[2];
   bool m_bEnableEraseExcludeRange;
   bool m_bDrawConnectedOnly;
-  bool  m_bFill3D;
+  bool m_bFill3D;
   bool m_bIsCloning;
 
   double m_dFillValue;
@@ -151,8 +127,7 @@ protected:
 
   QVariantMap m_mapGeos;
 
-  LayerVolumeBase* m_layerRef;
+  LayerVolumeBase *m_layerRef;
 };
-
 
 #endif

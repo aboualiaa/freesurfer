@@ -23,7 +23,7 @@
  *
  */
 
-#include <stdio.h>
+#include <cstdio>
 #include "diag.h"
 #include "error.h"
 #include "icosahedron.h"
@@ -64,8 +64,7 @@ IC_FACE ic42_faces[ICO_NFACES]
         { { 40, 32, 41 } }, { { 40, 41, 12 } }, { { 7, 35, 41 } },  { { 35, 8, 42 } },  { { 41, 35, 42 } },
         { { 41, 42, 12 } }, { { 8, 37, 42 } },  { { 37, 9, 39 } },  { { 42, 37, 39 } }, { { 42, 39, 12 } } };
 // clang-format on
-MRI_SURFACE *ic42_make_surface(int max_vertices, int max_faces)
-{
+MRI_SURFACE *ic42_make_surface(int max_vertices, int max_faces) {
   static int first_time = 1;
 
   if (first_time) {
@@ -77,14 +76,8 @@ MRI_SURFACE *ic42_make_surface(int max_vertices, int max_faces)
       ic42_faces[fno].vno[2] = vno;
     }
   }
-  
-  ICOSAHEDRON icos =
-    {
-        ICO_NVERTICES, 
-        ICO_NFACES, 
-        ic42_vertices,
-        ic42_faces
-    };
-    
+
+  ICOSAHEDRON icos = {ICO_NVERTICES, ICO_NFACES, ic42_vertices, ic42_faces};
+
   return ICOtoMRIS(&icos, max_vertices, max_faces);
 }

@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:09 $
@@ -23,23 +23,18 @@
  *
  */
 
-
-
-
 #ifndef CORIO_H_INC
 #define CORIO_H_INC
 
-#define CORVAL(ppCOR,row,col,slc) *(ppCOR[slc]+col+row*256)
+#define CORVAL(ppCOR, row, col, slc) *(ppCOR[slc] + col + row * 256)
 
-int               free_cor(unsigned char ***pppCOR);
-unsigned char ** alloc_cor(void);
-unsigned char **    ld_cor(char *cordir);
-int                 sv_cor(unsigned char **COR, char *cordir);
-int setcorval(unsigned char val, unsigned char ** COR,
-              int row, int col, int slc);
-unsigned char getcorval(unsigned char ** COR,
-                        int row, int col, int slc);
+int free_cor(unsigned char ***pppCOR);
+unsigned char **alloc_cor();
+unsigned char **ld_cor(char *cordir);
+int sv_cor(unsigned char **COR, char *cordir);
+int setcorval(unsigned char val, unsigned char **COR, int row, int col,
+              int slc);
+unsigned char getcorval(unsigned char **COR, int row, int col, int slc);
 int cordir_iswritable(char *cordir);
-
 
 #endif

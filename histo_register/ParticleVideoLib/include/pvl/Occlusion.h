@@ -5,17 +5,14 @@
 using namespace sbl;
 namespace pvl {
 
-
 /*! \file Occlusion.h
-    \brief The Occlusion module provides code for detecting/labelling occlusions 
+    \brief The Occlusion module provides code for detecting/labelling occlusions
     in a MotionField object.
 */
 
-
 /// run bilateral filter loop with occlusion detection
-void filterMotionLoop( MotionField &mf, const ImageGrayF &src, const ImageGrayF &dest, Config &varConf, bool fast );
-
+void filterMotionLoop(MotionField &mf, const ImageGrayF &src,
+                      const ImageGrayF &dest, Config &varConf, bool fast);
 
 } // end namespace pvl
 #endif // _PVL_OCCLUSION_H_
-

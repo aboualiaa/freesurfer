@@ -2,7 +2,7 @@
  * @file  mri_partial_ribbon.c
  * @brief extract cortical ribbon
  *
- * Usage: 
+ * Usage:
  * mri_partial_ribbon innerSurf_lh outerSurf_lh \
  *                    innerSurf_rh outerSurf_rh \
  *                    input_volume output_volume \
@@ -45,22 +45,20 @@ void usage() {
          "innerSurf_rh outerSurf_rh input_volume output_volume cma_mask\n");
 }
 
-
 int main(int argc, char *argv[]) {
-  char *inner_mris_fname_lh,*outer_mris_fname_lh,
-    *inner_mris_fname_rh,*outer_mris_fname_rh,
-    *input_mri_pref,*output_mri_pref,*mask_mri_pref;
-  MRI *mri,*mri_src,*mri_mask;
-  MRI_SURFACE *inner_mris_lh,*outer_mris_lh,*inner_mris_rh,*outer_mris_rh;
+  char *inner_mris_fname_lh, *outer_mris_fname_lh, *inner_mris_fname_rh,
+      *outer_mris_fname_rh, *input_mri_pref, *output_mri_pref, *mask_mri_pref;
+  MRI *mri, *mri_src, *mri_mask;
+  MRI_SURFACE *inner_mris_lh, *outer_mris_lh, *inner_mris_rh, *outer_mris_rh;
   int nargs;
 
   /* rkt: check for and handle version tag */
-  nargs = handle_version_option 
-    (argc, argv, 
-     "$Id: mri_partial_ribbon.c,v 1.11 2011/03/02 00:04:23 nicks Exp $", 
-     "$Name:  $");
+  nargs = handle_version_option(
+      argc, argv,
+      "$Id: mri_partial_ribbon.c,v 1.11 2011/03/02 00:04:23 nicks Exp $",
+      "$Name:  $");
   if (nargs && argc - nargs == 1)
-    exit (0);
+    exit(0);
   argc -= nargs;
 
   /* Set command-line parameters */
@@ -68,84 +66,80 @@ int main(int argc, char *argv[]) {
     usage();
     exit(-1);
   }
-  Progname=argv[0];
+  Progname = argv[0];
 
-  inner_mris_fname_lh=argv[1]; // lh.white
-  outer_mris_fname_lh=argv[2]; // lh.pial
-  inner_mris_fname_rh=argv[3]; // rh.white
-  outer_mris_fname_rh=argv[4]; // rh.pial
-  input_mri_pref=argv[5];      // volume
-  output_mri_pref=argv[6];     // output
-  if (argc==8)
-    mask_mri_pref=argv[7];     // cma mask
+  inner_mris_fname_lh = argv[1]; // lh.white
+  outer_mris_fname_lh = argv[2]; // lh.pial
+  inner_mris_fname_rh = argv[3]; // rh.white
+  outer_mris_fname_rh = argv[4]; // rh.pial
+  input_mri_pref = argv[5];      // volume
+  output_mri_pref = argv[6];     // output
+  if (argc == 8)
+    mask_mri_pref = argv[7]; // cma mask
   else
-    mask_mri_pref=NULL;
+    mask_mri_pref = NULL;
 
   /* Read surface information from left inner surface file */
-  printf("Reading left inner surface file %s.\n",inner_mris_fname_lh);
-  inner_mris_lh=MRISread(inner_mris_fname_lh);
+  printf("Reading left inner surface file %s.\n", inner_mris_fname_lh);
+  inner_mris_lh = MRISread(inner_mris_fname_lh);
   if (!inner_mris_lh) {
-    fprintf(stderr,"Could not read surface file %s.\n",inner_mris_fname_lh);
+    fprintf(stderr, "Could not read surface file %s.\n", inner_mris_fname_lh);
     exit(1);
   }
 
   /* Read surface information from left outer surface file */
-  printf("Reading left outer surface file %s.\n",outer_mris_fname_lh);
-  outer_mris_lh=MRISread(outer_mris_fname_lh);
+  printf("Reading left outer surface file %s.\n", outer_mris_fname_lh);
+  outer_mris_lh = MRISread(outer_mris_fname_lh);
   if (!outer_mris_lh) {
-    fprintf(stderr,"Could not read surface file %s.\n",outer_mris_fname_lh);
+    fprintf(stderr, "Could not read surface file %s.\n", outer_mris_fname_lh);
     exit(1);
   }
 
   /* Read surface information from right inner surface file */
-  printf("Reading right inner surface file %s.\n",inner_mris_fname_rh);
-  inner_mris_rh=MRISread(inner_mris_fname_rh);
+  printf("Reading right inner surface file %s.\n", inner_mris_fname_rh);
+  inner_mris_rh = MRISread(inner_mris_fname_rh);
   if (!inner_mris_rh) {
-    fprintf(stderr,"Could not read surface file %s.\n",inner_mris_fname_rh);
+    fprintf(stderr, "Could not read surface file %s.\n", inner_mris_fname_rh);
     exit(1);
   }
 
   /* Read surface information from right outer surface file */
-  printf("Reading right outer surface file %s.\n",outer_mris_fname_rh);
-  outer_mris_rh=MRISread(outer_mris_fname_rh);
+  printf("Reading right outer surface file %s.\n", outer_mris_fname_rh);
+  outer_mris_rh = MRISread(outer_mris_fname_rh);
   if (!outer_mris_rh) {
-    fprintf(stderr,"Could not read surface file %s.\n",outer_mris_fname_rh);
+    fprintf(stderr, "Could not read surface file %s.\n", outer_mris_fname_rh);
     exit(1);
   }
 
   /* Read example volume from file */
-  printf("Reading MRI volume directory %s.\n",input_mri_pref);
-  mri_src=MRIread(input_mri_pref);
+  printf("Reading MRI volume directory %s.\n", input_mri_pref);
+  mri_src = MRIread(input_mri_pref);
   if (!mri_src) {
-    fprintf(stderr,"Could not read MRI volume directory %s.\n",input_mri_pref);
+    fprintf(stderr, "Could not read MRI volume directory %s.\n",
+            input_mri_pref);
     exit(1);
   }
 
   /* Read example volume from file */
-  if (argc==8) {
-    printf("Reading MRI volume directory %s.\n",mask_mri_pref);
-    mri_mask=MRIread(mask_mri_pref);
+  if (argc == 8) {
+    printf("Reading MRI volume directory %s.\n", mask_mri_pref);
+    mri_mask = MRIread(mask_mri_pref);
     if (!mri_mask) {
-      fprintf(stderr,"Could not read MRI volume directory %s.\n",
+      fprintf(stderr, "Could not read MRI volume directory %s.\n",
               mask_mri_pref);
       exit(1);
     }
   } else
-    mri_mask=NULL;
+    mri_mask = NULL;
 
   /* Extract ribbon */
   printf("Extracting ribbon.\n");
-  mri=MRISpartialribbon(inner_mris_lh,
-                        outer_mris_lh,
-                        inner_mris_rh,
-                        outer_mris_rh,
-                        mri_src,
-                        NULL,
-                        mri_mask);
+  mri = MRISpartialribbon(inner_mris_lh, outer_mris_lh, inner_mris_rh,
+                          outer_mris_rh, mri_src, NULL, mri_mask);
 
   /* Save MRI volume to directory */
-  printf("Writing volume file %s.\n",output_mri_pref);
-  MRIwrite(mri,output_mri_pref);
+  printf("Writing volume file %s.\n", output_mri_pref);
+  MRIwrite(mri, output_mri_pref);
 
   MRIfree(&mri);
   MRIfree(&mri_src);
@@ -158,4 +152,3 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
-

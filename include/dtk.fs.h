@@ -10,11 +10,10 @@
 /*---------------------------------------------------------*/
 // http://trackvis.org/docs/?subsect=fileformat
 /*---------------------------------------------------------*/
-typedef struct
-{
-  int npoints; // number of points in the track
-  float *c, *r, *s; // Col, Row, Slice coordinates
-  int n_scalars; // May be inherited from HDR
+typedef struct {
+  int npoints;                       // number of points in the track
+  float *c, *r, *s;                  // Col, Row, Slice coordinates
+  int n_scalars;                     // May be inherited from HDR
   float *scalars[DTK_N_SCALARS_MAX]; // n_s by npoints
   int *label;
   int n_properties;
@@ -22,8 +21,7 @@ typedef struct
 } DTK_TRACK;
 
 // DO NOT ADD, REMOVE, OR REARRANGE ANYTHING FROM THIS STRUCT!!!!
-typedef struct
-{
+typedef struct {
   char id_string[6];
   short int dim[3];
   float voxel_size[3];
@@ -45,24 +43,23 @@ typedef struct
   int n_count;
   int version;
   int hdr_size;
-}  DTK_HDR;
+} DTK_HDR;
 
-typedef struct
-{
-  DTK_HDR *hdr; // header
-  DTK_TRACK     **trk; // array of tracks (n_count)
-  MRI           *mri_template; // only need geometry
+typedef struct {
+  DTK_HDR *hdr;      // header
+  DTK_TRACK **trk;   // array of tracks (n_count)
+  MRI *mri_template; // only need geometry
 } DTK_TRACK_SET;
 
-const char *DTKFSSrcVersion(void);
+const char *DTKFSSrcVersion();
 DTK_TRACK_SET *DTKloadTrackSet(char *trkfile, char *mrifile);
-DTK_TRACK *DTKreadTrack(FILE *fp, int n_scalars, int n_properties, 
-			float dc, float dr, float ds);
+DTK_TRACK *DTKreadTrack(FILE *fp, int n_scalars, int n_properties, float dc,
+                        float dr, float ds);
 DTK_TRACK *DTKallocTrack(int npoints, int n_scalars, int n_properties);
 int DTKprintTrack(FILE *fp, DTK_TRACK *trk);
 int DTKprintHeader(FILE *fp, DTK_HDR *dtkhdr);
 MRI *DTKmapEndPoints(DTK_TRACK_SET *dtkset);
-int DTKwriteTrack(FILE *fp, DTK_TRACK *trk,float dc, float dr, float ds);
+int DTKwriteTrack(FILE *fp, DTK_TRACK *trk, float dc, float dr, float ds);
 int DTKwriteTrackSet(char *trkfile, DTK_TRACK_SET *dtkset);
 int DTKlabelTracks(DTK_TRACK_SET *trkset, MRI *seg);
 DTK_TRACK_SET *DTKextractCC(DTK_TRACK_SET *trkset);
@@ -71,13 +68,12 @@ MRI *DTKsegROI(DTK_TRACK_SET *trkset, MRI *seg, int segid);
 DTK_TRACK_SET *DTKextractSeg(DTK_TRACK_SET *trkset, int segid);
 DTK_TRACK_SET *DTKextractSegEndPoints(DTK_TRACK_SET *trkset, int segid);
 
-//DTKwriteTrackSet(char *fname, DTK_TRACK_SET *dtkset)
-//DTKfree(DTK_TRACK_SET **pdtkset)
-//DTK_HDR *DTKloadHeader(char *trkfile);
-//DTKallocTracks(DTK_TRACK_SET *dtkset)
-//DTKloadTracks(FILE *fp, DTK_TRACK_SET *dtkset)
-//DTKtoCRS(DTK_TRACK_SET *dtkset)
-//DTKtoXYZ(DTK_TRACK_SET *dtkset)
-
+// DTKwriteTrackSet(char *fname, DTK_TRACK_SET *dtkset)
+// DTKfree(DTK_TRACK_SET **pdtkset)
+// DTK_HDR *DTKloadHeader(char *trkfile);
+// DTKallocTracks(DTK_TRACK_SET *dtkset)
+// DTKloadTracks(FILE *fp, DTK_TRACK_SET *dtkset)
+// DTKtoCRS(DTK_TRACK_SET *dtkset)
+// DTKtoXYZ(DTK_TRACK_SET *dtkset)
 
 #endif

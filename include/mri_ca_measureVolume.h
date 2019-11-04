@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:10 $
@@ -23,31 +23,22 @@
  *
  */
 
-
 #ifndef MeasureVolume_h
 #define MeasureVolume_h
 
 #include <string>
 
-
 #include "mri.h"
-
 
 using namespace std;
 
-
-
-
-class CMeasureVolume
-{
+class CMeasureVolume {
 public:
-  enum MeasureType { T1, T2, PD, EEG, MEG, fMRI, Unknown};
-
+  enum MeasureType { T1, T2, PD, EEG, MEG, fMRI, Unknown };
 
   MeasureType measureType;
-  MRI* pVolume;
+  MRI *pVolume;
   string strMeasureFileDir;
 };
-
 
 #endif

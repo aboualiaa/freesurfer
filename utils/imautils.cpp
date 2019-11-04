@@ -22,10 +22,10 @@
  *
  */
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include "fio.h"
 #include "machine.h"
 
@@ -33,10 +33,13 @@
 
 IMA_DICTIONARY_ENTRY ImaDictionary[NMAX_IMA_DICTIONARY] = {};
 int nImaDictionary = 0, ImaDictionaryGood = 0;
-const char *imaTypeString[6] = {"short", "int", "long", "float", "double", "string"};
-int imaTypeSize[6] = {sizeof(short), sizeof(int), sizeof(long), sizeof(float), sizeof(double), sizeof(char)};
+const char *imaTypeString[6] = {"short", "int",    "long",
+                                "float", "double", "string"};
+int imaTypeSize[6] = {sizeof(short), sizeof(int),    sizeof(long),
+                      sizeof(float), sizeof(double), sizeof(char)};
 
-static int imaSetDictEntry(int nthEntry, const char *key, int offset, const char *typestring, int nitems);
+static int imaSetDictEntry(int nthEntry, const char *key, int offset,
+                           const char *typestring, int nitems);
 static int imaGetKeyEntryNo(const char *key);
 
 /*--------------------------------------------------------------------
@@ -47,40 +50,37 @@ static int imaGetKeyEntryNo(const char *key);
   the caller is responsible for dealloc. If the architecture is
   Intel0-based, the byte order is reversed based on nybtes.
   --------------------------------------------------------------------*/
-void *imaLoadVal(FILE *imafp, int offset, int nbytes, int nitems, void *pval)
-{
+void *imaLoadVal(FILE *imafp, int offset, int nbytes, int nitems, void *pval) {
   int r;
 
   /* Go to the designated offset relative to the start of the file*/
   r = fseek(imafp, offset, SEEK_SET);
   if (r != 0) {
     printf("ERROR: imaLoadVal: could not seek to %d\n", offset);
-    return (NULL);
+    return (nullptr);
   }
   /* Allocate memory if need be */
-  if (pval == NULL) {
+  if (pval == nullptr) {
     pval = (void *)calloc(nbytes, nitems);
-    if (pval == NULL) {
+    if (pval == nullptr) {
       printf("ERROR: imaLoadVal: could not alloc %d bytes\n", nbytes);
-      return (NULL);
+      return (nullptr);
     }
   }
   /* Read in nitems of size nbytes */
   r = fread(pval, nbytes, nitems, imafp);
   if (r != nitems) {
-    printf(
-        "ERROR: imaLoadVal: could not read %d items of "
-        "%d bytes from offset %d\n",
-        nitems,
-        nbytes,
-        offset);
-    return (NULL);
+    printf("ERROR: imaLoadVal: could not read %d items of "
+           "%d bytes from offset %d\n",
+           nitems, nbytes, offset);
+    return (nullptr);
   }
   /* If this is a 486 arch, swap bytes because ima's are always
      created on a Sun */
   if (Arch486()) {
     r = ByteSwapBuf(pval, nitems, nbytes);
-    if (r != 0) return (NULL);
+    if (r != 0)
+      return (nullptr);
   }
 
   return (pval);
@@ -92,8 +92,7 @@ void *imaLoadVal(FILE *imafp, int offset, int nbytes, int nitems, void *pval)
   string, and, for strings, the number of characters in the string.
   The order is arbitrary.
   --------------------------------------------------------------------*/
-void MkImaDictionary(void)
-{
+void MkImaDictionary() {
   // extern int nImaDictionary, ImaDictionaryGood;
   int n = 0;
 
@@ -149,7 +148,8 @@ void MkImaDictionary(void)
   imaSetDictEntry(n++, "G21_Rel2_Mr_NumberOfSlicesNom", 4004, "long", 1);
   imaSetDictEntry(n++, "G21_Rel2_Mr_RepetitionTime", 4072, "double", 1);
   imaSetDictEntry(n++, "G21_Rel2_Mr_NumberOfEchoes", 4108, "long", 1);
-  imaSetDictEntry(n++, "G21_Rel2_Mr_CurrentSliceDistanceFactor", 4136, "double", 1);
+  imaSetDictEntry(n++, "G21_Rel2_Mr_CurrentSliceDistanceFactor", 4136, "double",
+                  1);
 
   imaSetDictEntry(n++, "G28_Pre_Rows", 4994, "short", 1);
   imaSetDictEntry(n++, "G28_Pre_Columns", 4996, "short", 1);
@@ -170,8 +170,8 @@ void MkImaDictionary(void)
 }
 /*--------------------------------------------------------------------
   --------------------------------------------------------------------*/
-static int imaSetDictEntry(int nthEntry, const char *key, int offset, const char *typestring, int nitems)
-{
+static int imaSetDictEntry(int nthEntry, const char *key, int offset,
+                           const char *typestring, int nitems) {
   int type;
 
   if (nthEntry >= NMAX_IMA_DICTIONARY) {
@@ -202,19 +202,19 @@ static int imaSetDictEntry(int nthEntry, const char *key, int offset, const char
   This is just a list of the items in the dictionary, not the
   values from a file.
   ---------------------------------------------------------------*/
-void DumpImaDictionary(FILE *fp)
-{
+void DumpImaDictionary(FILE *fp) {
   // extern IMA_DICTIONARY_ENTRY ImaDictionary[NMAX_IMA_DICTIONARY];
   // extern int nImaDictionary, ImaDictionaryGood;
   int n;
   IMA_DICTIONARY_ENTRY *ide;
 
-  if (!ImaDictionaryGood) MkImaDictionary();
+  if (!ImaDictionaryGood)
+    MkImaDictionary();
 
   for (n = 0; n < nImaDictionary; n++) {
     ide = &ImaDictionary[n];
-    fprintf(
-        fp, "%3d %-40s  %5d  %-7s %d  %3d\n", n, ide->key, ide->offset, ide->typestring, ide->typesize, ide->nitems);
+    fprintf(fp, "%3d %-40s  %5d  %-7s %d  %3d\n", n, ide->key, ide->offset,
+            ide->typestring, ide->typesize, ide->nitems);
   }
   return;
 }
@@ -222,8 +222,7 @@ void DumpImaDictionary(FILE *fp)
   DumpImaDictionaryVal() - dumps the dictionary to a file stream,
   including the corresponding values from a given ima file.
   ---------------------------------------------------------------*/
-int DumpImaDictionaryVal(FILE *fp, const char *imafile)
-{
+int DumpImaDictionaryVal(FILE *fp, const char *imafile) {
   // extern IMA_DICTIONARY_ENTRY ImaDictionary[NMAX_IMA_DICTIONARY];
   // extern int nImaDictionary, ImaDictionaryGood;
   const char *key, *typestring;
@@ -236,10 +235,11 @@ int DumpImaDictionaryVal(FILE *fp, const char *imafile)
   double dval;
   char string[1000];
 
-  if (!ImaDictionaryGood) MkImaDictionary();
+  if (!ImaDictionaryGood)
+    MkImaDictionary();
 
   imafp = fopen(imafile, "r");
-  if (imafp == NULL) {
+  if (imafp == nullptr) {
     printf("ERROR: cannot open %s\n", imafile);
     return (1);
   }
@@ -251,33 +251,34 @@ int DumpImaDictionaryVal(FILE *fp, const char *imafile)
     typesize = ImaDictionary[n].typesize;
     typestring = ImaDictionary[n].typestring;
     nitems = ImaDictionary[n].nitems;
-    fprintf(fp, "%3d %-40s  %5d  %-7s  %3d   ", n, key, offset, typestring, nitems);
+    fprintf(fp, "%3d %-40s  %5d  %-7s  %3d   ", n, key, offset, typestring,
+            nitems);
 
     switch (type) {
-      case IMA_TYPE_SHORT:
-        imaLoadVal(imafp, offset, typesize, nitems, &sval);
-        fprintf(fp, "%d\n", (int)sval);
-        break;
-      case IMA_TYPE_INT:
-        imaLoadVal(imafp, offset, typesize, nitems, &ival);
-        fprintf(fp, "%d\n", ival);
-        break;
-      case IMA_TYPE_LONG:
-        imaLoadVal(imafp, offset, typesize, nitems, &lval);
-        fprintf(fp, "%d\n", (int)lval);
-        break;
-      case IMA_TYPE_FLOAT:
-        imaLoadVal(imafp, offset, typesize, nitems, &fval);
-        fprintf(fp, "%f\n", fval);
-        break;
-      case IMA_TYPE_DOUBLE:
-        imaLoadVal(imafp, offset, typesize, nitems, &dval);
-        fprintf(fp, "%f\n", (float)dval);
-        break;
-      case IMA_TYPE_STRING:
-        imaLoadVal(imafp, offset, typesize, nitems, string);
-        fprintf(fp, "%s\n", string);
-        break;
+    case IMA_TYPE_SHORT:
+      imaLoadVal(imafp, offset, typesize, nitems, &sval);
+      fprintf(fp, "%d\n", (int)sval);
+      break;
+    case IMA_TYPE_INT:
+      imaLoadVal(imafp, offset, typesize, nitems, &ival);
+      fprintf(fp, "%d\n", ival);
+      break;
+    case IMA_TYPE_LONG:
+      imaLoadVal(imafp, offset, typesize, nitems, &lval);
+      fprintf(fp, "%d\n", (int)lval);
+      break;
+    case IMA_TYPE_FLOAT:
+      imaLoadVal(imafp, offset, typesize, nitems, &fval);
+      fprintf(fp, "%f\n", fval);
+      break;
+    case IMA_TYPE_DOUBLE:
+      imaLoadVal(imafp, offset, typesize, nitems, &dval);
+      fprintf(fp, "%f\n", (float)dval);
+      break;
+    case IMA_TYPE_STRING:
+      imaLoadVal(imafp, offset, typesize, nitems, string);
+      fprintf(fp, "%s\n", string);
+      break;
     }
   }
   fclose(imafp);
@@ -289,27 +290,26 @@ int DumpImaDictionaryVal(FILE *fp, const char *imafile)
   value and the data type. The value is derefferenced based on the
   data type and printed. No spaces or newlines are printed.
   --------------------------------------------------------------------*/
-int imaPrintVal(FILE *fp, int type, void *pval)
-{
+int imaPrintVal(FILE *fp, int type, void *pval) {
   switch (type) {
-    case IMA_TYPE_SHORT:
-      fprintf(fp, "%d", *((short *)pval));
-      break;
-    case IMA_TYPE_INT:
-      fprintf(fp, "%d", *((int *)pval));
-      break;
-    case IMA_TYPE_LONG:
-      fprintf(fp, "%ld", *((long *)pval));
-      break;
-    case IMA_TYPE_FLOAT:
-      fprintf(fp, "%f", *((float *)pval));
-      break;
-    case IMA_TYPE_DOUBLE:
-      fprintf(fp, "%f", (float)(*((double *)pval)));
-      break;
-    case IMA_TYPE_STRING:
-      fprintf(fp, "%s", (char *)pval);
-      break;
+  case IMA_TYPE_SHORT:
+    fprintf(fp, "%d", *((short *)pval));
+    break;
+  case IMA_TYPE_INT:
+    fprintf(fp, "%d", *((int *)pval));
+    break;
+  case IMA_TYPE_LONG:
+    fprintf(fp, "%ld", *((long *)pval));
+    break;
+  case IMA_TYPE_FLOAT:
+    fprintf(fp, "%f", *((float *)pval));
+    break;
+  case IMA_TYPE_DOUBLE:
+    fprintf(fp, "%f", (float)(*((double *)pval)));
+    break;
+  case IMA_TYPE_STRING:
+    fprintf(fp, "%s", (char *)pval);
+    break;
   }
 
   return (0);
@@ -319,35 +319,36 @@ int imaPrintVal(FILE *fp, int type, void *pval)
   imaLoadValFromKey() - loads a value from a file stream given the key
   in the IMA dictionary.
   --------------------------------------------------------------------*/
-void *imaLoadValFromKey(FILE *imafp, const char *key, void *pval)
-{
+void *imaLoadValFromKey(FILE *imafp, const char *key, void *pval) {
   // extern IMA_DICTIONARY_ENTRY ImaDictionary[NMAX_IMA_DICTIONARY];
   // extern int ImaDictionaryGood;
   int n, offset, typesize, nitems, nbytes;
   void *r;
 
-  if (!ImaDictionaryGood) MkImaDictionary();
+  if (!ImaDictionaryGood)
+    MkImaDictionary();
 
   n = imaGetKeyEntryNo(key);
-  if (n < 0) return (NULL);
+  if (n < 0)
+    return (nullptr);
 
   offset = ImaDictionary[n].offset;
   typesize = ImaDictionary[n].typesize;
   nitems = ImaDictionary[n].nitems;
   nbytes = typesize * nitems;
 
-  if (pval == NULL) {
+  if (pval == nullptr) {
     pval = (void *)calloc(nbytes, 1);
-    if (pval == NULL) {
+    if (pval == nullptr) {
       printf("ERROR: imaLoadValbyKey: could not alloc %d bytes\n", nbytes);
-      return (NULL);
+      return (nullptr);
     }
   }
 
   r = imaLoadVal(imafp, offset, typesize, nitems, pval);
-  if (r == NULL) {
+  if (r == nullptr) {
     free(pval);
-    return (NULL);
+    return (nullptr);
   }
 
   return (pval);
@@ -356,32 +357,34 @@ void *imaLoadValFromKey(FILE *imafp, const char *key, void *pval)
   imaTypeFromKey() - returns the interger code of the data type
   (IMA_TYPE_XXX) of an entry in the IMA dictionary given the key.
   --------------------------------------------------------------------*/
-int imaTypeFromKey(const char *key)
-{
+int imaTypeFromKey(const char *key) {
   // extern IMA_DICTIONARY_ENTRY ImaDictionary[NMAX_IMA_DICTIONARY];
   // extern int  ImaDictionaryGood;
   int n;
 
-  if (!ImaDictionaryGood) MkImaDictionary();
+  if (!ImaDictionaryGood)
+    MkImaDictionary();
 
   n = imaGetKeyEntryNo(key);
-  if (n < 0) return (-1);
+  if (n < 0)
+    return (-1);
 
   return (ImaDictionary[n].type);
 }
 /*--------------------------------------------------------------------
   imaGetKeyEntryNo() - return the entry number of the key.
   --------------------------------------------------------------------*/
-static int imaGetKeyEntryNo(const char *key)
-{
+static int imaGetKeyEntryNo(const char *key) {
   // extern IMA_DICTIONARY_ENTRY ImaDictionary[NMAX_IMA_DICTIONARY];
   // extern int nImaDictionary, ImaDictionaryGood;
   int n;
 
-  if (!ImaDictionaryGood) MkImaDictionary();
+  if (!ImaDictionaryGood)
+    MkImaDictionary();
 
   for (n = 0; n < nImaDictionary; n++)
-    if (strcmp(ImaDictionary[n].key, key) == 0) return (n);
+    if (strcmp(ImaDictionary[n].key, key) == 0)
+      return (n);
 
   printf("ERROR: key %s not found\n", key);
   return (-1);
@@ -390,12 +393,12 @@ static int imaGetKeyEntryNo(const char *key)
   imaTypeFromString() - returns the interger type code (IMA_TYPE_XXX)
   given the string name of the type.
   --------------------------------------------------------------------*/
-int imaTypeFromString(const char *typestring)
-{
+int imaTypeFromString(const char *typestring) {
   int i;
   for (i = 0; i < 6; i++) {
     // printf("%d %s\n",i,imaTypeString[i]);
-    if (strcmp(typestring, imaTypeString[i]) == 0) return (i);
+    if (strcmp(typestring, imaTypeString[i]) == 0)
+      return (i);
   }
   printf("ERROR: no support for type %s\n", typestring);
   return (-1);
@@ -408,8 +411,7 @@ int imaTypeFromString(const char *typestring)
   distance between slices is computed from the slice thickness and
   the distance factor.
   --------------------------------------------------------------------*/
-IMAFILEINFO *imaLoadFileInfo(const char *imafile)
-{
+IMAFILEINFO *imaLoadFileInfo(const char *imafile) {
   IMAFILEINFO *ifi;
   FILE *fp;
   int itmp, len, err;
@@ -422,17 +424,18 @@ IMAFILEINFO *imaLoadFileInfo(const char *imafile)
   char Separator;
 
   fp = fopen(imafile, "r");
-  if (fp == NULL) {
+  if (fp == nullptr) {
     printf("ERROR: could not open %s\n", imafile);
-    return (NULL);
+    return (nullptr);
   }
 
   ifi = (IMAFILEINFO *)calloc(sizeof(IMAFILEINFO), 1);
 
-  err = imaParseName(imafile, &ifi->StudyNo, &ifi->SeriesNo, &ifi->ImageNo, &Separator);
+  err = imaParseName(imafile, &ifi->StudyNo, &ifi->SeriesNo, &ifi->ImageNo,
+                     &Separator);
   if (err) {
     free(ifi);
-    return (NULL);
+    return (nullptr);
   }
 
   len = strlen(imafile);
@@ -441,8 +444,10 @@ IMAFILEINFO *imaLoadFileInfo(const char *imafile)
 
   ifi->NFilesInSeries = imaCountFilesInSeries(imafile, &FirstImageNo);
 
-  ifi->PatientName = (char *)imaLoadValFromKey(fp, "G10_Pat_PatientName", NULL);
-  ifi->PulseSequence = (char *)imaLoadValFromKey(fp, "G19_Acq4_CM_SequenceFileName", NULL);
+  ifi->PatientName =
+      (char *)imaLoadValFromKey(fp, "G10_Pat_PatientName", nullptr);
+  ifi->PulseSequence =
+      (char *)imaLoadValFromKey(fp, "G19_Acq4_CM_SequenceFileName", nullptr);
 
   imaLoadValFromKey(fp, "G10_Pat_PatientBirthdate_Year", &Year);
   imaLoadValFromKey(fp, "G10_Pat_PatientBirthdate_Month", &Month);
@@ -562,8 +567,7 @@ IMAFILEINFO *imaLoadFileInfo(const char *imafile)
   if (!ifi->IsMosaic) {
     ifi->NFilesPerFrame = ifi->VolDim[2];
     ifi->NFrames = 1;
-  }
-  else {
+  } else {
     nVolVoxs = ifi->VolDim[0] * ifi->VolDim[1] * ifi->VolDim[2];
     nMosVoxs = ifi->NImageRows * ifi->NImageCols;
     ifi->NFilesPerFrame = (int)(ceil((float)nVolVoxs / nMosVoxs));
@@ -584,59 +588,61 @@ IMAFILEINFO *imaLoadFileInfo(const char *imafile)
   return (ifi);
 }
 /*--------------------------------------------------------------------*/
-short *imaReadPixelData(IMAFILEINFO *ifi, short *PixelData)
-{
+short *imaReadPixelData(IMAFILEINFO *ifi, short *PixelData) {
   FILE *fp;
   int npixels, alloced = 0;
   int nread, r;
 
   fp = fopen(ifi->FileName, "r");
-  if (fp == NULL) {
+  if (fp == nullptr) {
     printf("ERROR: cannot open %s\n", ifi->FileName);
-    return (NULL);
+    return (nullptr);
   }
 
   npixels = ifi->NImageRows * ifi->NImageCols;
 
-  if (PixelData == NULL) {
+  if (PixelData == nullptr) {
     PixelData = (short *)calloc(npixels, sizeof(short));
-    if (PixelData == NULL) {
+    if (PixelData == nullptr) {
       printf("ERROR: could not alloc %d pixels\n", npixels);
       fclose(fp);
-      return (NULL);
+      return (nullptr);
     }
     alloced = 1;
   }
 
   if (fseek(fp, 6144, SEEK_SET) == -1) {
     printf("ERROR: could seek to 6144 in %s\n", ifi->FileName);
-    if (alloced) free(PixelData);
+    if (alloced)
+      free(PixelData);
     fclose(fp);
-    return (NULL);
+    return (nullptr);
   }
 
   nread = fread(PixelData, sizeof(short), npixels, fp);
   if (nread != npixels) {
-    printf("ERROR: only read %d of %d pixels in  %s\n", nread, npixels, ifi->FileName);
-    if (alloced) free(PixelData);
+    printf("ERROR: only read %d of %d pixels in  %s\n", nread, npixels,
+           ifi->FileName);
+    if (alloced)
+      free(PixelData);
     fclose(fp);
-    return (NULL);
+    return (nullptr);
   }
   fclose(fp);
 
   if (Arch486()) {
     r = ByteSwapBuf(PixelData, npixels, sizeof(short));
     if (r != 0) {
-      if (alloced) free(PixelData);
-      return (NULL);
+      if (alloced)
+        free(PixelData);
+      return (nullptr);
     }
   }
 
   return (PixelData);
 }
 /*--------------------------------------------------------------------*/
-int imaDumpFileInfo(FILE *fp, IMAFILEINFO *ifi)
-{
+int imaDumpFileInfo(FILE *fp, IMAFILEINFO *ifi) {
   fprintf(fp, "FileName          %s\n", ifi->FileName);
   fprintf(fp, "PatientName       %s\n", ifi->PatientName);
   fprintf(fp, "PatientDOB        %s\n", ifi->PatientDOB);
@@ -664,13 +670,19 @@ int imaDumpFileInfo(FILE *fp, IMAFILEINFO *ifi)
   fprintf(fp, "NFrames           %d\n", ifi->NFrames);
   fprintf(fp, "IsMosaic          %d\n", ifi->IsMosaic);
 
-  fprintf(fp, "ImgCenter  %8.4f %8.4f %8.4f \n", ifi->ImgCenter[0], ifi->ImgCenter[1], ifi->ImgCenter[2]);
+  fprintf(fp, "ImgCenter  %8.4f %8.4f %8.4f \n", ifi->ImgCenter[0],
+          ifi->ImgCenter[1], ifi->ImgCenter[2]);
 
-  fprintf(fp, "VolRes     %8.4f %8.4f %8.4f \n", ifi->VolRes[0], ifi->VolRes[1], ifi->VolRes[2]);
-  fprintf(fp, "VolDim     %3d      %3d       %3d \n", ifi->VolDim[0], ifi->VolDim[1], ifi->VolDim[2]);
-  fprintf(fp, "Vc         %8.4f %8.4f %8.4f \n", ifi->Vc[0], ifi->Vc[1], ifi->Vc[2]);
-  fprintf(fp, "Vr         %8.4f %8.4f %8.4f \n", ifi->Vr[0], ifi->Vr[1], ifi->Vr[2]);
-  fprintf(fp, "Vs         %8.4f %8.4f %8.4f \n", ifi->Vs[0], ifi->Vs[1], ifi->Vs[2]);
+  fprintf(fp, "VolRes     %8.4f %8.4f %8.4f \n", ifi->VolRes[0], ifi->VolRes[1],
+          ifi->VolRes[2]);
+  fprintf(fp, "VolDim     %3d      %3d       %3d \n", ifi->VolDim[0],
+          ifi->VolDim[1], ifi->VolDim[2]);
+  fprintf(fp, "Vc         %8.4f %8.4f %8.4f \n", ifi->Vc[0], ifi->Vc[1],
+          ifi->Vc[2]);
+  fprintf(fp, "Vr         %8.4f %8.4f %8.4f \n", ifi->Vr[0], ifi->Vr[1],
+          ifi->Vr[2]);
+  fprintf(fp, "Vs         %8.4f %8.4f %8.4f \n", ifi->Vs[0], ifi->Vs[1],
+          ifi->Vs[2]);
 
   // fprintf(fp,"VolCenter  %8.4f %8.4f %8.4f \n",
   // ifi->VolCenter[0],ifi->VolCenter[1],ifi->VolCenter[2]);
@@ -681,13 +693,13 @@ int imaDumpFileInfo(FILE *fp, IMAFILEINFO *ifi)
 /*--------------------------------------------------------------------
   imaParseName() - studyno-seriesno-imageno.ima
   --------------------------------------------------------------------*/
-int imaParseName(const char *imafile, int *StudyNo, int *SeriesNo, int *ImageNo, char *Separator)
-{
+int imaParseName(const char *imafile, int *StudyNo, int *SeriesNo, int *ImageNo,
+                 char *Separator) {
   char *imabase;
   int baselen, n, m;
   char tmpstr[500];
 
-  imabase = fio_basename(imafile, NULL);
+  imabase = fio_basename(imafile, nullptr);
   baselen = strlen(imabase);
 
   // printf("%s\n",imafile);
@@ -765,14 +777,15 @@ int imaParseName(const char *imafile, int *StudyNo, int *SeriesNo, int *ImageNo,
   imaHasIMAExtension() - returns 1 if the given file name ends in a
   .ima (or .IMA) extension.
   --------------------------------------------------------------------*/
-int imaHasIMAExtension(const char *filename)
-{
+int imaHasIMAExtension(const char *filename) {
   char *ext;
 
   ext = fio_extension(filename);
-  if (ext == NULL) return (0);
+  if (ext == nullptr)
+    return (0);
 
-  if (!strcasecmp(ext, "ima")) return (1);
+  if (!strcasecmp(ext, "ima"))
+    return (1);
 
   return (0);
 }
@@ -781,20 +794,20 @@ int imaHasIMAExtension(const char *filename)
   file. Returns 0 if it is not a Siemens IMA file or if the file does
   not exist.
   --------------------------------------------------------------------*/
-int imaIsSiemensIMA(const char *imafile)
-{
+int imaIsSiemensIMA(const char *imafile) {
   FILE *fp;
   char *Manufacturer;
 
   fp = fopen(imafile, "r");
-  if (fp == NULL) {
+  if (fp == nullptr) {
     // printf("ERROR: could not open %s\n",imafile);
     return (0);
   }
 
-  Manufacturer = (char *)imaLoadValFromKey(fp, "G08_Ide_Manufacturer", NULL);
+  Manufacturer = (char *)imaLoadValFromKey(fp, "G08_Ide_Manufacturer", nullptr);
 
-  if (Manufacturer == NULL) return (0);
+  if (Manufacturer == nullptr)
+    return (0);
   if (!strcasecmp(Manufacturer, "SIEMENS")) {
     free(Manufacturer);
     return (1);
@@ -810,30 +823,30 @@ int imaIsSiemensIMA(const char *imafile)
   file in the series, and up to determine the last. The number
   in the series is then last-first+1.
   --------------------------------------------------------------------*/
-int imaCountFilesInSeries(const char *imafile, int *FirstImageNo)
-{
+int imaCountFilesInSeries(const char *imafile, int *FirstImageNo) {
   int StudyNo, SeriesNo, ImageNo, LastImageNo;
-  char *imadir = NULL, *imaext;
+  char *imadir = nullptr, *imaext;
   int err, n;
   FILE *fp;
   char filename[1000];
   char Separator;
 
   fp = fopen(imafile, "r");
-  if (fp == NULL) {
+  if (fp == nullptr) {
     printf("ERROR: could not open %s\n", imafile);
     return (0);
   }
 
   err = imaParseName(imafile, &StudyNo, &SeriesNo, &ImageNo, &Separator);
-  if (err) return (-1);
+  if (err)
+    return (-1);
 
   imadir = fio_dirname(imafile);
   imaext = fio_extension(imafile);
 
   /* Count down */
   n = ImageNo;
-  while (1) {
+  while (true) {
     n--;
     if (Separator == '-')
       sprintf(filename, "%s/%d-%d-%d.%s", imadir, StudyNo, SeriesNo, n, imaext);
@@ -841,14 +854,15 @@ int imaCountFilesInSeries(const char *imafile, int *FirstImageNo)
       sprintf(filename, "%s/%d_%d_%d.%s", imadir, StudyNo, SeriesNo, n, imaext);
     // printf("%s\n",filename);
     fp = fopen(filename, "r");
-    if (fp == NULL) break;
+    if (fp == nullptr)
+      break;
     fclose(fp);
   }
   *FirstImageNo = n + 1;
 
   /* Count up */
   n = ImageNo;
-  while (1) {
+  while (true) {
     n++;
     if (Separator == '-')
       sprintf(filename, "%s/%d-%d-%d.%s", imadir, StudyNo, SeriesNo, n, imaext);
@@ -856,7 +870,8 @@ int imaCountFilesInSeries(const char *imafile, int *FirstImageNo)
       sprintf(filename, "%s/%d_%d_%d.%s", imadir, StudyNo, SeriesNo, n, imaext);
     // printf("%s\n",filename);
     fp = fopen(filename, "r");
-    if (fp == NULL) break;
+    if (fp == nullptr)
+      break;
     fclose(fp);
   }
   LastImageNo = n - 1;

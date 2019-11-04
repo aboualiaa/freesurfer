@@ -30,20 +30,15 @@
 
 class LayerMRI;
 
-class VolumeFilterMean : public VolumeFilter
-{
+class VolumeFilterMean : public VolumeFilter {
 public:
-  VolumeFilterMean( LayerMRI* input = 0, LayerMRI* output = 0, QObject* parent = 0 );
+  VolumeFilterMean(LayerMRI *input = 0, LayerMRI *output = 0,
+                   QObject *parent = 0);
 
-  QString GetName()
-  {
-    return "Mean";
-  }
+  QString GetName() { return "Mean"; }
 
 protected:
   bool Execute();
 };
 
 #endif
-
-

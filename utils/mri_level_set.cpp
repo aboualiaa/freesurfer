@@ -38,11 +38,11 @@
                            INCLUDE FILES
 ----------------------------------------------------------------------*/
 
-#include <ctype.h>
-#include <math.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cctype>
+#include <cmath>
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
 
 #include "diag.h"
 #include "macros.h"
@@ -72,53 +72,62 @@
 
 /* solve ut + f |grad(u)| = e uxx */
 
-MRI *MRIregionGrow(MRI *mri_src, MRI *mri_distance, float x0, float y0, float z0, int niter)
-{
-  int width, height, depth, t, x, y, z, xp1, xm1, yp1, ym1, zp1, zm1, write_iter;
-  double dx, dy, dz, dxx, dyy, dzz, dxy, dxz, dyz, dist_xp1, dist_xm1, dist_yp1, dist_ym1, dist_zp1, dist_zm1, dist, km,
-      denom, mag, dist_xp1yp1, dist_xp1zp1, dist_yp1zp1, grad, F, laplacian, dx_f, dx_b, dy_f, dy_b, dz_f, dz_b, sdx,
-      sdy, sdz, orig_mag;
+MRI *MRIregionGrow(MRI *mri_src, MRI *mri_distance, float x0, float y0,
+                   float z0, int niter) {
+  int width, height, depth, t, x, y, z, xp1, xm1, yp1, ym1, zp1, zm1,
+      write_iter;
+  double dx, dy, dz, dxx, dyy, dzz, dxy, dxz, dyz, dist_xp1, dist_xm1, dist_yp1,
+      dist_ym1, dist_zp1, dist_zm1, dist, km, denom, mag, dist_xp1yp1,
+      dist_xp1zp1, dist_yp1zp1, grad, F, laplacian, dx_f, dx_b, dy_f, dy_b,
+      dz_f, dz_b, sdx, sdy, sdz, orig_mag;
   double mag_pow, mag_scale, dt, e_diffusion, e_curv;
   float f;
-  BUFTYPE src, src_xp1, src_xm1, src_yp1, src_ym1, src_zp1, src_zm1, min_orig_src, max_orig_src;
+  BUFTYPE src, src_xp1, src_xm1, src_yp1, src_ym1, src_zp1, src_zm1,
+      min_orig_src, max_orig_src;
   char *cp;
 
   cp = getenv("WRITE_ITER");
   write_iter = WRITE_ITER;
-  if (cp) sscanf(cp, "%d", &write_iter);
+  if (cp)
+    sscanf(cp, "%d", &write_iter);
   cp = getenv("MAG_POW");
   mag_pow = MAG_POW;
-  if (cp) sscanf(cp, "%lf", &mag_pow);
+  if (cp)
+    sscanf(cp, "%lf", &mag_pow);
   cp = getenv("MAG_SCALE");
   mag_scale = MAG_SCALE;
-  if (cp) sscanf(cp, "%lf", &mag_scale);
+  if (cp)
+    sscanf(cp, "%lf", &mag_scale);
   cp = getenv("E_DIFFUSION");
   e_diffusion = E_DIFFUSION;
-  if (cp) sscanf(cp, "%lf", &e_diffusion);
+  if (cp)
+    sscanf(cp, "%lf", &e_diffusion);
   cp = getenv("E_CURV");
   e_curv = E_CURV;
-  if (cp) sscanf(cp, "%lf", &e_curv);
+  if (cp)
+    sscanf(cp, "%lf", &e_curv);
   cp = getenv("DT");
   dt = DT;
-  if (cp) sscanf(cp, "%lf", &dt);
+  if (cp)
+    sscanf(cp, "%lf", &dt);
 
   fprintf(stderr,
           "mag_scale = %2.1f^%2.1f, e_curv = %2.4f, e_diffusion = "
           "%2.2e, dt=%2.2f\n",
-          mag_scale,
-          mag_pow,
-          e_curv,
-          e_diffusion,
-          dt);
+          mag_scale, mag_pow, e_curv, e_diffusion, dt);
   width = mri_src->width;
   height = mri_src->height;
   depth = mri_src->depth;
 
-  if (x0 < 0.0f) x0 = (float)(width - 1) / 2.0f;
-  if (y0 < 0.0f) y0 = (float)(height - 1) / 2.0f;
-  if (z0 < 0.0f) z0 = (float)(depth - 1) / 2.0f;
+  if (x0 < 0.0f)
+    x0 = (float)(width - 1) / 2.0f;
+  if (y0 < 0.0f)
+    y0 = (float)(height - 1) / 2.0f;
+  if (z0 < 0.0f)
+    z0 = (float)(depth - 1) / 2.0f;
 
-  if (!mri_distance) mri_distance = MRIbuildDistanceMap(mri_src, NULL, x0, y0, z0, 2.0f);
+  if (!mri_distance)
+    mri_distance = MRIbuildDistanceMap(mri_src, nullptr, x0, y0, z0, 2.0f);
 
   min_orig_src = 255;
   max_orig_src = 0;
@@ -128,8 +137,10 @@ MRI *MRIregionGrow(MRI *mri_src, MRI *mri_distance, float x0, float y0, float z0
         src = MRIvox(mri_src, x, y, z);
         dist = MRIFvox(mri_distance, x, y, z);
         if (dist <= 0.0f) {
-          if (src > max_orig_src) max_orig_src = src;
-          if (src < min_orig_src) min_orig_src = src;
+          if (src > max_orig_src)
+            max_orig_src = src;
+          if (src < min_orig_src)
+            min_orig_src = src;
         }
       }
     }
@@ -137,7 +148,8 @@ MRI *MRIregionGrow(MRI *mri_src, MRI *mri_distance, float x0, float y0, float z0
 
   fprintf(stderr, "min_src = %d, max_src = %d\n", min_orig_src, max_orig_src);
   for (t = 0; t < niter; t++) {
-    if (!(t % 10)) fprintf(stderr, "\r%4.4d of %d     ", t, niter);
+    if (!(t % 10))
+      fprintf(stderr, "\r%4.4d of %d     ", t, niter);
     if (!(t % write_iter) && (Gdiag & DIAG_WRITE)) {
       char fname[100];
       MRI *mri_interior;
@@ -147,7 +159,7 @@ MRI *MRIregionGrow(MRI *mri_src, MRI *mri_distance, float x0, float y0, float z0
         MRIwrite(mri_distance, fname);
       }
       sprintf(fname, "front%d.mnc", t / write_iter);
-      mri_interior = MRIextractInterior(mri_src, mri_distance, NULL);
+      mri_interior = MRIextractInterior(mri_src, mri_distance, nullptr);
       MRIwrite(mri_interior, fname);
       MRIfree(&mri_interior);
     }
@@ -160,9 +172,11 @@ MRI *MRIregionGrow(MRI *mri_src, MRI *mri_distance, float x0, float y0, float z0
         for (x = 0; x < width; x++) {
           f = MRIFvox(mri_distance, x, y, z);
           dist = (double)f;
-          if (dist > MIN_DIST) continue;
+          if (dist > MIN_DIST)
+            continue;
 
-          if (x == 23 && y == 9 && z == 24) DiagBreak();
+          if (x == 23 && y == 9 && z == 24)
+            DiagBreak();
           xp1 = mri_src->xi[x + 1];
           xm1 = mri_src->xi[x - 1];
           dist_xp1 = MRIFvox(mri_distance, xp1, y, z);
@@ -212,10 +226,12 @@ MRI *MRIregionGrow(MRI *mri_src, MRI *mri_distance, float x0, float y0, float z0
           if (DZERO(denom))
             km = 0.0;
           else
-            km = ((dyy + dzz) * SQR(dx) + (dxx + dzz) * SQR(dy) + (dxx + dyy) * SQR(dz) -
+            km = ((dyy + dzz) * SQR(dx) + (dxx + dzz) * SQR(dy) +
+                  (dxx + dyy) * SQR(dz) -
                   2.0 * (dx * dy * dxy + dx * dz * dxz + dy * dz * dyz)) /
                  denom;
-          if (!isfinite(km)) km = 0.0;
+          if (!isfinite(km))
+            km = 0.0;
 
           /* speed function F based on normal and curvature */
           F = 1.0 - km * e_curv;
@@ -294,7 +310,7 @@ MRI *MRIregionGrow(MRI *mri_src, MRI *mri_distance, float x0, float y0, float z0
     sprintf(fname, "dist%d.mnc", t / write_iter);
     MRIwrite(mri_distance, fname);
     sprintf(fname, "front%d.mnc", t / write_iter);
-    mri_interior = MRIextractInterior(mri_src, mri_distance, NULL);
+    mri_interior = MRIextractInterior(mri_src, mri_distance, nullptr);
     MRIwrite(mri_interior, fname);
     MRIfree(&mri_interior);
   }
@@ -306,8 +322,8 @@ MRI *MRIregionGrow(MRI *mri_src, MRI *mri_distance, float x0, float y0, float z0
 
            Description:
 ----------------------------------------------------------------------*/
-MRI *MRIbuildDistanceMap(MRI *mri_src, MRI *mri_distance, float x0, float y0, float z0, float r)
-{
+MRI *MRIbuildDistanceMap(MRI *mri_src, MRI *mri_distance, float x0, float y0,
+                         float z0, float r) {
   int width, height, depth, x, y, z;
   float dist, xdist, ydist, zdist, norm;
 
@@ -342,8 +358,7 @@ MRI *MRIbuildDistanceMap(MRI *mri_src, MRI *mri_distance, float x0, float y0, fl
 
            Description:
 ----------------------------------------------------------------------*/
-MRI *MRIextractInterior(MRI *mri_src, MRI *mri_distance, MRI *mri_dst)
-{
+MRI *MRIextractInterior(MRI *mri_src, MRI *mri_distance, MRI *mri_dst) {
   int width, height, depth, x, y, z;
   float *pdist, dist;
   BUFTYPE *pdst, *psrc;
@@ -351,7 +366,8 @@ MRI *MRIextractInterior(MRI *mri_src, MRI *mri_distance, MRI *mri_dst)
   width = mri_src->width;
   height = mri_src->height;
   depth = mri_src->depth;
-  if (!mri_dst) mri_dst = MRIclone(mri_src, NULL);
+  if (!mri_dst)
+    mri_dst = MRIclone(mri_src, nullptr);
 
   for (z = 0; z < depth; z++) {
     for (y = 0; y < height; y++) {
@@ -376,8 +392,7 @@ MRI *MRIextractInterior(MRI *mri_src, MRI *mri_distance, MRI *mri_dst)
 
            Description:
 ----------------------------------------------------------------------*/
-MRI *MRIupdateDistanceMap(MRI *mri_distance)
-{
+MRI *MRIupdateDistanceMap(MRI *mri_distance) {
   int width, height, depth, x, y, z, xk, yk, zk, x0, y0, z0, xmin, ymin, zmin;
   float dist, min_dist, xdist, ydist, zdist;
 
@@ -409,11 +424,13 @@ MRI *MRIupdateDistanceMap(MRI *mri_distance)
             }
           }
           if (min_dist <= MIN_DIST) {
-            if (!x0 && !y0 && !z0) DiagBreak();
+            if (!x0 && !y0 && !z0)
+              DiagBreak();
             xdist = x0 - xmin;
             ydist = y0 - ymin;
             zdist = z0 - zmin;
-            dist = min_dist + sqrt(xdist * xdist + ydist * ydist + zdist * zdist);
+            dist =
+                min_dist + sqrt(xdist * xdist + ydist * ydist + zdist * zdist);
             MRIFvox(mri_distance, x0, y0, z0) = dist;
           }
         }

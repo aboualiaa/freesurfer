@@ -26,24 +26,23 @@
 /*-----------------------------------------------------
                     INCLUDE FILES
 -------------------------------------------------------*/
-#include <math.h>
+#include <cmath>
 #include <memory.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #include "box.h"
 #include "error.h"
 #include "macros.h"
 #include "proto.h"
 
-int BoxPrint(BOX *box, FILE *fp)
-{
-  fprintf(fp, "BOX: x: %d --> %d, y: %d --> %d, z: %d --> %d\n", box->x0, box->x1, box->y0, box->y1, box->z0, box->z1);
+int BoxPrint(BOX *box, FILE *fp) {
+  fprintf(fp, "BOX: x: %d --> %d, y: %d --> %d, z: %d --> %d\n", box->x0,
+          box->x1, box->y0, box->y1, box->z0, box->z1);
   return (NO_ERROR);
 }
-int BoxExpand(BOX *box_src, BOX *box_dst, int dx, int dy, int dz)
-{
+int BoxExpand(BOX *box_src, BOX *box_dst, int dx, int dy, int dz) {
   box_dst->x0 = MAX(box_src->x0 - dx, 0);
   box_dst->y0 = MAX(box_src->y0 - dy, 0);
   box_dst->z0 = MAX(box_src->z0 - dz, 0);

@@ -2,7 +2,7 @@
  * @file  version.h
  * @brief freesurfer version functions defined here
  *
- * Looks for the --version, -version, --all-info, or -all-info tag in the 
+ * Looks for the --version, -version, --all-info, or -all-info tag in the
  * argv and if found, prints out version information, namely this:
  * ProgramVersion, TimeStamp, CVS, User, Machine, Platform, PlatformVersion
  * CompilerName, and CompilerVersion.
@@ -26,9 +26,14 @@
  *
  */
 
-
 #ifndef VERSION_H
 #define VERSION_H
+
+#include <string>
+#include <cctype>
+#include <gsl/multi_span>
+
+using int64 = int64_t;
 
 /* This function looks for the --version, or -version tag in the
    argv and if found, prints out version information. This can be used
@@ -65,11 +70,17 @@
 
 */
 
-int handle_version_option(int argc, char** argv, const char* id_string, const char* version_string);
-int make_cmd_version_string(int argc, char** argv,  const char* id_string, const char* version_string, char *return_string);
+int handle_version_option(int argc, char **argv, const char *id_string,
+                          const char *version_string);
+int handle_version_option(bool all_info, gsl::multi_span<char *>,
+                          const std::string id_string,
+                          const std::string version_string);
+int make_cmd_version_string(int argc, char **argv, const char *id_string,
+                            const char *version_string, char *return_string);
 char *argv2cmdline(int argc, char *argv[]);
-char *VERuser(void);
+std::string argv2cmdline(gsl::multi_span<char *>, bool progname = true);
+char *VERuser();
 char *VERfileTimeStamp(char *fname);
-char *VERcurTimeStamp(void);
+char *VERcurTimeStamp();
 
 #endif

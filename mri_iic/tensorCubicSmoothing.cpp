@@ -27,27 +27,24 @@
 
 #include "tensorCubicSmoothing.h"
 
-//using namespace ctl;
+// using namespace ctl;
 
-TensorCubicSmoothing::TensorCubicSmoothing()
-{
-  //Nothing Needed
+TensorCubicSmoothing::TensorCubicSmoothing() {
+  // Nothing Needed
 }
-TensorCubicSmoothing::~TensorCubicSmoothing()
-{
-  //Nothing Needed
+TensorCubicSmoothing::~TensorCubicSmoothing() {
+  // Nothing Needed
 }
 
-//Copy Constructor
-TensorCubicSmoothing::TensorCubicSmoothing(const TensorCubicSmoothing& other)
-{
+// Copy Constructor
+TensorCubicSmoothing::TensorCubicSmoothing(const TensorCubicSmoothing &other) {
   AtWA = other.AtWA;
   AtWr = other.AtWr;
   coefficients = other.coefficients;
 }
 // Assignment Overload
-TensorCubicSmoothing& TensorCubicSmoothing::operator=(const TensorCubicSmoothing& other)
-{
+TensorCubicSmoothing &
+TensorCubicSmoothing::operator=(const TensorCubicSmoothing &other) {
   AtWA = other.AtWA;
   AtWr = other.AtWr;
   coefficients = other.coefficients;
@@ -60,8 +57,7 @@ int TensorCubicSmoothing::constructAtWA(const vnl_matrix<float> &B2x,
                                         const vnl_matrix<float> &B2y,
                                         const vnl_matrix<float> &B2z,
                                         const Matrix3d &W,
-                                        const vnl_vector<int> &indexMap)
-{
+                                        const vnl_vector<int> &indexMap) {
   int X = B2x.cols();
   int Y = B2y.cols();
   int Z = B2z.cols();
@@ -69,21 +65,19 @@ int TensorCubicSmoothing::constructAtWA(const vnl_matrix<float> &B2x,
   Matrix3d temp = doBasisMultiplications(W, B2x, B2y, B2z);
   AtWA.set_size(size, size);
 
-  //move to temporary 1 dimensional form
+  // move to temporary 1 dimensional form
   vnl_vector<float> intermediate(size * size);
   int count = 0;
-  for(int i = 0; i < Z; i++)
-    for(int j = 0; j < Y; j++)
-      for(int k = 0; k < X; k++)
-      {
+  for (int i = 0; i < Z; i++)
+    for (int j = 0; j < Y; j++)
+      for (int k = 0; k < X; k++) {
         intermediate(count++) = temp.getVal(j, k, i);
       }
 
-  //put in 2d array using index map
+  // put in 2d array using index map
   count = 0;
-  for(int i = 0; i < size; i++)
-    for(int j = 0; j < size; j++)
-    {
+  for (int i = 0; i < size; i++)
+    for (int j = 0; j < size; j++) {
       AtWA(j, i) = intermediate(indexMap(count++));
     }
 
@@ -95,9 +89,7 @@ int TensorCubicSmoothing::constructAtWA(const vnl_matrix<float> &B2x,
 int TensorCubicSmoothing::constructAtWr(const vnl_matrix<float> &Bx,
                                         const vnl_matrix<float> &By,
                                         const vnl_matrix<float> &Bz,
-                                        const Matrix3d          &W,
-                                        const Matrix3d          &r)
-{
+                                        const Matrix3d &W, const Matrix3d &r) {
 
   int X = Bx.cols();
   int Y = By.cols();
@@ -105,10 +97,9 @@ int TensorCubicSmoothing::constructAtWr(const vnl_matrix<float> &Bx,
   Matrix3d Wr = W;
 
   // multiply each element of W by corresponding in r
-  for(int i = 0; i < Z; i++)
-    for(int j = 0; j < Y; j++)
-      for(int k = 0; k < X; k++)
-      {
+  for (int i = 0; i < Z; i++)
+    for (int j = 0; j < Y; j++)
+      for (int k = 0; k < X; k++) {
         Wr.setVal(j, k, i, Wr.getVal(j, k, i) * r.getVal(j, k, i));
       }
 
@@ -116,54 +107,46 @@ int TensorCubicSmoothing::constructAtWr(const vnl_matrix<float> &Bx,
 
   AtWr.set_size(X * Y * Z);
   int count = 0;
-  for(int i = 0; i < Z; i++)
-    for(int j = 0; j < Y; j++)
-      for(int k = 0; k < X; k++)
-      {
+  for (int i = 0; i < Z; i++)
+    for (int j = 0; j < Y; j++)
+      for (int k = 0; k < X; k++) {
         AtWr(count++) = temp.getVal(j, k, i);
       }
 
-
-  //map into 1d vector
+  // map into 1d vector
   return 0;
 }
 
-// solves the non-linear system by means of least squares given regularization parameters
+// solves the non-linear system by means of least squares given regularization
+// parameters
 // TODO is P 3 or 2 dimensions?
-int TensorCubicSmoothing::solve(const Matrix3d &P, float lambda)
-{
-  //STUB
+int TensorCubicSmoothing::solve(const Matrix3d &P, float lambda) {
+  // STUB
   return 0;
 }
 // solves the non-linear system by means of least squares without regularization
-int TensorCubicSmoothing::solve()
-{
-  //STUB
+int TensorCubicSmoothing::solve() {
+  // STUB
   return 0;
 }
 
 // returns the solved coefficients
-void TensorCubicSmoothing::getCoefficients(vnl_vector<float> &c) const
-{
+void TensorCubicSmoothing::getCoefficients(vnl_vector<float> &c) const {
   c = coefficients;
 }
 // returns the smoothed data
-void TensorCubicSmoothing::expandCoefficients(Matrix3d &d,
-    const vnl_matrix<float> &Bx,
-    const vnl_matrix<float> &By,
-    const vnl_matrix<float> &Bz) const
-{
-  //STUB
+void TensorCubicSmoothing::expandCoefficients(
+    Matrix3d &d, const vnl_matrix<float> &Bx, const vnl_matrix<float> &By,
+    const vnl_matrix<float> &Bz) const {
+  // STUB
 }
 
 // multiplies the 3d data matrix by basis functions in each direction
-Matrix3d TensorCubicSmoothing::doBasisMultiplications(const Matrix3d &data,
-    const vnl_matrix<float> &Bx,
-    const vnl_matrix<float> &By,
-    const vnl_matrix<float> &Bz)
-{
+Matrix3d TensorCubicSmoothing::doBasisMultiplications(
+    const Matrix3d &data, const vnl_matrix<float> &Bx,
+    const vnl_matrix<float> &By, const vnl_matrix<float> &Bz) {
   int rows = data.getHeight();
-  //int cols = data.getWidth();
+  // int cols = data.getWidth();
   int slices = data.getDepth();
   int numBx = Bx.columns();
   int numBy = By.columns();
@@ -173,10 +156,10 @@ Matrix3d TensorCubicSmoothing::doBasisMultiplications(const Matrix3d &data,
 
   // multiplies each slice by By and places it in a temporary array shaped
   // such that it can be multiplied by Bxt
-  std::cerr << "data columns: " << (data.getSlice(0)).columns() << "\nBy rows: " << By.rows() << '\n';
-  for(int i = 0; i < slices; i++)
-  {
-    std::cerr << i <<"th slice being attempted\n";
+  std::cerr << "data columns: " << (data.getSlice(0)).columns()
+            << "\nBy rows: " << By.rows() << '\n';
+  for (int i = 0; i < slices; i++) {
+    std::cerr << i << "th slice being attempted\n";
     temp1.set_columns(i * numBy, data.getSlice(i) * By);
     std::cerr << "slice complete\n";
   }
@@ -189,27 +172,23 @@ Matrix3d TensorCubicSmoothing::doBasisMultiplications(const Matrix3d &data,
   temp1.set_size(numBx * numBy, slices);
   // reshape matrix for multiplication in z direction, this takes more effort
   // on our part because the data is not adjacent in our data structure
-  for(int i = 0; i < slices; i++)
-  {
+  for (int i = 0; i < slices; i++) {
     int count = 0;
-    for(int j = 0; j < numBy; j++)
-      for(int k = 0; k < numBx; k++)
-      {
+    for (int j = 0; j < numBy; j++)
+      for (int k = 0; k < numBx; k++) {
         temp1(count++, i) = temp2(k, j + i * numBy);
       }
   }
-// multiply by Bz
+  // multiply by Bz
   temp2 = temp1 * Bz;
 
   Matrix3d result(numBy, numBx, numBz);
 
   // reshape back into a 3 dimensional array
-  for(int i = 0; i < numBz; i++)
-  {
+  for (int i = 0; i < numBz; i++) {
     int count = 0;
-    for(int j = 0; j < numBx; j++)
-      for(int k = 0; k < numBy; k++)
-      {
+    for (int j = 0; j < numBx; j++)
+      for (int k = 0; k < numBy; k++) {
         result.setVal(k, j, i, temp2(count++, i));
       }
   }

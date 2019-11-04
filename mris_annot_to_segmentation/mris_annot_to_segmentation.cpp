@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:26 $
@@ -23,11 +23,10 @@
  *
  */
 
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+#include <cctype>
 
 #include "mri.h"
 #include "macros.h"
@@ -40,101 +39,100 @@
 #include "label.h"
 #include "version.h"
 
-int main(int argc, char *argv[]) ;
-static int get_option(int argc, char *argv[]) ;
-static void print_usage(void) ;
+int main(int argc, char *argv[]);
+static int get_option(int argc, char *argv[]);
+static void print_usage();
 
-const char *Progname ;
+const char *Progname;
 
+#define NAME_LEN 100
 
-#define NAME_LEN      100
+static char subjects_dir[NAME_LEN] = "";
 
-static char subjects_dir[NAME_LEN] = "" ;
-
-int
-main(int argc, char *argv[]) {
-  int          ac, nargs ;
-  char         *cp, *subject_name, *hemi, *surface, *annot_file, *color_file, *output_file;
-  MRI_SURFACE  *mris ;
-  MRI          *mri ;
-  int          err;
-  COLOR_TABLE* ctab;
+int main(int argc, char *argv[]) {
+  int ac, nargs;
+  char *cp, *subject_name, *hemi, *surface, *annot_file, *color_file,
+      *output_file;
+  MRI_SURFACE *mris;
+  MRI *mri;
+  int err;
+  COLOR_TABLE *ctab;
   char surf_name[NAME_LEN];
   char mri_name[NAME_LEN];
   int vno;
-  VERTEX* v;
+  VERTEX *v;
   int structure;
   float dx, dy, dz, len, d;
   double idxx, idxy, idxz;
 
-
   /* rkt: check for and handle version tag */
-  nargs = handle_version_option (argc, argv, "$Id: mris_annot_to_segmentation.c,v 1.8 2011/03/02 00:04:26 nicks Exp $", "$Name:  $");
+  nargs = handle_version_option(
+      argc, argv,
+      "$Id: mris_annot_to_segmentation.c,v 1.8 2011/03/02 00:04:26 nicks Exp $",
+      "$Name:  $");
   if (nargs && argc - nargs == 1)
-    exit (0);
+    exit(0);
   argc -= nargs;
 
-  Progname = argv[0] ;
-  ErrorInit(NULL, NULL, NULL) ;
-  DiagInit(NULL, NULL, NULL) ;
+  Progname = argv[0];
+  ErrorInit(NULL, NULL, NULL);
+  DiagInit(nullptr, nullptr, nullptr);
 
   /* read in command-line options */
-  ac = argc ;
-  for ( ; argc > 1 && ISOPTION(*argv[1]) ; argc--, argv++) {
-    nargs = get_option(argc, argv) ;
-    argc -= nargs ;
-    argv += nargs ;
+  ac = argc;
+  for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
+    nargs = get_option(argc, argv);
+    argc -= nargs;
+    argv += nargs;
   }
 
   if (argc < 7)
-    print_usage() ;
+    print_usage();
 
   subject_name = argv[1];
-  hemi         = argv[2];
-  surface      = argv[3];
-  annot_file   = argv[4];
-  color_file   = argv[5];
-  output_file  = argv[6];
+  hemi = argv[2];
+  surface = argv[3];
+  annot_file = argv[4];
+  color_file = argv[5];
+  output_file = argv[6];
 
   /* Read the surface first. */
-  cp = getenv ("SUBJECTS_DIR") ;
+  cp = getenv("SUBJECTS_DIR");
   if (!cp)
-    ErrorExit(ERROR_BADPARM, "no subjects directory in environment.\n") ;
-  strcpy (subjects_dir, cp) ;
-  sprintf(surf_name,"%s/%s/surf/%s.%s",subjects_dir,subject_name,hemi,surface);
-  fprintf (stderr, "reading %s...\n", surf_name) ;
-  mris = MRISread (surf_name) ;
+    ErrorExit(ERROR_BADPARM, "no subjects directory in environment.\n");
+  strcpy(subjects_dir, cp);
+  sprintf(surf_name, "%s/%s/surf/%s.%s", subjects_dir, subject_name, hemi,
+          surface);
+  fprintf(stderr, "reading %s...\n", surf_name);
+  mris = MRISread(surf_name);
   if (!mris)
-    ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s\n",
-              surf_name) ;
+    ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s\n", surf_name);
 
-  MRISsaveVertexPositions (mris, TMP_VERTICES);
-  err = MRISreadVertexPositions (mris, "pial");
+  MRISsaveVertexPositions(mris, TMP_VERTICES);
+  err = MRISreadVertexPositions(mris, "pial");
   if (err != NO_ERROR)
     ErrorExit(ERROR_NOFILE, "%s: could not read pial surface\n");
-  MRISsaveVertexPositions (mris, CANONICAL_VERTICES);
-  MRISrestoreVertexPositions (mris, TMP_VERTICES);
+  MRISsaveVertexPositions(mris, CANONICAL_VERTICES);
+  MRISrestoreVertexPositions(mris, TMP_VERTICES);
 
   /* Read the annotation file into the surface. */
-  err = MRISreadAnnotation (mris, annot_file);
+  err = MRISreadAnnotation(mris, annot_file);
   if (err != NO_ERROR)
-    ErrorExit(ERROR_NOFILE, "%s: could not read annotation %s\n",
-              annot_file);
+    ErrorExit(ERROR_NOFILE, "%s: could not read annotation %s\n", annot_file);
 
   /* Read the color look up table. */
-  ctab = CTABreadASCII ( color_file );
-  if (NULL == ctab)
-    ErrorExit(ERROR_NOFILE, "%s: could not read color table %s\n",
-              color_file);
+  ctab = CTABreadASCII(color_file);
+  if (nullptr == ctab)
+    ErrorExit(ERROR_NOFILE, "%s: could not read color table %s\n", color_file);
 
   /* Read in the T1 for this subject and change its name to the one
      they passed in. Set all values to 0. We'll use this as the
      segmentation volume. */
-  sprintf (mri_name,"%s/%s/mri/T1",subjects_dir,subject_name);
-  mri = MRIread (mri_name);
+  sprintf(mri_name, "%s/%s/mri/T1", subjects_dir, subject_name);
+  mri = MRIread(mri_name);
   if (!mri)
     ErrorExit(ERROR_NOFILE, "%s: could not read T1 for template volume");
-  MRIsetValues (mri, 0);
+  MRIsetValues(mri, 0);
 
   /* For every annoted vertex... */
   for (vno = 0; vno < mris->nvertices; vno++) {
@@ -142,12 +140,12 @@ main(int argc, char *argv[]) {
     v = &mris->vertices[vno];
 
     /* Get the color and then the index. */
-    if ( 0 != v->annotation ) {
+    if (0 != v->annotation) {
       structure = 0;
       if (mris->ct) {
-        CTABfindAnnotation (mris->ct, v->annotation, &structure);
+        CTABfindAnnotation(mris->ct, v->annotation, &structure);
       } else {
-        CTABfindAnnotation (ctab, v->annotation, &structure);
+        CTABfindAnnotation(ctab, v->annotation, &structure);
       }
 
       if (0 != structure) {
@@ -163,48 +161,40 @@ main(int argc, char *argv[]) {
         dy = v->cy - v->y;
         dz = v->cz - v->z;
 
-        len = sqrt(dx*dx + dy*dy + dz*dz) ;
+        len = sqrt(dx * dx + dy * dy + dz * dz);
         if (FZERO(len))
-          len = 1.0 ;
+          len = 1.0;
         dx /= len;
         dy /= len;
         dz /= len;
 
-        for ( d = 0 ; d <= len; d = d+0.1 ) {
+        for (d = 0; d <= len; d = d + 0.1) {
           if (mris->useRealRAS) {
-            MRIworldToVoxel (mri,
-                             v->x + (d * dx),
-                             v->y + (d * dy),
-                             v->z + (d * dz),
-                             &idxx, &idxy, &idxz);
+            MRIworldToVoxel(mri, v->x + (d * dx), v->y + (d * dy),
+                            v->z + (d * dz), &idxx, &idxy, &idxz);
           } else {
-            MRIsurfaceRASToVoxel (mri,
-                                  v->x + (d * dx),
-                                  v->y + (d * dy),
-                                  v->z + (d * dz),
-                                  &idxx, &idxy, &idxz);
+            MRIsurfaceRASToVoxel(mri, v->x + (d * dx), v->y + (d * dy),
+                                 v->z + (d * dz), &idxx, &idxy, &idxz);
           }
-          MRIvox(mri,(int)idxx,(int)idxy,(int)idxz) = (BUFTYPE)structure;
+          MRIvox(mri, (int)idxx, (int)idxy, (int)idxz) = (BUFTYPE)structure;
         }
-
       }
     }
 
-    if ( !(vno % 1000) ) {
-      fprintf( stdout, "\rConverting annotation... %.2f%% done",
-               ((float)vno / (float)mris->nvertices) * 100.0 );
-      fflush( stdout );
+    if (!(vno % 1000)) {
+      fprintf(stdout, "\rConverting annotation... %.2f%% done",
+              ((float)vno / (float)mris->nvertices) * 100.0);
+      fflush(stdout);
     }
   }
 
-  fprintf( stdout, "\rConverting annotation... 100%% done       \n" );
-
+  fprintf(stdout, "\rConverting annotation... 100%% done       \n");
 
   /* Write the segmentation */
-  MRIwrite (mri, output_file);
+  MRIwrite(mri, output_file);
 
-  exit(0) ;
-  return(0) ;
+  exit(0);
+  return (0);
 }
 
 /*----------------------------------------------------------------------
@@ -212,28 +202,28 @@ main(int argc, char *argv[]) {
 
            Description:
 ----------------------------------------------------------------------*/
-static int
-get_option(int argc, char *argv[]) {
-  int  nargs = 0 ;
-  char *option ;
+static int get_option(int argc, char *argv[]) {
+  int nargs = 0;
+  char *option;
 
-  option = argv[1] + 1 ;            /* past '-' */
+  option = argv[1] + 1; /* past '-' */
   switch (toupper(*option)) {
   case '?':
   case 'U':
-    print_usage() ;
-    exit(1) ;
-    break ;
+    print_usage();
+    exit(1);
+    break;
   default:
-    fprintf(stderr, "unknown option %s\n", argv[1]) ;
-    exit(1) ;
-    break ;
+    fprintf(stderr, "unknown option %s\n", argv[1]);
+    exit(1);
+    break;
   }
 
-  return(nargs) ;
+  return (nargs);
 }
-static void
-print_usage(void) {
-  printf("usage: %s <subject name> <hemi> <surface> <annot file> <color table> <output volume>\n", Progname);
-  exit(1) ;
+static void print_usage() {
+  printf("usage: %s <subject name> <hemi> <surface> <annot file> <color table> "
+         "<output volume>\n",
+         Progname);
+  exit(1);
 }

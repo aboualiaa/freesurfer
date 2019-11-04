@@ -34,15 +34,14 @@ class QVTKWidget;
 class QVTKPaintEngineInternal;
 
 //!  A paint engine class to direct QPainter calls into a VTK window
-class QVTKPaintEngine : public QPaintEngine
-{
+class QVTKPaintEngine : public QPaintEngine {
 public:
   QVTKPaintEngine();
   ~QVTKPaintEngine();
 
   // Description:
   // begin painting on device (QVTKWidget)
-  bool begin(QPaintDevice* dev);
+  bool begin(QPaintDevice *dev);
 
   // Description:
   // end painting on device
@@ -54,21 +53,19 @@ public:
 
   // Description:
   // updateState
-  void updateState(const QPaintEngineState&);
+  void updateState(const QPaintEngineState &);
 
   // Description:
   // draw a pixmap
-  void drawPixmap(const QRectF& r, const QPixmap& pm, const QRectF& sr);
+  void drawPixmap(const QRectF &r, const QPixmap &pm, const QRectF &sr);
 
   // Description:
   // draw a path
-  void drawPath(const QPainterPath& path);
+  void drawPath(const QPainterPath &path);
 
 protected:
-
-  QVTKWidget* Widget;
-  QVTKPaintEngineInternal* Internal;
+  QVTKWidget *Widget;
+  QVTKPaintEngineInternal *Internal;
 };
 
 #endif
-

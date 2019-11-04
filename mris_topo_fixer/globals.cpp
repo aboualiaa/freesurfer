@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:56 $
@@ -23,7 +23,6 @@
  *
  */
 
-
 #include "globals.h"
 
 #include <iostream>
@@ -36,9 +35,9 @@ using namespace std;
 #include "proto.h"
 #endif
 
-
 void check(bool exp) {
-  if (exp==false) cout << "e";
+  if (exp == false)
+    cout << "e";
 }
 
 void ErrorExit(string s) {
@@ -48,6 +47,5 @@ void ErrorExit(string s) {
 
 int Random(int nmax) {
   //  return rand()*nmax/RAND_MAX;
-  return nint(randomNumber(0.0, (double)nmax-1));
+  return nint(randomNumber(0.0, (double)nmax - 1));
 }
-

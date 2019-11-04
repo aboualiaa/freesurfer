@@ -32,16 +32,11 @@
 #include <QList>
 #include <QVariantMap>
 
-
-
 #include "label.h"
-
-
 
 class FSVolume;
 
-struct ControlPoint
-{
+struct ControlPoint {
   double pt[3];
   double value;
   QVariantMap info; // enhanced fields
@@ -49,46 +44,37 @@ struct ControlPoint
 
 typedef QList<ControlPoint> PointSet;
 
-class FSPointSet : public QObject
-{
+class FSPointSet : public QObject {
 public:
-  FSPointSet( QObject* parent = NULL );
+  FSPointSet(QObject *parent = NULL);
   virtual ~FSPointSet();
 
-  bool ReadAsLabel( const QString& filename );
-  bool ReadAsControlPoints( const QString& filename );
-  bool WriteAsLabel( const QString& filename );
-  bool WriteAsControlPoints(const QString& filename);
+  bool ReadAsLabel(const QString &filename);
+  bool ReadAsControlPoints(const QString &filename);
+  bool WriteAsLabel(const QString &filename);
+  bool WriteAsControlPoints(const QString &filename);
 
-  static bool IsLabelFormat( const QString& filename );
+  static bool IsLabelFormat(const QString &filename);
 
-  void UpdateLabel( PointSet& points_in, FSVolume* vol_ref );
-  void LabelToPointSet( PointSet& points_out, FSVolume* vol_ref );
+  void UpdateLabel(PointSet &points_in, FSVolume *vol_ref);
+  void LabelToPointSet(PointSet &points_out, FSVolume *vol_ref);
 
-  bool ReadFromStringAsControlPoints(const QString& content);
+  bool ReadFromStringAsControlPoints(const QString &content);
   QString WriteAsControlPointsToString();
 
-  bool GetCentroidRASPosition(double* pos, FSVolume* ref_vol);
+  bool GetCentroidRASPosition(double *pos, FSVolume *ref_vol);
 
-  double GetMinStat()
-  {
-    return m_dStatMin;
-  }
+  double GetMinStat() { return m_dStatMin; }
 
-  double GetMaxStat()
-  {
-    return m_dStatMax;
-  }
+  double GetMaxStat() { return m_dStatMax; }
 
 protected:
   void UpdateStatRange();
 
   // use label to save way points
-  LABEL*   m_label;
-  double   m_dStatMin;
-  double   m_dStatMax;
+  LABEL *m_label;
+  double m_dStatMin;
+  double m_dStatMax;
 };
 
 #endif
-
-

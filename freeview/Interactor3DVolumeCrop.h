@@ -28,28 +28,25 @@
 
 #include "Interactor3D.h"
 
-class Interactor3DVolumeCrop : public Interactor3D
-{
+class Interactor3DVolumeCrop : public Interactor3D {
 public:
-  Interactor3DVolumeCrop(QObject* parent);
+  Interactor3DVolumeCrop(QObject *parent);
   ~Interactor3DVolumeCrop();
 
   // return true if to have parent Interactor3D continue processing the event
   // return false to stop event from further processing
-  virtual bool ProcessMouseDownEvent( QMouseEvent* event, RenderView* view );
-  virtual bool ProcessMouseUpEvent  ( QMouseEvent* event, RenderView* view );
-  virtual bool ProcessMouseMoveEvent( QMouseEvent* event, RenderView* view );
-  virtual bool ProcessKeyDownEvent  ( QKeyEvent* event, RenderView* view );
+  virtual bool ProcessMouseDownEvent(QMouseEvent *event, RenderView *view);
+  virtual bool ProcessMouseUpEvent(QMouseEvent *event, RenderView *view);
+  virtual bool ProcessMouseMoveEvent(QMouseEvent *event, RenderView *view);
+  virtual bool ProcessKeyDownEvent(QKeyEvent *event, RenderView *view);
 
 protected:
-  virtual void UpdateCursor( QEvent* event, QWidget* wnd );
+  virtual void UpdateCursor(QEvent *event, QWidget *wnd);
 
-  int  m_nMousePosX;
-  int  m_nMousePosY;
+  int m_nMousePosX;
+  int m_nMousePosY;
 
   bool m_bCropping;
 };
 
 #endif
-
-

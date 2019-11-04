@@ -24,18 +24,12 @@
 #include "DialogAbout.h"
 #include "ui_DialogAbout.h"
 
-
-DialogAbout::DialogAbout(QWidget *parent) :
-  QDialog(parent),
-  ui(new Ui::DialogAbout)
-{
+DialogAbout::DialogAbout(QWidget *parent)
+    : QDialog(parent), ui(new Ui::DialogAbout) {
   ui->setupUi(this);
   QString strg = ui->labelVersion->text();
   strg.replace("xxx", QString("%1 %2").arg(__DATE__).arg(__TIME__));
   ui->labelVersion->setText(strg);
 }
 
-DialogAbout::~DialogAbout()
-{
-  delete ui;
-}
+DialogAbout::~DialogAbout() { delete ui; }

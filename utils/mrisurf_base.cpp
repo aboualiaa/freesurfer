@@ -19,9 +19,7 @@
  */
 #include "mrisurf_base.h"
 
-
-int mris_sort_compare_float(const void *pc1, const void *pc2)
-{
+int mris_sort_compare_float(const void *pc1, const void *pc2) {
   float c1, c2;
 
   c1 = *(float *)pc1;
@@ -30,618 +28,622 @@ int mris_sort_compare_float(const void *pc1, const void *pc2)
   /*  return(c1 > c2 ? 1 : c1 == c2 ? 0 : -1) ;*/
   if (c1 > c2) {
     return (1);
-  }
-  else if (c1 < c2) {
+  } else if (c1 < c2) {
     return (-1);
   }
 
   return (0);
 }
 
-
-const char* MRIS_Status_text(MRIS_Status s1)
-{
-    switch (s1) {
+const char *MRIS_Status_text(MRIS_Status s1) {
+  switch (s1) {
 #define SEP
-#define ELT(S,D) case S : return #S;
+#define ELT(S, D)                                                              \
+  case S:                                                                      \
+    return #S;
     MRIS_Status_ELTS
 #undef ELT
 #undef SEP
-    default: cheapAssert(false); return "<Bad MRIS_Status>";
-    }
+        default : cheapAssert(false);
+    return "<Bad MRIS_Status>";
+  }
 }
 
-
-MRIS_Status_DistanceFormula MRIS_Status_distanceFormula(MRIS_Status s1)
-{
-    switch (s1) {
+MRIS_Status_DistanceFormula MRIS_Status_distanceFormula(MRIS_Status s1) {
+  switch (s1) {
 #define SEP
-#define ELT(S,D) case S : return MRIS_Status_DistanceFormula_##D;
+#define ELT(S, D)                                                              \
+  case S:                                                                      \
+    return MRIS_Status_DistanceFormula_##D;
     MRIS_Status_ELTS
 #undef ELT
 #undef SEP
-    default: cheapAssert(false); return MRIS_Status_DistanceFormula_0;
-    }
+        default : cheapAssert(false);
+    return MRIS_Status_DistanceFormula_0;
+  }
 }
 
-
-bool areCompatible(MRIS_Status s1, MRIS_Status s2)
-{
+bool areCompatible(MRIS_Status s1, MRIS_Status s2) {
   return MRIS_Status_distanceFormula(s1) == MRIS_Status_distanceFormula(s2);
 }
 
-
-void checkOrigXYZCompatibleWkr(MRIS_Status s1, MRIS_Status s2, const char* file, int line) {
-  if (areCompatible(s1,s2)) return;
-  fprintf(stderr, "%s:%d using incompatible %s %s\n", file, line, 
-    MRIS_Status_text(s1), MRIS_Status_text(s2));
+void checkOrigXYZCompatibleWkr(MRIS_Status s1, MRIS_Status s2, const char *file,
+                               int line) {
+  if (areCompatible(s1, s2))
+    return;
+  fprintf(stderr, "%s:%d using incompatible %s %s\n", file, line,
+          MRIS_Status_text(s1), MRIS_Status_text(s2));
 }
 
-
-int  MRIS_acquireTemp(MRIS* mris, MRIS_TempAssigned temp) {
+int MRIS_acquireTemp(MRIS *mris, MRIS_TempAssigned temp) {
   int const bits = 1 << temp;
-  int const * tc = &mris->tempsAssigned;
+  int const *tc = &mris->tempsAssigned;
   cheapAssert(!(bits & *tc));
-  int* tv = (int*)tc;
+  int *tv = (int *)tc;
   *tv |= bits;
-  return 123;   // hack
+  return 123; // hack
 }
 
-void MRIS_checkAcquiredTemp(MRIS* mris, MRIS_TempAssigned temp, int MRIS_acquireTemp_result) {
+void MRIS_checkAcquiredTemp(MRIS *mris, MRIS_TempAssigned temp,
+                            int MRIS_acquireTemp_result) {
   int const bits = 1 << temp;
-  int const * tc = &mris->tempsAssigned;
+  int const *tc = &mris->tempsAssigned;
   cheapAssert((bits & *tc));
 }
 
-
-void MRIS_releaseTemp(MRIS* mris, MRIS_TempAssigned temp, int MRIS_acquireTemp_result) {
+void MRIS_releaseTemp(MRIS *mris, MRIS_TempAssigned temp,
+                      int MRIS_acquireTemp_result) {
   int const bits = 1 << temp;
-  int const * tc = &mris->tempsAssigned;
+  int const *tc = &mris->tempsAssigned;
   cheapAssert((bits & *tc));
-  int* tv = (int*)tc;
+  int *tv = (int *)tc;
   *tv &= ~bits;
 }
 
-
 // Create temps, and don't let the nvertices change until it is freed
 //
-float* MRISmakeFloatPerVertex(MRIS *mris) {
+float *MRISmakeFloatPerVertex(MRIS *mris) {
   MRISacquireNverticesFrozen(mris);
-  float* p = (float*)malloc(mris->nvertices*sizeof(float));
-  return p;  
+  float *p = (float *)malloc(mris->nvertices * sizeof(float));
+  return p;
 }
 
-void MRISfreeFloatPerVertex(MRIS *mris, float** pp) {
+void MRISfreeFloatPerVertex(MRIS *mris, float **pp) {
   freeAndNULL(*pp);
   MRISreleaseNverticesFrozen(mris);
 }
 
-
-// This is for backwards compatibility for when we don't want to fix the vertex area. 
-// Default is to fix, but this can be changed by setting to 0.
+// This is for backwards compatibility for when we don't want to fix the vertex
+// area. Default is to fix, but this can be changed by setting to 0.
 //
 int fix_vertex_area = 1;
 
-int MRISsetFixVertexAreaValue(int value)
-{
+int MRISsetFixVertexAreaValue(int value) {
   fix_vertex_area = value;
   return (fix_vertex_area);
 }
 
-int MRISgetFixVertexAreaValue(void)
-{
-  return (fix_vertex_area);
-}
+int MRISgetFixVertexAreaValue() { return (fix_vertex_area); }
 
-int MRISsetInflatedFileName(char *inflated_name)
-{
+int MRISsetInflatedFileName(char *inflated_name) {
   char fname[STRLEN];
 
   mrisurf_surface_names[0] = inflated_name;
   sprintf(fname, "%s.H", inflated_name);
-  char * copy = (char *)calloc(strlen(fname) + 1, sizeof(char));
+  char *copy = (char *)calloc(strlen(fname) + 1, sizeof(char));
   strcpy(copy, fname);
   curvature_names[0] = copy;
   return (NO_ERROR);
 }
 
-int MRISsetSulcFileName(const char *sulc_name)
-{
-  char * copy = (char *)calloc(strlen(sulc_name) + 1, sizeof(char));
+int MRISsetSulcFileName(const char *sulc_name) {
+  char *copy = (char *)calloc(strlen(sulc_name) + 1, sizeof(char));
   strcpy(copy, sulc_name);
   curvature_names[1] = copy;
   return (NO_ERROR);
 }
 
-int MRISsetOriginalFileName(char *orig_name)
-{
+int MRISsetOriginalFileName(char *orig_name) {
   mrisurf_surface_names[1] = mrisurf_surface_names[2] = orig_name;
   return (NO_ERROR);
 }
 
-
-
 double NEG_AREA_K = 10.0; /* was 200 */
-
-
 
 // An accelerator for a hot function
 //
 typedef struct ActiveRealmTree {
-    RealmTree*          realmTree;
-    MRIS const*         mris;
-    GetXYZ_FunctionType getXYZ;
+  RealmTree *realmTree;
+  MRIS const *mris;
+  GetXYZ_FunctionType getXYZ;
 } ActiveRealmTree;
 
-
-
 #ifdef HAVE_OPENMP
-static volatile bool    activeRealmTreesLockInited = false;
-static omp_lock_t       activeRealmTreesLock;
+static volatile bool activeRealmTreesLockInited = false;
+static omp_lock_t activeRealmTreesLock;
 #endif
 
 static void acquireActiveRealmTrees() {
 #ifdef HAVE_OPENMP
-    if (!activeRealmTreesLockInited) {	// avoid critical if possible
-        #pragma omp critical
-    	if (!activeRealmTreesLockInited) {
-	    omp_init_lock(&activeRealmTreesLock);
-	    activeRealmTreesLockInited = true;
-    	}
+  if (!activeRealmTreesLockInited) { // avoid critical if possible
+#pragma omp critical
+    if (!activeRealmTreesLockInited) {
+      omp_init_lock(&activeRealmTreesLock);
+      activeRealmTreesLockInited = true;
     }
-    omp_set_lock(&activeRealmTreesLock);
+  }
+  omp_set_lock(&activeRealmTreesLock);
 #endif
 }
 
 static void releaseActiveRealmTrees() {
 #ifdef HAVE_OPENMP
-    omp_unset_lock(&activeRealmTreesLock);
+  omp_unset_lock(&activeRealmTreesLock);
 #endif
 }
 
-static int              activeRealmTreesCapacity;
-static ActiveRealmTree* activeRealmTrees;
+static int activeRealmTreesCapacity;
+static ActiveRealmTree *activeRealmTrees;
 
-void insertActiveRealmTree(MRIS const * const mris, RealmTree* realmTree, GetXYZ_FunctionType getXYZ)
-{
-    acquireActiveRealmTrees();
-    if (mrisurf_activeRealmTreesSize == activeRealmTreesCapacity) {
-        activeRealmTreesCapacity++;
-        activeRealmTrees = 
-            (ActiveRealmTree*)realloc(
-                activeRealmTrees, activeRealmTreesCapacity*sizeof(ActiveRealmTree));
-    }
+void insertActiveRealmTree(MRIS const *const mris, RealmTree *realmTree,
+                           GetXYZ_FunctionType getXYZ) {
+  acquireActiveRealmTrees();
+  if (mrisurf_activeRealmTreesSize == activeRealmTreesCapacity) {
+    activeRealmTreesCapacity++;
+    activeRealmTrees = (ActiveRealmTree *)realloc(
+        activeRealmTrees, activeRealmTreesCapacity * sizeof(ActiveRealmTree));
+  }
 
-    ActiveRealmTree* art = &activeRealmTrees[mrisurf_activeRealmTreesSize++];
-    art->realmTree = realmTree;
-    art->mris      = mris;
-    art->getXYZ    = getXYZ;
-    releaseActiveRealmTrees();
+  ActiveRealmTree *art = &activeRealmTrees[mrisurf_activeRealmTreesSize++];
+  art->realmTree = realmTree;
+  art->mris = mris;
+  art->getXYZ = getXYZ;
+  releaseActiveRealmTrees();
 }
 
-void removeActiveRealmTree(RealmTree* realmTree)
-{
-    acquireActiveRealmTrees();
-    int i;
-    for (i = 0; activeRealmTrees[i].realmTree != realmTree; i++) ;
-    i++;
-    for (; i != mrisurf_activeRealmTreesSize; i++) activeRealmTrees[i-1] = activeRealmTrees[i];
-    mrisurf_activeRealmTreesSize--;
-    releaseActiveRealmTrees();
+void removeActiveRealmTree(RealmTree *realmTree) {
+  acquireActiveRealmTrees();
+  int i;
+  for (i = 0; activeRealmTrees[i].realmTree != realmTree; i++)
+    ;
+  i++;
+  for (; i != mrisurf_activeRealmTreesSize; i++)
+    activeRealmTrees[i - 1] = activeRealmTrees[i];
+  mrisurf_activeRealmTreesSize--;
+  releaseActiveRealmTrees();
 }
 
 int noteVnoMovedInActiveRealmTreesCount;
-void noteVnoMovedInActiveRealmTrees(MRIS const * const mris, int vno) {
-    acquireActiveRealmTrees();
-    int i;
-    noteVnoMovedInActiveRealmTreesCount++;
-    for (i = 0; i < mrisurf_activeRealmTreesSize; i++) {
-        if (activeRealmTrees[i].mris != mris) continue;
-        if (0)
-            fprintf(stderr,"Thread:%d updating realmTree:%p vno:%d\n", 
-                omp_get_thread_num(), activeRealmTrees[i].realmTree, vno);
-        noteIfXYZChangedRealmTree(
-            activeRealmTrees[i].realmTree, 
-            activeRealmTrees[i].mris,
-            activeRealmTrees[i].getXYZ, 
-            vno);
-    }
-    releaseActiveRealmTrees();
+void noteVnoMovedInActiveRealmTrees(MRIS const *const mris, int vno) {
+  acquireActiveRealmTrees();
+  int i;
+  noteVnoMovedInActiveRealmTreesCount++;
+  for (i = 0; i < mrisurf_activeRealmTreesSize; i++) {
+    if (activeRealmTrees[i].mris != mris)
+      continue;
+    if (false)
+      fprintf(stderr, "Thread:%d updating realmTree:%p vno:%d\n",
+              omp_get_thread_num(), activeRealmTrees[i].realmTree, vno);
+    noteIfXYZChangedRealmTree(activeRealmTrees[i].realmTree,
+                              activeRealmTrees[i].mris,
+                              activeRealmTrees[i].getXYZ, vno);
+  }
+  releaseActiveRealmTrees();
 }
 
-void notifyActiveRealmTreesChangedNFacesNVertices(MRIS const * const mris) {
-    acquireActiveRealmTrees();
-    int i;
-    for (i = 0; i < mrisurf_activeRealmTreesSize; i++) {
-        if (activeRealmTrees[i].mris != mris) continue;
-        if (0)
-            fprintf(stderr,"Thread:%d updating realmTree:%p\n", 
-                omp_get_thread_num(), activeRealmTrees[i].realmTree);
-        updateRealmTree(
-            activeRealmTrees[i].realmTree, 
-            activeRealmTrees[i].mris,
-            activeRealmTrees[i].getXYZ);
-    }
-    releaseActiveRealmTrees();
+void notifyActiveRealmTreesChangedNFacesNVertices(MRIS const *const mris) {
+  acquireActiveRealmTrees();
+  int i;
+  for (i = 0; i < mrisurf_activeRealmTreesSize; i++) {
+    if (activeRealmTrees[i].mris != mris)
+      continue;
+    if (false)
+      fprintf(stderr, "Thread:%d updating realmTree:%p\n", omp_get_thread_num(),
+              activeRealmTrees[i].realmTree);
+    updateRealmTree(activeRealmTrees[i].realmTree, activeRealmTrees[i].mris,
+                    activeRealmTrees[i].getXYZ);
+  }
+  releaseActiveRealmTrees();
 }
 
-
-// dist and dist_orig must be managed separately because 
-//      changing xyz        invalidates dist 
+// dist and dist_orig must be managed separately because
+//      changing xyz        invalidates dist
 //      changing origxyz    invalidates dist_orig
 //      changing v          invalidates both
 //
 // By keeping their storage allocation independent of the VERTEX
-// it is very fast to change VERTEX::dist and VERTEX::dist_orig between NULL and !NULL
-// so the code can make the ->dist or ->dist_orig become NULL, making the bad values immediately inaccessible
-// and then quickly having them available again when they are computed
-//     
-static void freeDistOrDistOrig(bool doOrig, VERTEX* v) {
-  if (doOrig) { *(void**)(&v->dist_orig) = NULL; v->dist_orig_capacity = 0; }
-  else        { *(void**)(&v->dist     ) = NULL; v->dist_capacity      = 0; }
+// it is very fast to change VERTEX::dist and VERTEX::dist_orig between NULL and
+// !NULL so the code can make the ->dist or ->dist_orig become NULL, making the
+// bad values immediately inaccessible and then quickly having them available
+// again when they are computed
+//
+static void freeDistOrDistOrig(bool doOrig, VERTEX *v) {
+  if (doOrig) {
+    *(void **)(&v->dist_orig) = nullptr;
+    v->dist_orig_capacity = 0;
+  } else {
+    *(void **)(&v->dist) = nullptr;
+    v->dist_capacity = 0;
+  }
 }
 
-static void changeDistOrDistOrig(bool doOrig, MRIS *mris, int vno, int oldSize, int neededCapacity) 
-{
-  VERTEX const * const v = &mris->vertices[vno];
+static void changeDistOrDistOrig(bool doOrig, MRIS *mris, int vno, int oldSize,
+                                 int neededCapacity) {
+  VERTEX const *const v = &mris->vertices[vno];
 
-  const int    * pcCap = doOrig ? &v->dist_orig_capacity : &v->dist_capacity; 
-  float* const * pc    = doOrig ? &v->dist_orig          : &v->dist;
+  const int *pcCap = doOrig ? &v->dist_orig_capacity : &v->dist_capacity;
+  float *const *pc = doOrig ? &v->dist_orig : &v->dist;
 
   if (*pcCap < neededCapacity) {
-  
-    void** p_storage = doOrig ? &mris->dist_orig_storage[vno] : &mris->dist_storage[vno];
-    float* alloced = (float*)realloc(*p_storage, neededCapacity*sizeof(float));
-    *p_storage = (void*)alloced;
+
+    void **p_storage =
+        doOrig ? &mris->dist_orig_storage[vno] : &mris->dist_storage[vno];
+    float *alloced =
+        (float *)realloc(*p_storage, neededCapacity * sizeof(float));
+    *p_storage = (void *)alloced;
 
     if (!*pc) {
-      char const flag = (char)(1)<<doOrig;
+      char const flag = (char)(1) << doOrig;
       mris->dist_alloced_flags |= flag;
     }
-    
-    *(float**)pc    = alloced;
-    *(int   *)pcCap = neededCapacity;
+
+    *(float **)pc = alloced;
+    *(int *)pcCap = neededCapacity;
   }
-  
+
   if (neededCapacity > oldSize) {
-    bzero((*pc) + oldSize, (neededCapacity-oldSize)*sizeof(float));
+    bzero((*pc) + oldSize, (neededCapacity - oldSize) * sizeof(float));
   }
 }
 
-float* mrisStealDistStore(MRIS* mris, int vno, int capacity) {
+float *mrisStealDistStore(MRIS *mris, int vno, int capacity) {
 
-  // mrisSetDist may be called later, so stealing it now (if it is not being used) 
-  // will avoid the need to malloc some now and to free later
+  // mrisSetDist may be called later, so stealing it now (if it is not being
+  // used) will avoid the need to malloc some now and to free later
   //
-  VERTEX const * const v = &mris->vertices[vno];
-  
-  float* p = NULL;
-  if (v->dist == NULL) { p = (float *)mris->dist_storage[vno]; mris->dist_storage[vno] = NULL; }
-  
-  return (float*)realloc(p, capacity*sizeof(float));
+  VERTEX const *const v = &mris->vertices[vno];
+
+  float *p = nullptr;
+  if (v->dist == nullptr) {
+    p = (float *)mris->dist_storage[vno];
+    mris->dist_storage[vno] = nullptr;
+  }
+
+  return (float *)realloc(p, capacity * sizeof(float));
 }
 
-void mrisSetDist(MRIS* mris, int vno, float* dist, int newCapacity) {
+void mrisSetDist(MRIS *mris, int vno, float *dist, int newCapacity) {
   // Some code has already computed the dist into a vector.
   // Here is a quick way of putting it into the vertex
   // The capacity must not be smaller than the current capacity
   //
   bool const doOrig = false;
-  char const flag = (char)(1)<<doOrig;
+  char const flag = (char)(1) << doOrig;
   mris->dist_alloced_flags |= flag;
-    
-  VERTEX const * const v = &mris->vertices[vno];
+
+  VERTEX const *const v = &mris->vertices[vno];
 
   cheapAssert(newCapacity >= v->dist_capacity);
 
-  float * const * pc = &v->dist;
-  float *       * p  = (float**)pc;
-  
-  if (mris->dist_storage[vno]) free(mris->dist_storage[vno]);   // very frequently avoid the lock
+  float *const *pc = &v->dist;
+  float **p = (float **)pc;
+
+  if (mris->dist_storage[vno])
+    free(mris->dist_storage[vno]); // very frequently avoid the lock
   mris->dist_storage[vno] = dist;
   *p = dist;
-  
-  const int * pcCap = &v->dist_capacity; *(int*)pcCap = newCapacity;
+
+  const int *pcCap = &v->dist_capacity;
+  *(int *)pcCap = newCapacity;
 }
 
-static void growDistOrDistOrig(bool doOrig, MRIS *mris, int vno, int minimumCapacity)
-{
-  VERTEX_TOPOLOGY const * const vt = &mris->vertices_topology[vno];
-  VERTEX          const * const v  = &mris->vertices         [vno];
+static void growDistOrDistOrig(bool doOrig, MRIS *mris, int vno,
+                               int minimumCapacity) {
+  VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
+  VERTEX const *const v = &mris->vertices[vno];
   int oldSize = doOrig ? v->dist_orig_capacity : vt->vtotal;
   int vSize = mrisVertexVSize(mris, vno);
-  if (vSize < minimumCapacity) vSize = minimumCapacity;
+  if (vSize < minimumCapacity)
+    vSize = minimumCapacity;
   changeDistOrDistOrig(doOrig, mris, vno, oldSize, vSize);
 }
 
-void MRISgrowDist(MRIS *mris, int vno, int minimumCapacity)
-{
+void MRISgrowDist(MRIS *mris, int vno, int minimumCapacity) {
   growDistOrDistOrig(false, mris, vno, minimumCapacity);
 }
 
-void MRISgrowDistOrig(MRIS *mris, int vno, int minimumCapacity)
-{
+void MRISgrowDistOrig(MRIS *mris, int vno, int minimumCapacity) {
   growDistOrDistOrig(true, mris, vno, minimumCapacity);
 }
 
-static void makeDistOrDistOrig(bool doOrig, MRIS *mris, int vno) 
-{
+static void makeDistOrDistOrig(bool doOrig, MRIS *mris, int vno) {
   int vSize = mrisVertexVSize(mris, vno);
   changeDistOrDistOrig(doOrig, mris, vno, 0, vSize);
 }
 
-void MRISmakeDist(MRIS *mris, int vno) 
-{
-  makeDistOrDistOrig(false, mris, vno);
-}
+void MRISmakeDist(MRIS *mris, int vno) { makeDistOrDistOrig(false, mris, vno); }
 
-void MRISmakeDistOrig(MRIS *mris, int vno) 
-{
+void MRISmakeDistOrig(MRIS *mris, int vno) {
   makeDistOrDistOrig(true, mris, vno);
 }
 
-
 // Freeing
 //
-static void freeDistsOrDistOrigs(bool doOrig, MRIS *mris)
-{
-  char const flag = (char)(1)<<doOrig;
+static void freeDistsOrDistOrigs(bool doOrig, MRIS *mris) {
+  char const flag = (char)(1) << doOrig;
 
-  if (!(mris->dist_alloced_flags & flag)) return;
-  
+  if (!(mris->dist_alloced_flags & flag))
+    return;
+
   int vno;
   for (vno = 0; vno < mris->nvertices; vno++) {
     freeDistOrDistOrig(doOrig, &mris->vertices[vno]);
   }
-  
+
   mris->dist_alloced_flags ^= flag;
 }
 
-void MRISfreeDistsButNotOrig(MRIS* mris)
-  // Maybe should not be here...
+void MRISfreeDistsButNotOrig(MRIS *mris)
+// Maybe should not be here...
 {
   mris->dist_nsize = 0;
-  freeDistsOrDistOrigs(false,mris);
+  freeDistsOrDistOrigs(false, mris);
 }
 
-void MRISfreeDistOrigs(MRIS* mris)
-  // Maybe should not be here...
+void MRISfreeDistOrigs(MRIS *mris)
+// Maybe should not be here...
 {
-  freeDistsOrDistOrigs(true,mris);
+  freeDistsOrDistOrigs(true, mris);
 }
 
-void MRISfreeDistsButNotOrig(MRIS_MP* mris)
-{
-  cheapAssert(!"MRISfreeDistsButNotOrig(MRIS_MP* mris) NYI");  
+void MRISfreeDistsButNotOrig(MRIS_MP *mris) {
+  cheapAssert(!"MRISfreeDistsButNotOrig(MRIS_MP* mris) NYI");
 }
-void MRISfreeDistsButNotOrig(MRISPV* mris)
-{
-  cheapAssert(!"MRISfreeDistsButNotOrig(MRISPV* mris) NYI");  
+void MRISfreeDistsButNotOrig(MRISPV *mris) {
+  cheapAssert(!"MRISfreeDistsButNotOrig(MRISPV* mris) NYI");
 }
-
 
 // VERTEX, FACE, EDGE primitives
 //
-static void VERTEX_TOPOLOGYdtr(VERTEX_TOPOLOGY* v) {
+static void VERTEX_TOPOLOGYdtr(VERTEX_TOPOLOGY *v) {
   freeAndNULL(v->v);
   freeAndNULL(v->f);
   freeAndNULL(v->n);
-  if (v->e) freeAndNULL(v->e);
+  if (v->e)
+    freeAndNULL(v->e);
 }
 
-static void VERTEXdtr(VERTEX* v) {
+static void VERTEXdtr(VERTEX *v) {
   freeDistOrDistOrig(false, v);
-  freeDistOrDistOrig(true,  v);
+  freeDistOrDistOrig(true, v);
 }
 
-static void FACEdtr(FACE* f) {
-  if (f->norm) DMatrixFree(&f->norm);
+static void FACEdtr(FACE *f) {
+  if (f->norm)
+    DMatrixFree(&f->norm);
   int k;
-  for (k=0; k < 3; k++){
-    if (f->gradNorm[k]) DMatrixFree(&f->gradNorm[k]);
+  for (k = 0; k < 3; k++) {
+    if (f->gradNorm[k])
+      DMatrixFree(&f->gradNorm[k]);
   }
 }
 
-static void MRIS_EDGEdtr(MRI_EDGE* e) {
-  for (int k=0; k<4; k++){
-    if (e->gradDot[k]) DMatrixFree(&e->gradDot[k]);
+static void MRIS_EDGEdtr(MRI_EDGE *e) {
+  for (int k = 0; k < 4; k++) {
+    if (e->gradDot[k])
+      DMatrixFree(&e->gradDot[k]);
   }
 }
 
-static void MRIS_CORNERdtr(MRI_CORNER* c) {
-  for (int k=0; k<3; k++){
-    if (c->gradDot[k]) DMatrixFree(&c->gradDot[k]);
+static void MRIS_CORNERdtr(MRI_CORNER *c) {
+  for (int k = 0; k < 3; k++) {
+    if (c->gradDot[k])
+      DMatrixFree(&c->gradDot[k]);
   }
 }
 
-// MRIS 
+// MRIS
 //
-void mrisDumpVertex(FILE* file, MRIS const * mris, int vno) {
-  VERTEX_TOPOLOGY const * const vt = &mris->vertices_topology[vno];
-  VERTEX          const * const v  = &mris->vertices         [vno];
-  
-  fprintf(file, "vno:%d ripflag:%d marked:%d nsizeCur:%d nsizeMax:%d vnum:%d v2num:%d v3num:%d vtotal:%d nsizeCur:%d nsizeMax:%d x:%f y:%f z:%f",
-    vno, v->ripflag, v->marked, vt->nsizeCur, vt->nsizeMax, vt->vnum, vt->v2num, vt->v3num, vt->vtotal, vt->nsizeCur, vt->nsizeMax, v->x, v->y, v->z);
-  
+void mrisDumpVertex(FILE *file, MRIS const *mris, int vno) {
+  VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
+  VERTEX const *const v = &mris->vertices[vno];
+
+  fprintf(file,
+          "vno:%d ripflag:%d marked:%d nsizeCur:%d nsizeMax:%d vnum:%d "
+          "v2num:%d v3num:%d vtotal:%d nsizeCur:%d nsizeMax:%d x:%f y:%f z:%f",
+          vno, v->ripflag, v->marked, vt->nsizeCur, vt->nsizeMax, vt->vnum,
+          vt->v2num, vt->v3num, vt->vtotal, vt->nsizeCur, vt->nsizeMax, v->x,
+          v->y, v->z);
+
   int const vsize = mrisVertexVSize(mris, vno);
   int i;
   for (i = 0; i < vsize; i++) {
-    fprintf(file, " [%d] v:%d dist:%f dist_orig:%f",
-      i, vt->v[i], v->dist ? v->dist[i] : -1.0f, v->dist_orig ? v->dist_orig[i] : -1.0f);
-  } fprintf(file, "\n");
+    fprintf(file, " [%d] v:%d dist:%f dist_orig:%f", i, vt->v[i],
+            v->dist ? v->dist[i] : -1.0f,
+            v->dist_orig ? v->dist_orig[i] : -1.0f);
+  }
+  fprintf(file, "\n");
 
   for (i = 0; i < vt->num; i++) {
-    fprintf(file, " [%d] f:%d n:%d",
-      i, vt->f[i], vt->n[i]);
-  } fprintf(file, "\n");
-  
+    fprintf(file, " [%d] f:%d n:%d", i, vt->f[i], vt->n[i]);
+  }
+  fprintf(file, "\n");
 }
 
-void mrisDumpFace(MRIS const * mris, int fno, FILE* file) {
-  FACE const * const f = &mris->faces[fno];
-  fprintf(file, "fno:%d ripflag:%d marked:%d\n",
-    fno, f->ripflag, f->marked);
+void mrisDumpFace(MRIS const *mris, int fno, FILE *file) {
+  FACE const *const f = &mris->faces[fno];
+  fprintf(file, "fno:%d ripflag:%d marked:%d\n", fno, f->ripflag, f->marked);
   int i;
   for (i = 0; i < VERTICES_PER_FACE; i++) {
-    fprintf(file, " [%d] v:%d",
-      i, f->v[i]);
-  } fprintf(file, "\n");
+    fprintf(file, " [%d] v:%d", i, f->v[i]);
+  }
+  fprintf(file, "\n");
 }
 
-void mrisDumpShape(FILE* file, MRIS const * mris) {
+void mrisDumpShape(FILE *file, MRIS const *mris) {
   fprintf(file, "mrisDumpShape {\n");
   fprintf(file, "nvertices:%d nfaces:%d max_nsize:%d nsize:%d\n",
-    mris->nvertices, mris->nfaces, mris->max_nsize, mris->nsize);
+          mris->nvertices, mris->nfaces, mris->max_nsize, mris->nsize);
   int vno;
-  for (vno = 0; vno < MIN(10,mris->nvertices); vno++) mrisDumpVertex(file, mris, vno);
+  for (vno = 0; vno < MIN(10, mris->nvertices); vno++)
+    mrisDumpVertex(file, mris, vno);
   int fno;
-  for (fno = 0; fno < MIN(10,mris->nfaces); fno++) mrisDumpFace(mris, fno, file);
+  for (fno = 0; fno < MIN(10, mris->nfaces); fno++)
+    mrisDumpFace(mris, fno, file);
   fprintf(file, "} // mrisDumpShape\n");
 }
 
-static void MRISchangedNFacesNVertices(MRIS * mris, bool scrambled) {
+static void MRISchangedNFacesNVertices(MRIS *mris, bool scrambled) {
   // useful for debugging
 }
 
 void MRISacquireNverticesFrozen(MRIS *mris) {
-  #pragma omp atomic
-  (*(int*)&mris->nverticesFrozen)++;
+#pragma omp atomic
+  (*(int *)&mris->nverticesFrozen)++;
 }
 void MRISreleaseNverticesFrozen(MRIS *mris) {
-  #pragma omp atomic
-  (*(int*)&mris->nverticesFrozen)--;
+#pragma omp atomic
+  (*(int *)&mris->nverticesFrozen)--;
 }
 
-bool MRISreallocVertices(MRIS * mris, int max_vertices, int nvertices) {
+bool MRISreallocVertices(MRIS *mris, int max_vertices, int nvertices) {
 
   // mris->max_vertices should only ever grow
   // because this code does not know how to free existing ones
   //
-  if (max_vertices < mris->max_vertices) max_vertices = mris->max_vertices;
-  
+  if (max_vertices < mris->max_vertices)
+    max_vertices = mris->max_vertices;
+
   cheapAssert(nvertices >= 0);
   cheapAssert(max_vertices >= nvertices);
   cheapAssert(!mris->nverticesFrozen);
-  
-  mris->vertices = (VERTEX *)realloc(mris->vertices, max_vertices*sizeof(VERTEX));
-  if (!mris->vertices) return false;
-  #ifndef SEPARATE_VERTEX_TOPOLOGY
-    mris->vertices_topology = mris->vertices;
-  #else
-    mris->vertices_topology = (VERTEX_TOPOLOGY *)realloc(mris->vertices_topology, max_vertices*sizeof(VERTEX_TOPOLOGY));
-  #endif
-  
-  mris->dist_storage      = (void**)realloc(mris->dist_storage,      max_vertices*sizeof(void*));
-  mris->dist_orig_storage = (void**)realloc(mris->dist_orig_storage, max_vertices*sizeof(void*));
-  
+
+  mris->vertices =
+      (VERTEX *)realloc(mris->vertices, max_vertices * sizeof(VERTEX));
+  if (!mris->vertices)
+    return false;
+#ifndef SEPARATE_VERTEX_TOPOLOGY
+  mris->vertices_topology = mris->vertices;
+#else
+  mris->vertices_topology = (VERTEX_TOPOLOGY *)realloc(
+      mris->vertices_topology, max_vertices * sizeof(VERTEX_TOPOLOGY));
+#endif
+
+  mris->dist_storage =
+      (void **)realloc(mris->dist_storage, max_vertices * sizeof(void *));
+  mris->dist_orig_storage =
+      (void **)realloc(mris->dist_orig_storage, max_vertices * sizeof(void *));
+
   int change = max_vertices - mris->nvertices;
-  if (change > 0) { // all above nvertices must be zero'ed, since MRISgrowNVertices does not...
-    bzero(mris->vertices          + mris->nvertices,     change*sizeof(VERTEX));
+  if (change > 0) { // all above nvertices must be zero'ed, since
+                    // MRISgrowNVertices does not...
+    bzero(mris->vertices + mris->nvertices, change * sizeof(VERTEX));
 #ifdef SEPARATE_VERTEX_TOPOLOGY
-    bzero(mris->vertices_topology + mris->nvertices,     change*sizeof(VERTEX_TOPOLOGY));
+    bzero(mris->vertices_topology + mris->nvertices,
+          change * sizeof(VERTEX_TOPOLOGY));
 #endif
   }
-  
+
   change = max_vertices - mris->max_vertices;
   if (change > 0) {
-    bzero(mris->dist_storage      + mris->max_vertices, change*sizeof(void*));
-    bzero(mris->dist_orig_storage + mris->max_vertices, change*sizeof(void*));
+    bzero(mris->dist_storage + mris->max_vertices, change * sizeof(void *));
+    bzero(mris->dist_orig_storage + mris->max_vertices,
+          change * sizeof(void *));
   }
 
-  *(int*)(&mris->max_vertices) = max_vertices;    // get around const
-  *(int*)(&mris->nvertices)    = nvertices;       // get around const
-    
+  *(int *)(&mris->max_vertices) = max_vertices; // get around const
+  *(int *)(&mris->nvertices) = nvertices;       // get around const
+
   notifyActiveRealmTreesChangedNFacesNVertices(mris);
-  
+
   return true;
 }
 
-void MRISgrowNVertices(MRIS * mris, int nvertices) {
+void MRISgrowNVertices(MRIS *mris, int nvertices) {
   cheapAssert(nvertices <= mris->max_vertices);
   MRISchangedNFacesNVertices(mris, false);
-  *(int*)(&mris->nvertices) = nvertices;  // get around const
+  *(int *)(&mris->nvertices) = nvertices; // get around const
 }
 
-void MRIStruncateNVertices(MRIS * mris, int nvertices) {
+void MRIStruncateNVertices(MRIS *mris, int nvertices) {
   cheapAssert(mris->nvertices >= nvertices);
   MRISchangedNFacesNVertices(mris, false);
-  *(int*)(&mris->nvertices) = nvertices;  // get around const
+  *(int *)(&mris->nvertices) = nvertices; // get around const
 }
 
-void MRISremovedVertices(MRIS * mris, int nvertices) {
+void MRISremovedVertices(MRIS *mris, int nvertices) {
   cheapAssert(mris->nvertices >= nvertices);
   MRISchangedNFacesNVertices(mris, true);
-  *(int*)(&mris->nvertices) = nvertices;  // get around const
+  *(int *)(&mris->nvertices) = nvertices; // get around const
 }
+bool MRISreallocFaces(MRIS *mris, int max_faces, int nfaces) {
 
-
-
-bool MRISreallocFaces(MRIS * mris, int max_faces, int nfaces) {
   cheapAssert(nfaces >= 0);
   cheapAssert(max_faces >= nfaces);
-  
-  mris->faces  =
-    (FACE *)realloc(mris->faces, max_faces*sizeof(FACE));
+
+  mris->faces = (FACE *)realloc(mris->faces, max_faces * sizeof(FACE));
   cheapAssert(mris->faces);
 
-  mris->faceNormCacheEntries =
-    (FaceNormCacheEntry*)realloc(mris->faceNormCacheEntries, max_faces*sizeof(FaceNormCacheEntry));
+  mris->faceNormCacheEntries = (FaceNormCacheEntry *)realloc(
+      mris->faceNormCacheEntries, max_faces * sizeof(FaceNormCacheEntry));
   cheapAssert(mris->faceNormCacheEntries);
- 
-  mris->faceNormDeferredEntries =
-    (FaceNormDeferredEntry*)realloc(mris->faceNormDeferredEntries, max_faces*sizeof(FaceNormDeferredEntry));
+
+  mris->faceNormDeferredEntries = (FaceNormDeferredEntry *)realloc(
+      mris->faceNormDeferredEntries, max_faces * sizeof(FaceNormDeferredEntry));
   cheapAssert(mris->faceNormDeferredEntries);
-  
-  
+
   int change = max_faces - mris->nfaces;
-  if (change > 0) { // all above nfaces must be zero'ed, since MRISgrowNFaces does not...
-      bzero(mris->faces                   + mris->nfaces, change*sizeof(FACE));
-      bzero(mris->faceNormCacheEntries    + mris->nfaces, change*sizeof(FaceNormCacheEntry));
-      bzero(mris->faceNormDeferredEntries + mris->nfaces, change*sizeof(FaceNormDeferredEntry));
+  if (change >
+      0) { // all above nfaces must be zero'ed, since MRISgrowNFaces does not...
+    bzero(mris->faces + mris->nfaces, change * sizeof(FACE));
+    bzero(mris->faceNormCacheEntries + mris->nfaces,
+          change * sizeof(FaceNormCacheEntry));
+    bzero(mris->faceNormDeferredEntries + mris->nfaces,
+          change * sizeof(FaceNormDeferredEntry));
   }
 
-  *(int*)(&mris->max_faces) = max_faces;    // get around const
-  *(int*)(&mris->nfaces)    = nfaces;       // get around const
-    
+  *(int *)(&mris->max_faces) = max_faces; // get around const
+  *(int *)(&mris->nfaces) = nfaces;       // get around const
+
   return true;
 }
 
-bool MRISallocateFaces(MRIS * mris, int nfaces) {
-    return MRISreallocFaces(mris, nfaces, nfaces);
+bool MRISallocateFaces(MRIS *mris, int nfaces) {
+  return MRISreallocFaces(mris, nfaces, nfaces);
 }
 
-void MRISgrowNFaces(MRIS * mris, int nfaces) {
+void MRISgrowNFaces(MRIS *mris, int nfaces) {
   cheapAssert(nfaces <= mris->max_faces);
   MRISchangedNFacesNVertices(mris, false);
-  *(int*)(&mris->nfaces) = nfaces;  // get around const
+  *(int *)(&mris->nfaces) = nfaces; // get around const
 }
 
-void MRIStruncateNFaces(MRIS * mris, int nfaces) {
+void MRIStruncateNFaces(MRIS *mris, int nfaces) {
   cheapAssert(mris->nfaces >= nfaces);
   MRISchangedNFacesNVertices(mris, false);
-  *(int*)(&mris->nfaces) = nfaces;  // get around const
+  *(int *)(&mris->nfaces) = nfaces; // get around const
 }
 
-void MRISremovedFaces(MRIS * mris, int nfaces) {
+void MRISremovedFaces(MRIS *mris, int nfaces) {
   cheapAssert(mris->nfaces >= nfaces);
   MRISchangedNFacesNVertices(mris, true);
-  *(int*)(&mris->nfaces) = nfaces;  // get around const
+  *(int *)(&mris->nfaces) = nfaces; // get around const
 }
 
-
-void MRISoverAllocVerticesAndFaces(MRIS* mris, int max_vertices, int max_faces, int nvertices, int nfaces)
-{
+void MRISoverAllocVerticesAndFaces(MRIS *mris, int max_vertices, int max_faces,
+                                   int nvertices, int nfaces) {
   MRISchangedNFacesNVertices(mris, false);
   cheapAssert(nvertices >= 0);
-  cheapAssert(nfaces    >= 0);
+  cheapAssert(nfaces >= 0);
 
-  if (max_vertices <= nvertices) max_vertices = nvertices;
-  if (max_faces    <= nfaces   ) max_faces    = nfaces;
+  if (max_vertices <= nvertices)
+    max_vertices = nvertices;
+  if (max_faces <= nfaces)
+    max_faces = nfaces;
 
   MRISreallocVertices(mris, max_vertices, nvertices);
   MRISreallocFaces(mris, max_faces, nfaces);
 }
-
 
 void MRISreallocVerticesAndFaces(MRIS *mris, int nvertices, int nfaces) {
   MRISoverAllocVerticesAndFaces(mris, nvertices, nfaces, nvertices, nfaces);
@@ -666,13 +668,15 @@ MRIS* MRIScopyMetadata(MRIS const * source, MRIS * target)
 }
 
 
-void MRISctr(MRIS *mris, int max_vertices, int max_faces, int nvertices, int nfaces) {
+void MRISctr(MRIS *mris, int max_vertices, int max_faces, int nvertices,
+             int nfaces) {
   // This should be the ONLY place where an MRIS is constructed
   //
   bzero(mris, sizeof(MRIS));
-  MRISoverAllocVerticesAndFaces(mris, max_vertices, max_faces, nvertices, nfaces);
-  
-  mris->max_nsize = mris->nsize = 1;      // only 1-connected neighbors initially
+  MRISoverAllocVerticesAndFaces(mris, max_vertices, max_faces, nvertices,
+                                nfaces);
+
+  mris->max_nsize = mris->nsize = 1; // only 1-connected neighbors initially
 }
 
 void MRISdtr(MRIS *mris) {
@@ -680,34 +684,34 @@ void MRISdtr(MRIS *mris) {
   freeAndNULL(mris->dy2);
   freeAndNULL(mris->dz2);
   freeAndNULL(mris->labels);
-  
-  if (mris->ct) CTABfree(&mris->ct);
 
-  
+  if (mris->ct)
+    CTABfree(&mris->ct);
+
   int vno;
   for (vno = 0; vno < mris->nvertices; vno++) {
     VERTEX_TOPOLOGYdtr(&mris->vertices_topology[vno]);
-    VERTEXdtr         (&mris->vertices         [vno]);
+    VERTEXdtr(&mris->vertices[vno]);
   }
   freeAndNULL(mris->vertices);
 
   freeAndNULL(mris->faceNormDeferredEntries);
   freeAndNULL(mris->faceNormCacheEntries);
-  
+
   int faceno;
-  for(faceno = 0; faceno < mris->nfaces; faceno++){
+  for (faceno = 0; faceno < mris->nfaces; faceno++) {
     FACEdtr(&mris->faces[faceno]);
   }
   freeAndNULL(mris->faces);
 
   int edgeNo;
-  for (edgeNo=0; edgeNo < mris->nedges; edgeNo++) {
+  for (edgeNo = 0; edgeNo < mris->nedges; edgeNo++) {
     MRIS_EDGEdtr(&mris->edges[edgeNo]);
   }
   freeAndNULL(mris->edges);
 
   int cornerNo;
-  for (cornerNo=0; cornerNo < mris->ncorners; cornerNo++) {
+  for (cornerNo = 0; cornerNo < mris->ncorners; cornerNo++) {
     MRIS_CORNERdtr(&mris->corners[cornerNo]);
   }
   freeAndNULL(mris->corners);
@@ -734,7 +738,7 @@ void MRISdtr(MRIS *mris) {
   }
 
   for (vno = 0; vno < mris->max_vertices; vno++) {
-    freeAndNULL(mris->dist_storage     [vno]);
+    freeAndNULL(mris->dist_storage[vno]);
     freeAndNULL(mris->dist_orig_storage[vno]);
   }
 
@@ -742,82 +746,77 @@ void MRISdtr(MRIS *mris) {
   freeAndNULL(mris->dist_orig_storage);
 }
 
-
 // Heap allocators are simply malloc and ctr the object, freeing is the opposite
 //
-MRIS *MRISoverAlloc(int max_vertices, int max_faces, int nvertices, int nfaces)
-{
-  MRIS* mris = (MRIS *)malloc(sizeof(MRIS));
-  if (!mris) ErrorExit(ERROR_NO_MEMORY, 
-                "MRISalloc(%d, %d): could not allocate mris structure", max_vertices, max_faces);
+MRIS *MRISoverAlloc(int max_vertices, int max_faces, int nvertices,
+                    int nfaces) {
+  MRIS *mris = (MRIS *)malloc(sizeof(MRIS));
+  if (!mris)
+    ErrorExit(ERROR_NO_MEMORY,
+              "MRISalloc(%d, %d): could not allocate mris structure",
+              max_vertices, max_faces);
 
   MRISctr(mris, max_vertices, max_faces, nvertices, nfaces);
 
   return (mris);
 }
 
-MRIS* MRISalloc(int nvertices, int nfaces)
-{
+MRIS *MRISalloc(int nvertices, int nfaces) {
   return MRISoverAlloc(nvertices, nfaces, nvertices, nfaces);
 }
 
-void MRISfree(MRIS **pmris)
-{
+void MRISfree(MRIS **pmris) {
   MRIS *mris = *pmris;
-  *pmris = NULL;
+  *pmris = nullptr;
   MRISdtr(mris);
   free(mris);
 }
 
-
 //======
 // ripped
 //
-char* MRISexportFaceRipflags(MRIS* mris) {
-  char* flags = (char*)malloc(mris->nfaces * sizeof(char));
+char *MRISexportFaceRipflags(MRIS *mris) {
+  char *flags = (char *)malloc(mris->nfaces * sizeof(char));
   int fno;
-  for (fno = 0 ; fno < mris->nfaces ; fno++){
+  for (fno = 0; fno < mris->nfaces; fno++) {
     flags[fno] = mris->faces[fno].ripflag;
   }
   return flags;
 }
 
-void  MRISimportFaceRipflags(MRIS* mris, const char* flags) {
+void MRISimportFaceRipflags(MRIS *mris, const char *flags) {
   int fno;
-  for (fno = 0 ; fno < mris->nfaces ; fno++){
+  for (fno = 0; fno < mris->nfaces; fno++) {
     mris->faces[fno].ripflag = flags[fno];
   }
 }
 
-
-char* MRISexportVertexRipflags(MRIS* mris) {
-  char* flags = (char*)malloc(mris->nvertices * sizeof(char));
+char *MRISexportVertexRipflags(MRIS *mris) {
+  char *flags = (char *)malloc(mris->nvertices * sizeof(char));
   int vno;
-  for (vno = 0 ; vno < mris->nvertices ; vno++){
+  for (vno = 0; vno < mris->nvertices; vno++) {
     flags[vno] = mris->vertices[vno].ripflag;
   }
   return flags;
 }
 
-void MRISimportVertexRipflags(MRIS* mris, const char* flags) {
+void MRISimportVertexRipflags(MRIS *mris, const char *flags) {
   int vno;
-  for (vno = 0 ; vno < mris->nvertices ; vno++){
+  for (vno = 0; vno < mris->nvertices; vno++) {
     mris->vertices[vno].ripflag = flags[vno];
   }
-} 
-
-int MRIScountRipped(MRIS *mris)
-{
-  int nripped=0, vno;
-  for (vno = 0 ; vno < mris->nvertices ; vno++){
-    if(mris->vertices[vno].ripflag) nripped++;
-  }
-  return(nripped);
 }
 
+int MRIScountRipped(MRIS *mris) {
+  int nripped = 0, vno;
+  for (vno = 0; vno < mris->nvertices; vno++) {
+    if (mris->vertices[vno].ripflag)
+      nripped++;
+  }
+  return (nripped);
+}
 
-int MRISstoreRipFlags(MRIS *mris)
-{
+int MRISstoreRipFlags(MRIS *mris) {
   int vno, fno;
   VERTEX *v;
   FACE *f;
@@ -833,8 +832,7 @@ int MRISstoreRipFlags(MRIS *mris)
   return (NO_ERROR);
 }
 
-int MRISrestoreRipFlags(MRIS *mris)
-{
+int MRISrestoreRipFlags(MRIS *mris) {
   int vno, fno;
   VERTEX *v;
   FACE *f;
@@ -852,8 +850,7 @@ int MRISrestoreRipFlags(MRIS *mris)
   return (NO_ERROR);
 }
 
-int MRISunrip(MRIS *mris)
-{
+int MRISunrip(MRIS *mris) {
   int vno, fno;
 
   for (vno = 0; vno < mris->nvertices; vno++) {
@@ -865,13 +862,10 @@ int MRISunrip(MRIS *mris)
   return (NO_ERROR);
 }
 
+char const *mrisurf_surface_names[3] = {"inflated", "smoothwm", "smoothwm"};
+char const *curvature_names[3] = {"inflated.H", "sulc", nullptr};
 
-
-char const * mrisurf_surface_names[3] = {"inflated", "smoothwm", "smoothwm"};
-char const * curvature_names      [3] = {"inflated.H", "sulc", NULL};
-
-int MRISsetCurvatureName(int nth, char const *name)
-{
+int MRISsetCurvatureName(int nth, char const *name) {
   if (nth > 2) {
     printf("ERROR: MRISsetCurvatureName() nth=%d > 2\n", nth);
     return (1);
@@ -880,9 +874,9 @@ int MRISsetCurvatureName(int nth, char const *name)
   return (0);
 }
 
-int MRISprintCurvatureNames(FILE *fp)
-{
-  for (unsigned int k = 0; k < sizeof(curvature_names) / sizeof(curvature_names[0]); k++) {
+int MRISprintCurvatureNames(FILE *fp) {
+  for (unsigned int k = 0;
+       k < sizeof(curvature_names) / sizeof(curvature_names[0]); k++) {
     if (curvature_names[k])
       printf("%d %s\n", k, curvature_names[k]);
     else if (mrisurf_surface_names[k])
@@ -891,59 +885,55 @@ int MRISprintCurvatureNames(FILE *fp)
   return (0);
 }
 
-
 static const float sigmas_default[] = {
     //    16.00, 4.0f, 2.0f, 1.0f, 0.5f
     //    8.00f, 4.00f, 2.0f, 0.5f
-    4.00f,
-    2.0f,
-    1.0f,
-    0.5f};
-const float * sigmas = sigmas_default;      // can be changed by caller
+    4.00f, 2.0f, 1.0f, 0.5f};
+const float *sigmas = sigmas_default; // can be changed by caller
 double nsigmas = (sizeof(sigmas_default) / sizeof(sigmas_default[0]));
 
-int MRISsetRegistrationSigmas(float *sigmas_local, int nsigmas_local)
-{
-  if (sigmas_local == NULL) {
+int MRISsetRegistrationSigmas(float *sigmas_local, int nsigmas_local) {
+  if (sigmas_local == nullptr) {
     nsigmas = (sizeof(sigmas_default) / sizeof(sigmas_default[0]));
-    sigmas  = sigmas_default;
-  }
-  else {
+    sigmas = sigmas_default;
+  } else {
     nsigmas = nsigmas_local;
-    sigmas  = sigmas_local;
+    sigmas = sigmas_local;
   }
   return (NO_ERROR);
 }
 
-
-VOXEL_LIST **vlst_alloc(MRIS *mris, int max_vox)
-{
+VOXEL_LIST **vlst_alloc(MRIS *mris, int max_vox) {
   int vno;
   VOXEL_LIST **vl;
 
   vl = (VOXEL_LIST **)calloc(mris->nvertices, sizeof(VOXEL_LIST *));
-  if (vl == NULL) ErrorExit(ERROR_NOMEMORY, "vlst_alloc(%d): could not allocate vl array", max_vox);
+  if (vl == nullptr)
+    ErrorExit(ERROR_NOMEMORY, "vlst_alloc(%d): could not allocate vl array",
+              max_vox);
   for (vno = 0; vno < mris->nvertices; vno++) {
     vl[vno] = VLSTalloc(max_vox);
-    if (vl[vno] == NULL) ErrorExit(ERROR_NOMEMORY, "vlst_alloc(%d): could not allocate list for vno %d", max_vox, vno);
+    if (vl[vno] == nullptr)
+      ErrorExit(ERROR_NOMEMORY,
+                "vlst_alloc(%d): could not allocate list for vno %d", max_vox,
+                vno);
     vl[vno]->nvox = 0;
   }
   return (vl);
 }
 
-int vlst_free(MRIS *mris, VOXEL_LIST ***pvl)
-{
+int vlst_free(MRIS *mris, VOXEL_LIST ***pvl) {
   VOXEL_LIST **vl = *pvl;
   int vno;
 
-  *pvl = NULL;
-  for (vno = 0; vno < mris->nvertices; vno++) VLSTfree(&vl[vno]);
+  *pvl = nullptr;
+  for (vno = 0; vno < mris->nvertices; vno++)
+    VLSTfree(&vl[vno]);
   free(vl);
   return (NO_ERROR);
 }
 
-int vlst_enough_data(MRIS *mris, int vno, VOXEL_LIST *vl, double displacement)
-{
+int vlst_enough_data(MRIS *mris, int vno, VOXEL_LIST *vl, double displacement) {
   double dot, dx, dy, dz;
   int i, nin, nout;
   VERTEX *v;
@@ -958,25 +948,24 @@ int vlst_enough_data(MRIS *mris, int vno, VOXEL_LIST *vl, double displacement)
     dy = vl->yd[i] - ys;
     dz = vl->zd[i] - zs;
     dot = dx * v->nx + dy * v->ny + dz * v->nz;
-    if (dot > 0)  // outside surface
+    if (dot > 0) // outside surface
       nout++;
-    else  // inside the surface
+    else // inside the surface
       nin++;
   }
-  return ((nout >= 2 && nin >= 2) || (nout >= 10 && nin >= 1) || (nout + nin > 4));
+  return ((nout >= 2 && nin >= 2) || (nout >= 10 && nin >= 1) ||
+          (nout + nin > 4));
 }
 
-int vlst_add_to_list(VOXEL_LIST *vl_src, VOXEL_LIST *vl_dst)
-{
+int vlst_add_to_list(VOXEL_LIST *vl_src, VOXEL_LIST *vl_dst) {
   int i;
 
   for (i = 0; i < vl_src->nvox; i++)
-    VLSTaddUnique(vl_dst, vl_src->xi[i], vl_src->yi[i], vl_src->zi[i], vl_src->xd[i], vl_src->yd[i], vl_src->zd[i]);
+    VLSTaddUnique(vl_dst, vl_src->xi[i], vl_src->yi[i], vl_src->zi[i],
+                  vl_src->xd[i], vl_src->yd[i], vl_src->zd[i]);
 
   return (NO_ERROR);
 }
-
-
 
 /*-----------------------------------------------------
   Parameters:
@@ -990,15 +979,14 @@ static int edgesIntersectStable(MRIS *mris, EDGE *edge1, EDGE *edge2);
 #if SPHERE_INTERSECTION
 
 /* check for intersection on the sphere */
-int edgesIntersect(MRIS *mris, EDGE *edge1, EDGE *edge2)
-{
+int edgesIntersect(MRIS *mris, EDGE *edge1, EDGE *edge2) {
   VERTEX *v1, *v2;
   double n0[3], n1[3], n2[3], u0[3], u1[3], u2[3], u3[3], u[3];
   double a0, a1, a2, a3, a, b;
 
   // first test if some vertices are the same
-  if (edge1->vno1 == edge2->vno1 || edge1->vno1 == edge2->vno2 || edge1->vno2 == edge2->vno1 ||
-      edge1->vno2 == edge2->vno2) {
+  if (edge1->vno1 == edge2->vno1 || edge1->vno1 == edge2->vno2 ||
+      edge1->vno2 == edge2->vno1 || edge1->vno2 == edge2->vno2) {
     return (0);
   }
 
@@ -1033,7 +1021,8 @@ int edgesIntersect(MRIS *mris, EDGE *edge1, EDGE *edge2)
 // if a0,a1, a2, or a3 are very small,
 // should definitely use edgesIntersectStable instead
 #define SMALL_VALUES 0.0000001
-  if (fabs(a0) < SMALL_VALUES || fabs(a1) < SMALL_VALUES || fabs(a2) < SMALL_VALUES || fabs(a3) < SMALL_VALUES) {
+  if (fabs(a0) < SMALL_VALUES || fabs(a1) < SMALL_VALUES ||
+      fabs(a2) < SMALL_VALUES || fabs(a3) < SMALL_VALUES) {
     return edgesIntersectStable(mris, edge1, edge2);
   }
 
@@ -1042,25 +1031,20 @@ int edgesIntersect(MRIS *mris, EDGE *edge1, EDGE *edge2)
 
   if (a > 0) {
     return (0);
-  }
-  else if (a < 0) {
+  } else if (a < 0) {
     //      fprintf(stderr,"-");
     if (b > 0) {
       return (0);
-    }
-    else {
+    } else {
       return (1);
     }
-  }
-  else {
+  } else {
     //    fprintf(stderr,"+");
     if (b > 0) {
       return (0);
-    }
-    else if (b < 0) {
+    } else if (b < 0) {
       return (1);
-    }
-    else {
+    } else {
       // special case again! The points are exactly aligned...
       double c0, c1, c2, c3, x1_min, x1_max, x2_min, x2_max;
 
@@ -1106,16 +1090,15 @@ int edgesIntersect(MRIS *mris, EDGE *edge1, EDGE *edge2)
 
 /* it should be a more stable implementation but a bit
    slower than the previous one */
-static int edgesIntersectStable(MRIS *mris, EDGE *edge1, EDGE *edge2)
-{
+static int edgesIntersectStable(MRIS *mris, EDGE *edge1, EDGE *edge2) {
   VERTEX *v1, *v2;
   double n0[3], n1[3], n2[3], u0[3], u1[3], u2[3], u3[3], u[3];
   double og0[3], og1[3], v_0[3], v_1[3];
   double a0, a1, a2, a3, a, b;
 
   // first test if some vertices are the same
-  if (edge1->vno1 == edge2->vno1 || edge1->vno1 == edge2->vno2 || edge1->vno2 == edge2->vno1 ||
-      edge1->vno2 == edge2->vno2) {
+  if (edge1->vno1 == edge2->vno1 || edge1->vno1 == edge2->vno2 ||
+      edge1->vno2 == edge2->vno1 || edge1->vno2 == edge2->vno2) {
     return (0);
   }
 
@@ -1176,24 +1159,19 @@ static int edgesIntersectStable(MRIS *mris, EDGE *edge1, EDGE *edge2)
 
   if (a > 0) {
     return (0);
-  }
-  else if (a < 0) {
+  } else if (a < 0) {
     if (b > 0) {
       return (0);
-    }
-    else {
+    } else {
       return (1);
     }
-  }
-  else {
+  } else {
     //    fprintf(stderr,"+");
     if (b > 0) {
       return (0);
-    }
-    else if (b < 0) {
+    } else if (b < 0) {
       return (1);
-    }
-    else {
+    } else {
       // special case again! The points are exactly aligned...
       double c0, c1, c2, c3, x1_min, x1_max, x2_min, x2_max;
 
@@ -1223,15 +1201,15 @@ static int edgesIntersectStable(MRIS *mris, EDGE *edge1, EDGE *edge2)
 
 #else
 /* original version */
-int edgesIntersect(MRIS *mris, EDGE *edge1, EDGE *edge2)
-{
+int edgesIntersect(MRIS *mris, EDGE *edge1, EDGE *edge2) {
   VERTEX *v1, *v2;
-  double b1, b2, m1, m2, x1_start, x1_end, y1_start, y1_end, x2_start, x2_end, y2_start, y2_end, x, y, x1min, x1max,
-      y1min, y1max, x2min, x2max, y2min, y2max, cx, cy, cz;
+  double b1, b2, m1, m2, x1_start, x1_end, y1_start, y1_end, x2_start, x2_end,
+      y2_start, y2_end, x, y, x1min, x1max, y1min, y1max, x2min, x2max, y2min,
+      y2max, cx, cy, cz;
   double origin[3], e0[3], e1[3], e0_0, e0_1, e0_2, e1_0, e1_1, e1_2;
 
-  if (edge1->vno1 == edge2->vno1 || edge1->vno1 == edge2->vno2 || edge1->vno2 == edge2->vno1 ||
-      edge1->vno2 == edge2->vno2) {
+  if (edge1->vno1 == edge2->vno1 || edge1->vno1 == edge2->vno2 ||
+      edge1->vno2 == edge2->vno1 || edge1->vno2 == edge2->vno2) {
     return (0);
   }
 
@@ -1242,7 +1220,8 @@ int edgesIntersect(MRIS *mris, EDGE *edge1, EDGE *edge2)
   e1_0 = e1[0];
   e1_1 = e1[1];
   e1_2 = e1[2];
-  if (edge1->vno1 == Gdiag_no || edge2->vno1 == Gdiag_no || edge1->vno2 == Gdiag_no || edge2->vno2 == Gdiag_no) {
+  if (edge1->vno1 == Gdiag_no || edge2->vno1 == Gdiag_no ||
+      edge1->vno2 == Gdiag_no || edge2->vno2 == Gdiag_no) {
     DiagBreak();
   }
   v1 = &mris->vertices[edge1->vno1];
@@ -1264,8 +1243,7 @@ int edgesIntersect(MRIS *mris, EDGE *edge1, EDGE *edge2)
   if (!FEQUAL(x1_start, x1_end)) {
     m1 = (y1_end - y1_start) / (x1_end - x1_start);
     b1 = y1_end - m1 * x1_end;
-  }
-  else {
+  } else {
     m1 = b1 = 0; /* will be handled differently */
   }
 
@@ -1317,8 +1295,7 @@ int edgesIntersect(MRIS *mris, EDGE *edge1, EDGE *edge2)
     if (y >= y1min && y <= y1max) {
       return (1);
     }
-  }
-  else if (FEQUAL(x2_start, x2_end)) /* l2 is vertical */
+  } else if (FEQUAL(x2_start, x2_end)) /* l2 is vertical */
   {
     if (FEQUAL(x1_start, x1_end)) /* both vertical */
     {
@@ -1328,8 +1305,7 @@ int edgesIntersect(MRIS *mris, EDGE *edge1, EDGE *edge2)
     if (y >= y2min && y <= y2max) {
       return (1);
     }
-  }
-  else /* neither line is vertical, compute intersection point */
+  } else /* neither line is vertical, compute intersection point */
   {
     m2 = (y2_end - y2_start) / (x2_end - x2_start);
     b2 = y2_end - m2 * x2_end;
@@ -1352,7 +1328,6 @@ int edgesIntersect(MRIS *mris, EDGE *edge1, EDGE *edge2)
 }
 #endif
 
-
 /*-----------------------------------------------------
   Parameters:
 
@@ -1363,14 +1338,14 @@ int edgesIntersect(MRIS *mris, EDGE *edge1, EDGE *edge2)
   through vertex v intersects any of the triangles at the
   given location.
   ------------------------------------------------------*/
-int mrisDirectionTriangleIntersection(
-    MRIS *mris, float x0, float y0, float z0, float nx, float ny, float nz, MHT *mht, double *pdist, int vno)
-{
+int mrisDirectionTriangleIntersection(MRIS *mris, float x0, float y0, float z0,
+                                      float nx, float ny, float nz, MHT *mht,
+                                      double *pdist, int vno) {
   double dist, min_dist, U0[3], U1[3], U2[3], pt[3], dir[3], int_pt[3], dot;
   float x, y, z, dx, dy, dz;
   FACE *face;
   int i, found, fno, ret;
-  static MHBT *prev_bucket = NULL;
+  static MHBT *prev_bucket = nullptr;
 
   dist = *pdist;
   dir[0] = nx;
@@ -1386,7 +1361,7 @@ int mrisDirectionTriangleIntersection(
   min_dist = 10000.0f;
 
   MHBT *bucket = MHTacqBucket(mht, x, y, z);
-  if (bucket == NULL) {
+  if (bucket == nullptr) {
     return (0);
   }
 
@@ -1396,7 +1371,8 @@ int mrisDirectionTriangleIntersection(
   for (bin = bucket->bins, found = i = 0; i < bucket->nused; i++, bin++) {
     fno = bin->fno;
     face = &mris->faces[fno];
-    if (face->v[0] == vno || face->v[1] == vno || face->v[2] == vno) continue;
+    if (face->v[0] == vno || face->v[1] == vno || face->v[2] == vno)
+      continue;
     if (fno == 1287 || fno == 5038) {
       DiagBreak();
     }
@@ -1415,7 +1391,7 @@ int mrisDirectionTriangleIntersection(
       }
     }
   }
-  
+
   MHTrelBucket(&bucket);
   return (found);
 }
@@ -1430,14 +1406,14 @@ int mrisDirectionTriangleIntersection(
   through vertex v intersects any of the triangles at the
   given location.
   ------------------------------------------------------*/
-int mrisAllNormalDirectionCurrentTriangleIntersections(
-    MRIS *mris, VERTEX *v, MHT *mht, double *pdist, int *flist)
-{
+int mrisAllNormalDirectionCurrentTriangleIntersections(MRIS *mris, VERTEX *v,
+                                                       MHT *mht, double *pdist,
+                                                       int *flist) {
   double dist, min_dist, U0[3], U1[3], U2[3], pt[3], dir[3], int_pt[3];
   float nx, ny, nz, x, y, z, dx, dy, dz, dot;
   int i, found, fno, ret;
-  static MHBT *last_bucket = NULL;
-  static VERTEX *last_v = NULL;
+  static MHBT *last_bucket = nullptr;
+  static VERTEX *last_v = nullptr;
 
   dist = *pdist;
   nx = v->nx;
@@ -1454,7 +1430,7 @@ int mrisAllNormalDirectionCurrentTriangleIntersections(
   z = v->z + nz * dist;
 
   MHBT *bucket = MHTacqBucket(mht, x, y, z);
-  if (bucket == NULL) {
+  if (bucket == nullptr) {
     return (-1);
   }
 
@@ -1488,9 +1464,8 @@ int mrisAllNormalDirectionCurrentTriangleIntersections(
       }
       found++;
       if (found == 1000)
-        ErrorExit(ERROR_BADPARM,
-                  "too many intersecting faces.  "
-                  "check filled volume for correctness\n");
+        ErrorExit(ERROR_BADPARM, "too many intersecting faces.  "
+                                 "check filled volume for correctness\n");
       if (dist < min_dist) {
         *pdist = min_dist = dist;
       }
@@ -1502,8 +1477,7 @@ int mrisAllNormalDirectionCurrentTriangleIntersections(
   return (found);
 }
 
-int MRISallocExtraGradients(MRIS *mris)
-{
+int MRISallocExtraGradients(MRIS *mris) {
   if (mris->dx2) {
     return (NO_ERROR); /* already allocated */
   }
@@ -1512,7 +1486,8 @@ int MRISallocExtraGradients(MRIS *mris)
   mris->dy2 = (float *)calloc(mris->nvertices, sizeof(float));
   mris->dz2 = (float *)calloc(mris->nvertices, sizeof(float));
   if (!mris->dx2 || !mris->dy2 || !mris->dz2)
-    ErrorExit(ERROR_NO_MEMORY, "MRISallocExtraGradients: could allocate gradient vectors");
+    ErrorExit(ERROR_NO_MEMORY,
+              "MRISallocExtraGradients: could allocate gradient vectors");
   return (NO_ERROR);
 }
 
@@ -1521,18 +1496,20 @@ static float checkNotNanf(float f) {
   return f;
 }
 
-void MRIScheckForNans(MRIS *mris)
-{
+void MRIScheckForNans(MRIS *mris) {
   int vno;
   for (vno = 0; vno < mris->nvertices; vno++) {
-    VERTEX const * const v = &mris->vertices[vno];
-    checkNotNanf(v->odx); checkNotNanf(v->ody); checkNotNanf(v->odz);
-    checkNotNanf(v-> dx); checkNotNanf(v-> dy); checkNotNanf(v-> dz);
-  }  
+    VERTEX const *const v = &mris->vertices[vno];
+    checkNotNanf(v->odx);
+    checkNotNanf(v->ody);
+    checkNotNanf(v->odz);
+    checkNotNanf(v->dx);
+    checkNotNanf(v->dy);
+    checkNotNanf(v->dz);
+  }
 }
 
-int slprints(char *apch_txt)
-{
+int slprints(char *apch_txt) {
   //
   // PRECONDITIONS
   //      o String <apch_txt> to print to stdout
@@ -1546,11 +1523,11 @@ int slprints(char *apch_txt)
   time_t t;
   char pch_hostname[255];
   size_t len_hostname;
-  char *pch_timeMon = NULL;
-  char *pch_time = NULL;
+  char *pch_timeMon = nullptr;
+  char *pch_time = nullptr;
   char pch_output[65536];
 
-  t = time(NULL);
+  t = time(nullptr);
   len_hostname = 255;
   gethostname(pch_hostname, len_hostname);
   strcpy(pch_hostname, strtok(pch_hostname, "."));
@@ -1564,8 +1541,7 @@ int slprints(char *apch_txt)
   return strlen(pch_output);
 }
 
-void cprints(char *apch_left, char *apch_right)
-{
+void cprints(char *apch_left, char *apch_right) {
   //
   // PRECONDITIONS
   //  o The length of each text string should be such that
@@ -1588,8 +1564,7 @@ void cprints(char *apch_left, char *apch_right)
   fflush(stderr);
 }
 
-void cprintd(const char *apch_left, int a_right)
-{
+void cprintd(const char *apch_left, int a_right) {
   //
   // PRECONDITIONS
   //  o The length of each text string should be such that
@@ -1605,16 +1580,14 @@ void cprintd(const char *apch_left, int a_right)
   sprintf(pch_right, " [ %d ]\n", a_right);
   if (strlen(apch_left)) {
     fprintf(stderr, "%*s", G_LC, apch_left);
-  }
-  else {
+  } else {
     fprintf(stderr, "%*s", G_LC, " ");
   }
   fprintf(stderr, "%*s", G_RC, pch_right);
   fflush(stderr);
 }
 
-void cprintf(char *apch_left, float af_right)
-{
+void cprintf(char *apch_left, float af_right) {
   //
   // PRECONDITIONS
   //  o The length of each text string should be such that
@@ -1630,16 +1603,14 @@ void cprintf(char *apch_left, float af_right)
   sprintf(pch_right, " [ %f ]\n", af_right);
   if (strlen(apch_left)) {
     fprintf(stderr, "%*s", G_LC, apch_left);
-  }
-  else {
+  } else {
     fprintf(stderr, "%*s", G_LC, " ");
   }
   fprintf(stderr, "%*s", G_RC, pch_right);
   fflush(stderr);
 }
 
-short VECTOR_elementIndex_findNotEqual(VECTOR *apV, float af_searchTerm)
-{
+short VECTOR_elementIndex_findNotEqual(VECTOR *apV, float af_searchTerm) {
   //
   // PRECONDITIONS
   //  o The <apV> is a column vector.
@@ -1662,8 +1633,7 @@ short VECTOR_elementIndex_findNotEqual(VECTOR *apV, float af_searchTerm)
   return b_ret;
 }
 
-short VECTOR_elementIndex_find(VECTOR *apV, float af_searchTerm)
-{
+short VECTOR_elementIndex_find(VECTOR *apV, float af_searchTerm) {
   //
   // PRECONDITIONS
   //  o The <apV> is a column vector.
@@ -1685,10 +1655,9 @@ short VECTOR_elementIndex_find(VECTOR *apV, float af_searchTerm)
     }
   return b_ret;
 }
+short MRIS_vertexProgress_print(MRIS *apmris, int avertex,
 
-
-short MRIS_vertexProgress_print(MRIS *apmris, int avertex, const char *apch_message)
-{
+                                const char *apch_message) {
   //
   // PRECONDITIONS
   //  o <avertex> is the current vertex being processed in a stream.
@@ -1706,7 +1675,7 @@ short MRIS_vertexProgress_print(MRIS *apmris, int avertex, const char *apch_mess
   fivePerc = 0.05 * totalVertices;
 
   if (!avertex) {
-    if (apch_message != NULL) {
+    if (apch_message != nullptr) {
       fprintf(stderr, "%*s", G_LC, apch_message);
     }
     fprintf(stderr, " [");
@@ -1716,16 +1685,14 @@ short MRIS_vertexProgress_print(MRIS *apmris, int avertex, const char *apch_mess
   }
   if (avertex == apmris->nvertices - 1) {
     fprintf(stderr, "] ");
-    if (apch_message != NULL) {
+    if (apch_message != nullptr) {
       fprintf(stderr, "%*s\n", 1, "[ ok ]");
     }
   }
   return 1;
 }
 
-
-int signum_eval(float af)
-{
+int signum_eval(float af) {
   //
   // PRECONDITIONS
   //  o <af> is an input float.
@@ -1737,24 +1704,27 @@ int signum_eval(float af)
   return (af < 0) ? -1 : 1;
 }
 
-
 /*!
   \fn int CompareVertexCoords(const void *v1, const void *v2)
-  \brief Compares the xyz coords from two vertices in the VERTEX_SORT structure. This
-  if a function that can be used in qsort to sort vertices by xyz.
+  \brief Compares the xyz coords from two vertices in the VERTEX_SORT structure.
+  This if a function that can be used in qsort to sort vertices by xyz.
  */
-int CompareVertexCoords(const void *v1, const void *v2)
-{
+int CompareVertexCoords(const void *v1, const void *v2) {
   VERTEX_SORT *vtx1, *vtx2;
-  vtx1 = (VERTEX_SORT*) v1;
-  vtx2 = (VERTEX_SORT*) v2;
+  vtx1 = (VERTEX_SORT *)v1;
+  vtx2 = (VERTEX_SORT *)v2;
   // Traditionally, vertices tended to be sorted in the ydir
-  if(vtx1->y < vtx2->y) return(-1);
-  if(vtx1->y > vtx2->y) return(+1);
-  if(vtx1->x < vtx2->x) return(-1);
-  if(vtx1->x > vtx2->x) return(+1);
-  if(vtx1->z < vtx2->z) return(-1);
-  return(+1);
+  if (vtx1->y < vtx2->y)
+    return (-1);
+  if (vtx1->y > vtx2->y)
+    return (+1);
+  if (vtx1->x < vtx2->x)
+    return (-1);
+  if (vtx1->x > vtx2->x)
+    return (+1);
+  if (vtx1->z < vtx2->z)
+    return (-1);
+  return (+1);
 }
 
 /*!
@@ -1763,15 +1733,19 @@ int CompareVertexCoords(const void *v1, const void *v2)
   structure. This if a function that can be used in qsort to sort
   faces by vertex index.
  */
-int CompareFaceVertices(const void *vf1, const void *vf2)
-{
+int CompareFaceVertices(const void *vf1, const void *vf2) {
   FACE_SORT *f1, *f2;
-  f1 = (FACE_SORT*) vf1;
-  f2 = (FACE_SORT*) vf2;
-  if(f1->v0 < f2->v0) return(-1);
-  if(f1->v0 > f2->v0) return(+1);
-  if(f1->v1 < f2->v1) return(-1);
-  if(f1->v1 > f2->v1) return(+1);
-  if(f1->v2 < f2->v2) return(-1);
-  return(+1);
+  f1 = (FACE_SORT *)vf1;
+  f2 = (FACE_SORT *)vf2;
+  if (f1->v0 < f2->v0)
+    return (-1);
+  if (f1->v0 > f2->v0)
+    return (+1);
+  if (f1->v1 < f2->v1)
+    return (-1);
+  if (f1->v1 > f2->v1)
+    return (+1);
+  if (f1->v2 < f2->v2)
+    return (-1);
+  return (+1);
 }

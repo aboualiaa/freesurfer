@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: greve $
  *    $Date: 2016/11/01 20:25:03 $
@@ -23,8 +23,6 @@
  *
  */
 
-
-
 #ifndef FMRIUTILS_INC
 #define FMRIUTILS_INC
 
@@ -37,48 +35,46 @@
 #endif
 
 /*---------------------------------------------------------*/
-typedef struct
-{
-  GLMMAT *glm;       // Holds all the glm stuff
-  MRI *y;            // Input data
-  MATRIX *Xg;        // Global regressor matrix
-  int npvr;          // Number of per-voxel regressors
-  MRI *pvr[50];      // Per-voxel regressors (local)
-  int nregtot;       // Total number of regressors
+typedef struct {
+  GLMMAT *glm;  // Holds all the glm stuff
+  MRI *y;       // Input data
+  MATRIX *Xg;   // Global regressor matrix
+  int npvr;     // Number of per-voxel regressors
+  MRI *pvr[50]; // Per-voxel regressors (local)
+  int nregtot;  // Total number of regressors
 
-  int pervoxflag;    // 1 if X is per-voxel
-  int XgLoaded;      // 1 if Xg has been loaded into glm->X
+  int pervoxflag; // 1 if X is per-voxel
+  int XgLoaded;   // 1 if Xg has been loaded into glm->X
 
-  MRI *w;            // Per-voxel, per-input weight
-  MATRIX *wg;        // Global weight vector
-  int skipweight;    // Don't use weight even if w != NULL
-  MRI *mask;         // Only proc within mask
-  int n_ill_cond;    // Number of ill-conditioned voxels
+  MRI *w;         // Per-voxel, per-input weight
+  MATRIX *wg;     // Global weight vector
+  int skipweight; // Don't use weight even if w != NULL
+  MRI *mask;      // Only proc within mask
+  int n_ill_cond; // Number of ill-conditioned voxels
 
-  MRI *yffxvar;      // Fixed effects variance of each y
-  int ffxdof;        // Fixed effects DOF
+  MRI *yffxvar; // Fixed effects variance of each y
+  int ffxdof;   // Fixed effects DOF
 
-  MRI *cond;         // condition of X'*X
-  int condsave;      // Flag to compute and save cond
-  MRI *beta;         // beta = inv(X'*X)*X'*y
-  MRI *yhat;         // yhat = X*beta
-  int yhatsave;      // Flag to save yhat
-  MRI *eres;         // eres = y - yhat
-  MRI *rvar;         // rvar = sum(eres.^2)/DOF;
+  MRI *cond;    // condition of X'*X
+  int condsave; // Flag to compute and save cond
+  MRI *beta;    // beta = inv(X'*X)*X'*y
+  MRI *yhat;    // yhat = X*beta
+  int yhatsave; // Flag to save yhat
+  MRI *eres;    // eres = y - yhat
+  MRI *rvar;    // rvar = sum(eres.^2)/DOF;
 
-  MRI *gamma[100];   // gamma = C*beta
+  MRI *gamma[100];    // gamma = C*beta
   MRI *gammaVar[100]; // gamma variance (t-tests only)
-  MRI *F[100];       // F = gamma'*inv(C*inv(XtX)C')*gamma/(rvar*J)
-  MRI *p[100];       // p = significance of the F
-  MRI *z[100];       // z derived from p
-  MRI *pcc[100];     // partial correlation coeff
-  MRI *ypmf[100];    // partial model fit for each contrast
-  MRI *FrameMask;    // Exclude a frame at a voxel if 0
-}
-MRIGLM;
+  MRI *F[100];        // F = gamma'*inv(C*inv(XtX)C')*gamma/(rvar*J)
+  MRI *p[100];        // p = significance of the F
+  MRI *z[100];        // z derived from p
+  MRI *pcc[100];      // partial correlation coeff
+  MRI *ypmf[100];     // partial model fit for each contrast
+  MRI *FrameMask;     // Exclude a frame at a voxel if 0
+} MRIGLM;
 /*---------------------------------------------------------*/
 
-const char *fMRISrcVersion(void);
+const char *fMRISrcVersion();
 MRI *fMRImatrixMultiply(MRI *inmri, MATRIX *M, MRI *outmri);
 MRI *fMRIcovariance(MRI *fmri, int Lag, float DOFAdjust, MRI *mask, MRI *covar);
 
@@ -92,9 +88,8 @@ MRI *fMRIndrop(MRI *inmri, int ndrop, MRI *outmri);
 MRI *fMRIframe(MRI *inmri, int frame, MRI *outmri);
 MRI *fMRIinsertFrame(MRI *srcmri, int srcframe, MRI *fmri, int frame);
 
-
-MATRIX *MRItoMatrix(MRI *mri, int c, int r, int s,
-                    int Mrows, int Mcols, MATRIX *M);
+MATRIX *MRItoMatrix(MRI *mri, int c, int r, int s, int Mrows, int Mcols,
+                    MATRIX *M);
 MATRIX *MRItoSymMatrix(MRI *mri, int c, int r, int s, MATRIX *M);
 int MRIfromMatrix(MRI *mri, int c, int r, int s, MATRIX *M, MRI *FrameMask);
 int MRIfromSymMatrix(MRI *mri, int c, int r, int s, MATRIX *M);
@@ -111,18 +106,18 @@ MRI *MRIvolMax(MRI *invol, MRI *out);
 MRI *MRIvolMaxIndex(MRI *invol, int base, MRI *mask, MRI *out);
 MRI *MRIvolMin(MRI *invol, MRI *out);
 MRI *MRIconjunct(MRI *invol, MRI *out);
-double MRIframeMax(MRI *vol, int frame, MRI *mask, int absflag,
-                   int *cmax, int *rmax, int *smax);
+double MRIframeMax(MRI *vol, int frame, MRI *mask, int absflag, int *cmax,
+                   int *rmax, int *smax);
 MRI *MRIframeMean(MRI *vol, MRI *volmn);
 MRI *MRIframeMedian(MRI *vol, MRI *volmn);
 MRI *fMRIdetrend(MRI *y, MATRIX *X);
 MRI *fMRItemporalAR1(MRI *fmri, float DOFAdjust, MRI *mask, MRI *ar1);
 MRI *fMRIspatialAR1(MRI *src, MRI *mask, MRI *ar1);
 MRI *fMRIspatialAR2(MRI *src, MRI *mask, MRI *ar2);
-int fMRIspatialAR1Mean(MRI *ar1, MRI *mask, double *car1mn,
-                       double *rar1mn,double *sar1mn);
-int fMRIspatialAR2Mean(MRI *src, MRI *mask, double *car2mn,
-                       double *rar2mn,double *sar2mn);
+int fMRIspatialAR1Mean(MRI *ar1, MRI *mask, double *car1mn, double *rar1mn,
+                       double *sar1mn);
+int fMRIspatialAR2Mean(MRI *src, MRI *mask, double *car2mn, double *rar2mn,
+                       double *sar2mn);
 MRI *fMRIaddOffset(MRI *in, MRI *offset, MRI *mask, MRI *out);
 MRI *fMRIsubSample(MRI *f, int Start, int Delta, int Stop, MRI *fsub);
 MRI *fMRIexcludeFrames(MRI *f, int *ExcludeFrames, int nExclude, MRI *fex);

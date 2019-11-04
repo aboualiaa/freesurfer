@@ -31,19 +31,19 @@ class QSpinBox;
 class QDoubleSpinBox;
 class QLineEdit;
 
-class UIUpdateHelper
-{
+class UIUpdateHelper {
 public:
   UIUpdateHelper();
 
-  void ShowWidgets( const QList<QWidget*>& widgets, bool bShow );
-  void EnableWidgets( const QList<QWidget*>& widgets, bool bEnable );
+  void ShowWidgets(const QList<QWidget *> &widgets, bool bShow);
+  void EnableWidgets(const QList<QWidget *> &widgets, bool bEnable);
 
-  void ChangeLineEditText( QLineEdit* w, const QString& strg );
-  void ChangeLineEditNumber( QLineEdit* w, double val, int precise = 2, bool ignoreFocus = false );
-  void ChangeSpinBoxValue( QSpinBox* w, int nVal );
-  void ChangeDoubleSpinBoxValue( QDoubleSpinBox* w, double dVal );
-  void BlockAllSignals(QWidget* w, bool bBlock);
+  void ChangeLineEditText(QLineEdit *w, const QString &strg);
+  void ChangeLineEditNumber(QLineEdit *w, double val, int precise = 2,
+                            bool ignoreFocus = false);
+  void ChangeSpinBoxValue(QSpinBox *w, int nVal);
+  void ChangeDoubleSpinBoxValue(QDoubleSpinBox *w, double dVal);
+  void BlockAllSignals(QWidget *w, bool bBlock);
 };
 
 #endif // UIUPDATEHELPER_H

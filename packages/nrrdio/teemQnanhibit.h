@@ -22,7 +22,6 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-
 /*
 ** the end result of this is that the source file which includes
 ** this can be sure that TEEM_QNANHIBIT is set, and can be sure that
@@ -30,11 +29,11 @@
 */
 
 #ifndef TEEM_QNANHIBIT
-#  error TEEM_QNANHIBIT not defined, see architecture-specific .mk file or check compilation options
+#error TEEM_QNANHIBIT not defined, see architecture-specific .mk file or check compilation options
 #elif TEEM_QNANHIBIT == 1
-#  /* okay, its 1 */
+#/* okay, its 1 */
 #elif TEEM_QNANHIBIT == 0
-#  /* okay, its 0 */
+#/* okay, its 0 */
 #else
-#  error TEEM_QNANHIBIT not set to 0 or 1, see architecture-specific .mk file or check compilation options
+#error TEEM_QNANHIBIT not set to 0 or 1, see architecture-specific .mk file or check compilation options
 #endif

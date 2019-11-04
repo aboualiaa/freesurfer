@@ -27,14 +27,12 @@
 
 #include "gca.h"
 
-namespace Freesurfer
-{
+namespace Freesurfer {
 
-void GetGCAstats( const GCA* const src );
+void GetGCAstats(const GCA *const src);
 
-void GetGCAnodeStats( const GCA* const src );
-void GetGCApriorStats( const GCA* const src );
-}
-
+void GetGCAnodeStats(const GCA *const src);
+void GetGCApriorStats(const GCA *const src);
+} // namespace Freesurfer
 
 #endif

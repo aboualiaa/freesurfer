@@ -55,18 +55,16 @@ class QVTKInteractorInternal;
  * @sa QVTKOpenGLNativeWidget
  */
 
-class VTKGUISUPPORTQT_EXPORT QVTKInteractor : public vtkRenderWindowInteractor
-{
+class VTKGUISUPPORTQT_EXPORT QVTKInteractor : public vtkRenderWindowInteractor {
 public:
-  static QVTKInteractor* New();
-  vtkTypeMacro(QVTKInteractor,vtkRenderWindowInteractor);
+  static QVTKInteractor *New();
+  vtkTypeMacro(QVTKInteractor, vtkRenderWindowInteractor);
 
   /**
    * Enum for additional event types supported.
    * These events can be picked up by command observers on the interactor.
    */
-  enum vtkCustomEvents
-  {
+  enum vtkCustomEvents {
     ContextMenuEvent = vtkCommand::UserEvent + 100,
     DragEnterEvent,
     DragMoveEvent,
@@ -114,7 +112,8 @@ protected:
   ~QVTKInteractor() override;
 
   // create a Qt Timer
-  int InternalCreateTimer(int timerId, int timerType, unsigned long duration) override;
+  int InternalCreateTimer(int timerId, int timerType,
+                          unsigned long duration) override;
   // destroy a Qt Timer
   int InternalDestroyTimer(int platformTimerId) override;
 #if defined(VTK_USE_TDX) && defined(Q_OS_WIN)
@@ -128,12 +127,10 @@ protected:
 #endif
 
 private:
+  QVTKInteractorInternal *Internal;
 
-  QVTKInteractorInternal* Internal;
-
-  QVTKInteractor(const QVTKInteractor&) = delete;
-  void operator=(const QVTKInteractor&) = delete;
-
+  QVTKInteractor(const QVTKInteractor &) = delete;
+  void operator=(const QVTKInteractor &) = delete;
 };
 
 #include <map>
@@ -142,19 +139,19 @@ class QSignalMapper;
 class QTimer;
 
 // internal class, do not use
-class QVTKInteractorInternal : public QObject
-{
+class QVTKInteractorInternal : public QObject {
   Q_OBJECT
 public:
-  QVTKInteractorInternal(QVTKInteractor* p);
+  QVTKInteractorInternal(QVTKInteractor *p);
   ~QVTKInteractorInternal() override;
 public Q_SLOTS:
   void TimerEvent(int id);
+
 public:
-  QSignalMapper* SignalMapper;
-  typedef std::map<int, QTimer*> TimerMap;
+  QSignalMapper *SignalMapper;
+  typedef std::map<int, QTimer *> TimerMap;
   TimerMap Timers;
-  QVTKInteractor* Parent;
+  QVTKInteractor *Parent;
 };
 
 #endif

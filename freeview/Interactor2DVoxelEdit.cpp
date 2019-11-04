@@ -28,26 +28,25 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 
-Interactor2DVoxelEdit::Interactor2DVoxelEdit( QObject* parent ) :
-  Interactor2DVolumeEdit( "MRI", parent )
-{}
+Interactor2DVoxelEdit::Interactor2DVoxelEdit(QObject *parent)
+    : Interactor2DVolumeEdit("MRI", parent) {}
 
-bool Interactor2DVoxelEdit::ProcessMouseDownEvent( QMouseEvent* event, RenderView* view )
-{
+bool Interactor2DVoxelEdit::ProcessMouseDownEvent(QMouseEvent *event,
+                                                  RenderView *view) {
   return Interactor2DVolumeEdit::ProcessMouseDownEvent(event, view);
 }
 
-bool Interactor2DVoxelEdit::ProcessMouseUpEvent( QMouseEvent* event, RenderView* view )
-{
+bool Interactor2DVoxelEdit::ProcessMouseUpEvent(QMouseEvent *event,
+                                                RenderView *view) {
   return Interactor2DVolumeEdit::ProcessMouseUpEvent(event, view);
 }
 
-bool Interactor2DVoxelEdit::ProcessKeyDownEvent( QKeyEvent* event, RenderView* renderview )
-{
+bool Interactor2DVoxelEdit::ProcessKeyDownEvent(QKeyEvent *event,
+                                                RenderView *renderview) {
   return Interactor2DVolumeEdit::ProcessKeyDownEvent(event, renderview);
 }
 
-bool Interactor2DVoxelEdit::ProcessKeyUpEvent( QKeyEvent* event, RenderView* renderview )
-{
+bool Interactor2DVoxelEdit::ProcessKeyUpEvent(QKeyEvent *event,
+                                              RenderView *renderview) {
   return Interactor2DVolumeEdit::ProcessKeyUpEvent(event, renderview);
 }

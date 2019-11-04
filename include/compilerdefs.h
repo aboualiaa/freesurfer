@@ -1,7 +1,8 @@
 #pragma once
 /*
   The following are taken from boost/predef
-  Ideally we would use that library, but it only appeared in boost 1.55 (Nov 2013)
+  Ideally we would use that library, but it only appeared in boost 1.55 (Nov
+  2013)
  */
 
 #ifdef BOOST_VERSION

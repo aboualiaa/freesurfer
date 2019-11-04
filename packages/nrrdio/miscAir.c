@@ -22,7 +22,6 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-
 #include "NrrdIO.h"
 #include "teem32bit.h"
 /* timer functions */
@@ -42,40 +41,26 @@
 ** the Teem version number and release date.  Originated in version 1.5;
 ** use of TEEM_VERSION #defines started in 1.9
 */
-const char *
-airTeemVersion = TEEM_VERSION_STRING;
-const char *
-airTeemReleaseDate = "26 December 2005";
+const char *airTeemVersion = TEEM_VERSION_STRING;
+const char *airTeemReleaseDate = "26 December 2005";
 
-double
-_airSanityHelper(double val)
-{
-  return val*val*val;
-}
+double _airSanityHelper(double val) { return val * val * val; }
 
 /*
 ******** airNull()
 **
 ** returns NULL
 */
-void *
-airNull(void)
-{
-
-  return NULL;
-}
+void *airNull(void) { return NULL; }
 
 /*
 ******** airSetNull
 **
 ** dereferences and sets to NULL, returns NULL
 */
-void *
-airSetNull(void **ptrP)
-{
+void *airSetNull(void **ptrP) {
 
-  if (ptrP)
-  {
+  if (ptrP) {
     *ptrP = NULL;
   }
   return NULL;
@@ -87,12 +72,9 @@ airSetNull(void **ptrP)
 ** to facilitate setting a newly free()'d pointer; always returns NULL.
 ** also makes sure that NULL is not passed to free().
 */
-void *
-airFree(void *ptr)
-{
+void *airFree(void *ptr) {
 
-  if (ptr)
-  {
+  if (ptr) {
     free(ptr);
   }
   return NULL;
@@ -107,28 +89,21 @@ airFree(void *ptr)
 ** Does not error checking.  If fopen fails, then C' errno and strerror are
 ** left untouched for the caller to access.
 */
-FILE *
-airFopen(const char *name, FILE *std, const char *mode)
-{
+FILE *airFopen(const char *name, FILE *std, const char *mode) {
   FILE *ret;
 
-  if (!strcmp(name, "-"))
-  {
+  if (!strcmp(name, "-")) {
     ret = std;
 #ifdef _MSC_VER
-    if (strchr(mode, 'b'))
-    {
+    if (strchr(mode, 'b')) {
       _setmode(_fileno(ret), _O_BINARY);
     }
 #endif
-  }
-  else
-  {
+  } else {
     ret = fopen(name, mode);
   }
   return ret;
 }
-
 
 /*
 ******** airFclose()
@@ -137,14 +112,10 @@ airFopen(const char *name, FILE *std, const char *mode)
 ** also makes sure that NULL is not passed to fclose(), and won't close
 ** stdin, stdout, or stderr (its up to the user to open these correctly)
 */
-FILE *
-airFclose(FILE *file)
-{
+FILE *airFclose(FILE *file) {
 
-  if (file)
-  {
-    if (!( stdin == file || stdout == file || stderr == file ))
-    {
+  if (file) {
+    if (!(stdin == file || stdout == file || stderr == file)) {
       fclose(file);
     }
   }
@@ -169,13 +140,11 @@ airFclose(FILE *file)
 **
 ** Someday I'll find/write a complete {f|s|}printf replacement ...
 */
-int
-airSinglePrintf(FILE *file, char *str, const char *_fmt, ...)
-{
+int airSinglePrintf(FILE *file, char *str, const char *_fmt, ...) {
   char *fmt, buff[AIR_STRLEN_LARGE];
-  double val=0, gVal, fVal;
+  double val = 0, gVal, fVal;
   int ret, isF, isD, cls;
-  char *conv=NULL, *p0, *p1, *p2, *p3, *p4, *p5;
+  char *conv = NULL, *p0, *p1, *p2, *p3, *p4, *p5;
   va_list ap;
 
   va_start(ap, _fmt);
@@ -193,32 +162,25 @@ airSinglePrintf(FILE *file, char *str, const char *_fmt, ...)
   /* the code here says "isF" and "isD" as if it means "is float" or
      "is double".  It really should be "is2" or "is3", as in,
      "is 2-character conversion sequence, or "is 3-character..." */
-  if (isF)
-  {
+  if (isF) {
     conv = p0 ? p0 : (p1 ? p1 : p2);
   }
-  if (isD)
-  {
+  if (isD) {
     conv = p3 ? p3 : (p4 ? p4 : p5);
   }
-  if (isF || isD)
-  {
+  if (isF || isD) {
     /* use "double" instead of "float" because var args are _always_
        subject to old-style C type promotions: float promotes to double */
     val = va_arg(ap, double);
     cls = airFPClass_d(val);
-    switch (cls)
-    {
+    switch (cls) {
     case airFP_SNAN:
     case airFP_QNAN:
     case airFP_POS_INF:
     case airFP_NEG_INF:
-      if (isF)
-      {
+      if (isF) {
         memmove(conv, "%s", 2);
-      }
-      else
-      {
+      } else {
         /* this sneakiness allows us to replace a 3-character conversion
            sequence for a double (such as %lg) with a 3-character conversion
            for a string, which we know has at most 4 characters */
@@ -226,9 +188,9 @@ airSinglePrintf(FILE *file, char *str, const char *_fmt, ...)
       }
       break;
     }
-#define PRINT(F, S, C, V) ((F) ? fprintf((F),(C),(V)) : sprintf((S),(C),(V)))
-    switch (cls)
-    {
+#define PRINT(F, S, C, V)                                                      \
+  ((F) ? fprintf((F), (C), (V)) : sprintf((S), (C), (V)))
+    switch (cls) {
     case airFP_SNAN:
     case airFP_QNAN:
       ret = PRINT(file, str, fmt, "NaN");
@@ -240,22 +202,17 @@ airSinglePrintf(FILE *file, char *str, const char *_fmt, ...)
       ret = PRINT(file, str, fmt, "-inf");
       break;
     default:
-      if (p2 || p5)
-      {
+      if (p2 || p5) {
         /* got "%g" or "%lg", see if it would be better to use "%f" */
         sprintf(buff, "%f", val);
         sscanf(buff, "%lf", &fVal);
         sprintf(buff, "%g", val);
         sscanf(buff, "%lf", &gVal);
-        if (fVal != gVal)
-        {
+        if (fVal != gVal) {
           /* using %g (or %lg) lost precision!! Use %f (or %lf) instead */
-          if (p2)
-          {
+          if (p2) {
             memmove(conv, "%f", 2);
-          }
-          else
-          {
+          } else {
             memmove(conv, "%lf", 3);
           }
         }
@@ -263,9 +220,7 @@ airSinglePrintf(FILE *file, char *str, const char *_fmt, ...)
       ret = PRINT(file, str, fmt, val);
       break;
     }
-  }
-  else
-  {
+  } else {
     /* conversion sequence is neither for float nor double */
     ret = file ? vfprintf(file, fmt, ap) : vsprintf(str, fmt, ap);
   }
@@ -280,5 +235,3 @@ const int airMy32Bit = 1;
 #else
 const int airMy32Bit = 0;
 #endif
-
-

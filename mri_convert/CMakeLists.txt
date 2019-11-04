@@ -7,7 +7,7 @@ include_directories(${FS_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/packages/dicom)
 
 add_executable(mri_convert mri_convert.cpp)
 add_help(mri_convert mri_convert.help.xml)
-target_link_libraries(mri_convert utils)
+target_link_libraries(mri_convert utils fmt)
 
 install(TARGETS mri_convert DESTINATION bin)
 

@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:23 $
@@ -23,11 +23,10 @@
  *
  */
 
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <ctype.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+#include <cctype>
 
 #include "mri.h"
 #include "macros.h"
@@ -41,284 +40,274 @@
 #include "mri.h"
 #include "version.h"
 
-int main(int argc, char *argv[]) ;
-static int get_option(int argc, char *argv[]) ;
-MRI *MRImarkTemporalWM(MRI *mri_seg, MRI *mri_dst) ;
+int main(int argc, char *argv[]);
+static int get_option(int argc, char *argv[]);
+MRI *MRImarkTemporalWM(MRI *mri_seg, MRI *mri_dst);
 
-const char *Progname ;
-static void usage_exit(int code) ;
+const char *Progname;
+static void usage_exit(int code);
 
-static char *seg_dir = "seg" ;
+static char *seg_dir = "seg";
 
-static char subjects_dir[STRLEN] ;
+static char subjects_dir[STRLEN];
 
-int
-main(int argc, char *argv[]) {
-  char         **av, fname[STRLEN], *out_fname, *subject_name, *cp ;
-  int          ac, nargs ;
-  int          msec, minutes, seconds ;
-  Timer start ;
-  MRI          *mri_seg, *mri_dst ;
+int main(int argc, char *argv[]) {
+  char **av, fname[STRLEN], *out_fname, *subject_name, *cp;
+  int ac, nargs;
+  int msec, minutes, seconds;
+  Timer start;
+  MRI *mri_seg, *mri_dst;
 
   /* rkt: check for and handle version tag */
-  nargs = handle_version_option (argc, argv, "$Id: mri_mark_temporal_lobe.c,v 1.5 2011/03/02 00:04:23 nicks Exp $", "$Name:  $");
+  nargs = handle_version_option(
+      argc, argv,
+      "$Id: mri_mark_temporal_lobe.c,v 1.5 2011/03/02 00:04:23 nicks Exp $",
+      "$Name:  $");
   if (nargs && argc - nargs == 1)
-    exit (0);
+    exit(0);
   argc -= nargs;
 
-  Progname = argv[0] ;
-  ErrorInit(NULL, NULL, NULL) ;
-  DiagInit(NULL, NULL, NULL) ;
+  Progname = argv[0];
+  ErrorInit(NULL, NULL, NULL);
+  DiagInit(nullptr, nullptr, nullptr);
 
-  start.reset() ;
+  start.reset();
 
-  ac = argc ;
-  av = argv ;
-  for ( ; argc > 1 && ISOPTION(*argv[1]) ; argc--, argv++) {
-    nargs = get_option(argc, argv) ;
-    argc -= nargs ;
-    argv += nargs ;
+  ac = argc;
+  av = argv;
+  for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
+    nargs = get_option(argc, argv);
+    argc -= nargs;
+    argv += nargs;
   }
 
   if (!strlen(subjects_dir)) /* hasn't been set on command line */
   {
-    cp = getenv("SUBJECTS_DIR") ;
+    cp = getenv("SUBJECTS_DIR");
     if (!cp)
       ErrorExit(ERROR_BADPARM, "%s: SUBJECTS_DIR not defined in environment",
                 Progname);
-    strcpy(subjects_dir, cp) ;
+    strcpy(subjects_dir, cp);
     if (argc < 3)
-      usage_exit(1) ;
+      usage_exit(1);
   }
 
+  out_fname = argv[argc - 1];
 
-  out_fname = argv[argc-1] ;
-
-  subject_name = argv[1] ;
-  sprintf(fname, "%s/%s/mri/%s", subjects_dir, subject_name, seg_dir) ;
-  mri_seg = MRIread(fname) ;
+  subject_name = argv[1];
+  sprintf(fname, "%s/%s/mri/%s", subjects_dir, subject_name, seg_dir);
+  mri_seg = MRIread(fname);
   if (!mri_seg)
-    ErrorExit(ERROR_NOFILE, "%s: could not read segmentation file %s",
-              Progname, fname) ;
-  mri_dst = MRImarkTemporalWM(mri_seg, NULL) ;
+    ErrorExit(ERROR_NOFILE, "%s: could not read segmentation file %s", Progname,
+              fname);
+  mri_dst = MRImarkTemporalWM(mri_seg, nullptr);
 
-  sprintf(fname, "%s/%s/mri/%s", subjects_dir, subject_name, out_fname) ;
-  printf("writing labeled temporal lobe to %s...\n", fname) ;
-  MRIwrite(mri_dst, fname) ;
-  MRIfree(&mri_dst) ;
-  msec = start.milliseconds() ;
-  seconds = nint((float)msec/1000.0f) ;
-  minutes = seconds / 60 ;
-  seconds = seconds % 60 ;
+  sprintf(fname, "%s/%s/mri/%s", subjects_dir, subject_name, out_fname);
+  printf("writing labeled temporal lobe to %s...\n", fname);
+  MRIwrite(mri_dst, fname);
+  MRIfree(&mri_dst);
+  msec = start.milliseconds();
+  seconds = nint((float)msec / 1000.0f);
+  minutes = seconds / 60;
+  seconds = seconds % 60;
   printf("temporal lobe marking took %d minutes"
-         " and %d seconds.\n", minutes, seconds) ;
-  exit(0) ;
-  return(0) ;
+         " and %d seconds.\n",
+         minutes, seconds);
+  exit(0);
+  return (0);
 }
 /*----------------------------------------------------------------------
             Parameters:
 
            Description:
 ----------------------------------------------------------------------*/
-static int
-get_option(int argc, char *argv[]) {
-  int  nargs = 0 ;
-  char *option ;
+static int get_option(int argc, char *argv[]) {
+  int nargs = 0;
+  char *option;
 
-  option = argv[1] + 1 ;            /* past '-' */
+  option = argv[1] + 1; /* past '-' */
   if (!stricmp(option, "DEBUG_VOXEL")) {
-    Gx = atoi(argv[2]) ;
-    Gy = atoi(argv[3]) ;
-    Gz = atoi(argv[4]) ;
-    nargs = 3 ;
-    printf("debugging node (%d, %d, %d)\n", Gx,Gy,Gz) ;
+    Gx = atoi(argv[2]);
+    Gy = atoi(argv[3]);
+    Gz = atoi(argv[4]);
+    nargs = 3;
+    printf("debugging node (%d, %d, %d)\n", Gx, Gy, Gz);
   } else if (!stricmp(option, "PARC_DIR") || !stricmp(option, "SEG_DIR")) {
-    seg_dir = argv[2] ;
-    nargs = 1 ;
-    printf("reading segmentation from subject's mri/%s directory\n",
-           seg_dir) ;
+    seg_dir = argv[2];
+    nargs = 1;
+    printf("reading segmentation from subject's mri/%s directory\n", seg_dir);
   } else if (!stricmp(option, "SDIR")) {
-    strcpy(subjects_dir, argv[2]) ;
-    nargs = 1 ;
-    printf("using %s as subjects directory\n", subjects_dir) ;
-  } else switch (toupper(*option)) {
+    strcpy(subjects_dir, argv[2]);
+    nargs = 1;
+    printf("using %s as subjects directory\n", subjects_dir);
+  } else
+    switch (toupper(*option)) {
     case '?':
     case 'U':
-      usage_exit(0) ;
-      break ;
+      usage_exit(0);
+      break;
     default:
-      fprintf(stderr, "unknown option %s\n", argv[1]) ;
-      exit(1) ;
-      break ;
+      fprintf(stderr, "unknown option %s\n", argv[1]);
+      exit(1);
+      break;
     }
 
-  return(nargs) ;
+  return (nargs);
 }
 /*----------------------------------------------------------------------
             Parameters:
 
            Description:
 ----------------------------------------------------------------------*/
-static void
-usage_exit(int code) {
+static void usage_exit(int code) {
   printf("usage: %s [options] <subject 1> <subject 2> ... <output file>\n",
-         Progname) ;
-  printf(
-    "\t-spacing  - spacing of classifiers in canonical space\n");
-  printf("\t-gradient - use intensity gradient as input to classifier.\n") ;
-  exit(code) ;
+         Progname);
+  printf("\t-spacing  - spacing of classifiers in canonical space\n");
+  printf("\t-gradient - use intensity gradient as input to classifier.\n");
+  exit(code);
 }
 
-MRI *
-MRImarkTemporalWM(MRI *mri_seg, MRI *mri_dst) {
-  int   x, y, z, yi, found_other, found_gray, nchanged, label, i,
-  width, height, depth, left ;
-  MRI   *mri_tmp ;
+MRI *MRImarkTemporalWM(MRI *mri_seg, MRI *mri_dst) {
+  int x, y, z, yi, found_other, found_gray, nchanged, label, i, width, height,
+      depth, left;
+  MRI *mri_tmp;
 
-
-  width = mri_seg->width ;
-  height = mri_seg->height ;
-  depth = mri_seg->depth ;
+  width = mri_seg->width;
+  height = mri_seg->height;
+  depth = mri_seg->depth;
 
   if (!mri_dst)
-    mri_dst = MRIclone(mri_seg, NULL) ;
+    mri_dst = MRIclone(mri_seg, nullptr);
 
-  mri_tmp = MRIcopy(mri_dst, NULL) ;
+  mri_tmp = MRIcopy(mri_dst, nullptr);
 
-  for (z = 0 ; z < depth ; z++) {
-    for (y = 0 ; y < height ; y++) {
-      for (x = 0 ; x < width ; x++) {
-        if (x == Gx && y == Gy && z== Gz)
-          DiagBreak() ;
-        label = MRIvox(mri_seg, x, y, z) ;
+  for (z = 0; z < depth; z++) {
+    for (y = 0; y < height; y++) {
+      for (x = 0; x < width; x++) {
+        if (x == Gx && y == Gy && z == Gz)
+          DiagBreak();
+        label = MRIvox(mri_seg, x, y, z);
         if (!IS_WM(label))
-          continue ;
-        left =
-          (label == Left_Cerebral_White_Matter) ||
-          (label == Left_Temporal_Cerebral_White_Matter) ;
+          continue;
+        left = (label == Left_Cerebral_White_Matter) ||
+               (label == Left_Temporal_Cerebral_White_Matter);
 
-        for (found_other = found_gray = 0, i = 1 ; i <= 3 ; i++) {
-          yi = mri_seg->yi[y+i] ;
-          label = MRIvox(mri_seg, x, yi, z) ;
+        for (found_other = found_gray = 0, i = 1; i <= 3; i++) {
+          yi = mri_seg->yi[y + i];
+          label = MRIvox(mri_seg, x, yi, z);
           if (IS_CORTEX(label))
-            found_gray = 1 ;   /* gray matter inferior */
+            found_gray = 1; /* gray matter inferior */
 
-          yi = mri_seg->yi[y-i] ;
-          label = MRIvox(mri_seg, x, yi, z) ;
+          yi = mri_seg->yi[y - i];
+          label = MRIvox(mri_seg, x, yi, z);
           if (IS_HIPPO(label) || IS_AMYGDALA(label))
-            found_other = 1 ;
+            found_other = 1;
         }
         if (found_other && found_gray) {
-          MRIvox(mri_dst, x, y, z) = left ?
-                                     Left_Cerebral_White_Matter:
-                                     Right_Cerebral_White_Matter ;
-          MRIvox(mri_seg, x, y, z) = left ?
-                                     Left_Temporal_Cerebral_White_Matter:
-                                     Right_Temporal_Cerebral_White_Matter ;
+          MRIvox(mri_dst, x, y, z) =
+              left ? Left_Cerebral_White_Matter : Right_Cerebral_White_Matter;
+          MRIvox(mri_seg, x, y, z) = left
+                                         ? Left_Temporal_Cerebral_White_Matter
+                                         : Right_Temporal_Cerebral_White_Matter;
         }
       }
     }
   }
 
   do {
-    nchanged = 0 ;
-    for (z = 0 ; z < depth ; z++) {
-      for (y = 0 ; y < height ; y++) {
-        for (x = 0 ; x < width ; x++) {
-          if (x == Gx && y == Gy && z== Gz)
-            DiagBreak() ;
+    nchanged = 0;
+    for (z = 0; z < depth; z++) {
+      for (y = 0; y < height; y++) {
+        for (x = 0; x < width; x++) {
+          if (x == Gx && y == Gy && z == Gz)
+            DiagBreak();
           if (MRIvox(mri_dst, x, y, z) > 0)
-            continue ;
-          label = MRIvox(mri_seg, x, y, z) ;
+            continue;
+          label = MRIvox(mri_seg, x, y, z);
           if (!IS_WM(label))
-            continue ;
-          left =
-            (label == Left_Cerebral_White_Matter) ||
-            (label == Left_Temporal_Cerebral_White_Matter) ;
+            continue;
+          left = (label == Left_Cerebral_White_Matter) ||
+                 (label == Left_Temporal_Cerebral_White_Matter);
 
-          for (found_other = found_gray = 0, i = 1 ; i <= 3 ; i++) {
-            yi = mri_seg->yi[y+i] ;
-            label = MRIvox(mri_seg, x, yi, z) ;
+          for (found_other = found_gray = 0, i = 1; i <= 3; i++) {
+            yi = mri_seg->yi[y + i];
+            label = MRIvox(mri_seg, x, yi, z);
             if (IS_CORTEX(label))
-              found_gray = 1 ;   /* gray matter inferior */
+              found_gray = 1; /* gray matter inferior */
 
-            yi = mri_seg->yi[y-i] ;  /* lateral ventricle superior */
-            label = MRIvox(mri_seg, x, yi, z) ;
+            yi = mri_seg->yi[y - i]; /* lateral ventricle superior */
+            label = MRIvox(mri_seg, x, yi, z);
             if (IS_LAT_VENT(label))
-              found_other = 1 ;
+              found_other = 1;
           }
-          if (found_other && found_gray && MRIneighborsOn(mri_dst, x, y,z,1)>0) {
-            nchanged++ ;
-            MRIvox(mri_dst, x, y, z) = left ?
-                                       Left_Cerebral_White_Matter :
-                                       Right_Cerebral_White_Matter ;
-            MRIvox(mri_seg, x, y, z) = left ?
-                                       Left_Temporal_Cerebral_White_Matter :
-                                       Right_Temporal_Cerebral_White_Matter ;
+          if (found_other && found_gray &&
+              MRIneighborsOn(mri_dst, x, y, z, 1) > 0) {
+            nchanged++;
+            MRIvox(mri_dst, x, y, z) =
+                left ? Left_Cerebral_White_Matter : Right_Cerebral_White_Matter;
+            MRIvox(mri_seg, x, y, z) =
+                left ? Left_Temporal_Cerebral_White_Matter
+                     : Right_Temporal_Cerebral_White_Matter;
           }
         }
       }
     }
-  } while (nchanged > 0) ;
+  } while (nchanged > 0);
 
-  for (i = 0 ; i < 3 ; i++) {
-    MRIcopy(mri_dst, mri_tmp) ;
-    for (z = 0 ; z < depth ; z++) {
-      for (y = 0 ; y < height ; y++) {
-        for (x = 0 ; x < width ; x++) {
-          if (x == Gx && y == Gy && z== Gz)
-            DiagBreak() ;
-          label = MRIvox(mri_seg, x, y, z) ;
+  for (i = 0; i < 3; i++) {
+    MRIcopy(mri_dst, mri_tmp);
+    for (z = 0; z < depth; z++) {
+      for (y = 0; y < height; y++) {
+        for (x = 0; x < width; x++) {
+          if (x == Gx && y == Gy && z == Gz)
+            DiagBreak();
+          label = MRIvox(mri_seg, x, y, z);
           if (!IS_WM(label) || (MRIvox(mri_dst, x, y, z) > 0))
-            continue ;
-          left =
-            (label == Left_Cerebral_White_Matter) ||
-            (label == Left_Temporal_Cerebral_White_Matter) ;
+            continue;
+          left = (label == Left_Cerebral_White_Matter) ||
+                 (label == Left_Temporal_Cerebral_White_Matter);
 
-          if (MRIneighborsOn(mri_dst, x, y,z, 1)>= 2) {
-            nchanged++ ;
-            MRIvox(mri_tmp, x, y, z) = left ?
-                                       Left_Cerebral_White_Matter :
-                                       Right_Cerebral_White_Matter ;
-            MRIvox(mri_seg, x, y, z) = left ?
-                                       Left_Temporal_Cerebral_White_Matter :
-                                       Right_Temporal_Cerebral_White_Matter ;
+          if (MRIneighborsOn(mri_dst, x, y, z, 1) >= 2) {
+            nchanged++;
+            MRIvox(mri_tmp, x, y, z) =
+                left ? Left_Cerebral_White_Matter : Right_Cerebral_White_Matter;
+            MRIvox(mri_seg, x, y, z) =
+                left ? Left_Temporal_Cerebral_White_Matter
+                     : Right_Temporal_Cerebral_White_Matter;
           }
         }
       }
     }
-    MRIcopy(mri_tmp, mri_dst) ;
+    MRIcopy(mri_tmp, mri_dst);
   }
   /* now dilate twice to get stray voxels and a bit of main temporal lobe */
-  for (i = 0 ; i < 2 ; i++) {
-    MRIcopy(mri_dst, mri_tmp) ;
-    for (z = 0 ; z < depth ; z++) {
-      for (y = 0 ; y < height ; y++) {
-        for (x = 0 ; x < width ; x++) {
-          if (x == Gx && y == Gy && z== Gz)
-            DiagBreak() ;
-          label = MRIvox(mri_seg, x, y, z) ;
+  for (i = 0; i < 2; i++) {
+    MRIcopy(mri_dst, mri_tmp);
+    for (z = 0; z < depth; z++) {
+      for (y = 0; y < height; y++) {
+        for (x = 0; x < width; x++) {
+          if (x == Gx && y == Gy && z == Gz)
+            DiagBreak();
+          label = MRIvox(mri_seg, x, y, z);
           if (!IS_WM(label) || (MRIvox(mri_dst, x, y, z) > 0))
-            continue ;
-          left =
-            (label == Left_Cerebral_White_Matter) ||
-            (label == Left_Temporal_Cerebral_White_Matter) ;
+            continue;
+          left = (label == Left_Cerebral_White_Matter) ||
+                 (label == Left_Temporal_Cerebral_White_Matter);
 
-          if (MRIneighborsOn(mri_dst, x, y,z, 1)>= 1) {
-            nchanged++ ;
-            MRIvox(mri_tmp, x, y, z) = left ?
-                                       Left_Cerebral_White_Matter :
-                                       Right_Cerebral_White_Matter ;
-            MRIvox(mri_seg, x, y, z) = left ?
-                                       Left_Temporal_Cerebral_White_Matter :
-                                       Right_Temporal_Cerebral_White_Matter ;
+          if (MRIneighborsOn(mri_dst, x, y, z, 1) >= 1) {
+            nchanged++;
+            MRIvox(mri_tmp, x, y, z) =
+                left ? Left_Cerebral_White_Matter : Right_Cerebral_White_Matter;
+            MRIvox(mri_seg, x, y, z) =
+                left ? Left_Temporal_Cerebral_White_Matter
+                     : Right_Temporal_Cerebral_White_Matter;
           }
         }
       }
     }
-    MRIcopy(mri_tmp, mri_dst) ;
+    MRIcopy(mri_tmp, mri_dst);
   }
 
-  MRIfree(&mri_tmp) ;
-  return(mri_dst) ;
+  MRIfree(&mri_tmp);
+  return (mri_dst);
 }

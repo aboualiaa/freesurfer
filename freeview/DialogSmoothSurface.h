@@ -7,8 +7,7 @@ namespace Ui {
 class DialogSmoothSurface;
 }
 
-class DialogSmoothSurface : public QDialog
-{
+class DialogSmoothSurface : public QDialog {
   Q_OBJECT
 
 public:

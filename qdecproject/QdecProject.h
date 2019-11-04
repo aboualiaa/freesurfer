@@ -39,16 +39,14 @@
 
 using namespace std;
 
-class QdecProject
-{
+class QdecProject {
 public:
-
   // Constructors/Destructors
   //
 
-  QdecProject ( );
+  QdecProject();
 
-  virtual ~QdecProject ( );
+  virtual ~QdecProject();
 
   /**
    * Load a .qdec project file (containing all necessary info to begin
@@ -59,9 +57,7 @@ public:
    * @param  isFileName
    * @param  isDataDir
    */
-  int LoadProjectFile ( const char* isFileName,
-			const char* isDataDir = "/tmp" );
-
+  int LoadProjectFile(const char *isFileName, const char *isDataDir = "/tmp");
 
   /**
    * Save all necessary information pertaining to this project
@@ -69,9 +65,7 @@ public:
    * @return int
    * @param  isFileName
    */
-  int SaveProjectFile ( const char* isFileName,
-			const char* isDataDir = "/tmp" );
-
+  int SaveProjectFile(const char *isFileName, const char *isDataDir = "/tmp");
 
   /**
    *
@@ -92,15 +86,14 @@ public:
    * @return int
    * @param isFormat
    */
-  int SetZipCommandFormat ( const char* isFormat );
-  int SetUnzipCommandFormat ( const char* isFormat );
+  int SetZipCommandFormat(const char *isFormat);
+  int SetUnzipCommandFormat(const char *isFormat);
 
   /**
    * @return int
    * @param  isFileName
    */
-  int LoadDataTable ( const char* isFileName );
-
+  int LoadDataTable(const char *isFileName);
 
   /**
    * Check that all subjects exist in the specified subjects_dir (including the
@@ -111,53 +104,46 @@ public:
    * same number of vertices).
    * @return int
    */
-  int VerifySubjects ( );
-
+  int VerifySubjects();
 
   /**
    * @return void
    * @param  iFilePointer
    */
-  void DumpDataTable ( FILE* iFilePointer );
-
+  void DumpDataTable(FILE *iFilePointer);
 
   /**
    * @return bool  true if a table has been loaded
    */
-  bool HaveDataTable ( );
-
+  bool HaveDataTable();
 
   /**
    * @return int
    * @param  isFileName
    */
-  int SaveDataTable ( const char* isFileName );
-
+  int SaveDataTable(const char *isFileName);
 
   /**
    * @return QdecDataTable*
    */
-  QdecDataTable* GetDataTable ( );
-
+  QdecDataTable *GetDataTable();
 
   /**
    * run asegstats2table and aparcstats2table to generate fresurfer stats data
    * on each subject, for later optional inclusion into the main mDataTable
    * creates file aseg_vol.dat, lh_aparc_thickness.dat...
    *
-   * returns the names of the data that were created (aseg_vol, 
+   * returns the names of the data that were created (aseg_vol,
    * lh_aparc_thickness...)
    *
    * @return vector< string >
    */
-  vector< string > CreateStatsDataTables ();
-
+  vector<string> CreateStatsDataTables();
 
   /**
    * @return string   directory where stats data tables are stored
    */
-  string GetStatsDataTablesDir () { return this->msStatsDataTablesDir; }
-  
+  string GetStatsDataTablesDir() { return this->msStatsDataTablesDir; }
 
   /**
    * Merge the factor given by isFactorName from data table iDataTable
@@ -169,12 +155,10 @@ public:
    * @param  isFactorName
    * @param  iDataTable
    */
-  int MergeFactorIntoDataTable ( const char* isFactorName, 
-                                 QdecDataTable* iDataTable )
-  {
-    return this->mDataTable->MergeFactor( isFactorName, iDataTable );
+  int MergeFactorIntoDataTable(const char *isFactorName,
+                               QdecDataTable *iDataTable) {
+    return this->mDataTable->MergeFactor(isFactorName, iDataTable);
   }
-
 
   /**
    * Delete the factor isFactorName from data table
@@ -182,83 +166,70 @@ public:
    * @return int
    * @param  isFactorName
    */
-  int RemoveFactorFromDataTable ( const char* isFactorName )
-  {
-    return this->mDataTable->DeleteFactor( isFactorName );
+  int RemoveFactorFromDataTable(const char *isFactorName) {
+    return this->mDataTable->DeleteFactor(isFactorName);
   }
-
 
   /**
    * @return string
    */
-  string GetSubjectsDir ( );
-
+  string GetSubjectsDir();
 
   /**
    * @param  ifnSubjectsDir
    */
-  int SetSubjectsDir ( const char* ifnSubjectsDir );
-
+  int SetSubjectsDir(const char *ifnSubjectsDir);
 
   /**
    * @return string
    */
-  string GetAverageSubject ( );
-
+  string GetAverageSubject();
 
   /**
    * @param  isSubjectName
    */
-  void SetAverageSubject ( const char* isSubjectName );
-
-
-  /**
-   * @return string
-   */
-  string GetDefaultWorkingDir ( );
-
+  void SetAverageSubject(const char *isSubjectName);
 
   /**
    * @return string
    */
-  string GetWorkingDir ( );
+  string GetDefaultWorkingDir();
 
+  /**
+   * @return string
+   */
+  string GetWorkingDir();
 
   /**
    * @return 0 if ok, 1 on error
    * @param  isWorkingDir
    */
-  int SetWorkingDir ( const char* isWorkingDir );
-
-
-  /**
-   * @return vector< string >
-   */
-  vector< string > GetSubjectIDs ( );
-
+  int SetWorkingDir(const char *isWorkingDir);
 
   /**
    * @return vector< string >
    */
-  vector< string > GetDiscreteFactorNames ( );
-
+  vector<string> GetSubjectIDs();
 
   /**
    * @return vector< string >
    */
-  vector< string > GetContinousFactorNames ( );
+  vector<string> GetDiscreteFactorNames();
 
+  /**
+   * @return vector< string >
+   */
+  vector<string> GetContinousFactorNames();
 
   /**
    * @return string
    */
-  string GetHemi ( );
-
+  string GetHemi();
 
   /**
    *
    * For Surface-based analysis:
-   * 
+   *
    * From the given design parameters, this creates the input data required by
    * mri_glmfit:
    *  - the 'y' data (concatenated subject volumes)
@@ -278,23 +249,19 @@ public:
    * @param  iSmoothnessLevel
    * @param  iProgressUpdateGUI (optional)
    */
-  int CreateGlmDesign ( const char* isName,
-                        const char* isFirstDiscreteFactor,
-                        const char* isSecondDiscreteFactor,
-                        const char* isFirstContinuousFactor,
-                        const char* isSecondContinuousFactor,
-                        const char** isNuisanceFactors,
-                        int iNumNuisanceFactors,
-                        const char* isMeasure,
-                        const char* isHemi,
-                        int iSmoothnessLevel,
-                        ProgressUpdateGUI* iProgressUpdateGUI=NULL );
-
+  int CreateGlmDesign(const char *isName, const char *isFirstDiscreteFactor,
+                      const char *isSecondDiscreteFactor,
+                      const char *isFirstContinuousFactor,
+                      const char *isSecondContinuousFactor,
+                      const char **isNuisanceFactors, int iNumNuisanceFactors,
+                      const char *isMeasure, const char *isHemi,
+                      int iSmoothnessLevel,
+                      ProgressUpdateGUI *iProgressUpdateGUI = nullptr);
 
   /**
    *
    * For Volume-based analysis:
-   * 
+   *
    * From the given design parameters, this creates the input data required by
    * mri_glmfit:
    *  - the 'y' data (data points stuffed into a volume)
@@ -312,54 +279,45 @@ public:
    * @param  isMeasure
    * @param  iProgressUpdateGUI
    */
-  int CreateGlmDesign ( const char* isName,
-                        const char* isFirstDiscreteFactor,
-                        const char* isSecondDiscreteFactor,
-                        const char* isFirstContinuousFactor,
-                        const char* isSecondContinuousFactor,
-                        const char** isNuisanceFactors,
-                        int iNumNuisanceFactors,
-                        const char* isMeasure,
-                        ProgressUpdateGUI* iProgressUpdateGUI );
-
+  int CreateGlmDesign(const char *isName, const char *isFirstDiscreteFactor,
+                      const char *isSecondDiscreteFactor,
+                      const char *isFirstContinuousFactor,
+                      const char *isSecondContinuousFactor,
+                      const char **isNuisanceFactors, int iNumNuisanceFactors,
+                      const char *isMeasure,
+                      ProgressUpdateGUI *iProgressUpdateGUI);
 
   /**
    * @return int
    */
-  int RunGlmFit ( );
-
+  int RunGlmFit();
 
   /**
    * @return QdecGlmFitResults
    */
-  QdecGlmFitResults* GetGlmFitResults ( );
-
+  QdecGlmFitResults *GetGlmFitResults();
 
   /**
-   * Run mri_label2label on each subject, mapping the label that was drawn on 
+   * Run mri_label2label on each subject, mapping the label that was drawn on
    * the average surface to each subject. Optionally supply a window manager
    * to allow posting progress info
    * @return int
    * @param  ifnLabel
    * @param  iProgressUpdateGUI (optional)
    */
-  int GenerateMappedLabelForAllSubjects 
-    ( const char* ifnLabel,
-      ProgressUpdateGUI* iProgressUpdateGUI=NULL );
-
+  int GenerateMappedLabelForAllSubjects(
+      const char *ifnLabel, ProgressUpdateGUI *iProgressUpdateGUI = nullptr);
 
   /**
    * @return QdecGlmDesign
    */
-  QdecGlmDesign* GetGlmDesign ( );
-
+  QdecGlmDesign *GetGlmDesign();
 
   /**
    * The file name of our metadata file, for the project file archive.
    * @return const char*
    */
-  const char* GetMetadataFileName () const;
-
+  const char *GetMetadataFileName() const;
 
   /**
    * Perform substitutions for command format strings. See
@@ -368,43 +326,38 @@ public:
    * (overwriting the contents of iosCommand).
    *
    */
-  void FormatCommandString ( const char* ifnProject,
-			     const char* isExpandedProjectBaseName,
-			     const char* isWorkingDir,
-			     const char* isFormat,
-			     string& iosCommand ) const;
-
+  void FormatCommandString(const char *ifnProject,
+                           const char *isExpandedProjectBaseName,
+                           const char *isWorkingDir, const char *isFormat,
+                           string &iosCommand) const;
 
   /**
    * Run mri_surfcluster using supplied sig.mgh (for a contrast)
-   * and supplied Monte Carlo threshold and sign to generate 
+   * and supplied Monte Carlo threshold and sign to generate
    * cluster-wise correction for multiple comparisons results
    * @return int
    * @param  isThreshold - one of: th13, th20, th23, th30, th33, th40
    * @param  isSign - one of: abs, pos, neg
    * @param  isContrast - name of contrast from which to use sig.mgh
    */
-  int RunMonteCarloSimulation ( const char* isThreshold,
-                                const char* isSign,
-                                const char* isContrast,
-                                const char** osClusterSigFileName );
+  int RunMonteCarloSimulation(const char *isThreshold, const char *isSign,
+                              const char *isContrast,
+                              const char **osClusterSigFileName);
 
 private:
-
   // private attributes
   //
 
-  QdecDataTable* mDataTable;
-  QdecGlmDesign* mGlmDesign;
-  QdecGlmFit* mGlmFitter;
+  QdecDataTable *mDataTable;
+  QdecGlmDesign *mGlmDesign;
+  QdecGlmFit *mGlmFitter;
 
-  // The command format to run to zip and unzip a file. 
+  // The command format to run to zip and unzip a file.
   string msZipCommandFormat;
   string msUnzipCommandFormat;
 
   // directory where stats data tables are stored
   string msStatsDataTablesDir;
-
 };
 
 #endif // QDECPROJECT_H

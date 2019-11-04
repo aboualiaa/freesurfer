@@ -59,37 +59,30 @@ airMopSub() and airMopUnMem were created
 
 #define AIR_MOP_INCR 10
 
-airArray *
-airMopNew()
-{
+airArray *airMopNew() {
 
   return airArrayNew(NULL, NULL, sizeof(airMop), AIR_MOP_INCR);
 }
 
-void
-airMopAdd(airArray *arr, void *ptr, airMopper mop, int when)
-{
+void airMopAdd(airArray *arr, void *ptr, airMopper mop, int when) {
   airMop *mops;
   unsigned int ii;
 
-  if (!arr)
-  {
+  if (!arr) {
     return;
   }
 
   mops = (airMop *)arr->data;
   /* first see if this is something we already set a callback for */
-  for (ii=0; ii<arr->len; ii++)
-  {
-    if (mops[ii].ptr == ptr && mops[ii].mop == mop)
-    {
+  for (ii = 0; ii < arr->len; ii++) {
+    if (mops[ii].ptr == ptr && mops[ii].mop == mop) {
       mops[ii].when = when;
       /* we're done */
       return;
     }
   }
   /* this is a new ptr */
-  ii = airArrayLenIncr(arr, 1);  /* HEY no error checking */
+  ii = airArrayLenIncr(arr, 1); /* HEY no error checking */
   mops = (airMop *)arr->data;
   mops[ii].ptr = ptr;
   mops[ii].mop = mop;
@@ -97,23 +90,18 @@ airMopAdd(airArray *arr, void *ptr, airMopper mop, int when)
   return;
 }
 
-void
-airMopSub(airArray *arr, void *ptr, airMopper mop)
-{
+void airMopSub(airArray *arr, void *ptr, airMopper mop) {
   airMop *mops;
   unsigned int ii;
 
-  if (!arr)
-  {
+  if (!arr) {
     return;
   }
 
   mops = (airMop *)arr->data;
   /* first see if this is something we already set a callback for */
-  for (ii=0; ii<arr->len; ii++)
-  {
-    if (mops[ii].ptr == ptr && mops[ii].mop == mop)
-    {
+  for (ii = 0; ii < arr->len; ii++) {
+    if (mops[ii].ptr == ptr && mops[ii].mop == mop) {
       mops[ii].ptr = NULL;
       mops[ii].mop = NULL;
       mops[ii].when = airMopNever;
@@ -124,13 +112,10 @@ airMopSub(airArray *arr, void *ptr, airMopper mop)
   return;
 }
 
-void
-airMopMem(airArray *arr, void *_ptrP, int when)
-{
+void airMopMem(airArray *arr, void *_ptrP, int when) {
   void **ptrP;
 
-  if (!(arr && _ptrP))
-  {
+  if (!(arr && _ptrP)) {
     return;
   }
 
@@ -146,13 +131,10 @@ airMopMem(airArray *arr, void *_ptrP, int when)
   return;
 }
 
-void
-airMopUnMem(airArray *arr, void *_ptrP)
-{
+void airMopUnMem(airArray *arr, void *_ptrP) {
   void **ptrP;
 
-  if (!(arr && _ptrP))
-  {
+  if (!(arr && _ptrP)) {
     return;
   }
 
@@ -162,44 +144,36 @@ airMopUnMem(airArray *arr, void *_ptrP)
   return;
 }
 
-void *
-_airMopPrint(void *_str)
-{
+void *_airMopPrint(void *_str) {
   char *str;
 
   str = (char *)_str;
-  if (str)
-  {
+  if (str) {
     printf("%s\n", str);
   }
   return NULL;
 }
 
-void
-airMopPrint(airArray *arr, const void *_str, int when)
-{
+void airMopPrint(airArray *arr, const void *_str, int when) {
   char *copy;
 
   if (!(arr && _str))
     return;
 
-  copy = airStrdup((char*)_str);
+  copy = airStrdup((char *)_str);
   airMopAdd(arr, copy, airFree, airMopAlways);
   airMopAdd(arr, copy, _airMopPrint, when);
   return;
 }
 
-char
-_airMopWhenStr[4][128] = {
-                           " never",
-                           " error",
-                           "  okay",
-                           "always",
-                         };
+char _airMopWhenStr[4][128] = {
+    " never",
+    " error",
+    "  okay",
+    "always",
+};
 
-void
-airMopDebug(airArray *arr)
-{
+void airMopDebug(airArray *arr) {
   airMop *mops;
   int i;
 
@@ -208,64 +182,52 @@ airMopDebug(airArray *arr)
 
   mops = (airMop *)arr->data;
   printf("airMopDebug: _________________________ mop stack for 0x%p:\n",
-         (void*)arr);
-  for (i=arr->len-1; i>=0; i--)
-  {
+         (void *)arr);
+  for (i = arr->len - 1; i >= 0; i--) {
     printf("% 4d: ", i);
-    if (NULL == mops[i].mop && NULL == mops[i].ptr
-        && airMopNever == mops[i].when)
-    {
+    if (NULL == mops[i].mop && NULL == mops[i].ptr &&
+        airMopNever == mops[i].when) {
       printf("no-op\n");
       continue;
     }
     /* else */
     printf("%s: ", _airMopWhenStr[mops[i].when]);
-    if (airFree == mops[i].mop)
-    {
-      printf("airFree(0x%p)\n", (void*)(mops[i].ptr));
+    if (airFree == mops[i].mop) {
+      printf("airFree(0x%p)\n", (void *)(mops[i].ptr));
       continue;
     }
-    if ((airMopper)airSetNull == mops[i].mop)
-    {
-      printf("airSetNull(0x%p)\n", (void*)(mops[i].ptr));
+    if ((airMopper)airSetNull == mops[i].mop) {
+      printf("airSetNull(0x%p)\n", (void *)(mops[i].ptr));
       continue;
     }
-    if (_airMopPrint == mops[i].mop)
-    {
-      printf("_airMopPrint(\"%s\" == 0x%p)\n",
-             (char*)(mops[i].ptr), (void*)(mops[i].ptr));
+    if (_airMopPrint == mops[i].mop) {
+      printf("_airMopPrint(\"%s\" == 0x%p)\n", (char *)(mops[i].ptr),
+             (void *)(mops[i].ptr));
       continue;
     }
-    if ((airMopper)airFclose == mops[i].mop)
-    {
-      printf("airFclose(0x%p)\n", (void*)(mops[i].ptr));
+    if ((airMopper)airFclose == mops[i].mop) {
+      printf("airFclose(0x%p)\n", (void *)(mops[i].ptr));
       continue;
     }
     /* else */
-    printf("0x%p(0x%p)\n", (void*)(mops[i].mop), (void*)(mops[i].ptr));
+    printf("0x%p(0x%p)\n", (void *)(mops[i].mop), (void *)(mops[i].ptr));
   }
   printf("airMopDebug: ^^^^^^^^^^^^^^^^^^^^^^^^^\n");
 }
 
-void
-airMopDone(airArray *arr, int error)
-{
+void airMopDone(airArray *arr, int error) {
   airMop *mops;
   int i;
 
   /*
   printf("airMopDone(%p): hello, %s\n", (void*)arr, error ? "error" : "okay");
   */
-  if (arr)
-  {
+  if (arr) {
     mops = (airMop *)arr->data;
-    for (i=arr->len-1; i>=0; i--)
-    {
-      if (mops[i].ptr
-          && (airMopAlways == mops[i].when
-              || (airMopOnError == mops[i].when && error)
-              || (airMopOnOkay == mops[i].when && !error)))
-      {
+    for (i = arr->len - 1; i >= 0; i--) {
+      if (mops[i].ptr && (airMopAlways == mops[i].when ||
+                          (airMopOnError == mops[i].when && error) ||
+                          (airMopOnOkay == mops[i].when && !error))) {
         mops[i].mop(mops[i].ptr);
       }
     }
@@ -277,17 +239,6 @@ airMopDone(airArray *arr, int error)
   return;
 }
 
-void
-airMopError(airArray *arr)
-{
+void airMopError(airArray *arr) { airMopDone(arr, AIR_TRUE); }
 
-  airMopDone(arr, AIR_TRUE);
-}
-
-void
-airMopOkay(airArray *arr)
-{
-
-  airMopDone(arr, AIR_FALSE);
-}
-
+void airMopOkay(airArray *arr) { airMopDone(arr, AIR_FALSE); }

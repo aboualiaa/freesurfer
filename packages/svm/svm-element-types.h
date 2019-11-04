@@ -5,7 +5,7 @@
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
  */
 /*
- * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR 
+ * Original Author: REPLACE_WITH_FULL_NAME_OF_CREATING_AUTHOR
  * CVS Revision Info:
  *    $Author: nicks $
  *    $Date: 2011/03/02 00:04:40 $
@@ -23,7 +23,6 @@
  *
  */
 
-
 ////SVM-LIB////////////////////////////////////////////////////////////////
 //
 // Name: Vector
@@ -34,8 +33,6 @@
 //  Polina Golland polina@ai.mit.edu
 //
 ///////////////////////////////////////////////////////////////////////////
-
-
 
 #ifndef __SVM_ELEMENT_TYPES_H__
 #define __SVM_ELEMENT_TYPES_H__
@@ -49,10 +46,8 @@ typedef Vector<double> DoubleVector;
 typedef Matrix<int> IntMatrix;
 typedef Matrix<double> DoubleMatrix;
 
-
 typedef float SvmReal;
 typedef Vector<SvmReal> SvmRealVector;
 typedef Matrix<SvmReal> SvmRealMatrix;
-
 
 #endif //  __SVM_ELEMENT_TYPES_H__

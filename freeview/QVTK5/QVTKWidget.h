@@ -51,20 +51,19 @@ class vtkImageData;
 #define QT_MAC_USE_COCOA
 
 #if defined(Q_OS_MAC)
-# if defined(QT_MAC_USE_COCOA) && defined(VTK_USE_COCOA)
-#  define QVTK_USE_COCOA
-# elif !defined(QT_MAC_USE_COCOA) && defined(VTK_USE_CARBON)
-#  define QVTK_USE_CARBON
-# elif defined(VTK_USE_COCOA)
-#  error "VTK configured to use Cocoa, but Qt configured to use Carbon"
-# elif defined(VTK_USE_CARBON)
-#  error "VTK configured to use Carbon, but Qt configured to use Cocoa"
-# endif
+#if defined(QT_MAC_USE_COCOA) && defined(VTK_USE_COCOA)
+#define QVTK_USE_COCOA
+#elif !defined(QT_MAC_USE_COCOA) && defined(VTK_USE_CARBON)
+#define QVTK_USE_CARBON
+#elif defined(VTK_USE_COCOA)
+#error "VTK configured to use Cocoa, but Qt configured to use Carbon"
+#elif defined(VTK_USE_CARBON)
+#error "VTK configured to use Carbon, but Qt configured to use Cocoa"
+#endif
 #endif
 
-
 #if defined(QVTK_USE_CARBON)
-#include <Carbon/Carbon.h>    // Event handling for dirty region
+#include <Carbon/Carbon.h> // Event handling for dirty region
 #endif
 
 #include "QVTKWin32Header.h"
@@ -78,40 +77,37 @@ class vtkTDxMacDevice;
 #endif
 
 //! QVTKWidget displays a VTK window in a Qt window.
-class QVTK_EXPORT QVTKWidget : public QWidget
-{
+class QVTK_EXPORT QVTKWidget : public QWidget {
   Q_OBJECT
 
-  Q_PROPERTY(bool automaticImageCacheEnabled
-             READ isAutomaticImageCacheEnabled
-             WRITE setAutomaticImageCacheEnabled)
-  Q_PROPERTY(double maxRenderRateForImageCache
-             READ maxRenderRateForImageCache
-             WRITE setMaxRenderRateForImageCache)
+  Q_PROPERTY(bool automaticImageCacheEnabled READ isAutomaticImageCacheEnabled
+                 WRITE setAutomaticImageCacheEnabled)
+  Q_PROPERTY(double maxRenderRateForImageCache READ maxRenderRateForImageCache
+                 WRITE setMaxRenderRateForImageCache)
 
 public:
   //! constructor
-  QVTKWidget(QWidget* parent = NULL, Qt::WindowFlags f = 0);
+  QVTKWidget(QWidget *parent = NULL, Qt::WindowFlags f = 0);
   //! destructor
   virtual ~QVTKWidget();
 
   // Description:
   // Set the vtk render window, if you wish to use your own vtkRenderWindow
-  virtual void SetRenderWindow(vtkRenderWindow*);
+  virtual void SetRenderWindow(vtkRenderWindow *);
 
   // Description:
   // Get the vtk render window.
-  virtual vtkRenderWindow* GetRenderWindow();
+  virtual vtkRenderWindow *GetRenderWindow();
 
   // Description:
-  // Get the Qt/vtk interactor that was either created by default or set by the user
-  virtual QVTKInteractor* GetInteractor();
+  // Get the Qt/vtk interactor that was either created by default or set by the
+  // user
+  virtual QVTKInteractor *GetInteractor();
 
   // Description:
   // Enum for additional event types supported.
   // These events can be picked up by command observers on the interactor
-  enum vtkCustomEvents
-  {
+  enum vtkCustomEvents {
     ContextMenuEvent = vtkCommand::UserEvent + 100,
     DragEnterEvent,
     DragMoveEvent,
@@ -139,13 +135,13 @@ public:
   // Description:
   // Returns the current image in the window.  If the image cache is up
   // to date, that is returned to avoid grabbing other windows.
-  virtual vtkImageData* cachedImage();
+  virtual vtkImageData *cachedImage();
 
   // Description:
   // Handle showing of the Widget
-  virtual void showEvent(QShowEvent*);
+  virtual void showEvent(QShowEvent *);
 
-  virtual QPaintEngine* paintEngine() const;
+  virtual QPaintEngine *paintEngine() const;
 
   // Description:
   // Use a 3DConnexion device. Initial value is false.
@@ -157,12 +153,11 @@ public:
   void SetUseTDx(bool useTDx);
   bool GetUseTDx() const;
 
-
 Q_SIGNALS:
   // Description:
   // This signal will be emitted whenever a mouse event occurs
   // within the QVTK window
-  void mouseEvent(QMouseEvent* event);
+  void mouseEvent(QMouseEvent *event);
 
   // Description:
   // This signal will be emitted whenever the cached image goes from clean
@@ -189,54 +184,54 @@ public Q_SLOTS:
 
 protected:
   // overloaded resize handler
-  virtual void resizeEvent(QResizeEvent* event);
+  virtual void resizeEvent(QResizeEvent *event);
   // overloaded move handler
-  virtual void moveEvent(QMoveEvent* event);
+  virtual void moveEvent(QMoveEvent *event);
   // overloaded paint handler
-  virtual void paintEvent(QPaintEvent* event);
+  virtual void paintEvent(QPaintEvent *event);
 
   // overloaded mouse press handler
-  virtual void mousePressEvent(QMouseEvent* event);
+  virtual void mousePressEvent(QMouseEvent *event);
   // overloaded mouse move handler
-  virtual void mouseMoveEvent(QMouseEvent* event);
+  virtual void mouseMoveEvent(QMouseEvent *event);
   // overloaded mouse release handler
-  virtual void mouseReleaseEvent(QMouseEvent* event);
+  virtual void mouseReleaseEvent(QMouseEvent *event);
   // overloaded key press handler
-  virtual void keyPressEvent(QKeyEvent* event);
+  virtual void keyPressEvent(QKeyEvent *event);
   // overloaded key release handler
-  virtual void keyReleaseEvent(QKeyEvent* event);
+  virtual void keyReleaseEvent(QKeyEvent *event);
   // overloaded enter event
-  virtual void enterEvent(QEvent*);
+  virtual void enterEvent(QEvent *);
   // overloaded leave event
-  virtual void leaveEvent(QEvent*);
+  virtual void leaveEvent(QEvent *);
 #ifndef QT_NO_WHEELEVENT
   // overload wheel mouse event
-  virtual void wheelEvent(QWheelEvent*);
+  virtual void wheelEvent(QWheelEvent *);
 #endif
   // overload focus event
-  virtual void focusInEvent(QFocusEvent*);
+  virtual void focusInEvent(QFocusEvent *);
   // overload focus event
-  virtual void focusOutEvent(QFocusEvent*);
+  virtual void focusOutEvent(QFocusEvent *);
   // overload Qt's event() to capture more keys
-  bool event( QEvent* e );
+  bool event(QEvent *e);
 
   // overload context menu event
-  virtual void contextMenuEvent(QContextMenuEvent*);
+  virtual void contextMenuEvent(QContextMenuEvent *);
   // overload drag enter event
-  virtual void dragEnterEvent(QDragEnterEvent*);
+  virtual void dragEnterEvent(QDragEnterEvent *);
   // overload drag move event
-  virtual void dragMoveEvent(QDragMoveEvent*);
+  virtual void dragMoveEvent(QDragMoveEvent *);
   // overload drag leave event
-  virtual void dragLeaveEvent(QDragLeaveEvent*);
+  virtual void dragLeaveEvent(QDragLeaveEvent *);
   // overload drop event
-  virtual void dropEvent(QDropEvent*);
+  virtual void dropEvent(QDropEvent *);
 
   // the vtk render window
-  vtkRenderWindow* mRenWin;
+  vtkRenderWindow *mRenWin;
   bool UseTDx;
 
   // the paint engine
-  QPaintEngine* mPaintEngine;
+  QPaintEngine *mPaintEngine;
 
   // set up an X11 window based on a visual and colormap
   // that VTK chooses
@@ -245,22 +240,21 @@ protected:
 #if defined(QVTK_USE_CARBON)
   EventHandlerUPP DirtyRegionHandlerUPP;
   EventHandlerRef DirtyRegionHandler;
-  static OSStatus DirtyRegionProcessor(EventHandlerCallRef er, EventRef event, void*);
+  static OSStatus DirtyRegionProcessor(EventHandlerCallRef er, EventRef event,
+                                       void *);
 #endif
 
 protected:
-
-  vtkImageData* mCachedImage;
+  vtkImageData *mCachedImage;
   bool cachedImageCleanFlag;
   bool automaticImageCache;
   double maxImageCacheRenderRate;
 
 private:
   //! unimplemented operator=
-  QVTKWidget const& operator=(QVTKWidget const&);
+  QVTKWidget const &operator=(QVTKWidget const &);
   //! unimplemented copy
-  QVTKWidget(const QVTKWidget&);
-
+  QVTKWidget(const QVTKWidget &);
 };
 
 class QVTKInteractorInternal;
@@ -269,12 +263,12 @@ class QVTKInteractorInternal;
 // .SECTION Description
 // QVTKInteractor is an interactor for a QVTKWiget.
 
-class QVTK_EXPORT QVTKInteractor : public QObject, public vtkRenderWindowInteractor
-{
+class QVTK_EXPORT QVTKInteractor : public QObject,
+                                   public vtkRenderWindowInteractor {
   Q_OBJECT
 public:
-  static QVTKInteractor* New();
-  vtkTypeMacro(QVTKInteractor,vtkRenderWindowInteractor);
+  static QVTKInteractor *New();
+  vtkTypeMacro(QVTKInteractor, vtkRenderWindowInteractor);
 
   // Description:
   // Overloaded terminiate app, which does nothing in Qt.
@@ -306,7 +300,8 @@ protected:
   ~QVTKInteractor();
 
   // create a Qt Timer
-  virtual int InternalCreateTimer(int timerId, int timerType, unsigned long duration);
+  virtual int InternalCreateTimer(int timerId, int timerType,
+                                  unsigned long duration);
   // destroy a Qt Timer
   virtual int InternalDestroyTimer(int platformTimerId);
 #if defined(VTK_USE_TDX) && defined(Q_WS_WIN)
@@ -317,13 +312,11 @@ protected:
 #endif
 
 private:
-
-  QVTKInteractorInternal* Internal;
+  QVTKInteractorInternal *Internal;
 
   // unimplemented copy
-  QVTKInteractor(const QVTKInteractor&);
+  QVTKInteractor(const QVTKInteractor &);
   // unimplemented operator=
-  void operator=(const QVTKInteractor&);
-
+  void operator=(const QVTKInteractor &);
 };
 #endif

@@ -8,24 +8,17 @@
 #include "glutint.h"
 
 /* CENTRY */
-void APIENTRY
-glutSwapBuffers(void)
-{
+void APIENTRY glutSwapBuffers(void) {
   GLUTwindow *window = __glutCurrentWindow;
 
-  if (window->renderWin == window->win)
-  {
-    if (__glutCurrentWindow->treatAsSingle)
-    {
+  if (window->renderWin == window->win) {
+    if (__glutCurrentWindow->treatAsSingle) {
       /* Pretend the double buffered window is single buffered,
          so treat glutSwapBuffers as a no-op. */
       return;
     }
-  }
-  else
-  {
-    if (__glutCurrentWindow->overlay->treatAsSingle)
-    {
+  } else {
+    if (__glutCurrentWindow->overlay->treatAsSingle) {
       /* Pretend the double buffered overlay is single
          buffered, so treat glutSwapBuffers as a no-op. */
       return;

@@ -30,33 +30,22 @@
 
 class LayerMRI;
 
-class VolumeFilterSobel : public VolumeFilter
-{
+class VolumeFilterSobel : public VolumeFilter {
 public:
-  VolumeFilterSobel( LayerMRI* input = 0, LayerMRI* output = 0, QObject* parent = 0 );
+  VolumeFilterSobel(LayerMRI *input = 0, LayerMRI *output = 0,
+                    QObject *parent = 0);
 
-  void SetSmoothing( bool bSmooth )
-  {
-    m_bSmoothing = bSmooth;
-  }
+  void SetSmoothing(bool bSmooth) { m_bSmoothing = bSmooth; }
 
-  void SetStandardDeviation( double sd )
-  {
-    m_dSD = sd;
-  }
+  void SetStandardDeviation(double sd) { m_dSD = sd; }
 
-  QString GetName()
-  {
-    return "Gradient";
-  }
+  QString GetName() { return "Gradient"; }
 
 protected:
   bool Execute();
 
-  bool    m_bSmoothing;
-  double  m_dSD;
+  bool m_bSmoothing;
+  double m_dSD;
 };
 
 #endif
-
-

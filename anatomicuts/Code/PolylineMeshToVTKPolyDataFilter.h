@@ -9,65 +9,57 @@
 using namespace itk;
 class vtkPolyData;
 
-  template <class TMesh>
-    class PolylineMeshToVTKPolyDataFilter : public ProcessObject
-  {
-  public:
-    typedef PolylineMeshToVTKPolyDataFilter Self;
-    typedef ProcessObject                   Superclass;
-    typedef SmartPointer<Self>       Pointer;
-    typedef SmartPointer<const Self> ConstPointer;
+template <class TMesh>
+class PolylineMeshToVTKPolyDataFilter : public ProcessObject {
+public:
+  using Self = PolylineMeshToVTKPolyDataFilter<TMesh>;
+  using Superclass = ProcessObject;
+  using Pointer = SmartPointer<Self>;
+  using ConstPointer = SmartPointer<const Self>;
 
-    itkNewMacro  (Self);
-    itkTypeMacro (PolylineMeshToVTKPolyDataFilter, ProcessObject);
+  itkNewMacro(Self);
+  itkTypeMacro(PolylineMeshToVTKPolyDataFilter, ProcessObject);
 
-    typedef TMesh    MeshType;
-    typedef typename MeshType::MeshTraits MeshTraits;
-    typedef typename MeshType::PointType  PointType;
-    typedef typename MeshType::PixelType  PixelType;
+  using MeshType = TMesh;
+  using MeshTraits = typename MeshType::MeshTraits;
+  using PointType = typename MeshType::PointType;
+  using PixelType = typename MeshType::PixelType;
 
-    /** Some convenient typedefs. */
-    typedef typename MeshType::Pointer         MeshPointer;
-    typedef typename MeshType::CellTraits      CellTraits;
-    typedef typename MeshType::CellIdentifier  CellIdentifier;
-    typedef typename MeshType::CellType        CellType;
-    typedef typename MeshType::CellAutoPointer CellAutoPointer;
-    typedef typename MeshType::PointIdentifier PointIdentifier;
-    typedef typename CellTraits::PointIdIterator     PointIdIterator;
-    
-    typedef typename MeshType::PointsContainerPointer
-      PointsContainerPointer;
-    
-    typedef typename MeshType::PointsContainer
-      PointsContainer;
+  /** Some convenient typedefs. */
+  using MeshPointer = typename MeshType::Pointer;
+  using CellTraits = typename MeshType::CellTraits;
+  using CellIdentifier = typename MeshType::CellIdentifier;
+  using CellType = typename MeshType::CellType;
+  using CellAutoPointer = typename MeshType::CellAutoPointer;
+  using PointIdentifier = typename MeshType::PointIdentifier;
+  using PointIdIterator = typename CellTraits::PointIdIterator;
 
-    typedef PolylineCell<CellType>                      PolylineCellType;
-    typedef typename  PolylineCellType::SelfAutoPointer SelfAutoPointer;
+  using PointsContainerPointer = typename MeshType::PointsContainerPointer;
 
-    void SetInput (MeshType *mesh);
-    
-    vtkSmartPointer<vtkPolyData> GetOutputPolyData (void)
-    { return m_Output; }
+  using PointsContainer = typename MeshType::PointsContainer;
 
-    virtual void Update (void)
-    { this->GenerateData(); }
-	void SetColor ( unsigned char color[])
-	{
-		this->m_color = color;
-	}
+  using PolylineCellType = PolylineCell<CellType>;
+  using SelfAutoPointer = typename PolylineCellType::SelfAutoPointer;
 
-  protected:
-    PolylineMeshToVTKPolyDataFilter();
-    ~PolylineMeshToVTKPolyDataFilter();
+  void SetInput(MeshType *mesh);
 
-    virtual void GenerateData (void);
+  vtkSmartPointer<vtkPolyData> GetOutputPolyData() { return m_Output; }
 
-  private:
-    PolylineMeshToVTKPolyDataFilter (const Self&);
-    void operator= (const Self&);
-	unsigned char* m_color;
-    vtkSmartPointer<vtkPolyData> m_Output;
-  };
+  virtual void Update() { this->GenerateData(); }
+  void SetColor(unsigned char color[]) { this->m_color = color; }
+
+protected:
+  PolylineMeshToVTKPolyDataFilter();
+  ~PolylineMeshToVTKPolyDataFilter();
+
+  virtual void GenerateData();
+
+private:
+  PolylineMeshToVTKPolyDataFilter(const Self &);
+  void operator=(const Self &);
+  unsigned char *m_color;
+  vtkSmartPointer<vtkPolyData> m_Output;
+};
 
 #include "PolylineMeshToVTKPolyDataFilter.txx"
 #endif

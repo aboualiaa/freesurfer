@@ -90,8 +90,7 @@ int ipmpar(int *);
 -----------------------------------------------------------------------
      .. Scalar Arguments ..
 */
-int ipmpar(int *i)
-{
+int ipmpar(int *i) {
   static int imach[11];
   static int ipmpar;
   /*     MACHINE CONSTANTS FOR AMDAHL MACHINES. */

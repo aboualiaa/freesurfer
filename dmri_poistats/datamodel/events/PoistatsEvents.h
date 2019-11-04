@@ -3,32 +3,31 @@
 
 #include <itkEventObject.h>
 
-namespace itk
-{
+namespace itk {
 
 /** Store all poistats events here, so that the CommandUpdate can catch them */
 
-itkEventMacro( PoistatsOdfCalculationEvent, ProgressEvent );
-itkEventMacro( PoistatsOdfCalculationStartEvent, PoistatsOdfCalculationEvent );
-itkEventMacro( PoistatsOdfCalculationProgressEvent, PoistatsOdfCalculationEvent );
-itkEventMacro( PoistatsOdfCalculationEndEvent, PoistatsOdfCalculationEvent );
+itkEventMacro(PoistatsOdfCalculationEvent, ProgressEvent);
+itkEventMacro(PoistatsOdfCalculationStartEvent, PoistatsOdfCalculationEvent);
+itkEventMacro(PoistatsOdfCalculationProgressEvent, PoistatsOdfCalculationEvent);
+itkEventMacro(PoistatsOdfCalculationEndEvent, PoistatsOdfCalculationEvent);
 
-itkEventMacro( SeedsEvent, ProgressEvent );
-itkEventMacro( SeedsUsingAllEvent, SeedsEvent );
-itkEventMacro( SeedsFoundInitialEvent, SeedsEvent );
-itkEventMacro( SeedsUnmaskedEvent, SeedsEvent );
+itkEventMacro(SeedsEvent, ProgressEvent);
+itkEventMacro(SeedsUsingAllEvent, SeedsEvent);
+itkEventMacro(SeedsFoundInitialEvent, SeedsEvent);
+itkEventMacro(SeedsUnmaskedEvent, SeedsEvent);
 
-itkEventMacro( GenerateOutputEvent, ProgressEvent );
-itkEventMacro( GenerateOptimalPathDensitiesEvent, GenerateOutputEvent );
-itkEventMacro( GenerateBestReplicaPathDensitiesEvent, GenerateOutputEvent );
-itkEventMacro( GenerateBestReplicaPathDensitiesStartEvent, 
-               GenerateBestReplicaPathDensitiesEvent );
-itkEventMacro( GenerateBestReplicaPathDensitiesProgressEvent, 
-               GenerateBestReplicaPathDensitiesEvent );
-itkEventMacro( GenerateBestReplicaPathDensitiesEndEvent, 
-               GenerateBestReplicaPathDensitiesEvent );
-itkEventMacro( GenerateFinalPathProbabilitiesEvent, GenerateOutputEvent );
+itkEventMacro(GenerateOutputEvent, ProgressEvent);
+itkEventMacro(GenerateOptimalPathDensitiesEvent, GenerateOutputEvent);
+itkEventMacro(GenerateBestReplicaPathDensitiesEvent, GenerateOutputEvent);
+itkEventMacro(GenerateBestReplicaPathDensitiesStartEvent,
+              GenerateBestReplicaPathDensitiesEvent);
+itkEventMacro(GenerateBestReplicaPathDensitiesProgressEvent,
+              GenerateBestReplicaPathDensitiesEvent);
+itkEventMacro(GenerateBestReplicaPathDensitiesEndEvent,
+              GenerateBestReplicaPathDensitiesEvent);
+itkEventMacro(GenerateFinalPathProbabilitiesEvent, GenerateOutputEvent);
 
-}
+} // namespace itk
 
 #endif /*POISTATSEVENTS_H_*/

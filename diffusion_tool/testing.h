@@ -1,11 +1,9 @@
 #ifndef TESTING_H
 #define TESTING_H
 
-
-class testing
-{
+class testing {
 public:
-    testing();
+  testing();
 };
 
 #endif // TESTING_H

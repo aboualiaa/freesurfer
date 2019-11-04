@@ -26,15 +26,14 @@ class QVTKPaintEngineInternal;
  * @deprecated Only used in conjunction with QVTKWidget which has also been
  * deprecated.
  */
-class QVTKPaintEngine : public QPaintEngine
-{
+class QVTKPaintEngine : public QPaintEngine {
 public:
   VTK_LEGACY(QVTKPaintEngine());
   ~QVTKPaintEngine() override;
 
   // Description:
   // begin painting on device (QVTKWidget)
-  bool begin(QPaintDevice* dev) override;
+  bool begin(QPaintDevice *dev) override;
 
   // Description:
   // end painting on device
@@ -46,26 +45,27 @@ public:
 
   // Description:
   // updateState
-  void updateState(const QPaintEngineState&) override;
+  void updateState(const QPaintEngineState &) override;
 
   // Description:
   // draw a pixmap
-  void drawPixmap(const QRectF& r, const QPixmap& pm, const QRectF& sr) override;
+  void drawPixmap(const QRectF &r, const QPixmap &pm,
+                  const QRectF &sr) override;
 
   // Description:
   // draw a path
-  void drawPath(const QPainterPath& path) override;
+  void drawPath(const QPainterPath &path) override;
 
   // Description:
   // draw a polygon
-  void drawPolygon(const QPointF* points, int pointCount, PolygonDrawMode mode) override;
-  void drawPolygon(const QPoint* points, int pointCount, PolygonDrawMode mode) override;
+  void drawPolygon(const QPointF *points, int pointCount,
+                   PolygonDrawMode mode) override;
+  void drawPolygon(const QPoint *points, int pointCount,
+                   PolygonDrawMode mode) override;
 
 protected:
-
-  QVTKWidget* Widget;
-  QVTKPaintEngineInternal* Internal;
+  QVTKWidget *Widget;
+  QVTKPaintEngineInternal *Internal;
 };
 
 #endif
-

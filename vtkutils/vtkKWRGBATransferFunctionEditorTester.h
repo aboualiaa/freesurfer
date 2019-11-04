@@ -7,21 +7,19 @@ class vtkKWRGBATransferFunctionEditor;
 
 class vtkKWRGBATransferFunctionEditorTester : public vtkKWApplication {
 
- public:
+public:
+  static vtkKWRGBATransferFunctionEditorTester *New();
+  vtkTypeRevisionMacro(vtkKWRGBATransferFunctionEditorTester, vtkKWApplication);
 
-  static vtkKWRGBATransferFunctionEditorTester* New ();
-  vtkTypeRevisionMacro( vtkKWRGBATransferFunctionEditorTester, vtkKWApplication );
+  virtual void Start(int argc, char *argv[]);
 
-  virtual void Start ( int argc, char* argv[] );
+  void EditorChangedFunction();
 
-  void EditorChangedFunction ();
+protected:
+  vtkKWRGBATransferFunctionEditorTester() {}
+  ~vtkKWRGBATransferFunctionEditorTester() {}
 
- protected:
-
-  vtkKWRGBATransferFunctionEditorTester () {}
-  ~vtkKWRGBATransferFunctionEditorTester () {}
-  
-  vtkKWRGBATransferFunctionEditor* mEditor;
+  vtkKWRGBATransferFunctionEditor *mEditor;
 };
 
 #endif

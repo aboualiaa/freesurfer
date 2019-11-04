@@ -10,9 +10,7 @@
 #include "glutint.h"
 
 #if defined(GLX_VERSION_1_1)
-int
-__glutIsSupportedByGLX(char *extension)
-{
+int __glutIsSupportedByGLX(char *extension) {
   static const char *extensions = NULL;
   const char *start;
   char *where, *terminator;
@@ -23,24 +21,20 @@ __glutIsSupportedByGLX(char *extension)
      looks like the server doesn't support GLX 1.1.
      Unfortunately, the original GLX 1.0 didn't have the notion
      of GLX extensions. */
-  if ((major == 1 && minor >= 1) || (major > 1))
-  {
+  if ((major == 1 && minor >= 1) || (major > 1)) {
     if (!extensions)
       extensions = glXQueryExtensionsString(__glutDisplay, __glutScreen);
     /* It takes a bit of care to be fool-proof about parsing
        the GLX extensions string.  Don't be fooled by
        sub-strings,  etc. */
     start = extensions;
-    for (;;)
-    {
+    for (;;) {
       where = strstr(start, extension);
       if (!where)
         return 0;
       terminator = where + strlen(extension);
-      if (where == start || *(where - 1) == ' ')
-      {
-        if (*terminator == ' ' || *terminator == '\0')
-        {
+      if (where == start || *(where - 1) == ' ') {
+        if (*terminator == ' ' || *terminator == '\0') {
           return 1;
         }
       }

@@ -27,15 +27,14 @@
 #include "tensorCubicSmoothing.h"
 #include "matrix3d.h"
 
-const int ROWS   = 400;
-const int COLS   = 400;
+const int ROWS = 400;
+const int COLS = 400;
 const int SLICES = 400;
 const int NUM_BX = 15;
 const int NUM_BY = 15;
 const int NUM_BZ = 15;
 
-int main()
-{
+int main() {
 
   vnl_matrix<float> Bx(ROWS, NUM_BX);
   vnl_matrix<float> By(COLS, NUM_BY);

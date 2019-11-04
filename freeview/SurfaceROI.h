@@ -42,61 +42,49 @@ class vtkCleanPolyData;
 class RenderView3D;
 class LayerSurface;
 
-class SurfaceROI : public QObject
-{
+class SurfaceROI : public QObject {
   Q_OBJECT
 public:
-  SurfaceROI( LayerSurface* owner );
+  SurfaceROI(LayerSurface *owner);
   virtual ~SurfaceROI();
 
-  void SetInput( vtkPolyData* polydata );
+  void SetInput(vtkPolyData *polydata);
 
-  void AddPoint( double* pt );
+  void AddPoint(double *pt);
 
   void Close();
 
-  void InitializeOutline(double * pos);
+  void InitializeOutline(double *pos);
 
   QColor GetColor();
-  void SetColor( const QColor& color );
+  void SetColor(const QColor &color);
 
   void Update();
 
-  void AppendProps( vtkRenderer* renderer );
+  void AppendProps(vtkRenderer *renderer);
 
-  void Show( bool bShow = true );
+  void Show(bool bShow = true);
 
-  int GetId()
-  {
-    return m_nId;
-  }
+  int GetId() { return m_nId; }
 
-  void SetId( int nId )
-  {
-    m_nId = nId;
-  }
+  void SetId(int nId) { m_nId = nId; }
 
-  vtkActor* GetActor();
+  vtkActor *GetActor();
 
-  LayerSurface* GetSurface()
-  {
-    return m_mris;
-  }
+  LayerSurface *GetSurface() { return m_mris; }
 
 signals:
-  void ColorChanged( const QColor& );
+  void ColorChanged(const QColor &);
 
 private:
-  void RebuildOutline( bool bClose );
+  void RebuildOutline(bool bClose);
 
-  vtkSmartPointer<vtkActor>   m_actorOutline;
-  vtkSmartPointer<vtkPoints>  m_points;
+  vtkSmartPointer<vtkActor> m_actorOutline;
+  vtkSmartPointer<vtkPoints> m_points;
 
-  LayerSurface*   m_mris;
-  QColor      m_color;
-  int   m_nId;
+  LayerSurface *m_mris;
+  QColor m_color;
+  int m_nId;
 };
 
 #endif
-
-

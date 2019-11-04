@@ -5,7 +5,7 @@
 
 #include "coords.h"
 
-typedef std::list< std::pair<Coords3d, Coords3d> > PointsContainerType;
+typedef std::list<std::pair<Coords3d, Coords3d>> PointsContainerType;
 
 typedef std::list<Coords3d> PointsListType;
 

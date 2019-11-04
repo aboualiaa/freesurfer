@@ -13,7 +13,7 @@
 
 using namespace std;
 
-#define CCS(str) (const_cast<char*>(str.c_str()))
+#define CCS(str) (const_cast<char *>(str.c_str()))
 
 //-------------------------------
 //
@@ -21,21 +21,19 @@ using namespace std;
 //
 //-------------------------------
 
-double sign(double x)
-{
-  if ( x>1e-13)
+double sign(double x) {
+  if (x > 1e-13)
     return 1.0;
-  else if ( x<-1e-13)
+  else if (x < -1e-13)
     return -1.0;
   return .0;
 }
 
-tIntCoords icoords(int x, int y, int z)
-{
+tIntCoords icoords(int x, int y, int z) {
   tIntCoords retval;
-  retval(0) =x;
-  retval(1) =y;
-  retval(2) =z;
+  retval(0) = x;
+  retval(1) = y;
+  retval(2) = z;
   return retval;
 }
 
@@ -49,38 +47,31 @@ tIntCoords icoords(int x, int y, int z)
 // Definitions
 //------------
 
-Material3d::Material3d()
-    : VMaterial()
-{}
+Material3d::Material3d() : VMaterial() {}
 
-Material3d::Material3d(double E,
-                       double nu)
-    : VMaterial(E,nu)
-{}
+Material3d::Material3d(double E, double nu) : VMaterial(E, nu) {}
 
-SmallMatrix
-Material3d::get_matrix() const
-{
-  SmallMatrix m(6,6);
+SmallMatrix Material3d::get_matrix() const {
+  SmallMatrix m(6, 6);
   m.set(0);
 
-  double dfactor = (get_E()/(1+get_nu()))/(1-2.0*get_nu());
-  double alpha = (1.0-get_nu())*dfactor;
-  double beta  = (1-2*get_nu())/2 * dfactor;
-  double dnu   = dfactor * get_nu();
+  double dfactor = (get_E() / (1 + get_nu())) / (1 - 2.0 * get_nu());
+  double alpha = (1.0 - get_nu()) * dfactor;
+  double beta = (1 - 2 * get_nu()) / 2 * dfactor;
+  double dnu = dfactor * get_nu();
 
-  m(0,0) = alpha;
-  m(0,1) = dnu;
-  m(0,2) = dnu;
-  m(1,0) = dnu;
-  m(1,1) = alpha;
-  m(1,2) = dnu;
-  m(2,0) = dnu;
-  m(2,2) = alpha;
+  m(0, 0) = alpha;
+  m(0, 1) = dnu;
+  m(0, 2) = dnu;
+  m(1, 0) = dnu;
+  m(1, 1) = alpha;
+  m(1, 2) = dnu;
+  m(2, 0) = dnu;
+  m(2, 2) = alpha;
 
-  m(3,3) = beta;
-  m(4,4) = beta;
-  m(5,5) = beta;
+  m(3, 3) = beta;
+  m(4, 4) = beta;
+  m(5, 5) = beta;
 
   return m;
 }
@@ -103,108 +94,92 @@ Material3d::get_matrix() const
 // Declarations
 //-------------
 
-
 //------
 // Definitions
 //------------
 
 Element3d::Element3d()
-    : TElement<3>(),
-    m_isShapeUpdated(false),
-    m_isInterpolUpdated(false)
-{}
+    : TElement<3>(), m_isShapeUpdated(false), m_isInterpolUpdated(false) {}
 
-SmallMatrix
-Element3d::get_matrix() const
-{
-  assert( m_vpNodes.size() == size_t(4) );
+SmallMatrix Element3d::get_matrix() const {
+  assert(m_vpNodes.size() == size_t(4));
 
-  if ( !m_isShapeUpdated )
+  if (!m_isShapeUpdated)
     update_coefs();
 
   double dbuf;
-  double dfactor = m_cpMaterial->get_E() /
-                   (1+m_cpMaterial->get_nu()) /
-                   (1 - 2* m_cpMaterial->get_nu()); // used in front of the elasticity matrix
-  double dalpha =
-    1- m_cpMaterial->get_nu(); // first 3 diagonal elements
+  double dfactor =
+      m_cpMaterial->get_E() / (1 + m_cpMaterial->get_nu()) /
+      (1 -
+       2 * m_cpMaterial->get_nu()); // used in front of the elasticity matrix
+  double dalpha = 1 - m_cpMaterial->get_nu(); // first 3 diagonal elements
   // of the elasticity matrix
   double dbeta =
-    .5 * ( 1 - 2* m_cpMaterial->get_nu() ); // next 3 diagonal elements
+      .5 * (1 - 2 * m_cpMaterial->get_nu()); // next 3 diagonal elements
   // of the elasticity matrix
   double dnu = m_cpMaterial->get_nu();
 
-//  double dvol = abs( vol( m_vpNodes[0]->coords(),
+  //  double dvol = abs( vol( m_vpNodes[0]->coords(),
   //   m_vpNodes[1]->coords(),
   //   m_vpNodes[2]->coords(),
   //   m_vpNodes[3]->coords() ) );
-  //dfactor *= dvol;
+  // dfactor *= dvol;
 
-  SmallMatrix mret(12,12);
-  for (int i=0; i<4; i++)
-    for (int j=0; j<4; j++)
-    {
+  SmallMatrix mret(12, 12);
+  for (int i = 0; i < 4; i++)
+    for (int j = 0; j < 4; j++) {
       // compute local matrix
 
-      SmallMatrix m(3,3);
+      SmallMatrix m(3, 3);
 
-      dbuf = dfactor * (dalpha * m_cb(i)*m_cb(j) + 
-                        dbeta * m_cc(i)*m_cc(j) + dbeta * m_cd(i)*m_cd(j) );
-      m(0,0) = dbuf;
+      dbuf = dfactor * (dalpha * m_cb(i) * m_cb(j) + dbeta * m_cc(i) * m_cc(j) +
+                        dbeta * m_cd(i) * m_cd(j));
+      m(0, 0) = dbuf;
 
-      dbuf = dfactor * ( dnu * m_cb(i)*m_cc(j) + dbeta * m_cc(i)*m_cb(j) );
-      m(0,1) = dbuf;
+      dbuf = dfactor * (dnu * m_cb(i) * m_cc(j) + dbeta * m_cc(i) * m_cb(j));
+      m(0, 1) = dbuf;
 
-      dbuf = dfactor * ( dnu * m_cb(i)*m_cd(j) + dbeta *m_cd(i)*m_cb(j) );
-      m(0,2) = dbuf;
+      dbuf = dfactor * (dnu * m_cb(i) * m_cd(j) + dbeta * m_cd(i) * m_cb(j));
+      m(0, 2) = dbuf;
 
-      dbuf = dfactor * ( dnu* m_cb(j)*m_cc(i) + dbeta * m_cb(i)*m_cc(j) );
-      m(1,0) = dbuf;
+      dbuf = dfactor * (dnu * m_cb(j) * m_cc(i) + dbeta * m_cb(i) * m_cc(j));
+      m(1, 0) = dbuf;
 
-      dbuf = dfactor * ( dalpha * m_cc(i)*m_cc(j) + 
-                         dbeta * m_cb(i)*m_cb(j) + dbeta * m_cd(i)*m_cd(j) );
-      m(1,1) = dbuf;
+      dbuf = dfactor * (dalpha * m_cc(i) * m_cc(j) + dbeta * m_cb(i) * m_cb(j) +
+                        dbeta * m_cd(i) * m_cd(j));
+      m(1, 1) = dbuf;
 
-      dbuf = dfactor * ( dnu *m_cc(i)*m_cd(j) + dbeta * m_cd(i)*m_cc(j) );
-      m(1,2) = dbuf;
+      dbuf = dfactor * (dnu * m_cc(i) * m_cd(j) + dbeta * m_cd(i) * m_cc(j));
+      m(1, 2) = dbuf;
 
-      dbuf = dfactor * ( dnu *m_cd(i)*m_cb(j) + dbeta * m_cb(i)*m_cd(j) );
-      m(2,0) = dbuf;
+      dbuf = dfactor * (dnu * m_cd(i) * m_cb(j) + dbeta * m_cb(i) * m_cd(j));
+      m(2, 0) = dbuf;
 
-      dbuf = dfactor * ( dnu * m_cd(i)*m_cc(j) + dbeta * m_cc(i)*m_cd(j) );
-      m(2,1) = dbuf;
+      dbuf = dfactor * (dnu * m_cd(i) * m_cc(j) + dbeta * m_cc(i) * m_cd(j));
+      m(2, 1) = dbuf;
 
-      dbuf = dfactor * ( dalpha * m_cd(i)*m_cd(j) + dbeta * m_cc(i)*m_cc(j) + 
-                         dbeta * m_cb(i)*m_cb(j) );
-      m(2,2) = dbuf;
+      dbuf = dfactor * (dalpha * m_cd(i) * m_cd(j) + dbeta * m_cc(i) * m_cc(j) +
+                        dbeta * m_cb(i) * m_cb(j));
+      m(2, 2) = dbuf;
 
-      mret.set_block( m,
-                      i*3,
-                      j*3);
+      mret.set_block(m, i * 3, j * 3);
     }
 
   return mret;
-
 }
 
-double
-Element3d::det( const tDblCoords& c0,
-                const tDblCoords& c1,
-                const tDblCoords& c2) const
-{
-  return c0(0) * ( c1(1)*c2(2) - c1(2)*c2(1) )
-         - c1(0) * ( c0(1)*c2(2) - c2(1)*c0(2) )
-         + c2(0) * ( c0(1)*c1(2) - c1(1)*c0(2) );
+double Element3d::det(const tDblCoords &c0, const tDblCoords &c1,
+                      const tDblCoords &c2) const {
+  return c0(0) * (c1(1) * c2(2) - c1(2) * c2(1)) -
+         c1(0) * (c0(1) * c2(2) - c2(1) * c0(2)) +
+         c2(0) * (c0(1) * c1(2) - c1(1) * c0(2));
 }
 
-double
-Element3d::det( double m00, double m01, double m02,
-                double m10, double m11, double m12,
-                double m20, double m21, double m22) const
-{
-  return m00 * ( m11*m22 - m12*m21 )
-         - m10 * ( m01*m22 - m21*m02 )
-         + m20 * ( m01*m12 - m11*m02 );
+double Element3d::det(double m00, double m01, double m02, double m10,
+                      double m11, double m12, double m20, double m21,
+                      double m22) const {
+  return m00 * (m11 * m22 - m12 * m21) - m10 * (m01 * m22 - m21 * m02) +
+         m20 * (m01 * m12 - m11 * m02);
 }
 #if 0
 void
@@ -270,84 +245,62 @@ Element3d::update_coefs() const
   m_updated = true;
 }
 #else
-void
-Element3d::update_coefs() const
-{
-  assert(m_vpNodes.size()==size_t(4));
+void Element3d::update_coefs() const {
+  assert(m_vpNodes.size() == size_t(4));
 
-  double dvol = det( m_vpNodes[1]->coords(),
-                     m_vpNodes[2]->coords(),
-                     m_vpNodes[3]->coords() )
-                - det( m_vpNodes[0]->coords(),
-                       m_vpNodes[2]->coords(),
-                       m_vpNodes[3]->coords() )
-                + det( m_vpNodes[0]->coords(),
-                       m_vpNodes[1]->coords(),
-                       m_vpNodes[3]->coords() )
-                - det( m_vpNodes[0]->coords(),
-                       m_vpNodes[1]->coords(),
-                       m_vpNodes[2]->coords() );
+  double dvol = det(m_vpNodes[1]->coords(), m_vpNodes[2]->coords(),
+                    m_vpNodes[3]->coords()) -
+                det(m_vpNodes[0]->coords(), m_vpNodes[2]->coords(),
+                    m_vpNodes[3]->coords()) +
+                det(m_vpNodes[0]->coords(), m_vpNodes[1]->coords(),
+                    m_vpNodes[3]->coords()) -
+                det(m_vpNodes[0]->coords(), m_vpNodes[1]->coords(),
+                    m_vpNodes[2]->coords());
 
   int alpha = -1;
   int arg_1, arg_2, arg_3;
-  for ( int i=0; i<4; ++i)
-  {
-    arg_1 = i>0?0:1;
-    arg_2 = i>1?1:2;
-    arg_3 = i>2?2:3;
+  for (int i = 0; i < 4; ++i) {
+    arg_1 = i > 0 ? 0 : 1;
+    arg_2 = i > 1 ? 1 : 2;
+    arg_3 = i > 2 ? 2 : 3;
 
-    m_cb(i) = alpha * det( 1,
-                           m_vpNodes[arg_1]->coords()(1),
-                           m_vpNodes[arg_1]->coords()(2),
-                           1,
-                           m_vpNodes[arg_2]->coords()(1),
-                           m_vpNodes[arg_2]->coords()(2),
-                           1,
-                           m_vpNodes[arg_3]->coords()(1),
-                           m_vpNodes[arg_3]->coords()(2) )
-      / dvol;
+    m_cb(i) =
+        alpha *
+        det(1, m_vpNodes[arg_1]->coords()(1), m_vpNodes[arg_1]->coords()(2), 1,
+            m_vpNodes[arg_2]->coords()(1), m_vpNodes[arg_2]->coords()(2), 1,
+            m_vpNodes[arg_3]->coords()(1), m_vpNodes[arg_3]->coords()(2)) /
+        dvol;
     alpha *= -1;
 
-    m_cc(i) = alpha * det( 1,
-                           m_vpNodes[arg_1]->coords()(0),
-                           m_vpNodes[arg_1]->coords()(2),
-                           1,
-                           m_vpNodes[arg_2]->coords()(0),
-                           m_vpNodes[arg_2]->coords()(2),
-                           1,
-                           m_vpNodes[arg_3]->coords()(0),
-                           m_vpNodes[arg_3]->coords()(2) )
-      / dvol;
+    m_cc(i) =
+        alpha *
+        det(1, m_vpNodes[arg_1]->coords()(0), m_vpNodes[arg_1]->coords()(2), 1,
+            m_vpNodes[arg_2]->coords()(0), m_vpNodes[arg_2]->coords()(2), 1,
+            m_vpNodes[arg_3]->coords()(0), m_vpNodes[arg_3]->coords()(2)) /
+        dvol;
     alpha *= -1;
 
-    m_cd(i) = alpha * det( 1,
-                           m_vpNodes[arg_1]->coords()(0),
-                           m_vpNodes[arg_1]->coords()(1),
-                           1,
-                           m_vpNodes[arg_2]->coords()(0),
-                           m_vpNodes[arg_2]->coords()(1),
-                           1,
-                           m_vpNodes[arg_3]->coords()(0),
-                           m_vpNodes[arg_3]->coords()(1) )
-      / dvol;
+    m_cd(i) =
+        alpha *
+        det(1, m_vpNodes[arg_1]->coords()(0), m_vpNodes[arg_1]->coords()(1), 1,
+            m_vpNodes[arg_2]->coords()(0), m_vpNodes[arg_2]->coords()(1), 1,
+            m_vpNodes[arg_3]->coords()(0), m_vpNodes[arg_3]->coords()(1)) /
+        dvol;
     alpha *= -1;
 
-    m_ca(i) = alpha * det( m_vpNodes[arg_1]->coords(),
-                           m_vpNodes[arg_2]->coords(),
-                           m_vpNodes[arg_3]->coords() ) / dvol;
-
+    m_ca(i) = alpha *
+              det(m_vpNodes[arg_1]->coords(), m_vpNodes[arg_2]->coords(),
+                  m_vpNodes[arg_3]->coords()) /
+              dvol;
   }
   m_isShapeUpdated = true;
-
 }
 #endif
 
-void
-Element3d::update_interpol_coefs() const
-{
-  assert(m_vpNodes.size()==size_t(4));
+void Element3d::update_interpol_coefs() const {
+  assert(m_vpNodes.size() == size_t(4));
 
-  if ( !m_isShapeUpdated )
+  if (!m_isShapeUpdated)
     update_coefs();
 
   m_int_a.set(0.0);
@@ -355,9 +308,8 @@ Element3d::update_interpol_coefs() const
   m_int_c.set(0.0);
   m_int_d.set(0.0);
 
-  for (int i=0; i<4; ++i)
-  {
-    const Coords3d& delta = m_vpNodes[i]->delta();
+  for (int i = 0; i < 4; ++i) {
+    const Coords3d &delta = m_vpNodes[i]->delta();
     m_int_a += m_ca(i) * delta;
     m_int_b += m_cb(i) * delta;
     m_int_c += m_cc(i) * delta;
@@ -366,42 +318,32 @@ Element3d::update_interpol_coefs() const
   m_isInterpolUpdated = true;
 }
 
-void
-Element3d::print(std::ostream& os) const
-{
+void Element3d::print(std::ostream &os) const {
   TElement<3>::print(os);
   std::cout << " a = " << m_ca << std::endl
-  << " b = " << m_cb << std::endl
-  << " c = " << m_cc << std::endl
-  << " d = " << m_cd << std::endl;
+            << " b = " << m_cb << std::endl
+            << " c = " << m_cc << std::endl
+            << " d = " << m_cd << std::endl;
 }
 
-bool
-Element3d::dst_contains(const tDblCoords& c) const
-{
-  assert(m_vpNodes.size()==size_t(4));
+bool Element3d::dst_contains(const tDblCoords &c) const {
+  assert(m_vpNodes.size() == size_t(4));
 
-  return contains( m_vpNodes[0]->dst_coords(),
-                   m_vpNodes[1]->dst_coords(),
-                   m_vpNodes[2]->dst_coords(),
-                   m_vpNodes[3]->dst_coords(),
-                   c);
+  return contains(m_vpNodes[0]->dst_coords(), m_vpNodes[1]->dst_coords(),
+                  m_vpNodes[2]->dst_coords(), m_vpNodes[3]->dst_coords(), c);
 }
 
-tDblCoords
-Element3d::inv_img(const tDblCoords& c) const
-{
-  if ( !m_isInterpolUpdated )
+tDblCoords Element3d::inv_img(const tDblCoords &c) const {
+  if (!m_isInterpolUpdated)
     update_interpol_coefs();
 
   m_int_b(0) += 1.0;
   m_int_c(1) += 1.0;
   m_int_d(2) += 1.0;
 
-  double inv_sys_det = 1.0 / det( m_int_b, m_int_c, m_int_d);
+  double inv_sys_det = 1.0 / det(m_int_b, m_int_c, m_int_d);
 
-  if ( abs(inv_sys_det) > 1.0e+4 )
-  {
+  if (abs(inv_sys_det) > 1.0e+4) {
     cerr << " Element3d::inv_img -> tiny det\n";
     exit(1);
   }
@@ -420,168 +362,118 @@ Element3d::inv_img(const tDblCoords& c) const
   return csrc;
 }
 
-double
-Element3d::dst_volume() const
-{
-  assert( m_vpNodes.size() == size_t(4) );
+double Element3d::dst_volume() const {
+  assert(m_vpNodes.size() == size_t(4));
 
-  return abs( vol( m_vpNodes[0]->dst_coords(),
-                   m_vpNodes[1]->dst_coords(),
-                   m_vpNodes[2]->dst_coords(),
-                   m_vpNodes[3]->dst_coords() ) );
+  return abs(vol(m_vpNodes[0]->dst_coords(), m_vpNodes[1]->dst_coords(),
+                 m_vpNodes[2]->dst_coords(), m_vpNodes[3]->dst_coords()));
 }
 
-bool
-Element3d::src_contains(const tDblCoords& c) const
-{
-  assert( m_vpNodes.size() == size_t(4) );
+bool Element3d::src_contains(const tDblCoords &c) const {
+  assert(m_vpNodes.size() == size_t(4));
 
-  return contains( m_vpNodes[0]->coords(),
-                   m_vpNodes[1]->coords(),
-                   m_vpNodes[2]->coords(),
-                   m_vpNodes[3]->coords(),
-                   c);
+  return contains(m_vpNodes[0]->coords(), m_vpNodes[1]->coords(),
+                  m_vpNodes[2]->coords(), m_vpNodes[3]->coords(), c);
 }
 
-bool
-Element3d::contains( const tDblCoords& c1,
-                     const tDblCoords& c2,
-                     const tDblCoords& c3,
-                     const tDblCoords& c4,
-                     const tDblCoords& c) const
-{
+bool Element3d::contains(const tDblCoords &c1, const tDblCoords &c2,
+                         const tDblCoords &c3, const tDblCoords &c4,
+                         const tDblCoords &c) const {
   tDblCoords cmin, cmax;
   cmin = c1;
   cmax = c1;
 
-  cmin = min( cmin, c2 );
-  cmin = min( cmin, c3 );
-  cmin = min( cmin, c4 );
+  cmin = min(cmin, c2);
+  cmin = min(cmin, c3);
+  cmin = min(cmin, c4);
 
-  cmax = max( cmax, c2 );
-  cmax = max( cmax, c3 );
-  cmax = max( cmax, c4 );
+  cmax = max(cmax, c2);
+  cmax = max(cmax, c3);
+  cmax = max(cmax, c4);
 
-  for (unsigned int ui=0; ui<3; ++ui)
-    if ( c(ui) < cmin(ui) || c(ui) > cmax(ui) )
+  for (unsigned int ui = 0; ui < 3; ++ui)
+    if (c(ui) < cmin(ui) || c(ui) > cmax(ui))
       return false;
 
-  double dvol_total = abs( vol( c1,c2,c3,c4));
-  double dvol_1 = abs( vol( c,c1,c2,c3));
-  double dvol_2 = abs( vol( c,c1,c2,c4));
-  double dvol_3 = abs( vol( c,c1,c3,c4));
-  double dvol_4 = abs( vol( c,c2,c3,c4));
+  double dvol_total = abs(vol(c1, c2, c3, c4));
+  double dvol_1 = abs(vol(c, c1, c2, c3));
+  double dvol_2 = abs(vol(c, c1, c2, c4));
+  double dvol_3 = abs(vol(c, c1, c3, c4));
+  double dvol_4 = abs(vol(c, c2, c3, c4));
 
-  return ( abs( dvol_total - dvol_1 - dvol_2 - dvol_3 - dvol_4 ) < 1.0e-5 );
+  return (abs(dvol_total - dvol_1 - dvol_2 - dvol_3 - dvol_4) < 1.0e-5);
 }
 
-tDblCoords
-Element3d::dir_img(const tDblCoords& src_coords) const
-{
-  if ( !m_isInterpolUpdated )
+tDblCoords Element3d::dir_img(const tDblCoords &src_coords) const {
+  if (!m_isInterpolUpdated)
     update_interpol_coefs();
 
-  return src_coords + m_int_a
-         + src_coords(0) * m_int_b
-         + src_coords(1) * m_int_c
-         + src_coords(2) * m_int_d;
-
+  return src_coords + m_int_a + src_coords(0) * m_int_b +
+         src_coords(1) * m_int_c + src_coords(2) * m_int_d;
 }
 
-double
-Element3d::shape_fct(int node_id,
-                     const tCoords& pt) const
-{
-  if ( !m_isShapeUpdated )
+double Element3d::shape_fct(int node_id, const tCoords &pt) const {
+  if (!m_isShapeUpdated)
     update_coefs();
 
-  return m_ca(node_id) +
-         pt(0) * m_cb(node_id) +
-         pt(1) * m_cc(node_id) +
+  return m_ca(node_id) + pt(0) * m_cb(node_id) + pt(1) * m_cc(node_id) +
          pt(2) * m_cd(node_id);
 }
 
-double
-Element3d::src_volume() const
-{
-  assert( m_vpNodes.size() == size_t(4) );
+double Element3d::src_volume() const {
+  assert(m_vpNodes.size() == size_t(4));
 
-  return abs( vol( m_vpNodes[0]->coords(),
-                   m_vpNodes[1]->coords(),
-                   m_vpNodes[2]->coords(),
-                   m_vpNodes[3]->coords() ) );
+  return abs(vol(m_vpNodes[0]->coords(), m_vpNodes[1]->coords(),
+                 m_vpNodes[2]->coords(), m_vpNodes[3]->coords()));
 }
 
-bool
-Element3d::orientation_pb(Frame f) const
-{
-  assert ( m_vpNodes.size() == size_t(4) );
+bool Element3d::orientation_pb(Frame f) const {
+  assert(m_vpNodes.size() == size_t(4));
 
-  switch (f)
-  {
-  case both:
-  {
-    double dvol_ref = vol( m_vpNodes[0]->coords(),
-                           m_vpNodes[1]->coords(),
-                           m_vpNodes[2]->coords(),
-                           m_vpNodes[3]->coords() );
-    double dvol_def = vol( m_vpNodes[0]->dst_coords(),
-                           m_vpNodes[1]->dst_coords(),
-                           m_vpNodes[2]->dst_coords(),
-                           m_vpNodes[3]->dst_coords() );
+  switch (f) {
+  case both: {
+    double dvol_ref = vol(m_vpNodes[0]->coords(), m_vpNodes[1]->coords(),
+                          m_vpNodes[2]->coords(), m_vpNodes[3]->coords());
+    double dvol_def =
+        vol(m_vpNodes[0]->dst_coords(), m_vpNodes[1]->dst_coords(),
+            m_vpNodes[2]->dst_coords(), m_vpNodes[3]->dst_coords());
 
-    if ( sign(dvol_def) != sign(dvol_ref) )
+    if (sign(dvol_def) != sign(dvol_ref))
       return true;
-  }
-  break;
+  } break;
   case src:
-    if ( sign( vol(m_vpNodes[0]->coords(),
-                   m_vpNodes[1]->coords(),
-                   m_vpNodes[2]->coords(),
-                   m_vpNodes[3]->coords() ) ) <= 0)
+    if (sign(vol(m_vpNodes[0]->coords(), m_vpNodes[1]->coords(),
+                 m_vpNodes[2]->coords(), m_vpNodes[3]->coords())) <= 0)
       return true;
     break;
   case dst:
-    if ( sign( vol(m_vpNodes[0]->dst_coords(),
-                   m_vpNodes[1]->dst_coords(),
-                   m_vpNodes[2]->dst_coords(),
-                   m_vpNodes[3]->dst_coords() ) ) <= 0)
+    if (sign(vol(m_vpNodes[0]->dst_coords(), m_vpNodes[1]->dst_coords(),
+                 m_vpNodes[2]->dst_coords(), m_vpNodes[3]->dst_coords())) <= 0)
       return true;
     break;
-  default:
-    ;
+  default:;
   }
 
   return false;
 }
 
-bool
-Element3d::orientation_test(double dalpha) const
-{
-  double dvol_ref = vol( m_vpNodes[0]->coords(),
-                         m_vpNodes[1]->coords(),
-                         m_vpNodes[2]->coords(),
-                         m_vpNodes[3]->coords()
-                       );
+bool Element3d::orientation_test(double dalpha) const {
+  double dvol_ref = vol(m_vpNodes[0]->coords(), m_vpNodes[1]->coords(),
+                        m_vpNodes[2]->coords(), m_vpNodes[3]->coords());
   double dvol_def =
-    vol( m_vpNodes[0]->coords() + m_vpNodes[0]->delta() * dalpha,
-         m_vpNodes[1]->coords() + m_vpNodes[1]->delta() * dalpha,
-         m_vpNodes[2]->coords() + m_vpNodes[2]->delta() * dalpha,
-         m_vpNodes[3]->coords() + m_vpNodes[3]->delta() * dalpha
-      );
-  if ( sign(dvol_def) != sign(dvol_ref) )
+      vol(m_vpNodes[0]->coords() + m_vpNodes[0]->delta() * dalpha,
+          m_vpNodes[1]->coords() + m_vpNodes[1]->delta() * dalpha,
+          m_vpNodes[2]->coords() + m_vpNodes[2]->delta() * dalpha,
+          m_vpNodes[3]->coords() + m_vpNodes[3]->delta() * dalpha);
+  if (sign(dvol_def) != sign(dvol_ref))
     return true;
 
   return false;
 }
 
-double
-Element3d::vol( const tDblCoords& c1, const tDblCoords& c2,
-                const tDblCoords& c3, const tDblCoords& c4) const
-{
-  return det( c2-c1,
-              c3-c1,
-              c4-c1);
+double Element3d::vol(const tDblCoords &c1, const tDblCoords &c2,
+                      const tDblCoords &c3, const tDblCoords &c4) const {
+  return det(c2 - c1, c3 - c1, c4 - c1);
 }
 
 //------------------------------------------
@@ -590,32 +482,22 @@ Element3d::vol( const tDblCoords& c1, const tDblCoords& c2,
 //
 //------------------------------------------
 
-
-
-class ElementProxy : public toct::TCubicRegion<3>
-{
+class ElementProxy : public toct::TCubicRegion<3> {
 public:
   typedef TElement<3> Element;
-  typedef TCoords<double,3> Coords3d;
+  typedef TCoords<double, 3> Coords3d;
 
-  ElementProxy(CMesh3d* pmesh, unsigned int elt_idx)
-  {
+  ElementProxy(CMesh3d *pmesh, unsigned int elt_idx) {
     m_pelt = pmesh->fetch_elt(elt_idx);
-    m_pelt->src_box( this->m_cmin, this->m_cmax );
+    m_pelt->src_box(this->m_cmin, this->m_cmax);
   }
 
-  bool contains(const Coords3d& pt) const
-  {
-    return m_pelt->src_contains(pt);
-  }
-  Element* elt() const
-  {
-    return m_pelt;
-  }
+  bool contains(const Coords3d &pt) const { return m_pelt->src_contains(pt); }
+  Element *elt() const { return m_pelt; }
+
 private:
-  Element* m_pelt;
+  Element *m_pelt;
 };
-
 
 //---------------------------------------
 //
@@ -623,101 +505,82 @@ private:
 //
 //---------------------
 
-CMesh3d::CMesh3d()
-    : TMesh3d(),
-    m_maxNodes(20),
-    m_poctree(NULL)
-{}
+CMesh3d::CMesh3d() : TMesh3d(), m_maxNodes(20), m_poctree(NULL) {}
 
-CMesh3d::CMesh3d(const CMesh3d& cmesh)
-    : TMesh3d(cmesh), m_maxNodes(cmesh.m_maxNodes)
-{
-  if ( cmesh.m_poctree )
-  {
-    m_poctree = new OctreeType( *cmesh.m_poctree );
+CMesh3d::CMesh3d(const CMesh3d &cmesh)
+    : TMesh3d(cmesh), m_maxNodes(cmesh.m_maxNodes) {
+  if (cmesh.m_poctree) {
+    m_poctree = new OctreeType(*cmesh.m_poctree);
   }
 }
 
-CMesh3d::~CMesh3d()
-{
-  if ( m_poctree ) delete m_poctree;
+CMesh3d::~CMesh3d() {
+  if (m_poctree)
+    delete m_poctree;
 }
 
-int
-CMesh3d::build_index_src()
-{
+int CMesh3d::build_index_src() {
 
   std::cout << " building index src\n";
   m_vpEltBlock.clear();
 
-  if (m_poctree) delete m_poctree;
+  if (m_poctree)
+    delete m_poctree;
   Coords3d cbuf = m_cmax - m_cmin;
   //  double ddelta = std::max( cbuf(0), std::max( cbuf(1), cbuf(2)));
   cbuf = m_cmin + cbuf;
-  m_poctree = new OctreeType( m_cmin, cbuf,6, m_maxNodes );
-  m_vpEltBlock.reserve( this->get_no_elts() );
-  for (unsigned int ui=0, noItems = this->get_no_elts(); ui < noItems; ++ui)
-    m_vpEltBlock.push_back( ElementProxy(this, ui) );
+  m_poctree = new OctreeType(m_cmin, cbuf, 6, m_maxNodes);
+  m_vpEltBlock.reserve(this->get_no_elts());
+  for (unsigned int ui = 0, noItems = this->get_no_elts(); ui < noItems; ++ui)
+    m_vpEltBlock.push_back(ElementProxy(this, ui));
 
   std::cout << " done building the list\n";
-  unsigned int count = 0;//, oldPercentage = 0, percentage;
+  unsigned int count = 0; //, oldPercentage = 0, percentage;
   Timer timer;
   for (std::vector<ElementProxy>::const_iterator cit = m_vpEltBlock.begin();
-       cit != m_vpEltBlock.end(); ++cit, ++count )
-  {
-    m_poctree->insertItem( &*cit );
-    if ( !(count % 100000) )
-    {
+       cit != m_vpEltBlock.end(); ++cit, ++count) {
+    m_poctree->insertItem(&*cit);
+    if (!(count % 100000)) {
       std::cout << "\t count inserted = " << count
-      << " elapsed = " << timer.seconds() << " seconds "
-      << " element count = " << m_poctree->getElementCount()
-      << std::endl;
+                << " elapsed = " << timer.seconds() << " seconds "
+                << " element count = " << m_poctree->getElementCount()
+                << std::endl;
       timer.reset();
     }
   }
 
   std::cout << " done building octree - total elements = "
-  << m_poctree->getElementCount() << std::endl;
+            << m_poctree->getElementCount() << std::endl;
 
   return 0;
 }
 
-const CMesh3d::tElement*
-CMesh3d::element_at_point(const tCoords& c) const
-{
-  if ( const ElementProxy* cep = m_poctree->element_at_point(c) )
+const CMesh3d::tElement *CMesh3d::element_at_point(const tCoords &c) const {
+  if (const ElementProxy *cep = m_poctree->element_at_point(c))
     return cep->elt();
   return NULL;
 }
 
-CMesh3d::tElement*
-CMesh3d::element_at_point(const tCoords& c)
-{
-  if (const ElementProxy* cep = m_poctree->element_at_point(c) )
+CMesh3d::tElement *CMesh3d::element_at_point(const tCoords &c) {
+  if (const ElementProxy *cep = m_poctree->element_at_point(c))
     return cep->elt();
   return NULL;
 }
 
-
-
-const CMesh3d::tNode*
-CMesh3d::closest_node(const tCoords& c) const
-{
+const CMesh3d::tNode *CMesh3d::closest_node(const tCoords &c) const {
   // get element at point
-  const tElement* cpelt = this->element_at_point(c);
+  const tElement *cpelt = this->element_at_point(c);
 
-  if ( !cpelt ) return NULL;
+  if (!cpelt)
+    return NULL;
 
-  double dbuf, dMin = ( m_cmax - m_cmin ).norm();
-  tNode* pnode = NULL;
-  tNode* pargmin = NULL;
-  for ( unsigned int ui=0, nnodes = cpelt->no_nodes();
-        ui < nnodes; ++ui )
-  {
+  double dbuf, dMin = (m_cmax - m_cmin).norm();
+  tNode *pnode = NULL;
+  tNode *pargmin = NULL;
+  for (unsigned int ui = 0, nnodes = cpelt->no_nodes(); ui < nnodes; ++ui) {
     cpelt->get_node(ui, &pnode);
     dbuf = (c - pnode->coords()).norm();
-    if ( dbuf < dMin )
-    {
+    if (dbuf < dMin) {
       pargmin = pnode;
       dMin = dbuf;
     }
@@ -726,25 +589,20 @@ CMesh3d::closest_node(const tCoords& c) const
   return pargmin;
 }
 
-
-CMesh3d::tNode*
-CMesh3d::closest_node(const tCoords& c)
-{
+CMesh3d::tNode *CMesh3d::closest_node(const tCoords &c) {
   // get element at point
-  tElement* pelt = this->element_at_point(c);
+  tElement *pelt = this->element_at_point(c);
 
-  if ( !pelt ) return NULL;
+  if (!pelt)
+    return NULL;
 
-  double dbuf, dMin = ( m_cmax - m_cmin ).norm();
-  tNode* pnode = NULL;
-  tNode* pargmin = NULL;
-  for ( unsigned int ui=0, nnodes = pelt->no_nodes();
-        ui < nnodes; ++ui )
-  {
+  double dbuf, dMin = (m_cmax - m_cmin).norm();
+  tNode *pnode = NULL;
+  tNode *pargmin = NULL;
+  for (unsigned int ui = 0, nnodes = pelt->no_nodes(); ui < nnodes; ++ui) {
     pelt->get_node(ui, &pnode);
     dbuf = (c - pnode->coords()).norm();
-    if ( dbuf < dMin )
-    {
+    if (dbuf < dMin) {
       pargmin = pnode;
       dMin = dbuf;
     }
@@ -752,7 +610,6 @@ CMesh3d::closest_node(const tCoords& c)
 
   return pargmin;
 }
-
 
 //-------------------------------------------------------
 //
@@ -760,20 +617,14 @@ CMesh3d::closest_node(const tCoords& c)
 //
 //-------------------------------------------------------
 
+DelaunayMesh::DelaunayMesh(PointsListType &sp, tDblCoords cmin, tDblCoords cmax,
+                           double vol, double de, double dnu)
+    : surfPoints(sp), dEltVol(vol), m_cmin(cmin), m_cmax(cmax), m_de(de),
+      m_dnu(dnu) {}
 
-DelaunayMesh::DelaunayMesh(PointsListType& sp,
-                           tDblCoords cmin,
-                           tDblCoords cmax,
-                           double vol,
-                           double de, double dnu)
-    : surfPoints(sp),dEltVol(vol), m_cmin(cmin), m_cmax(cmax),
-    m_de(de), m_dnu(dnu)
-{}
-
-tetgenio* DelaunayMesh::createDelaunay()
-{
+tetgenio *DelaunayMesh::createDelaunay() {
   tetgenio in;
-  tetgenio* out = new tetgenio;
+  tetgenio *out = new tetgenio;
 
   // All indices start from 1
   in.firstnumber = 1;
@@ -782,9 +633,9 @@ tetgenio* DelaunayMesh::createDelaunay()
   in.pointlist = new REAL[in.numberofpoints * 3];
 
   // fill in the points
-  for (unsigned int pt=0; pt<4; ++pt)
-    for (unsigned int ui=0; ui<3; ++ui)
-      in.pointlist[ui+3*pt] = m_cmin(ui);
+  for (unsigned int pt = 0; pt < 4; ++pt)
+    for (unsigned int ui = 0; ui < 3; ++ui)
+      in.pointlist[ui + 3 * pt] = m_cmin(ui);
 
   in.pointlist[3] = m_cmax(0);
 
@@ -793,48 +644,39 @@ tetgenio* DelaunayMesh::createDelaunay()
 
   in.pointlist[10] = m_cmax(1);
 
-  for (unsigned int ui=4; ui<8; ++ui)
-  {
-    in.pointlist[ ui*3 ]    = in.pointlist[ (ui-4) * 3];
-    in.pointlist[ ui*3 + 1] = in.pointlist[ (ui-4) * 3 + 1 ];
-    in.pointlist[ ui*3 + 2] = m_cmax(2);
+  for (unsigned int ui = 4; ui < 8; ++ui) {
+    in.pointlist[ui * 3] = in.pointlist[(ui - 4) * 3];
+    in.pointlist[ui * 3 + 1] = in.pointlist[(ui - 4) * 3 + 1];
+    in.pointlist[ui * 3 + 2] = m_cmax(2);
   }
 
   // add the points from the container
   unsigned int ui = 8;
-  for ( PointsListType::const_iterator cit = surfPoints.begin();
-        cit != surfPoints.end(); ++cit, ++ui)
-  {
-    for (unsigned int a = 0; a<3; ++a)
-      in.pointlist[ui*3 + a] = (*cit)(a);
+  for (PointsListType::const_iterator cit = surfPoints.begin();
+       cit != surfPoints.end(); ++cit, ++ui) {
+    for (unsigned int a = 0; a < 3; ++a)
+      in.pointlist[ui * 3 + a] = (*cit)(a);
   }
-
 
   // setup facets
   in.numberoffacets = 6;
-  in.facetlist = new tetgenio::facet[ in.numberoffacets ];
+  in.facetlist = new tetgenio::facet[in.numberoffacets];
   in.facetmarkerlist = new int[in.numberoffacets];
 
   // Facet 1. The leftmost facet.
-  setupFacet(&in.facetlist[0],
-             1,2,3,4);
+  setupFacet(&in.facetlist[0], 1, 2, 3, 4);
 
-  setupFacet(&in.facetlist[1],
-             5,6,7,8);
+  setupFacet(&in.facetlist[1], 5, 6, 7, 8);
 
-  setupFacet(&in.facetlist[2],
-             1,5,6,2);
+  setupFacet(&in.facetlist[2], 1, 5, 6, 2);
 
-  setupFacet(&in.facetlist[3],
-             2,6,7,3);
+  setupFacet(&in.facetlist[3], 2, 6, 7, 3);
 
-  setupFacet(&in.facetlist[4],
-             3,7,8,4);
+  setupFacet(&in.facetlist[4], 3, 7, 8, 4);
 
-  setupFacet(&in.facetlist[5],
-             4,8,5,1);
+  setupFacet(&in.facetlist[5], 4, 8, 5, 1);
 
-  for (int i=0; i<in.numberoffacets; ++i)
+  for (int i = 0; i < in.numberoffacets; ++i)
     in.facetmarkerlist[i] = 0;
 
   // tetrahedralize
@@ -843,18 +685,15 @@ tetgenio* DelaunayMesh::createDelaunay()
   os << "a" << volConstraint;
   os.flush();
 
-  char* pchBuf = new char[100];
+  char *pchBuf = new char[100];
 
-  sprintf(pchBuf, "pq1.414a%f",
-          dEltVol);
+  sprintf(pchBuf, "pq1.414a%f", dEltVol);
 
-  tetrahedralize( pchBuf,
-                  &in, out);
+  tetrahedralize(pchBuf, &in, out);
 
   delete[] pchBuf;
 
   return out;
-
 }
 
 /*
@@ -865,11 +704,9 @@ the input of this function is a Delaunay tetrahedral mesh
 - recover tetrahedra
 
 */
-void
-DelaunayMesh::convertFormat(tetgenio* p)
-{
+void DelaunayMesh::convertFormat(tetgenio *p) {
   // if destination mesh doesn't exist, exit error
-  if ( !m_pmesh )
+  if (!m_pmesh)
     throw " DelaunayMesh - NULL mesh";
 
   // setup nodes
@@ -877,43 +714,37 @@ DelaunayMesh::convertFormat(tetgenio* p)
   int noPoints = p->numberofpoints;
 
   tDblCoords tc, dcZero(.0);
-  REAL* pdbl = & p->pointlist[0];
+  REAL *pdbl = &p->pointlist[0];
   bool is_active[3];
-  std::fill_n(is_active,3, false);
+  std::fill_n(is_active, 3, false);
 
-  for (int index=0; index<noPoints; ++index, pdbl+=3)
-  {
+  for (int index = 0; index < noPoints; ++index, pdbl += 3) {
     tc(0) = *pdbl;
-    tc(1) = *(pdbl+1);
-    tc(2) = *(pdbl+2);
+    tc(1) = *(pdbl + 1);
+    tc(2) = *(pdbl + 2);
 
-    TNode<3>* pnode = Constructor::node(index,
-                                        tc,
-                                        dcZero,
-                                        is_active);
+    TNode<3> *pnode = Constructor::node(index, tc, dcZero, is_active);
     m_pmesh->add_node(pnode);
   } // next index
 
   // setup elements
   int numberoftetrahedra = p->numberoftetrahedra;
-  int* pint = &p->tetrahedronlist[0];
-  for (int index=0; index< numberoftetrahedra; ++index, pint+=4)
-  {
-    Element3d* pelt = Constructor::elt( index,
-                                        m_pmesh->node(*pint - firstnumber),
-                                        m_pmesh->node(*(pint+1) - firstnumber),
-                                        m_pmesh->node(*(pint+2) - firstnumber),
-                                        m_pmesh->node(*(pint+3) - firstnumber) );
-    m_pmesh->add_elt( pelt );
+  int *pint = &p->tetrahedronlist[0];
+  for (int index = 0; index < numberoftetrahedra; ++index, pint += 4) {
+    Element3d *pelt =
+        Constructor::elt(index, m_pmesh->node(*pint - firstnumber),
+                         m_pmesh->node(*(pint + 1) - firstnumber),
+                         m_pmesh->node(*(pint + 2) - firstnumber),
+                         m_pmesh->node(*(pint + 3) - firstnumber));
+    m_pmesh->add_elt(pelt);
   } // next index, pint
 }
 
-CMesh3d* DelaunayMesh::get()
-{
+CMesh3d *DelaunayMesh::get() {
   m_pmesh = new CMesh3d; // leak?
 
-  tetgenio* out = this->createDelaunay();
-  this->convertFormat( out );
+  tetgenio *out = this->createDelaunay();
+  this->convertFormat(out);
 
   // dbg - save mesh
   // out->save_nodes((char*)"iteration");
@@ -929,11 +760,8 @@ CMesh3d* DelaunayMesh::get()
   return m_pmesh;
 }
 
-void
-DelaunayMesh::setupFacet(tetgenio::facet* f,
-                         int a, int b, int c, int d)
-{
-  tetgenio::polygon* p;
+void DelaunayMesh::setupFacet(tetgenio::facet *f, int a, int b, int c, int d) {
+  tetgenio::polygon *p;
 
   f->numberofpolygons = 1;
   f->polygonlist = new tetgenio::polygon[f->numberofpolygons];
@@ -1110,42 +938,30 @@ AdaptiveDelaunay::create_bkg_mesh()
 }
 #endif
 
-MeshCreator::MeshCreator(tDblCoords cmin,
-                         tDblCoords cmax,
-                         tIntCoords ticks,
+MeshCreator::MeshCreator(tDblCoords cmin, tDblCoords cmax, tIntCoords ticks,
                          double de, double dnu)
-    : m_cmin(cmin), m_cmax(cmax),
-    m_mnodes(),
-    m_ticks(ticks),
-    m_step(-1.0),
-    m_d3_zero(0.0),
-    m_de(de), m_dnu(dnu)
-{
+    : m_cmin(cmin), m_cmax(cmax), m_mnodes(), m_ticks(ticks), m_step(-1.0),
+      m_d3_zero(0.0), m_de(de), m_dnu(dnu) {
   std::cout << " Mesh creator ticks = " << ticks << std::endl;
 
-  std::fill_n(m_is_active,3,false);
+  std::fill_n(m_is_active, 3, false);
 
-  for (int i=0; i<3; ++i)
-    m_step(i) = (m_cmax(i)-m_cmin(i)) / (m_ticks(i)-1.0) *.5;
+  for (int i = 0; i < 3; ++i)
+    m_step(i) = (m_cmax(i) - m_cmin(i)) / (m_ticks(i) - 1.0) * .5;
 
   m_pmesh = new CMesh3d;
   m_pmesh->m_cmin = m_cmin;
   m_pmesh->m_cmax = m_cmax;
 }
 
-CMesh3d*
-MeshCreator::get()
-{
+CMesh3d *MeshCreator::get() {
   setup_nodes();
   setup_elts();
 
   return m_pmesh;
 }
 
-void
-MeshCreator::add_node(int id,
-                      int x, int y, int z)
-{
+void MeshCreator::add_node(int id, int x, int y, int z) {
   tIntCoords index;
   index(0) = x;
   index(1) = y;
@@ -1156,127 +972,94 @@ MeshCreator::add_node(int id,
   tc(2) = double(z) * m_step(2);
   tc += m_cmin;
 
-  TNode<3>* pnode = Constructor::node(id,
-                                      tc,
-                                      m_d3_zero,
-                                      m_is_active);
+  TNode<3> *pnode = Constructor::node(id, tc, m_d3_zero, m_is_active);
   m_pmesh->add_node(pnode);
   m_mnodes[index] = pnode;
 }
 
-void
-MeshCreator::setup_nodes()
-{
+void MeshCreator::setup_nodes() {
   int id = 0;
 
-  for ( int i=0; i<m_ticks(0); ++i)
-    for ( int j=0; j<m_ticks(1); ++j)
-      for ( int k=0; k<m_ticks(2); ++k)
-      {
-        add_node(id++, 2*i, 2*j, 2*k);
+  for (int i = 0; i < m_ticks(0); ++i)
+    for (int j = 0; j < m_ticks(1); ++j)
+      for (int k = 0; k < m_ticks(2); ++k) {
+        add_node(id++, 2 * i, 2 * j, 2 * k);
 
-        if ( i<m_ticks(0)-1 && j<m_ticks(1)-1 )
-          add_node(id++, 2*i+1, 2*j+1, 2*k);
-        if ( i<m_ticks(0)-1 && k<m_ticks(2)-1 )
-          add_node(id++, 2*i+1, 2*j, 2*k+1);
-        if ( j<m_ticks(1)-1 && k<m_ticks(2)-1 )
-          add_node(id++, 2*i, 2*j+1, 2*k+1);
-        if ( i<m_ticks(0)-1 && j<m_ticks(1)-1 && k<m_ticks(2)-1 )
-          add_node(id++, 2*i+1, 2*j+1, 2*k+1);
+        if (i < m_ticks(0) - 1 && j < m_ticks(1) - 1)
+          add_node(id++, 2 * i + 1, 2 * j + 1, 2 * k);
+        if (i < m_ticks(0) - 1 && k < m_ticks(2) - 1)
+          add_node(id++, 2 * i + 1, 2 * j, 2 * k + 1);
+        if (j < m_ticks(1) - 1 && k < m_ticks(2) - 1)
+          add_node(id++, 2 * i, 2 * j + 1, 2 * k + 1);
+        if (i < m_ticks(0) - 1 && j < m_ticks(1) - 1 && k < m_ticks(2) - 1)
+          add_node(id++, 2 * i + 1, 2 * j + 1, 2 * k + 1);
       }
 }
 
-void
-MeshCreator::setup_elt_group(int& id,
-                             TNode<3>* pcubeCenter,
-                             TNode<3>* pfaceCenter,
-                             TNode<3>* p0,
-                             TNode<3>* p1,
-                             TNode<3>* p2,
-                             TNode<3>* p3)
-{
-  Element3d* pelt = NULL;
+void MeshCreator::setup_elt_group(int &id, TNode<3> *pcubeCenter,
+                                  TNode<3> *pfaceCenter, TNode<3> *p0,
+                                  TNode<3> *p1, TNode<3> *p2, TNode<3> *p3) {
+  Element3d *pelt = NULL;
 
-  pelt = Constructor::elt( id++,
-                           pcubeCenter, pfaceCenter,
-                           p0, p1 );
+  pelt = Constructor::elt(id++, pcubeCenter, pfaceCenter, p0, p1);
   m_pmesh->add_elt(pelt);
 
-  pelt = Constructor::elt( id++,
-                           pcubeCenter, pfaceCenter,
-                           p1, p2 );
+  pelt = Constructor::elt(id++, pcubeCenter, pfaceCenter, p1, p2);
   m_pmesh->add_elt(pelt);
 
-  pelt = Constructor::elt( id++,
-                           pcubeCenter, pfaceCenter,
-                           p2, p3 );
+  pelt = Constructor::elt(id++, pcubeCenter, pfaceCenter, p2, p3);
   m_pmesh->add_elt(pelt);
 
-  pelt = Constructor::elt( id++,
-                           pcubeCenter, pfaceCenter,
-                           p3, p0);
+  pelt = Constructor::elt(id++, pcubeCenter, pfaceCenter, p3, p0);
   m_pmesh->add_elt(pelt);
-
 }
 
-void
-MeshCreator::setup_elts()
-{
-  int id=0;
+void MeshCreator::setup_elts() {
+  int id = 0;
   NodeMapType::iterator it;
-  TNode<3> *pn0, *pn1, *pn2, *pn3,
-  *pn4, *pn5, *pn6, *pn7, *pnij0,
-  *pnik0, *pnjk0, *pnij1, *pnik1, *pnjk1, *pncenter;
+  TNode<3> *pn0, *pn1, *pn2, *pn3, *pn4, *pn5, *pn6, *pn7, *pnij0, *pnik0,
+      *pnjk0, *pnij1, *pnik1, *pnjk1, *pncenter;
 
-  vector<TNode<3>*> vpnodes;
+  vector<TNode<3> *> vpnodes;
 
-  for ( int k=0; k<m_ticks(2)-1; ++k)
-    for ( int j=0; j<m_ticks(1)-1; ++j)
-      for ( int i=0; i<m_ticks(0)-1; ++i)
-      {
+  for (int k = 0; k < m_ticks(2) - 1; ++k)
+    for (int j = 0; j < m_ticks(1) - 1; ++j)
+      for (int i = 0; i < m_ticks(0) - 1; ++i) {
         // 15 nodes
 
-        pn0 = get_node( 2*i,2*j,2*k);
-        pn1 = get_node( 2*(i+1), 2*j, 2*k);
-        pn2 = get_node( 2*(i+1), 2*(j+1), 2*k);
-        pn3 = get_node( 2*i, 2*(j+1), 2*k);
+        pn0 = get_node(2 * i, 2 * j, 2 * k);
+        pn1 = get_node(2 * (i + 1), 2 * j, 2 * k);
+        pn2 = get_node(2 * (i + 1), 2 * (j + 1), 2 * k);
+        pn3 = get_node(2 * i, 2 * (j + 1), 2 * k);
 
-        pn4 = get_node( 2*i, 2*j, 2*(k+1));
-        pn5 = get_node( 2*(i+1), 2*j, 2*(k+1) );
-        pn6 = get_node( 2*(i+1), 2*(j+1), 2*(k+1) );
-        pn7 = get_node( 2*i, 2*(j+1), 2*(k+1) );
+        pn4 = get_node(2 * i, 2 * j, 2 * (k + 1));
+        pn5 = get_node(2 * (i + 1), 2 * j, 2 * (k + 1));
+        pn6 = get_node(2 * (i + 1), 2 * (j + 1), 2 * (k + 1));
+        pn7 = get_node(2 * i, 2 * (j + 1), 2 * (k + 1));
 
-        pnij0 = get_node(2*i+1, 2*j+1, 2*k);
-        pnik0 = get_node(2*i+1, 2*j, 2*k+1);
-        pnjk0 = get_node(2*i, 2*j+1, 2*k+1);
+        pnij0 = get_node(2 * i + 1, 2 * j + 1, 2 * k);
+        pnik0 = get_node(2 * i + 1, 2 * j, 2 * k + 1);
+        pnjk0 = get_node(2 * i, 2 * j + 1, 2 * k + 1);
 
-        pnij1 = get_node( 2*i+1, 2*j+1, 2*(k+1) );
-        pnik1 = get_node( 2*i+1, 2*(j+1), 2*k+1 );
-        pnjk1 = get_node( 2*(i+1), 2*j+1, 2*k+1 );
+        pnij1 = get_node(2 * i + 1, 2 * j + 1, 2 * (k + 1));
+        pnik1 = get_node(2 * i + 1, 2 * (j + 1), 2 * k + 1);
+        pnjk1 = get_node(2 * (i + 1), 2 * j + 1, 2 * k + 1);
 
-        pncenter = get_node( 2*i+1, 2*j+1, 2*k+1);
+        pncenter = get_node(2 * i + 1, 2 * j + 1, 2 * k + 1);
 
         // 24 elements
-        setup_elt_group(id, pncenter, pnij0,
-                        pn3, pn2, pn1, pn0);
+        setup_elt_group(id, pncenter, pnij0, pn3, pn2, pn1, pn0);
 
-        setup_elt_group(id, pncenter, pnij1,
-                        pn4, pn5, pn6, pn7);
+        setup_elt_group(id, pncenter, pnij1, pn4, pn5, pn6, pn7);
 
-        setup_elt_group(id, pncenter, pnjk1,
-                        pn1, pn2, pn6, pn5 );
+        setup_elt_group(id, pncenter, pnjk1, pn1, pn2, pn6, pn5);
 
-        setup_elt_group(id, pncenter, pnik0,
-                        pn0, pn1, pn5, pn4 );
+        setup_elt_group(id, pncenter, pnik0, pn0, pn1, pn5, pn4);
 
-        setup_elt_group(id, pncenter, pnjk0,
-                        pn3, pn0, pn4, pn7);
+        setup_elt_group(id, pncenter, pnjk0, pn3, pn0, pn4, pn7);
 
-        setup_elt_group(id, pncenter, pnik1,
-                        pn2, pn3, pn7, pn6);
-
+        setup_elt_group(id, pncenter, pnik1, pn2, pn3, pn7, pn6);
       }
 
   m_pmesh->set_constants(m_de, m_dnu);
 }
-

@@ -4,68 +4,56 @@
 #include "kvlAtlasMeshRasterizor.h"
 #include "itkImage.h"
 
-
-namespace kvl
-{
-
+namespace kvl {
 
 /**
  *
  */
-class AtlasMeshVisitCounter: public AtlasMeshRasterizor
-{
-public :
-  
+class AtlasMeshVisitCounter : public AtlasMeshRasterizor {
+public:
   /** Standard class typedefs */
-  typedef AtlasMeshVisitCounter  Self;
-  typedef AtlasMeshRasterizor Superclass;
-  typedef itk::SmartPointer< Self >  Pointer;
-  typedef itk::SmartPointer< const Self >  ConstPointer;
+  using Self = AtlasMeshVisitCounter;
+  using Superclass = AtlasMeshRasterizor;
+  using Pointer = itk::SmartPointer<Self>;
+  using ConstPointer = itk::SmartPointer<const Self>;
 
   /** Method for creation through the object factory. */
-  itkNewMacro( Self );
+  itkNewMacro(Self);
 
   /** Run-time type information (and related methods). */
-  itkTypeMacro( AtlasMeshVisitCounter, itk::Object );
+  itkTypeMacro(AtlasMeshVisitCounter, itk::Object);
 
   /** Some typedefs */
-  typedef itk::Image< int, 3 >  ImageType;
+  using ImageType = itk::Image<int, 3>;
 
   /** */
-  void SetRegions( const ImageType::RegionType&  region )
-    {
+  void SetRegions(const ImageType::RegionType &region) {
     m_Image = ImageType::New();
-    m_Image->SetRegions( region );
+    m_Image->SetRegions(region);
     m_Image->Allocate();
-    m_Image->FillBuffer( 0 );
-    }
-  
+    m_Image->FillBuffer(0);
+  }
+
   /** */
-  const ImageType*  GetImage() const
-    { return m_Image; }
-    
-  
+  const ImageType *GetImage() const { return m_Image; }
+
 protected:
   AtlasMeshVisitCounter();
   virtual ~AtlasMeshVisitCounter();
-  
+
   //
-  bool RasterizeTetrahedron( const AtlasMesh* mesh, 
-                             AtlasMesh::CellIdentifier tetrahedronId,
-                             int threadNumber );
+  bool RasterizeTetrahedron(const AtlasMesh *mesh,
+                            AtlasMesh::CellIdentifier tetrahedronId,
+                            int threadNumber);
 
 private:
-  AtlasMeshVisitCounter(const Self&); //purposely not implemented
-  void operator=(const Self&); //purposely not implemented
-  
+  AtlasMeshVisitCounter(const Self &); // purposely not implemented
+  void operator=(const Self &);        // purposely not implemented
+
   //
-  ImageType::Pointer  m_Image;
-  
+  ImageType::Pointer m_Image;
 };
 
-
-
 } // end namespace kvl
-
 
 #endif

@@ -26,15 +26,13 @@
 
 #include <QDialog>
 
-namespace Ui
-{
+namespace Ui {
 class DialogNewROI;
 }
 
 class LayerMRI;
 
-class DialogNewROI : public QDialog
-{
+class DialogNewROI : public QDialog {
   Q_OBJECT
 
 public:
@@ -42,9 +40,9 @@ public:
   ~DialogNewROI();
 
   QString GetROIName();
-  void SetROIName( const QString& name );
+  void SetROIName(const QString &name);
 
-  LayerMRI* GetTemplate();
+  LayerMRI *GetTemplate();
 
 protected slots:
   void OnOK();
