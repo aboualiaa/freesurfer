@@ -80,6 +80,7 @@ constexpr float tenToEighth = 1e8;
 constexpr float eightPointZero = 8.0;
 
 namespace wbc {
+
 // FIXME: not packed
 struct WBCSYNTH {
   double distthresh;
