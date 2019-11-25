@@ -1,3 +1,8 @@
+if(LINUX)
+  set(CMAKE_Fortran_COMPILER "/usr/bin/gfortran-9")
+elseif(APPLE)
+  set(CMAKE_Fortran_COMPILER "usr/local/bin/gfortran-9")
+endif()
 # project info
 cmake_policy(SET CMP0048 NEW)
 project(freesurfer VERSION 7.0.0)
