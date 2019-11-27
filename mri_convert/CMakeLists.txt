@@ -3,11 +3,17 @@ project(mri_convert)
 # ATH: temporarily turning off this warning
 add_compile_options(-Wno-self-assign)
 
-include_directories(${FS_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/packages/dicom)
+include_directories(${FS_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/packages/dicom ${Boost_INCLUDE_DIRS})
 
-add_executable(mri_convert mri_convert.cpp)
+
+add_hpx_executable(mri_convert
+  SOURCES mri_convert_17.cpp
+  DEPENDENCIES utils ${Boost_LIBRARIES} benchmark fmt
+  COMPONENT_DEPENDENCIES iostreams)
+
+#add_executable(mri_convert mri_convert.cpp)
 add_help(mri_convert mri_convert.help.xml)
-target_link_libraries(mri_convert utils fmt)
+#target_link_libraries(mri_convert utils fmt)
 
 install(TARGETS mri_convert DESTINATION bin)
 
