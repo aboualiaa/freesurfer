@@ -105,10 +105,10 @@ struct ENV {
       "$Id: mri_convert.c,v 1.227 2017/02/16 19:15:42 greve Exp $";
 };
 
-#include <boost/program_options.hpp>
-#include <boost/program_options/parsers.hpp>
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
+#include <boost/program_options.hpp>
+#include <boost/program_options/parsers.hpp>
 
 namespace po = boost::program_options;
 namespace fsys = std::filesystem; // sadly fs is already defined: freesurfer
@@ -194,13 +194,14 @@ extern int errno;
 
 const char *Progname;
 
-int ncutends = 0, cutends_flag = 0;
+int ncutends = 0;
+bool cutends_flag{false};
 
-int slice_crop_flag = FALSE;
+bool slice_crop_flag{false};
 int slice_crop_start, slice_crop_stop;
 int SplitFrames = 0;
 int DeleteCMDs = 0;
-char NewTransformFname[2000];
+std::array<char, 2000> NewTransformFname{};
 int DoNewTransformFname = 0;
 
 /*-------------------------------------------------------------*/
@@ -222,7 +223,7 @@ int main(int argc, char *argv[]) {
   MRI *mri_in_like;
   int i;
   int err = 0;
-  int reorder_vals[3];
+  std::array<int, 3> reorder_vals{};
   float invert_val{1.0};
   bool in_info_flag{false};
   bool out_info_flag{false};
@@ -236,8 +237,8 @@ int main(int argc, char *argv[]) {
   int ConfKeepDC = 0;
   bool parse_only_flag{false};
   bool reorder_flag{false};
-  int reorder4_vals[4];
-  int reorder4_flag;
+  std::array<int, 4> reorder4_vals{};
+  bool reorder4_flag{false};
   bool in_stats_flag{false};
   bool out_stats_flag{false};
   bool read_only_flag{false};
@@ -246,12 +247,12 @@ int main(int argc, char *argv[]) {
   std::array<char, STRLEN> out_name{};
   int in_volume_type;
   int out_volume_type{MRI_VOLUME_TYPE_UNKNOWN};
-  char resample_type[STRLEN];
+  std::array<char, STRLEN> resample_type{};
   int resample_type_val{SAMPLE_TRILINEAR};
   bool in_i_size_flag{false};
   bool in_j_size_flag{false};
   bool in_k_size_flag{false};
-  int crop_flag = FALSE;
+  bool crop_flag{false};
   bool out_i_size_flag{false};
   bool out_j_size_flag{false};
   bool out_k_size_flag{false};
@@ -261,52 +262,52 @@ int main(int argc, char *argv[]) {
   float out_i_size;
   float out_j_size;
   float out_k_size;
-  int crop_center[3];
-  int sizes_good_flag;
-  int crop_size[3];
-  float in_i_directions[3];
-  float in_j_directions[3];
-  float in_k_directions[3];
-  float out_i_directions[3];
-  float out_j_directions[3];
-  float out_k_directions[3];
-  float voxel_size[3];
+  std::array<int, 3> crop_center{};
+  bool sizes_good_flag{false};
+  std::array<int, 3> crop_size{};
+  std::array<float, 3> in_i_directions{};
+  std::array<float, 3> in_j_directions{};
+  std::array<float, 3> in_k_directions{};
+  std::array<float, 3> out_i_directions{};
+  std::array<float, 3> out_j_directions{};
+  std::array<float, 3> out_k_directions{};
+  std::array<float, 3> voxel_size{};
   bool in_i_direction_flag{false};
   bool in_j_direction_flag{false};
   bool in_k_direction_flag{false};
   bool out_i_direction_flag{false};
   bool out_j_direction_flag{false};
   bool out_k_direction_flag{false};
-  int in_orientation_flag = FALSE;
-  char in_orientation_string[STRLEN];
-  int out_orientation_flag = FALSE;
-  char out_orientation_string[STRLEN];
-  char colortablefile[STRLEN] = "";
-  char tmpstr[STRLEN];
+  bool in_orientation_flag{false};
+  std::array<char, STRLEN> in_orientation_string{};
+  bool out_orientation_flag{false};
+  std::array<char, STRLEN> out_orientation_string{};
+  std::array<char, STRLEN> colortablefile{};
+  std::array<char, STRLEN> tmpstr{};
   char *stem;
   char *ext;
-  char ostr[4] = {'\0', '\0', '\0', '\0'};
+  std::array<char, 4> ostr{};
   char *errmsg = nullptr;
-  int in_tr_flag = 0;
+  bool in_tr_flag{false};
   float in_tr = 0;
-  int in_ti_flag = 0;
+  bool in_ti_flag{false};
   float in_ti = 0;
-  int in_te_flag = 0;
+  bool in_te_flag{false};
   float in_te = 0;
-  int in_flip_angle_flag = 0;
+  bool in_flip_angle_flag{false};
   float in_flip_angle = 0;
   float magnitude;
   float i_dot_j;
   float i_dot_k;
   float j_dot_k;
-  float in_center[3];
-  float out_center[3];
-  float delta_in_center[3];
+  std::array<float, 3> in_center{};
+  std::array<float, 3> out_center{};
+  std::array<float, 3> delta_in_center{};
   bool in_center_flag{false};
   bool out_center_flag{false};
   bool delta_in_center_flag{false};
   int out_data_type{-1};
-  char out_data_type_string[STRLEN];
+  std::array<char, STRLEN> out_data_type_string{};
   int out_n_i;
   int out_n_j;
   int out_n_k;
@@ -321,17 +322,17 @@ int main(int argc, char *argv[]) {
   int forced_in_type{MRI_VOLUME_TYPE_UNKNOWN};
   int forced_out_type{MRI_VOLUME_TYPE_UNKNOWN};
   std::array<char, STRLEN> in_type_string{};
-  char out_type_string[STRLEN];
+  std::array<char, STRLEN> out_type_string{};
   std::array<char, STRLEN> subject_name{};
   bool force_template_type_flag{false};
   int forced_template_type{MRI_VOLUME_TYPE_UNKNOWN};
-  char template_type_string[STRLEN];
-  char reslice_like_name[STRLEN];
+  std::array<char, STRLEN> template_type_string{};
+  std::array<char, STRLEN> reslice_like_name{};
   bool reslice_like_flag{false};
   int nframes = 0;
   bool frame_flag{false};
   bool mid_frame_flag{false};
-  int frames[2000];
+  std::array<int, 2000> frames{};
   char *errormsg;
   bool subsample_flag{false};
   int SubSampStart;
@@ -339,9 +340,9 @@ int main(int argc, char *argv[]) {
   int SubSampEnd;
   bool downsample2_flag{false};
   bool downsample_flag{false};
-  float downsample_factor[3];
-  char in_name_only[STRLEN];
-  char transform_fname[STRLEN];
+  std::array<float, 3> downsample_factor{};
+  std::array<char, STRLEN> in_name_only{};
+  std::array<char, STRLEN> transform_fname{};
   bool transform_flag{false};
   bool invert_transform_flag{false};
   LTA *lta_transform = nullptr;
@@ -352,9 +353,9 @@ int main(int argc, char *argv[]) {
   bool smooth_parcellation_flag{false};
   int smooth_parcellation_count;
   bool in_like_flag{false};
-  char in_like_name[STRLEN];
-  char out_like_name[STRLEN];
-  int out_like_flag = FALSE;
+  std::array<char, STRLEN> in_like_name{};
+  std::array<char, STRLEN> out_like_name{};
+  bool out_like_flag{false};
   int in_n_i;
   int in_n_j;
   int in_n_k;
@@ -362,34 +363,34 @@ int main(int argc, char *argv[]) {
   bool in_n_j_flag{false};
   bool in_n_k_flag{false};
   bool fill_parcellation_flag{false};
-  int read_parcellation_volume_flag;
+  bool read_parcellation_volume_flag{false};
   bool zero_outlines_flag{false};
-  int erode_seg_flag = FALSE;
+  bool erode_seg_flag{false};
   int n_erode_seg;
-  int dil_seg_flag = FALSE;
+  bool dil_seg_flag{false};
   int n_dil_seg;
   std::array<char, STRLEN> dil_seg_mask{};
   int read_otl_flags;
   bool color_file_flag{false};
-  char color_file_name[STRLEN];
+  std::array<char, STRLEN> color_file_name{};
   int no_scale_flag{false}; // TODO: convert to bool
   int temp_type;
   bool roi_flag{false};
   FILE *fptmp;
   int j;
   bool translate_labels_flag{false};
-  int force_ras_good = FALSE;
+  bool force_ras_good{false};
   std::array<char, STRLEN> gdf_image_stem{};
   bool in_matrix_flag{false};
   bool out_matrix_flag{false};
   float conform_size{1.0};
-  int zero_ge_z_offset_flag = FALSE; // E/
+  bool zero_ge_z_offset_flag{false}; // E/
   int nskip = 0;                     // number of frames to skip from start
   int ndrop = 0;                     // number of frames to skip from end
   VOL_GEOM vgtmp;
   LT *lt = nullptr;
   int DevXFM = 0;
-  char devxfm_subject[STRLEN];
+  std::array<char, STRLEN> devxfm_subject{};
   MATRIX *T;
   float scale_factor{1};
   float out_scale_factor{1};
@@ -398,20 +399,20 @@ int main(int argc, char *argv[]) {
   int reduce = 0;
   float fwhm = -1;
   float gstd = -1;
-  char cmdline[STRLEN];
-  int sphinx_flag = FALSE;
-  int LeftRightReverse = FALSE;
-  int LeftRightReversePix = FALSE;
-  int LeftRightMirrorFlag = FALSE;  // mirror half of the image
+  std::array<char, STRLEN> cmdline{};
+  bool sphinx_flag{false};
+  bool LeftRightReverse{false};
+  bool LeftRightReversePix{false};
+  bool LeftRightMirrorFlag{false};  // mirror half of the image
   char LeftRightMirrorHemi[STRLEN]; // which half to mirror (lh, rh)
-  int LeftRightKeepFlag = FALSE;    // keep half of the image
-  int LeftRightSwapLabel = FALSE;
-  int FlipCols = FALSE;
-  int SliceReverse = FALSE;
-  int SliceBias = FALSE;
+  bool LeftRightKeepFlag{false};    // keep half of the image
+  bool LeftRightSwapLabel{false};
+  bool FlipCols{false};
+  bool SliceReverse{false};
+  bool SliceBias{false};
   float SliceBiasAlpha = 1.0;
   float v;
-  char AutoAlignFile[STRLEN];
+  std::array<char, STRLEN> AutoAlignFile{};
   MATRIX *AutoAlign = nullptr;
   MATRIX *cras = nullptr;
   MATRIX *vmid = nullptr;
@@ -437,7 +438,7 @@ int main(int argc, char *argv[]) {
 
   make_cmd_version_string(
       argc, argv, "$Id: mri_convert.c,v 1.227 2017/02/16 19:15:42 greve Exp $",
-      "$Name:  $", cmdline);
+      "$Name:  $", cmdline.data());
 
   for (i = 0; i < argc; i++) {
     fmt::printf("%s ", argv[i]);
@@ -505,18 +506,18 @@ int main(int argc, char *argv[]) {
         if (strcmp(argv[i], "-at") == 0 ||
             strcmp(argv[i], "--apply_transform") == 0 ||
             strcmp(argv[i], "-T") == 0) {
-      get_string(argc, argv, &i, transform_fname);
+      get_string(argc, argv, &i, transform_fname.data());
       transform_flag = TRUE;
       invert_transform_flag = FALSE;
     } else if (strcmp(argv[i], "--like") == 0) {
-      get_string(argc, argv, &i, out_like_name);
+      get_string(argc, argv, &i, out_like_name.data());
       out_like_flag = TRUE;
       // creates confusion when this is printed:
       // fmt::printf("WARNING: --like does not work on multi-frame data\n");
       // but we'll leave it here for the interested coder
     } else if (strcmp(argv[i], "--crop") == 0) {
       crop_flag = TRUE;
-      get_ints(argc, argv, &i, crop_center, 3);
+      get_ints(argc, argv, &i, crop_center.data(), 3);
     } else if (strcmp(argv[i], "--slice-crop") == 0) {
       slice_crop_flag = TRUE;
       get_ints(argc, argv, &i, &slice_crop_start, 1);
@@ -527,17 +528,17 @@ int main(int argc, char *argv[]) {
       }
     } else if (strcmp(argv[i], "--cropsize") == 0) {
       crop_flag = TRUE;
-      get_ints(argc, argv, &i, crop_size, 3);
+      get_ints(argc, argv, &i, crop_size.data(), 3);
     } else if (strcmp(argv[i], "--devolvexfm") == 0) {
       /* devolve xfm to account for cras != 0 */
-      get_string(argc, argv, &i, devxfm_subject);
+      get_string(argc, argv, &i, devxfm_subject.data());
       DevXFM = 1;
     } else if (strcmp(argv[i], "-ait") == 0 ||
                strcmp(argv[i], "--apply_inverse_transform") == 0) {
-      get_string(argc, argv, &i, transform_fname);
-      if (FileExists(transform_fname) == 0) {
+      get_string(argc, argv, &i, transform_fname.data());
+      if (FileExists(transform_fname.data()) == 0) {
         fmt::fprintf(stderr, "ERROR: cannot find transform file %s\n",
-                     transform_fname);
+                     transform_fname.data());
         exit(1);
       }
       transform_flag = TRUE;
@@ -573,7 +574,7 @@ int main(int argc, char *argv[]) {
       out_k_size_flag = TRUE;
     } else if (strcmp(argv[i], "-iid") == 0 ||
                strcmp(argv[i], "--in_i_direction") == 0) {
-      get_floats(argc, argv, &i, in_i_directions, 3);
+      get_floats(argc, argv, &i, in_i_directions.data(), 3);
       magnitude = sqrt(in_i_directions[0] * in_i_directions[0] +
                        in_i_directions[1] * in_i_directions[1] +
                        in_i_directions[2] * in_i_directions[2]);
@@ -598,7 +599,7 @@ int main(int argc, char *argv[]) {
       in_i_direction_flag = TRUE;
     } else if (strcmp(argv[i], "-ijd") == 0 ||
                strcmp(argv[i], "--in_j_direction") == 0) {
-      get_floats(argc, argv, &i, in_j_directions, 3);
+      get_floats(argc, argv, &i, in_j_directions.data(), 3);
       magnitude = sqrt(in_j_directions[0] * in_j_directions[0] +
                        in_j_directions[1] * in_j_directions[1] +
                        in_j_directions[2] * in_j_directions[2]);
@@ -623,7 +624,7 @@ int main(int argc, char *argv[]) {
       in_j_direction_flag = TRUE;
     } else if (strcmp(argv[i], "-ikd") == 0 ||
                strcmp(argv[i], "--in_k_direction") == 0) {
-      get_floats(argc, argv, &i, in_k_directions, 3);
+      get_floats(argc, argv, &i, in_k_directions.data(), 3);
       magnitude = sqrt(in_k_directions[0] * in_k_directions[0] +
                        in_k_directions[1] * in_k_directions[1] +
                        in_k_directions[2] * in_k_directions[2]);
@@ -647,13 +648,13 @@ int main(int argc, char *argv[]) {
       }
       in_k_direction_flag = TRUE;
     } else if (strcmp(argv[i], "--ctab") == 0) {
-      get_string(argc, argv, &i, colortablefile);
+      get_string(argc, argv, &i, colortablefile.data());
     } else if (strcmp(argv[i], "--in_orientation") == 0) {
-      get_string(argc, argv, &i, in_orientation_string);
-      errmsg = MRIcheckOrientationString(in_orientation_string);
+      get_string(argc, argv, &i, in_orientation_string.data());
+      errmsg = MRIcheckOrientationString(in_orientation_string.data());
       if (errmsg != nullptr) {
         fmt::printf("ERROR: with in orientation string %s\n",
-                    in_orientation_string);
+                    in_orientation_string.data());
         fmt::printf("%s\n", errmsg);
         exit(1);
       }
@@ -661,11 +662,11 @@ int main(int argc, char *argv[]) {
     }
 
     else if (strcmp(argv[i], "--out_orientation") == 0) {
-      get_string(argc, argv, &i, out_orientation_string);
-      errmsg = MRIcheckOrientationString(out_orientation_string);
+      get_string(argc, argv, &i, out_orientation_string.data());
+      errmsg = MRIcheckOrientationString(out_orientation_string.data());
       if (errmsg != nullptr) {
         fmt::printf("ERROR: with out_orientation string %s\n",
-                    out_orientation_string);
+                    out_orientation_string.data());
         fmt::printf("%s\n", errmsg);
         exit(1);
       }
@@ -674,7 +675,7 @@ int main(int argc, char *argv[]) {
 
     else if (strcmp(argv[i], "-oid") == 0 ||
              strcmp(argv[i], "--out_i_direction") == 0) {
-      get_floats(argc, argv, &i, out_i_directions, 3);
+      get_floats(argc, argv, &i, out_i_directions.data(), 3);
       magnitude = sqrt(out_i_directions[0] * out_i_directions[0] +
                        out_i_directions[1] * out_i_directions[1] +
                        out_i_directions[2] * out_i_directions[2]);
@@ -700,7 +701,7 @@ int main(int argc, char *argv[]) {
       out_i_direction_flag = TRUE;
     } else if (strcmp(argv[i], "-ojd") == 0 ||
                strcmp(argv[i], "--out_j_direction") == 0) {
-      get_floats(argc, argv, &i, out_j_directions, 3);
+      get_floats(argc, argv, &i, out_j_directions.data(), 3);
       magnitude = sqrt(out_j_directions[0] * out_j_directions[0] +
                        out_j_directions[1] * out_j_directions[1] +
                        out_j_directions[2] * out_j_directions[2]);
@@ -726,7 +727,7 @@ int main(int argc, char *argv[]) {
       out_j_direction_flag = TRUE;
     } else if (strcmp(argv[i], "-okd") == 0 ||
                strcmp(argv[i], "--out_k_direction") == 0) {
-      get_floats(argc, argv, &i, out_k_directions, 3);
+      get_floats(argc, argv, &i, out_k_directions.data(), 3);
       magnitude = sqrt(out_k_directions[0] * out_k_directions[0] +
                        out_k_directions[1] * out_k_directions[1] +
                        out_k_directions[2] * out_k_directions[2]);
@@ -752,15 +753,15 @@ int main(int argc, char *argv[]) {
       out_k_direction_flag = TRUE;
     } else if (strcmp(argv[i], "-ic") == 0 ||
                strcmp(argv[i], "--in_center") == 0) {
-      get_floats(argc, argv, &i, in_center, 3);
+      get_floats(argc, argv, &i, in_center.data(), 3);
       in_center_flag = TRUE;
     } else if (strcmp(argv[i], "-dic") == 0 ||
                strcmp(argv[i], "--delta_in_center") == 0) {
-      get_floats(argc, argv, &i, delta_in_center, 3);
+      get_floats(argc, argv, &i, delta_in_center.data(), 3);
       delta_in_center_flag = TRUE;
     } else if (strcmp(argv[i], "-oc") == 0 ||
                strcmp(argv[i], "--out_center") == 0) {
-      get_floats(argc, argv, &i, out_center, 3);
+      get_floats(argc, argv, &i, out_center.data(), 3);
       out_center_flag = TRUE;
     } else if (strcmp(argv[i], "-oni") == 0 || strcmp(argv[i], "-oic") == 0 ||
                strcmp(argv[i], "--out_i_count") == 0) {
@@ -777,12 +778,12 @@ int main(int argc, char *argv[]) {
     } else if (strcmp(argv[i], "-vs") == 0 ||
                strcmp(argv[i], "--voxsize") == 0 ||
                strcmp(argv[i], "-voxsize") == 0) {
-      get_floats(argc, argv, &i, voxel_size, 3);
+      get_floats(argc, argv, &i, voxel_size.data(), 3);
       voxel_size_flag = TRUE;
     } else if (strcmp(argv[i], "-ds") == 0 ||
                strcmp(argv[i], "--downsample") == 0 ||
                strcmp(argv[i], "-downsample") == 0) {
-      get_floats(argc, argv, &i, downsample_factor, 3);
+      get_floats(argc, argv, &i, downsample_factor.data(), 3);
       downsample_flag = TRUE;
     } else if (strcmp(argv[i], "-ds2") == 0 ||
                strcmp(argv[i], "--downsample2") == 0) {
@@ -822,16 +823,16 @@ int main(int argc, char *argv[]) {
 
     else if (strcmp(argv[i], "-odt") == 0 ||
              strcmp(argv[i], "--out_data_type") == 0) {
-      get_string(argc, argv, &i, out_data_type_string);
-      if (strcmp(StrLower(out_data_type_string), "uchar") == 0) {
+      get_string(argc, argv, &i, out_data_type_string.data());
+      if (strcmp(StrLower(out_data_type_string.data()), "uchar") == 0) {
         out_data_type = MRI_UCHAR;
-      } else if (strcmp(StrLower(out_data_type_string), "short") == 0) {
+      } else if (strcmp(StrLower(out_data_type_string.data()), "short") == 0) {
         out_data_type = MRI_SHORT;
-      } else if (strcmp(StrLower(out_data_type_string), "int") == 0) {
+      } else if (strcmp(StrLower(out_data_type_string.data()), "int") == 0) {
         out_data_type = MRI_INT;
-      } else if (strcmp(StrLower(out_data_type_string), "float") == 0) {
+      } else if (strcmp(StrLower(out_data_type_string.data()), "float") == 0) {
         out_data_type = MRI_FLOAT;
-      } else if (strcmp(StrLower(out_data_type_string), "rgb") == 0) {
+      } else if (strcmp(StrLower(out_data_type_string.data()), "rgb") == 0) {
         out_data_type = MRI_RGB;
       } else {
         fmt::fprintf(stderr, "\n%s: unknown data type \"%s\"\n", Progname,
@@ -854,21 +855,21 @@ int main(int argc, char *argv[]) {
       i++;
     } else if (strcmp(argv[i], "-rt") == 0 ||
                strcmp(argv[i], "--resample_type") == 0) {
-      get_string(argc, argv, &i, resample_type);
-      if (strcmp(StrLower(resample_type), "interpolate") == 0) {
+      get_string(argc, argv, &i, resample_type.data());
+      if (strcmp(StrLower(resample_type.data()), "interpolate") == 0) {
         resample_type_val = SAMPLE_TRILINEAR;
-      } else if (strcmp(StrLower(resample_type), "nearest") == 0) {
+      } else if (strcmp(StrLower(resample_type.data()), "nearest") == 0) {
         resample_type_val = SAMPLE_NEAREST;
-      } else if (strcmp(StrLower(resample_type), "vote") == 0) {
+      } else if (strcmp(StrLower(resample_type.data()), "vote") == 0) {
         resample_type_val = SAMPLE_VOTE;
-      } else if (strcmp(StrLower(resample_type), "weighted") == 0) {
+      } else if (strcmp(StrLower(resample_type.data()), "weighted") == 0) {
         resample_type_val = SAMPLE_WEIGHTED;
       }
       /*       else if(strcmp(StrLower(resample_type), "sinc") == 0)
             {
               resample_type_val = SAMPLE_SINC;
             }*/
-      else if (strcmp(StrLower(resample_type), "cubic") == 0) {
+      else if (strcmp(StrLower(resample_type.data()), "cubic") == 0) {
         resample_type_val = SAMPLE_CUBIC_BSPLINE;
       } else {
         fmt::fprintf(stderr, "\n%s: unknown resample type \"%s\"\n", Progname,
@@ -887,14 +888,14 @@ int main(int argc, char *argv[]) {
       UseDICOMRead2 = 0;
     } else if (strcmp(argv[i], "-ot") == 0 ||
                strcmp(argv[i], "--out_type") == 0) {
-      get_string(argc, argv, &i, out_type_string);
-      forced_out_type = string_to_type(out_type_string);
+      get_string(argc, argv, &i, out_type_string.data());
+      forced_out_type = string_to_type(out_type_string.data());
       /* see mri_identify.c */
       force_out_type_flag = TRUE;
     } else if (strcmp(argv[i], "-tt") == 0 ||
                strcmp(argv[i], "--template_type") == 0) {
-      get_string(argc, argv, &i, template_type_string);
-      forced_template_type = string_to_type(template_type_string);
+      get_string(argc, argv, &i, template_type_string.data());
+      forced_template_type = string_to_type(template_type_string.data());
       force_template_type_flag = TRUE;
     } else if (strcmp(argv[i], "-sn") == 0 ||
                strcmp(argv[i], "--subject_name") == 0) {
@@ -910,7 +911,7 @@ int main(int argc, char *argv[]) {
       }
     } else if (strcmp(argv[i], "-rl") == 0 ||
                strcmp(argv[i], "--reslice_like") == 0) {
-      get_string(argc, argv, &i, reslice_like_name);
+      get_string(argc, argv, &i, reslice_like_name.data());
       reslice_like_flag = TRUE;
     } else if (strcmp(argv[i], "-f") == 0 || strcmp(argv[i], "--frame") == 0) {
       nframes = 0;
@@ -924,7 +925,7 @@ int main(int argc, char *argv[]) {
                (strncmp(argv[i + 1 + nframes], "-", 1) != 0) &&
                *errormsg == '\0');
 
-      get_ints(argc, argv, &i, frames, nframes);
+      get_ints(argc, argv, &i, frames.data(), nframes);
       frame_flag = TRUE;
     } else if (strcmp(argv[i], "--erode-seg") == 0) {
       get_ints(argc, argv, &i, &n_erode_seg, 1);
@@ -955,7 +956,7 @@ int main(int argc, char *argv[]) {
     }
 
     else if (strcmp(argv[i], "-il") == 0 || strcmp(argv[i], "--in_like") == 0) {
-      get_string(argc, argv, &i, in_like_name);
+      get_string(argc, argv, &i, in_like_name.data());
       in_like_flag = TRUE;
     } else if (strcmp(argv[i], "-roi") == 0 || strcmp(argv[i], "--roi") == 0) {
       roi_flag = TRUE;
@@ -979,7 +980,7 @@ int main(int argc, char *argv[]) {
       smooth_parcellation_flag = TRUE;
     } else if (strcmp(argv[i], "-cf") == 0 ||
                strcmp(argv[i], "--color_file") == 0) {
-      get_string(argc, argv, &i, color_file_name);
+      get_string(argc, argv, &i, color_file_name.data());
       color_file_flag = TRUE;
     } else if (strcmp(argv[i], "-nt") == 0 ||
                strcmp(argv[i], "--no_translate") == 0) {
@@ -1052,24 +1053,24 @@ int main(int argc, char *argv[]) {
       int NSlicesOverride;
       get_ints(argc, argv, &i, &NSlicesOverride, 1);
       fmt::printf("NSlicesOverride %d\n", NSlicesOverride);
-      fmt::printf(tmpstr, "%d", NSlicesOverride);
-      setenv("NSLICES_OVERRIDE", tmpstr, 1);
+      fmt::sprintf(tmpstr.data(), "%d", NSlicesOverride);
+      setenv("NSLICES_OVERRIDE", tmpstr.data(), 1);
     }
     /*-------------------------------------------------------------*/
     else if ((strcmp(argv[i], "--ncols-override") == 0)) {
       int NColsOverride;
       get_ints(argc, argv, &i, &NColsOverride, 1);
       fmt::printf("NColsOverride %d\n", NColsOverride);
-      fmt::printf(tmpstr, "%d", NColsOverride);
-      setenv("NCOLS_OVERRIDE", tmpstr, 1);
+      fmt::sprintf(tmpstr.data(), "%d", NColsOverride);
+      setenv("NCOLS_OVERRIDE", tmpstr.data(), 1);
     }
     /*-------------------------------------------------------------*/
     else if ((strcmp(argv[i], "--nrows-override") == 0)) {
       int NRowsOverride;
       get_ints(argc, argv, &i, &NRowsOverride, 1);
       fmt::printf("NRowsOverride %d\n", NRowsOverride);
-      fmt::printf(tmpstr, "%d", NRowsOverride);
-      setenv("NROWS_OVERRIDE", tmpstr, 1);
+      fmt::printf(tmpstr.data(), "%d", NRowsOverride);
+      setenv("NROWS_OVERRIDE", tmpstr.data(), 1);
     } else if (strcmp(argv[i], "--mosaic-fix-noascii") == 0) {
       setenv("FS_MOSAIC_FIX_NOASCII", "1", 1);
     }
@@ -1162,14 +1163,14 @@ int main(int argc, char *argv[]) {
   }
   /**** Finished parsing command line ****/
   /* option inconsistency checks */
-  if ((force_ras_good != 0) &&
-      ((in_i_direction_flag != 0) || (in_j_direction_flag != 0) ||
-       (in_k_direction_flag != 0))) {
+  if (((force_ras_good)) && ((in_i_direction_flag) || (in_j_direction_flag) ||
+                             (in_k_direction_flag))) {
     fmt::fprintf(stderr, "ERROR: cannot use --force_ras_good and "
                          "--in_?_direction_flag\n");
     exit(1);
   }
-  if (conform_flag == FALSE && conform_min == TRUE) {
+  if (static_cast<int>(conform_flag) == FALSE &&
+      static_cast<int>(conform_min) == TRUE) {
     fmt::fprintf(stderr, "In order to use -cm (--conform_min), "
                          "you must set -c (--conform)  at the same time.\n");
     exit(1);
@@ -1179,12 +1180,12 @@ int main(int argc, char *argv[]) {
 
   sizes_good_flag = TRUE;
 
-  if (((in_i_size_flag != 0) && in_i_size <= 0.0) ||
-      ((in_j_size_flag != 0) && in_j_size <= 0.0) ||
-      ((in_k_size_flag != 0) && in_k_size <= 0.0) ||
-      ((out_i_size_flag != 0) && out_i_size <= 0.0) ||
-      ((out_j_size_flag != 0) && out_j_size <= 0.0) ||
-      ((out_k_size_flag != 0) && out_k_size <= 0.0)) {
+  if (((in_i_size_flag) && in_i_size <= 0.0) ||
+      ((in_j_size_flag) && in_j_size <= 0.0) ||
+      ((in_k_size_flag) && in_k_size <= 0.0) ||
+      ((out_i_size_flag) && out_i_size <= 0.0) ||
+      ((out_j_size_flag) && out_j_size <= 0.0) ||
+      ((out_k_size_flag) && out_k_size <= 0.0)) {
     fmt::fprintf(stderr,
                  "\n%s: voxel sizes must be "
                  "greater than zero\n",
@@ -1192,26 +1193,26 @@ int main(int argc, char *argv[]) {
     sizes_good_flag = FALSE;
   }
 
-  if ((in_i_size_flag != 0) && in_i_size <= 0.0) {
+  if ((in_i_size_flag) && in_i_size <= 0.0) {
     fmt::fprintf(stderr, "in i size = %g\n", in_i_size);
   }
-  if ((in_j_size_flag != 0) && in_j_size <= 0.0) {
+  if ((in_j_size_flag) && in_j_size <= 0.0) {
     fmt::fprintf(stderr, "in j size = %g\n", in_j_size);
   }
-  if ((in_k_size_flag != 0) && in_k_size <= 0.0) {
+  if ((in_k_size_flag) && in_k_size <= 0.0) {
     fmt::fprintf(stderr, "in k size = %g\n", in_k_size);
   }
-  if ((out_i_size_flag != 0) && out_i_size <= 0.0) {
+  if ((out_i_size_flag) && out_i_size <= 0.0) {
     fmt::fprintf(stderr, "out i size = %g\n", out_i_size);
   }
-  if ((out_j_size_flag != 0) && out_j_size <= 0.0) {
+  if ((out_j_size_flag) && out_j_size <= 0.0) {
     fmt::fprintf(stderr, "out j size = %g\n", out_j_size);
   }
-  if ((out_k_size_flag != 0) && out_k_size <= 0.0) {
+  if ((out_k_size_flag) && out_k_size <= 0.0) {
     fmt::fprintf(stderr, "out k size = %g\n", out_k_size);
   }
 
-  if (sizes_good_flag == 0) {
+  if (sizes_good_flag) {
     usage_message(stdout);
     exit(1);
   }
@@ -1223,14 +1224,14 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  if (out_name[0] == '\0' && !((read_only_flag != 0) || (no_write_flag != 0))) {
+  if (out_name[0] == '\0' && !((read_only_flag) || (no_write_flag))) {
     fmt::fprintf(stderr, "\n%s: missing output volume name\n", Progname);
     usage_message(stdout);
     exit(1);
   }
 
   /* ---- catch no --like flag for OutStatTableFlag ----- */
-  if ((OutStatTableFlag != 0) && out_like_flag == 0) {
+  if ((OutStatTableFlag) && out_like_flag) {
     fmt::fprintf(
         stderr,
         "\n%s: pass example (or empty) stats-table with --like to specify "
@@ -1241,7 +1242,7 @@ int main(int argc, char *argv[]) {
   }
 
   /* ----- copy file name (only -- strip '@' and '#') ----- */
-  MRIgetVolumeName(in_name.data(), in_name_only);
+  MRIgetVolumeName(in_name.data(), in_name_only.data());
 
   /* If input type is spm and N_Zero_Pad_Input < 0, set to 3*/
   if ((strcmp(in_type_string.data(), "spm") == 0) && N_Zero_Pad_Input < 0) {
@@ -1249,7 +1250,7 @@ int main(int argc, char *argv[]) {
   }
 
   /* ----- catch unknown volume types ----- */
-  if ((force_in_type_flag != 0) && forced_in_type == MRI_VOLUME_TYPE_UNKNOWN) {
+  if ((force_in_type_flag) && forced_in_type == MRI_VOLUME_TYPE_UNKNOWN) {
     fmt::fprintf(stderr,
                  "\n%s: unknown input "
                  "volume type %s\n",
@@ -1258,32 +1259,31 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  if ((force_template_type_flag != 0) &&
+  if ((force_template_type_flag) &&
       forced_template_type == MRI_VOLUME_TYPE_UNKNOWN) {
     fmt::fprintf(stderr, "\n%s: unknown template volume type %s\n", Progname,
-                 template_type_string);
+                 template_type_string.data());
     usage_message(stdout);
     exit(1);
   }
 
-  if ((force_out_type_flag != 0) &&
-      forced_out_type == MRI_VOLUME_TYPE_UNKNOWN && (ascii_flag == 0)) {
+  if ((force_out_type_flag) && forced_out_type == MRI_VOLUME_TYPE_UNKNOWN &&
+      (ascii_flag == 0)) {
     fmt::fprintf(stderr, "\n%s: unknown output volume type %s\n", Progname,
-                 out_type_string);
+                 out_type_string.data());
     usage_message(stdout);
     exit(1);
   }
 
   /* ----- warn if read only is desired and an
      output volume is specified or the output info flag is set ----- */
-  if ((read_only_flag != 0) && out_name[0] != '\0') {
+  if ((read_only_flag) && out_name[0] != '\0') {
     fmt::fprintf(stderr,
                  "%s: warning: read only flag is set; "
                  "nothing will be written to %s\n",
                  Progname, out_name.data());
   }
-  if ((read_only_flag != 0) &&
-      ((out_info_flag != 0) || (out_matrix_flag != 0))) {
+  if ((read_only_flag) && ((out_info_flag) || (out_matrix_flag))) {
     fmt::fprintf(stderr,
                  "%s: warning: read only flag is set; "
                  "no output information will be printed\n",
@@ -1291,8 +1291,8 @@ int main(int argc, char *argv[]) {
   }
 
   /* ----- get the type of the output ----- */
-  if (read_only_flag == 0) {
-    if ((force_out_type_flag == 0) && (OutStatTableFlag == 0)) {
+  if (!read_only_flag) {
+    if ((!force_out_type_flag) && (!OutStatTableFlag)) {
       // if(!read_only_flag && !no_write_flag)
       // because conform_flag value changes depending on type below
       {
@@ -1314,9 +1314,9 @@ int main(int argc, char *argv[]) {
   }
 
   /* ----- catch the parse-only flag ----- */
-  if (parse_only_flag != 0) {
+  if (parse_only_flag) {
     fmt::printf("input volume name: %s\n", in_name.data());
-    fmt::printf("input name only: %s\n", in_name_only);
+    fmt::printf("input name only: %s\n", in_name_only.data());
     fmt::printf("output volume name: %s\n", out_name.data());
     fmt::printf("parse_only_flag = %d\n", parse_only_flag);
     fmt::printf("conform_flag = %d\n", conform_flag);
@@ -1326,10 +1326,10 @@ int main(int argc, char *argv[]) {
     fmt::printf("in_matrix_flag = %d\n", in_matrix_flag);
     fmt::printf("out_matrix_flag = %d\n", out_matrix_flag);
 
-    if (force_in_type_flag != 0) {
+    if (force_in_type_flag) {
       fmt::printf("input type is %d\n", forced_in_type);
     }
-    if (force_out_type_flag != 0) {
+    if (force_out_type_flag) {
       fmt::printf("output type is %d\n", forced_out_type);
     }
 
@@ -1341,18 +1341,18 @@ int main(int argc, char *argv[]) {
       fmt::printf("inversion, value is %g\n", invert_val);
     }
 
-    if (reorder_flag != 0) {
+    if (reorder_flag) {
       fmt::printf("reordering, values are %d %d %d\n", reorder_vals[0],
                   reorder_vals[1], reorder_vals[2]);
     }
 
-    if (reorder4_flag != 0) {
+    if (reorder4_flag) {
       fmt::printf("reordering, values are %d %d %d %d\n", reorder4_vals[0],
                   reorder4_vals[1], reorder4_vals[2], reorder4_vals[3]);
     }
 
     fmt::printf("translation of otl labels is %s\n",
-                translate_labels_flag != 0 ? "on" : "off");
+                translate_labels_flag ? "on" : "off");
 
     exit(0);
   }
@@ -1367,9 +1367,9 @@ int main(int argc, char *argv[]) {
   }
 
   /* ----- read the in_like volume ----- */
-  if (in_like_flag != 0) {
-    fmt::printf("reading info from %s...\n", in_like_name);
-    mri_in_like = MRIreadInfo(in_like_name);
+  if (in_like_flag) {
+    fmt::printf("reading info from %s...\n", in_like_name.data());
+    mri_in_like = MRIreadInfo(in_like_name.data());
     if (mri_in_like == nullptr) {
       exit(1);
     }
@@ -1377,37 +1377,37 @@ int main(int argc, char *argv[]) {
 
   /* ----- read the volume ----- */
   in_volume_type = MRI_VOLUME_TYPE_UNKNOWN;
-  if (InStatTableFlag == 0) {
-    if (force_in_type_flag != 0) {
+  if (!InStatTableFlag) {
+    if (force_in_type_flag) {
       in_volume_type = forced_in_type;
     } else {
-      in_volume_type = mri_identify(in_name_only);
+      in_volume_type = mri_identify(in_name_only.data());
     }
     if (in_volume_type == MRI_VOLUME_TYPE_UNKNOWN) {
       errno = 0;
-      if (fio_FileExistsReadable(in_name_only) == 0) {
-        fmt::printf("ERROR: file %s does not exist\n", in_name_only);
+      if (fio_FileExistsReadable(in_name_only.data()) == 0) {
+        fmt::printf("ERROR: file %s does not exist\n", in_name_only.data());
       } else {
         fmt::printf("ERROR: cannot determine file type for %s \n",
-                    in_name_only);
+                    in_name_only.data());
       }
-      if (in_like_flag != 0) {
+      if (in_like_flag) {
         MRIfree(&mri_in_like);
       }
       exit(1);
     }
   }
 
-  if ((roi_flag != 0) && in_volume_type != GENESIS_FILE) {
+  if ((roi_flag) && in_volume_type != GENESIS_FILE) {
     errno = 0;
     ErrorPrintf(ERROR_BADPARM, "rois must be in GE format");
-    if (in_like_flag != 0) {
+    if (in_like_flag) {
       MRIfree(&mri_in_like);
     }
     exit(1);
   }
 
-  if ((zero_ge_z_offset_flag != 0) && in_volume_type != DICOM_FILE) // E/
+  if (((zero_ge_z_offset_flag)) && in_volume_type != DICOM_FILE) // E/
   {
     zero_ge_z_offset_flag = FALSE;
     fmt::fprintf(stderr, "Not a GE dicom volume: -zgez "
@@ -1415,17 +1415,17 @@ int main(int argc, char *argv[]) {
   }
 
   fmt::printf("$Id: mri_convert.c,v 1.227 2017/02/16 19:15:42 greve Exp $\n");
-  fmt::printf("reading from %s...\n", in_name_only);
+  fmt::printf("reading from %s...\n", in_name_only.data());
 
   if (in_volume_type == MGH_MORPH) {
     GCA_MORPH *gcam;
     GCA_MORPH *gcam_out;
-    gcam = GCAMread(in_name_only);
+    gcam = GCAMread(in_name_only.data());
     if (gcam == nullptr) {
       ErrorExit(ERROR_NOFILE, "%s: could not read input morph from %s",
                 Progname, in_name_only);
     }
-    if (downsample2_flag != 0) {
+    if (downsample2_flag) {
       gcam_out = GCAMdownsample2(gcam);
     } else {
       gcam_out = gcam;
@@ -1437,7 +1437,7 @@ int main(int argc, char *argv[]) {
 
   if (in_volume_type == OTL_FILE) {
 
-    if ((in_like_flag == 0) && (in_n_k_flag == 0)) {
+    if ((!in_like_flag) && (!in_n_k_flag)) {
       errno = 0;
       ErrorPrintf(ERROR_BADPARM,
                   "parcellation read: must specify"
@@ -1445,30 +1445,29 @@ int main(int argc, char *argv[]) {
       exit(1);
     }
 
-    if (color_file_flag == 0) {
+    if (!color_file_flag) {
       errno = 0;
       ErrorPrintf(ERROR_BADPARM, "parcellation read: must specify a"
                                  "color file name");
-      if (in_like_flag != 0) {
+      if (in_like_flag) {
         MRIfree(&mri_in_like);
       }
       exit(1);
     }
 
     read_parcellation_volume_flag = TRUE;
-    if ((read_only_flag != 0) &&
-        ((in_info_flag != 0) || (in_matrix_flag != 0)) &&
-        (in_stats_flag == 0)) {
+    if ((read_only_flag) && ((in_info_flag) || (in_matrix_flag)) &&
+        (!in_stats_flag)) {
       read_parcellation_volume_flag = FALSE;
     }
 
     read_otl_flags = 0x00;
 
-    if (read_parcellation_volume_flag != 0) {
+    if (read_parcellation_volume_flag) {
       read_otl_flags |= READ_OTL_READ_VOLUME_FLAG;
     }
 
-    if (fill_parcellation_flag != 0) {
+    if (fill_parcellation_flag) {
       read_otl_flags |= READ_OTL_FILL_FLAG;
     } else {
       fmt::printf("notice: unfilled parcellations "
@@ -1477,24 +1476,25 @@ int main(int argc, char *argv[]) {
       read_otl_flags |= READ_OTL_FILL_FLAG;
     }
 
-    if (translate_labels_flag != 0) {
+    if (translate_labels_flag) {
       read_otl_flags |= READ_OTL_TRANSLATE_LABELS_FLAG;
     }
 
-    if (zero_outlines_flag != 0) {
+    if (zero_outlines_flag) {
       read_otl_flags |= READ_OTL_ZERO_OUTLINES_FLAG;
     }
 
-    if (in_like_flag != 0) {
+    if (in_like_flag) {
       mri = MRIreadOtl(in_name.data(), mri_in_like->width, mri_in_like->height,
-                       mri_in_like->depth, color_file_name, read_otl_flags);
+                       mri_in_like->depth, color_file_name.data(),
+                       read_otl_flags);
     } else {
-      mri = MRIreadOtl(in_name.data(), 0, 0, in_n_k, color_file_name,
+      mri = MRIreadOtl(in_name.data(), 0, 0, in_n_k, color_file_name.data(),
                        read_otl_flags);
     }
 
     if (mri == nullptr) {
-      if (in_like_flag != 0) {
+      if (in_like_flag) {
         MRIfree(&mri_in_like);
       }
       exit(1);
@@ -1516,11 +1516,11 @@ int main(int argc, char *argv[]) {
 #endif
 
     /* ----- smooth the parcellation if requested ----- */
-    if (smooth_parcellation_flag != 0) {
+    if (smooth_parcellation_flag) {
       fmt::printf("smoothing parcellation...\n");
       mri2 = MRIsmoothParcellation(mri, smooth_parcellation_count);
       if (mri2 == nullptr) {
-        if (in_like_flag != 0) {
+        if (in_like_flag) {
           MRIfree(&mri_in_like);
         }
         exit(1);
@@ -1532,25 +1532,25 @@ int main(int argc, char *argv[]) {
     resample_type_val = SAMPLE_NEAREST;
     no_scale_flag = TRUE;
 
-  } else if (roi_flag != 0) {
-    if ((in_like_flag == 0) && (in_n_k_flag == 0)) {
+  } else if (roi_flag) {
+    if ((!in_like_flag) && (!in_n_k_flag)) {
       errno = 0;
       ErrorPrintf(ERROR_BADPARM, "roi read: must specify a volume"
                                  "depth with either in_like or in_k_count");
-      if (in_like_flag != 0) {
+      if (in_like_flag) {
         MRIfree(&mri_in_like);
       }
       exit(1);
     }
 
-    if (in_like_flag != 0) {
+    if (in_like_flag) {
       mri = MRIreadGeRoi(in_name.data(), mri_in_like->depth);
     } else {
       mri = MRIreadGeRoi(in_name.data(), in_n_k);
     }
 
     if (mri == nullptr) {
-      if (in_like_flag != 0) {
+      if (in_like_flag) {
         MRIfree(&mri_in_like);
       }
       exit(1);
@@ -1559,21 +1559,20 @@ int main(int argc, char *argv[]) {
     resample_type_val = SAMPLE_NEAREST;
     no_scale_flag = TRUE;
   } else {
-    if ((read_only_flag != 0) &&
-        ((in_info_flag != 0) || (in_matrix_flag != 0)) &&
-        (in_stats_flag == 0)) {
-      if (force_in_type_flag != 0) {
+    if ((read_only_flag) && ((in_info_flag) || (in_matrix_flag)) &&
+        (!in_stats_flag)) {
+      if (force_in_type_flag) {
         mri = MRIreadHeader(in_name.data(), in_volume_type);
       } else {
         mri = MRIreadInfo(in_name.data());
       }
     } else {
-      if (force_in_type_flag != 0) {
+      if (force_in_type_flag) {
         // fmt::printf("MRIreadType()\n");
         mri = MRIreadType(in_name.data(), in_volume_type);
       } else {
         if (nthframe < 0) {
-          if (InStatTableFlag == 0) {
+          if (!InStatTableFlag) {
             mri = MRIread(in_name.data());
           } else {
             fmt::printf("Loading in stat table %s\n", in_name.data());
@@ -1593,7 +1592,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (mri == nullptr) {
-    if (in_like_flag != 0) {
+    if (in_like_flag) {
       MRIfree(&mri_in_like);
     }
     exit(1);
@@ -1609,7 +1608,7 @@ int main(int argc, char *argv[]) {
     mri = mritmp;
   }
 
-  if (slice_crop_flag != 0) {
+  if (slice_crop_flag) {
     fmt::printf("Cropping slices from %d to %d\n", slice_crop_start,
                 slice_crop_stop);
     mri2 = MRIcrop(mri, 0, 0, slice_crop_start, mri->width - 1, mri->height - 1,
@@ -1621,7 +1620,7 @@ int main(int argc, char *argv[]) {
     mri = mri2;
   }
 
-  if (LeftRightReverse != 0) {
+  if (LeftRightReverse) {
     // Performs a left-right reversal of the geometry by finding the
     // dimension that is most left-right oriented and negating its
     // column in the vox2ras matrix. The pixel data itself is not
@@ -1641,7 +1640,7 @@ int main(int argc, char *argv[]) {
     vmid = MatrixAlloc(4, 1, MATRIX_REAL);
     vmid->rptr[4][1] = 1;
 
-    MRIdircosToOrientationString(mri, ostr);
+    MRIdircosToOrientationString(mri, ostr.data());
     if (ostr[0] == 'L' || ostr[0] == 'R') {
       fmt::printf("  Reversing geometry for the columns\n");
       vmid->rptr[1][1] = mri->width / 2.0 - 1;
@@ -1681,7 +1680,7 @@ int main(int argc, char *argv[]) {
     MatrixFree(&cras);
   }
 
-  if (LeftRightSwapLabel != 0) {
+  if (LeftRightSwapLabel) {
     fmt::printf("Performing left-right swap of labels\n");
     // Good for aseg, aparc+aseg, wmparc, etc. Does not change geometry
     mri2 = MRIlrswapAseg(mri);
@@ -1689,7 +1688,7 @@ int main(int argc, char *argv[]) {
     mri = mri2;
   }
 
-  if (LeftRightReversePix != 0) {
+  if (LeftRightReversePix) {
     // Performs a left-right reversal of the pixels by finding the
     // dimension that is most left-right oriented and reversing
     // the order of the pixels. The geometry itself is not
@@ -1699,7 +1698,7 @@ int main(int argc, char *argv[]) {
                 "the volume geometry WRONG, so make sure you know what you  \n"
                 "are doing.\n");
 
-    MRIdircosToOrientationString(mri, ostr);
+    MRIdircosToOrientationString(mri, ostr.data());
     mri2 = MRIcopy(mri, nullptr);
     if (ostr[0] == 'L' || ostr[0] == 'R') {
       fmt::printf("  Reversing pixels for the columns\n");
@@ -1747,7 +1746,7 @@ int main(int argc, char *argv[]) {
     mri = mri2;
   }
 
-  if ((LeftRightMirrorFlag != 0) || (LeftRightKeepFlag != 0)) //(mr, 2012-03-08)
+  if ((LeftRightMirrorFlag) || (LeftRightKeepFlag)) //(mr, 2012-03-08)
   {
     // Mirror one half of the image into the other half (left-right)
     // the split point is at the middle of the dimension that is
@@ -1759,8 +1758,8 @@ int main(int argc, char *argv[]) {
                 "the image is upright and centerd, see make_upright.\n",
                 LeftRightMirrorHemi);
 
-    MRIdircosToOrientationString(mri, ostr);
-    fmt::printf("  Orientation string: %s\n", ostr);
+    MRIdircosToOrientationString(mri, ostr.data());
+    fmt::printf("  Orientation string: %s\n", ostr.data());
     mri2 = MRIcopy(mri, nullptr);
     v = 0;
     if (ostr[0] == 'L' || ostr[0] == 'R') {
@@ -1774,7 +1773,7 @@ int main(int argc, char *argv[]) {
         for (r = 0; r < mri->height; r++) {
           for (s = 0; s < mri->depth; s++) {
             for (f = 0; f < mri->nframes; f++) {
-              if (LeftRightMirrorFlag != 0) {
+              if (LeftRightMirrorFlag) {
                 v = MRIgetVoxVal(mri, c1, r, s, f);
               }
               MRIsetVoxVal(mri2, c2, r, s, f, v);
@@ -1794,7 +1793,7 @@ int main(int argc, char *argv[]) {
           r2 = mri->height - r1 - 1;
           for (s = 0; s < mri->depth; s++) {
             for (f = 0; f < mri->nframes; f++) {
-              if (LeftRightMirrorFlag != 0) {
+              if (LeftRightMirrorFlag) {
                 v = MRIgetVoxVal(mri, c, r1, s, f);
               }
               MRIsetVoxVal(mri2, c, r2, s, f, v);
@@ -1814,7 +1813,7 @@ int main(int argc, char *argv[]) {
             }
             s2 = mri->depth - s1 - 1;
             for (f = 0; f < mri->nframes; f++) {
-              if (LeftRightMirrorFlag != 0) {
+              if (LeftRightMirrorFlag) {
                 v = MRIgetVoxVal(mri, c, r, s1, f);
               }
               MRIsetVoxVal(mri2, c, r, s2, f, v);
@@ -1827,7 +1826,7 @@ int main(int argc, char *argv[]) {
     mri = mri2;
   }
 
-  if (FlipCols != 0) {
+  if (FlipCols) {
     // Reverses the columns WITHOUT changing the geometry in the
     // header.  Know what you are going here.
     fmt::printf("WARNING: flipping cols without changing geometry\n");
@@ -1849,7 +1848,7 @@ int main(int argc, char *argv[]) {
     mri = mri2;
   }
 
-  if (SliceReverse != 0) {
+  if (SliceReverse) {
     fmt::printf("Reversing slices, updating vox2ras\n");
     mri2 = MRIreverseSlices(mri, nullptr);
     if (mri2 == nullptr) {
@@ -1859,7 +1858,7 @@ int main(int argc, char *argv[]) {
     mri = mri2;
   }
 
-  if (SliceBias != 0) {
+  if (SliceBias) {
     fmt::printf("Applying Half-Cosine Slice Bias, Alpha = %g\n",
                 SliceBiasAlpha);
     MRIhalfCosBias(mri, SliceBiasAlpha, mri);
@@ -1909,13 +1908,13 @@ int main(int argc, char *argv[]) {
     MRIscalarMul(mri, mri, rescale_factor / globalmean);
   }
 
-  MRIaddCommandLine(mri, cmdline);
+  MRIaddCommandLine(mri, cmdline.data());
   if (!FEQUAL(scale_factor, 1.0)) {
     fmt::printf("scaling input volume by %2.3f\n", scale_factor);
     MRIscalarMul(mri, mri, scale_factor);
   }
 
-  if (zero_ge_z_offset_flag != 0) // E/
+  if (zero_ge_z_offset_flag) // E/
   {
     mri->c_s = 0.0;
   }
@@ -1923,18 +1922,18 @@ int main(int argc, char *argv[]) {
   fmt::printf("TR=%2.2f, TE=%2.2f, TI=%2.2f, flip angle=%2.2f\n", mri->tr,
               mri->te, mri->ti, DEGREES(mri->flip_angle));
   if (in_volume_type != OTL_FILE) {
-    if (fill_parcellation_flag != 0) {
+    if (fill_parcellation_flag) {
       fmt::printf("fill_parcellation flag ignored on a "
                   "non-parcellation read\n");
     }
-    if (smooth_parcellation_flag != 0) {
+    if (smooth_parcellation_flag) {
       fmt::printf("smooth_parcellation flag ignored on a "
                   "non-parcellation read\n");
     }
   }
 
   /* ----- apply the in_like volume if it's been read ----- */
-  if (in_like_flag != 0) {
+  if (in_like_flag) {
     if (mri->width != mri_in_like->width ||
         mri->height != mri_in_like->height ||
         mri->depth != mri_in_like->depth) {
@@ -1955,7 +1954,7 @@ int main(int argc, char *argv[]) {
       exit(1);
     }
     if (mri->nframes != mri_in_like->nframes) {
-      printf("INFO: frames are not the same\n");
+      fmt::printf("INFO: frames are not the same\n");
     }
     temp_type = mri->type;
 
@@ -1976,48 +1975,48 @@ int main(int argc, char *argv[]) {
   }
 
   if (mri->ras_good_flag == 0) {
-    printf("WARNING: it does not appear that there "
-           "was sufficient information\n"
-           "in the input to assign orientation to the volume... \n");
-    if (force_ras_good != 0) {
-      printf("However, you have specified that the "
-             "default orientation should\n"
-             "be used with by adding --force_ras_good "
-             "on the command-line.\n");
+    fmt::printf("WARNING: it does not appear that there "
+                "was sufficient information\n"
+                "in the input to assign orientation to the volume... \n");
+    if (force_ras_good) {
+      fmt::printf("However, you have specified that the "
+                  "default orientation should\n"
+                  "be used with by adding --force_ras_good "
+                  "on the command-line.\n");
       mri->ras_good_flag = 1;
     }
-    if ((in_i_direction_flag != 0) || (in_j_direction_flag != 0) ||
-        (in_k_direction_flag != 0)) {
-      printf("However, you have specified one or more "
-             "orientations on the \n"
-             "command-line using -i?d or --in-?-direction (?=i,j,k).\n");
+    if ((in_i_direction_flag) || (in_j_direction_flag) ||
+        (in_k_direction_flag)) {
+      fmt::printf("However, you have specified one or more "
+                  "orientations on the \n"
+                  "command-line using -i?d or --in-?-direction (?=i,j,k).\n");
       mri->ras_good_flag = 1;
     }
   }
 
   /* ----- apply command-line parameters ----- */
-  if (in_i_size_flag != 0) {
+  if (in_i_size_flag) {
     mri->xsize = in_i_size;
   }
-  if (in_j_size_flag != 0) {
+  if (in_j_size_flag) {
     mri->ysize = in_j_size;
   }
-  if (in_k_size_flag != 0) {
+  if (in_k_size_flag) {
     mri->zsize = in_k_size;
   }
-  if (in_i_direction_flag != 0) {
+  if (in_i_direction_flag) {
     mri->x_r = in_i_directions[0];
     mri->x_a = in_i_directions[1];
     mri->x_s = in_i_directions[2];
     mri->ras_good_flag = 1;
   }
-  if (in_j_direction_flag != 0) {
+  if (in_j_direction_flag) {
     mri->y_r = in_j_directions[0];
     mri->y_a = in_j_directions[1];
     mri->y_s = in_j_directions[2];
     mri->ras_good_flag = 1;
   }
-  if (in_k_direction_flag != 0) {
+  if (in_k_direction_flag) {
     mri->z_r = in_k_directions[0];
     mri->z_a = in_k_directions[1];
     mri->z_s = in_k_directions[2];
@@ -2027,20 +2026,21 @@ int main(int argc, char *argv[]) {
     mri->ncmds = 0;
   }
   if (DoNewTransformFname != 0) {
-    printf("Changing xform name to %s\n", NewTransformFname);
-    strcpy(mri->transform_fname, NewTransformFname);
+    fmt::printf("Changing xform name to %s\n", NewTransformFname.data());
+    strcpy(mri->transform_fname, NewTransformFname.data());
   }
-  if (in_orientation_flag != 0) {
-    printf("Setting input orientation to %s\n", in_orientation_string);
-    MRIorientationStringToDircos(mri, in_orientation_string);
+  if (in_orientation_flag) {
+    fmt::printf("Setting input orientation to %s\n",
+                in_orientation_string.data());
+    MRIorientationStringToDircos(mri, in_orientation_string.data());
     mri->ras_good_flag = 1;
   }
-  if (in_center_flag != 0) {
+  if (in_center_flag) {
     mri->c_r = in_center[0];
     mri->c_a = in_center[1];
     mri->c_s = in_center[2];
   }
-  if (delta_in_center_flag != 0) {
+  if (delta_in_center_flag) {
     mri->c_r += delta_in_center[0];
     mri->c_a += delta_in_center[1];
     mri->c_s += delta_in_center[2];
@@ -2049,21 +2049,21 @@ int main(int argc, char *argv[]) {
     strcpy(mri->subject_name, subject_name.data());
   }
 
-  if (in_tr_flag != 0) {
+  if (in_tr_flag) {
     mri->tr = in_tr;
   }
-  if (in_ti_flag != 0) {
+  if (in_ti_flag) {
     mri->ti = in_ti;
   }
-  if (in_te_flag != 0) {
+  if (in_te_flag) {
     mri->te = in_te;
   }
-  if (in_flip_angle_flag != 0) {
+  if (in_flip_angle_flag) {
     mri->flip_angle = in_flip_angle;
   }
 
   /* ----- correct starts, ends, and fov if necessary ----- */
-  if ((in_i_size_flag != 0) || (in_j_size_flag != 0) || (in_k_size_flag != 0)) {
+  if ((in_i_size_flag) || (in_j_size_flag) || (in_k_size_flag)) {
 
     fov_x = mri->xsize * mri->width;
     fov_y = mri->ysize * mri->height;
@@ -2086,64 +2086,66 @@ int main(int argc, char *argv[]) {
   j_dot_k = mri->y_r * mri->z_r + mri->y_a * mri->z_a + mri->y_s * mri->z_s;
   if (fabs(i_dot_j) > CLOSE_ENOUGH || fabs(i_dot_k) > CLOSE_ENOUGH ||
       fabs(i_dot_k) > CLOSE_ENOUGH) {
-    printf("warning: input volume axes are not orthogonal:"
-           "i_dot_j = %.6f, i_dot_k = %.6f, j_dot_k = %.6f\n",
-           i_dot_j, i_dot_k, j_dot_k);
+    fmt::printf("warning: input volume axes are not orthogonal:"
+                "i_dot_j = %.6f, i_dot_k = %.6f, j_dot_k = %.6f\n",
+                i_dot_j, i_dot_k, j_dot_k);
   }
-  printf("i_ras = (%g, %g, %g)\n", mri->x_r, mri->x_a, mri->x_s);
-  printf("j_ras = (%g, %g, %g)\n", mri->y_r, mri->y_a, mri->y_s);
-  printf("k_ras = (%g, %g, %g)\n", mri->z_r, mri->z_a, mri->z_s);
+  fmt::printf("i_ras = (%g, %g, %g)\n", mri->x_r, mri->x_a, mri->x_s);
+  fmt::printf("j_ras = (%g, %g, %g)\n", mri->y_r, mri->y_a, mri->y_s);
+  fmt::printf("k_ras = (%g, %g, %g)\n", mri->z_r, mri->z_a, mri->z_s);
 
   /* ----- catch the in info flag ----- */
-  if (in_info_flag != 0) {
-    printf("input structure:\n");
+  if (in_info_flag) {
+    fmt::printf("input structure:\n");
     MRIdump(mri, stdout);
   }
 
-  if (in_matrix_flag != 0) {
+  if (in_matrix_flag) {
     MATRIX *i_to_r;
     i_to_r = extract_i_to_r(mri);
     if (i_to_r != nullptr) {
-      printf("input ijk -> ras:\n");
+      fmt::printf("input ijk -> ras:\n");
       MatrixPrint(stdout, i_to_r);
       MatrixFree(&i_to_r);
     } else {
-      printf("error getting input matrix\n");
+      fmt::printf("error getting input matrix\n");
     }
   }
 
   /* ----- catch the in stats flag ----- */
-  if (in_stats_flag != 0) {
+  if (in_stats_flag) {
     MRIprintStats(mri, stdout);
   }
 
   // Load the transform
-  if (transform_flag != 0) {
-    printf("INFO: Reading transformation from file %s...\n", transform_fname);
-    transform_type = TransformFileNameType(transform_fname);
+  if (transform_flag) {
+    fmt::printf("INFO: Reading transformation from file %s...\n",
+                transform_fname.data());
+    transform_type = TransformFileNameType(transform_fname.data());
     if (transform_type == MNI_TRANSFORM_TYPE ||
         transform_type == TRANSFORM_ARRAY_TYPE ||
         transform_type == REGISTER_DAT || transform_type == FSLREG_TYPE) {
-      printf("Reading transform with LTAreadEx()\n");
+      fmt::printf("Reading transform with LTAreadEx()\n");
       // lta_transform = LTAread(transform_fname);
-      lta_transform = LTAreadEx(transform_fname);
+      lta_transform = LTAreadEx(transform_fname.data());
       if (lta_transform == nullptr) {
         fmt::fprintf(stderr, "ERROR: Reading transform from file %s\n",
-                     transform_fname);
+                     transform_fname.data());
         exit(1);
       }
       if (transform_type == FSLREG_TYPE) {
         MRI *tmp = nullptr;
-        if (out_like_flag == 0) {
-          printf("ERROR: fslmat does not have the information "
-                 "on the dst volume\n");
-          printf("ERROR: you must give option '--like volume' to specify the"
-                 " dst volume info\n");
+        if (!out_like_flag) {
+          fmt::printf("ERROR: fslmat does not have the information "
+                      "on the dst volume\n");
+          fmt::printf(
+              "ERROR: you must give option '--like volume' to specify the"
+              " dst volume info\n");
           MRIfree(&mri);
           exit(1);
         }
         // now setup dst volume info
-        tmp = MRIreadHeader(out_like_name, MRI_VOLUME_TYPE_UNKNOWN);
+        tmp = MRIreadHeader(out_like_name.data(), MRI_VOLUME_TYPE_UNKNOWN);
         // flsmat does not contain src and dst info
         LTAmodifySrcDstGeom(lta_transform, mri, tmp);
         // add src and dst information
@@ -2152,19 +2154,20 @@ int main(int argc, char *argv[]) {
       } // end FSLREG_TYPE
 
       if (DevXFM != 0) {
-        printf("INFO: devolving XFM (%s)\n", devxfm_subject);
-        printf("-------- before ---------\n");
+        fmt::printf("INFO: devolving XFM (%s)\n", devxfm_subject.data());
+        fmt::printf("-------- before ---------\n");
         MatrixPrint(stdout, lta_transform->xforms[0].m_L);
-        T = DevolveXFM(devxfm_subject, lta_transform->xforms[0].m_L, nullptr);
+        T = DevolveXFM(devxfm_subject.data(), lta_transform->xforms[0].m_L,
+                       nullptr);
         if (T == nullptr) {
           exit(1);
         }
-        printf("-------- after ---------\n");
+        fmt::printf("-------- after ---------\n");
         MatrixPrint(stdout, lta_transform->xforms[0].m_L);
-        printf("-----------------\n");
+        fmt::printf("-----------------\n");
       } // end DevXFM
 
-      if (invert_transform_flag != 0) {
+      if (invert_transform_flag) {
         inverse_transform_matrix =
             MatrixInverse(lta_transform->xforms[0].m_L, nullptr);
         if (inverse_transform_matrix == nullptr) {
@@ -2188,7 +2191,7 @@ int main(int argc, char *argv[]) {
           fmt::fprintf(stderr, "INFO: Trying to get the source "
                                "volume information from the transform name\n");
           // copy transform filename
-          strcpy(buf, transform_fname);
+          strcpy(buf, transform_fname.data());
           // reverse look for the first '/'
           p = strrchr(buf, '/');
           if (p != nullptr) {
@@ -2210,9 +2213,9 @@ int main(int argc, char *argv[]) {
             fmt::fprintf(stderr, "INFO: Succeeded in retrieving "
                                  "the source volume info.\n");
           } else {
-            printf("INFO: Failed to find %s as a source volume.  \n"
-                   "      The inverse c_(ras) may not be valid.\n",
-                   buf);
+            fmt::printf("INFO: Failed to find %s as a source volume.  \n"
+                        "      The inverse c_(ras) may not be valid.\n",
+                        buf);
           }
         } // end not valid
         copyVolGeom(&lt->dst, &vgtmp);
@@ -2224,23 +2227,25 @@ int main(int argc, char *argv[]) {
     // if type is non-linear, load transform below when applying it...
   } // end transform_flag
 
-  if (reslice_like_flag != 0) {
+  if (reslice_like_flag) {
 
-    if (force_template_type_flag != 0) {
-      printf("reading template info from (type %s) volume %s...\n",
-             template_type_string, reslice_like_name);
-      mri_template = MRIreadHeader(reslice_like_name, forced_template_type);
+    if (force_template_type_flag) {
+      fmt::printf("reading template info from (type %s) volume %s...\n",
+                  template_type_string.data(), reslice_like_name.data());
+      mri_template =
+          MRIreadHeader(reslice_like_name.data(), forced_template_type);
       if (mri_template == nullptr) {
         fmt::fprintf(stderr, "error reading from volume %s\n",
-                     reslice_like_name);
+                     reslice_like_name.data());
         exit(1);
       }
     } else {
-      printf("reading template info from volume %s...\n", reslice_like_name);
-      mri_template = MRIreadInfo(reslice_like_name);
+      fmt::printf("reading template info from volume %s...\n",
+                  reslice_like_name.data());
+      mri_template = MRIreadInfo(reslice_like_name.data());
       if (mri_template == nullptr) {
         fmt::fprintf(stderr, "error reading from volume %s\n",
-                     reslice_like_name);
+                     reslice_like_name.data());
         exit(1);
       }
       // if we loaded a transform above, set the lta target geometry from
@@ -2260,12 +2265,12 @@ int main(int argc, char *argv[]) {
       useVolGeomToMRI(&lta_transform->xforms[0].dst, mri_template);
     }
 
-    if (conform_flag != 0) {
+    if (conform_flag) {
       conform_width = 256;
-      if (conform_min == TRUE) {
+      if (conform_min) {
         conform_size = MRIfindMinSize(mri, &conform_width);
       } else {
-        if (conform_width_256_flag != 0) {
+        if (conform_width_256_flag) {
           conform_width = 256; // force it
         } else {
           conform_width = MRIfindRightSize(mri, conform_size);
@@ -2273,7 +2278,7 @@ int main(int argc, char *argv[]) {
       }
       mri_template =
           MRIconformedTemplate(mri, conform_width, conform_size, ConfKeepDC);
-    } else if (voxel_size_flag != 0) {
+    } else if (voxel_size_flag) {
       mri_template = MRIallocHeader(mri->width, mri->height, mri->depth,
                                     mri->type, mri->nframes);
       MRIcopyHeader(mri, mri_template);
@@ -2298,7 +2303,7 @@ int main(int argc, char *argv[]) {
       mri_template->zstart = -mri_template->depth / 2;
       mri_template->zend = mri_template->depth / 2;
 
-    } else if (downsample_flag != 0) {
+    } else if (downsample_flag) {
       mri_template = MRIallocHeader(mri->width, mri->height, mri->depth,
                                     mri->type, mri->nframes);
       MRIcopyHeader(mri, mri_template);
@@ -2326,63 +2331,63 @@ int main(int argc, char *argv[]) {
   }
 
   /* ----- apply command-line parameters ----- */
-  if (out_i_size_flag != 0) {
+  if (out_i_size_flag) {
     float scale;
     scale = mri_template->xsize / out_i_size;
     mri_template->xsize = out_i_size;
     mri_template->width = nint(mri_template->width * scale);
   }
-  if (out_j_size_flag != 0) {
+  if (out_j_size_flag) {
     float scale;
     scale = mri_template->ysize / out_j_size;
     mri_template->ysize = out_j_size;
     mri_template->height = nint(mri_template->height * scale);
   }
-  if (out_k_size_flag != 0) {
+  if (out_k_size_flag) {
     float scale;
     scale = mri_template->zsize / out_k_size;
     mri_template->zsize = out_k_size;
     mri_template->depth = nint(mri_template->depth * scale);
   }
-  if (out_n_i_flag != 0) {
+  if (out_n_i_flag) {
     mri_template->width = out_n_i;
   }
-  if (out_n_j_flag != 0) {
+  if (out_n_j_flag) {
     mri_template->height = out_n_j;
   }
-  if (out_n_k_flag != 0) {
+  if (out_n_k_flag) {
     mri_template->depth = out_n_k;
     mri_template->imnr1 = mri_template->imnr0 + out_n_k - 1;
   }
-  if (out_i_direction_flag != 0) {
+  if (out_i_direction_flag) {
     mri_template->x_r = out_i_directions[0];
     mri_template->x_a = out_i_directions[1];
     mri_template->x_s = out_i_directions[2];
   }
-  if (out_j_direction_flag != 0) {
+  if (out_j_direction_flag) {
     mri_template->y_r = out_j_directions[0];
     mri_template->y_a = out_j_directions[1];
     mri_template->y_s = out_j_directions[2];
   }
-  if (out_k_direction_flag != 0) {
+  if (out_k_direction_flag) {
     mri_template->z_r = out_k_directions[0];
     mri_template->z_a = out_k_directions[1];
     mri_template->z_s = out_k_directions[2];
   }
-  if (out_orientation_flag != 0) {
-    printf("Setting output orientation to %s\n", out_orientation_string);
-    MRIorientationStringToDircos(mri_template, out_orientation_string);
+  if (out_orientation_flag) {
+    fmt::printf("Setting output orientation to %s\n",
+                out_orientation_string.data());
+    MRIorientationStringToDircos(mri_template, out_orientation_string.data());
   }
-  if (out_center_flag != 0) {
+  if (out_center_flag) {
     mri_template->c_r = out_center[0];
     mri_template->c_a = out_center[1];
     mri_template->c_s = out_center[2];
   }
 
   /* ----- correct starts, ends, and fov if necessary ----- */
-  if ((out_i_size_flag != 0) || (out_j_size_flag != 0) ||
-      (out_k_size_flag != 0) || (out_n_i_flag != 0) || (out_n_j_flag != 0) ||
-      (out_n_k_flag != 0)) {
+  if ((out_i_size_flag) || (out_j_size_flag) || (out_k_size_flag) ||
+      (out_n_i_flag) || (out_n_j_flag) || (out_n_k_flag)) {
 
     fov_x = mri_template->xsize * mri_template->width;
     fov_y = mri_template->ysize * mri_template->height;
@@ -2410,35 +2415,36 @@ int main(int argc, char *argv[]) {
             mri_template->y_s * mri_template->z_s;
   if (fabs(i_dot_j) > CLOSE_ENOUGH || fabs(i_dot_k) > CLOSE_ENOUGH ||
       fabs(i_dot_k) > CLOSE_ENOUGH) {
-    printf("warning: output volume axes are not orthogonal:"
-           "i_dot_j = %.6f, i_dot_k = %.6f, j_dot_k = %.6f\n",
-           i_dot_j, i_dot_k, j_dot_k);
-    printf("i_ras = (%g, %g, %g)\n", mri_template->x_r, mri_template->x_a,
-           mri_template->x_s);
-    printf("j_ras = (%g, %g, %g)\n", mri_template->y_r, mri_template->y_a,
-           mri_template->y_s);
-    printf("k_ras = (%g, %g, %g)\n", mri_template->z_r, mri_template->z_a,
-           mri_template->z_s);
+    fmt::printf("warning: output volume axes are not orthogonal:"
+                "i_dot_j = %.6f, i_dot_k = %.6f, j_dot_k = %.6f\n",
+                i_dot_j, i_dot_k, j_dot_k);
+    fmt::printf("i_ras = (%g, %g, %g)\n", mri_template->x_r, mri_template->x_a,
+                mri_template->x_s);
+    fmt::printf("j_ras = (%g, %g, %g)\n", mri_template->y_r, mri_template->y_a,
+                mri_template->y_s);
+    fmt::printf("k_ras = (%g, %g, %g)\n", mri_template->z_r, mri_template->z_a,
+                mri_template->z_s);
   }
   if (out_data_type >= 0) {
     mri_template->type = out_data_type;
   }
 
   /* ----- catch the mri_template info flag ----- */
-  if (template_info_flag != 0) {
-    printf("template structure:\n");
+  if (template_info_flag) {
+    fmt::printf("template structure:\n");
     MRIdump(mri_template, stdout);
   }
 
   /* ----- exit here if read only is desired ----- */
-  if (read_only_flag != 0) {
+  if (read_only_flag) {
     exit(0);
   }
 
   /* ----- apply a transformation if requested ----- */
-  if (transform_flag != 0) {
-    printf("INFO: Applying transformation from file %s...\n", transform_fname);
-    transform_type = TransformFileNameType(transform_fname);
+  if (transform_flag) {
+    fmt::printf("INFO: Applying transformation from file %s...\n",
+                transform_fname.data());
+    transform_type = TransformFileNameType(transform_fname.data());
     if (transform_type == MNI_TRANSFORM_TYPE ||
         transform_type == TRANSFORM_ARRAY_TYPE ||
         transform_type == REGISTER_DAT || transform_type == FSLREG_TYPE) {
@@ -2454,20 +2460,21 @@ int main(int argc, char *argv[]) {
          can handle multiple transforms, but the inverse assumes only
          one. NN is good for ROI*/
 
-      printf("---------------------------------\n");
-      printf("INFO: Transform Matrix (%s)\n",
-             LTAtransformTypeName(lta_transform->type));
+      fmt::printf("---------------------------------\n");
+      fmt::printf("INFO: Transform Matrix (%s)\n",
+                  LTAtransformTypeName(lta_transform->type));
       MatrixPrint(stdout, lta_transform->xforms[0].m_L);
-      printf("---------------------------------\n");
+      fmt::printf("---------------------------------\n");
 
       /* LTAtransform() runs either MRIapplyRASlinearTransform()
          for RAS2RAS or MRIlinearTransform() for Vox2Vox. */
       /* MRIlinearTransform() calls MRIlinearTransformInterp() */
-      if (out_like_flag == 1) {
+      if (out_like_flag) {
         MRI *tmp = nullptr;
-        printf("INFO: transform dst into the like-volume (resample_type %d)\n",
-               resample_type_val);
-        tmp = MRIreadHeader(out_like_name, MRI_VOLUME_TYPE_UNKNOWN);
+        fmt::printf(
+            "INFO: transform dst into the like-volume (resample_type %d)\n",
+            resample_type_val);
+        tmp = MRIreadHeader(out_like_name.data(), MRI_VOLUME_TYPE_UNKNOWN);
         mri_transformed =
             MRIalloc(tmp->width, tmp->height, tmp->depth, mri->type);
         if (mri_transformed == nullptr) {
@@ -2479,7 +2486,7 @@ int main(int argc, char *argv[]) {
         mri_transformed = LTAtransformInterp(mri, mri_transformed,
                                              lta_transform, resample_type_val);
       } else {
-        if (out_center_flag != 0) {
+        if (out_center_flag) {
           MATRIX *m;
           MATRIX *mtmp;
           m = MRIgetResampleMatrix(mri_template, mri);
@@ -2492,12 +2499,14 @@ int main(int argc, char *argv[]) {
           lta_transform->type = LINEAR_VOX_TO_VOX;
         }
 
-        printf("Applying LTAtransformInterp (resample_type %d)\n",
-               resample_type_val);
+        fmt::printf("Applying LTAtransformInterp (resample_type %d)\n",
+                    resample_type_val);
         if (Gdiag_no > 0) {
-          printf("Dumping LTA ---------++++++++++++-----------------------\n");
+          fmt::printf(
+              "Dumping LTA ---------++++++++++++-----------------------\n");
           LTAdump(stdout, lta_transform);
-          printf("========-------------++++++++++++-------------------=====\n");
+          fmt::printf(
+              "========-------------++++++++++++-------------------=====\n");
         }
         mri_transformed =
             LTAtransformInterp(mri, nullptr, lta_transform, resample_type_val);
@@ -2507,7 +2516,7 @@ int main(int argc, char *argv[]) {
         fmt::fprintf(stderr, "ERROR: applying transform to volume\n");
         exit(1);
       }
-      if (out_center_flag != 0) {
+      if (out_center_flag) {
         mri_transformed->c_r = mri_template->c_r;
         mri_transformed->c_a = mri_template->c_a;
         mri_transformed->c_s = mri_template->c_s;
@@ -2516,20 +2525,21 @@ int main(int argc, char *argv[]) {
       MRIfree(&mri);
       mri = mri_transformed;
     } else if (transform_type == MORPH_3D_TYPE) {
-      printf("Applying morph_3d ...\n");
+      fmt::printf("Applying morph_3d ...\n");
       // this is a non-linear vox-to-vox transform
       // note that in this case trilinear
       // interpolation is always used, and -rt
       // option has no effect! -xh
-      TRANSFORM *tran = TransformRead(transform_fname);
+      TRANSFORM *tran = TransformRead(transform_fname.data());
       // check whether the volume to be morphed and the morph have the same
       // dimensions
       if (tran == nullptr) {
         ErrorExit(ERROR_NOFILE, "%s: could not read xform from %s\n", Progname,
                   transform_fname);
       }
-      if (invert_transform_flag == 0) {
-        printf("morphing to atlas with resample type %d\n", resample_type_val);
+      if (static_cast<int>(invert_transform_flag) == 0) {
+        fmt::printf("morphing to atlas with resample type %d\n",
+                    resample_type_val);
         mri_transformed =
             GCAMmorphToAtlas(mri, static_cast<GCA_MORPH *>(tran->xform),
                              nullptr, 0, resample_type_val);
@@ -2556,8 +2566,8 @@ int main(int argc, char *argv[]) {
 	  mri = mri_tmp ;
 	}
 #endif
-        printf("morphing from atlas with resample type %d\n",
-               resample_type_val);
+        fmt::printf("morphing from atlas with resample type %d\n",
+                    resample_type_val);
         mri_transformed =
             GCAMmorphFromAtlas(mri, gcam, mri_transformed, resample_type_val);
         MRIwrite(mri_transformed, "t.mgz");
@@ -2567,11 +2577,11 @@ int main(int argc, char *argv[]) {
       mri = mri_transformed;
     } else {
       fmt::fprintf(stderr, "unknown transform type in file %s\n",
-                   transform_fname);
+                   transform_fname.data());
       exit(1);
     }
-  } else if ((out_like_flag != 0) &&
-             (OutStatTableFlag == 0)) // flag set but no transform
+  } else if (((out_like_flag)) &&
+             (!OutStatTableFlag)) // flag set but no transform
   {
     // modify direction cosines to use the
     // out-like volume direction cosines
@@ -2584,8 +2594,9 @@ int main(int argc, char *argv[]) {
     MRI *tmp = nullptr;
     MATRIX *src2dst = nullptr;
 
-    printf("INFO: transform src into the like-volume: %s\n", out_like_name);
-    tmp = MRIreadHeader(out_like_name, MRI_VOLUME_TYPE_UNKNOWN);
+    fmt::printf("INFO: transform src into the like-volume: %s\n",
+                out_like_name.data());
+    tmp = MRIreadHeader(out_like_name.data(), MRI_VOLUME_TYPE_UNKNOWN);
     mri_transformed = MRIalloc(tmp->width, tmp->height, tmp->depth, mri->type);
     if (mri_transformed == nullptr) {
       ErrorExit(ERROR_NOMEMORY, "could not allocate memory");
@@ -2618,13 +2629,14 @@ int main(int argc, char *argv[]) {
   }
 
   /* ----- change type if necessary ----- */
-  if (mri->type != mri_template->type && nochange_flag == FALSE) {
-    printf("changing data type from %s to %s (noscale = %d)...\n",
-           MRItype2str(mri->type), MRItype2str(mri_template->type),
-           no_scale_flag);
+  if (mri->type != mri_template->type &&
+      static_cast<int>(nochange_flag) == FALSE) {
+    fmt::printf("changing data type from %s to %s (noscale = %d)...\n",
+                MRItype2str(mri->type), MRItype2str(mri_template->type),
+                no_scale_flag);
     mri2 = MRISeqchangeType(mri, mri_template->type, 0.0, 0.999, no_scale_flag);
     if (mri2 == nullptr) {
-      printf("ERROR: MRISeqchangeType\n");
+      fmt::printf("ERROR: MRISeqchangeType\n");
       exit(1);
     }
     /* (mr) now always map 0 to 0 (was only in conform case before)
@@ -2650,24 +2662,24 @@ int main(int argc, char *argv[]) {
   }
 
   /*printf("mri  vs.  mri_template\n");
-  printf(" dim  ( %i , %i , %i ) vs ( %i , %i , %i
+  fmt::printf(" dim  ( %i , %i , %i ) vs ( %i , %i , %i
   )\n",mri->width,mri->height,mri->depth,mri_template->width,mri_template->height,mri_template->depth);
-  printf(" size ( %.9g , %.9g , %.9g ) vs ( %.9g , %.9g , %.9g
+  fmt::printf(" size ( %.9g , %.9g , %.9g ) vs ( %.9g , %.9g , %.9g
   )\n",mri->xsize,mri->ysize,mri->zsize,mri_template->xsize,mri_template->ysize,mri_template->zsize);
-  printf(" xras ( %.9g , %.9g , %.9g ) vs ( %.9g , %.9g , %.9g
+  fmt::printf(" xras ( %.9g , %.9g , %.9g ) vs ( %.9g , %.9g , %.9g
   )\n",mri->x_r,mri->x_a,mri->x_s,mri_template->x_r,mri_template->x_a,mri_template->x_s);
-  printf(" yras ( %.9g , %.9g , %.9g ) vs ( %.9g , %.9g , %.9g
+  fmt::printf(" yras ( %.9g , %.9g , %.9g ) vs ( %.9g , %.9g , %.9g
   )\n",mri->y_r,mri->x_a,mri->y_s,mri_template->y_r,mri_template->y_a,mri_template->y_s);
-  printf(" zras ( %.9g , %.9g , %.9g ) vs ( %.9g , %.9g , %.9g
+  fmt::printf(" zras ( %.9g , %.9g , %.9g ) vs ( %.9g , %.9g , %.9g
   )\n",mri->z_r,mri->x_a,mri->z_s,mri_template->z_r,mri_template->z_a,mri_template->z_s);
-  printf(" cras ( %.9g , %.9g , %.9g ) vs ( %.9g , %.9g , %.9g
+  fmt::printf(" cras ( %.9g , %.9g , %.9g ) vs ( %.9g , %.9g , %.9g
   )\n",mri->c_r,mri->c_a,mri->c_s,mri_template->c_r,mri_template->c_a,mri_template->c_s);
   */
 
   /* ----- reslice if necessary and not performed during transform ----- */
   float eps = 1e-05; /* (mr) do eps testing to avoid reslicing due to tiny
                         differences, e.g. from IO */
-  if ((out_like_flag == 0) && (transform_type != MORPH_3D_TYPE) &&
+  if ((!out_like_flag) && (transform_type != MORPH_3D_TYPE) &&
       (fabs(mri->xsize - mri_template->xsize) > eps ||
        fabs(mri->ysize - mri_template->ysize) > eps ||
        fabs(mri->zsize - mri_template->zsize) > eps ||
@@ -2686,25 +2698,25 @@ int main(int argc, char *argv[]) {
        fabs(mri->c_r - mri_template->c_r) > eps ||
        fabs(mri->c_a - mri_template->c_a) > eps ||
        fabs(mri->c_s - mri_template->c_s) > eps)) {
-    printf("Reslicing using ");
+    fmt::printf("Reslicing using ");
     switch (resample_type_val) {
     case SAMPLE_TRILINEAR:
-      printf("trilinear interpolation \n");
+      fmt::printf("trilinear interpolation \n");
       break;
     case SAMPLE_NEAREST:
-      printf("nearest \n");
+      fmt::printf("nearest \n");
       break;
       /*    case SAMPLE_SINC:
-            printf("sinc \n");
+            fmt::printf("sinc \n");
             break;*/
     case SAMPLE_CUBIC:
-      printf("cubic \n");
+      fmt::printf("cubic \n");
       break;
     case SAMPLE_WEIGHTED:
-      printf("weighted \n");
+      fmt::printf("weighted \n");
       break;
     case SAMPLE_VOTE:
-      printf("voting \n");
+      fmt::printf("voting \n");
       break;
     }
     mri2 = MRIresample(mri, mri_template, resample_type_val);
@@ -2717,7 +2729,7 @@ int main(int argc, char *argv[]) {
 
   /* ----- invert contrast if necessary ----- */
   if (invert_val >= 0) {
-    printf("inverting contrast...\n");
+    fmt::printf("inverting contrast...\n");
     mri2 = MRIinvertContrast(mri, nullptr, invert_val);
     if (mri2 == nullptr) {
       exit(1);
@@ -2727,8 +2739,8 @@ int main(int argc, char *argv[]) {
   }
 
   /* ----- reorder if necessary ----- */
-  if (reorder_flag != 0) {
-    printf("reordering axes...\n");
+  if (reorder_flag) {
+    fmt::printf("reordering axes...\n");
     mri2 = MRIreorder(mri, nullptr, reorder_vals[0], reorder_vals[1],
                       reorder_vals[2]);
     if (mri2 == nullptr) {
@@ -2740,11 +2752,11 @@ int main(int argc, char *argv[]) {
   }
 
   /* ----- reorder if necessary ----- */
-  if (reorder4_flag != 0) {
-    printf("reordering all axes...\n");
-    printf("reordering, values are %d %d %d %d\n", reorder4_vals[0],
-           reorder4_vals[1], reorder4_vals[2], reorder4_vals[3]);
-    mri2 = MRIreorder4(mri, reorder4_vals);
+  if (reorder4_flag) {
+    fmt::printf("reordering all axes...\n");
+    fmt::printf("reordering, values are %d %d %d %d\n", reorder4_vals[0],
+                reorder4_vals[1], reorder4_vals[2], reorder4_vals[3]);
+    mri2 = MRIreorder4(mri, reorder4_vals.data());
     if (mri2 == nullptr) {
       fmt::fprintf(stderr, "error reordering all axes\n");
       exit(1);
@@ -2757,31 +2769,31 @@ int main(int argc, char *argv[]) {
   strcpy(mri->gdf_image_stem, gdf_image_stem.data());
 
   /* ----- catch the out info flag ----- */
-  if (out_info_flag != 0) {
-    printf("output structure:\n");
+  if (out_info_flag) {
+    fmt::printf("output structure:\n");
     MRIdump(mri, stdout);
   }
 
   /* ----- catch the out matrix flag ----- */
-  if (out_matrix_flag != 0) {
+  if (out_matrix_flag) {
     MATRIX *i_to_r;
     i_to_r = extract_i_to_r(mri);
     if (i_to_r != nullptr) {
-      printf("output ijk -> ras:\n");
+      fmt::printf("output ijk -> ras:\n");
       MatrixPrint(stdout, i_to_r);
       MatrixFree(&i_to_r);
     } else {
-      printf("error getting output matrix\n");
+      fmt::printf("error getting output matrix\n");
     }
   }
 
   /* ----- catch the out stats flag ----- */
-  if (out_stats_flag != 0) {
+  if (out_stats_flag) {
     MRIprintStats(mri, stdout);
   }
 
-  if (erode_seg_flag == TRUE) {
-    printf("Eroding segmentation %d\n", n_erode_seg);
+  if (erode_seg_flag) {
+    fmt::printf("Eroding segmentation %d\n", n_erode_seg);
     mri2 = MRIerodeSegmentation(mri, nullptr, n_erode_seg, 0);
     if (mri2 == nullptr) {
       exit(1);
@@ -2789,15 +2801,15 @@ int main(int argc, char *argv[]) {
     MRIfree(&mri);
     mri = mri2;
   }
-  if (dil_seg_flag == TRUE) {
+  if (dil_seg_flag) {
     mritmp = nullptr;
     if (dil_seg_mask[0] == '\0') {
-      printf("Dilating segmentation %d\n", n_dil_seg);
+      fmt::printf("Dilating segmentation %d\n", n_dil_seg);
     } else {
-      printf("Dilating segmentation, mask %s\n", dil_seg_mask);
+      fmt::printf("Dilating segmentation, mask %s\n", dil_seg_mask.data());
       mritmp = MRIread(dil_seg_mask.data());
       if (mritmp == nullptr) {
-        printf("ERROR: could not read %s\n", dil_seg_mask);
+        fmt::printf("ERROR: could not read %s\n", dil_seg_mask.data());
         exit(1);
       }
     }
@@ -2809,19 +2821,19 @@ int main(int argc, char *argv[]) {
     mri = mri2;
   }
 
-  if (frame_flag == TRUE) {
-    if (mid_frame_flag == TRUE) {
+  if (frame_flag) {
+    if (mid_frame_flag) {
       nframes = 1;
       frames[0] = nint(mri->nframes / 2);
     }
     if (nframes == 1) {
-      printf("keeping frame %d\n", frames[0]);
+      fmt::printf("keeping frame %d\n", frames[0]);
     } else {
-      printf("keeping frames");
+      fmt::printf("keeping frames");
       for (f = 0; f < nframes; f++) {
-        printf(" %d", frames[f]);
+        fmt::printf(" %d", frames[f]);
       }
-      printf("\n");
+      fmt::printf("\n");
     }
     mri2 = MRIallocSequence(mri->width, mri->height, mri->depth, mri->type,
                             nframes);
@@ -2832,8 +2844,8 @@ int main(int argc, char *argv[]) {
     MRIcopyPulseParameters(mri, mri2);
     for (f = 0; f < nframes; f++) {
       if (frames[f] < 0 || frames[f] >= mri->nframes) {
-        printf("   ERROR: valid frame numbers are between 0 and %d\n",
-               mri->nframes - 1);
+        fmt::printf("   ERROR: valid frame numbers are between 0 and %d\n",
+                    mri->nframes - 1);
         exit(1);
       } else {
         for (s = 0; s < mri2->depth; s++) {
@@ -2852,9 +2864,10 @@ int main(int argc, char *argv[]) {
 
   /* ----- drop the last ndrop frames (drop before skip) ------ */
   if (ndrop > 0) {
-    printf("Dropping last %d frames\n", ndrop);
+    fmt::printf("Dropping last %d frames\n", ndrop);
     if (mri->nframes <= ndrop) {
-      printf("   ERROR: can't drop, volume only has %d frames\n", mri->nframes);
+      fmt::printf("   ERROR: can't drop, volume only has %d frames\n",
+                  mri->nframes);
       exit(1);
     }
     mri2 = fMRIndrop(mri, ndrop, nullptr);
@@ -2867,9 +2880,10 @@ int main(int argc, char *argv[]) {
 
   /* ----- skip the first nskip frames ------ */
   if (nskip > 0) {
-    printf("Skipping %d frames\n", nskip);
+    fmt::printf("Skipping %d frames\n", nskip);
     if (mri->nframes <= nskip) {
-      printf("   ERROR: can't skip, volume only has %d frames\n", mri->nframes);
+      fmt::printf("   ERROR: can't skip, volume only has %d frames\n",
+                  mri->nframes);
       exit(1);
     }
     mri2 = fMRInskip(mri, nskip, nullptr);
@@ -2879,9 +2893,9 @@ int main(int argc, char *argv[]) {
     MRIfree(&mri);
     mri = mri2;
   }
-  if (subsample_flag != 0) {
-    printf("SubSample: Start = %d  Delta = %d, End = %d\n", SubSampStart,
-           SubSampDelta, SubSampEnd);
+  if (subsample_flag) {
+    fmt::printf("SubSample: Start = %d  Delta = %d, End = %d\n", SubSampStart,
+                SubSampDelta, SubSampEnd);
     mri2 = fMRIsubSample(mri, SubSampStart, SubSampDelta, SubSampEnd, nullptr);
     if (mri2 == nullptr) {
       exit(1);
@@ -2890,8 +2904,8 @@ int main(int argc, char *argv[]) {
     mri = mri2;
   }
 
-  if (cutends_flag == TRUE) {
-    printf("Cutting ends: n = %d\n", ncutends);
+  if (cutends_flag) {
+    fmt::printf("Cutting ends: n = %d\n", ncutends);
     mri2 = MRIcutEndSlices(mri, ncutends);
     if (mri2 == nullptr) {
       exit(1);
@@ -2901,7 +2915,7 @@ int main(int argc, char *argv[]) {
   }
 
   /* ----- crops ---------*/
-  if (crop_flag == TRUE) {
+  if (crop_flag) {
     MRI *mri_tmp;
     int x0;
     int y0;
@@ -2921,12 +2935,12 @@ int main(int argc, char *argv[]) {
   }
 
   if (!FEQUAL(out_scale_factor, 1.0)) {
-    printf("scaling output intensities by %2.3f\n", out_scale_factor);
+    fmt::printf("scaling output intensities by %2.3f\n", out_scale_factor);
     MRIscalarMul(mri, mri, out_scale_factor);
   }
 
-  if (sphinx_flag != 0) {
-    printf("Changing orientation information to Sphinx\n");
+  if (sphinx_flag) {
+    fmt::printf("Changing orientation information to Sphinx\n");
     MRIhfs2Sphinx(mri);
   }
 
@@ -2935,39 +2949,40 @@ int main(int argc, char *argv[]) {
   }
 
   // ----- modify color lookup table (specified by --ctab option) -----
-  if (strcmp("remove", colortablefile) == 0) {
+  if (strcmp("remove", colortablefile.data()) == 0) {
     // remove an embedded ctab
     if (mri->ct != nullptr) {
       std::cout << "removing color lookup table" << std::endl;
       CTABfree(&mri->ct);
     }
-  } else if (strlen(colortablefile) != 0) {
+  } else if (strlen(colortablefile.data()) != 0) {
     // add a user-specified ctab
     std::cout << "embedding color lookup table" << std::endl;
     if (mri->ct != nullptr) {
       CTABfree(&mri->ct);
     }
-    mri->ct = CTABreadASCII(colortablefile);
+    mri->ct = CTABreadASCII(colortablefile.data());
     if (mri->ct == nullptr) {
-      fs::fatal() << "could not read lookup table from " << colortablefile;
+      fs::fatal() << "could not read lookup table from "
+                  << colortablefile.data();
     }
   }
 
   /*------ Finally, write the output -----*/
 
-  if (OutStatTableFlag != 0) {
-    printf("Writing as Stats-Table to %s using template %s\n", out_name,
-           out_like_name);
+  if (OutStatTableFlag) {
+    fmt::printf("Writing as Stats-Table to %s using template %s\n",
+                out_name.data(), out_like_name.data());
 
-    OutStatTable = InitStatTableFromMRI(mri, out_like_name);
+    OutStatTable = InitStatTableFromMRI(mri, out_like_name.data());
     WriteStatTable(out_name.data(), OutStatTable);
 
-    printf("done\n");
+    fmt::printf("done\n");
     exit(0);
   }
 
   if (ascii_flag != 0) {
-    printf("Writing as ASCII to %s\n", out_name);
+    fmt::printf("Writing as ASCII to %s\n", out_name.data());
     fptmp = fopen(out_name.data(), "w");
     if (ascii_flag == 1 || ascii_flag == 2) {
       for (f = 0; f < mri->nframes; f++) {
@@ -3002,23 +3017,23 @@ int main(int argc, char *argv[]) {
       }
     }
     fclose(fptmp);
-    printf("done\n");
+    fmt::printf("done\n");
     exit(0);
   }
-  if (no_write_flag == 0) {
+  if (static_cast<int>(no_write_flag) == 0) {
     if (SplitFrames == 0) {
-      printf("writing to %s...\n", out_name);
-      if (force_out_type_flag != 0) {
+      fmt::printf("writing to %s...\n", out_name.data());
+      if (force_out_type_flag) {
         err = MRIwriteType(mri, out_name.data(), out_volume_type);
         if (err != NO_ERROR) {
-          printf("ERROR: failure writing %s as volume type %d\n", out_name,
-                 out_volume_type);
+          fmt::printf("ERROR: failure writing %s as volume type %d\n",
+                      out_name.data(), out_volume_type);
           exit(1);
         }
       } else {
         err = MRIwrite(mri, out_name.data());
         if (err != NO_ERROR) {
-          printf("ERROR: failure writing %s\n", out_name);
+          fmt::printf("ERROR: failure writing %s\n", out_name.data());
           exit(1);
         }
       }
@@ -3026,15 +3041,15 @@ int main(int argc, char *argv[]) {
       stem = IDstemFromName(out_name.data());
       ext = IDextensionFromName(out_name.data());
 
-      printf("Splitting frames, stem = %s, ext = %s\n", stem, ext);
+      fmt::printf("Splitting frames, stem = %s, ext = %s\n", stem, ext);
       mri2 = nullptr;
       for (i = 0; i < mri->nframes; i++) {
         mri2 = MRIcopyFrame(mri, mri2, i, 0);
-        sprintf(tmpstr, "%s%04d.%s", stem, i, ext);
-        printf("%2d %s\n", i, tmpstr);
-        err = MRIwrite(mri2, tmpstr);
+        fmt::sprintf(tmpstr.data(), "%s%04d.%s", stem, i, ext);
+        fmt::printf("%2d %s\n", i, tmpstr.data());
+        err = MRIwrite(mri2, tmpstr.data());
         if (err != NO_ERROR) {
-          printf("ERROR: failure writing %s\n", tmpstr);
+          fmt::printf("ERROR: failure writing %s\n", tmpstr.data());
           exit(1);
         }
       }
@@ -3218,7 +3233,7 @@ static bool good_cmdline_args(CMDARGS *cmdargs, ENV *env) {
     spdlog::set_level(spdlog::level::warn);
   }
 
-  if (vm.count("reorder_vals")) {
+  if (vm.count("reorder_vals") != 0U) {
     auto vals = vm["reorder_vals"].as<std::vector<int>>();
     if (vals.size() != 3) {
       spdlog::get("stderr")->critical(
@@ -3229,7 +3244,7 @@ static bool good_cmdline_args(CMDARGS *cmdargs, ENV *env) {
     }
   }
 
-  if (vm.count("reorder4_vals")) {
+  if (vm.count("reorder4_vals") != 0U) {
     auto vals = vm["reorder4_vals"].as<std::vector<int>>();
     if (vals.size() != 4) {
       spdlog::get("stderr")->critical(
@@ -3238,7 +3253,7 @@ static bool good_cmdline_args(CMDARGS *cmdargs, ENV *env) {
     } else {
       cmdargs->reorder4_flag = true;
     }
-  } else if (vm.count("r4")) {
+  } else if (vm.count("r4") != 0U) {
     auto vals = vm["r4"].as<std::vector<int>>();
     if (vals.size() != 4) {
       spdlog::get("stderr")->critical(
@@ -3249,15 +3264,15 @@ static bool good_cmdline_args(CMDARGS *cmdargs, ENV *env) {
     }
   }
 
-  if (vm.count("outside_val") || vm.count("oval")) {
+  if ((vm.count("outside_val") != 0U) || (vm.count("oval") != 0U)) {
     fmt::printf("setting outside val to %d\n", cmdargs->outside_val);
   }
 
-  if (vm.count("no-dwi")) {
+  if (vm.count("no-dwi") != 0U) {
     setenv("FS_LOAD_DWI", "0", 1);
   }
 
-  if (vm.count("left-right-mirror")) {
+  if (vm.count("left-right-mirror") != 0U) {
     if ((cmdargs->left_right_mirror != "lh") &&
         (cmdargs->left_right_mirror != "rh")) {
       fmt::printf(
@@ -3266,7 +3281,7 @@ static bool good_cmdline_args(CMDARGS *cmdargs, ENV *env) {
     }
   }
 
-  if (vm.count("left-right-keep")) {
+  if (vm.count("left-right-keep") != 0U) {
     if ((cmdargs->left_right_keep != "lh") &&
         (cmdargs->left_right_keep != "rh")) {
       fmt::printf("ERROR: pass either 'lh' or 'rh' with --left-right-keep!\n");
@@ -3274,58 +3289,58 @@ static bool good_cmdline_args(CMDARGS *cmdargs, ENV *env) {
     }
   }
 
-  if (vm.count("conform-dc")) {
+  if (vm.count("conform-dc") != 0U) {
     cmdargs->conform_flag = true;
   }
 
-  if (vm.count("cw256")) {
+  if (vm.count("cw256") != 0U) {
     cmdargs->conform_flag = true;
   }
 
-  if (vm.count("new-transform-fname")) {
+  if (vm.count("new-transform-fname") != 0U) {
     cmdargs->DoNewTransformFname = true;
   }
 
-  if (vm.count("rescale-dicom")) {
+  if (vm.count("rescale-dicom") != 0U) {
     // DO  apply rescale intercept and slope based on (0028,1052) (0028,1053).
     setenv("FS_RESCALE_DICOM", "1", 1);
   }
 
-  if (vm.count("no-rescale-dicom")) {
+  if (vm.count("no-rescale-dicom") != 0U) {
     // Do NOT apply rescale intercept and slope based on (0028,1052)
     // (0028,1053).
     setenv("FS_RESCALE_DICOM", "0", 1);
   }
 
-  if (vm.count("bvec-scanner")) {
+  if (vm.count("bvec-scanner") != 0U) {
     // force bvecs to be in scanner space. only applies when
     // reading dicoms
     setenv("FS_DESIRED_BVEC_SPACE", "1", 1);
   }
 
-  if (vm.count("bvec-voxel")) {
+  if (vm.count("bvec-voxel") != 0U) {
     // force bvecs to be in voxel space. only applies when
     // reading dicoms.
     setenv("FS_DESIRED_BVEC_SPACE", "2", 1);
   }
 
-  if (vm.count("no-analyze-rescale")) {
+  if (vm.count("no-analyze-rescale") != 0U) {
     // Turns off rescaling of analyze files
     setenv("FS_ANALYZE_NO_RESCALE", "1", 1);
   }
 
-  if (vm.count("autoalign")) {
+  if (vm.count("autoalign") != 0U) {
     cmdargs->AutoAlign =
         MatrixReadTxt(cmdargs->autoalign_file.c_str(), nullptr);
     fmt::printf("Auto Align Matrix\n");
     MatrixPrint(stdout, cmdargs->AutoAlign);
   }
 
-  if (vm.count("conform_min") || vm.count("cm")) {
+  if ((vm.count("conform_min") != 0U) || (vm.count("cm") != 0U)) {
     cmdargs->conform_flag = true;
   }
 
-  if (vm.count("conform_size") || vm.count("cs")) {
+  if ((vm.count("conform_size") != 0U) || (vm.count("cs") != 0U)) {
     cmdargs->conform_flag = true;
   }
   return false;
