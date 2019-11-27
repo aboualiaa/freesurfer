@@ -345,7 +345,7 @@ static bool good_cmdline_args(CMDARGS *cmdargs, ENV *env, WBC *wbc) {
     auto parsed_opts =
         po::command_line_parser(ac, av).options(desc).style(cl_style).run();
     po::store(parsed_opts, vm);
-  } catch (const std::exception &e) {
+  } catch (std::exception const &e) {
     spdlog::get("stderr")->critical(e.what());
     return false;
   }
@@ -363,7 +363,7 @@ static bool good_cmdline_args(CMDARGS *cmdargs, ENV *env, WBC *wbc) {
 
   try {
     po::notify(vm);
-  } catch (const std::exception &e) {
+  } catch (std::exception const &e) {
     spdlog::get("stderr")->critical(e.what());
     return false;
   }

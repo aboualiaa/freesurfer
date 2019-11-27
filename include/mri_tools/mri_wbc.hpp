@@ -16,7 +16,7 @@
 #include "spdlog/spdlog.h"
 
 #include <hpx/hpx_start.hpp>
-#include <hpx/include/iostreams.hpp>
+#include <hpx/include/iostreams.hpp> // hpx headers have to be included before boost headers
 
 #include <boost/program_options/parsers.hpp>
 
@@ -273,14 +273,14 @@ static void initArgDesc(podesc *desc, CMDARGS *cmdargs);
 ///
 /// \param desc
 /// \param env
-inline static void print_usage(const podesc &desc, ENV *env) {
+inline static void print_usage(podesc const &desc, ENV *env) {
   std::cout << desc << "\n" << env->vcid << std::endl;
 }
 
 ///
 /// \param desc
 /// \param env
-inline static void print_help(const podesc &desc, ENV *env) {
+inline static void print_help(podesc const &desc, ENV *env) {
   print_usage(desc, env);
   // TODO(aboualiaa): add tests and remove
   spdlog::get("stderr")->critical("this program is not yet tested!");
@@ -290,8 +290,8 @@ inline static void print_help(const podesc &desc, ENV *env) {
 /// \param cmdargs
 /// \param vm
 /// \return
-inline static bool shouldSave(const CMDARGS *cmdargs,
-                              const po::variables_map &vm) {
+inline static bool shouldSave(CMDARGS const *cmdargs,
+                              po::variables_map const &vm) {
   return cmdargs->SaveTest || (vm.count("fvol") != 0U) ||
          (vm.count("lh") != 0U) || (vm.count("rh") != 0U);
 }
@@ -303,8 +303,8 @@ namespace boost::program_options {
 /// \param vm
 /// \param for_what
 /// \param required_option
-inline void option_dependency(const povm &vm, const char *for_what,
-                              const char *required_option) {
+inline void option_dependency(povm const &vm, char const *for_what,
+                              char const *required_option) {
   if ((vm.count(for_what) != 0U) && !vm[for_what].defaulted()) {
     if (vm.count(required_option) == 0 || vm[required_option].defaulted()) {
       throw std::logic_error(std::string("Option '") + for_what +
@@ -317,8 +317,8 @@ inline void option_dependency(const povm &vm, const char *for_what,
 /// \param vm
 /// \param opt1
 /// \param opt2
-inline void conflicting_options(const povm &vm, const std::string &opt1,
-                                const std::string &opt2) {
+inline void conflicting_options(povm const &vm, std::string const &opt1,
+                                std::string const &opt2) {
   if ((vm.count(opt1) != 0U) && !vm[opt1].defaulted() &&
       (vm.count(opt2) != 0U) && !vm[opt2].defaulted()) {
     throw std::logic_error(std::string("Conflicting options '") + opt1 +
