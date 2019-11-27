@@ -12,7 +12,9 @@ enable_language(C CXX Fortran)
 # enable std c++17
 set(CMAKE_CXX_STANDARD 17)
 
-set(FS_PACKAGES_DIR "/Users/aboualiaa/Downloads/packages")
+if(APPLE)
+  set(FS_PACKAGES_DIR "/Users/aboualiaa/Downloads/packages")
+endif()
 # a few build options
 option(MINIMAL "Only build core components" OFF)
 option(BUILD_GUIS "Build GUI tools" ON)

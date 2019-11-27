@@ -13,10 +13,6 @@ jobs:
         apt:
           packages:
             #            - gfortran
-            - libxi-dev
-            - liblapack-dev
-            - tcsh
-            - curl
             - git
 
 before_install:
@@ -30,8 +26,8 @@ before_install:
   - sudo apt-get -y install liblapack-dev
   - sudo apt-get -y install tcsh
   - sudo apt-get -y install curl
-  - sudo apt-get -y install git
-  - sudo apt-get -y install xorg openbox
+  #  - sudo apt-get -y install git
+  - sudo apt-get -y install libx11-dev
 
 install:
   - curl --connect-timeout 8 --retry 5 -O http://surfer.nmr.mgh.harvard.edu/pub/data/fspackages/prebuilt/centos7-packages.tar.gz
