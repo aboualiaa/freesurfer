@@ -783,7 +783,7 @@ static float *powell_lin(const SurfaceVectorType &vmris_x,
   tDblCoords pt_x, pt_fx;
 
   PetscInt linInc = 1;
-  ierr = PetscOptionsGetInt(NULL, "-lin_res", &linInc, NULL);
+  ierr = PetscOptionsGetInt(NULL, NULL, "-lin_res", &linInc, NULL);
 
   SurfaceVectorType::const_iterator cit_x, cit_fx;
   cit_fx = vmris_fx.begin();
@@ -836,7 +836,7 @@ static int create_bc_container(PointsContainerType &container,
   PetscErrorCode ierr;
   PetscReal petreal = 1.0;
 
-  ierr = PetscOptionsGetReal(NULL, "-dirty", &petreal, NULL);
+  ierr = PetscOptionsGetReal(NULL, NULL, "-dirty", &petreal, NULL);
   CHKERRQ(ierr);
   double dirty = petreal;
   std::cout << " DIRTY value = " << dirty << std::endl;
@@ -1068,19 +1068,20 @@ IoParams::IoParams()
 
 int IoParams::parse(std::string &errMsg) {
   PetscErrorCode ierr;
-  PetscTruth petscFlag;
+  PetscBool petscFlag;
 
   const unsigned int maxLen = 256;
   char buffer[maxLen];
 
   // help
-  ierr = PetscOptionsGetString(NULL, "-help", buffer, maxLen, &petscFlag);
+  ierr = PetscOptionsGetString(NULL, NULL, "-help", buffer, maxLen, &petscFlag);
   CHKERRQ(ierr);
   if (petscFlag)
     help_exit();
 
   // fixed MRI
-  ierr = PetscOptionsGetString(NULL, "-fixed_mri", buffer, maxLen, &petscFlag);
+  ierr = PetscOptionsGetString(NULL, NULL, "-fixed_mri", buffer, maxLen,
+                               &petscFlag);
   CHKERRQ(ierr);
   if (petscFlag)
     strFixedMri = buffer;
@@ -1088,7 +1089,8 @@ int IoParams::parse(std::string &errMsg) {
     errMsg += " No fixed volume present (option -fixed_mri)\n";
 
   // moving MRI
-  ierr = PetscOptionsGetString(NULL, "-moving_mri", buffer, maxLen, &petscFlag);
+  ierr = PetscOptionsGetString(NULL, NULL, "-moving_mri", buffer, maxLen,
+                               &petscFlag);
   CHKERRQ(ierr);
   if (petscFlag)
     strMovingMri = buffer;
@@ -1096,7 +1098,7 @@ int IoParams::parse(std::string &errMsg) {
     errMsg += " No moving volume present (option -moving_mri)\n";
 
   // aseg (for the fixed volume)
-  ierr = PetscOptionsGetString(NULL, "-aseg", buffer, maxLen, &petscFlag);
+  ierr = PetscOptionsGetString(NULL, NULL, "-aseg", buffer, maxLen, &petscFlag);
   CHKERRQ(ierr);
   if (petscFlag)
     strAseg = buffer;
@@ -1112,7 +1114,8 @@ int IoParams::parse(std::string &errMsg) {
     else
       sprintf(option, "-fixed_surf_%d", surfIndex);
 
-    ierr = PetscOptionsGetString(NULL, option, buffer, maxLen, &petscFlag);
+    ierr =
+        PetscOptionsGetString(NULL, NULL, option, buffer, maxLen, &petscFlag);
     CHKERRQ(ierr);
     if (petscFlag)
       vstrFixedSurf.push_back(buffer);
@@ -1133,7 +1136,8 @@ int IoParams::parse(std::string &errMsg) {
     else
       sprintf(option, "-aparc_%d", surfIndex);
 
-    ierr = PetscOptionsGetString(NULL, option, buffer, maxLen, &petscFlag);
+    ierr =
+        PetscOptionsGetString(NULL, NULL, option, buffer, maxLen, &petscFlag);
     CHKERRQ(ierr);
     if (petscFlag) {
       hasAparc = true;
@@ -1159,7 +1163,8 @@ int IoParams::parse(std::string &errMsg) {
     else
       sprintf(option, "-moving_surf_%d", surfIndex);
 
-    ierr = PetscOptionsGetString(NULL, option, buffer, maxLen, &petscFlag);
+    ierr =
+        PetscOptionsGetString(NULL, NULL, option, buffer, maxLen, &petscFlag);
     CHKERRQ(ierr);
     if (petscFlag)
       vstrMovingSurf.push_back(buffer);
@@ -1172,7 +1177,7 @@ int IoParams::parse(std::string &errMsg) {
   }
 
   // Output options
-  ierr = PetscOptionsGetString(NULL, "-out", buffer, maxLen, &petscFlag);
+  ierr = PetscOptionsGetString(NULL, NULL, "-out", buffer, maxLen, &petscFlag);
   CHKERRQ(ierr);
   if (petscFlag)
     strOutput = buffer;
@@ -1180,7 +1185,8 @@ int IoParams::parse(std::string &errMsg) {
     std::cout << " No output option specified\n"
               << "\t will use default value " << strOutput << std::endl;
 
-  ierr = PetscOptionsGetString(NULL, "-out_field", buffer, maxLen, &petscFlag);
+  ierr = PetscOptionsGetString(NULL, NULL, "-out_field", buffer, maxLen,
+                               &petscFlag);
   CHKERRQ(ierr);
   if (petscFlag)
     strOutputField = buffer;
@@ -1188,33 +1194,37 @@ int IoParams::parse(std::string &errMsg) {
     std::cout << " No field output option specified\n"
               << "\t will use default value " << strOutputField << std::endl;
 
-  ierr = PetscOptionsGetString(NULL, "-out_surf", buffer, maxLen, &petscFlag);
+  ierr = PetscOptionsGetString(NULL, NULL, "-out_surf", buffer, maxLen,
+                               &petscFlag);
   CHKERRQ(ierr);
   if (petscFlag)
     strOutputSurf = buffer;
 
-  ierr = PetscOptionsGetString(NULL, "-out_mesh", buffer, maxLen, &petscFlag);
+  ierr = PetscOptionsGetString(NULL, NULL, "-out_mesh", buffer, maxLen,
+                               &petscFlag);
   CHKERRQ(ierr);
   if (petscFlag)
     strOutputMesh = buffer;
 
-  ierr = PetscOptionsGetString(NULL, "-out_surf_affine", buffer, maxLen,
+  ierr = PetscOptionsGetString(NULL, NULL, "-out_surf_affine", buffer, maxLen,
                                &petscFlag);
   CHKERRQ(ierr);
   if (petscFlag)
     strOutputSurfAffine = buffer;
 
-  ierr = PetscOptionsGetString(NULL, "-gcam", buffer, maxLen, &petscFlag);
+  ierr = PetscOptionsGetString(NULL, NULL, "-gcam", buffer, maxLen, &petscFlag);
   CHKERRQ(ierr);
   if (petscFlag)
     strGcam = buffer;
 
-  ierr = PetscOptionsGetString(NULL, "-out_affine", buffer, maxLen, &petscFlag);
+  ierr = PetscOptionsGetString(NULL, NULL, "-out_affine", buffer, maxLen,
+                               &petscFlag);
   CHKERRQ(ierr);
   if (petscFlag)
     strOutputAffine = buffer;
 
-  ierr = PetscOptionsGetString(NULL, "-dbg_output", buffer, maxLen, &petscFlag);
+  ierr = PetscOptionsGetString(NULL, NULL, "-dbg_output", buffer, maxLen,
+                               &petscFlag);
   CHKERRQ(ierr);
   if (petscFlag)
     strDebug = buffer;
@@ -1222,7 +1232,7 @@ int IoParams::parse(std::string &errMsg) {
 
   // Other options
   PetscReal petreal;
-  ierr = PetscOptionsGetReal(NULL, "-elt_vol", &petreal, &petscFlag);
+  ierr = PetscOptionsGetReal(NULL, NULL, "-elt_vol", &petreal, &petscFlag);
   CHKERRQ(ierr);
   if (petscFlag)
     eltVolMin = eltVolMax = petreal;
@@ -1230,7 +1240,7 @@ int IoParams::parse(std::string &errMsg) {
   {
     PetscReal rar[20];
     int nmax = 3;
-    ierr = PetscOptionsGetRealArray(NULL, "-elt_vol_range", rar, &nmax,
+    ierr = PetscOptionsGetRealArray(NULL, NULL, "-elt_vol_range", rar, &nmax,
                                     &petscFlag);
     CHKERRQ(ierr);
     if (petscFlag) {
@@ -1249,7 +1259,7 @@ int IoParams::parse(std::string &errMsg) {
   }
 
   // Poisson ratio
-  ierr = PetscOptionsGetReal(NULL, "-poisson", &petreal, &petscFlag);
+  ierr = PetscOptionsGetReal(NULL, NULL, "-poisson", &petreal, &petscFlag);
   CHKERRQ(ierr);
   if (petscFlag)
     poissonRatio = petreal;
@@ -1258,7 +1268,7 @@ int IoParams::parse(std::string &errMsg) {
               << "\t will use default value " << poissonRatio << std::endl;
 
   // Young modulus
-  ierr = PetscOptionsGetReal(NULL, "-young", &petreal, &petscFlag);
+  ierr = PetscOptionsGetReal(NULL, NULL, "-young", &petreal, &petscFlag);
   CHKERRQ(ierr);
   if (petscFlag)
     YoungModulus = petreal;
@@ -1266,12 +1276,13 @@ int IoParams::parse(std::string &errMsg) {
     std::cout << " No Young-modulus specified (option -young)\n"
               << "\t will use default value " << YoungModulus << std::endl;
 
-  ierr = PetscOptionsGetReal(NULL, "-surf_subsample", &petreal, &petscFlag);
+  ierr =
+      PetscOptionsGetReal(NULL, NULL, "-surf_subsample", &petreal, &petscFlag);
   CHKERRQ(ierr);
   if (petscFlag)
     surfSubsample = petreal;
 
-  ierr = PetscOptionsGetString(NULL, "-cache_transform", buffer, maxLen,
+  ierr = PetscOptionsGetString(NULL, NULL, "-cache_transform", buffer, maxLen,
                                &petscFlag);
   CHKERRQ(ierr);
   if (petscFlag) {
@@ -1279,20 +1290,20 @@ int IoParams::parse(std::string &errMsg) {
     std::cout << " will cache transform in file " << strTransform << std::endl;
   }
 
-  ierr = PetscOptionsHasName(NULL, "-compress", &petscFlag);
+  ierr = PetscOptionsHasName(NULL, NULL, "-compress", &petscFlag);
   CHKERRQ(ierr);
   compress = static_cast<bool>(petscFlag);
 
-  ierr = PetscOptionsGetInt(NULL, "-fem_steps", &iSteps, &petscFlag);
+  ierr = PetscOptionsGetInt(NULL, NULL, "-fem_steps", &iSteps, &petscFlag);
   CHKERRQ(ierr);
-  ierr = PetscOptionsGetInt(NULL, "-fem_end_step", &iEndStep, &petscFlag);
+  ierr = PetscOptionsGetInt(NULL, NULL, "-fem_end_step", &iEndStep, &petscFlag);
   CHKERRQ(ierr);
 
-  ierr = PetscOptionsHasName(NULL, "-topology_old", &petscFlag);
+  ierr = PetscOptionsHasName(NULL, NULL, "-topology_old", &petscFlag);
   CHKERRQ(ierr);
   bUseOldTopologySolver = static_cast<bool>(petscFlag);
 
-  ierr = PetscOptionsHasName(NULL, "-use_pial_for_surf", &petscFlag);
+  ierr = PetscOptionsHasName(NULL, NULL, "-use_pial_for_surf", &petscFlag);
   CHKERRQ(ierr);
   bUsePialForSurf = static_cast<bool>(petscFlag);
 

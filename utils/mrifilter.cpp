@@ -25,7 +25,7 @@
 /*-----------------------------------------------------
                     INCLUDE FILES
 -------------------------------------------------------*/
-#include <cmath>
+#include <math.h>
 #include <memory.h>
 #include <cstdio>
 #include <cstdlib>

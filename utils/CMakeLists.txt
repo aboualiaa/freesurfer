@@ -15,6 +15,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/packages/cephes
   ${CMAKE_SOURCE_DIR}/packages/nifti
   ${CMAKE_SOURCE_DIR}/packages/gifti
+  ${FS_INCLUDE_DIRS}
   SYSTEM
   ${X11_INCLUDE_DIR}
   ${ITK_INCLUDE_DIRS}

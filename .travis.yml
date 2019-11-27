@@ -1,37 +1,72 @@
-os: linux
-dist: bionic
+#os: linux
+#dist: bionic
+
+#cache:
+#  - apt
+#  - ccache
+
 language: cpp
-
 cache:
-  - apt
-  - ccache
+  apt: true
+  directories:
+    - packages/hpx
+    - $HOME/Library/Caches/Homebrew
 
-jobs:
-  include:
-    - os: linux
-      addons:
-        apt:
-          packages:
-            #            - gfortran
-            - git
+os: osx
+osx_image: xcode11.2
+
+before_cache:
+  - brew cleanup
 
 before_install:
-  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-  - sudo apt-get -q update
-  - sudo apt-get -y install gcc-9
-  - sudo apt-get -y install gfortran-9
-  - sudo apt-get -y install cmake
-  - sudo apt-get -y install python3.7-dev
-  - sudo apt-get -y install libxi-dev
-  - sudo apt-get -y install liblapack-dev
-  - sudo apt-get -y install tcsh
-  - sudo apt-get -y install curl
-  #  - sudo apt-get -y install git
-  - sudo apt-get -y install libx11-dev
-
-install:
-  - curl --connect-timeout 8 --retry 5 -O http://surfer.nmr.mgh.harvard.edu/pub/data/fspackages/prebuilt/centos7-packages.tar.gz
-  - tar -xzf centos7-packages.tar.gz
+  - brew update && brew install itk vtk petsc cmake python@3 gcc@9 jemalloc tcsh armadillo qt hdf5 libomp szip fltk open-mpi;
+  - alias python='python3'
+  - export PATH="/usr/local/opt/python/libexec/bin:$PATH"
+  - if [ -d ./packages/hpx ]; then
+    echo "cached hpx found -- nothing to download, installing";
+    cd ./packages/hpx/cmake-build-release;
+    make -j$(nproc) install;
+    cd ../../../;
+    else
+    git clone https://github.com/STEllAR-GROUP/hpx.git packages/hpx;
+    cd ./packages/hpx;
+    mkdir cmake-build-release && cd ./cmake-build-release;
+    cmake .. -DJEMALLOC_ROOT=/usr/local/opt/jemalloc -DHPX_WITH_MALLOC=jemalloc;
+    make -j$(nproc) install;
+    cd ../../../;
+    fi
 
 script:
-  - cmake . -DFS_PACKAGES_DIR=packages -DBUILD_GUIS=OFF && make -j4
+  - sudo xcode-select -s /Applications/Xcode.app
+  - mkdir cmake-build-release && cd ./cmake-build-release
+  - cmake -DGEMS_BUILD_MATLAB=OFF ..
+  - cmake -DGEMS_BUILD_MATLAB=OFF .. # again so that clang finds openMP
+  - make -j$(nproc)
+
+# os: linux
+#      addons:
+#        apt:
+#          packages:
+#            #            - gfortran
+#            - git
+#
+#before_install:
+#  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+#  - sudo apt-get -q update
+#  - sudo apt-get -y install gcc-9
+#  - sudo apt-get -y install gfortran-9
+#  - sudo apt-get -y install cmake
+#  - sudo apt-get -y install python3.7-dev
+#  - sudo apt-get -y install libxi-dev
+#  - sudo apt-get -y install liblapack-dev
+#  - sudo apt-get -y install tcsh
+#  - sudo apt-get -y install curl
+#  #  - sudo apt-get -y install git
+#  - sudo apt-get -y install libx11-dev
+
+#install:
+#  - curl --connect-timeout 8 --retry 5 -O http://surfer.nmr.mgh.harvard.edu/pub/data/fspackages/prebuilt/centos7-packages.tar.gz
+#  - tar -xzf centos7-packages.tar.gz
+#
+#script:
+#  - cmake . -DFS_PACKAGES_DIR=packages -DBUILD_GUIS=OFF && make -j4

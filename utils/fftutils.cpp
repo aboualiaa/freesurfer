@@ -34,7 +34,7 @@ Only one filter has been implemented so far: The Gaussian
 We have first some basic functions used in the FFT Filter.
 
 -----------------------------------------------------*/
-#include <cmath>
+#include <math.h>
 #include <cstdio>
 #include <cstdlib>
 

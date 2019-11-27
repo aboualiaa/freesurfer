@@ -1,7 +1,7 @@
 project(fem_elastic)
 
 if(PETSC_FOUND)
-
+  find_package(MPI REQUIRED)
   include_directories(
     ${FS_INCLUDE_DIRS}
     SYSTEM
@@ -19,7 +19,7 @@ if(PETSC_FOUND)
     transformUtils.cpp
     surf_utils.cpp
     ZlibStringCompressor.cpp
-  )
+    )
 
   # createMorph
   add_executable(createMorph fcreateMorph.cpp ${COMMON3D_SOURCES})
@@ -57,7 +57,7 @@ if(PETSC_FOUND)
     ZlibStringCompressor.cpp
     pbCluster_mesh_crop.cpp
     untangler.cpp
-  )
+    )
   target_link_libraries(surf2vol
     utils
     tetgen
@@ -65,7 +65,8 @@ if(PETSC_FOUND)
     ${LAPACK_LIBRARIES}
     ${BLAS_LIBRARIES}
     ${GFORTRAN_LIBRARIES}
-  )
+    ${MPI_CXX_LIBRARIES}
+    )
   install(TARGETS surf2vol DESTINATION bin)
 
   # fem_elastic library

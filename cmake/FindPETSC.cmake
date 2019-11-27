@@ -1,10 +1,10 @@
 # PETSC Find Module
 
 if(NOT PETSC_DIR)
-  set(PETSC_DIR ${FS_PACKAGES_DIR}/petsc/2.3.3)
+  set(PETSC_DIR "/usr/local/opt/petsc")
 endif()
 
-find_path(PETSC_INCLUDE_DIR HINTS ${PETSC_DIR} NAMES petsc.h PATH_SUFFIXES include)
+set(PETSC_INCLUDE_DIR ${PETSC_DIR}/include)
 
 find_package_handle_standard_args(PETSC DEFAULT_MSG PETSC_INCLUDE_DIR)
 
@@ -22,4 +22,6 @@ library_paths(
   petsccontrib
   mpich
   pmpich
+  petsc.3.12.1
+  petsc.3.12
 )

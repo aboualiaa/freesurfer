@@ -26,7 +26,7 @@ extern const char *Progname;
 
 #include <cctype>
 #include <cerrno>
-#include <cmath>
+#include <math.h>
 #include <memory.h>
 #include <cstdio>
 #include <cstdlib>
@@ -12075,7 +12075,7 @@ MRI *MRIchangeType(MRI *src, int dest_type, float f_low, float f_high,
       for (k = 0; k < src->depth; k++)
         for (j = 0; j < src->height; j++)
           for (i = 0; i < src->width; i++) {
-#if 0	    
+#if 0
             if (src->type == MRI_UCHAR)
               val = (float)MRIvox(src, i, j, k);
             if (src->type == MRI_SHORT)
@@ -12139,7 +12139,7 @@ MRI *MRIchangeType(MRI *src, int dest_type, float f_low, float f_high,
       for (i = 0; i < src->width; i++)
         for (j = 0; j < src->height; j++)
           for (k = 0; k < src->depth; k++) {
-#if 0	    
+#if 0
             if (src->type == MRI_UCHAR)
               val = (float)MRIvox(src, i, j, k);
             if (src->type == MRI_SHORT)

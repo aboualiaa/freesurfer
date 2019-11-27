@@ -24,7 +24,7 @@
  */
 
 #include <cctype>
-#include <cmath>
+#include <math.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -965,19 +965,19 @@ int RFcomputeOutOfBagCorrect(RANDOM_FOREST *rf, int *training_classes,
 	{
 	  if (c == max_class)
 	  {
-	    printf("%s: p = %2.2f ", 
+	    printf("%s: p = %2.2f ",
 		   rf->class_names[c], 100*(double)class_counts[c]/total_count) ;
 	    if (c==true_class)
 	      printf("CORRECT\n") ;
 	    else
 	      printf("(true = %s, p = %2.2f)\n",
-		     rf->class_names[true_class], 
+		     rf->class_names[true_class],
 		     100*(double)class_counts[true_class]/total_count) ;
 	  }
 	}
 	else
-	  printf("%s: p = %2.2f %s\n", 
-		 rf->class_names[c], 100*(double)class_counts[c]/total_count, 
+	  printf("%s: p = %2.2f %s\n",
+		 rf->class_names[c], 100*(double)class_counts[c]/total_count,
 		 c==max_class?"MAX":"") ;
       }
     }

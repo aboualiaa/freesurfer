@@ -25,7 +25,7 @@
  *
  */
 
-#include <cmath>
+#include <math.h>
 #include <cstdlib>
 
 //----------------------------------------------------

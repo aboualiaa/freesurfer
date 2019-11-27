@@ -23,7 +23,7 @@
  *
  */
 
-#include <cmath>
+#include <math.h>
 #include <cstdlib>
 #include <cstring>
 
@@ -282,7 +282,7 @@ int DCTinverseTransformVoxlist(DCT *dct, VOXEL_LIST *vl) {
     else if (z >= dct->mri_source->depth)
       z = dct->mri_source->depth - 1;
 
-#if 0    
+#if 0
     vl->xd[i] = dct->x_inv[x] ;
     vl->yd[i] = dct->y_inv[y] ;
     vl->zd[i] = dct->z_inv[z] ;

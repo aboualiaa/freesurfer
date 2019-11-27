@@ -39,7 +39,7 @@
 ----------------------------------------------------------------------*/
 
 #include <cctype>
-#include <cmath>
+#include <math.h>
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>

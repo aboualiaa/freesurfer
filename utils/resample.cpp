@@ -58,7 +58,7 @@
 
 #define RESAMPLE_SOURCE_CODE_FILE
 
-#include <cmath>
+#include <math.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>

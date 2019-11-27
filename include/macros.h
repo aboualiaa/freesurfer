@@ -30,7 +30,7 @@
 #include "const.h"
 #include "utils.h"
 #include "proto.h"
-#include <cmath>
+#include <math.h>
 
 #ifdef _MSDOS
 #include <math.h>

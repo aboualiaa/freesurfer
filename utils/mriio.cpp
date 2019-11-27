@@ -33,7 +33,7 @@
 #include <dirent.h>
 #include <cerrno>
 #include <fcntl.h>
-#include <cmath>
+#include <math.h>
 #include <memory.h>
 #include <cstdio>
 #include <cstdlib>
@@ -62,7 +62,7 @@
 #include "imautils.h"
 #include "macros.h"
 #include "matfile.h"
-#include <cmath>
+#include <math.h>
 #include "matrix.h"
 #include "mghendian.h"
 #include "mri2.h"
@@ -3350,7 +3350,7 @@ static int mincWrite(MRI *mri, const char *fname) {
 #if 0
           bool show = (vi[di_x] == 0) && (vi[di_y] == 0) && (34 < vi[di_z]) && (vi[di_z] < 39);
           if (show) {
-	      printf("%s:%d vol[%d,%d,%d,%d]:%g\n", __FILE__, __LINE__, 
+	      printf("%s:%d vol[%d,%d,%d,%d]:%g\n", __FILE__, __LINE__,
 	          vi[0], vi[1], vi[2], vi[3], voxel);
 	  }
 #endif
@@ -3360,7 +3360,7 @@ static int mincWrite(MRI *mri, const char *fname) {
 #if 0
           if (show) {
 	      double gotten = get_volume_voxel_value(minc_volume, vi[0], vi[1], vi[2], vi[3], 0);
-	      printf("%s:%d get returned vol[%d,%d,%d,%d]:%g\n", __FILE__, __LINE__, 
+	      printf("%s:%d get returned vol[%d,%d,%d,%d]:%g\n", __FILE__, __LINE__,
 	          vi[0], vi[1], vi[2], vi[3], gotten);
 	  }
 #endif

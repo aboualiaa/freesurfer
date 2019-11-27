@@ -2,7 +2,7 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
+#include <math.h>
 #include "min_heap.h"
 
 #define BIG_NO 100000000.0
@@ -103,10 +103,10 @@ void MARS_DT_Boundary(int *sv, int numVerts, int maxNeighbors, int *vertNbors,
 
 #if 0
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
-{      
+{
    double *final_cost;
    int *sv;
-   int *vertNbors; 
+   int *vertNbors;
    double *costNbors;
    int numVerts, maxNeighbors;
    int dims[1];
@@ -120,16 +120,16 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
    }
 
    sv = (int *) mxGetData(prhs[0]);
-   numVerts = * (int *) mxGetData(prhs[1]); 
-   maxNeighbors = * (int *) mxGetData(prhs[2]); 
+   numVerts = * (int *) mxGetData(prhs[1]);
+   maxNeighbors = * (int *) mxGetData(prhs[2]);
    vertNbors = (int *) mxGetData(prhs[3]);
    costNbors = (double *) mxGetData(prhs[4]); //unfortunately min_heap assumes double.
-   
+
    dims[0] = numVerts;
    plhs[0] = mxCreateNumericArray(1, dims, mxDOUBLE_CLASS, mxREAL);
    final_cost = (double *) mxGetPr(plhs[0]);
-   
-   MARS_DT_Boundary(sv, numVerts, maxNeighbors, vertNbors, costNbors, final_cost);    
+
+   MARS_DT_Boundary(sv, numVerts, maxNeighbors, vertNbors, costNbors, final_cost);
 }
 
 #endif

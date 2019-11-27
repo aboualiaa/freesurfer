@@ -33,7 +33,7 @@
   1. Add flag to turn use of weight on and off
 
 */
-#include <cmath>
+#include <math.h>
 #include <cstdio>
 #include <cstdlib>
 

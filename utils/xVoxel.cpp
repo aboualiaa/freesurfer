@@ -22,7 +22,7 @@
  */
 
 #include "xVoxel.h"
-#include <cmath>
+#include <math.h>
 #include <cstdlib>
 #include "xDebug.h"
 

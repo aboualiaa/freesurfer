@@ -1,7 +1,7 @@
 if(UNIX AND NOT APPLE)
-  set(CMAKE_Fortran_COMPILER "/usr/bin/gfortran-9")
+  set(CMAKE_Fortran_COMPILER "/usr/bin/gfortran")
 elseif(APPLE)
-  set(CMAKE_Fortran_COMPILER "usr/local/bin/gfortran-9")
+  set(CMAKE_Fortran_COMPILER "/usr/local/bin/gfortran")
 endif()
 # project info
 cmake_policy(SET CMP0048 NEW)
@@ -9,8 +9,8 @@ project(freesurfer VERSION 7.0.0)
 cmake_minimum_required(VERSION 3.10.2) # preparing for itk5
 enable_language(C CXX Fortran)
 
-# enable std c++17
-set(CMAKE_CXX_STANDARD 17)
+# enable std c++20
+set(CMAKE_CXX_STANDARD 20)
 
 if(APPLE)
   set(FS_PACKAGES_DIR "/Users/aboualiaa/Downloads/packages")
@@ -139,8 +139,7 @@ find_package(Boost COMPONENTS program_options unit_test_framework filesystem log
 
 # -------- itk --------
 find_package(ITK)
-#find_package(HDF5)
-#set(ITKV4_COMPATIBILITY ON CACHE BOOL "Preparing for itk5 migration" FORCE)
+
 # -------- ann --------
 # ANN is only used by mris_resample
 find_package(ANN)
@@ -156,28 +155,6 @@ find_package(MATLAB)
 # -------- hpx --------
 set(HPX_IGNORE_COMPILER_COMPATIBILITY ON)
 find_package(HPX)
-
-# -------- openMP --------
-#if(APPLE)
-#  if(CMAKE_C_COMPILER_ID MATCHES "Clang")
-#    set(OpenMP_C "${CMAKE_C_COMPILER}")
-#    set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp -lomp -L/usr/local/Cellar/libomp/9.0.0/lib -I/usr/local/Cellar/libomp/9.0.0/include")
-#    set(OpenMP_C_LIB_NAMES "libomp" "libgomp" "libiomp5")
-#    set(OpenMP_libomp_LIBRARY ${OpenMP_C_LIB_NAMES})
-#    set(OpenMP_libgomp_LIBRARY ${OpenMP_C_LIB_NAMES})
-#    set(OpenMP_libiomp5_LIBRARY ${OpenMP_C_LIB_NAMES})
-#  endif()
-#  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-#    set(OpenMP_CXX "${CMAKE_CXX_COMPILER}")
-#    set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp -lomp -L/usr/local/Cellar/libomp/9.0.0/lib -I/usr/local/Cellar/libomp/9.0.0/include")
-#    set(OpenMP_CXX_LIB_NAMES "libomp" "libgomp" "libiomp5")
-#    set(OpenMP_libomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
-#    set(OpenMP_libgomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
-#    set(OpenMP_libiomp5_LIBRARY ${OpenMP_CXX_LIB_NAMES})
-#  endif()
-#  set(CMAKE_EXE_LINKER_FLAGS "-Xpreprocessor -fopenmp -lomp -L/usr/local/Cellar/libomp/9.0.0/lib -I/usr/local/Cellar/libomp/9.0.0/include")
-#  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-#endif()
 
 # -------- openCV --------
 if(NOT APPLE)
@@ -253,18 +230,12 @@ endif()
 set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Suppressing benchmark's tests" FORCE)
 
 add_subdirectory(packages)
-#add_subdirectory(abseil-cpp)
-#add_subdirectory(googletest)
-#add_subdirectory(benchmark)
-#add_subdirectory(fmt)
-#add_subdirectory(GSL)
-#add_subdirectory(spdlog)
 
 # -------- openMP --------
 if(APPLE)
   if(CMAKE_C_COMPILER_ID MATCHES "Clang")
     set(OpenMP_C "${CMAKE_C_COMPILER}")
-    set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp -lomp -L/usr/local/Cellar/libomp/9.0.0/lib -I/usr/local/Cellar/libomp/9.0.0/include")
+    set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp -lomp -L/usr/local/opt/libomp/lib -I/usr/local/opt/libomp/include")
     set(OpenMP_C_LIB_NAMES "libomp" "libgomp" "libiomp5")
     set(OpenMP_libomp_LIBRARY ${OpenMP_C_LIB_NAMES})
     set(OpenMP_libgomp_LIBRARY ${OpenMP_C_LIB_NAMES})
@@ -272,13 +243,13 @@ if(APPLE)
   endif()
   if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(OpenMP_CXX "${CMAKE_CXX_COMPILER}")
-    set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp -lomp -L/usr/local/Cellar/libomp/9.0.0/lib -I/usr/local/Cellar/libomp/9.0.0/include -L/usr/local/Cellar/hdf5/1.10.5_1/lib -L/usr/local/Cellar/szip/2.1.1_1/lib")
+    set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp -lomp -L/usr/local/opt/libomp/lib -I/usr/local/opt/libomp/include -L/usr/local/opt/hdf5/lib -L/usr/local/opt/szip/lib")
     set(OpenMP_CXX_LIB_NAMES "libomp" "libgomp" "libiomp5")
     set(OpenMP_libomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
     set(OpenMP_libgomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
     set(OpenMP_libiomp5_LIBRARY ${OpenMP_CXX_LIB_NAMES})
   endif()
-  set(CMAKE_EXE_LINKER_FLAGS "-Xpreprocessor -fopenmp -lomp -L/usr/local/Cellar/libomp/9.0.0/lib -I/usr/local/Cellar/libomp/9.0.0/include")
+  set(CMAKE_EXE_LINKER_FLAGS "-Xpreprocessor -fopenmp -lomp -L/usr/local/opt/libomp/lib -I/usr/local/opt/libomp/include")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
 

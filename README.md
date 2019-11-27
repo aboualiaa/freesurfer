@@ -1,8 +1,10 @@
 <div align="center">
   <img src="https://surfer.nmr.mgh.harvard.edu/pub/data/tmp/brain.png">
   <p align="center">An open-source software suite for processing human brain MRI</p>
-  <img src="https://travis-ci.org/freesurfer/freesurfer.svg?branch=dev">
 </div>
+
+[![Build Status](https://travis-ci.com/aboualiaa/freesurfer.svg?branch=fs-modernize)](https://travis-ci.com/aboualiaa/freesurfer) 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/152dd9ab1aff497999ffb1872b9718f5)](https://www.codacy.com/manual/aboualiaa/freesurfer?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=aboualiaa/freesurfer&amp;utm_campaign=Badge_Grade)
 
 ## Introduction
 

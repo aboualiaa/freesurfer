@@ -65,7 +65,7 @@
 #include "proto.h"
 #endif
 
-#include <cmath>
+#include <math.h>
 
 #include "mosaic.h"
 

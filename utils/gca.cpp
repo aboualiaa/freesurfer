@@ -29,7 +29,7 @@
  */
 
 #include <cerrno>
-#include <cmath>
+#include <math.h>
 #include <cstdio>
 #include <cstdlib>
 
@@ -18242,22 +18242,22 @@ int GCAmapRenormalizeWithHistograms(GCA *gca, MRI *mri, TRANSFORM *transform,
 #if 0
   if (label_scales != plabel_scales) // copy to user-supplied space
   {
-    memmove(plabel_scales, label_scales, 
+    memmove(plabel_scales, label_scales,
             MAX_CMA_LABELS*sizeof(label_scales[0]));
   }
   if (label_offsets != plabel_offsets) // copy to user-supplied space
   {
-    memmove(plabel_offsets, label_offsets, 
+    memmove(plabel_offsets, label_offsets,
             MAX_CMA_LABELS*sizeof(label_offsets[0]));
   }
   if (label_peaks != plabel_peaks) // copy to user-supplied space
   {
-    memmove(plabel_peaks, label_peaks, 
+    memmove(plabel_peaks, label_peaks,
             MAX_CMA_LABELS*sizeof(label_peaks[0]));
   }
   if (computed != plabel_computed) // copy to user-supplied space
   {
-    memmove(plabel_computed, computed, 
+    memmove(plabel_computed, computed,
             MAX_CMA_LABELS*sizeof(computed[0]));
   }
 
@@ -20358,7 +20358,7 @@ int GCAcomputeRenormalizationWithAlignmentLongitudinal(
     MATRIX *m_eig ;
     VECTOR *v_dot, *v_obs, *v_obs_estimated, *v_dot_T ;
     int     r, c, c2, num_eig = NUM_EIG ;
-    
+
     m_eig = MatrixAlloc(NUM_INT_EIG_LABELS, num_eig, MATRIX_REAL) ;
     v_obs = RVectorAlloc(NUM_INT_EIG_LABELS, MATRIX_REAL) ;
     for (r = 0 ; r < NUM_INT_EIG_LABELS ; r++)
@@ -20370,7 +20370,7 @@ int GCAcomputeRenormalizationWithAlignmentLongitudinal(
 	*MATRIX_RELT(m_eig, r+1, c2) = intensity_eig_vectors[r][c] ;
       }
     }
-    
+
     for (r = 1 ; r <= NUM_INT_EIG_LABELS ; r++)
     {
       RVECTOR_ELT(v_obs, r) =
@@ -20397,7 +20397,7 @@ int GCAcomputeRenormalizationWithAlignmentLongitudinal(
       label_scales[l] *= (new_peak/old_peak) ;
       label_peaks[l] = new_peak ;
     }
-    
+
     MatrixFree(&m_eig) ;
     VectorFree(&v_dot) ;
     VectorFree(&v_obs) ;

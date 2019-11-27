@@ -40,7 +40,7 @@
 void *malloc(size_t size);
 #endif
 
-#include <cmath>
+#include <math.h>
 
 #include "mri.h"
 

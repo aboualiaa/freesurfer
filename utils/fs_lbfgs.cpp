@@ -21,7 +21,7 @@
 #endif
 
 #include "fs_vnl/fs_lbfgs.h"
-#include <cmath>
+#include <math.h>
 #include <iomanip> // for setw (replaces cout.form())
 #include <iostream>
 #include "diag.h"

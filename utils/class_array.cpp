@@ -26,7 +26,7 @@
   INCLUDE FILES
   -------------------------------------------------------*/
 #include "class_array.h"
-#include <cmath>
+#include <math.h>
 #include <cstdio>
 #include <cstdlib>
 #include "diag.h"
@@ -587,7 +587,7 @@ CA *CAread(char *fname) {
   int    width, height, depth, wsize, which_inputs, type, nscales ;
   char   c1_name[STRLEN], c2_name[STRLEN] ;
 
-  ca = CAalloc(width, height, depth, m_vox2index, type, which_inputs, 
+  ca = CAalloc(width, height, depth, m_vox2index, type, which_inputs,
             wsize, nscales, c1_name, c2_name, sigmas) ;
 #endif
   return (ca);

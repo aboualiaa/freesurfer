@@ -29,7 +29,8 @@
 // DON'T #include <mm_malloc.h> IT BREAKS icc AND IS NOT NEEDED
 #endif
 
-#include <cmath>
+#include <math.h>
+//#include <cmath>
 #include <cstdarg>
 
 #include <cstdio>

@@ -1,6 +1,7 @@
 project(freeview)
 
 if(BUILD_GUIS AND VTK_FOUND AND PETSC_FOUND AND TARGET vtkutils)
+  find_package(MPI REQUIRED)
 
   include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -24,7 +25,7 @@ if(BUILD_GUIS AND VTK_FOUND AND PETSC_FOUND AND TARGET vtkutils)
     Cursor2D.cpp
     Cursor3D.cpp
     CursorFactory.cpp
-    BrushProperty.cpp 
+    BrushProperty.cpp
     DialogAbout.cpp
     DialogCropVolume.cpp
     DialogCustomFill.cpp
@@ -193,10 +194,10 @@ if(BUILD_GUIS AND VTK_FOUND AND PETSC_FOUND AND TARGET vtkutils)
     WindowEditAnnotation.cpp
     DialogNewAnnotation.cpp
     freeview.qrc
-  )
+    )
 
   # build the QVTKWidget utilities
-#  if(${VTK_MAJOR_VERSION} LESS 8 AND NOT EXISTS ${VTK_INCLUDE_DIRS}/QVTKWidget.h)
+  #  if(${VTK_MAJOR_VERSION} LESS 8 AND NOT EXISTS ${VTK_INCLUDE_DIRS}/QVTKWidget.h)
   if(${VTK_MAJOR_VERSION} LESS 7)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/QVTK5)
     set(SOURCES ${SOURCES} QVTK5/QVTKWidget.cxx QVTK5/QVTKPaintEngine.cxx)
@@ -209,7 +210,7 @@ if(BUILD_GUIS AND VTK_FOUND AND PETSC_FOUND AND TARGET vtkutils)
       QVTK7/QVTKInteractorAdapter.cxx
       QVTK7/QVTKWidget.cxx
       QVTK7/QVTKPaintEngine.cxx
-    )
+      )
   endif()
 
   # fix for retina screens interacting with QVTKWidget
@@ -240,7 +241,8 @@ if(BUILD_GUIS AND VTK_FOUND AND PETSC_FOUND AND TARGET vtkutils)
     ${LAPACK_LIBRARIES}
     ${BLAS_LIBRARIES}
     ${GFORTRAN_LIBRARIES}
-  )
+    ${MPI_CXX_LIBRARIES}
+    )
 
   if(NOT APPLE)
     target_link_libraries(freeview glut ${X11_LIBRARIES})

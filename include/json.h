@@ -3384,7 +3384,7 @@ private:
 // #include <nlohmann/detail/input/parser.hpp>
 
 #include <cassert>    // assert
-#include <cmath>      // isfinite
+#include <math.h>     // isfinite
 #include <cstdint>    // uint8_t
 #include <functional> // function
 #include <string>     // string
@@ -5438,7 +5438,7 @@ private:
 #include <algorithm> // generate_n
 #include <array>     // array
 #include <cassert>   // assert
-#include <cmath>     // ldexp
+#include <math.h>    // ldexp
 #include <cstddef>   // size_t
 #include <cstdint>   // uint8_t, uint16_t, uint32_t, uint64_t
 #include <cstdio>    // snprintf
@@ -7830,7 +7830,7 @@ private:
 #include <cassert>     // assert
 #include <ciso646>     // and, or
 #include <clocale>     // localeconv, lconv
-#include <cmath>       // labs, isfinite, isnan, signbit
+#include <math.h>      // labs, isfinite, isnan, signbit
 #include <cstddef>     // size_t, ptrdiff_t
 #include <cstdint>     // uint8_t
 #include <cstdio>      // snprintf
@@ -7844,7 +7844,7 @@ private:
 
 #include <cassert> // assert
 #include <ciso646> // or, and, not
-#include <cmath>   // signbit, isfinite
+#include <math.h>  // signbit, isfinite
 #include <cstdint> // intN_t, uintN_t
 #include <cstring> // memcpy, memmove
 

@@ -38,7 +38,7 @@
 #include <math.h>
  */
 
-#include <cmath>
+#include <math.h>
 #include "macros.h"
 #include "tritri.h"
 

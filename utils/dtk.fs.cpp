@@ -29,7 +29,7 @@
   DTk http://trackvis.org/docs/?subsect=fileformat
   $Id: dtk.fs.c,v 1.5 2011/03/02 00:04:43 nicks Exp $
 */
-#include <cmath>
+#include <math.h>
 #include <cstdio>
 #include <cstdlib>
 

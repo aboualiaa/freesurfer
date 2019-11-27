@@ -31,7 +31,7 @@
  */
 
 #include <cfloat>
-#include <cmath>
+#include <math.h>
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>

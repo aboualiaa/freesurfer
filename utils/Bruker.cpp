@@ -142,7 +142,7 @@
 
 /* Martin Hoerrmann. */
 
-#include <cmath>
+#include <math.h>
 #include <cstdio>
 #include <cstdlib>
 #include <sys/stat.h>

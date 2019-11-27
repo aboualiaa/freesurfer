@@ -27,7 +27,7 @@
 /*-----------------------------------------------------
   INCLUDE FILES
   -------------------------------------------------------*/
-#include <cmath>
+#include <math.h>
 #include <cstdio>
 #include <cstdlib>
 double round(double x);

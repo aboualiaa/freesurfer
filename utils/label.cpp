@@ -26,7 +26,7 @@
 
 #include <cctype>
 #include <cerrno>
-#include <cmath>
+#include <math.h>
 #include <cstdio>
 #include <cstdlib>
 

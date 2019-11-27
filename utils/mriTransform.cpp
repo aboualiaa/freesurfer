@@ -21,10 +21,10 @@
  *
  */
 
-#include <cmath>
+#include <math.h>
 #include <cstdlib>
 
-#include <cmath>
+#include <math.h>
 #include <cstdlib>
 #include "macros.h"
 

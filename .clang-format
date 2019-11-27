@@ -8,13 +8,13 @@ AlignConsecutiveDeclarations: false
 AlignEscapedNewlines: Right
 AlignOperands:   true
 AlignTrailingComments: true
-#AllowAllArgumentsOnNextLine: true
-#AllowAllConstructorInitializersOnNextLine: true
+AllowAllArgumentsOnNextLine: true
+AllowAllConstructorInitializersOnNextLine: true
 AllowAllParametersOfDeclarationOnNextLine: true
 AllowShortBlocksOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: All
-#AllowShortLambdasOnASingleLine: All
+AllowShortLambdasOnASingleLine: All
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
 AlwaysBreakAfterDefinitionReturnType: None
@@ -24,7 +24,7 @@ AlwaysBreakTemplateDeclarations: MultiLine
 BinPackArguments: true
 BinPackParameters: true
 BraceWrapping:
-  #  AfterCaseLabel:  false
+  AfterCaseLabel:  false
   AfterClass:      false
   AfterControlStatement: false
   AfterEnum:       false
@@ -101,7 +101,7 @@ ReflowComments:  true
 SortIncludes:    false
 SortUsingDeclarations: true
 SpaceAfterCStyleCast: false
-#SpaceAfterLogicalNot: false
+SpaceAfterLogicalNot: false
 SpaceAfterTemplateKeyword: true
 SpaceBeforeAssignmentOperators: true
 SpaceBeforeCpp11BracedList: false

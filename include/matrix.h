@@ -203,7 +203,7 @@ MATRIX *MatrixReadFrom(FILE *fp, MATRIX *m);
 #define VECTOR_LOAD VECTOR3_LOAD
 #define V3_LOAD VECTOR3_LOAD
 
-#include <cmath>
+#include <math.h>
 #include "macros.h"
 
 #define XYZ_LOAD(v, x, y, z)                                                   \

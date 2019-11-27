@@ -26,7 +26,7 @@
 #include <sstream>
 #include <iostream>
 #include <string>
-#include <cmath>
+#include <math.h>
 
 // testing
 #include <cppunit/TestCase.h>

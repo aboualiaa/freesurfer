@@ -23,7 +23,7 @@
  */
 
 #include "flash.h"
-#include <cmath>
+#include <math.h>
 #include "diag.h"
 #include "error.h"
 #include "macros.h"

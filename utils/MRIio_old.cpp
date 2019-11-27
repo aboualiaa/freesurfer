@@ -26,7 +26,7 @@
 /* MRI I/O - routines for reading and writing large files fast */
 /* 2/1/91 - AD */
 
-#include <cmath>
+#include <math.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>

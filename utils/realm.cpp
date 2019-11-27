@@ -32,7 +32,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cfloat>
-#include <cmath>
+#include <math.h>
 #include <strings.h>
 
 #include "fnv_hash.h"

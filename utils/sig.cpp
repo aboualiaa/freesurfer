@@ -24,7 +24,7 @@
  */
 
 #include <cfloat>
-#include <cmath>
+#include <math.h>
 #include <cstdio>
 #include <cstdlib>
 

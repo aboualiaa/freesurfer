@@ -24,7 +24,7 @@
  */
 
 #include <cstdlib>
-#include <cmath>
+#include <math.h>
 
 #include "tukey.h"
 

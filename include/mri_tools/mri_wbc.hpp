@@ -5,8 +5,6 @@
 #ifndef MRI_TOOLS_MRI_WBC_HPP
 #define MRI_TOOLS_MRI_WBC_HPP
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Weverything"
 #include "absl/strings/str_join.h"
 #include "benchmark/benchmark.h"
 #include "fmt/printf.h"
@@ -19,8 +17,6 @@
 #include <hpx/include/iostreams.hpp> // hpx headers have to be included before boost headers
 
 #include <boost/program_options/parsers.hpp>
-
-#pragma GCC diagnostic pop
 
 #include "diag.h"
 #include "error.h"
@@ -47,7 +43,7 @@
 #include <unistd.h>
 #include <utility>
 
-#include "banned.h" // always include last, otherwise you'll break the stl :D
+//#include "banned.h" // always include last, otherwise you'll break the stl :D
 
 namespace po = boost::program_options;
 namespace fsys = std::filesystem; // sadly fs is already defined: freesurfer
