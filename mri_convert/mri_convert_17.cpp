@@ -55,45 +55,37 @@ struct CMDARGS {
 
 public:
   gsl::multi_span<char *> raw;
-  std::string fvol;
-  std::string volmask;
-  std::string flh;
-  std::string lhsurface;
-  std::string lhsurface2;
-  std::string lhlabel;
-  std::string lhmask;
-  std::string frh;
-  std::string rhsurface;
-  std::string rhsurface2;
-  std::string rhlabel;
-  std::string rhmask;
-  std::string outdir;
-  std::string volcon;
-  std::string lhcon;
-  std::string rhcon;
-  std::string volconS;
-  std::string lhconS;
-  std::string rhconS;
-  std::string volconL;
-  std::string lhconL;
-  std::string rhconL;
-  std::string volrhomean;
-  std::string lhrhomean;
-  std::string rhrhomean;
-  std::string matfile; // read: matrix file
-  std::vector<double> rholist;
-  double distthresh;
-  int nthreads;
-  bool DoMat; // do matrix??
-  bool ForceFail;
-  bool SaveTest;
-  bool DoTest;
-  bool debug = false;
-  bool DoDist;
+  std::vector<int> reorder_vals{};
+  bool reorder_flag{};
+  std::vector<int> reorder4_vals{};
+  bool reorder4_flag{};
+  bool debug{};
+  int outside_val{};
+  bool left_right_reverse{};
+  bool left_right_reverse_pix{};
+  bool left_right_mirror_flag{};
+  std::string left_right_mirror{};
+  std::string left_right_keep{};
+  bool left_right_swap_label{};
+  bool flip_cols{};
+  bool slice_reverse{};
+  bool in_stats_table{};
+  bool out_stats_table{};
+  float invert_contrast{};
+  std::string input_volume{};
+  std::string output_volume{};
+  bool conform_flag{};
+  int conf_keep_dc{};
+  bool conform_width_256_flag{};
+  bool delete_cmds{};
+  std::string new_transform_fname{};
+  bool DoNewTransformFname{};
+  bool sphinx_flag{};
 };
 
 struct ENV {
-  std::string vcid = "$Id: mri_wbc.c,v 1.8 2015/07/22 21:51:35 zkaufman Exp $";
+  std::string vcid =
+      "$Id: mri_convert.c,v 1.227 2017/02/16 19:15:42 greve Exp $";
 };
 
 #include <boost/program_options.hpp>
@@ -480,53 +472,7 @@ int main(int argc, char *argv[]) {
   argc -= nargs;
 
   for (i = 1; i < argc; i++) {
-    if (strcmp(argv[i], "-version2") == 0) {
-      exit(97);
-    } else if (strcmp(argv[i], "-r") == 0 ||
-               strcmp(argv[i], "--reorder") == 0) {
-      get_ints(argc, argv, &i, reorder_vals, 3);
-      reorder_flag = TRUE;
-    } else if (strcmp(argv[i], "-r4") == 0 ||
-               strcmp(argv[i], "--reorder4") == 0) {
-      get_ints(argc, argv, &i, reorder4_vals, 4);
-      reorder4_flag = TRUE;
-    } else if (strcmp(argv[i], "-oval") == 0 ||
-               strcmp(argv[i], "--outside_val") == 0) {
-      get_ints(argc, argv, &i, &outside_val, 1);
-      fmt::printf("setting outside val to %d\n", outside_val);
-    } else if (strcmp(argv[i], "--no-dwi") == 0) {
-      setenv("FS_LOAD_DWI", "0", 1);
-    } else if (strcmp(argv[i], "--debug") == 0) {
-      debug = 1;
-    } else if (strcmp(argv[i], "--left-right-reverse") == 0) {
-      LeftRightReverse = 1;
-    } else if (strcmp(argv[i], "--left-right-reverse-pix") == 0) {
-      LeftRightReversePix = 1;
-    } else if (strcmp(argv[i], "--left-right-mirror") == 0) {
-      LeftRightMirrorFlag = 1;
-      get_string(argc, argv, &i, LeftRightMirrorHemi);
-      if ((strcmp(LeftRightMirrorHemi, "lh") != 0) &&
-          (strcmp(LeftRightMirrorHemi, "rh") != 0)) {
-        fmt::printf(
-            "ERROR: pass either 'lh' or 'rh' with --left-right-mirror!\n");
-        exit(1);
-      }
-    } else if (strcmp(argv[i], "--left-right-keep") == 0) {
-      LeftRightKeepFlag = 1;
-      get_string(argc, argv, &i, LeftRightMirrorHemi);
-      if ((strcmp(LeftRightMirrorHemi, "lh") != 0) &&
-          (strcmp(LeftRightMirrorHemi, "rh") != 0)) {
-        fmt::printf(
-            "ERROR: pass either 'lh' or 'rh' with --left-right-keep!\n");
-        exit(1);
-      }
-    } else if (strcmp(argv[i], "--left-right-swap-label") == 0) {
-      LeftRightSwapLabel = 1;
-    } else if (strcmp(argv[i], "--flip-cols") == 0) {
-      FlipCols = 1;
-    } else if (strcmp(argv[i], "--slice-reverse") == 0) {
-      SliceReverse = 1;
-    } else if (strcmp(argv[i], "--ascii") == 0) {
+    if (strcmp(argv[i], "--ascii") == 0) {
       ascii_flag = 1;
       force_out_type_flag = TRUE;
     } else if (strcmp(argv[i], "--ascii+crsf") == 0) {
@@ -535,47 +481,6 @@ int main(int argc, char *argv[]) {
     } else if (strcmp(argv[i], "--ascii-fcol") == 0) {
       ascii_flag = 3;
       force_out_type_flag = TRUE;
-    } else if (strcmp(argv[i], "--in_stats_table") == 0) {
-      // Input is a stat table
-      InStatTableFlag = 1;
-    } else if (strcmp(argv[i], "--out_stats_table") == 0) {
-      // Input is a stat table
-      OutStatTableFlag = 1;
-    } else if (strcmp(argv[i], "--invert_contrast") == 0) {
-      get_floats(argc, argv, &i, &invert_val, 1);
-    } else if (strcmp(argv[i], "-i") == 0 ||
-               strcmp(argv[i], "--input_volume") == 0) {
-      get_string(argc, argv, &i, in_name.data());
-    } else if (strcmp(argv[i], "-o") == 0 ||
-               strcmp(argv[i], "--output_volume") == 0) {
-      get_string(argc, argv, &i, out_name.data());
-    } else if (strcmp(argv[i], "-c") == 0 ||
-               strcmp(argv[i], "--conform") == 0) {
-      conform_flag = TRUE;
-    } else if (strcmp(argv[i], "--conform-dc") == 0) {
-      conform_flag = TRUE;
-      ConfKeepDC = 1;
-    } else if (strcmp(argv[i], "--cw256") == 0) {
-      conform_flag = TRUE;
-      conform_width_256_flag = TRUE;
-    } else if (strcmp(argv[i], "--delete-cmds") == 0) {
-      DeleteCMDs = 1;
-    } else if (strcmp(argv[i], "--new-transform-fname") == 0) {
-      get_string(argc, argv, &i, NewTransformFname);
-      DoNewTransformFname = 1;
-    } else if (strcmp(argv[i], "--sphinx") == 0) {
-      sphinx_flag = TRUE;
-    } else if (strcmp(argv[i], "--rescale-dicom") == 0) {
-      // DO  apply rescale intercept and slope based on (0028,1052) (0028,1053).
-      setenv("FS_RESCALE_DICOM", "1", 1);
-    } else if (strcmp(argv[i], "--no-rescale-dicom") == 0) {
-      // Do NOT apply rescale intercept and slope based on (0028,1052)
-      // (0028,1053).
-      setenv("FS_RESCALE_DICOM", "0", 1);
-    } else if (strcmp(argv[i], "--bvec-scanner") == 0) {
-      // force bvecs to be in scanner space. only applies when
-      // reading dicoms
-      setenv("FS_DESIRED_BVEC_SPACE", "1", 1);
     } else if (strcmp(argv[i], "--bvec-voxel") == 0) {
       // force bvecs to be in voxel space. only applies when
       // reading dicoms.
@@ -3307,9 +3212,18 @@ static bool good_cmdline_args(CMDARGS *cmdargs, ENV *env) {
     auto parsed_opts =
         po::command_line_parser(ac, av).options(desc).style(cl_style).run();
     po::store(parsed_opts, vm);
+
+    po::conflicting_options(vm, "reorder4", "r4"); // may be specified only once
+    po::conflicting_options(vm, "outside_val",
+                            "oval"); // may be specified only once
+
   } catch (std::exception const &e) {
     spdlog::get("stderr")->critical(e.what());
     return false;
+  }
+
+  if (vm.count("version2") != 0U) {
+    exit(97);
   }
 
   if (vm.count("help") != 0U) {
@@ -3335,6 +3249,91 @@ static bool good_cmdline_args(CMDARGS *cmdargs, ENV *env) {
   } else {
     spdlog::set_level(spdlog::level::warn);
   }
+
+  if (vm.count("reorder_vals")) {
+    auto vals = vm["reorder_vals"].as<std::vector<int>>();
+    if (vals.size() != 3) {
+      spdlog::get("stderr")->critical(
+          "Incorrect number of values, reorder_vals expects 3 values");
+      return false;
+    } else {
+      cmdargs->reorder_flag = true;
+    }
+  }
+
+  if (vm.count("reorder4_vals")) {
+    auto vals = vm["reorder4_vals"].as<std::vector<int>>();
+    if (vals.size() != 4) {
+      spdlog::get("stderr")->critical(
+          "Incorrect number of values, reorder4_vals expects 4 values");
+      return false;
+    } else {
+      cmdargs->reorder4_flag = true;
+    }
+  } else if (vm.count("r4")) {
+    auto vals = vm["r4"].as<std::vector<int>>();
+    if (vals.size() != 4) {
+      spdlog::get("stderr")->critical(
+          "Incorrect number of values, r4 expects 4 values");
+      return false;
+    } else {
+      cmdargs->reorder4_flag = true;
+    }
+  }
+
+  if (vm.count("outside_val") || vm.count("oval")) {
+    fmt::printf("setting outside val to %d\n", cmdargs->outside_val);
+  }
+
+  if (vm.count("no-dwi")) {
+    setenv("FS_LOAD_DWI", "0", 1);
+  }
+
+  if (vm.count("left-right-mirror")) {
+    if ((cmdargs->left_right_mirror != "lh") &&
+        (cmdargs->left_right_mirror != "rh")) {
+      fmt::printf(
+          "ERROR: pass either 'lh' or 'rh' with --left-right-mirror!\n");
+      exit(1);
+    }
+  }
+
+  if (vm.count("left-right-keep")) {
+    if ((cmdargs->left_right_keep != "lh") &&
+        (cmdargs->left_right_keep != "rh")) {
+      fmt::printf("ERROR: pass either 'lh' or 'rh' with --left-right-keep!\n");
+      exit(1);
+    }
+  }
+
+  if (vm.count("conform-dc")) {
+    cmdargs->conform_flag = true;
+  }
+
+  if (vm.count("cw256")) {
+    cmdargs->conform_flag = true;
+  }
+
+  if (vm.count("new-transform-fname")) {
+    cmdargs->DoNewTransformFname = true;
+  }
+
+  if (vm.count("rescale-dicom")) {
+    // DO  apply rescale intercept and slope based on (0028,1052) (0028,1053).
+    setenv("FS_RESCALE_DICOM", "1", 1);
+  }
+
+  if (vm.count("no-rescale-dicom")) {
+    // Do NOT apply rescale intercept and slope based on (0028,1052)
+    // (0028,1053).
+    setenv("FS_RESCALE_DICOM", "0", 1);
+  }
+
+  if (vm.count("bvec-scanner")) {
+    // force bvecs to be in scanner space. only applies when
+    // reading dicoms
+    setenv("FS_DESIRED_BVEC_SPACE", "1", 1);
+  }
   return false;
 }
 
@@ -3348,7 +3347,116 @@ void initArgDesc(podesc *desc, CMDARGS *cmdargs) {
       ("version,v",                                                 /**/
        "print out version and exit")                                /**/
                                                                     /**/
-      ;
+      ("version2",                                                  /**/
+       "just exits")                                                /**/
+                                                                    /**/
+      ("debug",                                                     /**/
+       po::bool_switch(&cmdargs->debug),                            /**/
+       "turn on debugging")                                         /**/
+                                                                    /**/
+      ("reorder, r",                                                /**/
+       po::value<std::vector<int>>(&cmdargs->reorder_vals),         /**/
+       "todo")                                                      /**/
+                                                                    /**/
+      ("reorder4",                                                  /**/
+       po::value<std::vector<int>>(&cmdargs->reorder4_vals),        /**/
+       "todo")                                                      /**/
+                                                                    /**/
+      ("r4",                                                        /**/
+       po::value<std::vector<int>>(&cmdargs->reorder4_vals),        /**/
+       "todo")                                                      /**/
+                                                                    /**/
+      ("outside_val",                                               /**/
+       po::value<int>(&cmdargs->outside_val),                       /**/
+       "todo")                                                      /**/
+                                                                    /**/
+      ("oval",                                                      /**/
+       po::value<int>(&cmdargs->outside_val),                       /**/
+       "todo")                                                      /**/
+                                                                    /**/
+      ("no-dwi",                                                    /**/
+       "set FS_LOAD_DWI to 0")                                      /**/
+                                                                    /**/
+      ("left-right-reverse",                                        /**/
+       po::bool_switch(&cmdargs->left_right_reverse),               /**/
+       "left right reverse")                                        /**/
+                                                                    /**/
+      ("left-right-reverse-pix",                                    /**/
+       po::bool_switch(&cmdargs->left_right_reverse_pix),           /**/
+       "left-right-reverse-pix")                                    /**/
+                                                                    /**/
+      ("left-right-mirror",                                         /**/
+       po::value<std::string>(&cmdargs->left_right_mirror),         /**/
+       "left-right-mirror")                                         /**/
+                                                                    /**/
+      ("left-right-keep",                                           /**/
+       po::value<std::string>(&cmdargs->left_right_keep),           /**/
+       "left-right-keep")                                           /**/
+                                                                    /**/
+      ("left-right-swap-label",                                     /**/
+       po::bool_switch(&cmdargs->left_right_swap_label),            /**/
+       "left-right-swap-label")                                     /**/
+                                                                    /**/
+      ("flip-cols",                                                 /**/
+       po::bool_switch(&cmdargs->flip_cols),                        /**/
+       "flip-cols")                                                 /**/
+                                                                    /**/
+      ("slice-reverse",                                             /**/
+       po::bool_switch(&cmdargs->slice_reverse),                    /**/
+       "slice-reverse")                                             /**/
+                                                                    /**/
+      ("in_stats_table",                                            /**/
+       po::bool_switch(&cmdargs->in_stats_table),                   /**/
+       "in_stats_table")                                            /**/
+                                                                    /**/
+      ("out_stats_table",                                           /**/
+       po::bool_switch(&cmdargs->out_stats_table),                  /**/
+       "out_stats_table")                                           /**/
+                                                                    /**/
+      ("invert_contrast",                                           /**/
+       po::value<float>(&cmdargs->invert_contrast),                 /**/
+       "invert_contrast")                                           /**/
+                                                                    /**/
+      ("input_volume, i",                                           /**/
+       po::value<std::string>(&cmdargs->input_volume),              /**/
+       "input_volume")                                              /**/
+                                                                    /**/
+      ("output_volume, o",                                          /**/
+       po::value<std::string>(&cmdargs->output_volume),             /**/
+       "output_volume")                                             /**/
+                                                                    /**/
+      ("conform, c",                                                /**/
+       po::bool_switch(&cmdargs->conform_flag),                     /**/
+       "conform")                                                   /**/
+                                                                    /**/
+      ("conform-dc",                                                /**/
+       po::value<int>(&cmdargs->conf_keep_dc),                      /**/
+       "conform-dc")                                                /**/
+                                                                    /**/
+      ("cw256",                                                     /**/
+       po::bool_switch(&cmdargs->conform_width_256_flag),           /**/
+       "cw256")                                                     /**/
+                                                                    /**/
+      ("delete-cmds",                                               /**/
+       po::bool_switch(&cmdargs->delete_cmds),                      /**/
+       "delete-cmds")                                               /**/
+                                                                    /**/
+      ("new-transform-fname",                                       /**/
+       po::value<std::string>(&cmdargs->new_transform_fname),       /**/
+       "new-transform-fname")                                       /**/
+                                                                    /**/
+      ("sphinx",                                                    /**/
+       po::bool_switch(&cmdargs->sphinx_flag),                      /**/
+       "sphinx")                                                    /**/
+                                                                    /**/
+      ("rescale-dicom",                                             /**/
+       "rescale-dicom")                                             /**/
+                                                                    /**/
+      ("no-rescale-dicom",                                          /**/
+       "no-rescale-dicom")                                          /**/
+                                                                    /**/
+      ("bvec-scanner",                                              /**/
+       "bvec-scanner");                                             /**/
 }
 
 /* EOF */
