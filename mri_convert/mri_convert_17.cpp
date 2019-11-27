@@ -50,6 +50,126 @@
 #include "utils.h"
 #include "version.h"
 
+struct CMDARGS {
+  CMDARGS(int argc, char *argv[]) : raw(argv, argc){}; // NOLINT
+
+public:
+  gsl::multi_span<char *> raw;
+  std::string fvol;
+  std::string volmask;
+  std::string flh;
+  std::string lhsurface;
+  std::string lhsurface2;
+  std::string lhlabel;
+  std::string lhmask;
+  std::string frh;
+  std::string rhsurface;
+  std::string rhsurface2;
+  std::string rhlabel;
+  std::string rhmask;
+  std::string outdir;
+  std::string volcon;
+  std::string lhcon;
+  std::string rhcon;
+  std::string volconS;
+  std::string lhconS;
+  std::string rhconS;
+  std::string volconL;
+  std::string lhconL;
+  std::string rhconL;
+  std::string volrhomean;
+  std::string lhrhomean;
+  std::string rhrhomean;
+  std::string matfile; // read: matrix file
+  std::vector<double> rholist;
+  double distthresh;
+  int nthreads;
+  bool DoMat; // do matrix??
+  bool ForceFail;
+  bool SaveTest;
+  bool DoTest;
+  bool debug = false;
+  bool DoDist;
+};
+
+struct ENV {
+  std::string vcid = "$Id: mri_wbc.c,v 1.8 2015/07/22 21:51:35 zkaufman Exp $";
+};
+
+#include <boost/program_options.hpp>
+#include <boost/program_options/parsers.hpp>
+#include "spdlog/sinks/stdout_color_sinks.h"
+#include "spdlog/spdlog.h"
+
+namespace po = boost::program_options;
+namespace fsys = std::filesystem; // sadly fs is already defined: freesurfer
+using podesc = po::options_description;
+using povm = po::variables_map;
+namespace pocl = boost::program_options::command_line_style;
+
+auto cl_style =
+    pocl::allow_short | pocl::short_allow_adjacent | pocl::short_allow_next |
+    pocl::allow_long | pocl::long_allow_adjacent | pocl::long_allow_next |
+    pocl::allow_sticky | pocl::allow_dash_for_short | pocl::allow_long_disguise;
+namespace boost::program_options {
+
+///
+/// \param vm
+/// \param for_what
+/// \param required_option
+inline void option_dependency(povm const &vm, char const *for_what,
+                              char const *required_option) {
+  if ((vm.count(for_what) != 0U) && !vm[for_what].defaulted()) {
+    if (vm.count(required_option) == 0 || vm[required_option].defaulted()) {
+      throw std::logic_error(std::string("Option '") + for_what +
+                             "' requires option '" + required_option + "'.");
+    }
+  }
+}
+
+///
+/// \param vm
+/// \param opt1
+/// \param opt2
+inline void conflicting_options(povm const &vm, std::string const &opt1,
+                                std::string const &opt2) {
+  if ((vm.count(opt1) != 0U) && !vm[opt1].defaulted() &&
+      (vm.count(opt2) != 0U) && !vm[opt2].defaulted()) {
+    throw std::logic_error(std::string("Conflicting options '") + opt1 +
+                           "' and '" + opt2 + "'.");
+  }
+}
+} // namespace boost::program_options
+
+/// \brief does the housekeeping, use this to parse command lines,
+///  do sanity and inconsistency checks, read files etc. After that
+///  just start directly with your porgram logic
+/// \param cmdargs struct to hold values of parsed args
+/// \param env
+/// \return true if all logic is ok, false otherwise
+static bool good_cmdline_args(CMDARGS *cmdargs, ENV *env);
+
+/// \brief initialize options description and save values in cmdargs
+/// \param desc
+/// \param cmdargs
+static void initArgDesc(podesc *desc, CMDARGS *cmdargs);
+
+///
+/// \param desc
+/// \param env
+inline static void print_usage(podesc const &desc, ENV *env) {
+  std::cout << desc << "\n" << env->vcid << std::endl;
+}
+
+///
+/// \param desc
+/// \param env
+inline static void print_help(podesc const &desc, ENV *env) {
+  print_usage(desc, env);
+  // TODO(aboualiaa): add tests and remove
+  spdlog::get("stderr")->critical("this program is not yet tested!");
+}
+
 /* ----- determines tolerance of non-orthogonal basis vectors ----- */
 constexpr auto CLOSE_ENOUGH{5e-3};
 
@@ -76,47 +196,54 @@ int DoNewTransformFname = 0;
 
 /*-------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
+
+  auto env = ENV();
+  auto cmdargs = CMDARGS(argc, argv);
+  if (!good_cmdline_args(&cmdargs, &env)) {
+    return 1;
+  }
+
   int outside_val = 0;
   int nargs = 0;
-  MRI *mri;
-  MRI *mri2;
+  MRI *mri{nullptr};
+  MRI *mri2{nullptr};
   MRI *mri_template;
   MRI *mri_in_like;
   int i;
   int err = 0;
   int reorder_vals[3];
-  float invert_val;
-  int in_info_flag;
-  int out_info_flag;
-  int template_info_flag;
-  int voxel_size_flag;
-  int nochange_flag;
-  int conform_flag;
-  int conform_min; // conform to the smallest dimension
+  float invert_val{1.0};
+  bool in_info_flag{false};
+  bool out_info_flag{false};
+  bool template_info_flag{false};
+  bool voxel_size_flag{false};
+  bool nochange_flag{false};
+  bool conform_flag{false};
+  bool conform_min{false}; // conform to the smallest dimension
   int conform_width;
-  int conform_width_256_flag;
+  bool conform_width_256_flag{false};
   int ConfKeepDC = 0;
-  int parse_only_flag;
-  int reorder_flag;
+  bool parse_only_flag{false};
+  bool reorder_flag{false};
   int reorder4_vals[4];
   int reorder4_flag;
-  int in_stats_flag;
-  int out_stats_flag;
-  int read_only_flag;
-  int no_write_flag;
-  char in_name[STRLEN];
-  char out_name[STRLEN];
+  bool in_stats_flag{false};
+  bool out_stats_flag{false};
+  bool read_only_flag{false};
+  bool no_write_flag{false};
+  std::array<char, STRLEN> in_name{};
+  std::array<char, STRLEN> out_name{};
   int in_volume_type;
-  int out_volume_type;
+  int out_volume_type{MRI_VOLUME_TYPE_UNKNOWN};
   char resample_type[STRLEN];
-  int resample_type_val;
-  int in_i_size_flag;
-  int in_j_size_flag;
-  int in_k_size_flag;
+  int resample_type_val{SAMPLE_TRILINEAR};
+  bool in_i_size_flag{false};
+  bool in_j_size_flag{false};
+  bool in_k_size_flag{false};
   int crop_flag = FALSE;
-  int out_i_size_flag;
-  int out_j_size_flag;
-  int out_k_size_flag;
+  bool out_i_size_flag{false};
+  bool out_j_size_flag{false};
+  bool out_k_size_flag{false};
   float in_i_size;
   float in_j_size;
   float in_k_size;
@@ -133,12 +260,12 @@ int main(int argc, char *argv[]) {
   float out_j_directions[3];
   float out_k_directions[3];
   float voxel_size[3];
-  int in_i_direction_flag;
-  int in_j_direction_flag;
-  int in_k_direction_flag;
-  int out_i_direction_flag;
-  int out_j_direction_flag;
-  int out_k_direction_flag;
+  bool in_i_direction_flag{false};
+  bool in_j_direction_flag{false};
+  bool in_k_direction_flag{false};
+  bool out_i_direction_flag{false};
+  bool out_j_direction_flag{false};
+  bool out_k_direction_flag{false};
   int in_orientation_flag = FALSE;
   char in_orientation_string[STRLEN];
   int out_orientation_flag = FALSE;
@@ -164,87 +291,87 @@ int main(int argc, char *argv[]) {
   float in_center[3];
   float out_center[3];
   float delta_in_center[3];
-  int in_center_flag;
-  int out_center_flag;
-  int delta_in_center_flag;
-  int out_data_type;
+  bool in_center_flag{false};
+  bool out_center_flag{false};
+  bool delta_in_center_flag{false};
+  int out_data_type{-1};
   char out_data_type_string[STRLEN];
   int out_n_i;
   int out_n_j;
   int out_n_k;
-  int out_n_i_flag;
-  int out_n_j_flag;
-  int out_n_k_flag;
+  bool out_n_i_flag{false};
+  bool out_n_j_flag{false};
+  bool out_n_k_flag{false};
   float fov_x;
   float fov_y;
   float fov_z;
-  int force_in_type_flag;
-  int force_out_type_flag;
-  int forced_in_type;
-  int forced_out_type;
-  char in_type_string[STRLEN];
+  bool force_in_type_flag{false};
+  bool force_out_type_flag{false};
+  int forced_in_type{MRI_VOLUME_TYPE_UNKNOWN};
+  int forced_out_type{MRI_VOLUME_TYPE_UNKNOWN};
+  std::array<char, STRLEN> in_type_string{};
   char out_type_string[STRLEN];
-  char subject_name[STRLEN];
-  int force_template_type_flag;
-  int forced_template_type;
+  std::array<char, STRLEN> subject_name{};
+  bool force_template_type_flag{false};
+  int forced_template_type{MRI_VOLUME_TYPE_UNKNOWN};
   char template_type_string[STRLEN];
   char reslice_like_name[STRLEN];
-  int reslice_like_flag;
+  bool reslice_like_flag{false};
   int nframes = 0;
-  int frame_flag;
-  int mid_frame_flag;
+  bool frame_flag{false};
+  bool mid_frame_flag{false};
   int frames[2000];
   char *errormsg;
-  int subsample_flag;
+  bool subsample_flag{false};
   int SubSampStart;
   int SubSampDelta;
   int SubSampEnd;
-  int downsample2_flag;
-  int downsample_flag;
+  bool downsample2_flag{false};
+  bool downsample_flag{false};
   float downsample_factor[3];
   char in_name_only[STRLEN];
   char transform_fname[STRLEN];
-  int transform_flag;
-  int invert_transform_flag;
+  bool transform_flag{false};
+  bool invert_transform_flag{false};
   LTA *lta_transform = nullptr;
   MRI *mri_transformed = nullptr;
   MRI *mritmp = nullptr;
   int transform_type = -1;
   MATRIX *inverse_transform_matrix;
-  int smooth_parcellation_flag;
+  bool smooth_parcellation_flag{false};
   int smooth_parcellation_count;
-  int in_like_flag;
+  bool in_like_flag{false};
   char in_like_name[STRLEN];
   char out_like_name[STRLEN];
   int out_like_flag = FALSE;
   int in_n_i;
   int in_n_j;
   int in_n_k;
-  int in_n_i_flag;
-  int in_n_j_flag;
-  int in_n_k_flag;
-  int fill_parcellation_flag;
+  bool in_n_i_flag{false};
+  bool in_n_j_flag{false};
+  bool in_n_k_flag{false};
+  bool fill_parcellation_flag{false};
   int read_parcellation_volume_flag;
-  int zero_outlines_flag;
+  bool zero_outlines_flag{false};
   int erode_seg_flag = FALSE;
   int n_erode_seg;
   int dil_seg_flag = FALSE;
   int n_dil_seg;
-  char dil_seg_mask[STRLEN];
+  std::array<char, STRLEN> dil_seg_mask{};
   int read_otl_flags;
-  int color_file_flag;
+  bool color_file_flag{false};
   char color_file_name[STRLEN];
-  int no_scale_flag;
+  int no_scale_flag{false}; // TODO: convert to bool
   int temp_type;
-  int roi_flag;
+  bool roi_flag{false};
   FILE *fptmp;
   int j;
-  int translate_labels_flag;
+  bool translate_labels_flag{false};
   int force_ras_good = FALSE;
-  char gdf_image_stem[STRLEN];
-  int in_matrix_flag;
-  int out_matrix_flag;
-  float conform_size;
+  std::array<char, STRLEN> gdf_image_stem{};
+  bool in_matrix_flag{false};
+  bool out_matrix_flag{false};
+  float conform_size{1.0};
   int zero_ge_z_offset_flag = FALSE; // E/
   int nskip = 0;                     // number of frames to skip from start
   int ndrop = 0;                     // number of frames to skip from end
@@ -253,13 +380,13 @@ int main(int argc, char *argv[]) {
   int DevXFM = 0;
   char devxfm_subject[STRLEN];
   MATRIX *T;
-  float scale_factor;
-  float out_scale_factor;
-  float rescale_factor;
+  float scale_factor{1};
+  float out_scale_factor{1};
+  float rescale_factor{1};
   int nthframe = -1;
   int reduce = 0;
-  float fwhm;
-  float gstd;
+  float fwhm = -1;
+  float gstd = -1;
   char cmdline[STRLEN];
   int sphinx_flag = FALSE;
   int LeftRightReverse = FALSE;
@@ -288,8 +415,8 @@ int main(int argc, char *argv[]) {
   int r2 = 0;
   int s1 = 0;
   int s2 = 0;
-  int InStatTableFlag = 0;
-  int OutStatTableFlag = 0;
+  bool InStatTableFlag{false};
+  bool OutStatTableFlag{false};
   int UpsampleFlag = 0;
   int UpsampleFactor = 0;
 
@@ -326,12 +453,6 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  /* ----- keep the compiler quiet ----- */
-  mri2 = nullptr;
-  forced_in_type = forced_out_type = forced_template_type =
-      MRI_VOLUME_TYPE_UNKNOWN;
-  invert_transform_flag = FALSE;
-
   /* ----- get the program name ----- */
   Progname = strrchr(argv[0], '/');
   Progname = (Progname == nullptr ? argv[0] : Progname + 1);
@@ -346,69 +467,6 @@ int main(int argc, char *argv[]) {
   }
 
   /* ----- initialize values ----- */
-  scale_factor = 1;
-  rescale_factor = 1;
-  out_scale_factor = 1;
-  in_name[0] = '\0';
-  out_name[0] = '\0';
-  invert_val = -1.0;
-  in_info_flag = FALSE;
-  out_info_flag = FALSE;
-  voxel_size_flag = FALSE;
-  conform_flag = FALSE;
-  conform_width_256_flag = FALSE;
-  nochange_flag = FALSE;
-  parse_only_flag = FALSE;
-  reorder_flag = FALSE;
-  reorder4_flag = FALSE;
-  in_stats_flag = FALSE;
-  out_stats_flag = FALSE;
-  read_only_flag = FALSE;
-  no_write_flag = FALSE;
-  resample_type_val = SAMPLE_TRILINEAR;
-  in_i_size_flag = in_j_size_flag = in_k_size_flag = FALSE;
-  out_i_size_flag = out_j_size_flag = out_k_size_flag = FALSE;
-  in_i_direction_flag = in_j_direction_flag = in_k_direction_flag = FALSE;
-  out_i_direction_flag = out_j_direction_flag = out_k_direction_flag = FALSE;
-  in_center_flag = FALSE;
-  delta_in_center_flag = FALSE;
-  out_center_flag = FALSE;
-  out_data_type = -1;
-  out_n_i_flag = out_n_j_flag = out_n_k_flag = FALSE;
-  template_info_flag = FALSE;
-  out_volume_type = MRI_VOLUME_TYPE_UNKNOWN;
-  force_in_type_flag = force_out_type_flag = force_template_type_flag = FALSE;
-  subject_name[0] = '\0';
-  dil_seg_mask[0] = '\0';
-  reslice_like_flag = FALSE;
-  frame_flag = FALSE;
-  mid_frame_flag = FALSE;
-  subsample_flag = FALSE;
-  downsample2_flag = FALSE;
-  downsample_flag = FALSE;
-
-  transform_flag = FALSE;
-  smooth_parcellation_flag = FALSE;
-  in_like_flag = FALSE;
-  in_n_i_flag = in_n_j_flag = in_n_k_flag = FALSE;
-  fill_parcellation_flag = FALSE;
-  zero_outlines_flag = FALSE;
-  color_file_flag = FALSE;
-  no_scale_flag = 0;
-  roi_flag = FALSE;
-  translate_labels_flag = TRUE;
-  gdf_image_stem[0] = '\0';
-  in_matrix_flag = FALSE;
-  out_matrix_flag = FALSE;
-  conform_min = FALSE;
-  conform_size = 1.0;
-  nskip = 0;
-  ndrop = 0;
-  fwhm = -1;
-  gstd = -1;
-  in_type_string[0] = 0;
-  InStatTableFlag = 0;
-  OutStatTableFlag = 0;
   STAT_TABLE *StatTable = nullptr;
   STAT_TABLE *OutStatTable = nullptr;
 
@@ -487,10 +545,10 @@ int main(int argc, char *argv[]) {
       get_floats(argc, argv, &i, &invert_val, 1);
     } else if (strcmp(argv[i], "-i") == 0 ||
                strcmp(argv[i], "--input_volume") == 0) {
-      get_string(argc, argv, &i, in_name);
+      get_string(argc, argv, &i, in_name.data());
     } else if (strcmp(argv[i], "-o") == 0 ||
                strcmp(argv[i], "--output_volume") == 0) {
-      get_string(argc, argv, &i, out_name);
+      get_string(argc, argv, &i, out_name.data());
     } else if (strcmp(argv[i], "-c") == 0 ||
                strcmp(argv[i], "--conform") == 0) {
       conform_flag = TRUE;
@@ -953,8 +1011,8 @@ int main(int argc, char *argv[]) {
       }
     } else if (strcmp(argv[i], "-it") == 0 ||
                strcmp(argv[i], "--in_type") == 0) {
-      get_string(argc, argv, &i, in_type_string);
-      forced_in_type = string_to_type(in_type_string);
+      get_string(argc, argv, &i, in_type_string.data());
+      forced_in_type = string_to_type(in_type_string.data());
       force_in_type_flag = TRUE;
     } else if (strcmp(argv[i], "-dicomread2") == 0) {
       UseDICOMRead2 = 1;
@@ -973,11 +1031,11 @@ int main(int argc, char *argv[]) {
       force_template_type_flag = TRUE;
     } else if (strcmp(argv[i], "-sn") == 0 ||
                strcmp(argv[i], "--subject_name") == 0) {
-      get_string(argc, argv, &i, subject_name);
+      get_string(argc, argv, &i, subject_name.data());
     } else if (strcmp(argv[i], "-gis") == 0 ||
                strcmp(argv[i], "--gdf_image_stem") == 0) {
-      get_string(argc, argv, &i, gdf_image_stem);
-      if (strlen(gdf_image_stem) == 0) {
+      get_string(argc, argv, &i, gdf_image_stem.data());
+      if (strlen(gdf_image_stem.data()) == 0) {
         fmt::fprintf(stderr, "\n%s: zero length GDF image stem given\n",
                      Progname);
         usage_message(stdout);
@@ -1008,7 +1066,7 @@ int main(int argc, char *argv[]) {
       get_ints(argc, argv, &i, &n_dil_seg, 1);
       dil_seg_flag = TRUE;
     } else if (strcmp(argv[i], "--dil-seg-mask") == 0) {
-      get_string(argc, argv, &i, dil_seg_mask);
+      get_string(argc, argv, &i, dil_seg_mask.data());
     } else if (strcmp(argv[i], "--cutends") == 0) {
       get_ints(argc, argv, &i, &ncutends, 1);
       cutends_flag = TRUE;
@@ -1216,9 +1274,9 @@ int main(int argc, char *argv[]) {
         exit(1);
       } else {
         if (in_name[0] == '\0') {
-          strcpy(in_name, argv[i]);
+          strcpy(in_name.data(), argv[i]);
         } else if (out_name[0] == '\0') {
-          strcpy(out_name, argv[i]);
+          strcpy(out_name.data(), argv[i]);
         } else {
           if (i + 1 == argc) {
             fmt::fprintf(stderr, "\n%s: extra argument (\"%s\")\n", Progname,
@@ -1316,10 +1374,10 @@ int main(int argc, char *argv[]) {
   }
 
   /* ----- copy file name (only -- strip '@' and '#') ----- */
-  MRIgetVolumeName(in_name, in_name_only);
+  MRIgetVolumeName(in_name.data(), in_name_only);
 
   /* If input type is spm and N_Zero_Pad_Input < 0, set to 3*/
-  if ((strcmp(in_type_string, "spm") == 0) && N_Zero_Pad_Input < 0) {
+  if ((strcmp(in_type_string.data(), "spm") == 0) && N_Zero_Pad_Input < 0) {
     N_Zero_Pad_Input = 3;
   }
 
@@ -1328,7 +1386,7 @@ int main(int argc, char *argv[]) {
     fmt::fprintf(stderr,
                  "\n%s: unknown input "
                  "volume type %s\n",
-                 Progname, in_type_string);
+                 Progname, in_type_string.data());
     usage_message(stdout);
     exit(1);
   }
@@ -1355,7 +1413,7 @@ int main(int argc, char *argv[]) {
     fmt::fprintf(stderr,
                  "%s: warning: read only flag is set; "
                  "nothing will be written to %s\n",
-                 Progname, out_name);
+                 Progname, out_name.data());
   }
   if ((read_only_flag != 0) &&
       ((out_info_flag != 0) || (out_matrix_flag != 0))) {
@@ -1371,7 +1429,7 @@ int main(int argc, char *argv[]) {
       // if(!read_only_flag && !no_write_flag)
       // because conform_flag value changes depending on type below
       {
-        out_volume_type = mri_identify(out_name);
+        out_volume_type = mri_identify(out_name.data());
         if (out_volume_type == MRI_VOLUME_TYPE_UNKNOWN) {
           fmt::fprintf(stderr, "%s: can't determine type of output volume\n",
                        Progname);
@@ -1390,9 +1448,9 @@ int main(int argc, char *argv[]) {
 
   /* ----- catch the parse-only flag ----- */
   if (parse_only_flag != 0) {
-    fmt::printf("input volume name: %s\n", in_name);
+    fmt::printf("input volume name: %s\n", in_name.data());
     fmt::printf("input name only: %s\n", in_name_only);
-    fmt::printf("output volume name: %s\n", out_name);
+    fmt::printf("output volume name: %s\n", out_name.data());
     fmt::printf("parse_only_flag = %d\n", parse_only_flag);
     fmt::printf("conform_flag = %d\n", conform_flag);
     fmt::printf("conform_size = %f\n", conform_size);
@@ -1409,7 +1467,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (subject_name[0] != '\0') {
-      fmt::printf("subject name is %s\n", subject_name);
+      fmt::printf("subject name is %s\n", subject_name.data());
     }
 
     if (invert_val >= 0) {
@@ -1433,7 +1491,7 @@ int main(int argc, char *argv[]) {
   }
 
   /* ----- check for a gdf image stem if the output type is gdf ----- */
-  if (out_volume_type == GDF_FILE && strlen(gdf_image_stem) == 0) {
+  if (out_volume_type == GDF_FILE && strlen(gdf_image_stem.data()) == 0) {
     fmt::fprintf(stderr,
                  "%s: GDF output type, "
                  "but no GDF image file stem\n",
@@ -1506,7 +1564,7 @@ int main(int argc, char *argv[]) {
       gcam_out = gcam;
     }
 
-    GCAMwrite(gcam_out, out_name);
+    GCAMwrite(gcam_out, out_name.data());
     exit(0);
   }
 
@@ -1561,10 +1619,11 @@ int main(int argc, char *argv[]) {
     }
 
     if (in_like_flag != 0) {
-      mri = MRIreadOtl(in_name, mri_in_like->width, mri_in_like->height,
+      mri = MRIreadOtl(in_name.data(), mri_in_like->width, mri_in_like->height,
                        mri_in_like->depth, color_file_name, read_otl_flags);
     } else {
-      mri = MRIreadOtl(in_name, 0, 0, in_n_k, color_file_name, read_otl_flags);
+      mri = MRIreadOtl(in_name.data(), 0, 0, in_n_k, color_file_name,
+                       read_otl_flags);
     }
 
     if (mri == nullptr) {
@@ -1618,9 +1677,9 @@ int main(int argc, char *argv[]) {
     }
 
     if (in_like_flag != 0) {
-      mri = MRIreadGeRoi(in_name, mri_in_like->depth);
+      mri = MRIreadGeRoi(in_name.data(), mri_in_like->depth);
     } else {
-      mri = MRIreadGeRoi(in_name, in_n_k);
+      mri = MRIreadGeRoi(in_name.data(), in_n_k);
     }
 
     if (mri == nullptr) {
@@ -1637,29 +1696,30 @@ int main(int argc, char *argv[]) {
         ((in_info_flag != 0) || (in_matrix_flag != 0)) &&
         (in_stats_flag == 0)) {
       if (force_in_type_flag != 0) {
-        mri = MRIreadHeader(in_name, in_volume_type);
+        mri = MRIreadHeader(in_name.data(), in_volume_type);
       } else {
-        mri = MRIreadInfo(in_name);
+        mri = MRIreadInfo(in_name.data());
       }
     } else {
       if (force_in_type_flag != 0) {
         // fmt::printf("MRIreadType()\n");
-        mri = MRIreadType(in_name, in_volume_type);
+        mri = MRIreadType(in_name.data(), in_volume_type);
       } else {
         if (nthframe < 0) {
           if (InStatTableFlag == 0) {
-            mri = MRIread(in_name);
+            mri = MRIread(in_name.data());
           } else {
-            fmt::printf("Loading in stat table %s\n", in_name);
-            StatTable = LoadStatTable(in_name);
+            fmt::printf("Loading in stat table %s\n", in_name.data());
+            StatTable = LoadStatTable(in_name.data());
             if (StatTable == nullptr) {
-              fmt::printf("ERROR: loading y %s as a stat table\n", in_name);
+              fmt::printf("ERROR: loading y %s as a stat table\n",
+                          in_name.data());
               exit(1);
             }
             mri = StatTable->mri;
           }
         } else {
-          mri = MRIreadEx(in_name, nthframe);
+          mri = MRIreadEx(in_name.data(), nthframe);
         }
       }
     }
@@ -2016,7 +2076,8 @@ int main(int argc, char *argv[]) {
       ErrorPrintf(ERROR_BADPARM,
                   "%s: (width, height, depth, frames) "
                   "= (%d, %d, %d, %d)\n",
-                  in_name, mri->width, mri->height, mri->depth, mri->nframes);
+                  in_name.data(), mri->width, mri->height, mri->depth,
+                  mri->nframes);
       ErrorPrintf(ERROR_BADPARM,
                   "%s: (width, height, depth, frames) "
                   "= (%d, %d, %d, %d)\n",
@@ -2037,7 +2098,7 @@ int main(int argc, char *argv[]) {
       ErrorPrintf(ERROR_BADPARM,
                   "error copying information from "
                   "%s structure to %s structure\n",
-                  in_like_name, in_name);
+                  in_like_name, in_name.data());
       MRIfree(&mri);
       MRIfree(&mri_in_like);
       exit(1);
@@ -2118,7 +2179,7 @@ int main(int argc, char *argv[]) {
     mri->c_s += delta_in_center[2];
   }
   if (subject_name[0] != '\0') {
-    strcpy(mri->subject_name, subject_name);
+    strcpy(mri->subject_name, subject_name.data());
   }
 
   if (in_tr_flag != 0) {
@@ -2826,7 +2887,7 @@ int main(int argc, char *argv[]) {
   }
 
   /* ----- store the gdf file stem ----- */
-  strcpy(mri->gdf_image_stem, gdf_image_stem);
+  strcpy(mri->gdf_image_stem, gdf_image_stem.data());
 
   /* ----- catch the out info flag ----- */
   if (out_info_flag != 0) {
@@ -2867,7 +2928,7 @@ int main(int argc, char *argv[]) {
       printf("Dilating segmentation %d\n", n_dil_seg);
     } else {
       printf("Dilating segmentation, mask %s\n", dil_seg_mask);
-      mritmp = MRIread(dil_seg_mask);
+      mritmp = MRIread(dil_seg_mask.data());
       if (mritmp == nullptr) {
         printf("ERROR: could not read %s\n", dil_seg_mask);
         exit(1);
@@ -3032,7 +3093,7 @@ int main(int argc, char *argv[]) {
            out_like_name);
 
     OutStatTable = InitStatTableFromMRI(mri, out_like_name);
-    WriteStatTable(out_name, OutStatTable);
+    WriteStatTable(out_name.data(), OutStatTable);
 
     printf("done\n");
     exit(0);
@@ -3040,7 +3101,7 @@ int main(int argc, char *argv[]) {
 
   if (ascii_flag != 0) {
     printf("Writing as ASCII to %s\n", out_name);
-    fptmp = fopen(out_name, "w");
+    fptmp = fopen(out_name.data(), "w");
     if (ascii_flag == 1 || ascii_flag == 2) {
       for (f = 0; f < mri->nframes; f++) {
         for (s = 0; s < mri->depth; s++) {
@@ -3081,22 +3142,22 @@ int main(int argc, char *argv[]) {
     if (SplitFrames == 0) {
       printf("writing to %s...\n", out_name);
       if (force_out_type_flag != 0) {
-        err = MRIwriteType(mri, out_name, out_volume_type);
+        err = MRIwriteType(mri, out_name.data(), out_volume_type);
         if (err != NO_ERROR) {
           printf("ERROR: failure writing %s as volume type %d\n", out_name,
                  out_volume_type);
           exit(1);
         }
       } else {
-        err = MRIwrite(mri, out_name);
+        err = MRIwrite(mri, out_name.data());
         if (err != NO_ERROR) {
           printf("ERROR: failure writing %s\n", out_name);
           exit(1);
         }
       }
     } else {
-      stem = IDstemFromName(out_name);
-      ext = IDextensionFromName(out_name);
+      stem = IDstemFromName(out_name.data());
+      ext = IDextensionFromName(out_name.data());
 
       printf("Splitting frames, stem = %s, ext = %s\n", stem, ext);
       mri2 = nullptr;
@@ -3226,5 +3287,68 @@ void usage_message(FILE *stream) {
 void usage(FILE *stream) {
   outputHelpXml(mri_convert_help_xml, mri_convert_help_xml_len);
 } /* end usage() */
+
+static bool good_cmdline_args(CMDARGS *cmdargs, ENV *env) {
+
+  podesc desc("\nUSAGE: mri_wbc <options> --lh <lhsurface> -o "
+              "<outdir>\n\nAvailable Options");
+  povm vm;
+
+  initArgDesc(&desc, cmdargs);
+  auto args = cmdargs->raw;
+  auto ac = static_cast<int>(args.size());
+  auto av = args.data();
+  if (ac == 1) {
+    print_usage(desc, env);
+    return false;
+  }
+
+  try {
+    auto parsed_opts =
+        po::command_line_parser(ac, av).options(desc).style(cl_style).run();
+    po::store(parsed_opts, vm);
+  } catch (std::exception const &e) {
+    spdlog::get("stderr")->critical(e.what());
+    return false;
+  }
+
+  if (vm.count("help") != 0U) {
+    print_help(desc, env);
+    return false;
+  }
+
+  if ((vm.count("version") != 0U) || (vm.count("all-info") != 0U)) {
+    handle_version_option(vm.count("all-info") != 0U, args, env->vcid,
+                          "$Name:  $");
+    return false;
+  }
+
+  try {
+    po::notify(vm);
+  } catch (std::exception const &e) {
+    spdlog::get("stderr")->critical(e.what());
+    return false;
+  }
+
+  if (cmdargs->debug) {
+    spdlog::set_level(spdlog::level::debug); // Set global log level to debug
+  } else {
+    spdlog::set_level(spdlog::level::warn);
+  }
+  return false;
+}
+
+void initArgDesc(podesc *desc, CMDARGS *cmdargs) {
+
+  desc->add_options()                                               /**/
+                                                                    /**/
+      ("help,h",                                                    /**/
+       "print out information on how to use this program and exit") /**/
+                                                                    /**/
+      ("version,v",                                                 /**/
+       "print out version and exit")                                /**/
+                                                                    /**/
+      ;
+}
 
 /* EOF */
