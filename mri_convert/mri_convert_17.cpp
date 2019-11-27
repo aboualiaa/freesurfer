@@ -81,6 +81,23 @@ public:
   std::string new_transform_fname{};
   bool DoNewTransformFname{};
   bool sphinx_flag{};
+  std::string autoalign_file{};
+  MATRIX *AutoAlign{};
+  bool nochange{};
+  bool conform_min_flag{};
+  float conform_size{};
+  bool parse_only_flag{};
+  bool in_info_flag{};
+  bool out_info_flag{};
+  bool template_info_flag{};
+  bool in_stats_flag{};
+  bool out_stats_flag{};
+  bool read_only_flag{};
+  bool no_write_flag{};
+  bool in_matrix_flag{};
+  bool out_matrix_flag{};
+  bool force_ras_good{};
+  bool split_frames_flag{};
 };
 
 struct ENV {
@@ -188,6 +205,8 @@ int DoNewTransformFname = 0;
 
 /*-------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
+
+  auto err_logger = spdlog::stderr_color_mt("stderr");
 
   auto env = ENV();
   auto cmdargs = CMDARGS(argc, argv);
@@ -481,68 +500,11 @@ int main(int argc, char *argv[]) {
     } else if (strcmp(argv[i], "--ascii-fcol") == 0) {
       ascii_flag = 3;
       force_out_type_flag = TRUE;
-    } else if (strcmp(argv[i], "--bvec-voxel") == 0) {
-      // force bvecs to be in voxel space. only applies when
-      // reading dicoms.
-      setenv("FS_DESIRED_BVEC_SPACE", "2", 1);
-    } else if (strcmp(argv[i], "--no-analyze-rescale") == 0) {
-      // Turns off rescaling of analyze files
-      setenv("FS_ANALYZE_NO_RESCALE", "1", 1);
-    } else if (strcmp(argv[i], "--autoalign") == 0) {
-      get_string(argc, argv, &i, AutoAlignFile);
-      AutoAlign = MatrixReadTxt(AutoAlignFile, nullptr);
-      fmt::printf("Auto Align Matrix\n");
-      MatrixPrint(stdout, AutoAlign);
-    } else if (strcmp(argv[i], "-nc") == 0 ||
-               strcmp(argv[i], "--nochange") == 0) {
-      nochange_flag = TRUE;
-    } else if (strcmp(argv[i], "-cm") == 0 ||
-               strcmp(argv[i], "--conform_min") == 0) {
-      conform_min = TRUE;
-      conform_flag = TRUE;
-    } else if (strcmp(argv[i], "-cs") == 0 ||
-               strcmp(argv[i], "--conform_size") == 0) {
-      get_floats(argc, argv, &i, &conform_size, 1);
-      conform_flag = TRUE;
-    } else if (strcmp(argv[i], "-po") == 0 ||
-               strcmp(argv[i], "--parse_only") == 0) {
-      parse_only_flag = TRUE;
-    } else if (strcmp(argv[i], "-ii") == 0 ||
-               strcmp(argv[i], "--in_info") == 0) {
-      in_info_flag = TRUE;
-    } else if (strcmp(argv[i], "-oi") == 0 ||
-               strcmp(argv[i], "--out_info") == 0) {
-      out_info_flag = TRUE;
-    } else if (strcmp(argv[i], "-ti") == 0 ||
-               strcmp(argv[i], "--template_info") == 0) {
-      template_info_flag = TRUE;
-    } else if (strcmp(argv[i], "-is") == 0 ||
-               strcmp(argv[i], "--in_stats") == 0) {
-      in_stats_flag = TRUE;
-    } else if (strcmp(argv[i], "-os") == 0 ||
-               strcmp(argv[i], "--out_stats") == 0) {
-      out_stats_flag = TRUE;
-    } else if (strcmp(argv[i], "-ro") == 0 ||
-               strcmp(argv[i], "--read_only") == 0) {
-      read_only_flag = TRUE;
-    } else if (strcmp(argv[i], "-nw") == 0 ||
-               strcmp(argv[i], "--no_write") == 0) {
-      no_write_flag = TRUE;
-    } else if (strcmp(argv[i], "-im") == 0 ||
-               strcmp(argv[i], "--in_matrix") == 0) {
-      in_matrix_flag = TRUE;
-    } else if (strcmp(argv[i], "-om") == 0 ||
-               strcmp(argv[i], "--out_matrix") == 0) {
-      out_matrix_flag = TRUE;
-    } else if (strcmp(argv[i], "--force_ras_good") == 0) {
-      force_ras_good = TRUE;
-    } else if (strcmp(argv[i], "--split") == 0) {
-      SplitFrames = TRUE;
-    }
-    // transform related things here /////////////////////
-    else if (strcmp(argv[i], "-at") == 0 ||
-             strcmp(argv[i], "--apply_transform") == 0 ||
-             strcmp(argv[i], "-T") == 0) {
+    } else
+        // transform related things here /////////////////////
+        if (strcmp(argv[i], "-at") == 0 ||
+            strcmp(argv[i], "--apply_transform") == 0 ||
+            strcmp(argv[i], "-T") == 0) {
       get_string(argc, argv, &i, transform_fname);
       transform_flag = TRUE;
       invert_transform_flag = FALSE;
@@ -3216,6 +3178,12 @@ static bool good_cmdline_args(CMDARGS *cmdargs, ENV *env) {
     po::conflicting_options(vm, "reorder4", "r4"); // may be specified only once
     po::conflicting_options(vm, "outside_val",
                             "oval"); // may be specified only once
+    po::conflicting_options(vm, "nochange",
+                            "nc"); // may be specified only once
+    po::conflicting_options(vm, "conform_min",
+                            "cm"); // may be specified only once
+    po::conflicting_options(vm, "conform_size",
+                            "cs"); // may be specified only once
 
   } catch (std::exception const &e) {
     spdlog::get("stderr")->critical(e.what());
@@ -3333,6 +3301,32 @@ static bool good_cmdline_args(CMDARGS *cmdargs, ENV *env) {
     // force bvecs to be in scanner space. only applies when
     // reading dicoms
     setenv("FS_DESIRED_BVEC_SPACE", "1", 1);
+  }
+
+  if (vm.count("bvec-voxel")) {
+    // force bvecs to be in voxel space. only applies when
+    // reading dicoms.
+    setenv("FS_DESIRED_BVEC_SPACE", "2", 1);
+  }
+
+  if (vm.count("no-analyze-rescale")) {
+    // Turns off rescaling of analyze files
+    setenv("FS_ANALYZE_NO_RESCALE", "1", 1);
+  }
+
+  if (vm.count("autoalign")) {
+    cmdargs->AutoAlign =
+        MatrixReadTxt(cmdargs->autoalign_file.c_str(), nullptr);
+    fmt::printf("Auto Align Matrix\n");
+    MatrixPrint(stdout, cmdargs->AutoAlign);
+  }
+
+  if (vm.count("conform_min") || vm.count("cm")) {
+    cmdargs->conform_flag = true;
+  }
+
+  if (vm.count("conform_size") || vm.count("cs")) {
+    cmdargs->conform_flag = true;
   }
   return false;
 }
@@ -3456,7 +3450,128 @@ void initArgDesc(podesc *desc, CMDARGS *cmdargs) {
        "no-rescale-dicom")                                          /**/
                                                                     /**/
       ("bvec-scanner",                                              /**/
-       "bvec-scanner");                                             /**/
+       "bvec-scanner")                                              /**/
+                                                                    /**/
+      ("bvec-voxel",                                                /**/
+       "bvec-voxel")                                                /**/
+                                                                    /**/
+      ("no-analyze-rescale",                                        /**/
+       "no-analyze-rescale")                                        /**/
+                                                                    /**/
+      ("autoalign",                                                 /**/
+       po::value<std::string>(&cmdargs->autoalign_file),            /**/
+       "autoalign")                                                 /**/
+                                                                    /**/
+      ("nochange",                                                  /**/
+       po::bool_switch(&cmdargs->nochange),                         /**/
+       "nochange")                                                  /**/
+                                                                    /**/
+      ("nc",                                                        /**/
+       po::bool_switch(&cmdargs->nochange),                         /**/
+       "nc")                                                        /**/
+                                                                    /**/
+      ("conform_min",                                               /**/
+       po::bool_switch(&cmdargs->conform_min_flag),                 /**/
+       "conform_min")                                               /**/
+                                                                    /**/
+      ("conform_size",                                              /**/
+       po::value<float>(&cmdargs->conform_size),                    /**/
+       "conform_size")                                              /**/
+                                                                    /**/
+      ("cs",                                                        /**/
+       po::value<float>(&cmdargs->conform_size),                    /**/
+       "conform_size")                                              /**/
+                                                                    /**/
+      ("parse_only",                                                /**/
+       po::bool_switch(&cmdargs->parse_only_flag),                  /**/
+       "parse_only")                                                /**/
+                                                                    /**/
+      ("po",                                                        /**/
+       po::bool_switch(&cmdargs->parse_only_flag),                  /**/
+       "parse_only")                                                /**/
+                                                                    /**/
+      ("in_info",                                                   /**/
+       po::bool_switch(&cmdargs->in_info_flag),                     /**/
+       "in_info")                                                   /**/
+                                                                    /**/
+      ("ii",                                                        /**/
+       po::bool_switch(&cmdargs->in_info_flag),                     /**/
+       "in_info")                                                   /**/
+                                                                    /**/
+      ("out_info",                                                  /**/
+       po::bool_switch(&cmdargs->out_info_flag),                    /**/
+       "out_info")                                                  /**/
+                                                                    /**/
+      ("oi",                                                        /**/
+       po::bool_switch(&cmdargs->out_info_flag),                    /**/
+       "out_info")                                                  /**/
+                                                                    /**/
+      ("template_info",                                             /**/
+       po::bool_switch(&cmdargs->template_info_flag),               /**/
+       "template_info")                                             /**/
+                                                                    /**/
+      ("ti",                                                        /**/
+       po::bool_switch(&cmdargs->template_info_flag),               /**/
+       "template_info")                                             /**/
+                                                                    /**/
+      ("in_stats",                                                  /**/
+       po::bool_switch(&cmdargs->in_stats_flag),                    /**/
+       "in_stats")                                                  /**/
+                                                                    /**/
+      ("is",                                                        /**/
+       po::bool_switch(&cmdargs->in_stats_flag),                    /**/
+       "in_stats")                                                  /**/
+                                                                    /**/
+      ("out_stats",                                                 /**/
+       po::bool_switch(&cmdargs->out_stats_flag),                   /**/
+       "out_stats")                                                 /**/
+                                                                    /**/
+      ("os",                                                        /**/
+       po::bool_switch(&cmdargs->out_stats_flag),                   /**/
+       "out_stats")                                                 /**/
+                                                                    /**/
+      ("read_only",                                                 /**/
+       po::bool_switch(&cmdargs->read_only_flag),                   /**/
+       "read_only")                                                 /**/
+                                                                    /**/
+      ("ro",                                                        /**/
+       po::bool_switch(&cmdargs->read_only_flag),                   /**/
+       "read_only")                                                 /**/
+                                                                    /**/
+      ("no_write",                                                  /**/
+       po::bool_switch(&cmdargs->no_write_flag),                    /**/
+       "no_write")                                                  /**/
+                                                                    /**/
+      ("nw",                                                        /**/
+       po::bool_switch(&cmdargs->no_write_flag),                    /**/
+       "no_write")                                                  /**/
+                                                                    /**/
+      ("in_matrix",                                                 /**/
+       po::bool_switch(&cmdargs->in_matrix_flag),                   /**/
+       "in_matrix")                                                 /**/
+                                                                    /**/
+      ("im",                                                        /**/
+       po::bool_switch(&cmdargs->in_matrix_flag),                   /**/
+       "in_matrix")                                                 /**/
+                                                                    /**/
+      ("out_matrix",                                                /**/
+       po::bool_switch(&cmdargs->out_matrix_flag),                  /**/
+       "out_matrix")                                                /**/
+                                                                    /**/
+      ("om",                                                        /**/
+       po::bool_switch(&cmdargs->out_matrix_flag),                  /**/
+       "out_matrix")                                                /**/
+                                                                    /**/
+      ("force_ras_good",                                            /**/
+       po::bool_switch(&cmdargs->force_ras_good),                   /**/
+       "force_ras_good")                                            /**/
+                                                                    /**/
+      ("split",                                                     /**/
+       po::bool_switch(&cmdargs->split_frames_flag),                /**/
+       "split")                                                     /**/
+                                                                    /**/
+      /* transform related things here */                           /**/
+      ("", "");                                                     /**/
 }
 
 /* EOF */

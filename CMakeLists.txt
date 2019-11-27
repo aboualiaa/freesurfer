@@ -1,4 +1,4 @@
-if(LINUX)
+if(UNIX AND NOT APPLE)
   set(CMAKE_Fortran_COMPILER "/usr/bin/gfortran-9")
 elseif(APPLE)
   set(CMAKE_Fortran_COMPILER "usr/local/bin/gfortran-9")
@@ -62,7 +62,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Default build type" FORCE)
 endif()
 
-# create a custom target "make install-nmr" to only install nmr-component files 
+# create a custom target "make install-nmr" to only install nmr-component files
 add_custom_target(install-nmr COMMAND ${CMAKE_COMMAND} -D COMPONENT=nmr -P cmake_install.cmake)
 
 # --------------------------------------------------
