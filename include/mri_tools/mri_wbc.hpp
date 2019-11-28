@@ -17,6 +17,7 @@
 #include <hpx/include/iostreams.hpp> // hpx headers have to be included before boost headers
 
 #include <boost/program_options/parsers.hpp>
+#include <boost/filesystem.hpp>
 
 #include "diag.h"
 #include "error.h"
@@ -46,7 +47,7 @@
 //#include "banned.h" // always include last, otherwise you'll break the stl :D
 
 namespace po = boost::program_options;
-namespace fsys = std::filesystem; // sadly fs is already defined: freesurfer
+namespace fsys = boost::filesystem; // sadly fs is already defined: freesurfer
 using podesc = po::options_description;
 using povm = po::variables_map;
 namespace pocl = boost::program_options::command_line_style;

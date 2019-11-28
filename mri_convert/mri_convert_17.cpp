@@ -152,9 +152,9 @@ auto cl_style =
 namespace boost::program_options {
 
 ///
-/// \param vm
-/// \param for_what
-/// \param required_option
+/// \param vm variables map
+/// \param for_what requiring option
+/// \param required_option required option
 inline void option_dependency(povm const &vm, std::string const &for_what,
                               std::string const &required_option) {
   if ((vm.count(for_what) != 0U) && !vm[for_what].defaulted()) {
@@ -166,9 +166,9 @@ inline void option_dependency(povm const &vm, std::string const &for_what,
 }
 
 ///
-/// \param vm
-/// \param opt1
-/// \param opt2
+/// \param vm variables map
+/// \param opt1 conflicting option1
+/// \param opt2 conflicting option2
 inline void conflicting_options(povm const &vm, std::string const &opt1,
                                 std::string const &opt2) {
   if ((vm.count(opt1) != 0U) && !vm[opt1].defaulted() &&
@@ -183,25 +183,25 @@ inline void conflicting_options(povm const &vm, std::string const &opt1,
 ///  do sanity and inconsistency checks, read files etc. After that
 ///  just start directly with your porgram logic
 /// \param cmdargs struct to hold values of parsed args
-/// \param env
+/// \param env holds the vcid string
 /// \return true if all logic is ok, false otherwise
 static bool good_cmdline_args(CMDARGS *cmdargs, ENV *env);
 
 /// \brief initialize options description and save values in cmdargs
-/// \param desc
-/// \param cmdargs
+/// \param desc holds description of supported args
+/// \param cmdargs holds the actual args
 static void initArgDesc(podesc *desc, CMDARGS *cmdargs);
 
 ///
-/// \param desc
-/// \param env
+/// \param desc holds description of supported args
+/// \param env holds the vcid string
 inline static void print_usage(podesc const &desc, ENV *env) {
   std::cout << desc << "\n" << env->vcid << std::endl;
 }
 
 ///
-/// \param desc
-/// \param env
+/// \param desc holds description of supported args
+/// \param env holds the vcid string
 inline static void print_help(podesc const &desc, ENV *env) {
   print_usage(desc, env);
   // TODO(aboualiaa): add tests and remove
@@ -223,15 +223,15 @@ extern int errno;
 
 const char *Progname;
 
-int ncutends = 0;
+int ncutends{};
 bool cutends_flag{false};
 
 bool slice_crop_flag{false};
 int slice_crop_start, slice_crop_stop;
-int SplitFrames = 0;
-int DeleteCMDs = 0;
+int SplitFrames{};
+int DeleteCMDs{};
 std::array<char, 2000> NewTransformFname{};
-int DoNewTransformFname = 0;
+int DoNewTransformFname{};
 
 /*-------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
@@ -285,12 +285,12 @@ int main(int argc, char *argv[]) {
   bool out_i_size_flag{false};
   bool out_j_size_flag{false};
   bool out_k_size_flag{false};
-  float in_i_size;
+  double in_i_size;
   float in_j_size;
-  float in_k_size;
+  double in_k_size;
   float out_i_size;
   float out_j_size;
-  float out_k_size;
+  double out_k_size;
   std::array<int, 3> crop_center{};
   bool sizes_good_flag{false};
   std::array<int, 3> crop_size{};
