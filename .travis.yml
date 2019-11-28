@@ -10,6 +10,7 @@ cache:
   apt: true
   directories:
     - packages/hpx
+    - cmake-build-release
     - $HOME/Library/Caches/Homebrew
 
 os: osx
@@ -38,7 +39,7 @@ before_install:
 
 script:
   - sudo xcode-select -s /Applications/Xcode.app
-  - mkdir cmake-build-release && cd ./cmake-build-release
+  - mkdir -p cmake-build-release && cd ./cmake-build-release
   - cmake -DGEMS_BUILD_MATLAB=OFF ..
   - cmake -DGEMS_BUILD_MATLAB=OFF .. # again so that clang finds openMP
   - make -j$(nproc)
