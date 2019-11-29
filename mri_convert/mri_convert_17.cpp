@@ -510,8 +510,8 @@ int main(int argc, char *argv[]) {
   }
 
   /* ----- initialize values ----- */
-  STAT_TABLE *StatTable = nullptr;
-  STAT_TABLE *OutStatTable = nullptr;
+  STAT_TABLE *StatTable{};
+  STAT_TABLE *OutStatTable{};
 
   /* rkt: check for and handle version tag */
   nargs = handle_version_option(
