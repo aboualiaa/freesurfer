@@ -145,10 +145,11 @@ using podesc = po::options_description;
 using povm = po::variables_map;
 namespace pocl = boost::program_options::command_line_style;
 
-auto cl_style =
+static auto cl_style =
     pocl::allow_short | pocl::short_allow_adjacent | pocl::short_allow_next |
     pocl::allow_long | pocl::long_allow_adjacent | pocl::long_allow_next |
     pocl::allow_sticky | pocl::allow_dash_for_short | pocl::allow_long_disguise;
+
 namespace boost::program_options {
 
 ///
@@ -167,8 +168,8 @@ inline void option_dependency(povm const &vm, std::string const &for_what,
 
 ///
 /// \param vm variables map
-/// \param opt1 conflicting option1
-/// \param opt2 conflicting option2
+/// \param opt1 conflicting option 1
+/// \param opt2 conflicting option 2
 inline void conflicting_options(povm const &vm, std::string const &opt1,
                                 std::string const &opt2) {
   if ((vm.count(opt1) != 0U) && !vm[opt1].defaulted() &&
@@ -217,22 +218,11 @@ void get_string(int argc, char *argv[], int *pos, char *val);
 void usage_message(FILE *stream);
 void usage(FILE *stream);
 
-int debug{};
+static int debug{};
 
 extern int errno;
 
 const char *Progname;
-
-int ncutends{};
-bool cutends_flag{false};
-
-bool slice_crop_flag{false};
-int slice_crop_start{};
-int slice_crop_stop{};
-int SplitFrames{};
-int DeleteCMDs{};
-std::array<char, 2000> NewTransformFname{};
-int DoNewTransformFname{};
 
 /*-------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
@@ -245,6 +235,15 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
+  int ncutends{};
+  bool cutends_flag{false};
+  bool slice_crop_flag{false};
+  int slice_crop_start{};
+  int slice_crop_stop{};
+  int SplitFrames{};
+  int DeleteCMDs{};
+  std::array<char, 2000> NewTransformFname{};
+  int DoNewTransformFname{};
   int outside_val{};
   int nargs{};
   MRI *mri{};
@@ -403,7 +402,7 @@ int main(int argc, char *argv[]) {
   int read_otl_flags{};
   bool color_file_flag{};
   std::array<char, STRLEN> color_file_name{};
-  int no_scale_flag{}; // TODO: convert to bool
+  int no_scale_flag{}; // TODO(aboualiaa): convert to bool
   int temp_type{};
   bool roi_flag{};
   FILE *fptmp{};

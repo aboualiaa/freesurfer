@@ -10,14 +10,15 @@ git:
   quiet: true
 
 language: cpp
-cache:
-  apt: true
-  directories:
-    - packages/hpx
-    - $HOME/Library/Caches/Homebrew
 
-os: osx
-osx_image: xcode11.2
+jobs:
+  include:
+    - os: osx
+      osx_image: xcode11.2
+      cache:
+        directories:
+          - packages/hpx
+          - $HOME/Library/Caches/Homebrew
 
 before_cache:
   - brew cleanup
