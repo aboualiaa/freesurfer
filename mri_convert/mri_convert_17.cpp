@@ -134,18 +134,19 @@ struct ENV {
       "$Id: mri_convert.c,v 1.227 2017/02/16 19:15:42 greve Exp $";
 };
 
-#include "spdlog/sinks/stdout_color_sinks.h"
-#include "spdlog/spdlog.h"
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
+#include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
 
 namespace po = boost::program_options;
-namespace fsys = std::filesystem; // sadly fs is already defined: freesurfer
+namespace fsys = boost::filesystem; // sadly fs is already defined: freesurfer
 using podesc = po::options_description;
 using povm = po::variables_map;
 namespace pocl = boost::program_options::command_line_style;
 
-static auto cl_style =
+static auto const cl_style =
     pocl::allow_short | pocl::short_allow_adjacent | pocl::short_allow_next |
     pocl::allow_long | pocl::long_allow_adjacent | pocl::long_allow_next |
     pocl::allow_sticky | pocl::allow_dash_for_short | pocl::allow_long_disguise;
@@ -186,7 +187,7 @@ inline void conflicting_options(povm const &vm, std::string const &opt1,
 /// \param cmdargs struct to hold values of parsed args
 /// \param env holds the vcid string
 /// \return true if all logic is ok, false otherwise
-static bool good_cmdline_args(CMDARGS *cmdargs, ENV *env);
+static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool;
 
 /// \brief initialize options description and save values in cmdargs
 /// \param desc holds description of supported args
@@ -3124,7 +3125,7 @@ void usage(FILE *stream) {
   outputHelpXml(mri_convert_help_xml, mri_convert_help_xml_len);
 } /* end usage() */
 
-static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) -> bool {
+static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
 
   podesc desc("\nUSAGE: mri_wbc <options> --lh <lhsurface> -o "
               "<outdir>\n\nAvailable Options");

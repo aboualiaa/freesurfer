@@ -5,6 +5,15 @@
 
 [![Build Status](https://travis-ci.com/aboualiaa/freesurfer.svg?branch=fs-modernize)](https://travis-ci.com/aboualiaa/freesurfer) 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/152dd9ab1aff497999ffb1872b9718f5)](https://www.codacy.com/manual/aboualiaa/freesurfer?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=aboualiaa/freesurfer&amp;utm_campaign=Badge_Grade)
+![Issues](https://img.shields.io/github/issues/aboualiaa/freesurfer)
+![Pull Requests](https://img.shields.io/github/issues-pr/aboualiaa/freesurfer)
+![Contributers](https://img.shields.io/github/contributors/aboualiaa/freesurfer)
+![Last Commit](https://img.shields.io/github/last-commit/aboualiaa/freesurfer)
+![Version](https://img.shields.io/github/v/tag/aboualiaa/freesurfer)
+![Code Size](https://img.shields.io/github/repo-size/aboualiaa/freesurfer)
+
+![Follow](https://img.shields.io/github/followers/aboualiaa?style=social)
+![Forks](https://img.shields.io/github/forks/aboualiaa/freesurfer?style=social)
 
 ## Introduction
 
