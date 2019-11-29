@@ -5,12 +5,15 @@
 #  - apt
 #  - ccache
 
+git:
+  depth: false
+  quiet: true
+
 language: cpp
 cache:
   apt: true
   directories:
     - packages/hpx
-    - cmake-build-release
     - $HOME/Library/Caches/Homebrew
 
 os: osx
