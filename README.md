@@ -45,17 +45,19 @@ Terms and conditions for use, reproduction, distribution and contribution are fo
 
 - [x] ITK 5
 - [x] Catalina: Apple Clang 11
-- [ ] Catalina: LLVM Clang 9
-- [ ] Catalina: GCC 9
-- [ ] Centos: GCC 9
-- [ ] Centos: Clang 9
+- [ ] ContiniousIntegration
+    - [x] macOS
+    - [ ] Ubuntu
+    - [ ] Catalina: LLVM Clang 9
+    - [ ] Catalina: GCC 9
+    - [ ] Centos: GCC 9
+    - [ ] Centos: Clang 9
 - [ ] no banned functions
-- [ ] Boost Program Options
-- [ ] TDD (GoogleTest)
+- [ ] Unify Interface using Boost Program Options
+- [ ] TDD (Boost/Google/Catch2?)
 - [ ] Benchmarks
 - [ ] DataOrientedDesign
-- [ ] Logging
-- [ ] ContiniousIntegration
+- [ ] Logging (spdlog)
 - [ ] C++17/20
 - [ ] Documentation
 - [ ] Guides

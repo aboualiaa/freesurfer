@@ -22,210 +22,9 @@
  *
  */
 
-#include <cctype>
-#include <cerrno>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <unistd.h>
+#include "mri_convert.hpp"
+#include "mri_convert_lib.hpp"
 
-#include "fmt/printf.h"
-
-#include "DICOMRead.h"
-#include "cma.h"
-#include "diag.h"
-#include "error.h"
-#include "fio.h"
-#include "fmriutils.h"
-#include "fmriutils.h"
-#include "fsgdf.h"
-#include "fsinit.h"
-#include "gcamorph.h"
-#include "macros.h"
-#include "mri.h"
-#include "mri2.h"
-#include "mri_conform.h"
-#include "mri_identify.h"
-#include "stats.h"
-#include "utils.h"
-#include "version.h"
-
-struct CMDARGS {
-  CMDARGS(int argc, char *argv[]) : raw(argv, argc){}; // NOLINT
-
-public:
-  gsl::multi_span<char *> raw;
-  std::vector<int> reorder_vals{};
-  bool reorder_flag{};
-  std::vector<int> reorder4_vals{};
-  bool reorder4_flag{};
-  bool debug{};
-  int outside_val{};
-  bool left_right_reverse{};
-  bool left_right_reverse_pix{};
-  bool left_right_mirror_flag{};
-  std::string left_right_mirror{};
-  std::string left_right_keep{};
-  bool left_right_swap_label{};
-  bool flip_cols{};
-  bool slice_reverse{};
-  bool in_stats_table{};
-  bool out_stats_table{};
-  float invert_contrast{};
-  std::string input_volume{};
-  std::string output_volume{};
-  bool conform_flag{};
-  int conf_keep_dc{};
-  bool conform_width_256_flag{};
-  bool delete_cmds{};
-  std::string new_transform_fname{};
-  bool DoNewTransformFname{};
-  bool sphinx_flag{};
-  std::string autoalign_file{};
-  MATRIX *AutoAlign{};
-  bool nochange{};
-  bool conform_min_flag{};
-  float conform_size{};
-  bool parse_only_flag{};
-  bool in_info_flag{};
-  bool out_info_flag{};
-  bool template_info_flag{};
-  bool in_stats_flag{};
-  bool out_stats_flag{};
-  bool read_only_flag{};
-  bool no_write_flag{};
-  bool in_matrix_flag{};
-  bool out_matrix_flag{};
-  bool force_ras_good{};
-  bool split_frames_flag{};
-  std::string transform_fname{};
-  bool transform_flag{};
-  bool invert_transform_flag{};
-  std::string out_like_name{};
-  bool out_like_flag{};
-  bool crop_flag{};
-  std::vector<int> crop_center{};
-  bool slice_crop_flag{};
-  int slice_crop_start{};
-  int slice_crop_stop{};
-  std::vector<int> slice_crop{};
-  std::vector<int> cropsize{};
-  std::string devolvexfm{};
-  int DevXFM{};
-  int upsample_factor{};
-  bool upsample_flag{};
-  bool in_i_size_flag{};
-  bool in_j_size_flag{};
-  bool in_k_size_flag{};
-  bool out_i_size_flag{};
-  bool out_j_size_flag{};
-  bool out_k_size_flag{};
-  float in_i_size{};
-  float in_j_size{};
-  float in_k_size{};
-  float out_i_size{};
-  float out_j_size{};
-  float out_k_size{};
-  std::string colortablefile{};
-};
-
-struct ENV {
-  std::string vcid =
-      "$Id: mri_convert.c,v 1.227 2017/02/16 19:15:42 greve Exp $";
-};
-
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/spdlog.h>
-#include <boost/filesystem.hpp>
-#include <boost/program_options.hpp>
-#include <boost/program_options/parsers.hpp>
-
-namespace po = boost::program_options;
-namespace fsys = boost::filesystem; // sadly fs is already defined: freesurfer
-using podesc = po::options_description;
-using povm = po::variables_map;
-namespace pocl = boost::program_options::command_line_style;
-
-static auto const cl_style =
-    pocl::allow_short | pocl::short_allow_adjacent | pocl::short_allow_next |
-    pocl::allow_long | pocl::long_allow_adjacent | pocl::long_allow_next |
-    pocl::allow_sticky | pocl::allow_dash_for_short | pocl::allow_long_disguise;
-
-namespace boost::program_options {
-
-///
-/// \param vm variables map
-/// \param for_what requiring option
-/// \param required_option required option
-inline void option_dependency(povm const &vm, std::string const &for_what,
-                              std::string const &required_option) {
-  if ((vm.count(for_what) != 0U) && !vm[for_what].defaulted()) {
-    if (vm.count(required_option) == 0 || vm[required_option].defaulted()) {
-      throw std::logic_error(std::string("Option '") + for_what +
-                             "' requires option '" + required_option + "'.");
-    }
-  }
-}
-
-///
-/// \param vm variables map
-/// \param opt1 conflicting option 1
-/// \param opt2 conflicting option 2
-inline void conflicting_options(povm const &vm, std::string const &opt1,
-                                std::string const &opt2) {
-  if ((vm.count(opt1) != 0U) && !vm[opt1].defaulted() &&
-      (vm.count(opt2) != 0U) && !vm[opt2].defaulted()) {
-    throw std::logic_error(std::string("Conflicting options '") + opt1 +
-                           "' and '" + opt2 + "'.");
-  }
-}
-} // namespace boost::program_options
-
-/// \brief does the housekeeping, use this to parse command lines,
-///  do sanity and inconsistency checks, read files etc. After that
-///  just start directly with your porgram logic
-/// \param cmdargs struct to hold values of parsed args
-/// \param env holds the vcid string
-/// \return true if all logic is ok, false otherwise
-static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool;
-
-/// \brief initialize options description and save values in cmdargs
-/// \param desc holds description of supported args
-/// \param cmdargs holds the actual args
-static void initArgDesc(podesc *desc, CMDARGS *cmdargs);
-
-///
-/// \param desc holds description of supported args
-/// \param env holds the vcid string
-inline static void print_usage(podesc const &desc, ENV *env) {
-  std::cout << desc << "\n" << env->vcid << std::endl;
-}
-
-///
-/// \param desc holds description of supported args
-/// \param env holds the vcid string
-inline static void print_help(podesc const &desc, ENV *env) {
-  print_usage(desc, env);
-  // TODO(aboualiaa): add tests and remove
-  spdlog::get("stderr")->critical("this program is not yet tested!");
-}
-
-/* ----- determines tolerance of non-orthogonal basis vectors ----- */
-constexpr auto CLOSE_ENOUGH{5e-3};
-
-void get_ints(int argc, char *argv[], int *pos, int *vals, int nvals);
-void get_floats(int argc, char *argv[], int *pos, float *vals, int nvals);
-void get_string(int argc, char *argv[], int *pos, char *val);
-void usage_message(FILE *stream);
-void usage(FILE *stream);
-
-static int debug{};
-
-extern int errno;
-
-const char *Progname;
-
-/*-------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
 
   auto err_logger = spdlog::stderr_color_mt("stderr");
@@ -273,11 +72,11 @@ int main(int argc, char *argv[]) {
   bool out_stats_flag{};
   bool read_only_flag{};
   bool no_write_flag{};
-  std::array<char, STRLEN> in_name{};
-  std::array<char, STRLEN> out_name{};
+  std::string in_name{};
+  std::string out_name{};
   int in_volume_type{};
   int out_volume_type{MRI_VOLUME_TYPE_UNKNOWN};
-  std::array<char, STRLEN> resample_type{};
+  std::string resample_type{};
   int resample_type_val{SAMPLE_TRILINEAR};
   bool in_i_size_flag{};
   bool in_j_size_flag{};
@@ -309,11 +108,11 @@ int main(int argc, char *argv[]) {
   bool out_j_direction_flag{};
   bool out_k_direction_flag{};
   bool in_orientation_flag{};
-  std::array<char, STRLEN> in_orientation_string{};
+  std::string in_orientation_string{};
   bool out_orientation_flag{};
-  std::array<char, STRLEN> out_orientation_string{};
-  std::array<char, STRLEN> colortablefile{};
-  std::array<char, STRLEN> tmpstr{};
+  std::string out_orientation_string{};
+  std::string colortablefile{};
+  std::string tmpstr{};
   char *stem{};
   char *ext{};
   std::array<char, 4> ostr{};
@@ -337,7 +136,7 @@ int main(int argc, char *argv[]) {
   bool out_center_flag{};
   bool delta_in_center_flag{};
   int out_data_type{-1};
-  std::array<char, STRLEN> out_data_type_string{};
+  std::string out_data_type_string{};
   int out_n_i{};
   int out_n_j{};
   int out_n_k{};
@@ -351,13 +150,13 @@ int main(int argc, char *argv[]) {
   bool force_out_type_flag{};
   int forced_in_type{MRI_VOLUME_TYPE_UNKNOWN};
   int forced_out_type{MRI_VOLUME_TYPE_UNKNOWN};
-  std::array<char, STRLEN> in_type_string{};
-  std::array<char, STRLEN> out_type_string{};
-  std::array<char, STRLEN> subject_name{};
+  std::string in_type_string{};
+  std::string out_type_string{};
+  std::string subject_name{};
   bool force_template_type_flag{};
   int forced_template_type{MRI_VOLUME_TYPE_UNKNOWN};
-  std::array<char, STRLEN> template_type_string{};
-  std::array<char, STRLEN> reslice_like_name{};
+  std::string template_type_string{};
+  std::string reslice_like_name{};
   bool reslice_like_flag{};
   int nframes{};
   bool frame_flag{};
@@ -371,8 +170,8 @@ int main(int argc, char *argv[]) {
   bool downsample2_flag{};
   bool downsample_flag{};
   std::array<float, 3> downsample_factor{};
-  std::array<char, STRLEN> in_name_only{};
-  std::array<char, STRLEN> transform_fname{};
+  std::string in_name_only{};
+  std::string transform_fname{};
   bool transform_flag{};
   bool invert_transform_flag{};
   LTA *lta_transform{};
@@ -383,8 +182,8 @@ int main(int argc, char *argv[]) {
   bool smooth_parcellation_flag{};
   int smooth_parcellation_count{};
   bool in_like_flag{};
-  std::array<char, STRLEN> in_like_name{};
-  std::array<char, STRLEN> out_like_name{};
+  std::string in_like_name{};
+  std::string out_like_name{};
   bool out_like_flag{};
   int in_n_i{};
   int in_n_j{};
@@ -399,10 +198,10 @@ int main(int argc, char *argv[]) {
   int n_erode_seg{};
   bool dil_seg_flag{};
   int n_dil_seg{};
-  std::array<char, STRLEN> dil_seg_mask{};
+  std::string dil_seg_mask{};
   int read_otl_flags{};
   bool color_file_flag{};
-  std::array<char, STRLEN> color_file_name{};
+  std::string color_file_name{};
   int no_scale_flag{}; // TODO(aboualiaa): convert to bool
   int temp_type{};
   bool roi_flag{};
@@ -410,7 +209,7 @@ int main(int argc, char *argv[]) {
   int j{};
   bool translate_labels_flag{};
   bool force_ras_good{};
-  std::array<char, STRLEN> gdf_image_stem{};
+  std::string gdf_image_stem{};
   bool in_matrix_flag{};
   bool out_matrix_flag{};
   float conform_size{1.0};
@@ -420,7 +219,7 @@ int main(int argc, char *argv[]) {
   VOL_GEOM vgtmp;
   LT *lt{};
   int DevXFM{};
-  std::array<char, STRLEN> devxfm_subject{};
+  std::string devxfm_subject{};
   MATRIX *T{};
   float scale_factor{1};
   float out_scale_factor{1};
@@ -429,21 +228,20 @@ int main(int argc, char *argv[]) {
   int reduce{};
   float fwhm{-1};
   float gstd{-1};
-  std::array<char, STRLEN> cmdline{};
+  std::string cmdline{};
   bool sphinx_flag{};
   bool LeftRightReverse{};
   bool LeftRightReversePix{};
-  bool LeftRightMirrorFlag{}; // mirror half of the image
-  std::array<char, STRLEN>
-      LeftRightMirrorHemi{}; // which half to mirror (lh, rh)
-  bool LeftRightKeepFlag{};  // keep half of the image
+  bool LeftRightMirrorFlag{};        // mirror half of the image
+  std::string LeftRightMirrorHemi{}; // which half to mirror (lh, rh)
+  bool LeftRightKeepFlag{};          // keep half of the image
   bool LeftRightSwapLabel{};
   bool FlipCols{};
   bool SliceReverse{};
   bool SliceBias{};
   float SliceBiasAlpha{1.0};
   float v{};
-  std::array<char, STRLEN> AutoAlignFile{};
+  std::string AutoAlignFile{};
   MATRIX *AutoAlign{};
   MATRIX *cras{};
   MATRIX *vmid{};
@@ -477,8 +275,8 @@ int main(int argc, char *argv[]) {
   fmt::printf("\n");
   fflush(stdout);
 
-  crop_size[0] = crop_size[1] = crop_size[2] = 256;
-  crop_center[0] = crop_center[1] = crop_center[2] = 128;
+  crop_size.fill(256);
+  crop_center.fill(128);
   for (i = 0; i < argc; i++) {
     if (strcmp(argv[i], "--debug") == 0) {
       fptmp = fopen("debug.gdb", "w");
@@ -544,7 +342,7 @@ int main(int argc, char *argv[]) {
                      "in_i_direction = (%g, %g, %g)\n",
                      Progname, in_i_directions[0], in_i_directions[1],
                      in_i_directions[2]);
-        usage_message(stdout);
+        usage_message_lib(stdout);
         exit(1);
       }
       if (magnitude != 1.0) {
@@ -859,7 +657,7 @@ int main(int argc, char *argv[]) {
     } else if (strcmp(argv[i], "-gis") == 0 ||
                strcmp(argv[i], "--gdf_image_stem") == 0) {
       get_string(argc, argv, &i, gdf_image_stem.data());
-      if (strlen(gdf_image_stem.data()) == 0) {
+      if (gdf_image_stem.empty()) {
         fmt::fprintf(stderr, "\n%s: zero length GDF image stem given\n",
                      Progname);
         usage_message(stdout);
@@ -1200,7 +998,7 @@ int main(int argc, char *argv[]) {
   MRIgetVolumeName(in_name.data(), in_name_only.data());
 
   /* If input type is spm and N_Zero_Pad_Input < 0, set to 3*/
-  if ((strcmp(in_type_string.data(), "spm") == 0) && N_Zero_Pad_Input < 0) {
+  if (in_type_string == "spm" && N_Zero_Pad_Input < 0) {
     N_Zero_Pad_Input = 3;
   }
 
@@ -1313,7 +1111,7 @@ int main(int argc, char *argv[]) {
   }
 
   /* ----- check for a gdf image stem if the output type is gdf ----- */
-  if (out_volume_type == GDF_FILE && strlen(gdf_image_stem.data()) == 0) {
+  if (out_volume_type == GDF_FILE && gdf_image_stem.empty()) {
     fmt::fprintf(stderr,
                  "%s: GDF output type, "
                  "but no GDF image file stem\n",
@@ -1378,7 +1176,7 @@ int main(int argc, char *argv[]) {
     gcam = GCAMread(in_name_only.data());
     if (gcam == nullptr) {
       ErrorExit(ERROR_NOFILE, "%s: could not read input morph from %s",
-                Progname, in_name_only);
+                Progname, in_name_only.data());
     }
     if (downsample2_flag) {
       gcam_out = GCAMdownsample2(gcam);
@@ -1897,12 +1695,12 @@ int main(int argc, char *argv[]) {
       ErrorPrintf(ERROR_BADPARM,
                   "%s: (width, height, depth, frames) "
                   "= (%d, %d, %d, %d)\n",
-                  in_name.data(), mri->width, mri->height, mri->depth,
+                  in_name.c_str(), mri->width, mri->height, mri->depth,
                   mri->nframes);
       ErrorPrintf(ERROR_BADPARM,
                   "%s: (width, height, depth, frames) "
                   "= (%d, %d, %d, %d)\n",
-                  in_like_name, mri_in_like->width, mri_in_like->height,
+                  in_like_name.c_str(), mri_in_like->width, mri_in_like->height,
                   mri_in_like->depth, mri_in_like->nframes);
       MRIfree(&mri);
       MRIfree(&mri_in_like);
@@ -1919,7 +1717,7 @@ int main(int argc, char *argv[]) {
       ErrorPrintf(ERROR_BADPARM,
                   "error copying information from "
                   "%s structure to %s structure\n",
-                  in_like_name, in_name.data());
+                  in_like_name.c_str(), in_name.data());
       MRIfree(&mri);
       MRIfree(&mri_in_like);
       exit(1);
@@ -2490,7 +2288,7 @@ int main(int argc, char *argv[]) {
       // dimensions
       if (tran == nullptr) {
         ErrorExit(ERROR_NOFILE, "%s: could not read xform from %s\n", Progname,
-                  transform_fname);
+                  transform_fname.c_str());
       }
       if (static_cast<int>(invert_transform_flag) == 0) {
         fmt::printf("morphing to atlas with resample type %d\n",
@@ -2904,13 +2702,13 @@ int main(int argc, char *argv[]) {
   }
 
   // ----- modify color lookup table (specified by --ctab option) -----
-  if (strcmp("remove", colortablefile.data()) == 0) {
+  if (colortablefile == "remove") {
     // remove an embedded ctab
     if (mri->ct != nullptr) {
       std::cout << "removing color lookup table" << std::endl;
       CTABfree(&mri->ct);
     }
-  } else if (strlen(colortablefile.data()) != 0) {
+  } else if (!colortablefile.empty()) {
     // add a user-specified ctab
     std::cout << "embedding color lookup table" << std::endl;
     if (mri->ct != nullptr) {
@@ -3017,10 +2815,8 @@ int main(int argc, char *argv[]) {
   exit(0);
 
 } /* end main() */
-/*----------------------------------------------------------------------*/
 
 void get_ints(int argc, char *argv[], int *pos, int *vals, int nvals) {
-
   char *ep;
   int i;
 
@@ -3127,9 +2923,12 @@ void usage(FILE *stream) {
 
 static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
 
-  podesc desc("\nUSAGE: mri_wbc <options> --lh <lhsurface> -o "
-              "<outdir>\n\nAvailable Options");
-  povm vm;
+  namespace po = boost::program_options;
+
+  po::options_description desc(
+      "\nUSAGE: mri_convert_exec [options] <in volume> <out volume>\n"
+      "\n\nAvailable Options");
+  po::variables_map vm;
 
   initArgDesc(&desc, cmdargs);
   auto args = cmdargs->raw;
@@ -3397,7 +3196,10 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
   return false;
 }
 
-void initArgDesc(podesc *desc, CMDARGS *cmdargs) {
+void initArgDesc(boost::program_options::options_description *desc,
+                 CMDARGS *cmdargs) {
+
+  namespace po = boost::program_options;
 
   desc->add_options()                                                   /**/
                                                                         /**/
@@ -3736,5 +3538,4 @@ void initArgDesc(podesc *desc, CMDARGS *cmdargs) {
       /* out ijk directions*/                                           /**/
       ;                                                                 /**/
 }
-
 /* EOF */
