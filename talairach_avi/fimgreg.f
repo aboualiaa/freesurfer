@@ -373,7 +373,7 @@ c     if(nnn.eq.0)then
         escale=escale*squeeze
 c     endif
       niter=niter-1
-      if(niter.gt.0)goto 79      
+      if(niter.gt.0)goto 79
 
    76 if(.not.lsuperfine)then
         do j=1,jmax

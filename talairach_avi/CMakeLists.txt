@@ -6,7 +6,7 @@ if("${CMAKE_Fortran_COMPILER_ID}" MATCHES "Intel")
   set(ICC_LIBRARIES irc svml imf)
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ax=CORE-AVX512 -qopenmp -132 -nofor_main")
 else()
-  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ffixed-line-length-132 -fno-second-underscore")
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -w -ffixed-line-length-132 -fno-second-underscore")
 endif()
 
 install(
@@ -25,11 +25,11 @@ add_test_script(NAME talairach_avi_test SCRIPT test.sh)
 set(TRX_SOURCES rec.c Getifh.c endianio.c)
 
 add_executable(analyzeto4dfp analyzeto4dfp.c cflip.c ${TRX_SOURCES})
-target_link_libraries(analyzeto4dfp ${ICC_LIBRARIES} )
+target_link_libraries(analyzeto4dfp ${ICC_LIBRARIES})
 install(TARGETS analyzeto4dfp DESTINATION bin)
 
 add_executable(4dfptoanalyze 4dfptoanalyze.c cflip.c Inithdr.c ${TRX_SOURCES})
-target_link_libraries(4dfptoanalyze ${ICC_LIBRARIES} )
+target_link_libraries(4dfptoanalyze ${ICC_LIBRARIES})
 install(TARGETS 4dfptoanalyze DESTINATION bin)
 
 add_executable(flip_4dfp flip_4dfp.c cflip.c ${TRX_SOURCES})
@@ -45,14 +45,14 @@ target_link_libraries(ifh2hdr ${ICC_LIBRARIES})
 install(TARGETS ifh2hdr DESTINATION bin)
 
 set(RMS_SOURCES
-  cgauss3d.c
-  fftsol.f
-  imgpad.f
-  polfit.f
-  matopr.f
-  eigen.f
-  param6opr.f
-)
+    cgauss3d.c
+    fftsol.f90
+    imgpad.f90
+    polfit.f90
+    matopr.f90
+    eigen.f90
+    param6opr.f90
+    )
 
 add_definitions(-DHAVE_GFORTRAN)
 # this prevents linking to gfortran dynmically
@@ -65,7 +65,7 @@ target_link_libraries(gauss_4dfp ${ICC_LIBRARIES})
 install(TARGETS gauss_4dfp DESTINATION bin)
 
 set(LIN_SOURCES t4_sub.f t4scale.c)
-set(IMG_SOURCES fimgreg.f imgvalm.f imgvalx.f ffind.f)
+set(IMG_SOURCES fimgreg.f imgvalm.f90 imgvalx.f90 ffind.f)
 
 add_executable(imgreg_4dfp imgreg_4dfp.c ${TRX_SOURCES} ${RMS_SOURCES}
                ${LIN_SOURCES} ${IMG_SOURCES} cflip.c)
@@ -74,7 +74,7 @@ install(TARGETS imgreg_4dfp DESTINATION bin)
 
 add_executable(t4imgs_4dfp t4imgs_4dfp.c ${TRX_SOURCES} ${RMS_SOURCES}
                ${LIN_SOURCES} ${IMG_SOURCES} cflip.c spline3dvgh.f
-               ft4imgo.f to_711-2B.f ft4imgn.f set_rnan.f ft4ixyz.f)
+               ft4imgo.f to_711-2B.f ft4imgn.f90 set_rnan.f ft4ixyz.f)
 target_link_libraries(t4imgs_4dfp ${ICC_LIBRARIES})
 install(TARGETS t4imgs_4dfp DESTINATION bin)
 

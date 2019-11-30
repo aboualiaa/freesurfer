@@ -13,7 +13,7 @@ c
       write(*,"('$Id: ft4ixyz.f,v 1.1 2007/05/04 22:33:59 nicks Exp $')")
       return
       end
-      
+
       subroutine pt4ixyz(imgdim,voxdim,centert,mmppixt,t4mat,centero,mmppixo,t4atl,t4)
       integer*4 imgdim(3)			! assumed positive
       real*4    voxdim(3)			! assumed positive

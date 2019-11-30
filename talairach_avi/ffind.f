@@ -62,7 +62,7 @@ c     by brute force coarse search in translation space
       do jj=1,nterm
         param(jj)=garam(jj)
       enddo
-      
+
       return
       end
 
