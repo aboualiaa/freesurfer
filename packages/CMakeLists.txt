@@ -6,23 +6,22 @@ add_compile_options(-Wno-everything -fPIC)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_subdirectories(
-  jpeg
-  expat
-  tiff
-  glut
-  xml2
-  minc
-  dicom
-  cephes
-  netcdf
-  tetgen
-  nrrdio
-  nifti
-  gifti
-  svm
-  #  abseil-cpp
-  benchmark
-  googletest
-  GSL
-  fmt
+    jpeg
+    expat
+    tiff
+    glut
+    xml2
+    minc
+    dicom
+    cephes
+    netcdf
+    tetgen
+    nrrdio
+    nifti
+    gifti
+    svm
+    googletest
+    benchmark
+    GSL
+    fmt
 )

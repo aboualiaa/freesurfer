@@ -26,7 +26,6 @@
 #include "mri_convert_lib.hpp"
 
 int main(int argc, char *argv[]) {
-
   auto err_logger = spdlog::stderr_color_mt("stderr");
 
   auto env = ENV();
@@ -342,7 +341,7 @@ int main(int argc, char *argv[]) {
                      "in_i_direction = (%g, %g, %g)\n",
                      Progname, in_i_directions[0], in_i_directions[1],
                      in_i_directions[2]);
-        usage_message_lib(stdout);
+        fs::utils::cli::usage_message(stdout, Progname);
         exit(1);
       }
       if (magnitude != 1.0) {
@@ -367,7 +366,7 @@ int main(int argc, char *argv[]) {
                      "in_j_direction = (%g, %g, %g)\n",
                      Progname, in_j_directions[0], in_j_directions[1],
                      in_j_directions[2]);
-        usage_message(stdout);
+        fs::utils::cli::usage_message(stdout, Progname);
         exit(1);
       }
       if (magnitude != 1.0) {
@@ -392,7 +391,7 @@ int main(int argc, char *argv[]) {
                      "in_k_direction = (%g, %g, %g)\n",
                      Progname, in_k_directions[0], in_k_directions[1],
                      in_k_directions[2]);
-        usage_message(stdout);
+        fs::utils::cli::usage_message(stdout, Progname);
         exit(1);
       }
       if (magnitude != 1.0) {
@@ -441,7 +440,7 @@ int main(int argc, char *argv[]) {
                      "out_i_direction = (%g, %g, %g)\n",
                      Progname, out_i_directions[0], out_i_directions[1],
                      out_i_directions[2]);
-        usage_message(stdout);
+        fs::utils::cli::usage_message(stdout, Progname);
         exit(1);
       }
       if (magnitude != 1.0) {
@@ -467,7 +466,7 @@ int main(int argc, char *argv[]) {
                      "out_j_direction = (%g, %g, %g)\n",
                      Progname, out_j_directions[0], out_j_directions[1],
                      out_j_directions[2]);
-        usage_message(stdout);
+        fs::utils::cli::usage_message(stdout, Progname);
         exit(1);
       }
       if (magnitude != 1.0) {
@@ -493,7 +492,7 @@ int main(int argc, char *argv[]) {
                      "out_k_direction = (%g, %g, %g)\n",
                      Progname, out_k_directions[0], out_k_directions[1],
                      out_k_directions[2]);
-        usage_message(stdout);
+        fs::utils::cli::usage_message(stdout, Progname);
         exit(1);
       }
       if (magnitude != 1.0) {
@@ -591,7 +590,7 @@ int main(int argc, char *argv[]) {
       } else {
         fmt::fprintf(stderr, "\n%s: unknown data type \"%s\"\n", Progname,
                      argv[i]);
-        usage_message(stdout);
+        fs::utils::cli::usage_message(stdout, Progname);
         exit(1);
       }
     } else if (strcmp(argv[i], "--bfile-little-endian") == 0) {
@@ -628,7 +627,7 @@ int main(int argc, char *argv[]) {
       } else {
         fmt::fprintf(stderr, "\n%s: unknown resample type \"%s\"\n", Progname,
                      argv[i]);
-        usage_message(stdout);
+        fs::utils::cli::usage_message(stdout, Progname);
         exit(1);
       }
     } else if (strcmp(argv[i], "-it") == 0 ||
@@ -660,7 +659,7 @@ int main(int argc, char *argv[]) {
       if (gdf_image_stem.empty()) {
         fmt::fprintf(stderr, "\n%s: zero length GDF image stem given\n",
                      Progname);
-        usage_message(stdout);
+        fs::utils::cli::usage_message(stdout, Progname);
         exit(1);
       }
     } else if (strcmp(argv[i], "-rl") == 0 ||
@@ -727,7 +726,7 @@ int main(int argc, char *argv[]) {
                      "\n%s: clean parcellation count must "
                      "be between 14 and 26, inclusive\n",
                      Progname);
-        usage_message(stdout);
+        fs::utils::cli::usage_message(stdout, Progname);
         exit(1);
       }
       smooth_parcellation_flag = TRUE;
@@ -891,7 +890,7 @@ int main(int argc, char *argv[]) {
     else {
       if (argv[i][0] == '-') {
         fmt::fprintf(stderr, "\n%s: unknown flag \"%s\"\n", Progname, argv[i]);
-        usage_message(stdout);
+        fs::utils::cli::usage_message(stdout, Progname);
         exit(1);
       } else {
         if (in_name[0] == '\0') {
@@ -908,7 +907,7 @@ int main(int argc, char *argv[]) {
                          "following)\n",
                          Progname, argv[i]);
           }
-          usage_message(stdout);
+          fs::utils::cli::usage_message(stdout, Progname);
           exit(1);
         }
       }
@@ -966,20 +965,20 @@ int main(int argc, char *argv[]) {
   }
 
   if (sizes_good_flag) {
-    usage_message(stdout);
+    fs::utils::cli::usage_message(stdout, Progname);
     exit(1);
   }
 
   /* ----- catch missing input or output volume name ----- */
   if (in_name[0] == '\0') {
     fmt::fprintf(stderr, "\n%s: missing input volume name\n", Progname);
-    usage_message(stdout);
+    fs::utils::cli::usage_message(stdout, Progname);
     exit(1);
   }
 
   if (out_name[0] == '\0' && !((read_only_flag) || (no_write_flag))) {
     fmt::fprintf(stderr, "\n%s: missing output volume name\n", Progname);
-    usage_message(stdout);
+    fs::utils::cli::usage_message(stdout, Progname);
     exit(1);
   }
 
@@ -990,7 +989,7 @@ int main(int argc, char *argv[]) {
         "\n%s: pass example (or empty) stats-table with --like to specify "
         "measure, column and row headers\n",
         Progname);
-    usage_message(stdout);
+    fs::utils::cli::usage_message(stdout, Progname);
     exit(1);
   }
 
@@ -1008,7 +1007,7 @@ int main(int argc, char *argv[]) {
                  "\n%s: unknown input "
                  "volume type %s\n",
                  Progname, in_type_string.data());
-    usage_message(stdout);
+    fs::utils::cli::usage_message(stdout, Progname);
     exit(1);
   }
 
@@ -1016,7 +1015,7 @@ int main(int argc, char *argv[]) {
       forced_template_type == MRI_VOLUME_TYPE_UNKNOWN) {
     fmt::fprintf(stderr, "\n%s: unknown template volume type %s\n", Progname,
                  template_type_string.data());
-    usage_message(stdout);
+    fs::utils::cli::usage_message(stdout, Progname);
     exit(1);
   }
 
@@ -1024,7 +1023,7 @@ int main(int argc, char *argv[]) {
       (ascii_flag == 0)) {
     fmt::fprintf(stderr, "\n%s: unknown output volume type %s\n", Progname,
                  out_type_string.data());
-    usage_message(stdout);
+    fs::utils::cli::usage_message(stdout, Progname);
     exit(1);
   }
 
@@ -2825,7 +2824,7 @@ void get_ints(int argc, char *argv[], int *pos, int *vals, int nvals) {
                  "\n%s: argument %s expects %d integers; "
                  "only %d arguments after flag\n",
                  Progname, argv[*pos], nvals, argc - *pos - 1);
-    usage_message(stdout);
+    fs::utils::cli::usage_message(stdout, Progname);
     exit(1);
   }
 
@@ -2833,7 +2832,7 @@ void get_ints(int argc, char *argv[], int *pos, int *vals, int nvals) {
     if (argv[*pos + i + 1][0] == '\0') {
       fmt::fprintf(stderr, "\n%s: argument to %s flag is null\n", Progname,
                    argv[*pos]);
-      usage_message(stdout);
+      fs::utils::cli::usage_message(stdout, Progname);
       exit(1);
     }
 
@@ -2844,7 +2843,7 @@ void get_ints(int argc, char *argv[], int *pos, int *vals, int nvals) {
                    "\n%s: error converting \"%s\" to an "
                    "integer for %s flag, incorrect # of args (need %d)?\n",
                    Progname, argv[*pos + i + 1], argv[*pos], nvals);
-      usage_message(stdout);
+      fs::utils::cli::usage_message(stdout, Progname);
       exit(1);
     }
   }
@@ -2863,7 +2862,7 @@ void get_floats(int argc, char *argv[], int *pos, float *vals, int nvals) {
                  "\n%s: argument %s expects %d floats; "
                  "only %d arguments after flag\n",
                  Progname, argv[*pos], nvals, argc - *pos - 1);
-    usage_message(stdout);
+    fs::utils::cli::usage_message(stdout, Progname);
     exit(1);
   }
 
@@ -2871,7 +2870,7 @@ void get_floats(int argc, char *argv[], int *pos, float *vals, int nvals) {
     if (argv[*pos + i + 1][0] == '\0') {
       fmt::fprintf(stderr, "\n%s: argument to %s flag is null\n", Progname,
                    argv[*pos]);
-      usage_message(stdout);
+      fs::utils::cli::usage_message(stdout, Progname);
       exit(1);
     }
 
@@ -2882,7 +2881,7 @@ void get_floats(int argc, char *argv[], int *pos, float *vals, int nvals) {
                    "\n%s: error converting \"%s\" to a "
                    "float for %s flag: incorrect # of args? Need %d\n",
                    Progname, argv[*pos + i + 1], argv[*pos], nvals);
-      usage_message(stdout);
+      fs::utils::cli::usage_message(stdout, Progname);
       exit(1);
     }
   }
@@ -2898,7 +2897,7 @@ void get_string(int argc, char *argv[], int *pos, char *val) {
                  "\n%s: argument %s expects an extra argument; "
                  "none found\n",
                  Progname, argv[*pos]);
-    usage_message(stdout);
+    fs::utils::cli::usage_message(stdout, Progname);
     exit(1);
   }
 
@@ -2924,7 +2923,7 @@ void usage(FILE *stream) {
 static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
 
   namespace po = boost::program_options;
-
+  using opt_deps = std::map<std::string, std::string>;
   po::options_description desc(
       "\nUSAGE: mri_convert_exec [options] <in volume> <out volume>\n"
       "\n\nAvailable Options");
@@ -2940,12 +2939,14 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
   }
 
   try {
-    auto parsed_opts =
-        po::command_line_parser(ac, av).options(desc).style(cl_style).run();
+    auto parsed_opts = po::command_line_parser(ac, av)
+                           .options(desc)
+                           .style(fs::utils::cli::po_style)
+                           .run();
     po::store(parsed_opts, vm);
 
-    std::map<std::string, std::string> conflicting_opts;
-    std::map<std::string, std::string> dependant_opts;
+    opt_deps conflicting_opts;
+    opt_deps dependant_opts;
 
     conflicting_opts["reorder4"] = "r4";
     conflicting_opts["outside_val"] = "oval";
@@ -2972,7 +2973,8 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     exit(97);
   }
 
-  if (vm.count("help") != 0U) {
+  if (vm.count("help") != 0U || vm.count("usage") != 0U) {
+    usage(nullptr);
     print_help(desc, env);
     return false;
   }
@@ -3208,6 +3210,9 @@ void initArgDesc(boost::program_options::options_description *desc,
                                                                         /**/
       ("version,v",                                                     /**/
        "print out version and exit")                                    /**/
+                                                                        /**/
+      ("usage,u",                                                       /**/
+       "print usage and exit")                                          /**/
                                                                         /**/
       ("version2",                                                      /**/
        "just exits")                                                    /**/

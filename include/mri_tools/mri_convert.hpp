@@ -182,8 +182,6 @@ print_usage(boost::program_options::options_description const &desc, ENV *env) {
 inline static void
 print_help(boost::program_options::options_description const &desc, ENV *env) {
   print_usage(desc, env);
-  // TODO(aboualiaa): add tests and remove
-  spdlog::get("stderr")->critical("this program is not yet tested!");
 }
 
 /* ----- determines tolerance of non-orthogonal basis vectors ----- */
@@ -192,7 +190,7 @@ constexpr auto CLOSE_ENOUGH{5e-3};
 void get_ints(int argc, char *argv[], int *pos, int *vals, int nvals);
 void get_floats(int argc, char *argv[], int *pos, float *vals, int nvals);
 void get_string(int argc, char *argv[], int *pos, char *val);
-void usage_message(FILE *stream);
+[[deprecated("use fs::usage_message and pass Progname instead")]] void usage_message(FILE *stream);
 void usage(FILE *stream);
 
 static int debug{};

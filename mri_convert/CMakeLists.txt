@@ -1,7 +1,7 @@
 project(mri_convert)
 
 include_directories(${FS_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/packages/dicom
-                    ${Boost_INCLUDE_DIRS})
+                    ${Boost_INCLUDE_DIRS} ${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
 add_library(mri_convert STATIC EXCLUDE_FROM_ALL mri_convert_lib.cpp)
 
@@ -22,4 +22,5 @@ install(TARGETS mri_make_uchar DESTINATION bin)
 add_executable(mri_convert_tests mri_convert_tests.cpp)
 add_help(mri_convert_tests mri_convert.help.xml)
 set_target_properties(mri_convert_tests PROPERTIES EXCLUDE_FROM_ALL TRUE)
-target_link_libraries(mri_convert_tests utils mri_convert ${Boost_LIBRARIES} benchmark fmt)
+target_link_libraries(mri_convert_tests utils mri_convert ${GTEST_LIBRARIES} benchmark fmt gtest)
+add_test(mri_convert_tests mri_convert_tests)

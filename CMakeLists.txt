@@ -120,8 +120,8 @@ add_definitions(-DHAVE_ZLIB)
 # -------- gfortran/blas/lapack --------
 if(NOT APPLE)
   find_library(GFORTRAN_LIBRARIES
-    HINTS /usr/lib/gcc/x86_64-linux-gnu/4.8 /usr/lib/gcc/x86_64-redhat-linux/4.8.2/
-    NAMES libgfortran.a gfortran)
+               HINTS /usr/lib/gcc/x86_64-linux-gnu/4.8 /usr/lib/gcc/x86_64-redhat-linux/4.8.2/
+               NAMES libgfortran.a gfortran)
   find_library(BLAS_LIBRARIES NAMES libblas.a)
   find_library(LAPACK_LIBRARIES NAMES liblapack.a)
 endif()
@@ -281,9 +281,9 @@ if(DISTRIBUTE_FSPYTHON)
     set(PYTHON_EXECUTABLE ${FSPYTHON_DIR}/bin/python3)
     set(PYTHON_LIBRARY ${FSPYTHON_DIR}/lib/libpython3.6m)
     # install the barebones python distribution
-    INSTALL(DIRECTORY ${FSPYTHON_DIR}/bin ${FSPYTHON_DIR}/lib ${FSPYTHON_DIR}/include
-      DESTINATION ${CMAKE_INSTALL_PREFIX}/python USE_SOURCE_PERMISSIONS
-      )
+    install(DIRECTORY ${FSPYTHON_DIR}/bin ${FSPYTHON_DIR}/lib ${FSPYTHON_DIR}/include
+            DESTINATION ${CMAKE_INSTALL_PREFIX}/python USE_SOURCE_PERMISSIONS
+            )
   else()
     message(FATAL_ERROR "Cannot find fspython distribution in FS_PACKAGES_DIR")
   endif()
@@ -340,18 +340,18 @@ add_subdirectory(distribution)
 
 # the top-level include dir contain the most commonly included freesurfer header files
 set(FS_INCLUDE_DIRS
-  ${CMAKE_SOURCE_DIR}/include
-  ${CMAKE_SOURCE_DIR}/include/mri_tools
-  ${CMAKE_SOURCE_DIR}/packages/minc
-  ${CMAKE_SOURCE_DIR}/packages/netcdf
-  ${CMAKE_SOURCE_DIR}/packages/nifti
-  ${CMAKE_SOURCE_DIR}/packages/abseil-cpp/
-  ${CMAKE_SOURCE_DIR}/packages/benchmark/include/
-  ${CMAKE_SOURCE_DIR}/packages/fmt/include/
-  ${CMAKE_SOURCE_DIR}/packages/GSL/include
-  ${CMAKE_SOURCE_DIR}/packages/spdlog/include
-  /usr/local/include/aboualiaa
-  )
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/include/mri_tools
+    ${CMAKE_SOURCE_DIR}/packages/minc
+    ${CMAKE_SOURCE_DIR}/packages/netcdf
+    ${CMAKE_SOURCE_DIR}/packages/nifti
+    ${CMAKE_SOURCE_DIR}/packages/abseil-cpp/
+    ${CMAKE_SOURCE_DIR}/packages/benchmark/include/
+    ${CMAKE_SOURCE_DIR}/packages/fmt/include/
+    ${CMAKE_SOURCE_DIR}/packages/GSL/include
+    ${CMAKE_SOURCE_DIR}/packages/spdlog/include
+    /usr/local/include/aboualiaa
+    )
 
 # build the freesurfer static libraries
 add_subdirectories(utils)

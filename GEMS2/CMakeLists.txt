@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 project(gems)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-everything -arch x86_64 -Wl,-w")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-everything -arch x86_64 -Wl,-w")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-everything -arch x86_64 -fPIC -fpermissive -msse2 -mfpmath=sse -Wl,-w ")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-everything -arch x86_64 -fPIC -fpermissive -msse2 -mfpmath=sse -Wl,-w ")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(interfaces)
@@ -45,16 +45,16 @@ else()
   endif()
 endif()
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "-fPIC -fpermissive -msse2 -mfpmath=sse")
+#set(CMAKE_CXX_STANDARD 17)
+#set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-fPIC -fpermissive -msse2 -mfpmath=sse")
 
 if(GEMS_BUILD_EXECUTABLES OR GEMS_BUILD_GUI)
   add_definitions(-DUSE_DYNAMIC_MESH)
   message(STATUS "Since you're building executables to compute meshes, ITK dynamic meshes will "
-    "be used (internally using std::map instead of std::vector to store lists of points, cells, etc). "
-    "Everything will still work, but anything that only uses existing meshes will be "
-    "slower. (up to 100% slower)"
-    )
+          "be used (internally using std::map instead of std::vector to store lists of points, cells, etc). "
+          "Everything will still work, but anything that only uses existing meshes will be "
+          "slower. (up to 100% slower)"
+          )
 endif()
 
 if(GEMS_BUILD_CUDA)
@@ -68,39 +68,39 @@ endif()
 
 # source
 set(SOURCES
-  gzstream.C
-  itkMGHImageIO.cxx
-  itkMGHImageIOFactory.cxx
-  kvlAtlasMeshAlphaDrawer.cxx
-  kvlAtlasMeshCollection.cxx
-  kvlAtlasMeshCollectionValidator.cxx
-  kvlAtlasMeshDeformationConjugateGradientOptimizer.cxx
-  kvlAtlasMeshDeformationFixedStepGradientDescentOptimizer.cxx
-  kvlAtlasMeshDeformationGradientDescentOptimizer.cxx
-  kvlAtlasMeshDeformationLBFGSOptimizer.cxx
-  kvlAtlasMeshDeformationOptimizer.cxx
-  kvlAtlasMeshLabelImageStatisticsCollector.cxx
-  kvlAtlasMeshMultiAlphaDrawer.cxx
-  kvlAtlasMeshPositionCostAndGradientCalculator.cxx
-  kvlAtlasMeshProbabilityImageStatisticsCollector.cxx
-  kvlAtlasMeshRasterizor.cxx
-  kvlAtlasMeshSmoother.cxx
-  kvlAtlasMeshStatisticsCollector.cxx
-  kvlAtlasMeshSummaryDrawer.cxx
-  kvlAtlasMeshToIntensityImageCostAndGradientCalculator.cxx
-  kvlAtlasMeshToLabelImageCostAndGradientCalculator.cxx
-  kvlAtlasMeshToPointSetCostAndGradientCalculator.cxx
-  kvlAtlasMeshVisitCounter.cxx
-  kvlAtlasMeshValueDrawer.cxx
-  kvlAtlasParameterEstimator.cxx
-  kvlAverageAtlasMeshPositionCostAndGradientCalculator.cxx
-  kvlCompressionLookupTable.cxx
-  kvlConditionalGaussianEntropyCostAndGradientCalculator.cxx
-  kvlCroppedImageReader.cxx
-  kvlHistogrammer.cxx
-  kvlMutualInformationCostAndGradientCalculator.cxx
-  kvlAtlasMeshJacobianDeterminantDrawer.cxx
-  )
+    gzstream.C
+    itkMGHImageIO.cxx
+    itkMGHImageIOFactory.cxx
+    kvlAtlasMeshAlphaDrawer.cxx
+    kvlAtlasMeshCollection.cxx
+    kvlAtlasMeshCollectionValidator.cxx
+    kvlAtlasMeshDeformationConjugateGradientOptimizer.cxx
+    kvlAtlasMeshDeformationFixedStepGradientDescentOptimizer.cxx
+    kvlAtlasMeshDeformationGradientDescentOptimizer.cxx
+    kvlAtlasMeshDeformationLBFGSOptimizer.cxx
+    kvlAtlasMeshDeformationOptimizer.cxx
+    kvlAtlasMeshLabelImageStatisticsCollector.cxx
+    kvlAtlasMeshMultiAlphaDrawer.cxx
+    kvlAtlasMeshPositionCostAndGradientCalculator.cxx
+    kvlAtlasMeshProbabilityImageStatisticsCollector.cxx
+    kvlAtlasMeshRasterizor.cxx
+    kvlAtlasMeshSmoother.cxx
+    kvlAtlasMeshStatisticsCollector.cxx
+    kvlAtlasMeshSummaryDrawer.cxx
+    kvlAtlasMeshToIntensityImageCostAndGradientCalculator.cxx
+    kvlAtlasMeshToLabelImageCostAndGradientCalculator.cxx
+    kvlAtlasMeshToPointSetCostAndGradientCalculator.cxx
+    kvlAtlasMeshVisitCounter.cxx
+    kvlAtlasMeshValueDrawer.cxx
+    kvlAtlasParameterEstimator.cxx
+    kvlAverageAtlasMeshPositionCostAndGradientCalculator.cxx
+    kvlCompressionLookupTable.cxx
+    kvlConditionalGaussianEntropyCostAndGradientCalculator.cxx
+    kvlCroppedImageReader.cxx
+    kvlHistogrammer.cxx
+    kvlMutualInformationCostAndGradientCalculator.cxx
+    kvlAtlasMeshJacobianDeterminantDrawer.cxx
+    )
 
 # gems libary
 add_library(kvlGEMSCommon ${SOURCES})
