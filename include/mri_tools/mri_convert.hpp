@@ -33,6 +33,7 @@
 
 #include <cctype>
 #include <cerrno>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -152,6 +153,20 @@ public:
   std::string out_name{};
   bool zero_ge_z_offset_flag{};
   bool no_zero_ge_z_offset_flag{};
+  int nskip{};
+  int ndrop{};
+  int nslices_override{};
+  int ncols_override{};
+  int nrows_override{};
+  std::string statusfile{};
+  std::string sdcmlist{};
+  std::vector<int> fsubsample{};
+  int SubSampStart{};
+  int SubSampDelta{};
+  int SubSampEnd{};
+  bool subsample_flag{};
+  bool frame_flag{};
+  bool mid_frame_flag{};
 };
 
 struct ENV {
@@ -224,12 +239,21 @@ print_help(boost::program_options::options_description const &desc, ENV *env) {
 /* ----- determines tolerance of non-orthogonal basis vectors ----- */
 constexpr auto CLOSE_ENOUGH{5e-3};
 
-void get_ints(int argc, char *argv[], int *pos, int *vals, int nvals);
-void get_floats(int argc, char *argv[], int *pos, float *vals, int nvals);
-void get_doubles(int argc, char *argv[], int *pos, double *vals, int nvals);
-void get_string(int argc, char *argv[], int *pos, char *val);
+[[deprecated("use boost::program_options")]] void
+get_ints(int argc, char *argv[], int *pos, int *vals, int nvals);
+
+[[deprecated("use boost::program_options")]] void
+get_floats(int argc, char *argv[], int *pos, float *vals, int nvals);
+
+[[deprecated("use boost::program_options")]] void
+get_doubles(int argc, char *argv[], int *pos, double *vals, int nvals);
+
+[[deprecated("use boost::program_options")]] void
+get_string(int argc, char *argv[], int *pos, char *val);
+
 [[deprecated("use fs::usage_message and pass Progname instead")]] void
 usage_message(FILE *stream);
+
 void usage(FILE *stream);
 
 static int debug{};

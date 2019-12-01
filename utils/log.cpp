@@ -72,7 +72,7 @@ void throwExceptions(bool setting) { exceptions = setting; }
   `setErrorLog(filename)`.
   **This is for internal use only** - use `fs::error()` to throw errors.
 */
-void fs_detail::writeToErrorLog(const std::string &message) {
+void fs::detail::writeToErrorLog(const std::string &message) {
   if (errorlog.empty())
     return;
 
@@ -87,7 +87,7 @@ void fs_detail::writeToErrorLog(const std::string &message) {
   **This is for internal use only** - use `fs::fatal(code)` to throw a fatal
   error.
 */
-void fs_detail::errorExit(int code) {
+void fs::detail::errorExit(int code) {
   if (exceptions) {
     if (code != 0)
       throw code;

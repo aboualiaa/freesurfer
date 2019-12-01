@@ -24,8 +24,7 @@ const char *reset();
 // global settings
 void throwExceptions(bool setting);
 void setErrorLog(const std::string &filename);
-
-namespace fs_detail {
+namespace fs::detail {
 
 void writeToErrorLog(const std::string &message);
 void errorExit(int code);
@@ -42,37 +41,37 @@ struct logger {
   std::ostringstream ss;
 };
 
-} // namespace fs_detail
+} // namespace fs::detail
 
 namespace fs {
 
-struct fatal : public fs_detail::logger {
+struct fatal : public detail::logger {
   int ret;
   fatal(int err = 1) : ret(err) {}
   ~fatal() {
     std::cerr << term::red() << "error: " << term::reset() << this->ss.str()
               << "\n";
-    fs_detail::writeToErrorLog(this->ss.str());
-    fs_detail::errorExit(this->ret);
+    detail::writeToErrorLog(this->ss.str());
+    detail::errorExit(this->ret);
   }
 };
 
-struct error : public fs_detail::logger {
+struct error : public detail::logger {
   ~error() {
     std::cerr << term::red() << "error: " << term::reset() << this->ss.str()
               << "\n";
-    fs_detail::writeToErrorLog(this->ss.str());
+    detail::writeToErrorLog(this->ss.str());
   }
 };
 
-struct warning : public fs_detail::logger {
+struct warning : public detail::logger {
   ~warning() {
     std::cerr << term::yellow() << "warning: " << term::reset()
               << this->ss.str() << "\n";
   }
 };
 
-struct debug : public fs_detail::logger {
+struct debug : public detail::logger {
   ~debug() {
     std::cerr << term::cyan() << "debug: " << term::reset() << this->ss.str()
               << "\n";

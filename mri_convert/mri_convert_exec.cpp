@@ -623,18 +623,6 @@ auto main(int argc, char *argv[]) -> int {
     } else if (strcmp(argv[i], "--slice-bias") == 0) {
       get_floats(argc, argv, &i, &SliceBiasAlpha, 1);
       SliceBias = TRUE;
-    } else if (strcmp(argv[i], "--mid-frame") == 0) {
-      frame_flag = TRUE;
-      mid_frame_flag = TRUE;
-    } else if (strcmp(argv[i], "--fsubsample") == 0) {
-      get_ints(argc, argv, &i, &SubSampStart, 1);
-      get_ints(argc, argv, &i, &SubSampDelta, 1);
-      get_ints(argc, argv, &i, &SubSampEnd, 1);
-      if (SubSampDelta == 0) {
-        fmt::printf("ERROR: don't use subsample delta = 0\n");
-        exit(1);
-      }
-      subsample_flag = TRUE;
     } else if (strcmp(argv[i], "-il") == 0 ||
                strcmp(argv[i], "--in_like") == 0) {
       get_string(argc, argv, &i, in_like_name.data());
@@ -662,130 +650,6 @@ auto main(int argc, char *argv[]) -> int {
     } else if (strcmp(argv[i], "-cg") == 0 ||
                strcmp(argv[i], "--crop_gdf") == 0) {
       mriio_set_gdf_crop_flag(TRUE);
-    }
-    /*-------------------------------------------------------------*/
-    else if (strcmp(argv[i], "--status") == 0 ||
-             strcmp(argv[i], "--statusfile") == 0) {
-      /* File name to write percent complete for Siemens DICOM */
-      if ((argc - 1) - i < 1) {
-        fmt::fprintf(stderr, "ERROR: option --statusfile "
-                             "requires one argument\n");
-        exit(1);
-      }
-      i++;
-      SDCMStatusFile =
-          static_cast<char *>(calloc(strlen(argv[i]) + 1, sizeof(char)));
-      memmove(SDCMStatusFile, argv[i], strlen(argv[i]));
-      fptmp = fopen(SDCMStatusFile, "w");
-      if (fptmp == nullptr) {
-        fmt::fprintf(stderr, "ERROR: could not open %s for writing\n",
-                     SDCMStatusFile);
-        exit(1);
-      }
-      fmt::fprintf(fptmp, "0\n");
-      fclose(fptmp);
-    }
-    /*-------------------------------------------------------------*/
-    else if (strcmp(argv[i], "--sdcmlist") == 0) {
-      /* File name that contains a list of Siemens DICOM files
-         that are in the same run as the one listed on the
-         command-line. If not present, the directory will be scanned,
-         but this can take a while.
-      */
-      if ((argc - 1) - i < 1) {
-        fmt::fprintf(stderr,
-                     "ERROR: option --sdcmlist requires one argument\n");
-        exit(1);
-      }
-      i++;
-      SDCMListFile =
-          static_cast<char *>(calloc(strlen(argv[i]) + 1, sizeof(char)));
-      memmove(SDCMListFile, argv[i], strlen(argv[i]));
-      fptmp = fopen(SDCMListFile, "r");
-      if (fptmp == nullptr) {
-        fmt::fprintf(stderr, "ERROR: could not open %s for reading\n",
-                     SDCMListFile);
-        exit(1);
-      }
-      fclose(fptmp);
-    }
-    /*-------------------------------------------------------------*/
-    else if ((strcmp(argv[i], "--nslices-override") == 0)) {
-      int NSlicesOverride;
-      get_ints(argc, argv, &i, &NSlicesOverride, 1);
-      fmt::printf("NSlicesOverride %d\n", NSlicesOverride);
-      fmt::sprintf(tmpstr.data(), "%d", NSlicesOverride);
-      setenv("NSLICES_OVERRIDE", tmpstr.data(), 1);
-    }
-    /*-------------------------------------------------------------*/
-    else if ((strcmp(argv[i], "--ncols-override") == 0)) {
-      int NColsOverride;
-      get_ints(argc, argv, &i, &NColsOverride, 1);
-      fmt::printf("NColsOverride %d\n", NColsOverride);
-      fmt::sprintf(tmpstr.data(), "%d", NColsOverride);
-      setenv("NCOLS_OVERRIDE", tmpstr.data(), 1);
-    }
-    /*-------------------------------------------------------------*/
-    else if ((strcmp(argv[i], "--nrows-override") == 0)) {
-      int NRowsOverride;
-      get_ints(argc, argv, &i, &NRowsOverride, 1);
-      fmt::printf("NRowsOverride %d\n", NRowsOverride);
-      fmt::printf(tmpstr.data(), "%d", NRowsOverride);
-      setenv("NROWS_OVERRIDE", tmpstr.data(), 1);
-    } else if (strcmp(argv[i], "--mosaic-fix-noascii") == 0) {
-      setenv("FS_MOSAIC_FIX_NOASCII", "1", 1);
-    }
-    /*-------------------------------------------------------------*/
-    else if ((strcmp(argv[i], "--nspmzeropad") == 0) ||
-             (strcmp(argv[i], "--out_nspmzeropad") == 0)) {
-      /* Choose the amount of zero padding for spm output files */
-      if ((argc - 1) - i < 1) {
-        fmt::fprintf(stderr, "ERROR: option --out_nspmzeropad "
-                             "requires one argument\n");
-        exit(1);
-      }
-      i++;
-      sscanf(argv[i], "%d", &N_Zero_Pad_Output);
-    }
-    /*-------------------------------------------------------------*/
-    else if ((strcmp(argv[i], "--in_nspmzeropad") == 0)) {
-      /* Choose the amount of zero padding for spm input files */
-      if ((argc - 1) - i < 1) {
-        fmt::fprintf(stderr, "ERROR: option --in_nspmzeropad "
-                             "requires one argument\n");
-        exit(1);
-      }
-      i++;
-      sscanf(argv[i], "%d", &N_Zero_Pad_Input);
-    } else if ((strcmp(argv[i], "--no-strip-pound") == 0)) {
-      MRIIO_Strip_Pound = 0;
-      /*-----------------------------------------------------*/ // E/
-    } else if (strcmp(argv[i], "--nskip") == 0) {
-      get_ints(argc, argv, &i, &nskip, 1);
-      fmt::printf("nskip = %d\n", nskip);
-      if (nskip < 0) {
-        fmt::printf("ERROR: nskip cannot be negative\n");
-        exit(1);
-      }
-    } else if (strcmp(argv[i], "--ndrop") == 0) {
-      get_ints(argc, argv, &i, &ndrop, 1);
-      fmt::printf("ndrop = %d\n", ndrop);
-      if (ndrop < 0) {
-        fmt::printf("ERROR: ndrop cannot be negative\n");
-        exit(1);
-      }
-    } else if (strcmp(argv[i], "--diag") == 0) {
-      get_ints(argc, argv, &i, &Gdiag_no, 1);
-    } else if (strcmp(argv[i], "--mra") == 0) {
-      /* This flag forces DICOMread to first use 18,50 to get the slice
-         thickness instead of 18,88. This is needed with siemens mag res
-         angiogram (MRAs) */
-      SliceResElTag1 = 0x50;
-      SliceResElTag2 = 0x88;
-    } else if (strcmp(argv[i], "--auto-slice-res") == 0) {
-      /* Automatically determine whether to get slice thickness from 18,50 or
-         18,88 depending upon  the value of 18,23 */
-      AutoSliceResElTag = 1;
     }
   }
   /**** Finished parsing command line ****/
@@ -3170,6 +3034,98 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     cmdargs->in_flip_angle_flag = true;
   }
 
+  if (vm.count("nskip") != 0) {
+    if (cmdargs->nskip < 0) {
+      spdlog::get("stderr")->critical("nskip cannot be negativ");
+      exit(1);
+    }
+  }
+
+  if (vm.count("ndrop") != 0) {
+    if (cmdargs->ndrop < 0) {
+      spdlog::get("stderr")->critical("nskip cannot be negativ");
+      exit(1);
+    }
+  }
+
+  if (vm.count("mra") != 0) {
+    SliceResElTag1 = 0x50;
+    SliceResElTag2 = 0x88;
+  }
+
+  if (vm.count("auto-slice-res") != 0) {
+    AutoSliceResElTag = 1;
+  }
+
+  if (vm.count("no-strip-pound") != 0) {
+    MRIIO_Strip_Pound = 0;
+  }
+
+  if (vm.count("mosaic-fix-noascii") != 0) {
+    setenv("FS_MOSAIC_FIX_NOASCII", "1", 1);
+  }
+
+  if (vm.count("nslices-override") != 0) {
+    fmt::printf("NSlicesOverride %d\n", cmdargs->nslices_override);
+    std::string tmpstr = std::to_string(cmdargs->nslices_override);
+    setenv("NSLICES_OVERRIDE", tmpstr.data(), 1);
+  }
+
+  if (vm.count("ncols-override") != 0) {
+    fmt::printf("NColsOverride %d\n", cmdargs->ncols_override);
+    std::string tmpstr = std::to_string(cmdargs->ncols_override);
+    setenv("NCOLS_OVERRIDE", tmpstr.data(), 1);
+  }
+
+  if (vm.count("nrows-override") != 0) {
+    fmt::printf("NRowsOverride %d\n", cmdargs->nrows_override);
+    std::string tmpstr = std::to_string(cmdargs->nrows_override);
+    setenv("NROWS_OVERRIDE", tmpstr.data(), 1);
+  }
+
+  if (vm.count("statusfile") != 0 || vm.count("status") != 0) {
+    SDCMStatusFile = cmdargs->statusfile.data();
+    std::ofstream ofs(SDCMStatusFile);
+    if (!ofs.is_open()) {
+      fmt::fprintf(stderr, "ERROR: could not open %s for writing\n",
+                   SDCMStatusFile);
+      exit(1);
+    }
+    ofs << "0\n";
+    ofs.close();
+  }
+
+  if (vm.count("sdcmlist") != 0) {
+    SDCMListFile = cmdargs->sdcmlist.data();
+    std::ifstream fptmp(SDCMListFile);
+    if (!fptmp.is_open()) {
+      fmt::fprintf(stderr, "ERROR: could not open %s for reading\n",
+                   SDCMListFile);
+      exit(1);
+    }
+    fptmp.close();
+  }
+
+  if (vm.count("fsubsample") != 0) {
+    auto opts = vm["fsubsample"].as<std::vector<int>>();
+    if (opts.size() != 3) {
+      fmt::fprintf(stderr,
+                   "ERROR: fsubsample neads 3 values: start, delta, end\n");
+    }
+    cmdargs->SubSampStart = opts[0];
+    cmdargs->SubSampDelta = opts[1];
+    cmdargs->SubSampEnd = opts[2];
+    if (cmdargs->SubSampDelta == 0) {
+      fmt::printf("ERROR: don't use subsample delta = 0\n");
+      exit(1);
+    }
+    cmdargs->subsample_flag = true;
+  }
+
+  if (vm.count("mid-frame") != 0) {
+    cmdargs->frame_flag = true;
+  }
+
   return false;
 }
 
@@ -3685,6 +3641,80 @@ void initArgDesc(boost::program_options::options_description *desc,
       /**/                                                              /**/
       ("nozgez",                                                        /**/
        po::bool_switch(&cmdargs->no_zero_ge_z_offset_flag),             /**/
-       "no_zero_ge_z_offset");
+       "no_zero_ge_z_offset")                                           /**/
+      /**/                                                              /**/
+      ("nskip",                                                         /**/
+       po::value<int>(&cmdargs->nskip),                                 /**/
+       "nskip")                                                         /**/
+      /**/                                                              /**/
+      ("ndrop",                                                         /**/
+       po::value<int>(&cmdargs->ndrop),                                 /**/
+       "ndrop")                                                         /**/
+      /**/                                                              /**/
+      ("diag",                                                          /**/
+       po::value<int>(&Gdiag_no),                                       /**/
+       "diag")                                                          /**/
+      /**/                                                              /**/
+      ("mra",                                                           /**/
+       "This flag forces DICOMread to first use 18,50 to get the slice" /**/
+       " thickness instead of 18,88. This is needed with siemens mag "  /**/
+       "res angiogram (MRAs)")                                          /**/
+      /**/                                                              /**/
+      ("auto-slice-res",                                                /**/
+       "Automatically determine whether to get slice thickness "        /**/
+       "from 18,50 or 18,88 depending upon  the value of 18,23")        /**/
+      /**/                                                              /**/
+      ("no-strip-pound",                                                /**/
+       "no-strip-pound")                                                /**/
+      /**/                                                              /**/
+      ("in_nspmzeropad",                                                /**/
+       po::value<int>(&N_Zero_Pad_Input),                               /**/
+       "in_nspmzeropad")                                                /**/
+      /**/                                                              /**/
+      ("nspmzeropad",                                                   /**/
+       po::value<int>(&N_Zero_Pad_Output),                              /**/
+       "out_nspmzeropad")                                               /**/
+      /**/                                                              /**/
+      ("out_nspmzeropad",                                               /**/
+       po::value<int>(&N_Zero_Pad_Output),                              /**/
+       "out_nspmzeropad")                                               /**/
+      /**/                                                              /**/
+      ("mosaic-fix-noascii",                                            /**/
+       "mosaic-fix-noascii")                                            /**/
+      /**/                                                              /**/
+      ("nslices-override",                                              /**/
+       po::value<int>(&cmdargs->nslices_override),                      /**/
+       "nslices-override")                                              /**/
+      /**/                                                              /**/
+      ("ncols-override",                                                /**/
+       po::value<int>(&cmdargs->ncols_override),                        /**/
+       "ncols-override")                                                /**/
+      /**/                                                              /**/
+      ("nrows-override",                                                /**/
+       po::value<int>(&cmdargs->nrows_override),                        /**/
+       "nrows-override")                                                /**/
+      /**/                                                              /**/
+      ("statusfile",                                                    /**/
+       po::value<std::string>(&cmdargs->statusfile),                    /**/
+       "File name to write percent complete for Siemens DICOM")         /**/
+      /**/                                                              /**/
+      ("status",                                                        /**/
+       po::value<std::string>(&cmdargs->statusfile),                    /**/
+       "File name to write percent complete for Siemens DICOM")         /**/
+      /**/                                                              /**/
+      ("sdcmlist",                                                      /**/
+       po::value<std::string>(&cmdargs->sdcmlist),                      /**/
+       "File name that contains a list of Siemens DICOM files that "    /**/
+       "are in the same run as the one listed on the command-line. "    /**/
+       "If not present, the directory will be scanned, but this can "   /**/
+       "take a while.")                                                 /**/
+      /**/                                                              /**/
+      ("fsubsample",                                                    /**/
+       po::value<std::vector<int>>(&cmdargs->fsubsample),               /**/
+       "fsubsample")                                                    /**/
+      /**/                                                              /**/
+      ("mid-frame",                                                     /**/
+       po::bool_switch(&cmdargs->mid_frame_flag),                       /**/
+       "mid-frame");                                                    /**/
 }
 /* EOF */
