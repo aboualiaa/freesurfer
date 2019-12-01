@@ -11,7 +11,7 @@
 
 using uint64 = uint64_t;
 
-namespace fs::utils::cli {
+namespace fs::util::cli {
 
 auto usage_message(FILE *stream, char const *Progname) -> bool {
   if (stream == stdin) {
@@ -41,7 +41,23 @@ auto usage_message(std::ostream &stream, char const *Progname) -> bool {
 auto usage_message(std::ostream &stream, std::string const &Progname) -> bool {
   return usage_message(stream, Progname.c_str());
 }
-} // namespace fs::utils::cli
+
+auto usage_message() -> std::string {
+  std::ostringstream tmp;
+  tmp << "\ntype " << GET_PROGRAM_NAME() << " -u for usage\n\n";
+  return tmp.str();
+}
+
+auto usage_message(FILE *stream) -> bool {
+  if (stream != nullptr) {
+    fmt::fprintf(stream, usage_message());
+    return true;
+  }
+
+  return false;
+}
+
+} // namespace fs::util::cli
 
 namespace fs::math {
 

@@ -28,8 +28,9 @@
 
 auto main(int argc, char *argv[]) -> int {
   auto err_logger = spdlog::stderr_color_mt("stderr");
-
   auto env = ENV();
+  fs::util::cli::usage_message(stdout);
+  exit(32);
   auto cmdargs = CMDARGS(argc, argv);
   if (!good_cmdline_args(&cmdargs, &env)) {
     return 1;
@@ -296,8 +297,7 @@ auto main(int argc, char *argv[]) -> int {
   }
 
   /* ----- get the program name ----- */
-  Progname = strrchr(argv[0], '/');
-  Progname = (Progname == nullptr ? argv[0] : Progname + 1);
+  Progname = GET_PROGRAM_NAME();
 
   /* ----- pass the command line to mriio ----- */
   mriio_command_line(argc, argv);
@@ -342,7 +342,7 @@ auto main(int argc, char *argv[]) -> int {
                      "in_i_direction = (%g, %g, %g)\n",
                      Progname, in_i_directions[0], in_i_directions[1],
                      in_i_directions[2]);
-        fs::utils::cli::usage_message(stdout, Progname);
+        fs::util::cli::usage_message(stdout);
         exit(1);
       }
       if (magnitude != 1.0) {
@@ -363,7 +363,7 @@ auto main(int argc, char *argv[]) -> int {
                      "in_j_direction = (%g, %g, %g)\n",
                      Progname, in_j_directions[0], in_j_directions[1],
                      in_j_directions[2]);
-        fs::utils::cli::usage_message(stdout, Progname);
+        fs::util::cli::usage_message(stdout);
         exit(1);
       }
       if (magnitude != 1.0) {
@@ -384,7 +384,7 @@ auto main(int argc, char *argv[]) -> int {
                      "in_k_direction = (%g, %g, %g)\n",
                      Progname, in_k_directions[0], in_k_directions[1],
                      in_k_directions[2]);
-        fs::utils::cli::usage_message(stdout, Progname);
+        fs::util::cli::usage_message(stdout);
         exit(1);
       }
       if (magnitude != 1.0) {
@@ -429,7 +429,7 @@ auto main(int argc, char *argv[]) -> int {
                      "out_i_direction = (%g, %g, %g)\n",
                      Progname, out_i_directions[0], out_i_directions[1],
                      out_i_directions[2]);
-        fs::utils::cli::usage_message(stdout, Progname);
+        fs::util::cli::usage_message(stdout);
         exit(1);
       }
       if (magnitude != 1.0) {
@@ -451,7 +451,7 @@ auto main(int argc, char *argv[]) -> int {
                      "out_j_direction = (%g, %g, %g)\n",
                      Progname, out_j_directions[0], out_j_directions[1],
                      out_j_directions[2]);
-        fs::utils::cli::usage_message(stdout, Progname);
+        fs::util::cli::usage_message(stdout);
         exit(1);
       }
       if (magnitude != 1.0) {
@@ -473,7 +473,7 @@ auto main(int argc, char *argv[]) -> int {
                      "out_k_direction = (%g, %g, %g)\n",
                      Progname, out_k_directions[0], out_k_directions[1],
                      out_k_directions[2]);
-        fs::utils::cli::usage_message(stdout, Progname);
+        fs::util::cli::usage_message(stdout);
         exit(1);
       }
       if (magnitude != 1.0) {
@@ -530,7 +530,7 @@ auto main(int argc, char *argv[]) -> int {
       } else {
         fmt::fprintf(stderr, "\n%s: unknown data type \"%s\"\n", Progname,
                      argv[i]);
-        fs::utils::cli::usage_message(stdout, Progname);
+        fs::util::cli::usage_message(stdout);
         exit(1);
       }
     } else if (strcmp(argv[i], "--bfile-little-endian") == 0) {
@@ -567,7 +567,7 @@ auto main(int argc, char *argv[]) -> int {
       } else {
         fmt::fprintf(stderr, "\n%s: unknown resample type \"%s\"\n", Progname,
                      argv[i]);
-        fs::utils::cli::usage_message(stdout, Progname);
+        fs::util::cli::usage_message(stdout);
         exit(1);
       }
     } else if (strcmp(argv[i], "-it") == 0 ||
@@ -599,7 +599,7 @@ auto main(int argc, char *argv[]) -> int {
       if (gdf_image_stem.empty()) {
         fmt::fprintf(stderr, "\n%s: zero length GDF image stem given\n",
                      Progname);
-        fs::utils::cli::usage_message(stdout, Progname);
+        fs::util::cli::usage_message(stdout);
         exit(1);
       }
     } else if (strcmp(argv[i], "-rl") == 0 ||
@@ -635,7 +635,7 @@ auto main(int argc, char *argv[]) -> int {
                      "\n%s: clean parcellation count must "
                      "be between 14 and 26, inclusive\n",
                      Progname);
-        fs::utils::cli::usage_message(stdout, Progname);
+        fs::util::cli::usage_message(stdout);
         exit(1);
       }
       smooth_parcellation_flag = TRUE;
@@ -704,13 +704,13 @@ auto main(int argc, char *argv[]) -> int {
   }
 
   if (sizes_good_flag) {
-    fs::utils::cli::usage_message(stdout, Progname);
+    fs::util::cli::usage_message(stdout);
     exit(1);
   }
 
   if (out_name[0] == '\0' && !((read_only_flag) || (no_write_flag))) {
     fmt::fprintf(stderr, "\n%s: missing output volume name\n", Progname);
-    fs::utils::cli::usage_message(stdout, Progname);
+    fs::util::cli::usage_message(stdout);
     exit(1);
   }
 
@@ -721,7 +721,7 @@ auto main(int argc, char *argv[]) -> int {
         "\n%s: pass example (or empty) stats-table with --like to specify "
         "measure, column and row headers\n",
         Progname);
-    fs::utils::cli::usage_message(stdout, Progname);
+    fs::util::cli::usage_message(stdout);
     exit(1);
   }
 
@@ -739,7 +739,7 @@ auto main(int argc, char *argv[]) -> int {
                  "\n%s: unknown input "
                  "volume type %s\n",
                  Progname, in_type_string.data());
-    fs::utils::cli::usage_message(stdout, Progname);
+    fs::util::cli::usage_message(stdout);
     exit(1);
   }
 
@@ -747,7 +747,7 @@ auto main(int argc, char *argv[]) -> int {
       forced_template_type == MRI_VOLUME_TYPE_UNKNOWN) {
     fmt::fprintf(stderr, "\n%s: unknown template volume type %s\n", Progname,
                  template_type_string.data());
-    fs::utils::cli::usage_message(stdout, Progname);
+    fs::util::cli::usage_message(stdout);
     exit(1);
   }
 
@@ -755,7 +755,7 @@ auto main(int argc, char *argv[]) -> int {
       (ascii_flag == 0)) {
     fmt::fprintf(stderr, "\n%s: unknown output volume type %s\n", Progname,
                  out_type_string.data());
-    fs::utils::cli::usage_message(stdout, Progname);
+    fs::util::cli::usage_message(stdout);
     exit(1);
   }
 
@@ -2556,7 +2556,7 @@ void get_ints(int argc, char *argv[], int *pos, int *vals, int nvals) {
                  "\n%s: argument %s expects %d integers; "
                  "only %d arguments after flag\n",
                  Progname, argv[*pos], nvals, argc - *pos - 1);
-    fs::utils::cli::usage_message(stdout, Progname);
+    fs::util::cli::usage_message(stdout);
     exit(1);
   }
 
@@ -2564,7 +2564,7 @@ void get_ints(int argc, char *argv[], int *pos, int *vals, int nvals) {
     if (argv[*pos + i + 1][0] == '\0') {
       fmt::fprintf(stderr, "\n%s: argument to %s flag is null\n", Progname,
                    argv[*pos]);
-      fs::utils::cli::usage_message(stdout, Progname);
+      fs::util::cli::usage_message(stdout);
       exit(1);
     }
 
@@ -2575,7 +2575,7 @@ void get_ints(int argc, char *argv[], int *pos, int *vals, int nvals) {
                    "\n%s: error converting \"%s\" to an "
                    "integer for %s flag, incorrect # of args (need %d)?\n",
                    Progname, argv[*pos + i + 1], argv[*pos], nvals);
-      fs::utils::cli::usage_message(stdout, Progname);
+      fs::util::cli::usage_message(stdout);
       exit(1);
     }
   }
@@ -2594,7 +2594,7 @@ void get_floats(int argc, char *argv[], int *pos, float *vals, int nvals) {
                  "\n%s: argument %s expects %d floats; "
                  "only %d arguments after flag\n",
                  Progname, argv[*pos], nvals, argc - *pos - 1);
-    fs::utils::cli::usage_message(stdout, Progname);
+    fs::util::cli::usage_message(stdout);
     exit(1);
   }
 
@@ -2602,7 +2602,7 @@ void get_floats(int argc, char *argv[], int *pos, float *vals, int nvals) {
     if (argv[*pos + i + 1][0] == '\0') {
       fmt::fprintf(stderr, "\n%s: argument to %s flag is null\n", Progname,
                    argv[*pos]);
-      fs::utils::cli::usage_message(stdout, Progname);
+      fs::util::cli::usage_message(stdout);
       exit(1);
     }
 
@@ -2613,7 +2613,7 @@ void get_floats(int argc, char *argv[], int *pos, float *vals, int nvals) {
                    "\n%s: error converting \"%s\" to a "
                    "float for %s flag: incorrect # of args? Need %d\n",
                    Progname, argv[*pos + i + 1], argv[*pos], nvals);
-      fs::utils::cli::usage_message(stdout, Progname);
+      fs::util::cli::usage_message(stdout);
       exit(1);
     }
   }
@@ -2632,7 +2632,7 @@ void get_doubles(int argc, char *argv[], int *pos, double *vals, int nvals) {
                  "\n%s: argument %s expects %d floats; "
                  "only %d arguments after flag\n",
                  Progname, argv[*pos], nvals, argc - *pos - 1);
-    fs::utils::cli::usage_message(stdout, Progname);
+    fs::util::cli::usage_message(stdout);
     exit(1);
   }
 
@@ -2640,7 +2640,7 @@ void get_doubles(int argc, char *argv[], int *pos, double *vals, int nvals) {
     if (argv[*pos + i + 1][0] == '\0') {
       fmt::fprintf(stderr, "\n%s: argument to %s flag is null\n", Progname,
                    argv[*pos]);
-      fs::utils::cli::usage_message(stdout, Progname);
+      fs::util::cli::usage_message(stdout);
       exit(1);
     }
 
@@ -2651,7 +2651,7 @@ void get_doubles(int argc, char *argv[], int *pos, double *vals, int nvals) {
                    "\n%s: error converting \"%s\" to a "
                    "float for %s flag: incorrect # of args? Need %d\n",
                    Progname, argv[*pos + i + 1], argv[*pos], nvals);
-      fs::utils::cli::usage_message(stdout, Progname);
+      fs::util::cli::usage_message(stdout);
       exit(1);
     }
   }
@@ -2667,7 +2667,7 @@ void get_string(int argc, char *argv[], int *pos, char *val) {
                  "\n%s: argument %s expects an extra argument; "
                  "none found\n",
                  Progname, argv[*pos]);
-    fs::utils::cli::usage_message(stdout, Progname);
+    fs::util::cli::usage_message(stdout);
     exit(1);
   }
 
@@ -2715,7 +2715,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     auto parsed_opts = po::command_line_parser(ac, av)
                            .options(desc)
                            .positional(pos)
-                           .style(fs::utils::cli::po_style)
+                           .style(fs::util::cli::po_style)
                            .run();
     po::store(parsed_opts, vm);
 

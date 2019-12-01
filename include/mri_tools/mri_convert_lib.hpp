@@ -11,9 +11,17 @@
 #include <fmt/format.h>
 #include <fmt/printf.h>
 
+#undef GET_PROGRAM_NAME
+#ifdef __GLIBC__
+#define GET_PROGRAM_NAME() program_invocation_short_name
+#else /* *BSD and OS X */
+#include <cstdlib>
+#define GET_PROGRAM_NAME() getprogname()
+#endif
+
 namespace pocl = boost::program_options::command_line_style;
 
-namespace fs::utils::cli {
+namespace fs::util::cli {
 
 // program option style
 static auto const po_style =
@@ -26,7 +34,9 @@ auto usage_message(FILE *stream, char const *Progname) -> bool;
 auto usage_message(FILE *stream, std::string const &Progname) -> bool;
 auto usage_message(std::ostream &stream, char const *Progname) -> bool;
 auto usage_message(std::ostream &stream, std::string const &Progname) -> bool;
-} // namespace fs::utils::cli
+auto usage_message() -> std::string;
+auto usage_message(FILE *stream) -> bool;
+} // namespace fs::util::cli
 
 namespace fs::math {
 auto frobenius_norm(const std::vector<double> *matrix) -> double;
