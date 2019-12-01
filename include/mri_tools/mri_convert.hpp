@@ -180,7 +180,7 @@ namespace boost::program_options {
 /// \param vm variables map
 /// \param for_what requiring option
 /// \param required_option required option
-inline void option_dependency(boost::program_options::variables_map const &vm,
+inline void dependant_options(boost::program_options::variables_map const &vm,
                               std::string const &for_what,
                               std::string const &required_option) {
   if ((vm.count(for_what) != 0U) && !vm[for_what].defaulted()) {
