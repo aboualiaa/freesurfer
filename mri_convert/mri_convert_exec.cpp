@@ -24,8 +24,9 @@
 
 #include "mri_convert.hpp"
 #include "mri_convert_lib.hpp"
+#include <armadillo>
 
-int main(int argc, char *argv[]) {
+auto main(int argc, char *argv[]) -> int {
   auto err_logger = spdlog::stderr_color_mt("stderr");
 
   auto env = ENV();
@@ -35,8 +36,8 @@ int main(int argc, char *argv[]) {
   }
 
   int ncutends{};
-  bool cutends_flag{false};
-  bool slice_crop_flag{false};
+  bool cutends_flag{};
+  bool slice_crop_flag{};
   int slice_crop_start{};
   int slice_crop_stop{};
   int SplitFrames{};
@@ -93,12 +94,12 @@ int main(int argc, char *argv[]) {
   std::array<int, 3> crop_center{};
   bool sizes_good_flag{};
   std::array<int, 3> crop_size{};
-  std::array<float, 3> in_i_directions{};
-  std::array<float, 3> in_j_directions{};
-  std::array<float, 3> in_k_directions{};
-  std::array<float, 3> out_i_directions{};
-  std::array<float, 3> out_j_directions{};
-  std::array<float, 3> out_k_directions{};
+  std::vector<double> in_i_directions{};
+  std::vector<double> in_j_directions{};
+  std::vector<double> in_k_directions{};
+  std::vector<double> out_i_directions{};
+  std::vector<double> out_j_directions{};
+  std::vector<double> out_k_directions{};
   std::array<float, 3> voxel_size{};
   bool in_i_direction_flag{};
   bool in_j_direction_flag{};
@@ -124,7 +125,7 @@ int main(int argc, char *argv[]) {
   float in_te{};
   bool in_flip_angle_flag{};
   float in_flip_angle{};
-  float magnitude;
+  double magnitude;
   float i_dot_j{};
   float i_dot_k{};
   float j_dot_k{};
@@ -259,6 +260,7 @@ int main(int argc, char *argv[]) {
   bool OutStatTableFlag{};
   int UpsampleFlag{};
   int UpsampleFactor{};
+  arma::mat A = arma::randu<arma::mat>(4, 5);
 
   FSinit();
   ErrorInit(NULL, NULL, NULL);
@@ -331,10 +333,9 @@ int main(int argc, char *argv[]) {
       force_out_type_flag = TRUE;
     } else if (strcmp(argv[i], "-iid") == 0 ||
                strcmp(argv[i], "--in_i_direction") == 0) {
-      get_floats(argc, argv, &i, in_i_directions.data(), 3);
-      magnitude = sqrt(in_i_directions[0] * in_i_directions[0] +
-                       in_i_directions[1] * in_i_directions[1] +
-                       in_i_directions[2] * in_i_directions[2]);
+      get_doubles(argc, argv, &i, in_i_directions.data(), 3);
+
+      magnitude = fs::math::frobenius_norm(&in_i_directions);
       if (magnitude == 0.0) {
         fmt::fprintf(stderr,
                      "\n%s: directions must have non-zero magnitude; "
@@ -347,19 +348,15 @@ int main(int argc, char *argv[]) {
       if (magnitude != 1.0) {
         fmt::printf("normalizing in_i_direction: (%g, %g, %g) -> ",
                     in_i_directions[0], in_i_directions[1], in_i_directions[2]);
-        in_i_directions[0] = in_i_directions[0] / magnitude;
-        in_i_directions[1] = in_i_directions[1] / magnitude;
-        in_i_directions[2] = in_i_directions[2] / magnitude;
+        fs::math::frobenius_normalize(&in_i_directions);
         fmt::printf("(%g, %g, %g)\n", in_i_directions[0], in_i_directions[1],
                     in_i_directions[2]);
       }
       in_i_direction_flag = TRUE;
     } else if (strcmp(argv[i], "-ijd") == 0 ||
                strcmp(argv[i], "--in_j_direction") == 0) {
-      get_floats(argc, argv, &i, in_j_directions.data(), 3);
-      magnitude = sqrt(in_j_directions[0] * in_j_directions[0] +
-                       in_j_directions[1] * in_j_directions[1] +
-                       in_j_directions[2] * in_j_directions[2]);
+      get_doubles(argc, argv, &i, in_j_directions.data(), 3);
+      magnitude = fs::math::frobenius_norm(&in_j_directions);
       if (magnitude == 0.0) {
         fmt::fprintf(stderr,
                      "\n%s: directions must have non-zero magnitude; "
@@ -372,19 +369,15 @@ int main(int argc, char *argv[]) {
       if (magnitude != 1.0) {
         fmt::printf("normalizing in_j_direction: (%g, %g, %g) -> ",
                     in_j_directions[0], in_j_directions[1], in_j_directions[2]);
-        in_j_directions[0] = in_j_directions[0] / magnitude;
-        in_j_directions[1] = in_j_directions[1] / magnitude;
-        in_j_directions[2] = in_j_directions[2] / magnitude;
+        fs::math::frobenius_normalize(&in_j_directions);
         fmt::printf("(%g, %g, %g)\n", in_j_directions[0], in_j_directions[1],
                     in_j_directions[2]);
       }
       in_j_direction_flag = TRUE;
     } else if (strcmp(argv[i], "-ikd") == 0 ||
                strcmp(argv[i], "--in_k_direction") == 0) {
-      get_floats(argc, argv, &i, in_k_directions.data(), 3);
-      magnitude = sqrt(in_k_directions[0] * in_k_directions[0] +
-                       in_k_directions[1] * in_k_directions[1] +
-                       in_k_directions[2] * in_k_directions[2]);
+      get_doubles(argc, argv, &i, in_k_directions.data(), 3);
+      magnitude = fs::math::frobenius_norm(&in_k_directions);
       if (magnitude == 0.0) {
         fmt::fprintf(stderr,
                      "\n%s: directions must have non-zero magnitude; "
@@ -397,9 +390,7 @@ int main(int argc, char *argv[]) {
       if (magnitude != 1.0) {
         fmt::printf("normalizing in_k_direction: (%g, %g, %g) -> ",
                     in_k_directions[0], in_k_directions[1], in_k_directions[2]);
-        in_k_directions[0] = in_k_directions[0] / magnitude;
-        in_k_directions[1] = in_k_directions[1] / magnitude;
-        in_k_directions[2] = in_k_directions[2] / magnitude;
+        fs::math::frobenius_normalize(&in_k_directions);
         fmt::printf("(%g, %g, %g)\n", in_k_directions[0], in_k_directions[1],
                     in_k_directions[2]);
       }
@@ -430,10 +421,8 @@ int main(int argc, char *argv[]) {
 
     else if (strcmp(argv[i], "-oid") == 0 ||
              strcmp(argv[i], "--out_i_direction") == 0) {
-      get_floats(argc, argv, &i, out_i_directions.data(), 3);
-      magnitude = sqrt(out_i_directions[0] * out_i_directions[0] +
-                       out_i_directions[1] * out_i_directions[1] +
-                       out_i_directions[2] * out_i_directions[2]);
+      get_doubles(argc, argv, &i, out_i_directions.data(), 3);
+      magnitude = fs::math::frobenius_norm(&out_i_directions);
       if (magnitude == 0.0) {
         fmt::fprintf(stderr,
                      "\n%s: directions must have non-zero magnitude; "
@@ -447,19 +436,15 @@ int main(int argc, char *argv[]) {
         fmt::printf("normalizing out_i_direction: (%g, %g, %g) -> ",
                     out_i_directions[0], out_i_directions[1],
                     out_i_directions[2]);
-        out_i_directions[0] = out_i_directions[0] / magnitude;
-        out_i_directions[1] = out_i_directions[1] / magnitude;
-        out_i_directions[2] = out_i_directions[2] / magnitude;
+        fs::math::frobenius_normalize(&out_i_directions);
         fmt::printf("(%g, %g, %g)\n", out_i_directions[0], out_i_directions[1],
                     out_i_directions[2]);
       }
       out_i_direction_flag = TRUE;
     } else if (strcmp(argv[i], "-ojd") == 0 ||
                strcmp(argv[i], "--out_j_direction") == 0) {
-      get_floats(argc, argv, &i, out_j_directions.data(), 3);
-      magnitude = sqrt(out_j_directions[0] * out_j_directions[0] +
-                       out_j_directions[1] * out_j_directions[1] +
-                       out_j_directions[2] * out_j_directions[2]);
+      get_doubles(argc, argv, &i, out_j_directions.data(), 3);
+      magnitude = fs::math::frobenius_norm(&out_j_directions);
       if (magnitude == 0.0) {
         fmt::fprintf(stderr,
                      "\n%s: directions must have non-zero magnitude; "
@@ -473,19 +458,15 @@ int main(int argc, char *argv[]) {
         fmt::printf("normalizing out_j_direction: (%g, %g, %g) -> ",
                     out_j_directions[0], out_j_directions[1],
                     out_j_directions[2]);
-        out_j_directions[0] = out_j_directions[0] / magnitude;
-        out_j_directions[1] = out_j_directions[1] / magnitude;
-        out_j_directions[2] = out_j_directions[2] / magnitude;
+        fs::math::frobenius_normalize(&out_j_directions);
         fmt::printf("(%g, %g, %g)\n", out_j_directions[0], out_j_directions[1],
                     out_j_directions[2]);
       }
       out_j_direction_flag = TRUE;
     } else if (strcmp(argv[i], "-okd") == 0 ||
                strcmp(argv[i], "--out_k_direction") == 0) {
-      get_floats(argc, argv, &i, out_k_directions.data(), 3);
-      magnitude = sqrt(out_k_directions[0] * out_k_directions[0] +
-                       out_k_directions[1] * out_k_directions[1] +
-                       out_k_directions[2] * out_k_directions[2]);
+      get_doubles(argc, argv, &i, out_k_directions.data(), 3);
+      magnitude = fs::math::frobenius_norm(&out_k_directions);
       if (magnitude == 0.0) {
         fmt::fprintf(stderr,
                      "\n%s: directions must have non-zero magnitude; "
@@ -499,9 +480,7 @@ int main(int argc, char *argv[]) {
         fmt::printf("normalizing out_k_direction: (%g, %g, %g) -> ",
                     out_k_directions[0], out_k_directions[1],
                     out_k_directions[2]);
-        out_k_directions[0] = out_k_directions[0] / magnitude;
-        out_k_directions[1] = out_k_directions[1] / magnitude;
-        out_k_directions[2] = out_k_directions[2] / magnitude;
+        fs::math::frobenius_normalize(&out_k_directions);
         fmt::printf("(%g, %g, %g)\n", out_k_directions[0], out_k_directions[1],
                     out_k_directions[2]);
       }
@@ -518,18 +497,6 @@ int main(int argc, char *argv[]) {
                strcmp(argv[i], "--out_center") == 0) {
       get_floats(argc, argv, &i, out_center.data(), 3);
       out_center_flag = TRUE;
-    } else if (strcmp(argv[i], "-oni") == 0 || strcmp(argv[i], "-oic") == 0 ||
-               strcmp(argv[i], "--out_i_count") == 0) {
-      get_ints(argc, argv, &i, &out_n_i, 1);
-      out_n_i_flag = TRUE;
-    } else if (strcmp(argv[i], "-onj") == 0 || strcmp(argv[i], "-ojc") == 0 ||
-               strcmp(argv[i], "--out_j_count") == 0) {
-      get_ints(argc, argv, &i, &out_n_j, 1);
-      out_n_j_flag = TRUE;
-    } else if (strcmp(argv[i], "-onk") == 0 || strcmp(argv[i], "-okc") == 0 ||
-               strcmp(argv[i], "--out_k_count") == 0) {
-      get_ints(argc, argv, &i, &out_n_k, 1);
-      out_n_k_flag = TRUE;
     } else if (strcmp(argv[i], "-vs") == 0 ||
                strcmp(argv[i], "--voxsize") == 0 ||
                strcmp(argv[i], "-voxsize") == 0) {
@@ -540,21 +507,6 @@ int main(int argc, char *argv[]) {
                strcmp(argv[i], "-downsample") == 0) {
       get_floats(argc, argv, &i, downsample_factor.data(), 3);
       downsample_flag = TRUE;
-    } else if (strcmp(argv[i], "-ds2") == 0 ||
-               strcmp(argv[i], "--downsample2") == 0) {
-      downsample2_flag = TRUE;
-    } else if (strcmp(argv[i], "-ini") == 0 || strcmp(argv[i], "-iic") == 0 ||
-               strcmp(argv[i], "--in_i_count") == 0) {
-      get_ints(argc, argv, &i, &in_n_i, 1);
-      in_n_i_flag = TRUE;
-    } else if (strcmp(argv[i], "-inj") == 0 || strcmp(argv[i], "-ijc") == 0 ||
-               strcmp(argv[i], "--in_j_count") == 0) {
-      get_ints(argc, argv, &i, &in_n_j, 1);
-      in_n_j_flag = TRUE;
-    } else if (strcmp(argv[i], "-ink") == 0 || strcmp(argv[i], "-ikc") == 0 ||
-               strcmp(argv[i], "--in_k_count") == 0) {
-      get_ints(argc, argv, &i, &in_n_k, 1);
-      in_n_k_flag = TRUE;
     } else if (strcmp(argv[i], "--fwhm") == 0) {
       get_floats(argc, argv, &i, &fwhm, 1);
       gstd = fwhm / sqrt(log(256.0));
@@ -562,18 +514,6 @@ int main(int argc, char *argv[]) {
     } else if (strcmp(argv[i], "--reduce") == 0) {
       get_ints(argc, argv, &i, &reduce, 1);
       fmt::printf("reducing input image %d times\n", reduce);
-    } else if (strcmp(argv[i], "-tr") == 0) {
-      get_floats(argc, argv, &i, &in_tr, 1);
-      in_tr_flag = TRUE;
-    } else if (strcmp(argv[i], "-TI") == 0) {
-      get_floats(argc, argv, &i, &in_ti, 1);
-      in_ti_flag = TRUE;
-    } else if (strcmp(argv[i], "-te") == 0) {
-      get_floats(argc, argv, &i, &in_te, 1);
-      in_te_flag = TRUE;
-    } else if (strcmp(argv[i], "-flip_angle") == 0) {
-      get_floats(argc, argv, &i, &in_flip_angle, 1);
-      in_flip_angle_flag = TRUE;
     } else if (strcmp(argv[i], "-odt") == 0 ||
                strcmp(argv[i], "--out_data_type") == 0) {
       get_string(argc, argv, &i, out_data_type_string.data());
@@ -680,17 +620,6 @@ int main(int argc, char *argv[]) {
 
       get_ints(argc, argv, &i, frames.data(), nframes);
       frame_flag = TRUE;
-    } else if (strcmp(argv[i], "--erode-seg") == 0) {
-      get_ints(argc, argv, &i, &n_erode_seg, 1);
-      erode_seg_flag = TRUE;
-    } else if (strcmp(argv[i], "--dil-seg") == 0) {
-      get_ints(argc, argv, &i, &n_dil_seg, 1);
-      dil_seg_flag = TRUE;
-    } else if (strcmp(argv[i], "--dil-seg-mask") == 0) {
-      get_string(argc, argv, &i, dil_seg_mask.data());
-    } else if (strcmp(argv[i], "--cutends") == 0) {
-      get_ints(argc, argv, &i, &ncutends, 1);
-      cutends_flag = TRUE;
     } else if (strcmp(argv[i], "--slice-bias") == 0) {
       get_floats(argc, argv, &i, &SliceBiasAlpha, 1);
       SliceBias = TRUE;
@@ -710,14 +639,6 @@ int main(int argc, char *argv[]) {
                strcmp(argv[i], "--in_like") == 0) {
       get_string(argc, argv, &i, in_like_name.data());
       in_like_flag = TRUE;
-    } else if (strcmp(argv[i], "-roi") == 0 || strcmp(argv[i], "--roi") == 0) {
-      roi_flag = TRUE;
-    } else if (strcmp(argv[i], "-fp") == 0 ||
-               strcmp(argv[i], "--fill_parcellation") == 0) {
-      fill_parcellation_flag = TRUE;
-    } else if (strcmp(argv[i], "-zo") == 0 ||
-               strcmp(argv[i], "--zero_outlines") == 0) {
-      zero_outlines_flag = TRUE;
     } else if (strcmp(argv[i], "-sp") == 0 ||
                strcmp(argv[i], "--smooth_parcellation") == 0) {
       get_ints(argc, argv, &i, &smooth_parcellation_count, 1);
@@ -734,25 +655,13 @@ int main(int argc, char *argv[]) {
                strcmp(argv[i], "--color_file") == 0) {
       get_string(argc, argv, &i, color_file_name.data());
       color_file_flag = TRUE;
-    } else if (strcmp(argv[i], "-nt") == 0 ||
-               strcmp(argv[i], "--no_translate") == 0) {
-      translate_labels_flag = FALSE;
     } else if (strcmp(argv[i], "-ns") == 0 ||
                strcmp(argv[i], "--no_scale") == 0) {
       get_ints(argc, argv, &i, &no_scale_flag, 1);
       // no_scale_flag = (no_scale_flag == 0 ? FALSE : TRUE);
-    } else if (strcmp(argv[i], "-nth") == 0 ||
-               strcmp(argv[i], "--nth_frame") == 0) {
-      get_ints(argc, argv, &i, &nthframe, 1);
     } else if (strcmp(argv[i], "-cg") == 0 ||
                strcmp(argv[i], "--crop_gdf") == 0) {
       mriio_set_gdf_crop_flag(TRUE);
-    } else if ((strcmp(argv[i], "-u") == 0) ||
-               (strcmp(argv[i], "--usage") == 0) ||
-               (strcmp(argv[i], "--help") == 0) ||
-               (strcmp(argv[i], "-h") == 0)) {
-      usage(stdout);
-      exit(0);
     }
     /*-------------------------------------------------------------*/
     else if (strcmp(argv[i], "--status") == 0 ||
@@ -851,14 +760,6 @@ int main(int argc, char *argv[]) {
     } else if ((strcmp(argv[i], "--no-strip-pound") == 0)) {
       MRIIO_Strip_Pound = 0;
       /*-----------------------------------------------------*/ // E/
-    } else if (strcmp(argv[i], "-zgez") == 0 ||
-               strcmp(argv[i], "--zero_ge_z_offset") == 0) {
-      zero_ge_z_offset_flag = TRUE;
-    }
-    /*-----------------------------------------------------*/ // E/
-    else if (strcmp(argv[i], "-nozgez") == 0 ||
-             strcmp(argv[i], "--no_zero_ge_z_offset") == 0) {
-      zero_ge_z_offset_flag = FALSE;
     } else if (strcmp(argv[i], "--nskip") == 0) {
       get_ints(argc, argv, &i, &nskip, 1);
       fmt::printf("nskip = %d\n", nskip);
@@ -885,32 +786,6 @@ int main(int argc, char *argv[]) {
       /* Automatically determine whether to get slice thickness from 18,50 or
          18,88 depending upon  the value of 18,23 */
       AutoSliceResElTag = 1;
-    }
-    /*-------------------------------------------------------------*/
-    else {
-      if (argv[i][0] == '-') {
-        fmt::fprintf(stderr, "\n%s: unknown flag \"%s\"\n", Progname, argv[i]);
-        fs::utils::cli::usage_message(stdout, Progname);
-        exit(1);
-      } else {
-        if (in_name[0] == '\0') {
-          strcpy(in_name.data(), argv[i]);
-        } else if (out_name[0] == '\0') {
-          strcpy(out_name.data(), argv[i]);
-        } else {
-          if (i + 1 == argc) {
-            fmt::fprintf(stderr, "\n%s: extra argument (\"%s\")\n", Progname,
-                         argv[i]);
-          } else {
-            fmt::fprintf(stderr,
-                         "\n%s: extra arguments (\"%s\" and "
-                         "following)\n",
-                         Progname, argv[i]);
-          }
-          fs::utils::cli::usage_message(stdout, Progname);
-          exit(1);
-        }
-      }
     }
   }
   /**** Finished parsing command line ****/
@@ -965,13 +840,6 @@ int main(int argc, char *argv[]) {
   }
 
   if (sizes_good_flag) {
-    fs::utils::cli::usage_message(stdout, Progname);
-    exit(1);
-  }
-
-  /* ----- catch missing input or output volume name ----- */
-  if (in_name[0] == '\0') {
-    fmt::fprintf(stderr, "\n%s: missing input volume name\n", Progname);
     fs::utils::cli::usage_message(stdout, Progname);
     exit(1);
   }
@@ -2890,6 +2758,44 @@ void get_floats(int argc, char *argv[], int *pos, float *vals, int nvals) {
 
 } /* end get_floats() */
 
+void get_doubles(int argc, char *argv[], int *pos, double *vals, int nvals) {
+
+  char *ep;
+  int i;
+
+  if (*pos + nvals >= argc) {
+    fmt::fprintf(stderr,
+                 "\n%s: argument %s expects %d floats; "
+                 "only %d arguments after flag\n",
+                 Progname, argv[*pos], nvals, argc - *pos - 1);
+    fs::utils::cli::usage_message(stdout, Progname);
+    exit(1);
+  }
+
+  for (i = 0; i < nvals; i++) {
+    if (argv[*pos + i + 1][0] == '\0') {
+      fmt::fprintf(stderr, "\n%s: argument to %s flag is null\n", Progname,
+                   argv[*pos]);
+      fs::utils::cli::usage_message(stdout, Progname);
+      exit(1);
+    }
+
+    vals[i] = strtod(argv[*pos + i + 1], &ep);
+
+    if (*ep != '\0') {
+      fmt::fprintf(stderr,
+                   "\n%s: error converting \"%s\" to a "
+                   "float for %s flag: incorrect # of args? Need %d\n",
+                   Progname, argv[*pos + i + 1], argv[*pos], nvals);
+      fs::utils::cli::usage_message(stdout, Progname);
+      exit(1);
+    }
+  }
+
+  *pos += nvals;
+
+} /* end get_floats() */
+
 void get_string(int argc, char *argv[], int *pos, char *val) {
 
   if (*pos + 1 >= argc) {
@@ -2923,10 +2829,13 @@ void usage(FILE *stream) {
 static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
 
   namespace po = boost::program_options;
-  using opt_deps = std::map<std::string, std::string>;
+  using opt_deps = std::multimap<std::string, std::string>;
+
   po::options_description desc(
       "\nUSAGE: mri_convert_exec [options] <in volume> <out volume>\n"
       "\n\nAvailable Options");
+  po::positional_options_description pos;
+  pos.add("in_name", 1).add("out_name", 1);
   po::variables_map vm;
 
   initArgDesc(&desc, cmdargs);
@@ -2941,22 +2850,30 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
   try {
     auto parsed_opts = po::command_line_parser(ac, av)
                            .options(desc)
+                           .positional(pos)
                            .style(fs::utils::cli::po_style)
                            .run();
     po::store(parsed_opts, vm);
 
-    opt_deps conflicting_opts;
+    opt_deps conflicts;
     opt_deps dependant_opts;
 
-    conflicting_opts["reorder4"] = "r4";
-    conflicting_opts["outside_val"] = "oval";
-    conflicting_opts["nochange"] = "nc";
-    conflicting_opts["conform_min"] = "cm";
-    conflicting_opts["conform_size"] = "cs";
-    conflicting_opts["apply_transform"] = "at";
-    conflicting_opts["apply_inverse_transform"] = "ait";
+    conflicts.insert(std::make_pair("reorder4", "r4"));
+    conflicts.insert(std::make_pair("outside_val", "oval"));
+    conflicts.insert(std::make_pair("nochange", "nc"));
+    conflicts.insert(std::make_pair("conform_min", "cm"));
+    conflicts.insert(std::make_pair("conform_size", "cs"));
+    conflicts.insert(std::make_pair("apply_transform", "at"));
+    conflicts.insert(std::make_pair("apply_inverse_transform", "ait"));
+    conflicts.insert(std::make_pair("nth_frame", "nth"));
+    conflicts.insert(std::make_pair("no_zero_ge_z_offset", "nozgez"));
+    conflicts.insert(std::make_pair("no_zero_ge_z_offset", "zero_ge_z_offset"));
+    conflicts.insert(std::make_pair("no_zero_ge_z_offset", "zgez"));
+    conflicts.insert(std::make_pair("zero_ge_z_offset", "zgez"));
+    conflicts.insert(std::make_pair("zero_ge_z_offset", "no_zero_ge_z_offset"));
+    conflicts.insert(std::make_pair("zero_ge_z_offset", "nozgez"));
 
-    for (auto const &[key, val] : conflicting_opts) {
+    for (auto const &[key, val] : conflicts) {
       po::conflicting_options(vm, key, val);
     }
 
@@ -3131,7 +3048,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
   if (vm.count("slice-crop") != 0U) {
     auto vals = vm["slice-crop"].as<std::vector<int>>();
     if (vals.size() != 2) {
-      fmt::printf("ERROR: need 2 arguments (start and end position");
+      fmt::printf("ERROR: need 2 arguments (start and end position ");
       exit(1);
     }
     cmdargs->slice_crop_flag = true;
@@ -3195,6 +3112,64 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     cmdargs->out_k_size_flag = true;
   }
 
+  if (vm.count("erode-seg") != 0U) {
+    cmdargs->erode_seg_flag = true;
+  }
+
+  if (vm.count("dil-seg") != 0U) {
+    cmdargs->dil_seg_flag = true;
+  }
+
+  if (vm.count("cutends") != 0U) {
+    cmdargs->ncutends_flag = true;
+  }
+
+  if ((vm.count("out_i_count") != 0U) || (vm.count("oni") != 0U) ||
+      (vm.count("oic") != 0U)) {
+    cmdargs->out_n_i_flag = true;
+  }
+
+  if ((vm.count("out_j_count") != 0U) || (vm.count("onj") != 0U) ||
+      (vm.count("ojc") != 0U)) {
+    cmdargs->out_n_j_flag = true;
+  }
+
+  if ((vm.count("out_k_count") != 0U) || (vm.count("onk") != 0U) ||
+      (vm.count("okc") != 0U)) {
+    cmdargs->out_n_k_flag = true;
+  }
+
+  if ((vm.count("in_i_count") != 0U) || (vm.count("ini") != 0U) ||
+      (vm.count("iic") != 0U)) {
+    cmdargs->in_n_i_flag = true;
+  }
+
+  if ((vm.count("in_j_count") != 0U) || (vm.count("inj") != 0U) ||
+      (vm.count("ijc") != 0U)) {
+    cmdargs->in_n_j_flag = true;
+  }
+
+  if ((vm.count("in_k_count") != 0U) || (vm.count("ink") != 0U) ||
+      (vm.count("ikc") != 0U)) {
+    cmdargs->in_n_k_flag = true;
+  }
+
+  if (vm.count("tr") != 0U) {
+    cmdargs->in_tr_flag = true;
+  }
+
+  if (vm.count("TI") != 0U) {
+    cmdargs->in_ti_flag = true;
+  }
+
+  if (vm.count("te") != 0U) {
+    cmdargs->in_te_flag = true;
+  }
+
+  if (vm.count("flip_angle") != 0U) {
+    cmdargs->in_flip_angle_flag = true;
+  }
+
   return false;
 }
 
@@ -3236,7 +3211,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("outside_val",                                                   /**/
        po::value<int>(&cmdargs->outside_val),                           /**/
        "Set the values outside of the image that may rotate in if a"    /**/
-       " transform is applied to val\n")                                /**/
+       " transform is applied to val")                                  /**/
                                                                         /**/
       ("oval",                                                          /**/
        po::value<int>(&cmdargs->outside_val),                           /**/
@@ -3535,12 +3510,181 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("oks",                                                           /**/
        po::value<float>(&cmdargs->out_k_size),                          /**/
        "out_k_size")                                                    /**/
-      /* in ijk directions*/                                            /**/
+                                                                        /**/
       ("ctab",                                                          /**/
        po::value<std::string>(&cmdargs->colortablefile),                /**/
        "ctab")                                                          /**/
-      /* in out orientation*/                                           /**/
-      /* out ijk directions*/                                           /**/
-      ;                                                                 /**/
+                                                                        /**/
+      ("nth_frame",                                                     /**/
+       po::value<int>(&cmdargs->nthframe),                              /**/
+       "nth_frame")                                                     /**/
+                                                                        /**/
+      ("nth",                                                           /**/
+       po::value<int>(&cmdargs->nthframe),                              /**/
+       "nth_frame")                                                     /**/
+                                                                        /**/
+      ("no_translate",                                                  /**/
+       po::bool_switch(&cmdargs->translate_labels_flag),                /**/
+       "no_translate")                                                  /**/
+                                                                        /**/
+      ("nt",                                                            /**/
+       po::bool_switch(&cmdargs->translate_labels_flag),                /**/
+       "no_translate")                                                  /**/
+                                                                        /**/
+      ("zero_outlines",                                                 /**/
+       po::bool_switch(&cmdargs->zero_outlines_flag),                   /**/
+       "zero_outlines")                                                 /**/
+                                                                        /**/
+      ("zo",                                                            /**/
+       po::bool_switch(&cmdargs->zero_outlines_flag),                   /**/
+       "zero_outlines")                                                 /**/
+                                                                        /**/
+      ("fill_parcellation",                                             /**/
+       po::bool_switch(&cmdargs->fill_parcellation_flag),               /**/
+       "fill_parcellation")                                             /**/
+                                                                        /**/
+      ("fp",                                                            /**/
+       po::bool_switch(&cmdargs->fill_parcellation_flag),               /**/
+       "fill_parcellation")                                             /**/
+                                                                        /**/
+      ("roi",                                                           /**/
+       po::bool_switch(&cmdargs->roi_flag),                             /**/
+       "roi flag")                                                      /**/
+                                                                        /**/
+      ("dil-seg-mask",                                                  /**/
+       po::value<std::string>(&cmdargs->dil_seg_mask),                  /**/
+       "dil-seg-mask")                                                  /**/
+                                                                        /**/
+      ("erode-seg",                                                     /**/
+       po::value<int>(&cmdargs->erode_seg),                             /**/
+       "erode-seg")                                                     /**/
+                                                                        /**/
+      ("dil-seg",                                                       /**/
+       po::value<int>(&cmdargs->dil_seg),                               /**/
+       "dil-seg")                                                       /**/
+                                                                        /**/
+      ("cutends",                                                       /**/
+       po::value<int>(&cmdargs->ncutends),                              /**/
+       "cutends")                                                       /**/
+      /**/                                                              /**/
+      ("out_i_count",                                                   /**/
+       po::value<int>(&cmdargs->out_n_i),                               /**/
+       "out_i_count")                                                   /**/
+      /**/                                                              /**/
+      ("oni",                                                           /**/
+       po::value<int>(&cmdargs->out_n_i),                               /**/
+       "out_i_count")                                                   /**/
+      /**/                                                              /**/
+      ("oic",                                                           /**/
+       po::value<int>(&cmdargs->out_n_i),                               /**/
+       "out_i_count")                                                   /**/
+      /**/                                                              /**/
+      ("out_j_count",                                                   /**/
+       po::value<int>(&cmdargs->out_n_j),                               /**/
+       "out_i_count")                                                   /**/
+      /**/                                                              /**/
+      ("onj",                                                           /**/
+       po::value<int>(&cmdargs->out_n_j),                               /**/
+       "out_j_count")                                                   /**/
+      /**/                                                              /**/
+      ("ojc",                                                           /**/
+       po::value<int>(&cmdargs->out_n_j),                               /**/
+       "out_j_count")                                                   /**/
+      /**/                                                              /**/
+      ("out_k_count",                                                   /**/
+       po::value<int>(&cmdargs->out_n_k),                               /**/
+       "out_i_count")                                                   /**/
+      /**/                                                              /**/
+      ("onk",                                                           /**/
+       po::value<int>(&cmdargs->out_n_k),                               /**/
+       "out_k_count")                                                   /**/
+      /**/                                                              /**/
+      ("okc",                                                           /**/
+       po::value<int>(&cmdargs->out_n_k),                               /**/
+       "out_k_count")                                                   /**/
+      /**/                                                              /**/
+      ("downsample2",                                                   /**/
+       po::bool_switch(&cmdargs->downsample2_flag),                     /**/
+       "downsample2")                                                   /**/
+      /**/                                                              /**/
+      ("ds2",                                                           /**/
+       po::bool_switch(&cmdargs->downsample2_flag),                     /**/
+       "downsample2")                                                   /**/
+      /**/                                                              /**/
+      ("in_i_count",                                                    /**/
+       po::value<int>(&cmdargs->in_n_i),                                /**/
+       "in_i_count")                                                    /**/
+      /**/                                                              /**/
+      ("ini",                                                           /**/
+       po::value<int>(&cmdargs->in_n_i),                                /**/
+       "in_i_count")                                                    /**/
+      /**/                                                              /**/
+      ("iic",                                                           /**/
+       po::value<int>(&cmdargs->in_n_i),                                /**/
+       "in_i_count")                                                    /**/
+      /**/                                                              /**/
+      ("in_j_count",                                                    /**/
+       po::value<int>(&cmdargs->in_n_j),                                /**/
+       "in_j_count")                                                    /**/
+      /**/                                                              /**/
+      ("inj",                                                           /**/
+       po::value<int>(&cmdargs->in_n_j),                                /**/
+       "in_i_count")                                                    /**/
+      /**/                                                              /**/
+      ("ijc",                                                           /**/
+       po::value<int>(&cmdargs->in_n_j),                                /**/
+       "in_j_count")                                                    /**/
+      /**/                                                              /**/
+      ("in_k_count",                                                    /**/
+       po::value<int>(&cmdargs->in_n_k),                                /**/
+       "in_k_count")                                                    /**/
+      /**/                                                              /**/
+      ("ink",                                                           /**/
+       po::value<int>(&cmdargs->in_n_k),                                /**/
+       "in_k_count")                                                    /**/
+      /**/                                                              /**/
+      ("ikc",                                                           /**/
+       po::value<int>(&cmdargs->in_n_k),                                /**/
+       "in_k_count")                                                    /**/
+      /**/                                                              /**/
+      ("tr",                                                            /**/
+       po::value<float>(&cmdargs->in_tr),                               /**/
+       "tr")                                                            /**/
+      /**/                                                              /**/
+      ("TI",                                                            /**/
+       po::value<float>(&cmdargs->in_ti),                               /**/
+       "ti")                                                            /**/
+      /**/                                                              /**/
+      ("te",                                                            /**/
+       po::value<float>(&cmdargs->in_te),                               /**/
+       "te")                                                            /**/
+      /**/                                                              /**/
+      ("flip_angle",                                                    /**/
+       po::value<float>(&cmdargs->in_flip_angle),                       /**/
+       "flip_angle")                                                    /**/
+      /**/                                                              /**/
+      ("in_name",                                                       /**/
+       po::value<std::string>(&cmdargs->in_name)->required(),           /**/
+       "in_name")                                                       /**/
+      /**/                                                              /**/
+      ("out_name",                                                      /**/
+       po::value<std::string>(&cmdargs->out_name),                      /**/
+       "out_name")                                                      /**/
+      /**/                                                              /**/
+      ("zero_ge_z_offset",                                              /**/
+       po::bool_switch(&cmdargs->zero_ge_z_offset_flag),                /**/
+       "zero_ge_z_offset")                                              /**/
+      /**/                                                              /**/
+      ("zgez",                                                          /**/
+       po::bool_switch(&cmdargs->zero_ge_z_offset_flag),                /**/
+       "zero_ge_z_offset")                                              /**/
+      /**/                                                              /**/
+      ("no_zero_ge_z_offset",                                           /**/
+       po::bool_switch(&cmdargs->no_zero_ge_z_offset_flag),             /**/
+       "no_zero_ge_z_offset")                                           /**/
+      /**/                                                              /**/
+      ("nozgez",                                                        /**/
+       po::bool_switch(&cmdargs->no_zero_ge_z_offset_flag),             /**/
+       "no_zero_ge_z_offset");
 }
 /* EOF */

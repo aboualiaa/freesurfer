@@ -6,9 +6,10 @@
 #define MRI_TOOLS_MRI_CONVERT_LIB_HPP
 
 #include <boost/program_options.hpp>
-#include <fmt/printf.h>
-#include <fmt/format.h>
 #include <cstdio>
+#include <eigen3/Eigen/Dense>
+#include <fmt/format.h>
+#include <fmt/printf.h>
 
 namespace pocl = boost::program_options::command_line_style;
 
@@ -21,10 +22,14 @@ static auto const po_style =
     pocl::long_allow_next | pocl::allow_sticky | pocl::allow_dash_for_short |
     pocl::allow_long_disguise;
 
-auto returnAnInt(int toReturn) -> int;
 auto usage_message(FILE *stream, char const *Progname) -> bool;
-auto usage_message(FILE *stream, std::string const Progname) -> bool;
+auto usage_message(FILE *stream, std::string const &Progname) -> bool;
 auto usage_message(std::ostream &stream, char const *Progname) -> bool;
-auto usage_message(std::ostream &stream, const std::string Progname) -> bool;
-} // namespace fs::utils
+auto usage_message(std::ostream &stream, std::string const &Progname) -> bool;
+} // namespace fs::utils::cli
+
+namespace fs::math {
+auto frobenius_norm(const std::vector<double> *matrix) -> double;
+auto frobenius_normalize(std::vector<double> *matrix) -> void;
+} // namespace fs::math
 #endif // MRI_TOOLS_MRI_CONVERT_LIB_HPP

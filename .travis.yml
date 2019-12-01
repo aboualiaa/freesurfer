@@ -24,7 +24,7 @@ before_cache:
   - brew cleanup
 
 before_install:
-  - brew update && brew install itk vtk petsc cmake python@3 gcc@9 jemalloc tcsh armadillo qt hdf5 libomp szip fltk open-mpi;
+  - brew update && brew install itk vtk petsc cmake python@3 gcc@9 jemalloc tcsh armadillo qt hdf5 libomp szip fltk open-mpi eigen;
   - alias python='python3'
   - export PATH="/usr/local/opt/python/libexec/bin:$PATH"
   - if [ -d ./packages/hpx ]; then
@@ -45,7 +45,7 @@ script:
   - sudo xcode-select -s /Applications/Xcode.app
   - mkdir -p cmake-build-release && cd ./cmake-build-release
   - cmake -DGEMS_BUILD_MATLAB=OFF ..
-  - cmake -DGEMS_BUILD_MATLAB=OFF .. # again so that clang finds openMP
+  - cmake -DGEMS_BUILD_MATLAB=OFF .. # again so that appleclang finds openMP
   - make -j$(nproc)
 
 # os: linux

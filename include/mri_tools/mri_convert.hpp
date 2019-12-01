@@ -115,6 +115,43 @@ public:
   float out_j_size{};
   float out_k_size{};
   std::string colortablefile{};
+  int nthframe{};
+  bool translate_labels_flag{};
+  bool zero_outlines_flag{};
+  bool fill_parcellation_flag{};
+  bool roi_flag{};
+  std::string dil_seg_mask{};
+  bool erode_seg_flag{};
+  int erode_seg;
+  int dil_seg{};
+  bool dil_seg_flag{};
+  int ncutends{};
+  bool ncutends_flag{};
+  bool out_n_i_flag{};
+  bool out_n_j_flag{};
+  bool out_n_k_flag{};
+  bool in_n_i_flag{};
+  bool in_n_j_flag{};
+  bool in_n_k_flag{};
+  bool in_tr_flag{};
+  bool in_ti_flag{};
+  bool in_te_flag{};
+  bool in_flip_angle_flag{};
+  int out_n_i{};
+  int in_n_i{};
+  bool downsample2_flag{};
+  int in_n_j{};
+  int in_n_k{};
+  float in_tr{};
+  float in_ti{};
+  float in_te{};
+  float in_flip_angle{};
+  int out_n_j{};
+  int out_n_k{};
+  std::string in_name{};
+  std::string out_name{};
+  bool zero_ge_z_offset_flag{};
+  bool no_zero_ge_z_offset_flag{};
 };
 
 struct ENV {
@@ -189,8 +226,10 @@ constexpr auto CLOSE_ENOUGH{5e-3};
 
 void get_ints(int argc, char *argv[], int *pos, int *vals, int nvals);
 void get_floats(int argc, char *argv[], int *pos, float *vals, int nvals);
+void get_doubles(int argc, char *argv[], int *pos, double *vals, int nvals);
 void get_string(int argc, char *argv[], int *pos, char *val);
-[[deprecated("use fs::usage_message and pass Progname instead")]] void usage_message(FILE *stream);
+[[deprecated("use fs::usage_message and pass Progname instead")]] void
+usage_message(FILE *stream);
 void usage(FILE *stream);
 
 static int debug{};
