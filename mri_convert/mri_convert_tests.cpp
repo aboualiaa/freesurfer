@@ -10,7 +10,7 @@ using namespace fs::utils::cli;
 
 std::random_device rd;  // obtain a random number from hardware
 std::mt19937 eng(rd()); // seed the generator
-std::uniform_int_distribution<> distr(0, 13'000); // define the range
+std::uniform_int_distribution<> distr(0, 40'000); // define the range
 auto fsrand = distr(eng);
 
 TEST(test_usage_message, nullptr_test) {

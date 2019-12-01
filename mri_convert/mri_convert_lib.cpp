@@ -4,9 +4,7 @@
 
 #include "mri_convert_lib.hpp"
 
-#include <armadillo>
 #include <eigen3/Eigen/Dense>
-#include <gsl/gsl>
 
 #include <cstdint>
 #include <iostream>
@@ -48,22 +46,14 @@ auto usage_message(std::ostream &stream, std::string const &Progname) -> bool {
 namespace fs::math {
 
 auto frobenius_norm(const std::vector<double> *matrix) -> double {
-  auto temp = *matrix;
-  Eigen::MatrixXd dirs(1, temp.size());
-  for (uint64_t j = 0; j < temp.size(); ++j) {
-    dirs(0, static_cast<int64_t>(j)) = temp[j];
-  }
-  return dirs.norm();
+  return Eigen::VectorXd::Map((*matrix).data(),
+                              static_cast<Eigen::Index>((*matrix).size()))
+      .norm();
 }
 
 auto frobenius_normalize(std::vector<double> *matrix) -> void {
-  Eigen::MatrixXd dirs(1, (*matrix).size());
-  for (uint64_t i = 0; i < (*matrix).size(); ++i) {
-    dirs(0, static_cast<int64_t>(i)) = (*matrix)[i];
-  }
-  dirs.normalize();
-  for (uint64_t j = 0; j < (*matrix).size(); ++j) {
-    (*matrix)[j] = dirs(0, static_cast<int64_t>(j));
-  }
+  Eigen::VectorXd::Map((*matrix).data(),
+                       static_cast<Eigen::Index>((*matrix).size()))
+      .normalize();
 }
 } // namespace fs::math
