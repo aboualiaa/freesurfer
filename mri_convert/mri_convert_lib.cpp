@@ -8,6 +8,8 @@
 
 #include <cstdint>
 #include <iostream>
+#include <fstream>
+#include <algorithm>
 
 using uint64 = uint64_t;
 
@@ -57,6 +59,14 @@ auto usage_message(FILE *stream) -> bool {
   return false;
 }
 
+void print_parsed_tokens(po::basic_parsed_options<char> const &parsed_opts) {
+  for (auto &opt : parsed_opts.options) {
+    for (auto &token : opt.original_tokens) {
+      fmt::print("{} ", token);
+    }
+    fmt::print("\n");
+  }
+}
 } // namespace fs::util::cli
 
 namespace fs::math {
@@ -73,3 +83,20 @@ auto frobenius_normalize(std::vector<double> *matrix) -> void {
   Eigen::VectorXd::Map(data, size).normalize();
 }
 } // namespace fs::math
+
+namespace fs::dbg {
+void create_gdb_file(gsl::multi_span<char *> args) {
+  std::ofstream fptmp("debug.gdb");
+  fmt::fprintf(fptmp, "# source this file in gdb to debug\n");
+  fmt::fprintf(fptmp, "file %s\n", args[0]);
+  fmt::fprintf(fptmp, "run ");
+  for (int j = 1; j < args.size(); j++) {
+    if (strcmp(args[j], "--debug") == 0) {
+      continue;
+    }
+    fmt::fprintf(fptmp, "%s ", args[j]);
+  }
+  fmt::fprintf(fptmp, "\n");
+  fptmp.close();
+}
+} // namespace fs::dbg

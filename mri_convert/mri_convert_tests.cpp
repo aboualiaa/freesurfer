@@ -88,6 +88,19 @@ TEST(test_frobenius_normalize, vector_version) {
   }
 }
 
+TEST(test_check_vector_range, test_vectors) {
+  std::vector<std::string> strvec{20};
+  ASSERT_TRUE(fs::util::cli::check_vector_range(strvec, 20));
+  ASSERT_TRUE(fs::util::cli::check_vector_range(strvec, 20, 30));
+  ASSERT_FALSE(fs::util::cli::check_vector_range(strvec, 19));
+  ASSERT_FALSE(fs::util::cli::check_vector_range(strvec, 0));
+  ASSERT_FALSE(fs::util::cli::check_vector_range(strvec, 30));
+  ASSERT_TRUE(fs::util::cli::check_vector_range(strvec, 15, 25));
+  ASSERT_TRUE(fs::util::cli::check_vector_range(strvec, 15, 20));
+  ASSERT_TRUE(fs::util::cli::check_vector_range(strvec, 19, 20));
+  ASSERT_TRUE(fs::util::cli::check_vector_range(strvec, 20, 21));
+}
+
 int main() {
 
   testing::InitGoogleTest();

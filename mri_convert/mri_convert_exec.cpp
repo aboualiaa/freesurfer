@@ -2673,14 +2673,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
                            .run();
     po::store(parsed_opts, vm);
 
-    for (auto &opt : parsed_opts.options) {
-      std::cout << opt.string_key;
-      std::cout << " ";
-      for (auto &val : opt.value) {
-        std::cout << val << " ";
-      }
-      std::cout << std::endl;
-    }
+    fs::util::cli::print_parsed_tokens(parsed_opts);
 
     opt_deps conflicts;
     opt_deps dependants;
@@ -2738,13 +2731,13 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
 
   if (cmdargs->debug) {
     spdlog::set_level(spdlog::level::debug); // Set global log level to debug
+    fs::dbg::create_gdb_file(args);
   } else {
     spdlog::set_level(spdlog::level::warn);
   }
 
-  if (vm.count("reorder_vals") != 0U) {
-    auto vals = vm["reorder_vals"].as<std::vector<int>>();
-    if (vals.size() != 3) {
+  if (vm.count("reorder") != 0U) {
+    if (!fs::util::cli::check_vector_range(cmdargs->reorder_vals, 3)) {
       spdlog::get("stderr")->critical(
           "Incorrect number of values, reorder_vals expects 3 values");
       return false;
@@ -2752,22 +2745,14 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     cmdargs->reorder_flag = true;
   }
 
-  if (vm.count("reorder4_vals") != 0U) {
-    auto vals = vm["reorder4_vals"].as<std::vector<int>>();
-    if (vals.size() != 4) {
+  if (vm.count("reorder4_vals") != 0U || vm.count("r4") != 0U) {
+
+    if (!fs::util::cli::check_vector_range(cmdargs->reorder4_vals, 4)) {
       spdlog::get("stderr")->critical(
           "Incorrect number of values, reorder4_vals expects 4 values");
       return false;
     }
-    cmdargs->reorder4_flag = true;
 
-  } else if (vm.count("r4") != 0U) {
-    auto vals = vm["r4"].as<std::vector<int>>();
-    if (vals.size() != 4) {
-      spdlog::get("stderr")->critical(
-          "Incorrect number of values, r4 expects 4 values");
-      return false;
-    }
     cmdargs->reorder4_flag = true;
   }
 
@@ -2864,8 +2849,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
   }
 
   if (vm.count("crop") != 0U) {
-    auto crops = vm["crop"].as<std::vector<int>>();
-    if (crops.size() != 3) {
+    if (!fs::util::cli::check_vector_range(cmdargs->crop_center, 3)) {
       fmt::printf("ERROR: --crop must have 3 arguments");
       exit(1);
     }
@@ -2873,14 +2857,13 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
   }
 
   if (vm.count("slice-crop") != 0U) {
-    auto vals = vm["slice-crop"].as<std::vector<int>>();
-    if (vals.size() != 2) {
+    if (!fs::util::cli::check_vector_range(cmdargs->slice_crop, 2)) {
       fmt::printf("ERROR: need 2 arguments (start and end position ");
       exit(1);
     }
     cmdargs->slice_crop_flag = true;
-    cmdargs->slice_crop_start = vals[0];
-    cmdargs->slice_crop_stop = vals[1];
+    cmdargs->slice_crop_start = cmdargs->slice_crop[0];
+    cmdargs->slice_crop_stop = cmdargs->slice_crop[1];
     if (cmdargs->slice_crop_start > cmdargs->slice_crop_stop) {
       fmt::fprintf(stderr, "ERROR: s_start > s_end\n");
       exit(1);
@@ -2888,8 +2871,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
   }
 
   if (vm.count("cropsize") != 0U) {
-    auto crops = vm["cropsize"].as<std::vector<int>>();
-    if (crops.size() != 3) {
+    if (!fs::util::cli::check_vector_range(cmdargs->cropsize, 3)) {
       fmt::printf("ERROR: --cropsize must have 3 arguments");
       exit(1);
     }
@@ -3070,14 +3052,17 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
   }
 
   if (vm.count("fsubsample") != 0) {
-    auto opts = vm["fsubsample"].as<std::vector<int>>();
-    if (opts.size() != 3) {
+    if (!fs::util::cli::check_vector_range(cmdargs->fsubsample, 3)) {
       fmt::fprintf(stderr,
-                   "ERROR: fsubsample neads 3 values: start, delta, end\n");
+                   "ERROR: fsubsample neads exactly 3 values: start, delta, "
+                   "end. You entered %d.\n",
+                   cmdargs->fsubsample.size());
+      exit(1);
     }
-    cmdargs->SubSampStart = opts[0];
-    cmdargs->SubSampDelta = opts[1];
-    cmdargs->SubSampEnd = opts[2];
+
+    cmdargs->SubSampStart = cmdargs->fsubsample[0];
+    cmdargs->SubSampDelta = cmdargs->fsubsample[1];
+    cmdargs->SubSampEnd = cmdargs->fsubsample[2];
     if (cmdargs->SubSampDelta == 0) {
       fmt::printf("ERROR: don't use subsample delta = 0\n");
       exit(1);
@@ -3087,20 +3072,6 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
 
   if (cmdargs->mid_frame_flag) {
     cmdargs->frame_flag = true;
-  }
-
-  if (cmdargs->debug) {
-    std::ofstream fptmp("debugme.gdb");
-    fptmp << "# source this file in gdb to debug\n";
-    fptmp << "file " << av[0] << " \n";
-    fptmp << "run ";
-    for (int j = 1; j < ac; j++) {
-      if (strcmp(av[j], "--debug") != 0) {
-        fptmp << av[j] << " ";
-      }
-    }
-    fptmp << "\n";
-    fptmp.close();
   }
 
   return true;
@@ -3647,7 +3618,7 @@ void initArgDesc(boost::program_options::options_description *desc,
                                                                            /**/
       ("no-strip-pound",                                                   /**/
        "no-strip-pound")                                                   /**/
-      /**/                                                                 /**/
+                                                                           /**/
       ("in_nspmzeropad",                                                   /**/
        po::value<int>(&N_Zero_Pad_Input),                                  /**/
        "in_nspmzeropad")                                                   /**/

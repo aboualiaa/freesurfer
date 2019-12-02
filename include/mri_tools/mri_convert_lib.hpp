@@ -10,6 +10,9 @@
 #include <eigen3/Eigen/Dense>
 #include <fmt/format.h>
 #include <fmt/printf.h>
+#include <gsl/multi_span>
+
+#include "mri_convert_lib.tpp"
 
 #undef GET_PROGRAM_NAME
 #ifdef __GLIBC__
@@ -19,9 +22,10 @@
 #define GET_PROGRAM_NAME() getprogname()
 #endif
 
-namespace pocl = boost::program_options::command_line_style;
-
 namespace fs::util::cli {
+
+namespace pocl = boost::program_options::command_line_style;
+namespace po = boost::program_options;
 
 // program option style
 static auto const po_style =
@@ -36,10 +40,16 @@ auto usage_message(std::ostream &stream, char const *Progname) -> bool;
 auto usage_message(std::ostream &stream, std::string const &Progname) -> bool;
 auto usage_message() -> std::string;
 auto usage_message(FILE *stream) -> bool;
+void print_parsed_tokens(po::basic_parsed_options<char> const &parsed_opts);
 } // namespace fs::util::cli
 
 namespace fs::math {
 auto frobenius_norm(const std::vector<double> *matrix) -> double;
 auto frobenius_normalize(std::vector<double> *matrix) -> void;
 } // namespace fs::math
+
+namespace fs::dbg {
+void create_gdb_file(gsl::multi_span<char *> args);
+} // namespace fs::dbg
+
 #endif // MRI_TOOLS_MRI_CONVERT_LIB_HPP
