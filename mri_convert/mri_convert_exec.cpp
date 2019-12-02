@@ -91,8 +91,10 @@ auto main(int argc, char *argv[]) -> int {
   float out_j_size{};
   double out_k_size{};
   std::array<int, 3> crop_center{};
+  crop_center.fill(128);
   bool sizes_good_flag{};
   std::array<int, 3> crop_size{};
+  crop_size.fill(256);
   std::vector<double> in_i_directions{};
   std::vector<double> in_j_directions{};
   std::vector<double> in_k_directions{};
@@ -269,31 +271,6 @@ auto main(int argc, char *argv[]) -> int {
   make_cmd_version_string(
       argc, argv, "$Id: mri_convert.c,v 1.227 2017/02/16 19:15:42 greve Exp $",
       "$Name:  $", cmdline.data());
-
-  for (i = 0; i < argc; i++) {
-    fmt::printf("%s ", argv[i]);
-  }
-  fmt::printf("\n");
-  fflush(stdout);
-
-  crop_size.fill(256);
-  crop_center.fill(128);
-  for (i = 0; i < argc; i++) {
-    if (strcmp(argv[i], "--debug") == 0) {
-      fptmp = fopen("debug.gdb", "w");
-      fmt::fprintf(fptmp, "# source this file in gdb to debug\n");
-      fmt::fprintf(fptmp, "file %s \n", argv[0]);
-      fmt::fprintf(fptmp, "run ");
-      for (j = 1; j < argc; j++) {
-        if (strcmp(argv[j], "--debug") != 0) {
-          fmt::fprintf(fptmp, "%s ", argv[j]);
-        }
-      }
-      fmt::fprintf(fptmp, "\n");
-      fclose(fptmp);
-      break;
-    }
-  }
 
   Progname = GET_PROGRAM_NAME();
 
@@ -3111,7 +3088,21 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     cmdargs->frame_flag = true;
   }
 
-  return false;
+  if (cmdargs->debug) {
+    std::ofstream fptmp("debugme.gdb");
+    fptmp << "# source this file in gdb to debug\n";
+    fptmp << "file " << av[0] << " \n";
+    fptmp << "run ";
+    for (int j = 1; j < ac; j++) {
+      if (strcmp(av[j], "--debug") != 0) {
+        fptmp << av[j] << " ";
+      }
+    }
+    fptmp << "\n";
+    fptmp.close();
+  }
+
+  return true;
 }
 
 void initArgDesc(boost::program_options::options_description *desc,
