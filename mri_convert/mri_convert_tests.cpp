@@ -99,6 +99,7 @@ TEST(test_check_vector_range, test_vectors) {
   ASSERT_TRUE(fs::util::cli::check_vector_range(strvec, 15, 20));
   ASSERT_TRUE(fs::util::cli::check_vector_range(strvec, 19, 20));
   ASSERT_TRUE(fs::util::cli::check_vector_range(strvec, 20, 21));
+  ASSERT_DEATH(fs::util::cli::check_vector_range(strvec, 30, 20), "");
 }
 
 int main() {
