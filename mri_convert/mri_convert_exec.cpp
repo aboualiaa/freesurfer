@@ -126,7 +126,7 @@ auto main(int argc, char *argv[]) -> int {
   float in_te{};
   bool in_flip_angle_flag{};
   float in_flip_angle{};
-  double magnitude;
+  double norm;
   float i_dot_j{};
   float i_dot_k{};
   float j_dot_k{};
@@ -288,8 +288,9 @@ auto main(int argc, char *argv[]) -> int {
                strcmp(argv[i], "--in_i_direction") == 0) {
       get_doubles(argc, argv, &i, in_i_directions.data(), 3);
 
-      magnitude = fs::math::frobenius_norm(&in_i_directions);
-      if (magnitude == 0.0) {
+      norm = fs::math::frobenius_norm(&in_i_directions);
+
+      if (norm == 0.0) {
         fmt::fprintf(stderr,
                      "\n%s: directions must have non-zero magnitude; "
                      "in_i_direction = (%g, %g, %g)\n",
@@ -298,7 +299,7 @@ auto main(int argc, char *argv[]) -> int {
         fs::util::cli::usage_message(stdout);
         exit(1);
       }
-      if (magnitude != 1.0) {
+      if (norm != 1.0) {
         fmt::printf("normalizing in_i_direction: (%g, %g, %g) -> ",
                     in_i_directions[0], in_i_directions[1], in_i_directions[2]);
         fs::math::frobenius_normalize(&in_i_directions);
@@ -309,8 +310,8 @@ auto main(int argc, char *argv[]) -> int {
     } else if (strcmp(argv[i], "-ijd") == 0 ||
                strcmp(argv[i], "--in_j_direction") == 0) {
       get_doubles(argc, argv, &i, in_j_directions.data(), 3);
-      magnitude = fs::math::frobenius_norm(&in_j_directions);
-      if (magnitude == 0.0) {
+      norm = fs::math::frobenius_norm(&in_j_directions);
+      if (norm == 0.0) {
         fmt::fprintf(stderr,
                      "\n%s: directions must have non-zero magnitude; "
                      "in_j_direction = (%g, %g, %g)\n",
@@ -319,7 +320,7 @@ auto main(int argc, char *argv[]) -> int {
         fs::util::cli::usage_message(stdout);
         exit(1);
       }
-      if (magnitude != 1.0) {
+      if (norm != 1.0) {
         fmt::printf("normalizing in_j_direction: (%g, %g, %g) -> ",
                     in_j_directions[0], in_j_directions[1], in_j_directions[2]);
         fs::math::frobenius_normalize(&in_j_directions);
@@ -330,8 +331,8 @@ auto main(int argc, char *argv[]) -> int {
     } else if (strcmp(argv[i], "-ikd") == 0 ||
                strcmp(argv[i], "--in_k_direction") == 0) {
       get_doubles(argc, argv, &i, in_k_directions.data(), 3);
-      magnitude = fs::math::frobenius_norm(&in_k_directions);
-      if (magnitude == 0.0) {
+      norm = fs::math::frobenius_norm(&in_k_directions);
+      if (norm == 0.0) {
         fmt::fprintf(stderr,
                      "\n%s: directions must have non-zero magnitude; "
                      "in_k_direction = (%g, %g, %g)\n",
@@ -340,7 +341,7 @@ auto main(int argc, char *argv[]) -> int {
         fs::util::cli::usage_message(stdout);
         exit(1);
       }
-      if (magnitude != 1.0) {
+      if (norm != 1.0) {
         fmt::printf("normalizing in_k_direction: (%g, %g, %g) -> ",
                     in_k_directions[0], in_k_directions[1], in_k_directions[2]);
         fs::math::frobenius_normalize(&in_k_directions);
@@ -375,8 +376,8 @@ auto main(int argc, char *argv[]) -> int {
     else if (strcmp(argv[i], "-oid") == 0 ||
              strcmp(argv[i], "--out_i_direction") == 0) {
       get_doubles(argc, argv, &i, out_i_directions.data(), 3);
-      magnitude = fs::math::frobenius_norm(&out_i_directions);
-      if (magnitude == 0.0) {
+      norm = fs::math::frobenius_norm(&out_i_directions);
+      if (norm == 0.0) {
         fmt::fprintf(stderr,
                      "\n%s: directions must have non-zero magnitude; "
                      "out_i_direction = (%g, %g, %g)\n",
@@ -385,7 +386,7 @@ auto main(int argc, char *argv[]) -> int {
         fs::util::cli::usage_message(stdout);
         exit(1);
       }
-      if (magnitude != 1.0) {
+      if (norm != 1.0) {
         fmt::printf("normalizing out_i_direction: (%g, %g, %g) -> ",
                     out_i_directions[0], out_i_directions[1],
                     out_i_directions[2]);
@@ -397,8 +398,8 @@ auto main(int argc, char *argv[]) -> int {
     } else if (strcmp(argv[i], "-ojd") == 0 ||
                strcmp(argv[i], "--out_j_direction") == 0) {
       get_doubles(argc, argv, &i, out_j_directions.data(), 3);
-      magnitude = fs::math::frobenius_norm(&out_j_directions);
-      if (magnitude == 0.0) {
+      norm = fs::math::frobenius_norm(&out_j_directions);
+      if (norm == 0.0) {
         fmt::fprintf(stderr,
                      "\n%s: directions must have non-zero magnitude; "
                      "out_j_direction = (%g, %g, %g)\n",
@@ -407,7 +408,7 @@ auto main(int argc, char *argv[]) -> int {
         fs::util::cli::usage_message(stdout);
         exit(1);
       }
-      if (magnitude != 1.0) {
+      if (norm != 1.0) {
         fmt::printf("normalizing out_j_direction: (%g, %g, %g) -> ",
                     out_j_directions[0], out_j_directions[1],
                     out_j_directions[2]);
@@ -419,8 +420,8 @@ auto main(int argc, char *argv[]) -> int {
     } else if (strcmp(argv[i], "-okd") == 0 ||
                strcmp(argv[i], "--out_k_direction") == 0) {
       get_doubles(argc, argv, &i, out_k_directions.data(), 3);
-      magnitude = fs::math::frobenius_norm(&out_k_directions);
-      if (magnitude == 0.0) {
+      norm = fs::math::frobenius_norm(&out_k_directions);
+      if (norm == 0.0) {
         fmt::fprintf(stderr,
                      "\n%s: directions must have non-zero magnitude; "
                      "out_k_direction = (%g, %g, %g)\n",
@@ -429,7 +430,7 @@ auto main(int argc, char *argv[]) -> int {
         fs::util::cli::usage_message(stdout);
         exit(1);
       }
-      if (magnitude != 1.0) {
+      if (norm != 1.0) {
         fmt::printf("normalizing out_k_direction: (%g, %g, %g) -> ",
                     out_k_directions[0], out_k_directions[1],
                     out_k_directions[2]);
