@@ -62,14 +62,14 @@ auto usage_message(FILE *stream) -> bool {
 namespace fs::math {
 
 auto frobenius_norm(const std::vector<double> *matrix) -> double {
-  return Eigen::VectorXd::Map((*matrix).data(),
-                              static_cast<Eigen::Index>((*matrix).size()))
-      .norm();
+  auto size = static_cast<Eigen::Index>((*matrix).size());
+  auto data = (*matrix).data();
+  return Eigen::VectorXd::Map(data, size).norm();
 }
 
 auto frobenius_normalize(std::vector<double> *matrix) -> void {
-  Eigen::VectorXd::Map((*matrix).data(),
-                       static_cast<Eigen::Index>((*matrix).size()))
-      .normalize();
+  auto size = static_cast<Eigen::Index>((*matrix).size());
+  auto data = (*matrix).data();
+  Eigen::VectorXd::Map(data, size).normalize();
 }
 } // namespace fs::math
