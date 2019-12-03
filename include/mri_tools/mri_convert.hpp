@@ -173,6 +173,31 @@ public:
   int out_data_type;
   std::string resample_type;
   int resample_type_val;
+  std::vector<double> in_i_directions;
+  bool in_i_direction_flag;
+  std::vector<double> in_j_directions;
+  bool in_j_direction_flag;
+  std::vector<double> in_k_directions;
+  std::vector<double> out_i_directions;
+  std::vector<double> out_j_directions;
+  std::vector<double> out_k_directions;
+  bool out_j_direction_flag;
+  bool out_i_direction_flag;
+  bool out_k_direction_flag;
+  bool in_k_direction_flag;
+  std::string in_type_string;
+  bool force_in_type_flag;
+  bool force_out_type_flag;
+  std::string out_type_string;
+  int forced_out_type;
+  int forced_in_type;
+  bool force_template_type_flag;
+  int forced_template_type;
+  std::string template_type_string;
+  std::vector<int> frames;
+  int smooth_parcellation_count;
+  bool smooth_parcellation_flag;
+  int ascii_flag;
 };
 
 struct ENV {
