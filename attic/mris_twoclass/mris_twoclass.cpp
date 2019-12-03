@@ -36,9 +36,6 @@
 #include "proto.h"
 #include "mrisurf.h"
 #include "label.h"
-#include "macros.h"
-#include "fio.h"
-#include "mrishash.h"
 #include "sig.h"
 #include "version.h"
 

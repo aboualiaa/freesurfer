@@ -24,7 +24,6 @@
  */
 
 #include <stdlib.h>
-#include <math.h>
 #include <string.h>
 #include <stdio.h>
 

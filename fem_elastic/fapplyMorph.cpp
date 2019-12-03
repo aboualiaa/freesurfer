@@ -1,7 +1,6 @@
 
 // STL includes
 #include <math.h>
-#include <fstream>
 #include <iostream>
 
 // MPI

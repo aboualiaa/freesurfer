@@ -44,7 +44,6 @@
 #include "macros.h"
 
 #include "mri.h"
-#include "mrimorph.h"
 #include "mrinorm.h"
 
 #include "mrishash_internals.h"
@@ -55,7 +54,6 @@
 #include "error.h"
 #include "matrix.h"
 #include "proto.h"
-#include "timer.h"
 
 #define MAX_4_NEIGHBORS 100
 #define MAX_3_NEIGHBORS 70
@@ -106,7 +104,7 @@ static int my_mrisComputeTangentPlanes(MRI_SURFACE *mris);
 static int FindSpikes(MRI_SURFACE *mris, int iter);
 static int SmoothSpikes(MRI_SURFACE *mris, int niter);
 
-  static int all_flag = 0;
+static int all_flag = 0;
 static char *suffix = "hippocampus";
 static char *labelvolume = "mri/aseg";
 // static char     *labelvolume = "mri/aseg_new.mgh" ;

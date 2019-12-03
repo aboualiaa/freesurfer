@@ -32,7 +32,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
-#include <unistd.h>
 #include <cstring>
 
 #include "error.h"
@@ -41,8 +40,6 @@
 
 #include "mri.h"
 #include "mrisutils.h"
-#include "MRIio_old.h"
-#include "mri_identify.h"
 #include "mri2.h"
 #include "tags.h"
 #include "matrix.h"
@@ -53,8 +50,6 @@
 #include "macros.h"
 #include "colortab.h"
 #include "cmdargs.h"
-#include "region.h"
-#include "resample.h"
 #include "fsenv.h"
 
 #define PROJ_TYPE_NONE 0

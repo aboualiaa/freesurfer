@@ -40,11 +40,8 @@
 #include "diag.h"
 #include "mrimorph.h"
 #include "utils.h"
-#include "gca.h"
 #include "cma.h"
-#include "version.h"
 #include "transform.h"
-#include "fastmarching.h"
 #include "voxlist.h"
 #include "mrisurf.h"
 

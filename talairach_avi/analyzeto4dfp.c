@@ -26,7 +26,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
 #include <float.h>
 #include <endianio.h> /* includes <ANALYZE.h>	*/
 #include <Getifh.h>

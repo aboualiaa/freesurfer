@@ -24,7 +24,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
 #include <cctype>
 
 #include "mri.h"
@@ -34,12 +33,9 @@
 #include "diag.h"
 #include "proto.h"
 #include "tags.h"
-#include "mrimorph.h"
 #include "const.h"
-#include "transform.h"
 #include "timer.h"
 #include "version.h"
-#include "gcamorph.h"
 
 static void DiagBreak2() {}
 

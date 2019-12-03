@@ -79,14 +79,10 @@
 
 #include <iostream>
 #include <fstream>
-#include <sstream>
-#include <cstdlib>
 #include <iterator>
-#include <algorithm>
 using namespace std;
 
 #include <scanopt.h>
-#include <cstring>
 
 //
 //\\\***

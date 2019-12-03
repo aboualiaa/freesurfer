@@ -1,7 +1,6 @@
 #include <boost/test/unit_test.hpp>
 
 #include <thread>
-#include <iostream>
 
 #include "stopwatch.hpp"
 

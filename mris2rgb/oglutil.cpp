@@ -28,7 +28,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
-#include <cctype>
 #ifdef HAVE_APPLE_OPENGL_FRAMEWORK
 #include <OpenGL/glu.h>
 #include <OpenGL/gl.h>
@@ -41,7 +40,6 @@
 #include "diag.h"
 #include "proto.h"
 #include "mrisurf.h"
-#include "macros.h"
 #include "TexFont.h"
 #include "oglutil.h"
 

@@ -35,17 +35,13 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
-#include <unistd.h>
 #include <cstring>
-#include <sys/time.h>
 
 #include "error.h"
 #include "diag.h"
-#include "proto.h"
 #include "matrix.h"
 #include "mri.h"
 #include "registerio.h"
-#include "fio.h"
 #include "version.h"
 #include "resample.h"
 

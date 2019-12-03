@@ -29,18 +29,13 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
 #include <cctype>
-#include <unistd.h>
 #include <cstring>
-#include <sys/stat.h>
 
 #include "mri.h"
 #include "macros.h"
 #include "error.h"
-#include "diag.h"
 #include "proto.h"
-#include "fio.h"
 #include "version.h"
 #include "connectcomp.h"
 #include "mrisurf.h"

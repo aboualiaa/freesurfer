@@ -34,20 +34,13 @@
 #include <cctype>
 
 #include <cassert>
-#include <cerrno>
-
-#include <getopt.h>
-#include <cstdarg>
 
 #include "macros.h"
 #include "error.h"
 #include "diag.h"
 #include "proto.h"
 #include "mrisurf.h"
-#include "mri.h"
-#include "macros.h"
 #include "version.h"
-//#include "xDebug.h"
 #include "label.h"
 
 #define STRBUF 65536

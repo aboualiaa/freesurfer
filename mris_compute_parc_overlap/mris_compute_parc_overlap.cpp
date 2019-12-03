@@ -52,7 +52,6 @@
 #include <cstdlib>
 
 #include "mrisurf.h"
-#include "annotation.h"
 #include "version.h"
 #include "error.h"
 #include "utils.h"

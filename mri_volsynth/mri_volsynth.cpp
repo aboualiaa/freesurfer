@@ -25,21 +25,17 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
-#include <unistd.h>
 #include <cstring>
 #include <sys/time.h>
 #include <cctype>
 
 #include "error.h"
 #include "diag.h"
-#include "proto.h"
 #include "utils.h"
 #include "mri_identify.h"
-#include "matrix.h"
 #include "mri.h"
 #include "mri2.h"
 #include "fmriutils.h"
-#include "MRIio_old.h"
 #include "randomfields.h"
 #include "mri_circulars.h"
 #include "ctrpoints.h"

@@ -25,8 +25,6 @@
 
 #include "VolumeFilterMean.h"
 #include "LayerMRI.h"
-#include <vtkImageData.h>
-#include <vtkImageMedian3D.h>
 #include "ProgressCallback.h"
 
 #include "utils.h"

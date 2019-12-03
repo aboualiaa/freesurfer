@@ -31,7 +31,6 @@
 #include "vtkPolyData.h"
 #include "MainWindow.h"
 #include "RenderView2D.h"
-#include "vtkPolyData.h"
 #include "vtkPoints.h"
 #include "vtkCellArray.h"
 #include "vtkFloatArray.h"

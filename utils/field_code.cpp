@@ -23,11 +23,9 @@
  *
  */
 
-#include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <unistd.h>
 #include "error.h"
 
 #include "field_code.h"

@@ -40,7 +40,6 @@
 #include "rforest.h"
 #include "cma.h"
 #include <fcntl.h>
-#include <sys/stat.h>
 #include <unistd.h>
 
 static int features = FEATURE_INTENSITY | FEATURE_MEAN3 | FEATURE_DIRECTION |
@@ -335,17 +334,17 @@ static int get_option(int argc, char *argv[]) {
 #if 0
 #define WM 2
 #define CAUDATE 3
-static int aseg_labels[] = 
+static int aseg_labels[] =
 {
-  Left_WM_hypointensities,  
-  Right_WM_hypointensities,  
+  Left_WM_hypointensities,
+  Right_WM_hypointensities,
   Left_Cerebral_White_Matter,
   Right_Cerebral_White_Matter,
   Left_Caudate,
   Right_Caudate
 } ;
 
-static int training_labels[] = 
+static int training_labels[] =
 {
   WMSA,
   WMSA,

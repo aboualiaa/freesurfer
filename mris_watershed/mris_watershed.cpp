@@ -22,7 +22,6 @@ the watershed transformation. In Mathematical Morphology in Image Processing
 */
 #include <cstdlib>
 #include <cstdio>
-#include <cmath>
 #include <cstring>
 #include <cctype>
 #include "romp_support.h"

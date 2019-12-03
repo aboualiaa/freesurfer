@@ -27,7 +27,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <cmath>
 #include <cctype>
 
 #include "macros.h"
@@ -35,8 +34,6 @@
 #include "diag.h"
 #include "proto.h"
 #include "mrisurf.h"
-#include "mri.h"
-#include "macros.h"
 
 static char vcid[] =
     "$Id: hiam_make_template.c,v 1.5 2011/03/02 00:04:08 nicks Exp $";

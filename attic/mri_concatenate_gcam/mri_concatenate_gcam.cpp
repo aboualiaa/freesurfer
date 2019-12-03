@@ -1,13 +1,10 @@
 #include <string>
 #include <vector>
-#include <iostream>
-#include <fstream>
 
 #include "error.h"
 #include "utils.h"
 #include "macros.h"
 #include "mri.h"
-#include "version.h"
 #include "transform.h"
 #include "gcamorph.h"
 

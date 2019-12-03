@@ -25,14 +25,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <dirent.h>
 #include "const.h"
 #include "version.h"
-#include "mghendian.h"
 
 #define MAX_FILES 10000
 

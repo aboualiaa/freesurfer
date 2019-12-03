@@ -37,11 +37,9 @@ IEEE Transaction on Pattern Analysis and Machine Intelligence, 2012.
 #include "mri.h"
 #include "error.h"
 #include "macros.h"
-#include "error.h"
 #include "diag.h"
 #include "proto.h"
 #include "mrimorph.h"
-#include "mri_conform.h"
 #include "utils.h"
 #include "const.h"
 #include "timer.h"
@@ -499,7 +497,7 @@ static void usage_exit(int code) {
 
 #if 0
 static VECTOR *
-extract_neighborhood(MRI **mri, int nlevels, int  whalf, int x0, int y0, int z0, VECTOR *v) 
+extract_neighborhood(MRI **mri, int nlevels, int  whalf, int x0, int y0, int z0, VECTOR *v)
 {
   int wsize = 2*whalf+1, i, x, y, z, xk, yk, zk ;
 
@@ -514,7 +512,7 @@ extract_neighborhood(MRI **mri, int nlevels, int  whalf, int x0, int y0, int z0,
     {
       y = mri->yi[y0+yk] ;
       for (zk = -whalf ; zk <= whalf ; zk++, i++)
-      { 
+      {
 	z = mri->zi[z0+zk] ;
 	VECTOR_ELT(v, i) = MRIgetVoxVal(mri, x, y, z, 0) ;
       }

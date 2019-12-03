@@ -55,10 +55,7 @@
 
 **************************************************************/
 
-#include <cstdarg>
 #include <cstdio>
-#include <cstdlib>
-#include <cstring>
 #ifndef Darwin
 #include <malloc.h>
 #else
@@ -66,8 +63,6 @@
 #endif
 
 #include <math.h>
-
-#include "mosaic.h"
 
 //#define _DEBUG
 

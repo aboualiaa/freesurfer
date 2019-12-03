@@ -6,25 +6,14 @@
 #include "itkVector.h"
 #include "itkListSample.h"
 #include "itkKdTree.h"
-#include "itkWeightedCentroidKdTreeGenerator.h"
-#include "itkKdTreeBasedKmeansEstimator.h"
-#include "itkDistanceToCentroidMembershipFunction.h"
-//#include "itkCurrentsToCentroidMembershipFunction.h"
-//#include "itkEuclideanToCentroidMembershipFunction.h"
-//#include "itkKMeansClassifierFilter.h"
 #include "itkNormalVariateGenerator.h"
 #include <iostream>
-#include <limits>
-//#include <utility>
 #include <algorithm>
 #include "vnl/vnl_matrix.h"
-#include "vnl/vnl_math.h"
-#include "math.h"
 #include <stdlib.h>
 #include <vnl/vnl_sparse_matrix.h>
 #include <vnl/algo/vnl_sparse_symmetric_eigensystem.h>
 #include <vnl/algo/vnl_symmetric_eigensystem.h>
-#include <set>
 #include "ThreadedMembershipFunction.h"
 
 template <class T> class PriorityNode {

@@ -33,7 +33,6 @@
 #include "error.h"
 #include "diag.h"
 #include "proto.h"
-#include "mrinorm.h"
 #include "mriclass.h"
 #include "version.h"
 

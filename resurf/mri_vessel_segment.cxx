@@ -1,27 +1,16 @@
 #include <iostream>
-#include <string>
 #include "itkImage.h"
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
 #include "GetPot.h"
 #include "itkThresholdMaximumConnectedComponentsImageFilter.h"
-//#include "itkCoherenceEnhancingDiffusionImageFilter.h"
-#include "itkGradientAnisotropicDiffusionImageFilter.h"
-#include "itkBinaryBallStructuringElement.h"
-#include "itkGrayscaleErodeImageFilter.h"
-#include "itkGrayscaleDilateImageFilter.h"
-#include "itkSubtractImageFilter.h"
 #include "itkLabelImageToShapeLabelMapFilter.h"
-#include "itkRescaleIntensityImageFilter.h"
-#include "itkInvertIntensityImageFilter.h"
 #include "itkBinaryThresholdImageFilter.h"
 #include "itkBinaryImageToLabelMapFilter.h"
 #include "itkBinaryImageToShapeLabelMapFilter.h"
 #include "itkLabelOverlayImageFilter.h"
 
 #include "mri.h"
-#include "mrisurf.h"
-#include "fsenv.h"
 #include "cma.h"
 
 int main(int narg, char *arg[]) {

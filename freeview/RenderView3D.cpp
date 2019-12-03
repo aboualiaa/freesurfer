@@ -38,7 +38,6 @@
 #include <vtkProp.h>
 #include <vtkCellPicker.h>
 #include <vtkRenderWindow.h>
-#include <vtkRenderWindowInteractor.h>
 #include <vtkRenderer.h>
 #include <vtkCamera.h>
 #include <vtkActor2D.h>
@@ -66,9 +65,7 @@
 #include "MyUtils.h"
 #include "FSSurface.h"
 #include "Interactor3DPathEdit.h"
-#include <QElapsedTimer>
 #include "vtkInteractorStyleMyTrackballCamera.h"
-#include <vtkCubeAxesActor.h>
 
 #define SLICE_PICKER_PIXEL_TOLERANCE 15
 

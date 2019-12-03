@@ -21,19 +21,3 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
-
-#include <cctype>
-#include <math.h>
-#include <cstdio>
-#include <cstdlib>
-
-#include "cma.h"
-#include "diag.h"
-#include "error.h"
-#include "gcamorph.h"
-#include "macros.h"
-#include "rfa.h"
-#include "rfutils.h"
-#include "talairachex.h"
-#include "transform.h"
-#include "utils.h"

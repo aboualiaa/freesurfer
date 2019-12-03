@@ -24,7 +24,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
 #include <cctype>
 
 #include "utils.h"
@@ -36,7 +35,6 @@
 #include "proto.h"
 #include "version.h"
 #include "fio.h"
-#include "cmdargs.h"
 
 int main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);

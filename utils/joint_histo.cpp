@@ -13,18 +13,13 @@
   INCLUDE FILES
   -------------------------------------------------------*/
 #include <math.h>
-#include <memory.h>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 
 #include "diag.h"
 #include "error.h"
 #include "fio.h"
-#include "histo.h"
-#include "macros.h"
 #include "mri.h"
-#include "proto.h"
 
 #include "joint_histo.h"
 

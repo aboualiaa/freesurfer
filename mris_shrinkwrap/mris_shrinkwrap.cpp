@@ -31,12 +31,9 @@
 #include "macros.h"
 
 #include "mri.h"
-#include "mrimorph.h"
-#include "mrinorm.h"
 #include "mrisegment.h"
 #include "mrisurf.h"
 #include "mrisurf_project.h"
-#include "icosahedron.h"
 
 #include "error.h"
 #include "diag.h"

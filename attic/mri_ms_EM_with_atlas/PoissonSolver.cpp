@@ -33,7 +33,6 @@
 /* All the volumes here are assumed to be FLOAT */
 #include <stdio.h>
 #include <stdlib.h>
-#include <memory.h>
 #include <math.h>
 #include "PoissonSolver.h"
 #define JACOBI 0

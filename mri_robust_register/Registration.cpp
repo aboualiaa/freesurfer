@@ -24,7 +24,6 @@
  */
 
 #include "Registration.h"
-#include "RegistrationStep.h"
 #include "Quaternion.h"
 #include "MyMatrix.h"
 #include "MyMRI.h"
@@ -34,8 +33,6 @@
 
 #include <limits>
 #include <cassert>
-#include <fstream>
-#include <sstream>
 #include <iostream>
 #include <vnl/algo/vnl_matrix_inverse.h>
 #include <vnl/vnl_inverse.h>
@@ -43,10 +40,8 @@
 #include <vnl/vnl_matlab_print.h>
 #include <vnl/algo/vnl_determinant.h>
 
-#include <climits>
 #include "error.h"
 #include "macros.h"
-#include "mrimorph.h"
 
 using namespace std;
 

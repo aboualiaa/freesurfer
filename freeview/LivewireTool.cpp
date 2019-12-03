@@ -31,8 +31,6 @@
 #include <vtkImageShiftScale.h>
 #include <vtkImageChangeInformation.h>
 #include <vtkImageAnisotropicDiffusion2D.h>
-#include <vtkImageGaussianSmooth.h>
-#include <vtkCellArray.h>
 #include "vtkDijkstraImageGeodesicPath.h"
 
 LivewireTool::LivewireTool()

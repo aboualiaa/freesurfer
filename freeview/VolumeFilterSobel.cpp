@@ -24,12 +24,10 @@
  */
 
 #include "VolumeFilterSobel.h"
-#include <math.h>
 #include "LayerMRI.h"
 #include <vtkImageData.h>
 #include <vtkImageSobel3D.h>
 #include <vtkImageMagnitude.h>
-#include <vtkImageCast.h>
 #include <vtkPointData.h>
 #include <vtkDataArray.h>
 #include <vtkImageShiftScale.h>

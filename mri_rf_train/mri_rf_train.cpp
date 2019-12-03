@@ -37,17 +37,13 @@
 #include "utils.h"
 #include "timer.h"
 #include "gca.h"
-#include "gcamorph.h"
 #include "transform.h"
 #include "cma.h"
 #include "flash.h"
 #include "version.h"
 #include "rforest.h"
 #include "rfa.h"
-#include "gca.h"
-#include "talairachex.h"
 #include <fcntl.h>
-#include <sys/stat.h>
 #include <unistd.h>
 
 #define MAX_RFA_INPUTS 1000

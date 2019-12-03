@@ -1,6 +1,5 @@
 #include <functional>
 #include <iostream>
-#include <sstream>
 #include <algorithm>
 
 #include <boost/test/unit_test.hpp>

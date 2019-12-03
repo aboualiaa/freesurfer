@@ -23,8 +23,6 @@
  *
  */
 
-#include <iostream>
-
 #include "fs_vnl/fs_lbfgs_observer.h"
 
 fs_lbfgs_observer::fs_lbfgs_observer() {

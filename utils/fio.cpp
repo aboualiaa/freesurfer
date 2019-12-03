@@ -24,17 +24,14 @@
 
 #include "fio.h"
 #include <cerrno>
-#include <math.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
 #include "bfileio.h"
 #include "error.h"
 #include "machine.h"
-#include "mghendian.h"
 #include "proto.h"
 #include "utils.h" // strcpyalloc
 #include "diag.h"

@@ -36,15 +36,10 @@
 #include "error.h"
 #include "diag.h"
 #include "proto.h"
-#include "mrimorph.h"
-#include "mri_conform.h"
 #include "utils.h"
 #include "const.h"
 #include "timer.h"
 #include "version.h"
-#include "mrisurf.h"
-#include "registerio.h"
-#include "cma.h"
 #include "mrinorm.h"
 
 int main(int argc, char *argv[]);

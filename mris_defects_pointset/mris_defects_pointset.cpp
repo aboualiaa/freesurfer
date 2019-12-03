@@ -1,6 +1,5 @@
 #include <string>
 #include <iostream>
-#include <fstream>
 
 #include "mris_defects_pointset.help.xml.h"
 #include "argparse.h"

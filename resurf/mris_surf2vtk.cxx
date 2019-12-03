@@ -4,15 +4,10 @@
 #include "itkDefaultStaticMeshTraits.h"
 #include "itkMesh.h"
 #include "itkTriangleCell.h"
-#include <set>
 #include "GetPot.h"
-#include <string>
-#include "colortab.h"
-#include "fsenv.h"
 
 #include "mrisurf.h"
 
-#include "mrisurf.h"
 #include "itkVTKPolyDataWriter.h"
 
 int main(int narg, char *arg[]) {

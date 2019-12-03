@@ -31,7 +31,6 @@
 
 #include "macros.h"
 
-#include "mri.h"
 #include "mrisurf.h"
 #include "mrisurf_project.h"
 

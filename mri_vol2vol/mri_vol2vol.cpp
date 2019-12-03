@@ -455,10 +455,8 @@ ENDHELP --------------------------------------------------------------
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
-#include <unistd.h>
 #include <cstring>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <cctype>
 #include <cerrno>
 
@@ -472,7 +470,6 @@ ENDHELP --------------------------------------------------------------
 #include "version.h"
 #include "mri2.h"
 #include "mri_identify.h"
-#include "MRIio_old.h"
 #include "registerio.h"
 #include "resample.h"
 #include "transform.h"

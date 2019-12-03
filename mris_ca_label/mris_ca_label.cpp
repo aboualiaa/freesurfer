@@ -30,7 +30,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
 #include <cctype>
 
 #include "macros.h"
@@ -45,11 +44,9 @@
 #include "utils.h"
 #include "timer.h"
 #include "gcsa.h"
-#include "transform.h"
 #include "annotation.h"
 #include "icosahedron.h"
 #include "version.h"
-#include "cma.h"
 
 static char vcid[] =
     "$Id: mris_ca_label.c,v 1.37 2014/02/04 17:46:42 fischl Exp $";

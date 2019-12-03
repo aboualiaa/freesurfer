@@ -32,12 +32,9 @@
  ****************************************************************/
 
 #include <cerrno>
-#include <math.h>
 #include <cstdio>
 #include <cstdlib>
-#include <strings.h>
 
-#include <cstring>
 #include "mri_identify.h"
 #include "selxavgio.h"
 

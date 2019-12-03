@@ -36,7 +36,6 @@
 #include "legacy.h"
 
 #include <cstdlib>
-#include <cassert>
 
 extern string G_SELF;
 
@@ -472,7 +471,7 @@ void s_weights_copy(
 ) {
     //
     // ARGS
-    //	sw_target	in/out		target struct 
+    //	sw_target	in/out		target struct
     //	sw_source	in/out		source struct
     //
     // DESC
@@ -495,7 +494,7 @@ void s_Dweights_copy(
 ) {
     //
     // ARGS
-    //	sw_target	in/out		target struct 
+    //	sw_target	in/out		target struct
     //	sw_source	in/out		source struct
     //
     // DESC
@@ -1976,8 +1975,8 @@ costFunc_unityReturn(
     bool            b_relNextReference) {
     //
     // POSTCONDITIONS
-    //  o Will always return a 1.0 as the transition cost. This is used 
-    //    primarily in determining logical distances between nodes in the 
+    //  o Will always return a 1.0 as the transition cost. This is used
+    //    primarily in determining logical distances between nodes in the
     //    vertex.
     //
     //   Most of the function arguments are superfluous in this case.

@@ -30,8 +30,6 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "cmdargs.h"
-
 /* --------------------------------------------- */
 const char *CMDSrcVersion() {
   return ("$Id: cmdargs.c,v 1.3 2011/03/02 00:04:42 nicks Exp $");

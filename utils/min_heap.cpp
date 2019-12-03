@@ -1,6 +1,5 @@
 // MARS Project (Thomas Yeo and Mert Sabuncu), MIT, CSAIL (c) 2006-2008
 
-#include <math.h>
 #include <cstdio>
 #include <cstdlib>
 

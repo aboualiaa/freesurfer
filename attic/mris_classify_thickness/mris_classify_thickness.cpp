@@ -31,7 +31,6 @@
 #include <math.h>
 #include <ctype.h>
 #include <fcntl.h>
-#include <sys/stat.h>
 #include <unistd.h>
 
 #include "timer.h"
@@ -41,10 +40,7 @@
 #include "const.h"
 #include "proto.h"
 #include "mrisurf.h"
-#include "macros.h"
-#include "fio.h"
 #include "mrishash.h"
-#include "sig.h"
 #include "version.h"
 #include "rforest.h"
 #include "cma.h"
@@ -363,7 +359,7 @@ int main(int argc, char *argv[]) {
 #if 0
     rf2 = RFread(rf_write_name) ;
     DiagBreak() ;
-    for (correct = n = 0 ; n < num_class1+num_class2 ; n++) 
+    for (correct = n = 0 ; n < num_class1+num_class2 ; n++)
     {
       classnum = RFclassify(rf2, training_data[n], &pval, n < num_class1 ? 0 : 1) ;
       if (classnum == training_class[n])

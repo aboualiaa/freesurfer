@@ -28,9 +28,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <cctype>
 #include <cerrno>
 
@@ -45,7 +43,6 @@
 #include "mrinorm.h"
 #include "cma.h"
 #include "version.h"
-#include "error.h"
 #include "tags.h"
 #include "transform.h"
 #include "talairachex.h"

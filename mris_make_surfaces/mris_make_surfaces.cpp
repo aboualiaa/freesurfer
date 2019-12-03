@@ -32,8 +32,6 @@
 #include <cstring>
 #include <cmath>
 #include <cctype>
-#include <sys/types.h>
-#include <sys/stat.h>
 #ifdef HAVE_OPENMP
 #include "romp_support.h"
 #endif
@@ -47,13 +45,11 @@
 #include "mrisutils.h"
 #include "mri.h"
 #include "cma.h"
-#include "macros.h"
 #include "mrimorph.h"
 #include "tags.h"
 #include "mrinorm.h"
 #include "version.h"
 #include "label.h"
-#include "voxlist.h"
 #include "fsinit.h"
 #include "mris_multimodal_refinement.h"
 #include "surfgrad.h"

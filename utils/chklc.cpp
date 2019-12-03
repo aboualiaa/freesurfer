@@ -26,14 +26,12 @@
 #include <gnu/libc-version.h>
 #endif
 
-#include <chklc.h>
 #include <const.h>
 #include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <unistd.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 
 #include "diag.h"

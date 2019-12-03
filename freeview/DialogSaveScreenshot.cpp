@@ -29,7 +29,6 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QFileInfo>
-#include <QSettings>
 #include <QDebug>
 
 DialogSaveScreenshot::DialogSaveScreenshot(QWidget *parent)

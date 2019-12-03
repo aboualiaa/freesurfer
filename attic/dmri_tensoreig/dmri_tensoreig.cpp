@@ -22,35 +22,22 @@
  *
  */
 
-#include <float.h>
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/utsname.h>
 #include <unistd.h>
 #include <string.h>
-#include <ctype.h>
-#include <time.h>
 #include <errno.h>
 
 #include "macros.h"
-#include "const.h"
-#include "machine.h"
-#include "fio.h"
 #include "utils.h"
-#include "mri.h"
 #include "mri2.h"
-#include "gcamorph.h"
 #include "minc.h"
-#include "analyze.h"
-#include "mri_identify.h"
 #include "error.h"
 #include "diag.h"
 #include "version.h"
-#include "mghendian.h"
-#include "fio.h"
 #include "cmdargs.h"
 #include "fsenv.h"
-#include "DICOMRead.h"
 #include "dti.h"
 
 static int parse_commandline(int argc, char **argv);

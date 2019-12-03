@@ -31,7 +31,6 @@
 #include "image.h"
 #include "macros.h" // DZERO
 #include "mri.h"
-#include "proto.h" // nint
 #include "utils.h" // fgetl
 
 DENSITY *DensityHistogramEstimate(MRI *mri1, MRI *mri2, int nbins, float sigma,

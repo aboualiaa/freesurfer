@@ -62,7 +62,6 @@
 #include <unistd.h>
 #include <cerrno>
 
-#include "macros.h"
 #include "mrisurf.h"
 #include "mrisutils.h"
 #include "utils.h"

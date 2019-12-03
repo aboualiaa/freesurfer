@@ -1,8 +1,5 @@
 #include "itkNumericTraitsVariableLengthVectorPixel.h"
 #include "vnl/vnl_math.h"
-#include <cstring>
-#include <stdlib.h>
-#include <string.h>
 
 template <typename TValueType, class TMesh>
 void LabelPerPointVariableLengthVector<TValueType, TMesh>::SetCell(

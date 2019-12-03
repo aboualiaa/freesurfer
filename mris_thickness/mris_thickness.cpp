@@ -37,9 +37,7 @@
 #include "proto.h"
 #include "mrisurf.h"
 #include "mri.h"
-#include "macros.h"
 #include "version.h"
-#include "icosahedron.h"
 #include "label.h"
 
 static char vcid[] =
@@ -78,8 +76,6 @@ static char *long_fname = nullptr;
 static LABEL *cortex_label = nullptr;
 static LABEL *fsaverage_label = nullptr;
 
-#include "voxlist.h"
-#include "mrinorm.h"
 int main(int argc, char *argv[]) {
   char *out_fname, *sname, *cp, fname[STRLEN], *hemi;
   int nargs, msec;
@@ -296,7 +292,7 @@ int main(int argc, char *argv[]) {
       static INTEGRATION_PARMS nparms ;
 
       nparms.dt = 0.9 ;
-      nparms.momentum = .5; 
+      nparms.momentum = .5;
       nparms.niterations = 1000 ;
       nparms.l_nlarea = 0 ;
       nparms.l_thick_min = 0 ;

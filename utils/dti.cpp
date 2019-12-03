@@ -21,21 +21,16 @@
  *
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
+ *
  */
 
 // $Id: dti.c,v 1.30 2015/04/22 16:49:32 greve Exp $
 
 #include "dti.h"
-#include <pwd.h>
 #include <cstdio>
 #include <cstdlib>
 #include <string>
 #include <cstring>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/utsname.h>
-#include <ctime>
-#include <unistd.h>
 #include "DICOMRead.h"
 #include "diag.h"
 #include "fio.h"
@@ -44,7 +39,6 @@
 #include "mri.h"
 #include "mri2.h"
 #include "utils.h"
-#include "version.h"
 
 /* --------------------------------------------- */
 // Return the CVS version of this file.

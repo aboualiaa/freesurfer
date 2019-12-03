@@ -32,8 +32,6 @@
 #include <string.h>
 #include <math.h>
 #include <ctype.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 
 #include "macros.h"
 #include "error.h"
@@ -42,7 +40,6 @@
 #include "timer.h"
 #include "mrisurf.h"
 #include "mri.h"
-#include "macros.h"
 #include "mrimorph.h"
 #include "tags.h"
 #include "mrinorm.h"

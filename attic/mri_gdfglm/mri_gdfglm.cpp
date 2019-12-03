@@ -29,12 +29,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <unistd.h>
 #include <string.h>
 
 #include "error.h"
 #include "diag.h"
-#include "proto.h"
 #include "matfile.h"
 
 #include "matrix.h"

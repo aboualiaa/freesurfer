@@ -46,7 +46,6 @@
 #include <ctype.h>
 
 #include "mri.h"
-#include "matrix.h"
 #include "proto.h"
 #include "macros.h"
 #include "error.h"
@@ -56,7 +55,6 @@
 #include "utils.h"
 #include "gca.h"
 #include "cma.h"
-#include "mrinorm.h"
 #include "gcamorph.h"
 #include "transform.h"
 #include "mrisegment.h"
@@ -1145,7 +1143,7 @@ int main(int argc, char *argv[]) {
 
 #if 0
     for (i = 0 ; i < gcam_ms->nsigmas ; i++)
-      GCAinsertLabels(gcam_ms->gcas[i], mri_inputs, transform, ninsertions, 
+      GCAinsertLabels(gcam_ms->gcas[i], mri_inputs, transform, ninsertions,
                       insert_labels, insert_intensities, insert_coords, insert_whalf) ;
 #endif
 
@@ -1219,8 +1217,8 @@ int main(int argc, char *argv[]) {
       mri_aseg = replace_labels(mri_aseg_orig, NULL, combine_labels,
                                 NCOMBINE_LABELS, NULL);
 #if 0
-      gca_log_posterior = 
-        GCAimagePosteriorLogProbability(gcam_ms->gcas[0], mri_aseg_orig, 
+      gca_log_posterior =
+        GCAimagePosteriorLogProbability(gcam_ms->gcas[0], mri_aseg_orig,
                                         mri_inputs, gcam_transform)/nvox ;
 #endif
       sprintf(fname, "%s_aseg%d.mgh", parms.base_name, round);

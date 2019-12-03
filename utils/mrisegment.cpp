@@ -30,11 +30,9 @@
 #include <memory.h>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 
 #include "diag.h"
 #include "error.h"
-#include "macros.h"
 #include "mri.h"
 #include "mrisegment.h"
 #include "proto.h"

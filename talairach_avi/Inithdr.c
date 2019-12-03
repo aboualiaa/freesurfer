@@ -27,7 +27,6 @@
 #include <string.h>
 #include <time.h>
 #include <stdio.h>
-#include <math.h>
 #include <ANALYZE.h>
 #include <unistd.h>
 #include <pwd.h>

@@ -53,10 +53,8 @@
 #include <unistd.h>
 #include <sys/utsname.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <cerrno>
 
-#include "macros.h"
 #include "utils.h"
 #include "fio.h"
 #include "version.h"
@@ -69,14 +67,11 @@
 #include "fmriutils.h"
 #include "matfile.h"
 #include "cma.h"
-#include "mrimorph.h"
 #include "region.h"
 #include "resample.h"
 #include "numerics.h"
-#include "registerio.h"
 #include "mrisurf.h"
 #include "mrisutils.h"
-#include "cma.h"
 #include "mri_identify.h"
 #include "gtm.h"
 #include "pdf.h"

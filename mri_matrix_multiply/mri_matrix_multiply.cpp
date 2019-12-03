@@ -24,13 +24,8 @@
  */
 
 #include <cstdio>
-#include <unistd.h>
 #include <cstring>
-#include <cctype>
-#include "machine.h"
 #include "fio.h"
-#include "utils.h"
-#include "mri.h"
 #include "matrix.h"
 #include "matfile.h"
 #include "version.h"

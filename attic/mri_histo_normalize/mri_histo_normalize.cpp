@@ -27,15 +27,11 @@
 #include <ctype.h>
 
 #include "mri.h"
-#include "mrinorm.h"
 #include "macros.h"
 #include "error.h"
 #include "diag.h"
 #include "proto.h"
-#include "mrimorph.h"
-#include "mri_conform.h"
 #include "utils.h"
-#include "transform.h"
 #include "timer.h"
 #include "version.h"
 #include "histo.h"

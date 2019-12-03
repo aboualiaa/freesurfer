@@ -28,9 +28,6 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #include <ctype.h>
 #include "mri.h"
 #include "const.h"
@@ -38,12 +35,10 @@
 #include "error.h"
 #include "macros.h"
 #include "proto.h"
-#include "mrimorph.h"
 #include "timer.h"
 #include "mrinorm.h"
 #include "cma.h"
 #include "version.h"
-#include "error.h"
 #include "transform.h"
 #include "talairachex.h"
 #include "matrix.h"

@@ -49,7 +49,6 @@
 #include <sys/time.h>
 
 #include "icosahedron.h"
-#include "MRIio_old.h"
 #include "error.h"
 #include "diag.h"
 #include "mrisurf.h"
@@ -59,7 +58,6 @@
 #include "mri2.h"
 #include "prime.h"
 #include "fsenv.h"
-#include "registerio.h"
 #include "resample.h"
 #include "selxavgio.h"
 #include "version.h"

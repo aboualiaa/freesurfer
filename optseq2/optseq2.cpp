@@ -35,7 +35,6 @@
 #include "proto.h"
 
 #include "matrix.h"
-#include "mri.h"
 #include "matfile.h"
 #include "evschutils.h"
 #include "version.h"

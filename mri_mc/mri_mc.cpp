@@ -31,12 +31,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <unistd.h>
 
-#include "fio.h"
 #include "const.h"
-#include "diag.h"
 #include "proto.h"
 #include "macros.h"
 #include "error.h"
@@ -45,7 +42,6 @@
 #include "mrisurf.h"
 #include "version.h"
 #include "tags.h"
-#include "gca.h"
 #include "MC.h"
 
 #define MAXFACES 3000000
@@ -539,17 +535,17 @@ int saveTesselation2(tesselation_parms *parms) {
     int f;
     float v0[3],v1[3],d1,d2,d3;
     for (f=0;f<mris->nfaces;f++) {
-      v0[0] = mris->vertices[mris->faces[f].v[2]].x - 
+      v0[0] = mris->vertices[mris->faces[f].v[2]].x -
         mris->vertices[mris->faces[f].v[0]].x;
-      v0[1] = mris->vertices[mris->faces[f].v[2]].y - 
+      v0[1] = mris->vertices[mris->faces[f].v[2]].y -
         mris->vertices[mris->faces[f].v[0]].y;
-      v0[2] = mris->vertices[mris->faces[f].v[2]].z - 
+      v0[2] = mris->vertices[mris->faces[f].v[2]].z -
         mris->vertices[mris->faces[f].v[0]].z;
-      v1[0] = mris->vertices[mris->faces[f].v[1]].x - 
+      v1[0] = mris->vertices[mris->faces[f].v[1]].x -
         mris->vertices[mris->faces[f].v[0]].x;
-      v1[1] = mris->vertices[mris->faces[f].v[1]].y - 
+      v1[1] = mris->vertices[mris->faces[f].v[1]].y -
         mris->vertices[mris->faces[f].v[0]].y;
-      v1[2] = mris->vertices[mris->faces[f].v[1]].z - 
+      v1[2] = mris->vertices[mris->faces[f].v[1]].z -
         mris->vertices[mris->faces[f].v[0]].z;
       d1 = -v1[1]*v0[2] + v0[1]*v1[2];
       d2 = v1[0]*v0[2] - v0[0]*v1[2];

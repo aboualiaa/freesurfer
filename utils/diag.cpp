@@ -35,7 +35,6 @@
 #include "fsinit.h"
 #include "image.h"
 #include "proto.h"
-#include "windiag.h"
 
 /*-----------------------------------------------------
                     MACROS AND CONSTANTS

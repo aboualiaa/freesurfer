@@ -6,10 +6,7 @@
 
 #include <eigen3/Eigen/Dense>
 
-#include <cstdint>
-#include <iostream>
 #include <fstream>
-#include <algorithm>
 
 namespace fs::util::cli {
 
@@ -50,10 +47,7 @@ auto usage_message() -> std::string {
 
 auto usage_message(FILE *stream) -> bool {
   if (stream != nullptr) {
-    if (fmt::fprintf(stream, usage_message()) < 0) {
-      return false;
-    }
-    return true;
+    return fmt::fprintf(stream, usage_message()) >= 0;
   }
   return false;
 }
@@ -65,9 +59,8 @@ void print_parsed_tokens(po::basic_parsed_options<char> const &parsed_opts) {
       tmp += token;
       tmp += " ";
     }
-    tmp.pop_back();
-    fmt::print("{}", tmp);
-    fmt::print("\n");
+    tmp.pop_back(); // last space
+    fmt::print("{}\n", tmp);
   }
 }
 } // namespace fs::util::cli

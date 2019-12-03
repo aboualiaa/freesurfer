@@ -4,12 +4,9 @@
 
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
-#include <QGraphicsSceneHoverEvent>
 #include <QPainter>
 #include <QStyleOption>
-#include <iostream>
 
-#include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QGraphicsPixmapItem>
 #include <QDebug>

@@ -33,7 +33,6 @@
 #include "DialogReplaceLabel.h"
 #include <QTimer>
 #include <QSettings>
-#include <QDebug>
 #include "LayerPropertyMRI.h"
 
 ToolWindowEdit::ToolWindowEdit(QWidget *parent)

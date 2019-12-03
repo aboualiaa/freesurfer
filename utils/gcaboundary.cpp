@@ -33,7 +33,6 @@
 #include "fio.h"
 #include "gcaboundary.h"
 #include "macros.h"
-#include "matrix.h"
 #include "talairachex.h"
 #include "transform.h"
 #include "tritri.h"

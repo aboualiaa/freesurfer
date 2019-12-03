@@ -32,8 +32,6 @@
 ////////////////////////////////////////////////////////////////////
 #include <string>
 #include <iostream>
-#include <fstream>
-#include <sstream>
 #include <vector>
 #include <cassert>
 
@@ -47,8 +45,6 @@
 #include "macros.h"
 #include "mri.h"
 #include "matrix.h"
-#include "timer.h"
-#include "diag.h"
 #include "mrimorph.h"
 #include "version.h"
 #include <vnl/vnl_matrix.h>

@@ -32,16 +32,9 @@
  */
 
 #include "C_mpmOverlay.h"
-#include "dijkstra.h"
 #include "general.h"
 
-#include "c_surface.h"
-#include "c_vertex.h"
-#include "unistd.h"
-
-#include <sstream>
 #include <iostream>
-#include <fstream>
 
 extern bool Gb_stdout;
 extern stringstream Gsout;

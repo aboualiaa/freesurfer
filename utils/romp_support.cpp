@@ -32,7 +32,6 @@ static const int debug = 0;
 #endif
 
 #include <cstdlib>
-#include <pthread.h>
 
 static void __attribute__((constructor)) before_main() {
   int n = omp_get_max_threads();
@@ -557,8 +556,8 @@ int main(int argc, char* argv[])
     }
     comBuffer[comSize] = 0;
     fprintf(stdout, "%s:%d main() of %s\n", __FILE__, __LINE__, comBuffer);
-    
-    // Trivial timing 
+
+    // Trivial timing
     //
     if (0) {
         ROMP_PF_begin
@@ -567,17 +566,17 @@ int main(int argc, char* argv[])
 #pragma omp parallel for if_ROMP(assume_reproducible)
         for (i = 0; i < 4; i++) {
             int j;
-            for (j = 0; j < 250000; j++) {   
+            for (j = 0; j < 250000; j++) {
                 sum += i/(double)j;
             }
         }
         ROMP_PF_end
-        
+
         rompExitHandler();
         return 0;
     }
-    
-    
+
+
     if (1) {
         ROMP_PF_begin
 
@@ -586,17 +585,17 @@ int main(int argc, char* argv[])
         for (i = 0; i < 4; i++) {
             ROMP_PF_begin
             int j;
-            for (j = 0; j < 250000; j++) {   
+            for (j = 0; j < 250000; j++) {
                 sum += i/(double)j;
             }
             ROMP_PF_end
         }
         ROMP_PF_end
-        
+
         return 0;
     }
-    
-    
+
+
     // Simple timing and control example
     //
     static const int v_size = 30000;
@@ -610,53 +609,53 @@ int main(int argc, char* argv[])
 #pragma omp parallel for if_ROMP(fast) reduction(+ : sum)
     for (i = 0; i < v_size; i++) {
         ROMP_PFLB_begin
-    
+
     threadMask |= 1 <<
 #ifdef HAVE_OPENMP
         omp_get_thread_num();
 #else
         0;
-#endif  
+#endif
         sum += 1.0 / i;
-    
+
     int j;
     ROMP_PF_begin
 #pragma omp parallel for if_ROMP(assume_reproducible) reduction(+ : sum)
         for (j = 0; j < i; j++) {
             //ROMP_PFLB_begin
-        
+
         sum += 1.0 / j;
-        
+
             ROMP_PFLB_end;
         }
         ROMP_PF_end
-    
+
         ROMP_PFLB_end;
     }
     ROMP_PF_end
 
     fprintf(stdout, "ThreadMask:%p\n", (void*)threadMask);
-    
+
     // Reproducible reduction example
     //
     ROMP_PF_begin
-    
+
     double doubleToSum0_0,doubleToSum1_0;
     int numThreads;
     for (numThreads = 1; numThreads <= 10; numThreads++) {
-    
+
         ROMP_PF_begin
-        
+
         omp_set_num_threads(numThreads);
-    
+
         double doubleToSum0 = 0.0, doubleToSum1 = 0.0;
-        
+
         // the original loop control
         //
 #define ROMP_VARIABLE originalVariable
 #define ROMP_LO 1
 #define ROMP_HI 10000
-    
+
         // the original reductions
         //
 #define ROMP_SUMREDUCTION0 doubleToSum0
@@ -670,7 +669,7 @@ int main(int argc, char* argv[])
 
 #define doubleToSum0 ROMP_PARTIALSUM(0)
 #define doubleToSum1 ROMP_PARTIALSUM(1)
-    
+
             // the original loop body
             //
             doubleToSum0 += 1.0 /             (double)(originalVariable)  ;
@@ -681,21 +680,21 @@ int main(int argc, char* argv[])
 
 #include "romp_for_end.h"
 
-        if (numThreads == 1) {        
+        if (numThreads == 1) {
             doubleToSum0_0 = doubleToSum0;
             doubleToSum1_0 = doubleToSum1;
         } else {
             if (doubleToSum0_0 != doubleToSum0) fprintf(stderr, "diff 0\n");
             if (doubleToSum1_0 != doubleToSum1) fprintf(stderr, "diff 1\n");
         }
-        
+
         printf("romp_for numThreads:%d doubleToSum0:%g doubleToSum1:%g\n",
             numThreads, doubleToSum0,doubleToSum1);
-            
+
         ROMP_PF_end
     }
     ROMP_PF_end
-    
+
     // Done
     //
     ROMP_show_stats(stdout);

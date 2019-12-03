@@ -31,9 +31,6 @@
 #include <cmath>
 #include <cctype>
 #include <unistd.h>
-#include <sys/utsname.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 
 #include "mri.h"
 #include "macros.h"

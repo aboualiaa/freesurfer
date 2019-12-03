@@ -28,8 +28,7 @@
 #include <cstdlib>
 #include <cstring>
 #include "fio.h"
-#include "macros.h" // FEQUAL
-#include "proto.h"  // nint
+#include "proto.h" // nint
 #include "resample.h"
 #include "timer.h"
 

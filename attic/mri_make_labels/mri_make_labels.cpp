@@ -3,7 +3,6 @@
 #include <math.h>
 #include "diag.h"
 #include "error.h"
-#include "utils.h"
 #include "macros.h"
 #include "label.h"
 #include "mri.h"

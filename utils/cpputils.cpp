@@ -22,18 +22,11 @@
  *
  */
 
-#include "cma.h"
-#include "diag.h"
-#include "macros.h"
 #include "mri.h"
 #include "mrisurf.h"
 
-#include <cstdio>
-#include <iomanip>
-#include <iostream>
 #include <queue>
 #include <string>
-#include <vector>
 
 #include "MRISOBBTree.h"
 #include "MRISdistancefield.h"

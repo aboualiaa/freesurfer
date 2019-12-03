@@ -34,8 +34,6 @@
 #include "diag.h"
 #include "timer.h"
 #include "proto.h"
-#include "mrinorm.h"
-#include "mri_conform.h"
 #include "cma.h"
 #include "version.h"
 

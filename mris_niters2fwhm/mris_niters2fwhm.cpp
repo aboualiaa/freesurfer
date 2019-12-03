@@ -33,8 +33,6 @@ ENDHELP
 #include <cstdlib>
 #include <cmath>
 double round(double x);
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/utsname.h>
 #include <unistd.h>
 
@@ -46,14 +44,10 @@ double round(double x);
 #include "diag.h"
 #include "mri.h"
 #include "fmriutils.h"
-#include "mrisurf.h"
 #include "mri2.h"
 #include "fio.h"
 #include "version.h"
-#include "annotation.h"
 #include "cmdargs.h"
-#include "timer.h"
-#include "matfile.h"
 #include "randomfields.h"
 #include "icosahedron.h"
 double MRISmeanInterVertexDist(MRIS *surf);

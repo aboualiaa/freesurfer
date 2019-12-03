@@ -30,15 +30,12 @@ extern const char *Progname;
 #include <memory.h>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 
 #include "faster_variants.h"
 #include "romp_support.h"
 
-#include "box.h"
 #include "cma.h"
 #include "diag.h"
-#include "error.h"
 #include "fastmarching.h"
 #include "filter.h"
 #include "fnv_hash.h"
@@ -48,9 +45,7 @@ extern const char *Progname;
 #include "mri2.h"
 #include "mriBSpline.h"
 #include "pdf.h"
-#include "proto.h"
 #include "randomfields.h"
-#include "region.h"
 #include "talairachex.h"
 #include "utils.h"
 #include "voxlist.h"

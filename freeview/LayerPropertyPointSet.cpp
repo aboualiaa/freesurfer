@@ -31,7 +31,6 @@
 #include "vtkRGBAColorTransferFunction.h"
 #include "LayerMRI.h"
 #include "FSVolume.h"
-#include "MyUtils.h"
 #include <QFile>
 #include <QStringList>
 #include <QTextStream>

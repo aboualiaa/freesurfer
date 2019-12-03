@@ -28,7 +28,6 @@
 #include "vtkActor.h"
 #include "FSVolume.h"
 #include "vtkImageExtractComponents.h"
-#include "vtkActor.h"
 #include "vtkPolyDataMapper.h"
 #include "LayerPropertyMRI.h"
 #include "vtkProperty.h"
@@ -243,14 +242,11 @@ void LayerVolumeTrack::Highlight(int nLabel) {
   }
 }
 
-void LayerVolumeTrack::SetLabelVisible(int nLabel, bool bVisible)
-{
-  MRI* mri = m_volumeSource->GetMRI();
-  for (int i = 0; i < mri->nframes; i++)
-  {
-    if (nLabel == mri->frames[i].label)
-    {
-      m_actors[i]->SetVisibility(bVisible?1:0);
+void LayerVolumeTrack::SetLabelVisible(int nLabel, bool bVisible) {
+  MRI *mri = m_volumeSource->GetMRI();
+  for (int i = 0; i < mri->nframes; i++) {
+    if (nLabel == mri->frames[i].label) {
+      m_actors[i]->SetVisibility(bVisible ? 1 : 0);
       emit ActorUpdated();
     }
   }

@@ -47,7 +47,6 @@
 #include "vtkMath.h"
 #include "vtkObjectFactory.h"
 #include <vector>
-#include <set>
 #include <algorithm>
 #include <iterator>
 #include <cmath>

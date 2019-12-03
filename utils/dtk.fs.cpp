@@ -34,13 +34,10 @@
 #include <cstdlib>
 
 double round(double x);
-#include "diag.h"
-#include "error.h"
 #include "matrix.h"
 #include "mri.h"
 #include "mri2.h"
 #include "mri_identify.h"
-#include "proto.h"
 #include "utils.h"
 
 #include "dtk.fs.h"

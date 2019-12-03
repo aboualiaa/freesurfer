@@ -34,7 +34,6 @@
 #include "fsgdf.h"
 #include "machine.h"
 #include "matrix.h"
-#include "mghendian.h"
 #include "mri.h"
 #include "mri_identify.h"
 #include "mrinorm.h"

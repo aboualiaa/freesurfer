@@ -25,9 +25,7 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <cmath>
-#include <cctype>
 
 #include "macros.h"
 #include "error.h"
@@ -35,9 +33,6 @@
 #include "proto.h"
 #include "mrisurf.h"
 #include "mri.h"
-#include "macros.h"
-#include "version.h"
-#include "timer.h"
 #include "cma.h"
 
 #include "fastmarching.h"
@@ -230,7 +225,7 @@ int main(int argc, char *argv[]) {
 
 #if 0
           printf("checking for csf in regions closer than %2.1fmm\n", label_dist);
-          
+
           /*
             count the # of voxels that are csf in the interior of the white
             matter, that are also closer to the source of the distance

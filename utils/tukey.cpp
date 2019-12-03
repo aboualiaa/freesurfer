@@ -23,10 +23,7 @@
  *
  */
 
-#include <cstdlib>
 #include <math.h>
-
-#include "tukey.h"
 
 double tukey_biweight(double residual, double C) {
   if (abs(residual) > C) {

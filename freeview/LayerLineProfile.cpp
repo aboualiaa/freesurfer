@@ -18,7 +18,6 @@
 #include <QTextStream>
 #include <QDebug>
 #include "LayerPropertyLineProfile.h"
-#include "FSPointSet.h"
 #include "LayerPropertyPointSet.h"
 #include <vtkLookupTable.h>
 #include <vtkMath.h>

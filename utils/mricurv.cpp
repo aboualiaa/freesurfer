@@ -23,13 +23,9 @@
  *
  */
 
-#include <cctype>
 #include <math.h>
-#include <cstdio>
-#include <cstdlib>
 
 #include "MC.h"
-#include "error.h"
 #include "macros.h"
 #include "mri.h"
 #include "mricurv.h"

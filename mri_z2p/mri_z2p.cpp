@@ -43,14 +43,9 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/utsname.h>
 #include <unistd.h>
 
-#include "macros.h"
-#include "utils.h"
 #include "mrisutils.h"
 #include "error.h"
 #include "diag.h"

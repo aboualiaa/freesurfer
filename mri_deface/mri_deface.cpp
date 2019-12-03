@@ -40,7 +40,6 @@
 #include "utils.h"
 #include "gca.h"
 #include "cma.h"
-#include "mrinorm.h"
 #include "version.h"
 
 const char *Progname;

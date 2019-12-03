@@ -23,8 +23,6 @@
  *
  */
 
-#include <iostream>
-
 #include "macros.h"
 #include "diag.h"
 #include "cma.h"

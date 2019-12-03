@@ -25,7 +25,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
 #include <cctype>
 
 #include "mri.h"
@@ -33,12 +32,9 @@
 #include "error.h"
 #include "diag.h"
 #include "proto.h"
-#include "mrimorph.h"
-#include "mri_conform.h"
 #include "utils.h"
 #include "timer.h"
 #include "version.h"
-#include "gca.h"
 #include "cma.h"
 
 int main(int argc, char *argv[]);

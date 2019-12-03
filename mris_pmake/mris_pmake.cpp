@@ -38,31 +38,18 @@
 #endif
 
 #include <string>
-#include <iostream>
-#include <fstream>
-#include <sstream>
 #include <cstdlib>
 
 using namespace std;
 
 #include <cstdio>
-#include <cstdlib>
-#include <unistd.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
 
 #include "help.h"
 #include "scanopt.h"
-#include "dijkstra.h"
-#include "C_mpmProg.h"
 #include "c_SSocket.h"
-#include "pstream.h"
 #include "general.h"
 #include "asynch.h"
-#include "c_vertex.h"
-#include "c_label.h"
-#include "c_surface.h"
 
 // Some global vars...
 extern const option longopts[];

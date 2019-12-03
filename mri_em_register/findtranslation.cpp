@@ -23,12 +23,6 @@
  *
  */
 
-#include <fstream>
-#include <string>
-#include <sstream>
-#include <iostream>
-#include <iomanip>
-
 #include "diag.h"
 #include "macros.h"
 #include "proto.h"
@@ -73,8 +67,6 @@ void CheckInverseTranslation(const MATRIX *mat, const float dx, const float dy,
 #endif
 
 #include "emregisterutils.h"
-
-#include "findtranslation.h"
 
 // ------------------------------------------------------------
 

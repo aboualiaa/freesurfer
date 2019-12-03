@@ -44,7 +44,6 @@
 #include <math.h>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <strings.h>
 #include <unistd.h>
 

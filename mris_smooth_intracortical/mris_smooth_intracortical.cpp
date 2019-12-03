@@ -54,25 +54,17 @@
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
-#include <cctype>
 #include <glob.h>
 #include <libgen.h>
 
 #include "macros.h"
 #include "error.h"
 #include "tags.h"
-#include "diag.h"
 #include "proto.h"
 #include "mrisurf.h"
 #include "mri.h"
-#include "macros.h"
-#include "version.h"
-#include "fsenv.h"
-#include "registerio.h"
 
-#include <sys/time.h>
 #include <ctime>
-#include <unistd.h>
 
 #define MAX_NB (6)             // the reasonable number of neighbors (tan size)
 #define MAX_SURF (20)          // max number of surfaces

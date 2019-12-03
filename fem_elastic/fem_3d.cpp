@@ -1,12 +1,7 @@
-
-#include <unistd.h>
-
 #include <math.h>
 #include <map>
-#include <string>
 #include <sstream>
 
-#include "misc.h"
 #include "timer.h"
 
 #include "fem_3d.h"

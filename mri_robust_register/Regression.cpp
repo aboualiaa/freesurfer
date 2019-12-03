@@ -41,7 +41,6 @@
 #include <vnl/algo/vnl_qr.h>
 #undef export
 
-#include <cstdio>
 #include <cstdlib>
 #include "error.h"
 

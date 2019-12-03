@@ -22,15 +22,12 @@
  *
  */
 
-#include <algorithm>
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
 #include <limits>
 #include <numeric>
 using namespace std;
-
-#include "minmax.hpp"
 
 #include "gcalinearprior.hpp"
 

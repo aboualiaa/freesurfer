@@ -36,7 +36,6 @@
 #include "proto.h"
 #include "classify.h"
 #include "version.h"
-#include "rforest.h"
 #include "cma.h"
 
 static int features = FEATURE_INTENSITY | FEATURE_MEAN3 | FEATURE_DIRECTION |

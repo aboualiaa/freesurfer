@@ -25,6 +25,8 @@
 #ifndef MATFILE_H
 #define MATFILE_H
 
+#include <string>
+
 #include "znzlib.h"
 #include "matrix.h"
 #include "machine.h"

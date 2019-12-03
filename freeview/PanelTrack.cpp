@@ -27,7 +27,6 @@
 #include "ui_MainWindow.h"
 #include "LayerTrack.h"
 #include "MyUtils.h"
-#include "LayerCollection.h"
 #include "LayerPropertyTrack.h"
 #include <QFileInfo>
 

@@ -32,7 +32,6 @@
 #include <cstring>
 #include <cmath>
 #include <cctype>
-#include <sys/time.h>
 #include <sys/resource.h>
 
 #include "macros.h"
@@ -42,8 +41,6 @@
 #include "tags.h"
 #include "timer.h"
 #include "mrisurf.h"
-#include "mri.h"
-#include "macros.h"
 #include "version.h"
 
 static char vcid[] =

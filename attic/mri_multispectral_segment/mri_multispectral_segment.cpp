@@ -34,8 +34,6 @@
 #include "macros.h"
 #include "error.h"
 #include "cma.h"
-#include "histo.h"
-#include "mri.h"
 
 #define DEBUG_MODE 1
 #define OUTPUT_SURFACES 0
@@ -2204,13 +2202,13 @@ static void label_voxel(void) {
 
 #if 0 /*could be usefull to determine white matter tissue- gray...             \
         However, the right threshold have to be found...*/
-          
+
           else if (MRIFvox(mri_T1,i,j,k)>800 && MRIFvox(mri_T1,i,j,k)<1400)
             MRIFvox(mri_CSF,i,j,k)=800;  /*Gray matter*/
-          
+
           else if (MRIFvox(mri_T1,i,j,k)>500 && MRIFvox(mri_T1,i,j,k)<700)
             MRIFvox(mri_T1,i,j,k)=600; /*white matter*/
-          
+
           else
             MRIFvox(mri_T1,i,j,k)=500; /*ambiguous*/
 #endif

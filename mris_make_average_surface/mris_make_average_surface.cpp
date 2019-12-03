@@ -96,8 +96,6 @@ ENDHELP
 #include <cstring>
 #include <cmath>
 #include <cctype>
-#include <unistd.h>
-#include <sys/stat.h>
 
 #include "macros.h"
 #include "error.h"
@@ -106,12 +104,10 @@ ENDHELP
 #include "mri.h"
 #include "mrisurf.h"
 #include "mrisutils.h"
-#include "macros.h"
 #include "icosahedron.h"
 #include "transform.h"
 #include "version.h"
 #include "fio.h"
-#include "gca.h"
 #include "gcamorph.h"
 
 static char vcid[] =

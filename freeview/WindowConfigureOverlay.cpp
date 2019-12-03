@@ -33,7 +33,6 @@
 #include "LayerMRI.h"
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QDebug>
 #include <QSettings>
 #include <QTimer>
 

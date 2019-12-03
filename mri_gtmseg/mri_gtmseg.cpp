@@ -41,8 +41,6 @@
 
 #undef X
 #include "mri2.h"
-#include "macros.h"
-#include "utils.h"
 #include "fio.h"
 #include "version.h"
 #include "cmdargs.h"

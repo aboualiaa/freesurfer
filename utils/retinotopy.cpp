@@ -25,13 +25,11 @@
 
 #include <math.h>
 #include <cstdio>
-#include <cstdlib>
 
 double round(double x);
 #include "fsglm.h"
 #include "mri.h"
 #include "mrisurf.h"
-#include "surfcluster.h"
 
 /*------------------------------------------------------------
   \fn void RETcompute_angles(MRIS *mris)

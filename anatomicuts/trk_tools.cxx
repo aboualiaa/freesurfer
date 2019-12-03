@@ -2,7 +2,6 @@
 #include "vtkPolyDataReader.h"
 #include "vtkPolyDataWriter.h"
 #include <iostream>
-#include <string>
 #include "itkImageFileReader.h"
 #include "GetPot.h"
 #include "itkImage.h"
@@ -10,10 +9,8 @@
 #include "TrkVTKPolyDataFilter.txx"
 #include "PolylineMeshToVTKPolyDataFilter.h"
 #include "VTKPolyDataToPolylineMeshFilter.h"
-#include "vtkPolyDataWriter.h"
 #include "itkImageFileWriter.h"
 #include "MeshToImageFilter.h"
-#include "mri.h"
 
 int main(int narg, char *arg[]) {
   enum { Dimension = 3 };

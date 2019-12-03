@@ -29,7 +29,6 @@
 #include "diag.h"
 #include "error.h"
 #include "matrix.h"
-#include "mghendian.h"
 #include "proto.h"
 #include "zlib.h"
 

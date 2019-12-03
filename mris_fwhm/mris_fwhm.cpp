@@ -118,14 +118,11 @@ ENDHELP
 #include <cstdlib>
 #include <cmath>
 double round(double x);
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/utsname.h>
 #include <unistd.h>
 
 #include "romp_support.h"
 
-#include "macros.h"
 #include "utils.h"
 #include "mrisurf.h"
 #include "mrisutils.h"
@@ -133,18 +130,13 @@ double round(double x);
 #include "diag.h"
 #include "mri.h"
 #include "fmriutils.h"
-#include "mrisurf.h"
 #include "mri2.h"
 #include "fio.h"
 #include "version.h"
-#include "annotation.h"
 #include "cmdargs.h"
-#include "timer.h"
 #include "matfile.h"
 #include "randomfields.h"
-#include "icosahedron.h"
 #include "pdf.h"
-#include "matfile.h"
 #include "fsenv.h"
 
 static int parse_commandline(int argc, char **argv);

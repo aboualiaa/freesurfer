@@ -33,7 +33,6 @@
 #include <vector>
 #include <QDebug>
 #include "FSLabel.h"
-#include "vtkImageThreshold.h"
 
 using namespace std;
 

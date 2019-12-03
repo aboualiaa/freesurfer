@@ -36,10 +36,8 @@
 
 #include "utils.h"
 #include "error.h"
-#include "proto.h"
 #include "mri.h"
 #include "mri2.h"
-#include "macros.h"
 #include "diag.h"
 #include "fio.h"
 #include "version.h"

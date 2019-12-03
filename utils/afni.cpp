@@ -43,7 +43,6 @@
 
 #include "error.h"
 #include "machine.h"
-#include "mghendian.h"
 #include "utils.h"
 
 #include "AFNI.h"

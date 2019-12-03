@@ -32,7 +32,6 @@ double round(double x);
 #include <sys/utsname.h>
 #include <unistd.h>
 
-#include "macros.h"
 #include "mrisurf.h"
 #include "mrisutils.h"
 #include "error.h"

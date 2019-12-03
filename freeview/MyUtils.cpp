@@ -26,9 +26,6 @@
 #include "MyUtils.h"
 #include <math.h>
 #include <stddef.h>
-#include <QFileInfo>
-#include <QDir>
-#include <QDebug>
 #include <iostream>
 
 #include "matrix.h"
@@ -503,8 +500,7 @@ QString MyUtils::Win32PathProof(const QString &path_in) {
 #endif
 }
 
-QString MyUtils::RealToNumber(qreal val, int nPrecision)
-{
+QString MyUtils::RealToNumber(qreal val, int nPrecision) {
   if (qAbs(val) >= pow(10, nPrecision))
     return QString("%1").arg(val, 0, 'f', 0);
   else

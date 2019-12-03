@@ -24,8 +24,6 @@
 #include <math.h>
 #include <cstdlib>
 
-#include <math.h>
-#include <cstdlib>
 #include "macros.h"
 
 #include "mriTransform.h"

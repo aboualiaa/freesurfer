@@ -27,8 +27,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
-#include <cctype>
 #include "mri.h"
 #include "mrisurf.h"
 #include "macros.h"
@@ -37,11 +35,8 @@
 #include "proto.h"
 #include "utils.h"
 #include "timer.h"
-#include "matrix.h"
-#include "transform.h"
 #include "version.h"
 #include "label.h"
-#include "cma.h"
 
 int main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);

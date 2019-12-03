@@ -25,14 +25,11 @@
 
 #include <string>
 #include <iostream>
-#include <fstream>
 
 #include "error.h"
 #include "macros.h"
 #include "mri.h"
 #include "transform.h"
-#include "resample.h"
-#include "registerio.h"
 #include "version.h"
 
 using namespace std;

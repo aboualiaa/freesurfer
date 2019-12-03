@@ -31,16 +31,12 @@
 #include <stdlib.h>
 #include <math.h>
 #include <ctype.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/stat.h>
 
 #include "mri.h"
 #include "macros.h"
 #include "error.h"
 #include "diag.h"
 #include "proto.h"
-#include "fio.h"
 #include "version.h"
 
 static char *fname_before = NULL; /* filename for template volume before N3 */

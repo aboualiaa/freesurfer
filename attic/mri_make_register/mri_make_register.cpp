@@ -24,19 +24,10 @@
  */
 
 #include <stdio.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #include <string.h>
-#include <ctype.h>
 #include <stdlib.h>
 #include <math.h>
-#include "machine.h"
-#include "fio.h"
-#include "utils.h"
 #include "mri.h"
-#include "minc.h"
-#include "analyze.h"
-#include "mri_identify.h"
 #include "matrix.h"
 #include "error.h"
 #include "version.h"

@@ -25,8 +25,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
 #include <endianio.h>
 #include <Getifh.h>

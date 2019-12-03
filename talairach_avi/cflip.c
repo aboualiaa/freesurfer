@@ -23,9 +23,7 @@
  *
  */
 
-#include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <endianio.h>
 
 void flipx(float *imgf, int *pnx, int *pny, int *pnz) {

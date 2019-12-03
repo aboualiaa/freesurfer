@@ -1,40 +1,8 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <cerrno>
 
-#include "mrisurf.h"
-#include "utils.h"
-#include "error.h"
-#include "proto.h"
 #include "mri.h"
-#include "macros.h"
-#include "diag.h"
-#include "minc.h"
-#include "region.h"
-#include "machine.h"
-#include "fio.h"
-#include "mri_identify.h"
-#include "mrisurf.h"
-#include "fmriutils.h"
-#include "gcsa.h"
-#include "fsgdf.h"
-#include "icosahedron.h"
-#include "gca.h"
-#include "gcamorph.h"
-#include "DICOMRead.h"
-#include "fsenv.h"
-#include "qdecutils.h"
-#include "dti.h"
-#include "registerio.h"
-#include "timer.h"
-#include "evschutils.h"
-#include "matrix.h"
-#include "matfile.h"
-#include "randomfields.h"
 
 static void ErrorValidation(const char *string) {
   fprintf(stdout, "\nValidation Error: %s\n", string);

@@ -36,8 +36,6 @@
 #include "const.h"
 #include "proto.h"
 #include "mri.h"
-#include "macros.h"
-#include "fio.h"
 #include "sig.h"
 #include "label.h"
 #include "version.h"

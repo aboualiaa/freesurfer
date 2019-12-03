@@ -44,7 +44,6 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "MRIio_old.h"
 #include "mri.h"
 #include "macros.h"
 #include "error.h"
@@ -52,15 +51,12 @@
 #include "proto.h"
 #include "label.h"
 
-#include "bfileio.h"
 #include "registerio.h"
 #include "resample.h"
-#include "corio.h"
 #include "selxavgio.h"
 #include "mri2.h"
 #include "fio.h"
 #include "version.h"
-#include "mri_circulars.h"
 #include "mri_identify.h"
 #include "fmriutils.h"
 

@@ -33,7 +33,6 @@
 #include "error.h"
 #include "diag.h"
 #include "proto.h"
-#include "mrimorph.h"
 #include "transform.h"
 #include "version.h"
 

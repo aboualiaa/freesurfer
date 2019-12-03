@@ -54,14 +54,10 @@
 
 */
 #include <cerrno>
-#include <math.h>
 #include <cstdio>
 #include <cstdlib>
-#include <strings.h>
 #include <unistd.h>
 extern int errno;
-
-#include "corio.h"
 
 /*-------------------------------------*/
 unsigned char **alloc_cor() {

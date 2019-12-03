@@ -25,7 +25,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <math.h>
 #include <ctype.h>
 
@@ -33,13 +32,7 @@
 #include "macros.h"
 #include "error.h"
 #include "diag.h"
-#include "const.h"
 #include "proto.h"
-#include "mrisurf.h"
-#include "macros.h"
-#include "fio.h"
-#include "mrishash.h"
-#include "cvector.h"
 #include "svm.h"
 #include "version.h"
 #include "voxlist.h"

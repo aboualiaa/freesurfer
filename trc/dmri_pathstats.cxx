@@ -24,25 +24,16 @@
  */
 
 #include "blood.h"
-#include "spline.h"
 
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <float.h>
-#include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <limits>
 #include <limits.h>
-#include <math.h>
-#include <stdlib.h>
 #include <string>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/utsname.h>
-#include <time.h>
 #include <unistd.h>
 #include <vector>
 

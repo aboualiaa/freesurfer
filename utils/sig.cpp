@@ -28,11 +28,8 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "diag.h"
-#include "error.h"
 #include "macros.h"
 #include "numerics.h"
-#include "proto.h"
 #include "sig.h"
 
 /*----------------------------------------------------*/

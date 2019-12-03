@@ -49,15 +49,12 @@
 #include "mrimorph.h"
 #include "mrisegment.h"
 #include "numerics.h"
-#include "proto.h"
 #include "tags.h"
 #include "talairachex.h"
 #include "transform.h"
 #include "utils.h"
 
 #include "affine.h"
-
-#include "timer.h"
 
 #include "znzlib.h"
 

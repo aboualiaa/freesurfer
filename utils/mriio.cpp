@@ -30,17 +30,13 @@
 #define _MRIIO_SRC
 
 #include <cctype>
-#include <dirent.h>
 #include <cerrno>
 #include <fcntl.h>
 #include <math.h>
 #include <memory.h>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <sys/stat.h>
-#include <sys/types.h>
-#include <ctime>
 #include <unistd.h>
 
 #include "machine.h"
@@ -62,16 +58,13 @@
 #include "imautils.h"
 #include "macros.h"
 #include "matfile.h"
-#include <math.h>
 #include "matrix.h"
-#include "mghendian.h"
 #include "mri2.h"
 #include "mri_circulars.h"
 #include "mri_identify.h"
 #include "nifti1.h"
 #include "nifti1_io.h"
 #include "proto.h"
-#include "region.h"
 #include "signa.h"
 #include "tags.h"
 #include "utils.h"

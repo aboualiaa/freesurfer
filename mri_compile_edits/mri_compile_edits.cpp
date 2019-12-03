@@ -26,7 +26,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
 #include <cctype>
 
 #include "mri.h"
@@ -34,11 +33,9 @@
 #include "error.h"
 #include "diag.h"
 #include "proto.h"
-#include "mri.h"
 #include "colortab.h"
 #include "utils.h"
 #include "const.h"
-#include "timer.h"
 #include "version.h"
 
 int main(int argc, char *argv[]);

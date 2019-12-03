@@ -2,23 +2,15 @@
 #include <string>
 #include "itkImageFileReader.h"
 #include "GetPot.h"
-#include "itkConstNeighborhoodIterator.h"
 #include "itkImage.h"
 #include <map>
-#include <vnl/vnl_matrix.h>
-#include <vnl/vnl_vector.h>
-#include <vnl/vnl_vector_ref.h>
 #include <queue>
-#include <sparse/spMatrix.h>
-#include "itkMinimumMaximumImageCalculator.h"
 #include "vtkPolyData.h"
 #include "vtkPolyDataReader.h"
 #include "vtkPolyDataWriter.h"
 #include "itkDefaultStaticMeshTraits.h"
 #include "itkMesh.h"
 #include "itkPolylineCell.h"
-#include <type_traits>
-#include <typeinfo>
 #define PI 3.14159265
 #include "itkRigid3DTransform.h"
 #include "NormalizedCutsFilter.h"
@@ -32,7 +24,6 @@
 #include "EuclideanMembershipFunction.h"
 #include "HausdorffMembershipFunction.h"
 #include "LabelPerPointMembershipFunction.h"
-#include "LabelsHistogramMembershipFunction.h"
 #include "LabelsEntropyAndIntersectionMembershipFunction.h"
 #include "LabelsPointToPointMembershipFunction.h"
 #include "LabelPerPointVariableLengthVector.h"

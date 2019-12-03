@@ -27,7 +27,6 @@
  *
  */
 
-#include <assert.h>
 #include "LayerPropertySurface.h"
 #include "vtkLookupTable.h"
 #include "vtkRGBAColorTransferFunction.h"

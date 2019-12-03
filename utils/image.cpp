@@ -25,25 +25,19 @@
 /*-----------------------------------------------------
                     INCLUDE FILES
 -------------------------------------------------------*/
-#include <fcntl.h>
 #include <math.h>
 #include <memory.h>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
-#include <unistd.h> /* for SEEK_ constants */
 
 #include "hmem.h"
 #include "hips.h"
 
-#include "diag.h"
 #include "error.h"
 #include "image.h"
 #include "machine.h"
 #include "macros.h"
-#include "matfile.h"
 #include "matrix.h"
-#include "proto.h"
 #include "utils.h"
 
 /*-----------------------------------------------------

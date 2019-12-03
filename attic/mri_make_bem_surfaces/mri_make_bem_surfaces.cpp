@@ -28,7 +28,6 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
 
 #include <sys/stat.h>
 
@@ -36,7 +35,6 @@
 #include "diag.h"
 #include "error.h"
 #include "const.h"
-#include "icosahedron.h"
 #include "version.h"
 #include "MRIio_old.h" // lcalloc
 

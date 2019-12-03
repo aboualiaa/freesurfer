@@ -43,7 +43,6 @@
 #include "transform.h"
 #include "mrisurf.h"
 #include "cma.h"
-#include "icosahedron.h"
 #include "voxlist.h"
 #include "pdf.h"
 #include "tritri.h"

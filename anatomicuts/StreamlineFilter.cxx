@@ -174,7 +174,7 @@ int main(int argc, char *argv[]) {
                                                      averageId, cellId)
                          : 0;
       //			std::cout << dist << " " << stdCluster <<
-      //std::endl;
+      // std::endl;
       if (lenghtSoFar >= minLenght && lenghtSoFar <= maxLenght &&
           cellId % offset == 0 && (val1 != val2 || !filterUShape) &&
           (val1 != 0 || !maskFibers) && (dist <= stdCluster)) {

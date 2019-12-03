@@ -37,19 +37,13 @@
                     INCLUDE FILES
 -------------------------------------------------------*/
 #include <math.h>
-#include <memory.h>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 
 #include "hips.h"
-#include "diag.h"
 #include "error.h"
-#include "filter.h"
 #include "image.h"
-#include "machine.h"
 #include "macros.h"
-#include "proto.h"
 #include "utils.h"
 
 /*-----------------------------------------------------

@@ -38,7 +38,6 @@
 #include <cstdlib>
 
 double round(double x);
-#include "MRIio_old.h"
 #include "diag.h"
 #include <cfloat>
 #include "fmriutils.h"

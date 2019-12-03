@@ -30,9 +30,7 @@
 #include <QAction>
 #include <QLineEdit>
 #include <QSpinBox>
-#include <QDoubleSpinBox>
 #include <QDebug>
-#include "LayerTreeWidget.h"
 #include "MainWindow.h"
 
 PanelLayer::PanelLayer(const QString &layerType, QWidget *parent)

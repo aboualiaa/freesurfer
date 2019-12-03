@@ -38,20 +38,15 @@
                     INCLUDE FILES
 -------------------------------------------------------*/
 #include <math.h>
-#include <memory.h>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
-#include <unistd.h> /* for unlink */
 
 #include "hips.h"
 
 #include "diag.h"
 #include "error.h"
 #include "image.h"
-#include "machine.h"
 #include "macros.h"
-#include "proto.h"
 #include "timer.h"
 #include "utils.h"
 

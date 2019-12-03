@@ -5,14 +5,12 @@
 #include "LayerMRI.h"
 #include "LayerROI.h"
 #include "vtkImageCast.h"
-#include "vtkImageDilateErode3D.h"
 #include "vtkDoubleArray.h"
 #include "vtkPointData.h"
 #include "vtkExtractVOI.h"
 #include <QDebug>
 #include <QFile>
 #include "vtkImageGaussianSmooth.h"
-#include "vtkImageExtractComponents.h"
 #include <QElapsedTimer>
 #include "LayerPropertyMRI.h"
 

@@ -24,7 +24,6 @@
  */
 
 #include "MyVTKUtils.h"
-#include <math.h>
 #include <stddef.h>
 #include <vtkSmartPointer.h>
 #include <vtkRenderer.h>
@@ -41,27 +40,16 @@
 #include <vtkImageData.h>
 #include <vtkImageDilateErode3D.h>
 #include <vtkContourFilter.h>
-#include <vtkMarchingContourFilter.h>
 #include <vtkMarchingCubes.h>
 #include <vtkPolyDataConnectivityFilter.h>
 #include <vtkPolyData.h>
-#include <vtkCellArray.h>
-#include <vtkSmoothPolyDataFilter.h>
 #include <vtkPolyDataMapper.h>
-#include <vtkStripper.h>
 #include <vtkPolyDataNormals.h>
 #include <vtkCamera.h>
 #include <vtkCubeSource.h>
-#include <vtkLineSource.h>
-#include <vtkSphereSource.h>
-#include <vtkTubeFilter.h>
 #include <vtkProperty.h>
-#include <vtkVectorText.h>
-#include <vtkFollower.h>
 #include <vtkAppendPolyData.h>
-#include <vtkConeSource.h>
 #include <vtkImageThreshold.h>
-#include <vtkDecimatePro.h>
 #include <vtkTriangleFilter.h>
 #include <vtkPiecewiseFunction.h>
 #include <vtkColorTransferFunction.h>
@@ -74,27 +62,18 @@
 #include <vtkImageShiftScale.h>
 #include <vtkImageChangeInformation.h>
 #include <vtkImageAnisotropicDiffusion2D.h>
-#include <vtkImageGaussianSmooth.h>
-#include <vtkImageClip.h>
 #include <vtkDijkstraImageGeodesicPath.h>
 #include <vtkCleanPolyData.h>
-#include <vtkImageResample.h>
 #include <vtkImageReslice.h>
 #include <vtkWindowedSincPolyDataFilter.h>
 #include <QFileInfo>
 #include <QDebug>
 #include <QMap>
-#include "vtkDataSetMapper.h"
 #include "vtkGlyph3DMapper.h"
-#include "vtkThreshold.h"
 #include "vtkDataSetAttributes.h"
-#include "vtkGeometryFilter.h"
 #include "vtkPointData.h"
 #include "vtkFloatArray.h"
-#include "vtkPassThrough.h"
-#include "vtkDiscreteMarchingCubes.h"
 #if VTK_MAJOR_VERSION > 5
-#include "vtkFlyingEdges3D.h"
 #endif
 
 bool MyVTKUtils::VTKScreenCapture(vtkRenderWindow *renderWnd,

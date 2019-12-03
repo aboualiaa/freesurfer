@@ -4,7 +4,6 @@
 #include <cstring>
 #include <cstdarg>
 #include <vector>
-#include <unistd.h>
 
 #include "log.h"
 

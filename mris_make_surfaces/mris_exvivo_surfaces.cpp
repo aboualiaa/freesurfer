@@ -41,10 +41,7 @@
 #include "timer.h"
 #include "mrisurf.h"
 #include "mri.h"
-#include "macros.h"
-#include "mrimorph.h"
 #include "tags.h"
-#include "mrinorm.h"
 #include "version.h"
 #include "label.h"
 
@@ -1406,7 +1403,7 @@ int MRIScomputeBorderValues_MEF_WHITE(MRI_SURFACE *mris, MRI *mri_em_combined,
             ((mag) > (next_mag)) &&
             (val5 <= (gm_mean[1] + 1.2 * gm_std[1]))
 #if 0
-          && 
+          &&
           (val5 >= wm_mean[1]-0.5*wm_std[1]) //is this too restrictive??
 #endif
         ) {

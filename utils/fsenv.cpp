@@ -23,14 +23,9 @@
  */
 
 #include "fsenv.h"
-#include <pwd.h>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/utsname.h>
-#include <ctime>
 #include <unistd.h>
 #include "mri.h"
 #include "utils.h"

@@ -23,7 +23,6 @@
  *
  */
 
-#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include "const.h"

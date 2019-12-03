@@ -31,14 +31,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <cctype>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <unistd.h>
-#include <iostream>
-#include <fstream>
-#include <iomanip>
 #include <vector>
-#include <sys/time.h>
 #include <sys/resource.h>
 
 #define INDIVIDUAL_TIMERS 0
@@ -49,10 +42,6 @@
 #include "affine.hpp"
 #endif
 
-#include "affine.h"
-
-#include "gcautils.hpp"
-
 #include "mri.h"
 #include "macros.h"
 #include "error.h"
@@ -60,26 +49,16 @@
 #include "mrisurf.h"
 #include "matrix.h"
 #include "proto.h"
-#include "stats.h"
-#include "timer.h"
 #include "const.h"
-#include "mrishash.h"
-#include "icosahedron.h"
-#include "tritri.h"
-#include "timer.h"
-#include "chklc.h"
 #include "diag.h"
 #include "version.h"
 #include "mrisegment.h"
 #include "fio.h"
 #include "mri_conform.h"
 #include "gca.h"
-#include "gcamorph.h"
 #include "cma.h"
 #include "transform.h"
-#include "talairachex.h"
 #include "mri_circulars.h"
-#include "timer.h"
 
 #define WM_CONST 110 /* not used anymore */
 #define MAX_INT 100  /*100% is a good value for the watershed algo */

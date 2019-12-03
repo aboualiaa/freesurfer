@@ -2,14 +2,10 @@
 #define _TrkVTKPolyDataFilter_txx_
 
 #include "TrkVTKPolyDataFilter.h"
-//#include "vial.h"	// Needs to be included first because of CVS libs
 #include <vtkCellArray.h>
-#include <vtkCellData.h>
-#include <vtkFieldData.h>
 
 #include <vtkPolyData.h>
 #include <vtkPoints.h>
-#include <vtkFieldData.h>
 #include <vtkSmartPointer.h>
 #include "itkPoint.h"
 #include "itkImage.h"

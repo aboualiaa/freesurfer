@@ -2,16 +2,9 @@
 #include <iostream>
 #include "itkImage.h"
 #include <map>
-#include "itkDefaultStaticMeshTraits.h"
 #include "fsSurface.h"
-#include "itkTriangleCell.h"
-#include <set>
 #include "GetPot.h"
-#include <string>
-#include "colortab.h"
-#include "fsenv.h"
 #include "itkVTKPolyDataWriter.h"
-#include "itkSmoothingQuadEdgeMeshFilter.h"
 #include "vtkCellData.h"
 #include "vtkPointData.h"
 
@@ -25,9 +18,7 @@
 #include "vtkTriangleFilter.h"
 
 #include "vtkDelaunay3D.h"
-#include "macros.h"
 #include "mrisurf.h"
-#include "mri.h"
 #include "vtkKdTreePointLocator.h"
 #if VTK_MAJOR_VERSION > 5
 #include "vtkPCACurvatureEstimation.h"

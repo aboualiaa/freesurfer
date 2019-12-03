@@ -22,7 +22,6 @@
  *
  */
 
-#include <cctype>
 #include <math.h>
 #include <cstdio>
 #include <cstdlib>

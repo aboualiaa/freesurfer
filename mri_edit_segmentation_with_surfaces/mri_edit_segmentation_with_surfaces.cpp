@@ -24,7 +24,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <cmath>
 #include <cctype>
 
@@ -34,8 +33,6 @@
 #include "proto.h"
 #include "mrisurf.h"
 #include "mri.h"
-#include "macros.h"
-#include "fio.h"
 #include "mrishash.h"
 #include "cma.h"
 #include "mrisegment.h"
@@ -1013,7 +1010,7 @@ edit_hippocampal_complex(MRI *mri,
   }
 
 
-  /* build two masks for stuff that is above (below) 
+  /* build two masks for stuff that is above (below)
      the parahippocampal gyrus */
   for (vno = 0 ; vno < mris->nvertices ; vno++)
   {
@@ -1070,8 +1067,8 @@ edit_hippocampal_complex(MRI *mri,
         {
           DiagBreak() ;
         }
-        if ((index == PARAHIPPOCAMPAL_GYRUS || 
-             index == LINGUAL_SULCUS || 
+        if ((index == PARAHIPPOCAMPAL_GYRUS ||
+             index == LINGUAL_SULCUS ||
              index == LINGUAL_SULCUS2) &&
             MRIvox(mri_aparc, x, yi, z) == FUSIFORM_GYRUS)
         {
@@ -1081,7 +1078,7 @@ edit_hippocampal_complex(MRI *mri,
         break ;
       }
 
-    /* search superior - if a different label that can be 
+    /* search superior - if a different label that can be
        inf to hippo, don't use this one */
     ind = index ;
     for (yi = y-1 ; yi >= 0 ; yi--)
@@ -1091,7 +1088,7 @@ edit_hippocampal_complex(MRI *mri,
       {
         ind = 0 ;
       }
-      if (IS_INF_TO_HIPPO(MRIvox(mri_aparc, x, yi, z)) && 
+      if (IS_INF_TO_HIPPO(MRIvox(mri_aparc, x, yi, z)) &&
           MRIvox(mri_aparc, x, yi, z) != ind)
       {
         dont_use = 1 ;
@@ -1199,9 +1196,9 @@ edit_hippocampal_complex(MRI *mri,
 
   mht = MHTcreateVertexTable_Resolution(mris, CURRENT_VERTICES, 8.0f) ;
 
-  /* find voxels that are below the parahippocampal gyrus and 
+  /* find voxels that are below the parahippocampal gyrus and
      labeled as something that should
-     be above (hippocampus, amygdala, inf lat vent), and 
+     be above (hippocampus, amygdala, inf lat vent), and
      change it's label to cortex.
   */
   for (changed = x = 0 ; x < mri->width ; x++)
@@ -1224,13 +1221,13 @@ edit_hippocampal_complex(MRI *mri,
         }
 
         label = MRIvox(mri, x, y, z) ;
-        /* only process amygdala and hippocampal voxels 
+        /* only process amygdala and hippocampal voxels
            for the correct hemisphere */
-        if ((right && ((label != Right_Hippocampus) && 
-                       (label != Right_Amygdala) && 
+        if ((right && ((label != Right_Hippocampus) &&
+                       (label != Right_Amygdala) &&
                        (label != Right_Inf_Lat_Vent))) ||
-            (!right && ((label != Left_Hippocampus) && 
-                        (label != Left_Amygdala) && 
+            (!right && ((label != Left_Hippocampus) &&
+                        (label != Left_Amygdala) &&
                         (label != Left_Inf_Lat_Vent))))
         {
           continue ;
@@ -1259,11 +1256,11 @@ edit_hippocampal_complex(MRI *mri,
             {
               continue ;  /* this voxel is superior to wm surface */
             }
-            /* at this point, the wm vertex is running 
+            /* at this point, the wm vertex is running
                nearly inferior-superior, so use
               laterality to determine which side of parahippo it is on */
-            if (fabs(xw) - fabs(v->x) < MIN_DIST)  /* if it isn't 
-                                                      clearly lateral 
+            if (fabs(xw) - fabs(v->x) < MIN_DIST)  /* if it isn't
+                                                      clearly lateral
                                                       to parahippo,
                                                       don't change it */
             {
@@ -1271,19 +1268,19 @@ edit_hippocampal_complex(MRI *mri,
             }
 
           }
-          else if (((fabs(v->nz) < fabs(v->nx)) || 
+          else if (((fabs(v->nz) < fabs(v->nx)) ||
                     (fabs(v->nz) < fabs(v->ny)))) /* not clearly inf or sup */
           {
-            /* at this point, the wm vertex is running nearly 
+            /* at this point, the wm vertex is running nearly
                inferior-superior, so use
                laterality to determine which side of parahippo it is on */
-            if (fabs(xw) - fabs(v->x) < MIN_DIST)  /* if it isn't clearly 
+            if (fabs(xw) - fabs(v->x) < MIN_DIST)  /* if it isn't clearly
                                                       lateral to parahippo,
                                                       don't change it */
             {
               continue ;
             }
-            if ((((fabs(v->nz)) < fabs(v->nx)) && 
+            if ((((fabs(v->nz)) < fabs(v->nx)) &&
                  ((fabs(v->nz) < fabs(v->ny)))))
             {
               continue ;  /* if it's not clearly pointing up, don't use it */
@@ -1292,13 +1289,13 @@ edit_hippocampal_complex(MRI *mri,
 #else
           if (zw > (v->z) && (fabs(zw-v->z) > MIN_DIST))
           {
-            continue ;  /* don't change wm that is superior 
+            continue ;  /* don't change wm that is superior
                            to parahippocampal gyrus */
           }
-          if (fabs(zw-v->z) < 
+          if (fabs(zw-v->z) <
               MIN_DIST)  /* too close - make sure it is medial of wm */
           {
-            if (fabs(xw) - fabs(v->x) < 
+            if (fabs(xw) - fabs(v->x) <
                 MIN_DIST)  /* if it isn't clearly lateral to parahippo,
                               don't change it */
             {
@@ -1346,9 +1343,9 @@ edit_hippocampal_complex(MRI *mri,
         label = MRIvox(mri, x, y, z) ;
 
         /* only process cortex voxels for the correct hemisphere */
-        if ((right && ((label != Right_Cerebral_Cortex) && 
+        if ((right && ((label != Right_Cerebral_Cortex) &&
                        (label != Right_Hippocampus))) ||
-            (!right && ((label != Left_Cerebral_Cortex) && 
+            (!right && ((label != Left_Cerebral_Cortex) &&
                         (label != Left_Hippocampus))))
         {
           continue ;
@@ -1361,8 +1358,8 @@ edit_hippocampal_complex(MRI *mri,
         }
         index = CTABannotationToIndex(mris->ct, v->annotation) ;
         /* only thin temporal wm */
-        if ((index != MEDIAL_WALL) && 
-            (index != LINGUAL_SULCUS) && 
+        if ((index != MEDIAL_WALL) &&
+            (index != LINGUAL_SULCUS) &&
             (index != LINGUAL_SULCUS2) &&
             (index != PARAHIPPOCAMPAL_GYRUS))
         {
@@ -1380,7 +1377,7 @@ edit_hippocampal_complex(MRI *mri,
                    "changing to wm...\n",
                    Gx, Gy, Gz, label, cma_label_to_name(label), index) ;
           changed++ ;
-          MRIvox(mri, x, y, z) = 
+          MRIvox(mri, x, y, z) =
             right ? Right_Cerebral_White_Matter : Left_Cerebral_White_Matter ;
         }
       }
@@ -1389,7 +1386,7 @@ edit_hippocampal_complex(MRI *mri,
   total_changed = changed ;
   i = 0 ;
 
-  /* look for stuff that is above the parahippocampal gyrus 
+  /* look for stuff that is above the parahippocampal gyrus
      and labeled cortex, and
      change it to hippocampus */
   do
@@ -1438,12 +1435,12 @@ edit_hippocampal_complex(MRI *mri,
           }
           index = CTABannotationToIndex(mris->ct, v->annotation) ;
 #endif
-          if ((MRIneighbors(mri, x, y, z, 
+          if ((MRIneighbors(mri, x, y, z,
                             right ? Right_Hippocampus : Left_Hippocampus) == 0) &&
-              (MRIneighbors(mri, x, y, z, 
+              (MRIneighbors(mri, x, y, z,
                             right ? Right_Inf_Lat_Vent : Left_Inf_Lat_Vent) == 0))
           {
-            continue ;  /* no hippocampal or inf lat vent 
+            continue ;  /* no hippocampal or inf lat vent
                            neighbors - ignore it */
           }
           if (MRIvox(mri_above_inf_lat_vent, x, y, z) > 0)
@@ -1488,7 +1485,7 @@ edit_unknowns(MRI *mri_aseg, MRI *mri)
   double mean_wm, mean_vent ;
   double val ;
 
-  /*  find unknown voxels that border both wm and 
+  /*  find unknown voxels that border both wm and
       inf_lat_vent, and change them to one
       or the other */
   for (x = 0 ; x < mri->width ; x++)
@@ -1507,43 +1504,43 @@ edit_unknowns(MRI *mri_aseg, MRI *mri)
         {
           continue ;
         }
-        if ((MRIneighbors(mri_aseg, x, y, z, 
+        if ((MRIneighbors(mri_aseg, x, y, z,
                           Left_Cerebral_White_Matter) > 0) &&
-            (MRIneighbors(mri_aseg, x, y, z, 
+            (MRIneighbors(mri_aseg, x, y, z,
                           Left_Inf_Lat_Vent) > 0))
         {
           right = 0 ;
-          mean_vent = MRIlabelMean(mri, mri_aseg, x, y, z, 1, 
+          mean_vent = MRIlabelMean(mri, mri_aseg, x, y, z, 1,
                                    Left_Inf_Lat_Vent) ;
-          mean_wm = MRIlabelMean(mri, mri_aseg, x, y, z, 1, 
+          mean_wm = MRIlabelMean(mri, mri_aseg, x, y, z, 1,
                                  Left_Cerebral_White_Matter) ;
         }
-        else if ((MRIneighbors(mri_aseg, x, y, z, 
+        else if ((MRIneighbors(mri_aseg, x, y, z,
                                Right_Cerebral_White_Matter) > 0) &&
-                 (MRIneighbors(mri_aseg, x, y, z, 
+                 (MRIneighbors(mri_aseg, x, y, z,
                                Right_Inf_Lat_Vent) > 0))
         {
-          mean_vent = MRIlabelMean(mri, mri_aseg, x, y, z, 1, 
+          mean_vent = MRIlabelMean(mri, mri_aseg, x, y, z, 1,
                                    Right_Inf_Lat_Vent) ;
-          mean_wm = MRIlabelMean(mri, mri_aseg, x, y, z, 1, 
+          mean_wm = MRIlabelMean(mri, mri_aseg, x, y, z, 1,
                                  Right_Cerebral_White_Matter) ;
           right = 1 ;
         }
         else
         {
-          continue ;  /* must nbr both vent and wm, 
+          continue ;  /* must nbr both vent and wm,
                          otherwise don't process it */
         }
 
         MRIsampleVolume(mri, x, y, z, &val) ;
         if (fabs(val-mean_wm) < fabs(val-mean_vent))
         {
-          MRIvox(mri_aseg, x, y, z) = 
+          MRIvox(mri_aseg, x, y, z) =
             right ? Right_Cerebral_White_Matter : Left_Cerebral_White_Matter ;
         }
         else
         {
-          MRIvox(mri_aseg, x, y, z) = 
+          MRIvox(mri_aseg, x, y, z) =
             right ? Right_Inf_Lat_Vent : Left_Inf_Lat_Vent ;
         }
       }
@@ -1702,7 +1699,7 @@ edit_calcarine(MRI *mri, MRI_SURFACE *mris, int right)
           DiagBreak() ;
         }
         label = MRIvox(mri, x, y, z) ;
-        if (((label == Left_Lateral_Ventricle || 
+        if (((label == Left_Lateral_Ventricle ||
               label == Right_Lateral_Ventricle)) &&
             (MRIvox(mri_calc, x, y, z) > 0))
         {

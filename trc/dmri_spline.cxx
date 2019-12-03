@@ -23,31 +23,20 @@
  *
  */
 
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <float.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/utsname.h>
 #include <unistd.h>
 
-#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <limits.h>
-#include <math.h>
-#include <stdlib.h>
-#include <string>
-#include <time.h>
-#include <vector>
 
 #include "cmdargs.h"
 #include "diag.h"
 #include "error.h"
 #include "fio.h"
-#include "mri.h"
 #include "timer.h"
 #include "version.h"
 

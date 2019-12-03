@@ -35,16 +35,12 @@
 #include "/usr/include/g++-3/alloc.h"
 #endif
 
-#include <string>
-
-#include <fstream>
 #include <vector>
 #include <algorithm>
 
 #include "macros.h"
 #include "mri.h"
 #include "version.h"
-#include "macros.h"
 #include "transform.h"
 #include "talairachex.h"
 const char *Progname;

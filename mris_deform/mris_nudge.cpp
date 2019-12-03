@@ -27,7 +27,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
 #include <cctype>
 
 #include "mri.h"
@@ -36,14 +35,9 @@
 #include "diag.h"
 #include "proto.h"
 #include "utils.h"
-#include "const.h"
-#include "timer.h"
 #include "version.h"
-#include "transform.h"
 #include "mrisurf.h"
 #include "label.h"
-#include "tritri.h"
-#include "filter.h"
 
 const char *Progname = nullptr;
 

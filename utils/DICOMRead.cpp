@@ -27,11 +27,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <sys/file.h>
-#include <sys/time.h>
-#include <sys/timeb.h>
-#include <sys/types.h>
-#include <ctime>
 #include <unistd.h>
 
 #ifndef Darwin
@@ -42,17 +37,12 @@ void *malloc(size_t size);
 
 #include <math.h>
 
-#include "mri.h"
-
 #include "diag.h"
 #include "dti.h"
 #include "fio.h"
 #include "fsenv.h"
 #include "macros.h" // DEGREES
 #include "mosaic.h"
-#include "mri_identify.h"
-
-// #include "affine.h"
 
 #define _DICOMRead_SRC
 #include "DICOMRead.h"

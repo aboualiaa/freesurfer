@@ -26,27 +26,15 @@
  */
 
 #include <cstdio>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <cstring>
 #include <cctype>
-#include <ctime>
 #include "const.h"
-#include "machine.h"
 #include "cma.h"
-#include "fio.h"
 #include "utils.h"
 #include "mri.h"
-#include "gcamorph.h"
 #include "minc.h"
-#include "analyze.h"
-#include "mri_identify.h"
 #include "error.h"
 #include "diag.h"
 #include "version.h"
-#include "mghendian.h"
-#include "fio.h"
-#include "cmdargs.h"
 #include "macros.h"
 
 static int get_option(int argc, char *argv[]);

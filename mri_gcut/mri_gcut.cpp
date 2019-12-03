@@ -65,10 +65,7 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <unistd.h>
 #include <cstring>
-#include <cerrno>
-#include <cmath>
 
 #include "mri.h"
 #include "error.h"

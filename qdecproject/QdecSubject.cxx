@@ -26,7 +26,6 @@
 #include <cstring>
 #include <stdexcept>
 #include <sstream>
-#include <iostream>
 
 #include "QdecSubject.h"
 

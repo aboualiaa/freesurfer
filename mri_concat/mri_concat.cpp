@@ -35,10 +35,8 @@
 #include <cmath>
 #include <cfloat>
 #include <cctype>
-#include <sys/time.h>
 #include <sys/resource.h>
 #include "macros.h"
-#include "mrisurf.h"
 #include "mrisutils.h"
 #include "error.h"
 #include "diag.h"
@@ -48,7 +46,6 @@
 #include "fmriutils.h"
 #include "version.h"
 #include "mri_identify.h"
-#include "cmdargs.h"
 
 static int parse_commandline(int argc, char **argv);
 static void check_options();

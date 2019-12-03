@@ -89,7 +89,6 @@ ENDHELP --------------------------------------------------------------
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
-#include <unistd.h>
 #include <cstring>
 
 #include "macros.h"
@@ -101,18 +100,11 @@ ENDHELP --------------------------------------------------------------
 #include "mri.h"
 #include "version.h"
 #include "mri2.h"
-#include "mri_identify.h"
-#include "MRIio_old.h"
 #include "registerio.h"
 #include "resample.h"
 #include "gca.h"
-#include "gcamorph.h"
-#include "fio.h"
 #include "cmdargs.h"
-#include "pdf.h"
 #include "timer.h"
-#include "numerics.h"
-#include "mri_circulars.h"
 #include "romp_support.h"
 
 #ifdef X

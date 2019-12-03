@@ -37,7 +37,6 @@
 #include "fio.h"
 
 #include "unistd.h"
-#include <libgen.h>
 
 #include <sstream>
 

@@ -25,18 +25,15 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <math.h>
 #include <ctype.h>
 
-#include "numerics.h"
 #include "macros.h"
 #include "error.h"
 #include "diag.h"
 #include "mri.h"
 #include "proto.h"
 #include "version.h"
-#include "matrix.h"
 #include "mrisegment.h"
 
 #define RGB_SIZE 500

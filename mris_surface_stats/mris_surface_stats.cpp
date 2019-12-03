@@ -30,7 +30,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
-#include <cctype>
 #include "mri.h"
 #include "mri_identify.h"
 #include "mrisurf.h"
@@ -40,8 +39,6 @@
 #include "proto.h"
 #include "utils.h"
 #include "timer.h"
-#include "matrix.h"
-#include "transform.h"
 #include "version.h"
 #include "label.h"
 #define DEBUG 0

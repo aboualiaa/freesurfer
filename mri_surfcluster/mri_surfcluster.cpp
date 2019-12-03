@@ -31,7 +31,6 @@
 
 #include "error.h"
 #include "diag.h"
-#include "proto.h"
 #include "utils.h"
 #include "matrix.h"
 #include "mri.h"
@@ -39,7 +38,6 @@
 #include "mri_identify.h"
 #include "mrisurf.h"
 #include "mrisutils.h"
-#include "MRIio_old.h"
 #include "fio.h"
 #include "volcluster.h"
 #include "surfcluster.h"

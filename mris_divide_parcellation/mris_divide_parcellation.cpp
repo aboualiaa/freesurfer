@@ -118,11 +118,7 @@ ENDHELP ----------------------------------------------------------------
 #include <cstdlib>
 #include <cmath>
 double round(double x);
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <cctype>
-#include <sys/utsname.h>
-#include <unistd.h>
 
 #include "macros.h"
 #include "version.h"
@@ -131,7 +127,6 @@ double round(double x);
 #include "error.h"
 #include "diag.h"
 #include "annotation.h"
-#include "matrix.h"
 
 static int get_option(int argc, char *argv[]);
 static void usage_exit();

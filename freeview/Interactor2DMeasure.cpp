@@ -33,7 +33,6 @@
 #include "Region2DLine.h"
 #include "Region2DPolyline.h"
 #include "Region2DRectangle.h"
-//#include "ToolWindowMeasure.h"
 #include "CursorFactory.h"
 #include <vtkRenderer.h>
 

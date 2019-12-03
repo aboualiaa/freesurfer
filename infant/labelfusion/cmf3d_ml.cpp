@@ -55,7 +55,6 @@
 
 */
 
-#include <exception>
 #include <stdlib.h>
 #include <math.h>
 

@@ -35,7 +35,6 @@
 #include "proto.h"
 #include "mrisurf.h"
 #include "mrisurf_metricProperties.h"
-#include "macros.h"
 #include "utils.h"
 #include "version.h"
 

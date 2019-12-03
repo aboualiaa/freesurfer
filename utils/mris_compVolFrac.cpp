@@ -25,20 +25,11 @@
  */
 
 #include <cstdio>
-#include <cstdlib>
-#include <sys/utsname.h>
-#include <unistd.h>
 
-#include "cmdargs.h"
-#include "diag.h"
-#include "error.h"
-#include "fio.h"
-#include "macros.h"
 #include "mris_compVolFrac.h"
 #include "mrisurf.h"
 #include "mrisurf_metricProperties.h"
 #include "utils.h"
-#include "version.h"
 
 MRI *MRIcomputeVolumeFractionFromSurface(MRI_SURFACE *mris, double acc,
                                          MRI *mri_src, MRI *mri_fractions) {

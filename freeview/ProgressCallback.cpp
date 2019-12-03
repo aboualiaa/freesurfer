@@ -1,4 +1,3 @@
-#include "ProgressCallback.h"
 #include "MainApplication.h"
 #include <QDebug>
 

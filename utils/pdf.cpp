@@ -28,9 +28,6 @@
 #include <cstdlib>
 #include <sys/time.h>
 
-#include "proto.h"
-#include "utils.h"
-
 #include "pdf.h"
 
 double round(double x);

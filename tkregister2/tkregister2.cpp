@@ -48,11 +48,7 @@ static char vcid[] =
 #include <sys/time.h>
 #include <cstdlib>
 #include <cstdio>
-#include <sys/time.h>
 #include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <fcntl.h>
 
 #ifdef HAVE_TCL_TK_GL
 
@@ -115,7 +111,6 @@ static char vcid[] =
 #include "diag.h"
 #include "utils.h"
 #include "const.h"
-#include "machine.h"
 #include "MRIio_old.h"
 #include "mri.h"
 #include "mri2.h"
@@ -126,7 +121,6 @@ static char vcid[] =
 #include "fio.h"
 #include "pdf.h"
 #include "resample.h"
-#include "pdf.h"
 #include "fmriutils.h"
 #include "mri_conform.h"
 

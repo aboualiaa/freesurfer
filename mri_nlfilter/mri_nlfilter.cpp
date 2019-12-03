@@ -27,7 +27,6 @@
 #include <cstdlib>
 #include <cmath>
 #include <cctype>
-#include <memory.h>
 
 #include "filter.h"
 #include "macros.h"

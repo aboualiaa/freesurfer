@@ -5,13 +5,8 @@
  */
 
 #include <cstdio>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <cstring>
 #include <cstdlib>
 #include <cctype>
-#include <ctime>
-#include "const.h"
 #include "utils.h"
 #include "mri.h"
 #include "mri2.h"

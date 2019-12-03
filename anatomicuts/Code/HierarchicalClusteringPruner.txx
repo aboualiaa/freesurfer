@@ -2,7 +2,6 @@
 #define _HierarchicalClusteringPruner_txx_
 
 #include "HierarchicalClusteringPruner.h"
-#include <vtkCellArray.h>
 #include <vtkCellData.h>
 #include "TrkVTKPolyDataFilter.txx"
 

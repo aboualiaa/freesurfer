@@ -4,7 +4,6 @@
 #include "ThreadedMembershipFunction.h"
 #include <iostream>
 #include "vnl/vnl_matrix.h"
-#include <stdlib.h>
 
 template <class TMembershipFunctionType>
 void ThreadedMembershipFunction<

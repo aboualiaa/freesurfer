@@ -24,7 +24,6 @@
  *
  */
 
-#include <cctype>
 #include <cerrno>
 #include <math.h>
 #include <cstdio>

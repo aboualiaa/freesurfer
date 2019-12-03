@@ -27,19 +27,14 @@
 #include <cstdlib>
 #include <unistd.h>
 #include <cstring>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/utsname.h>
 // MacOSX does not have malloc.h but declaration is in stdlib.h
 #ifndef Darwin
 #include <malloc.h>
 #endif
-#include <cerrno>
 #include <cctype>
-#include "mri.h"
 #include "diag.h"
 #include "error.h"
-#include "utils.h"
 #include "DICOMRead.h"
 #include "fio.h"
 #include "version.h"

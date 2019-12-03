@@ -24,25 +24,15 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <unistd.h>
 #include <cmath>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <cerrno>
-#include <cfloat>
 #include "mrisurf.h"
 #include "mrisutils.h"
 #include "geodesics.h"
 #include "timer.h"
-#include "utils.h"
-#include "annotation.h"
-#include "error.h"
 #include "dmatrix.h"
 #include "surfgrad.h"
-#include "diag.h"
 #include "DICOMRead.h"
 #include "region.h"
-#include "surfgrad.h"
 
 #include "romp_support.h"
 #undef private

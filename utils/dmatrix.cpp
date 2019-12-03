@@ -22,15 +22,11 @@
  *
  */
 
-#include <cctype>
 #include <math.h>
 #include <memory.h>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
-#include <unistd.h>
 
-#include "diag.h"
 #include "error.h"
 #include "matrix.h"
 #include "dmatrix.h"

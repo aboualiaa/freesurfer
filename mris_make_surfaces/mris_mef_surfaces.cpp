@@ -40,8 +40,6 @@
 #include "timer.h"
 #include "mrisurf.h"
 #include "mri.h"
-#include "macros.h"
-#include "mrimorph.h"
 #include "tags.h"
 #include "mrinorm.h"
 #include "version.h"
@@ -1943,7 +1941,7 @@ int MRIScomputeBorderValues_MEF_PIAL(MRI_SURFACE *mris, MRI *mri_em_combined,
 
 int
 MRISpositionSurface_mef(MRI_SURFACE *mris, MRI *mri_30, MRI *mri_5,
-                        INTEGRATION_PARMS *parms, 
+                        INTEGRATION_PARMS *parms,
                         float weight30, float weight5) {
   /*  char   *cp ;*/
   int    avgs, niterations, n, write_iterations, nreductions = 0, done ;
@@ -1952,7 +1950,7 @@ MRISpositionSurface_mef(MRI_SURFACE *mris, MRI *mri_30, MRI *mri_5,
   Timer then ;
   int msec ;
 
-  max_mm = MIN(MAX_ASYNCH_MM, MIN(mri_30->xsize, 
+  max_mm = MIN(MAX_ASYNCH_MM, MIN(mri_30->xsize,
                                   MIN(mri_30->ysize, mri_30->zsize))/2) ;
 
   //note that the following is for pial surface avoid intersection with white
@@ -1966,7 +1964,7 @@ MRISpositionSurface_mef(MRI_SURFACE *mris, MRI *mri_30, MRI *mri_5,
   //the following are used in mrisComputeIntensityError() and computeSSE()
   parms->mri_brain = NULL; //mri_30 ;
   parms->mri_smooth = NULL; //mri_5 ;
-  niterations = parms->niterations ; //should be different for white and pial; 
+  niterations = parms->niterations ; //should be different for white and pial;
                                      // yeah 25 for white and 30 for pial
   write_iterations = parms->write_iterations ;
   if (Gdiag & DIAG_WRITE) {
@@ -2003,7 +2001,7 @@ MRISpositionSurface_mef(MRI_SURFACE *mris, MRI *mri_30, MRI *mri_5,
 
   avgs = parms->n_averages ;
   last_rms = rms = mrisRmsValError_mef(mris, mri_30, mri_5, weight30, weight5);
-  // last_sse = sse = MRIScomputeSSE(mris, parms) ; 
+  // last_sse = sse = MRIScomputeSSE(mris, parms) ;
 //this computation results were never used
 
   if (Gdiag & DIAG_SHOW)
@@ -2160,11 +2158,11 @@ mrisRmsValError_mef(MRI_SURFACE *mris,
 
 #if 0
 static int
-mrisComputeIntensityTerm_mef(MRI_SURFACE *mris, 
+mrisComputeIntensityTerm_mef(MRI_SURFACE *mris,
                              double l_intensity, MRI *mri_30,
-                             MRI *mri_5, 
-                             double sigma_global, 
-                             float weight30, float weight5) 
+                             MRI *mri_5,
+                             double sigma_global,
+                             float weight30, float weight5)
 {
   int     vno ;
   VERTEX  *v ;
@@ -2203,8 +2201,8 @@ mrisComputeIntensityTerm_mef(MRI_SURFACE *mris,
       double dist, val, step_size ;
       int  n ;
 
-      step_size = MIN(sigma/2, 
-                      MIN(mri_30->xsize, 
+      step_size = MIN(sigma/2,
+                      MIN(mri_30->xsize,
                           MIN(mri_30->ysize, mri_30->zsize))*0.5) ;
       ktotal = 0.0 ;
       for (n = 0, val_outside = val_inside = 0.0, dist = step_size ;
@@ -2262,8 +2260,8 @@ mrisComputeIntensityTerm_mef(MRI_SURFACE *mris,
       double dist, val, step_size ;
       int  n ;
 
-      step_size = MIN(sigma/2, 
-                      MIN(mri_5->xsize, 
+      step_size = MIN(sigma/2,
+                      MIN(mri_5->xsize,
                           MIN(mri_5->ysize, mri_5->zsize))*0.5) ;
       ktotal = 0.0 ;
       for (n = 0, val_outside = val_inside = 0.0, dist = step_size ;

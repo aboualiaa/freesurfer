@@ -3,8 +3,6 @@
 #include <iostream>
 #include <stdlib.h> // exit
 
-#include "transformUtils.h"
-
 float *read_transform(const char *fname) {
   std::ifstream ifs(fname);
 

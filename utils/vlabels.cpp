@@ -26,7 +26,6 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "diag.h"
 #include "error.h"
 #include "fio.h"
 #include "macros.h"

@@ -23,7 +23,6 @@
  *
  */
 
-#include <cctype>
 #include <math.h>
 #include <cstdio>
 #include <cstdlib>
@@ -31,11 +30,8 @@
 
 #include "MRIio_old.h" /*.H*/
 #include "cma.h"       /* using cma_label_to_name() */
-#include "const.h"
 #include "diag.h"
 #include "error.h"
-#include "fio.h"
-#include "gca.h"
 #include "macros.h"
 #include "mri.h"
 #include "mrisurf.h"

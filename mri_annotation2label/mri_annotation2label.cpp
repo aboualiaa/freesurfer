@@ -24,15 +24,10 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
 #include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/utsname.h>
-#include <unistd.h>
 #include <cstring>
 #include <cerrno>
 
-#include "MRIio_old.h"
 #include "error.h"
 #include "diag.h"
 #include "mrisurf.h"

@@ -39,7 +39,6 @@
 #include <climits>
 #include "error.h"
 #include "macros.h"
-#include "mrimorph.h"
 #include "histo.h"
 
 using namespace std;

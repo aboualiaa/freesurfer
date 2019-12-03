@@ -28,7 +28,6 @@
 #include "VolumeCropper.h"
 #include "LayerMRI.h"
 #include <QShowEvent>
-#include <QHideEvent>
 #include <QSettings>
 
 DialogCropVolume::DialogCropVolume(QWidget *parent, LayerMRI *mri)

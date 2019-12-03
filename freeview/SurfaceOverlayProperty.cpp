@@ -27,7 +27,6 @@
  *
  */
 
-#include <assert.h>
 #include "SurfaceOverlayProperty.h"
 #include "vtkLookupTable.h"
 #include "vtkRGBAColorTransferFunction.h"

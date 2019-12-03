@@ -36,18 +36,15 @@ MC Sim:
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <unistd.h>
 #include <string.h>
 
 #include "error.h"
 #include "diag.h"
-#include "proto.h"
 #include "resample.h"
 #include "icosahedron.h"
 #include "matrix.h"
 #include "matfile.h"
 #include "mri.h"
-#include "MRIio_old.h"
 #include "mri_identify.h"
 #include "sig.h"
 #include "fmriutils.h"

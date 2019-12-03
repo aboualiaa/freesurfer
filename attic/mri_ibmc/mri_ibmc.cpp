@@ -42,17 +42,14 @@
 #include <sys/utsname.h>
 #include <float.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <errno.h>
 
-#include "macros.h"
 #include "utils.h"
 #include "fio.h"
 #include "version.h"
 #include "cmdargs.h"
 #include "error.h"
 #include "diag.h"
-#include "fsenv.h"
 #include "registerio.h"
 #include "matrix.h"
 #include "mri2.h"

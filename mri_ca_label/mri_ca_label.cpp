@@ -31,7 +31,6 @@
 #include <cctype>
 #include <sys/utsname.h>
 #include <unistd.h>
-#include <sys/time.h>
 #include <sys/resource.h>
 #ifdef HAVE_OPENMP // mrisurf.c has numerous parallelized functions
 #include "romp_support.h"
@@ -49,9 +48,7 @@
 #include "transform.h"
 #include "gcamorph.h"
 #include "cma.h"
-#include "histo.h"
 #include "tags.h"
-#include "mrinorm.h"
 #include "version.h"
 #include "fsinit.h"
 
@@ -3334,7 +3331,7 @@ GCAlabelWMandWMSAs( GCA *gca,
               continue ;
             }
           }
-          else if (nwm+nwmsa < .9*WSIZE*WSIZE*WSIZE) 
+          else if (nwm+nwmsa < .9*WSIZE*WSIZE*WSIZE)
           {// somewhat arbitrary - the bulk of the nbhd
             continue ;
           }
@@ -3379,11 +3376,11 @@ GCAlabelWMandWMSAs( GCA *gca,
               VectorSubtract(v_vals, v_mean_wm, v_dif_label) ;
               VectorSubtract(v_vals, v_mean_wmsa, v_dif_wmsa) ;
               if (
-                ((fabs(VECTOR_ELT(v_dif_wmsa,1)) < 
+                ((fabs(VECTOR_ELT(v_dif_wmsa,1)) <
                   fabs(VECTOR_ELT(v_dif_label,1))) &&
-                 (fabs(VECTOR_ELT(v_dif_wmsa,2)) < 
+                 (fabs(VECTOR_ELT(v_dif_wmsa,2)) <
                   fabs(VECTOR_ELT(v_dif_label,2))) &&
-                 (fabs(VECTOR_ELT(v_dif_wmsa,3)) < 
+                 (fabs(VECTOR_ELT(v_dif_wmsa,3)) <
                   fabs(VECTOR_ELT(v_dif_label,3)))) ||
                 ((2*wmsa_dist < wm_dist) && (2*wmsa_mdist < wm_mdist)))
               {
@@ -3452,7 +3449,7 @@ GCAlabelWMandWMSAs( GCA *gca,
             ncaudate = MRIlabelsInNbhd(mri_tmp, x, y, z,WHALF, caudate_label) ;
             ngm = MRIlabelsInNbhd(mri_tmp, x, y, z,WHALF, gm_label) ;
 
-            if (ngm+ncaudate+nwm+nwmsa+nunknown < .9*WSIZE*WSIZE*WSIZE)  
+            if (ngm+ncaudate+nwm+nwmsa+nunknown < .9*WSIZE*WSIZE*WSIZE)
             {// somewhat arbitrary - the bulk of the nbhd
               continue ;
             }
@@ -3474,11 +3471,11 @@ GCAlabelWMandWMSAs( GCA *gca,
               if (x == Ggca_x && y == Ggca_y && z == Ggca_z)
                 printf("         - wm_dist = %2.0f, wmsa_dist = %2.0f\n",
                        wm_dist, wmsa_dist) ;
-              if ((fabs(VECTOR_ELT(v_dif_wmsa,1)) < 
+              if ((fabs(VECTOR_ELT(v_dif_wmsa,1)) <
                    fabs(VECTOR_ELT(v_dif_label,1))) &&
-                  (fabs(VECTOR_ELT(v_dif_wmsa,2)) < 
+                  (fabs(VECTOR_ELT(v_dif_wmsa,2)) <
                    fabs(VECTOR_ELT(v_dif_label,2))) &&
-                  (fabs(VECTOR_ELT(v_dif_wmsa,3)) < 
+                  (fabs(VECTOR_ELT(v_dif_wmsa,3)) <
                    fabs(VECTOR_ELT(v_dif_label,3))))
               {
                 if (x == Ggca_x && y == Ggca_y && z == Ggca_z)
@@ -3494,11 +3491,11 @@ GCAlabelWMandWMSAs( GCA *gca,
               if (x == Ggca_x && y == Ggca_y && z == Ggca_z)
                 printf("         - wm_dist = %2.0f, wmsa_dist = %2.0f\n",
                        wm_dist, wmsa_dist) ;
-              if (((fabs(VECTOR_ELT(v_dif_wmsa,1)) < 
+              if (((fabs(VECTOR_ELT(v_dif_wmsa,1)) <
                     fabs(VECTOR_ELT(v_dif_label,1))) &&
-                   (fabs(VECTOR_ELT(v_dif_wmsa,2)) < 
+                   (fabs(VECTOR_ELT(v_dif_wmsa,2)) <
                     fabs(VECTOR_ELT(v_dif_label,2))) &&
-                   (fabs(VECTOR_ELT(v_dif_wmsa,3)) < 
+                   (fabs(VECTOR_ELT(v_dif_wmsa,3)) <
                     fabs(VECTOR_ELT(v_dif_label,3)))) ||
                   (wmsa_dist*3 < wm_dist))
               {
@@ -3519,11 +3516,11 @@ GCAlabelWMandWMSAs( GCA *gca,
               if (x == Ggca_x && y == Ggca_y && z == Ggca_z)
                 printf("         - wm_dist = %2.0f, wmsa_dist = %2.0f\n",
                        wm_dist, wmsa_dist) ;
-              if ((fabs(VECTOR_ELT(v_dif_wmsa,1)) < 
+              if ((fabs(VECTOR_ELT(v_dif_wmsa,1)) <
                    fabs(VECTOR_ELT(v_dif_label,1))) &&
-                  (fabs(VECTOR_ELT(v_dif_wmsa,2)) < 
+                  (fabs(VECTOR_ELT(v_dif_wmsa,2)) <
                    fabs(VECTOR_ELT(v_dif_label,2))) &&
-                  (fabs(VECTOR_ELT(v_dif_wmsa,3)) < 
+                  (fabs(VECTOR_ELT(v_dif_wmsa,3)) <
                    fabs(VECTOR_ELT(v_dif_label,3))))
               {
                 if (x == Ggca_x && y == Ggca_y && z == Ggca_z)
@@ -4094,7 +4091,7 @@ static int change_unlikely_voxels(GCA *gca, MRI *mri_dst_label, MRI *mri_inputs,
              cma_label_to_name(max_label));
     }
 #if 0
-    gcap = getGCAP(gca, mri_inputs, transform, 
+    gcap = getGCAP(gca, mri_inputs, transform,
                    vl->xi[i], vl->yi[i], vl->zi[i]) ;
     max_p = 0.0 ;
     max_label = 0 ;
@@ -4104,11 +4101,11 @@ static int change_unlikely_voxels(GCA *gca, MRI *mri_dst_label, MRI *mri_inputs,
       {
         DiagBreak() ;
       }
-      if (gcap->labels[n] == label_to_change)   
+      if (gcap->labels[n] == label_to_change)
       {// don't let it be the one we are changing
         continue ;
       }
-      p = GCAlabelProbability(mri_inputs, gca, transform, 
+      p = GCAlabelProbability(mri_inputs, gca, transform,
                               (float)x, (float)y, (float)z, gcap->labels[n]) ;
       if (p > max_p)
       {

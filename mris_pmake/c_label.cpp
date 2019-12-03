@@ -31,7 +31,6 @@
 #include "c_vertex.h"
 
 #include "C_mpmProg.h"
-#include "asynch.h"
 
 #include <sstream>
 

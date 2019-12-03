@@ -23,16 +23,11 @@
  */
 
 #include "MyCmdLineParser.h"
-#include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <string>
 #include <vector>
 
 #include <iostream>
-
-#include <fstream>
-#include <stdarg.h>
 
 using namespace std;
 

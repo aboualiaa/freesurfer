@@ -29,14 +29,9 @@
 #include <cstdlib>
 #include <cmath>
 double round(double x);
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/utsname.h>
 #include <unistd.h>
 
-#include "macros.h"
-#include "utils.h"
-#include "mrisurf.h"
 #include "mrisutils.h"
 #include "error.h"
 #include "diag.h"
@@ -44,9 +39,6 @@ double round(double x);
 #include "mri2.h"
 #include "fio.h"
 #include "version.h"
-#include "label.h"
-#include "annotation.h"
-#include "fmriutils.h"
 #include "cmdargs.h"
 #include "fsglm.h"
 

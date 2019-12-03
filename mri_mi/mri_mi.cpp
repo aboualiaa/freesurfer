@@ -24,13 +24,8 @@
  */
 
 #include <stdio.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <time.h>
-#include "const.h"
 #include "utils.h"
 #include "mri.h"
 #include "mri2.h"

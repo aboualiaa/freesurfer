@@ -28,13 +28,9 @@
 #include <algorithm>
 #include <string>
 #include <iostream>
-#include <fstream>
-#include <sstream>
-#include <vector>
 #include <cassert>
 
 #define export // obsolete feature 'export template' used in these headers
-#include <vnl/vnl_inverse.h>
 #include <vnl/vnl_matrix_fixed.h>
 #include <vnl/algo/vnl_determinant.h>
 #include <vnl/algo/vnl_svd.h>
@@ -56,8 +52,6 @@
 #include "mriBSpline.h"
 #include "matrix.h"
 #include "timer.h"
-#include "diag.h"
-#include "mrimorph.h"
 #include "version.h"
 #include "transform.h"
 

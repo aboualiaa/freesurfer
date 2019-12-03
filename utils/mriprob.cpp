@@ -23,12 +23,9 @@
  *
  */
 
-#include <cctype>
 #include <math.h>
 #include <cstdio>
-#include <cstdlib>
 
-#include "const.h"
 #include "diag.h"
 #include "error.h"
 #include "macros.h"

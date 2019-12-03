@@ -1,45 +1,24 @@
-#include "itkDecisionRule.h"
-#include "itkVector.h"
 #include "itkListSample.h"
-#include "itkKdTree.h"
 #include "itkWeightedCentroidKdTreeGenerator.h"
 #include "itkKdTreeBasedKmeansEstimator.h"
 #include "itkMinimumDecisionRule.h"
 #include "itkEuclideanDistanceMetric.h"
 #include "itkDistanceToCentroidMembershipFunction.h"
 #include "itkSampleClassifierFilter.h"
-#include "itkNormalVariateGenerator.h"
 
-#include "vtkVersion.h"
-#include "vtkActor.h"
-#include "vtkInteractorStyleTrackballCamera.h"
-#include "vtkPolyData.h"
-#include "vtkPolyDataMapper.h"
-#include "vtkProperty.h"
-#include "vtkRenderer.h"
-#include "vtkRenderWindow.h"
-#include "vtkRenderWindowInteractor.h"
-#include "vtkSmartPointer.h"
-#include "vtkVertexGlyphFilter.h"
 #include "itkImage.h"
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
 #include "itkVariableLengthVector.h"
 
 #include <iostream>
-#include "itkImage.h"
-#include <map>
 #include "itkDefaultStaticMeshTraits.h"
 #include "fsSurface.h"
 #include "itkTriangleCell.h"
-#include <set>
 #include "GetPot.h"
-#include <string>
 #include "colortab.h"
-#include "fsenv.h"
 #include "itkVTKPolyDataWriter.h"
 #include <vnl/vnl_cross.h>
-#include <cmath>
 
 #include "mrisurf.h"
 

@@ -27,14 +27,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <memory.h>
 
 #include "diag.h"
 #include "error.h"
 #include "macros.h"
 #include "utils.h"
-#include "proto.h"
-#include "cluster.h"
 #include "matrix.h"
 #include "rbf.h"
 #include "version.h"

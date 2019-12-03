@@ -28,8 +28,6 @@
 #include <cctype>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
-#include <libxml/xinclude.h>
-#include <libxml/xmlIO.h>
 #include <cstring>
 
 static void printName(xmlNodePtr cur);

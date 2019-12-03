@@ -32,21 +32,17 @@
 #include <cstdlib>
 double round(double x);
 #include <memory.h>
-#include <cstring>
 
 #include "romp_support.h"
 
-#include "box.h"
 #include "diag.h"
 #include "error.h"
 #include "filter.h"
 #include "macros.h"
 #include "matrix.h"
-#include "minc.h"
 #include "mri.h"
 #include "mri2.h"
 #include "proto.h"
-#include "region.h"
 
 extern const char *Progname;
 

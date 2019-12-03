@@ -24,16 +24,13 @@
  */
 
 #include <iostream>
-#include <iomanip>
 #if (__GNUC__ < 3)
 #include "/usr/include/g++-3/alloc.h"
 #endif
-#include <string>
 
 #include "error.h"
 #include "mri.h"
 #include "transform.h"
-#include "talairachex.h"
 #include "utils.h"
 const char *Progname = "regdat2xfm";
 

@@ -28,7 +28,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <unistd.h>
 #include <iomanip>
 #include "error.h"
 #include "fio.h"

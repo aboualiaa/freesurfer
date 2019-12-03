@@ -40,7 +40,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "gcamorph.h"
 #include "mri.h"
 #include "proto.h"
 #include "macros.h"
@@ -51,7 +50,6 @@
 #include "matrix.h"
 #include "gca.h"
 #include "cma.h"
-#include "version.h"
 #include "label.h"
 
 const char *Progname;

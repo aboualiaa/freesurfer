@@ -25,7 +25,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <cmath>
 #include <cctype>
 
@@ -34,9 +33,6 @@
 #include "diag.h"
 #include "mri.h"
 #include "proto.h"
-#include "histo.h"
-#include "transform.h"
-#include "mrinorm.h"
 #include "version.h"
 #include "tags.h"
 #include "flash.h"

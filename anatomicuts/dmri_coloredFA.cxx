@@ -112,8 +112,8 @@ int main(int narg, char *arg[]) {
   // Values and color association
   vector<float> FA_value;
   // vtkSmartPointer<vtkPolyData> pointsPolyData =
-  // vtkSmartPointer<vtkPolyData>::New(); vtkSmartPointer<vtkPolyData> polydata =
-  // vtkSmartPointer<vtkPolyData>::New();
+  // vtkSmartPointer<vtkPolyData>::New(); vtkSmartPointer<vtkPolyData> polydata
+  // = vtkSmartPointer<vtkPolyData>::New();
   vtkSmartPointer<vtkUnsignedCharArray> colors =
       vtkSmartPointer<vtkUnsignedCharArray>::New();
 

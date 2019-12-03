@@ -25,17 +25,14 @@
 #include "ui_PanelPointSet.h"
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
-#include <QToolBar>
 #include "LayerPointSet.h"
 #include "LayerPropertyPointSet.h"
-#include "LayerCollection.h"
 #include "LayerMRI.h"
 #include <QFileDialog>
 #include "MyUtils.h"
 #include <QLabel>
 #include <QDateTime>
 #include <QInputDialog>
-#include <QScrollBar>
 #include <QDebug>
 #include <QTimer>
 #include <QTreeWidgetItem>

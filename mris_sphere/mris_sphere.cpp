@@ -30,7 +30,6 @@
 #include <cstring>
 #include <cmath>
 #include <cctype>
-#include <sys/time.h>
 #include <sys/resource.h>
 
 #include "macros.h"

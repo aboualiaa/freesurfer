@@ -40,7 +40,6 @@
 #include <vtkUnsignedCharArray.h>
 #include <vtkPointData.h>
 #include <vtkProperty.h>
-#include <vtkLODActor.h>
 #include "MyUtils.h"
 
 LayerTrack::LayerTrack(LayerMRI *ref, QObject *parent, bool bCluster)

@@ -35,8 +35,6 @@
 #include "error.h"
 #include "diag.h"
 #include "proto.h"
-#include "mrimorph.h"
-#include "mri_conform.h"
 #include "utils.h"
 #include "const.h"
 #include "timer.h"
@@ -160,7 +158,7 @@ int main(int argc, char *argv[]) {
   mri_layers->yend = resolution*mri_layers->height/2.0 ;
   mri_layers->zstart = -resolution*mri_layers->depth/2.0 ;
   mri_layers->zend = resolution*mri_layers->depth/2 ;
-  mri_layers->c_r = mri_aseg->c_r ; mri_layers->c_a = mri_aseg->c_a ; 
+  mri_layers->c_r = mri_aseg->c_r ; mri_layers->c_a = mri_aseg->c_a ;
   mri_layers->c_s = mri_aseg->c_s ;
 #else
   mri_in = MRIreadHeader(in_fname, MRI_VOLUME_TYPE_UNKNOWN);

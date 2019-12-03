@@ -36,9 +36,7 @@
 #include "timer.h"
 #include "diag.h"
 #include "mrimorph.h"
-#include "mri_conform.h"
 #include "utils.h"
-#include "matrix.h"
 #include "version.h"
 
 const char *Progname;

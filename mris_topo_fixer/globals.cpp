@@ -23,12 +23,10 @@
  *
  */
 
-#include "globals.h"
 
 #include <iostream>
 using namespace std;
 
-#include "error.h"
 #include "macros.h"
 
 #ifdef Windows_NT

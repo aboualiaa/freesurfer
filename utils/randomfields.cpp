@@ -27,8 +27,6 @@
 #include <math.h>
 #include <cstdio>
 #include <cstdlib>
-#include <sys/stat.h>
-#include <sys/types.h>
 
 #include "fsglm.h"
 #include "mri.h"

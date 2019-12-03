@@ -1,20 +1,10 @@
 #include <cstdio>
 #include <cstdlib>
-#include <unistd.h>
 #include <cstring>
 #include <cerrno>
-#include "diag.h"
-#include "error.h"
-#include "mri.h"
 #include "mri2.h"
-#include "fmriutils.h"
-#include "mri_identify.h"
-#include "gcamorph.h"
 #include "DICOMRead.h"
-#include "version.h"
-#include "utils.h"
 #include "macros.h"
-#include "fmriutils.h"
 
 extern int errno;
 const char *Progname;

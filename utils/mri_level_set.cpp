@@ -38,16 +38,13 @@
                            INCLUDE FILES
 ----------------------------------------------------------------------*/
 
-#include <cctype>
 #include <math.h>
-#include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
 
 #include "diag.h"
 #include "macros.h"
 #include "mri.h"
-#include "proto.h"
 
 #ifndef SQR
 #define SQR(x) ((x) * (x))

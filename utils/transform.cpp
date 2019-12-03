@@ -31,8 +31,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 
 #define _TRANSFORM_SRC
 #include "transform.h"
@@ -46,7 +44,6 @@
 #include "matrix.h"
 #include "mri.h"
 #include "mri_circulars.h"
-#include "mrinorm.h"
 #include "proto.h"
 #include "registerio.h"
 #include "resample.h"
@@ -1631,8 +1628,6 @@ static int ltaFSLwrite(const LTA *lta, const char *fname) {
   return (NO_ERROR);
 }
 
-#include "minc.h"
-
 static int ltaMNIwrite(const LTA *lta, const char *fname) {
   FILE *fp;
   int row;
@@ -2778,7 +2773,6 @@ MRI *TransformApplyInverseType(TRANSFORM *transform, MRI *mri_src, MRI *mri_dst,
   return (mri_dst);
 }
 
-#include "stats.h"
 LTA *ltaReadRegisterDat(const char *fname, const char *mov, const char *ref) {
   LTA *lta;
   char *tmpstr;

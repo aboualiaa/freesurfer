@@ -29,7 +29,6 @@
 #include <memory.h>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 
 #include "diag.h"
 #include "error.h"
@@ -37,7 +36,6 @@
 #include "macros.h"
 #include "mri.h"
 #include "mriclass.h"
-#include "proto.h"
 #include "region.h"
 #include "utils.h"
 

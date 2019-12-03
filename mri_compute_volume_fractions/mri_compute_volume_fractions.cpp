@@ -30,7 +30,6 @@
 #include <unistd.h>
 #include <sys/utsname.h>
 
-#include "macros.h"
 #include "utils.h"
 #include "fio.h"
 #include "version.h"

@@ -28,8 +28,6 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
-#include <sys/time.h>
-#include <sys/resource.h>
 #ifdef HAVE_OPENMP
 #include "romp_support.h"
 #endif
@@ -44,10 +42,8 @@
 #include "utils.h"
 #include "gca.h"
 #include "cma.h"
-#include "mrinorm.h"
 #include "version.h"
 #include "mri2.h"
-#include "connectcomp.h"
 
 #include "emregisterutils.h"
 #include "findtranslation.h"

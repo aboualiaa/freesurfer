@@ -3,13 +3,10 @@
 
 #include "MeshToImageFilter.h"
 
-#include <itkImageRegionIterator.h>
 #include <itkImageIterator.h>
-#include <itkImageRegionConstIteratorWithIndex.h>
 #include <itkGaussianSpatialFunction.h>
 #include <algorithm>
 #include <iostream>
-#include <exception>
 
 using namespace itk;
 

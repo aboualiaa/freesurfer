@@ -40,10 +40,8 @@
 #include <memory.h>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 
 #include "cluster.h"
-#include "diag.h"
 #include "error.h"
 #include "macros.h"
 #include "matrix.h"

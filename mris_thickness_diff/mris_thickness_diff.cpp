@@ -33,18 +33,14 @@
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
-#include <cctype>
 #include "macros.h"
 #include "error.h"
 #include "diag.h"
 #include "proto.h"
 #include "mrisurf.h"
 #include "mri.h"
-#include "macros.h"
 #include "mrishash.h"
 #include "mri_identify.h"
-#include "annotation.h"
-#include "icosahedron.h"
 #include "version.h"
 
 #define MAX_DATA_NUMBERS 200

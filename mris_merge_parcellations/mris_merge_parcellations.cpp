@@ -26,7 +26,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <cmath>
 #include <cctype>
 
 #include "macros.h"
@@ -36,10 +35,8 @@
 #include "timer.h"
 #include "mrisurf.h"
 #include "mri.h"
-#include "macros.h"
 #include "version.h"
 #include "label.h"
-#include "MARS_DT_Boundary.h"
 
 static char vcid[] =
     "$Id: mris_merge_parcellations.c,v 1.6 2011/03/02 00:04:33 nicks Exp $";

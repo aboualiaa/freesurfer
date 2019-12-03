@@ -64,13 +64,10 @@
 #include <cstdlib>
 #include <cstring>
 #include <cctype>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <cfloat>
 #include "mri2.h"
 #include "fio.h"
 #include "matfile.h"
-#include "stats.h"
 #include "fsenv.h"
 #include "utils.h"
 #include "proto.h"

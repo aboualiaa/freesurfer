@@ -35,7 +35,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
-#include <unistd.h>
 #include <cstring>
 
 #include "error.h"
@@ -45,7 +44,6 @@
 
 #include "fio.h"
 #include "mri.h"
-#include "MRIio_old.h"
 #include "cmdargs.h"
 
 static int parse_commandline(int argc, char **argv);

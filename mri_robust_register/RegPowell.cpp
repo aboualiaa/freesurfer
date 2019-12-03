@@ -30,17 +30,12 @@
 #include "numerics.h"
 
 #include <cassert>
-#include <fstream>
-#include <sstream>
 #include <iostream>
 #include <vnl/vnl_inverse.h>
-#include "RegistrationStep.h"
-#include "MyMatrix.h"
 #include <iomanip>
 #include "fs_vnl/fs_powell.h"
 #include "fs_vnl/fs_cost_function.h"
 #include <vnl/vnl_cost_function.h>
-#include <vnl/algo/vnl_powell.h>
 
 using namespace std;
 

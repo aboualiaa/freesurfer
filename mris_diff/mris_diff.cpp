@@ -83,12 +83,9 @@
 #include <algorithm>
 #include <cmath>
 double round(double x);
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/utsname.h>
 #include <unistd.h>
 
-#include "macros.h"
 #include "utils.h"
 #include "mrisurf.h"
 #include "mrisurf_metricProperties.h"
@@ -97,14 +94,10 @@ double round(double x);
 #include "diag.h"
 #include "label.h"
 #include "mri.h"
-#include "mrisurf.h"
 #include "mri2.h"
-#include "fio.h"
 #include "version.h"
-#include "annotation.h"
 #include "cmdargs.h"
 #include "timer.h"
-#include "matfile.h"
 
 static int parse_commandline(int argc, char **argv);
 static void check_options();

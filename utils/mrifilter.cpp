@@ -29,19 +29,15 @@
 #include <memory.h>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 
-#include "box.h"
 #include "diag.h"
 #include "error.h"
 #include "fftutils.h"
 #include "filter.h"
 #include "macros.h"
-#include "minc.h"
 #include "mri.h"
 #include "mrinorm.h"
 #include "proto.h"
-#include "region.h"
 #include "talairachex.h"
 #include "cma.h"
 

@@ -26,17 +26,11 @@
                     INCLUDE FILES
 -------------------------------------------------------*/
 #include <math.h>
-#include <memory.h>
-#include <cstdio>
 #include <cstdlib>
-#include <cstring>
 
-#include "diag.h"
 #include "error.h"
 #include "macros.h"
-#include "minc.h"
 #include "mri.h"
-#include "proto.h"
 
 /*-----------------------------------------------------
                     MACROS AND CONSTANTS

@@ -71,16 +71,13 @@
 %
 
 -----------------------------------------------------------------*/
-
+/// TODO: ↓ this
 /******************************************************************
   Notes from Doug:
   1.  There may need to be some checking to make sure that the image
   supplied to some of the functions is in the correct format.
 
  ******************************************************************/
-
-#include <cstdio>
-#include <cstdlib>
 
 #include "error.h"
 #include "hips.h"

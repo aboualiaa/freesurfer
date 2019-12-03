@@ -41,7 +41,6 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "diag.h"
 #include "error.h"
 #include "gclass.h"
 #include "macros.h"

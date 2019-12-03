@@ -30,9 +30,6 @@
 #include <cctype>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include <X11/Xatom.h>
-#include <X11/keysym.h>
-#include <X11/keysymdef.h>
 
 #define OPENGL_CODE 1
 #include <glut.h>
@@ -58,7 +55,6 @@
 #include "tiff.h"
 #include "tiffio.h"
 #include "label.h"
-#include "macros.h"
 #include "version.h"
 
 static char vcid[] = "$Id: mris2rgb.c,v 1.38 2011/03/02 00:04:26 nicks Exp $";

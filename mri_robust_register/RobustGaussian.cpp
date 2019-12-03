@@ -25,7 +25,6 @@
 #include "RobustGaussian.h"
 
 #include <cstdlib>
-#include <cstdio>
 #include <cmath>
 #include <iostream>
 

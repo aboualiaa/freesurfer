@@ -1,7 +1,6 @@
 #include "kvlCroppedImageReader.h"
 
 #include "vnl/vnl_matlab_read.h"
-#include "vnl/vnl_matrix.h"
 #include "itkImageFileReader.h"
 #include "itkImageRegionConstIterator.h"
 #include "itkImageRegionIterator.h"
@@ -147,11 +146,11 @@ CroppedImageReader ::GetTransformOfFileName(const std::string &filename) {
     //          << io->GetOrigin( 1 ) << ", "
     //          << io->GetOrigin( 2 ) << " ]" << std::endl;
 
-#if 0    
-    // 
+#if 0
+    //
     if ( dynamic_cast< itk::MGHImageIO* >( io.GetPointer() ) )
       {
-      std::cout << "==========================================" << std::endl;  
+      std::cout << "==========================================" << std::endl;
       std::cout << "Dealing with MGH format here - rotating orientation around Z-axis!" << std::endl;
       std::cout << "==========================================" << std::endl;
       TransformType::OutputVectorType  scaling;
@@ -406,7 +405,7 @@ void CroppedImageReader ::Read(const char *fileName,
     shrinker->Update();
     m_Image = shrinker->GetOutput();
 
-#if 0  
+#if 0
     // Make sure to unset spacing and origin as we don't look at it,
     // but VTK sure does!
     const float spacing[] = { 1.0f, 1.0f, 1.0f };

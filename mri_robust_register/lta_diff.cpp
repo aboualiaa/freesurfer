@@ -24,12 +24,9 @@
  */
 #include <string>
 #include <iostream>
-#include <fstream>
-#include <sstream>
 #include <vector>
 #include <cassert>
 #include <limits>
-#include <iostream>
 
 #define export // obsolete feature 'export template' used in these headers
 #include <vnl/vnl_matrix.h>
@@ -44,9 +41,6 @@
 #include "macros.h"
 #include "mri.h"
 #include "matrix.h"
-#include "timer.h"
-#include "diag.h"
-#include "mrimorph.h"
 #include "version.h"
 #include "transform.h"
 

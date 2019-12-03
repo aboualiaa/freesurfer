@@ -27,7 +27,6 @@
 #include <math.h>
 #include "LayerMRI.h"
 #include <vtkImageData.h>
-#include "ProgressCallback.h"
 #include "MyVTKUtils.h"
 #include <QTimer>
 

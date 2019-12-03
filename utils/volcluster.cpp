@@ -33,7 +33,6 @@
 #include "matrix.h"
 #include "mri.h"
 #include "randomfields.h"
-#include "resample.h"
 #include "transform.h"
 #include "utils.h"
 #define VOLCLUSTER_SRC

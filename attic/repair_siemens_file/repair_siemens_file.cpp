@@ -25,12 +25,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
 #include "const.h"
 #include "error.h"
 #include "version.h"
-#include "mghendian.h"
 
 #define OLD_APPEND ".orig"
 #define HEADER_LENGTH 6144

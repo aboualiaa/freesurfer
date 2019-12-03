@@ -6,9 +6,6 @@
 #define MRI_TOOLS_MRI_CONVERT_LIB_HPP
 
 #include <boost/program_options.hpp>
-#include <cstdio>
-#include <eigen3/Eigen/Dense>
-#include <fmt/format.h>
 #include <fmt/printf.h>
 #include <gsl/multi_span>
 

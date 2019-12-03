@@ -35,11 +35,9 @@
 #include "diag.h"
 #include "proto.h"
 #include "mrimorph.h"
-#include "mri_conform.h"
 #include "utils.h"
 #include "timer.h"
 #include "version.h"
-#include "cma.h"
 
 int main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);
@@ -195,12 +193,12 @@ int main(int argc, char *argv[]) {
 #if 0
   if (smooth_sigma > 0)  // correct for multiple comparisons using GRF and monte carlo sims
   {
-    MRI          *mri_kernel = MRIgaussian1d(smooth_sigma, 100), *mri_n1, *mri_n2, 
+    MRI          *mri_kernel = MRIgaussian1d(smooth_sigma, 100), *mri_n1, *mri_n2,
                  *mri_n1_smoothed, *mri_n2_smoothed, *mri_noise_change;
     int          nsim, b ;
     HISTOGRAM    *h = NULL ;
     float        min_val, max_val ;
-    
+
     mri_n1 = MRIcloneDifferentType(mri1, MRI_FLOAT) ;
     mri_n2 = MRIcloneDifferentType(mri2, MRI_FLOAT) ;
     mri_n1_smoothed = MRIclone(mri_n1, NULL) ;
@@ -232,7 +230,7 @@ int main(int argc, char *argv[]) {
   if (smooth_sigma > 0)
   {
     MRI *mri_smooth, *mri_kernel = MRIgaussian1d(smooth_sigma, 100) ;
-    
+
     mri_smooth = MRIconvolveGaussian(mri_change, NULL, mri_kernel) ;
     MRIfree(&mri_change) ; mri_change = mri_smooth ;
 

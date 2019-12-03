@@ -26,8 +26,6 @@
 /* connectcomp.c */
 
 #include "connectcomp.h"
-#include <math.h>
-#include <memory.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>

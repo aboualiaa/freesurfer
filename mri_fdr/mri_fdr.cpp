@@ -33,11 +33,7 @@
 #include <cstdlib>
 #include <unistd.h>
 #include <sys/utsname.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 
-#include "macros.h"
-#include "utils.h"
 #include "fio.h"
 #include "version.h"
 #include "cmdargs.h"
@@ -45,20 +41,13 @@
 #include "diag.h"
 #include "mri.h"
 #include "mri2.h"
-#include "mrisurf.h"
 #ifdef _OPENMP
 #include "romp_support.h"
 #endif
 #include "timer.h"
-#include "mrimorph.h"
-#include "fmriutils.h"
 #include "fsenv.h"
-#include "matfile.h"
-#include "icosahedron.h"
-#include "cpputils.h"
 #include "numerics.h"
 #include "randomfields.h"
-#include "mri_conform.h"
 
 double round(double x);
 

@@ -23,17 +23,9 @@
  */
 
 #include <cerrno>
-#include <math.h>
 #include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <unistd.h>
 
-#include "error.h"
-#include "histo.h"
 #include "mri.h"
-
-#include "mri_conform.h"
 
 /*-------------------------------------------------------------------*/
 double round(double); // why is this never defined?!?

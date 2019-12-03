@@ -16,7 +16,6 @@
 
 #include "vtkCamera.h"
 #include "vtkCallbackCommand.h"
-#include "vtkMath.h"
 #include "vtkObjectFactory.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"

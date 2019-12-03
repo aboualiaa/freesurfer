@@ -25,12 +25,9 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
 #include <cctype>
 
-#include "mri.h"
 #include "macros.h"
-#include "minc.h"
 #include "error.h"
 #include "diag.h"
 #include "proto.h"

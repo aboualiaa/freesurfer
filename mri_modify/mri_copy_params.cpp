@@ -23,7 +23,6 @@
  */
 
 #include <iostream>
-#include <iomanip>
 
 #include "error.h"
 #include "mri.h"

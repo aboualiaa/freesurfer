@@ -317,7 +317,6 @@ ENDHELP
 #include "fio.h"
 #include "pdf.h"
 
-#include "MRIio_old.h"
 #include "error.h"
 #include "diag.h"
 #include "mrisurf.h"
@@ -325,7 +324,6 @@ ENDHELP
 #include "mri2.h"
 #include "mri_identify.h"
 
-#include "bfileio.h"
 #include "registerio.h"
 //  extern char *ResampleVtxMapFile;
 #include "resample.h"

@@ -1,11 +1,7 @@
-#include <cstdlib>
 #include <cstdio>
-#include <cmath>
 #include "diag.h"
 #include "error.h"
-#include "utils.h"
 #include "macros.h"
-#include "histo.h"
 #include "mri.h"
 #include "mrisurf.h"
 

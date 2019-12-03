@@ -23,7 +23,6 @@
  */
 
 #include <iostream>
-#include <iomanip>
 #include <cstdio>
 #include <vector>
 #if (__GNUC__ < 3)

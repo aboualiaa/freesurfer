@@ -2,19 +2,7 @@
 
 #include "vtkPolyData.h"
 #include <iostream>
-#include "itkImage.h"
-#include <map>
-#include "itkDefaultStaticMeshTraits.h"
-#include "fsSurface.h"
-#include "itkTriangleCell.h"
-#include <set>
 #include "GetPot.h"
-#include <string>
-#include "colortab.h"
-#include "fsenv.h"
-#include "itkVTKPolyDataWriter.h"
-#include <vnl/vnl_cross.h>
-#include <cmath>
 
 #include "vtkPoints.h"
 #include "vtkKdTreePointLocator.h"

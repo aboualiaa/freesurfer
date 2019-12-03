@@ -36,7 +36,6 @@
 #include "vtkTriangleFilter.h"
 #include "vtkPlane.h"
 #include "LayerMRI.h"
-#include "vtkImageData.h"
 #include "vtkMatrix4x4.h"
 
 Landmark::Landmark() {

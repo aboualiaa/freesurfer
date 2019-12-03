@@ -36,13 +36,11 @@
 #include "proto.h"
 #include "mrisurf.h"
 #include "mrisutils.h"
-#include "macros.h"
 #include "fio.h"
 #include "version.h"
 #include "matrix.h"
 #include "transform.h"
 #include "gifti.h"
-#include "mri_identify.h"
 #include "fsenv.h"
 
 #include "compilerdefs.h"

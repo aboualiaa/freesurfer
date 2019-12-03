@@ -36,8 +36,6 @@
 #include "timer.h"
 #include "mrisurf.h"
 #include "mri.h"
-#include "macros.h"
-#include "mrimorph.h"
 #include "mrinorm.h"
 #include "mri_conform.h"
 #include "cvector.h"

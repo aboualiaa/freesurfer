@@ -34,10 +34,8 @@
 #include <sstream>
 using namespace std;
 
-#include <sys/times.h>
 #include <ctime>
 
-// #include <stdlib.h>
 #include <unistd.h>
 #include <cstring>
 

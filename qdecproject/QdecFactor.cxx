@@ -27,7 +27,6 @@
  */
 
 #include <cstring>
-#include <iostream>
 #include <stdexcept>
 #include "QdecFactor.h"
 

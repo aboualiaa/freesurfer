@@ -27,7 +27,6 @@
 #include <cstdio>
 #include <cmath>
 #include <cctype>
-#include <strings.h>
 
 #include "glut.h"
 #include "error.h"

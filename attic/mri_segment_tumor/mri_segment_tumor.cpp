@@ -46,15 +46,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <ctype.h>
-#include <sys/utsname.h>
 
 #include "macros.h"
 #include "utils.h"
-#include "fio.h"
 #include "version.h"
-#include "cmdargs.h"
 #include "error.h"
 #include "diag.h"
 #include "mri.h"

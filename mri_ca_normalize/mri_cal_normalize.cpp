@@ -35,7 +35,6 @@
 #include "error.h"
 #include "timer.h"
 #include "diag.h"
-#include "mrimorph.h"
 #include "utils.h"
 #include "gca.h"
 #include "tags.h"
@@ -1135,7 +1134,7 @@ normalize_timepoints_with_samples(MRI *mri, GCA_SAMPLE *gcas, int nsamples, int 
   // build a bias correction for each time point (which each has its own frame)
   for (frame = 0 ; frame < mri->nframes ; frame++)
   {
-    MRIclear(mri_bias) ; 
+    MRIclear(mri_bias) ;
     for (i = 0 ; i < nsamples ; i++)
     {
       if (i == Gdiag_no)

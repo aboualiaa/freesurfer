@@ -37,7 +37,6 @@
 #include <vtkRenderer.h>
 #include <QDebug>
 #include "LayerROI.h"
-#include "LayerPropertyROI.h"
 #include <QTimer>
 
 Interactor2DVolumeEdit::Interactor2DVolumeEdit(const QString &layerTypeName,
@@ -182,7 +181,7 @@ bool Interactor2DVolumeEdit::ProcessMouseDownEvent(QMouseEvent *event,
             mri);
         break;
       } else if (!mri->IsEditable()) //&& ( event->ControlDown() || m_nAction ==
-                                     //EM_Polyline ) )
+                                     // EM_Polyline ) )
       {
         emit Error(
             QString("Selected layer '%1' is not editable").arg(mri->GetName()),

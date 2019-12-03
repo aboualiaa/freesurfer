@@ -37,10 +37,8 @@
 #include <QSettings>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QClipboard>
 #include <QFile>
 #include <QTextStream>
-#include <QDebug>
 
 ToolWindowMeasure::ToolWindowMeasure(QWidget *parent)
     : QWidget(parent), UIUpdateHelper(), ui(new Ui::ToolWindowMeasure) {

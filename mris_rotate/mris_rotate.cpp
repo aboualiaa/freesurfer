@@ -25,7 +25,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <cmath>
 #include <cctype>
 
@@ -34,8 +33,6 @@
 #include "diag.h"
 #include "proto.h"
 #include "mrisurf.h"
-#include "mri.h"
-#include "macros.h"
 #include "version.h"
 
 static char vcid[] = "$Id: mris_rotate.c,v 1.6 2011/03/02 00:04:33 nicks Exp $";

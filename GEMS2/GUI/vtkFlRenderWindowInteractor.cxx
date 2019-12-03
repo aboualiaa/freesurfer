@@ -37,7 +37,6 @@
 #include <vtkInteractorStyle.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>
-#include <vtkVersion.h>
 
 //---------------------------------------------------------------------------
 vtkFlRenderWindowInteractor::vtkFlRenderWindowInteractor()
@@ -96,7 +95,7 @@ void vtkFlRenderWindowInteractor::Enable() {
   // if already enabled then done
   if (Enabled != 0) {
     return;
-}
+  }
 
   // that's it
   Enabled = 1;
@@ -107,7 +106,7 @@ void vtkFlRenderWindowInteractor::Disable() {
   // if already disabled then done
   if (Enabled == 0) {
     return;
-}
+  }
 
   // that's it (we can't remove the event handler like it should be...)
   Enabled = 0;
@@ -128,7 +127,7 @@ void vtkFlRenderWindowInteractor::SetRenderWindow(vtkRenderWindow *aren) {
   // the our (vtkFlRWI) dimensions
   if (RenderWindow != nullptr) {
     RenderWindow->SetSize(this->w(), this->h());
-}
+  }
 }
 //---------------------------------------------------------------------------
 // this gets called during FLTK window draw()s and resize()s
@@ -158,7 +157,7 @@ void vtkFlRenderWindowInteractor::UpdateSize(int W, int H) {
 void OnTimerGlobal(void *p) {
   if (p != nullptr) {
     (static_cast<vtkFlRenderWindowInteractor *>(p))->OnTimer();
-}
+  }
 }
 
 //---------------------------------------------------------------------------
@@ -169,7 +168,7 @@ int vtkFlRenderWindowInteractor::CreateTimer(int timertype) {
     Fl::add_timeout(0.01, OnTimerGlobal, (void *)this);
   } else {
     Fl::repeat_timeout(0.01, OnTimerGlobal, (void *)this);
-}
+  }
 
   return 1;
   // Fl::repeat_timer() is more correct, it doesn't measure the timeout
@@ -185,9 +184,9 @@ int vtkFlRenderWindowInteractor::DestroyTimer() {
 void vtkFlRenderWindowInteractor::OnTimer() {
   if (Enabled == 0) {
     return;
-}
-    // this is all we need to do, InteractorStyle is stateful and will
-    // continue with whatever it's busy
+  }
+  // this is all we need to do, InteractorStyle is stateful and will
+  // continue with whatever it's busy
 
 #if (VTK_MAJOR_VERSION >= 4)
   // new style
@@ -243,7 +242,7 @@ void vtkFlRenderWindowInteractor::resize(int x, int y, int w, int h) {
 int vtkFlRenderWindowInteractor::handle(int event) {
   if (Enabled == 0) {
     return 0;
-}
+  }
 
 #if (VTK_MAJOR_VERSION >= 4)
   // setup for new style

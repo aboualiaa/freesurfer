@@ -44,13 +44,10 @@
 #include <cstdio>
 #include <cstring>
 #include <cctype>
-#include <sys/time.h>
-#include <sys/resource.h>
 
 #include "romp_support.h"
 
 #include "mri.h"
-#include "matrix.h"
 #include "proto.h"
 #include "macros.h"
 #include "error.h"
@@ -60,7 +57,6 @@
 #include "utils.h"
 #include "gca.h"
 #include "cma.h"
-#include "mrinorm.h"
 #include "gcamorph.h"
 #include "transform.h"
 #include "mrisegment.h"
@@ -69,7 +65,6 @@
 #include "mri2.h"
 #include "fsinit.h"
 #include "ctrpoints.h"
-#include "gcamorphtestutils.h"
 
 static int nozero = 0;
 extern int gcam_write_grad; // defined in gcamorph.c for diags

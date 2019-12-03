@@ -27,7 +27,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <pwd.h>
-#include <ctime>
 #include "diag.h"
 #include "error.h"
 #include "fio.h"

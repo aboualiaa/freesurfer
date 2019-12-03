@@ -25,10 +25,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
-#include <cctype>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <unistd.h>
 #include <ctime>
 
 #include "TVector.h"
@@ -37,17 +33,8 @@
 #include "macros.h"
 #include "error.h"
 #include "mrisurf.h"
-#include "matrix.h"
 #include "proto.h"
-#include "stats.h"
-#include "timer.h"
-#include "const.h"
 #include "mrishash.h"
-#include "icosahedron.h"
-#include "tritri.h"
-#include "timer.h"
-#include "chklc.h"
-#include "diag.h"
 
 using namespace std;
 

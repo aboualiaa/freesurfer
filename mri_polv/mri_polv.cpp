@@ -24,7 +24,6 @@
  */
 
 #include <cctype>
-#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 
@@ -32,7 +31,6 @@
 #include "error.h"
 #include "macros.h"
 #include "mri.h"
-#include "mrinorm.h"
 #include "proto.h"
 #include "version.h"
 
@@ -50,11 +48,11 @@ static int window_size = WINDOW_SIZE;
 int main(int argc, char *argv[]) {
   char **av;
   int ac;
-int nargs;
+  int nargs;
   MRI *mri_src;
-MRI *mri_dst = nullptr;
+  MRI *mri_dst = nullptr;
   char *in_fname;
-char *out_fname;
+  char *out_fname;
 
   /* rkt: check for and handle version tag */
   nargs = handle_version_option(
@@ -62,7 +60,7 @@ char *out_fname;
       "$Name:  $");
   if ((nargs != 0) && argc - nargs == 1) {
     exit(0);
-}
+  }
   argc -= nargs;
 
   Progname = argv[0];
@@ -79,43 +77,43 @@ char *out_fname;
 
   if (argc < 1) {
     argc = 1;
-}
+  }
 
   if (argc < 1) {
     ErrorExit(ERROR_BADPARM, "%s: no input name specified", Progname);
-}
+  }
   in_fname = argv[1];
 
   if (argc < 2) {
     ErrorExit(ERROR_BADPARM, "%s: no output name specified", Progname);
-}
+  }
   out_fname = argv[2];
 
   if (verbose != 0) {
     fprintf(stderr, "reading from %s...", in_fname);
-}
+  }
   mri_src = MRIread(in_fname);
   if (mri_src == nullptr) {
     ErrorExit(ERROR_NO_FILE, "%s: could not open source file %s", Progname,
               in_fname);
-}
+  }
 
   if (verbose != 0) {
     fprintf(stderr, "done.\ncalculating plane of least variance...");
-}
+  }
   mri_dst = MRIcentralPlaneOfLeastVarianceNormal(mri_src, nullptr, window_size);
   if (mri_dst == nullptr) {
     ErrorExit(ERROR_BADPARM, "%s: plane of least variance calculation failed",
               Progname);
-}
+  }
 
   if (verbose != 0) {
     fprintf(stderr, "\ndone. writing output to %s", out_fname);
-}
+  }
   MRIwrite(mri_dst, out_fname);
   if (verbose != 0) {
     fprintf(stderr, "\n");
-}
+  }
   exit(0);
 }
 
@@ -131,7 +129,7 @@ static int get_option(char *argv[]) {
   option = argv[1] + 1; /* past '-' */
   if (stricmp(option, "-help") == 0) {
     print_help();
-}
+  }
   switch (toupper(*option)) {
   case 'V':
     verbose = static_cast<int>(verbose) == 0;
@@ -140,7 +138,7 @@ static int get_option(char *argv[]) {
     if (sscanf(argv[2], "%d", &window_size) < 0) {
       ErrorExit(ERROR_BADPARM, "%s: could not scan window size from %s",
                 Progname, argv[2]);
-}
+    }
     fprintf(stderr, "using a %d x %d window of CPOLV calcualation\n",
             window_size, window_size);
     nargs = 1;

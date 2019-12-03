@@ -26,7 +26,6 @@
 #include "Interactor2DVoxelEdit.h"
 #include <QDebug>
 #include <QMouseEvent>
-#include <QKeyEvent>
 
 Interactor2DVoxelEdit::Interactor2DVoxelEdit(QObject *parent)
     : Interactor2DVolumeEdit("MRI", parent) {}

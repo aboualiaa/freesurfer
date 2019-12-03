@@ -28,7 +28,6 @@
 #include <cmath>
 #include <cctype>
 
-#include "mri.h"
 #include "mrisurf.h"
 #include "macros.h"
 #include "error.h"

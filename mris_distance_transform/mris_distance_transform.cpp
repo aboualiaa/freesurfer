@@ -35,11 +35,9 @@
 #include "timer.h"
 #include "mrisurf.h"
 #include "mri.h"
-#include "macros.h"
 #include "version.h"
 #include "label.h"
 #include "annotation.h"
-#include "MARS_DT_Boundary.h"
 
 static char vcid[] =
     "$Id: mris_distance_transform.c,v 1.5 2013/04/12 20:59:17 fischl Exp $";
@@ -340,7 +338,7 @@ crop_anterior_label(LABEL *area, float anterior_dist)
     if (area->lv[n].y > amax)
       amax = area->lv[n].y ;
   }
-  
+
   amax -= anterior_dist ;
   printf("cropping all vertices with Y > %2.0f\n", amax) ;
   for (n = 0 ; n < area->n_points ; n++)
@@ -362,7 +360,7 @@ crop_posterior_label(LABEL *area, float anterior_dist)
     if (area->lv[n].y > amax)
       amax = area->lv[n].y ;
   }
-  
+
   amax += anterior_dist ;
   printf("cropping all vertices with Y > %2.0f\n", amax) ;
   for (n = 0 ; n < area->n_points ; n++)

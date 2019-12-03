@@ -137,7 +137,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <sys/stat.h>
-#include <sys/types.h>
 
 #include "diag.h"
 #include "fsglm.h"

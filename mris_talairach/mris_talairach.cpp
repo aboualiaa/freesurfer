@@ -25,8 +25,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
-#include <cmath>
 #include <cctype>
 
 #include "macros.h"
@@ -34,7 +32,6 @@
 #include "diag.h"
 #include "proto.h"
 #include "mrisurf.h"
-#include "macros.h"
 #include "version.h"
 
 static char vcid[] =

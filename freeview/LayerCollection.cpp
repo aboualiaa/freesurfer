@@ -29,7 +29,6 @@
 #include <math.h>
 #include <QDebug>
 #include <iostream>
-#include <QTimer>
 
 LayerCollection::LayerCollection(const QString &strType, QObject *parent)
     : QObject(parent), m_layerActive(NULL), m_strType(strType) {

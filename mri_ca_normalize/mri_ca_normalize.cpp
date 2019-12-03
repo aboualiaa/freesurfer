@@ -34,7 +34,6 @@
 #include "error.h"
 #include "timer.h"
 #include "diag.h"
-#include "mrimorph.h"
 #include "utils.h"
 #include "gca.h"
 #include "tags.h"

@@ -32,11 +32,9 @@
 #include "vtkPolyData.h"
 #include "MainWindow.h"
 #include "RenderView3D.h"
-#include "vtkPolyData.h"
 #include "vtkPoints.h"
 #include "vtkCellArray.h"
 #include "vtkFloatArray.h"
-#include <vtkProperty.h>
 #include "MyUtils.h"
 #include "LayerMRI.h"
 #include "LayerPropertyMRI.h"

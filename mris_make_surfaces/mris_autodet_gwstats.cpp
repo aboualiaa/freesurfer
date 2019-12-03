@@ -25,25 +25,18 @@
 #include <cstdlib>
 #include <cmath>
 double round(double x);
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/utsname.h>
 #include <unistd.h>
-#include <cfloat>
-#include <cerrno>
 
 #include "utils.h"
 #include "mrisurf.h"
 #include "mrisutils.h"
-#include "surfgrad.h"
 #include "error.h"
 #include "diag.h"
 #include "mri.h"
 #include "mri2.h"
 #include "fio.h"
 #include "version.h"
-#include "label.h"
-#include "annotation.h"
 #include "cmdargs.h"
 #include "romp_support.h"
 

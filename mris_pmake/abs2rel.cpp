@@ -24,7 +24,6 @@
  * SUCH DAMAGE.
  */
 #include <cerrno>
-#include <cstdlib>
 #include <cstring>
 /*
  * abs2rel: convert an absolute path name into relative.

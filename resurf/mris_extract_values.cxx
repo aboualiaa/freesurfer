@@ -1,45 +1,15 @@
 #include <iostream>
-#include <fstream>
-#include <string>
 #include "itkImageFileReader.h"
 #include "GetPot.h"
-#include "itkConstNeighborhoodIterator.h"
-#include "itkImage.h"
-#include "vtkPolyData.h"
-#include "vtkPolyDataReader.h"
-#include "vtkPolyDataWriter.h"
-#include "itkDefaultStaticMeshTraits.h"
 #include "itkMesh.h"
-#include "itkPolylineCell.h"
-#include "TrkVTKPolyDataFilter.txx"
-#include "PolylineMeshToVTKPolyDataFilter.h"
-#include "itkImageDuplicator.h"
-#include "itkNeighborhoodIterator.h"
-#include <ctime>
 
-#include <iostream>
-#include "itkImage.h"
 #include <map>
-#include "itkDefaultStaticMeshTraits.h"
-#include "itkMesh.h"
 #include "itkTriangleCell.h"
-#include <set>
-#include "GetPot.h"
-#include <string>
 #include "colortab.h"
-#include "fsenv.h"
 
 #include "mrisurf.h"
-#include "itkVTKPolyDataWriter.h"
 #include "mris_multimodal_refinement.h"
-#include "itkImage.h"
-#include "vtkSmartPointer.h"
-#include "vtkPoints.h"
-#include "vtkPolyData.h"
-#include "itkImageFileReader.h"
 
-#include <vtkPolyLine.h>
-#include <vtkPolyData.h>
 
 int main(int narg, char *arg[]) {
   //	try{

@@ -1,8 +1,6 @@
 #include "BinaryTreeEdge.h"
 #include "BinaryTreeNode.h"
 
-#include <math.h>
-
 #include <QPainter>
 
 static const double Pi = 3.14159265358979323846264338327950288419717;

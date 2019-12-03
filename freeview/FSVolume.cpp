@@ -34,15 +34,10 @@
 #include "vtkCellData.h"
 #include "vtkIntArray.h"
 #include "vtkSmartPointer.h"
-#include "vtkImageReslice.h"
 #include "vtkMatrix4x4.h"
-#include "vtkSmartPointer.h"
 #include "vtkTransform.h"
-#include "vtkImageChangeInformation.h"
 #include "vtkMath.h"
-#include "vtkTransform.h"
 #include "MyVTKUtils.h"
-#include "vtkMatrix4x4.h"
 #include <QFileInfo>
 #include <QFile>
 #include <QTextStream>

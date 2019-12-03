@@ -64,7 +64,6 @@
 #include "timer.h"
 #include "transform.h"
 #include "utils.h"
-#include "gcamorphtestutils.h"
 
 #if WITH_DMALLOC
 #include <dmalloc.h>
@@ -86,7 +85,8 @@ static int Gxneg = -1;
 static int Gyneg = -1;
 static int Gzneg = -1;
 
-static int most_likely_label(GCA_MORPH *gcam, TRANSFORM *transform, int x, int y, int z, MRI *mri_inputs);
+static int most_likely_label(GCA_MORPH *gcam, TRANSFORM *transform, int x,
+                             int y, int z, MRI *mri_inputs);
 int dtrans_label_to_frame(GCA_MORPH_PARMS *mp, int label);
 MRI *MRIcomposeWarps(MRI *mri_warp1, MRI *mri_warp2, MRI *mri_dst);
 int fix_borders(GCA_MORPH *gcam);
@@ -151,7 +151,8 @@ int dtrans_labels[] = {Left_Lateral_Ventricle, Right_Lateral_Ventricle};
 #endif
 
 #define _NDTRANS_LABELS (sizeof(dtrans_labels) / sizeof(dtrans_labels[0]))
-#define _NCOMBINE_LABELS (sizeof(combine_labels) / (2 * sizeof(combine_labels[0][0])))
+#define _NCOMBINE_LABELS                                                       \
+  (sizeof(combine_labels) / (2 * sizeof(combine_labels[0][0])))
 int NCOMBINE_LABELS = _NCOMBINE_LABELS;
 int NDTRANS_LABELS = _NDTRANS_LABELS;
 
@@ -162,7 +163,8 @@ double gcamMaxGradient(GCA_MORPH *gcam);
 int gcamCheck(GCA_MORPH *gcam, MRI *mri);
 int gcamWriteDiagnostics(GCA_MORPH *gcam);
 int gcamShowCompressed(GCA_MORPH *gcam, FILE *fp);
-MATRIX *gcamComputeOptimalTargetLinearTransform(GCA_MORPH *gcam, MATRIX *m_L, double reg);
+MATRIX *gcamComputeOptimalTargetLinearTransform(GCA_MORPH *gcam, MATRIX *m_L,
+                                                double reg);
 int gcamApplyLinearTransform(GCA_MORPH *gcam, MATRIX *m_L);
 int gcamComputeTargetGradient(GCA_MORPH *gcam);
 int gcamExpansionTerm(GCA_MORPH *gcam, MRI *mri, double l_expansion);
@@ -170,18 +172,12 @@ double gcamExpansionEnergy(GCA_MORPH *gcam, MRI *mri);
 int gcamSetTotalMovement(GCA_MORPH *gcam, float alpha);
 int gcamCheckJacobian(GCA_MORPH *gcam, float min_j, float max_j);
 int gcamConstrainJacobian(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms);
-int gcamComputeMostLikelyDirection(GCA_MORPH *gcam,
-                                   MRI *mri,
-                                   double x0,
-                                   double y0,
-                                   double z0,
-                                   double target,
-                                   MRI *mri_kernel,
-                                   MRI *mri_nbhd,
-                                   double *pdx,
-                                   double *pdy,
-                                   double *pdz);
-NODE_LOOKUP_TABLE *gcamCreateNodeLookupTable(GCA_MORPH *gcam, MRI *mri, NODE_LOOKUP_TABLE *nlt);
+int gcamComputeMostLikelyDirection(GCA_MORPH *gcam, MRI *mri, double x0,
+                                   double y0, double z0, double target,
+                                   MRI *mri_kernel, MRI *mri_nbhd, double *pdx,
+                                   double *pdy, double *pdz);
+NODE_LOOKUP_TABLE *gcamCreateNodeLookupTable(GCA_MORPH *gcam, MRI *mri,
+                                             NODE_LOOKUP_TABLE *nlt);
 // static int gcamSetGradientToNbrAverage(GCA_MORPH *gcam, int x, int y, int z);
 int gcamFreeNodeLookupTable(NODE_LOOKUP_TABLE **pnlt);
 MRI *gcamCreateJacobianImage(GCA_MORPH *gcam);
@@ -192,31 +188,43 @@ static int gcamMLElabelAtLocation(GCA_MORPH *gcam,
 #endif
 
 int GCAMremoveNegativeNodes(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms);
-int gcamRemoveCompressedNodes(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms, float compression_ratio);
-double gcamFindOptimalTimeStep(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms, MRI *mri);
-int gcamAreaTermAtNode(GCA_MORPH *gcam, double l_area, int i, int j, int k, double *pdx, double *pdy, double *pdz);
-int gcamVolumeChangeTermAtNode(
-    GCA_MORPH *gcam, MRI *mri, double l_area, int i, int j, int k, double *pdx, double *pdy, double *pdz);
+int gcamRemoveCompressedNodes(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms,
+                              float compression_ratio);
+double gcamFindOptimalTimeStep(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms,
+                               MRI *mri);
+int gcamAreaTermAtNode(GCA_MORPH *gcam, double l_area, int i, int j, int k,
+                       double *pdx, double *pdy, double *pdz);
+int gcamVolumeChangeTermAtNode(GCA_MORPH *gcam, MRI *mri, double l_area, int i,
+                               int j, int k, double *pdx, double *pdy,
+                               double *pdz);
 
 int finitep(float f);
 
 int write_snapshot(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms, int iter);
 int log_integration_parms(FILE *fp, GCA_MORPH_PARMS *parms);
-int gcamLimitGradientMagnitude(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms, MRI *mri);
+int gcamLimitGradientMagnitude(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms,
+                               MRI *mri);
 
-int gcamMultiscaleTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, double l_multiscale);
-int gcamDistanceTransformTerm(GCA_MORPH *gcam, MRI *mri_source, MRI *mri, double l_dtrans, GCA_MORPH_PARMS *mp);
-double gcamDistanceTransformEnergy(GCA_MORPH *gcam, MRI *mri_source, MRI *mri, GCA_MORPH_PARMS *mp);
-int gcamLikelihoodTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, double l_likelihood, GCA_MORPH_PARMS *parms);
+int gcamMultiscaleTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth,
+                       double l_multiscale);
+int gcamDistanceTransformTerm(GCA_MORPH *gcam, MRI *mri_source, MRI *mri,
+                              double l_dtrans, GCA_MORPH_PARMS *mp);
+double gcamDistanceTransformEnergy(GCA_MORPH *gcam, MRI *mri_source, MRI *mri,
+                                   GCA_MORPH_PARMS *mp);
+int gcamLikelihoodTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth,
+                       double l_likelihood, GCA_MORPH_PARMS *parms);
 double gcamMapEnergy(GCA_MORPH *gcam, MRI *mri);
 
 double gcamBinaryEnergy(GCA_MORPH *gcam, MRI *mri);
-double gcamAreaIntensityEnergy(GCA_MORPH *gcam, MRI *mri, NODE_LOOKUP_TABLE *nlt);
+double gcamAreaIntensityEnergy(GCA_MORPH *gcam, MRI *mri,
+                               NODE_LOOKUP_TABLE *nlt);
 int gcamMapTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, double l_map);
 
-int gcamBinaryTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, MRI *mri_dist, double l_binary);
-int gcamAreaIntensityTerm(
-    GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, double l_area_intensity, NODE_LOOKUP_TABLE *nlt, float sigma);
+int gcamBinaryTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, MRI *mri_dist,
+                   double l_binary);
+int gcamAreaIntensityTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth,
+                          double l_area_intensity, NODE_LOOKUP_TABLE *nlt,
+                          float sigma);
 
 double gcamMultiscaleEnergy(GCA_MORPH *gcam, MRI *mri);
 
@@ -238,12 +246,15 @@ int gcamAreaTerm(GCA_MORPH *gcam, double l_jacobian);
 double gcamAreaEnergy(GCA_MORPH *gcam);
 
 int check_gcam(const GCAM *gcam);
-MATRIX *gcamComputeOptimalLinearTransformInRegion(
-    GCA_MORPH *gcam, MRI *mri_mask, MATRIX *m_L, int x0, int y0, int z0, int whalf);
+MATRIX *gcamComputeOptimalLinearTransformInRegion(GCA_MORPH *gcam,
+                                                  MRI *mri_mask, MATRIX *m_L,
+                                                  int x0, int y0, int z0,
+                                                  int whalf);
 #define DEFAULT_PYRAMID_LEVELS 3
 #define MAX_PYRAMID_LEVELS 20
 #define MAX_EXP 200
-#define GCAMN_SUB(mns1, mns2, v) V3_LOAD(v, mns1->x - mns2->x, mns1->y - mns2->y, mns1->z - mns2->z)
+#define GCAMN_SUB(mns1, mns2, v)                                               \
+  V3_LOAD(v, mns1->x - mns2->x, mns1->y - mns2->y, mns1->z - mns2->z)
 
 static int Ginvalid = 0;
 static int Galigned = 0;
@@ -252,8 +263,7 @@ static int Galigned = 0;
 #define MIN_NODE_DIST (1)
 #define MIN_NODE_DIST_SQ (MIN_NODE_DIST * MIN_NODE_DIST)
 
-void GCAMwriteGeom(const GCA_MORPH *gcam, znzFile file)
-{
+void GCAMwriteGeom(const GCA_MORPH *gcam, znzFile file) {
   char buf[512];
 
   // src volume info
@@ -304,8 +314,7 @@ void GCAMwriteGeom(const GCA_MORPH *gcam, znzFile file)
   znzwrite(buf, sizeof(char), 512, file);
 }
 
-void GCAMreadGeom(GCA_MORPH *gcam, znzFile file)
-{
+void GCAMreadGeom(GCA_MORPH *gcam, znzFile file) {
   // src volume info
   gcam->image.valid = znzreadInt(file);
   gcam->image.width = znzreadInt(file);
@@ -352,8 +361,7 @@ void GCAMreadGeom(GCA_MORPH *gcam, znzFile file)
   znzread(gcam->atlas.fname, sizeof(char), 512, file);
 }
 
-int GCAMwrite(const GCA_MORPH *gcam, const char *fname)
-{
+int GCAMwrite(const GCA_MORPH *gcam, const char *fname) {
   znzFile file;
   // FILE            *fp=0 ;
   int x, y, z;
@@ -370,7 +378,8 @@ int GCAMwrite(const GCA_MORPH *gcam, const char *fname)
   file = znzopen(fname, "wb", gzipped);
   if (znz_isnull(file)) {
     errno = 0;
-    ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "GCAMwrite(%s): could not open file", fname));
+    ErrorReturn(ERROR_BADPARM,
+                (ERROR_BADPARM, "GCAMwrite(%s): could not open file", fname));
   }
 
   znzwriteFloat(GCAM_VERSION, file);
@@ -446,8 +455,7 @@ int GCAMwrite(const GCA_MORPH *gcam, const char *fname)
   If the inverse must be computed, then it reads in the header for
   mri/orig.mgz. See also GCAMreadAndInvert().
   -----------------------------------------------------------------*/
-int GCAMwriteInverse(const char *gcamfname, GCA_MORPH *gcam)
-{
+int GCAMwriteInverse(const char *gcamfname, GCA_MORPH *gcam) {
   char *gcamdir, *mridir, tmpstr[2000], *gcambase;
   MRI *mri;
   int freegcam;
@@ -457,7 +465,8 @@ int GCAMwriteInverse(const char *gcamfname, GCA_MORPH *gcam)
   if (gcam == NULL) {
     printf("Reading %s \n", gcamfname);
     gcam = GCAMread(gcamfname);
-    if (gcam == NULL) return (1);
+    if (gcam == NULL)
+      return (1);
     freegcam = 1;
   }
   gcamdir = fio_dirname(gcamfname);
@@ -489,15 +498,15 @@ int GCAMwriteInverse(const char *gcamfname, GCA_MORPH *gcam)
   printf("Saving inverse to %s\n", tmpstr);
   GCAMwrite(gcam, tmpstr);
 
-  if (freegcam) GCAMfree(&gcam);
+  if (freegcam)
+    GCAMfree(&gcam);
   free(gcamdir);
   free(gcambase);
 
   return (0);
 }
 
-int GCAMwriteInverseNonTal(const char *gcamfname, GCA_MORPH *gcam)
-{
+int GCAMwriteInverseNonTal(const char *gcamfname, GCA_MORPH *gcam) {
   char tmpstr[2000];
   MRI *mri;
   int freegcam;
@@ -550,8 +559,7 @@ int GCAMwriteInverseNonTal(const char *gcamfname, GCA_MORPH *gcam)
   if the morph must be explicitly inverted, it will read in the header
   for mri/orig.mgz (or die trying).
   ----------------------------------------------------------------------*/
-GCA_MORPH *GCAMreadAndInvert(const char *gcamfname)
-{
+GCA_MORPH *GCAMreadAndInvert(const char *gcamfname) {
   GCA_MORPH *gcam;
   char tmpstr[2000], *gcamdir, *mridir;
   MRI *mri;
@@ -605,14 +613,13 @@ GCA_MORPH *GCAMreadAndInvert(const char *gcamfname)
     if (gcam->mri_zind == NULL) {
       printf("ERROR: reading %s\n", tmpstr);
     }
-  }
-  else {
+  } else {
     // Must invert explicitly
     printf("Inverting Morph\n");
     // Need template mri
     mridir = fio_dirname(gcamdir);
-    sprintf(tmpstr, "%s/%s", mridir,(gcam->image).fname);
-    //sprintf(tmpstr, "%s", (gcam->image).fname); // was this. always fail?
+    sprintf(tmpstr, "%s/%s", mridir, (gcam->image).fname);
+    // sprintf(tmpstr, "%s", (gcam->image).fname); // was this. always fail?
     mri = MRIreadHeader(tmpstr, MRI_VOLUME_TYPE_UNKNOWN);
     if (mri == NULL) {
       printf("ERROR: reading %s\n", tmpstr);
@@ -626,8 +633,7 @@ GCA_MORPH *GCAMreadAndInvert(const char *gcamfname)
   return (gcam);
 }
 
-GCA_MORPH *GCAMreadAndInvertNonTal(const char *gcamfname)
-{
+GCA_MORPH *GCAMreadAndInvertNonTal(const char *gcamfname) {
   GCA_MORPH *gcam;
   char tmpstr[2000], *gcamdir;
   MRI *mri;
@@ -681,13 +687,12 @@ GCA_MORPH *GCAMreadAndInvertNonTal(const char *gcamfname)
     if (gcam->mri_zind == NULL) {
       printf("ERROR: reading %s\n", tmpstr);
     }
-  }
-  else {
+  } else {
     // Must invert explicitly
     printf("Inverting Morph\n");
     // Need template mri
     sprintf(tmpstr, "%s", (gcam->image).fname);
-    if (!fio_FileExistsReadable(tmpstr)) {  // Look in parent directory
+    if (!fio_FileExistsReadable(tmpstr)) { // Look in parent directory
       char *mridir, altname[2000];
 
       mridir = fio_dirname(gcamdir);
@@ -697,8 +702,7 @@ GCA_MORPH *GCAMreadAndInvertNonTal(const char *gcamfname)
         printf("WARN: cannot acccess %s\n", tmpstr);
         printf("WARN: using %s\n", altname);
         strcpy(tmpstr, altname);
-      }
-      else {
+      } else {
         mridir = fio_dirname(mridir);
         sprintf(altname, "%s/mri/norm.mgz", mridir);
 
@@ -722,9 +726,11 @@ GCA_MORPH *GCAMreadAndInvertNonTal(const char *gcamfname)
   return (gcam);
 }
 
-double GCAMregisterPipelineAndComputeRMS(
-    GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PARMS *parms, double *last_rms, int *level_steps, int i)
-{
+double GCAMregisterPipelineAndComputeRMS(GCA_MORPH *gcam, MRI *mri,
+                                         MRI *mri_smooth,
+                                         GCA_MORPH_PARMS *parms,
+                                         double *last_rms, int *level_steps,
+                                         int i) {
   double result;
   *last_rms = GCAMcomputeRMS(gcam, mri, parms);
   if (i == 0) {
@@ -736,8 +742,8 @@ double GCAMregisterPipelineAndComputeRMS(
   return result;
 }
 
-void GCAMregister_pctLoop_saveBefore(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms, const int level)
-{
+void GCAMregister_pctLoop_saveBefore(GCA_MORPH *gcam, MRI *mri,
+                                     GCA_MORPH_PARMS *parms, const int level) {
   char fname[STRLEN];
 
   MRI *mri_gca, *mri_tmp;
@@ -747,8 +753,7 @@ void GCAMregister_pctLoop_saveBefore(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS 
     sprintf(fname, "%s_target.mgz", parms->base_name);
     printf("writing target volume to %s...\n", fname);
     MRIwrite(mri, fname);
-  }
-  else {
+  } else {
     mri_gca = MRIclone(mri, NULL);
     GCAMbuildMostLikelyVolume(gcam, mri_gca);
     if (mri_gca->nframes > 1) {
@@ -766,8 +771,8 @@ void GCAMregister_pctLoop_saveBefore(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS 
   }
 }
 
-void GCAMregister_pctLoop_saveAfter(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms, const int level)
-{
+void GCAMregister_pctLoop_saveAfter(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms,
+                                    const int level) {
   char fname[STRLEN];
   char path[STRLEN], fname_only[STRLEN];
   FileNameOnly(parms->write_fname, fname_only);
@@ -781,15 +786,9 @@ void GCAMregister_pctLoop_saveAfter(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms, con
   //            GCAMrasToVox(gcam, mri) ;
 }
 
-void GCAMregister_pctLoop(GCA_MORPH *gcam,
-                          MRI *mri,
-                          GCA_MORPH_PARMS *parms,
-                          const int level,
-                          MRI *mri_smooth,
-                          double *rms,
-                          double *last_rms,
-                          double *pct_change)
-{
+void GCAMregister_pctLoop(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms,
+                          const int level, MRI *mri_smooth, double *rms,
+                          double *last_rms, double *pct_change) {
   int level_steps;
 
   int i = 0;
@@ -805,7 +804,8 @@ void GCAMregister_pctLoop(GCA_MORPH *gcam,
       }
     }
 
-    parms->end_rms = *rms = GCAMregisterPipelineAndComputeRMS(gcam, mri, mri_smooth, parms, last_rms, &level_steps, i);
+    parms->end_rms = *rms = GCAMregisterPipelineAndComputeRMS(
+        gcam, mri, mri_smooth, parms, last_rms, &level_steps, i);
     level_steps = parms->start_t - level_steps; /* # of steps taken in
                                                    GCAMregisterLevel */
     if (level_steps == 0) {
@@ -825,16 +825,17 @@ void GCAMregister_pctLoop(GCA_MORPH *gcam,
   } while (*pct_change > parms->tol);
 }
 
-int GCAMregister(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
-{
+int GCAMregister(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms) {
   char fname[STRLEN];
   int level, navgs, l2, relabel, orig_relabel, start_t = 0, passno;
   MRI *mri_smooth = NULL, *mri_kernel;
-  double base_sigma, pct_change, rms, last_rms = 0.0, label_dist, orig_dt, l_smooth, start_rms = 0.0, l_orig_smooth,
+  double base_sigma, pct_change, rms, last_rms = 0.0, label_dist, orig_dt,
+                                      l_smooth, start_rms = 0.0, l_orig_smooth,
                                       l_elastic, l_orig_elastic;
   long int tnow, tstart;
-  Timer timer,timer2;
-  printf("Starting GCAMregister()\n"); fflush(stdout);
+  Timer timer, timer2;
+  printf("Starting GCAMregister()\n");
+  fflush(stdout);
 
   if (FZERO(parms->min_sigma)) {
     parms->min_sigma = 0.4;
@@ -922,13 +923,15 @@ int GCAMregister(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
      the intensity image, otherwise things are too much of a mess.
   */
   if (!DZERO(parms->l_dtrans))
-    parms->mri_dist_map = GCAMcreateDistanceTransforms(mri, parms->mri, NULL, 40.0, gcam, &parms->mri_atlas_dist_map);
+    parms->mri_dist_map = GCAMcreateDistanceTransforms(
+        mri, parms->mri, NULL, 40.0, gcam, &parms->mri_atlas_dist_map);
 
   if (!DZERO(parms->l_binary)) {
     MRI *mri_tmp;
 
     parms->mri_dist_map =
-        MRIdistanceTransform(parms->mri_binary, NULL, parms->target_label, -1, DTRANS_MODE_SIGNED, NULL);
+        MRIdistanceTransform(parms->mri_binary, NULL, parms->target_label, -1,
+                             DTRANS_MODE_SIGNED, NULL);
 #if 0
     if (DZERO(parms->l_area_intensity))
     {
@@ -944,9 +947,8 @@ int GCAMregister(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
 #endif
     {
       if (parms->mri_binary == NULL)
-        ErrorExit(ERROR_BADPARM,
-                  "GCAMregister: must fill parms->mri_binary "
-                  "pointer when area_intensity also specified");
+        ErrorExit(ERROR_BADPARM, "GCAMregister: must fill parms->mri_binary "
+                                 "pointer when area_intensity also specified");
       mri_tmp = MRIbinarize(parms->mri_binary, NULL, 1, 0, 1);
       parms->mri_binary = MRIchangeType(mri_tmp, MRI_FLOAT, 0, 1, 1);
       MRIfree(&mri_tmp);
@@ -968,8 +970,7 @@ int GCAMregister(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
   }
   if (parms->levels < 0) {
     parms->levels = DEFAULT_PYRAMID_LEVELS;
-  }
-  else if (parms->levels >= MAX_PYRAMID_LEVELS) {
+  } else if (parms->levels >= MAX_PYRAMID_LEVELS) {
     parms->levels = MAX_PYRAMID_LEVELS;
   }
 
@@ -981,13 +982,11 @@ int GCAMregister(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
     if (parms->log_fp == NULL) {
       if (parms->start_t == 0) {
         parms->log_fp = fopen(fname, "w");
-      }
-      else {
+      } else {
         parms->log_fp = fopen(fname, "a");
       }
     }
-  }
-  else {
+  } else {
     parms->log_fp = NULL;
   }
 
@@ -997,8 +996,7 @@ int GCAMregister(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
   // make node to have the max_prior label values
   if (parms->relabel_avgs >= parms->navgs && parms->relabel) {
     GCAMcomputeLabels(mri, gcam);
-  }
-  else {
+  } else {
     GCAMcomputeMaxPriorLabels(gcam);
   }
 
@@ -1007,16 +1005,20 @@ int GCAMregister(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
     parms->npasses = 1;
   }
 
-  printf("npasses = %d, nlevels = %d\n",parms->npasses,parms->levels);
+  printf("npasses = %d, nlevels = %d\n", parms->npasses, parms->levels);
 
   for (passno = 0; passno < parms->npasses; passno++) {
 
-    printf("#pass# %d of %d ************************\n", passno + 1, parms->npasses);
+    printf("#pass# %d of %d ************************\n", passno + 1,
+           parms->npasses);
     if (parms->log_fp)
-      fprintf(parms->log_fp, "**************** pass %d of %d ************************\n", passno + 1, parms->npasses);
+      fprintf(parms->log_fp,
+              "**************** pass %d of %d ************************\n",
+              passno + 1, parms->npasses);
     if (passno == parms->enable_zero_passes) {
       printf("enabling zero nodes\n");
-      if (parms->log_fp) fprintf(parms->log_fp, "enabling zero nodes\n");
+      if (parms->log_fp)
+        fprintf(parms->log_fp, "enabling zero nodes\n");
       GCAMremoveIgnoreZero(gcam, parms->mri);
     }
 
@@ -1027,11 +1029,12 @@ int GCAMregister(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
     // the smoothness of the mesh (not to be confused with the next level
     // that changes the smoothing of the MRI (parms->levels controls both)
     for (level = parms->levels - 1; level >= 0; level--) {
-      
+
       rms = parms->start_rms;
       if (parms->reset_avgs == parms->navgs) {
         printf("resetting metric properties...\n");
-        GCAMcopyNodePositions(gcam, ORIGINAL_POSITIONS, SAVED_ORIGINAL_POSITIONS);
+        GCAMcopyNodePositions(gcam, ORIGINAL_POSITIONS,
+                              SAVED_ORIGINAL_POSITIONS);
         GCAMcopyNodePositions(gcam, CURRENT_POSITIONS, ORIGINAL_POSITIONS);
         gcamComputeMetricProperties(gcam);
         GCAMstoreMetricProperties(gcam);
@@ -1043,43 +1046,47 @@ int GCAMregister(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
         parms->l_elastic = l_elastic;
         parms->l_elastic = l_elastic / ((parms->navgs) + 1);
         printf("setting elastic coefficient to %2.3f\n", parms->l_elastic);
-      }
-      else {
-        if (DZERO(parms->l_binary) && DZERO(parms->l_area_intensity) && parms->scale_smoothness) {
+      } else {
+        if (DZERO(parms->l_binary) && DZERO(parms->l_area_intensity) &&
+            parms->scale_smoothness) {
           parms->l_smoothness = l_smooth / ((parms->navgs) + 1);
-        }
-        else {
+        } else {
           parms->l_smoothness = l_smooth;
         }
-        printf("setting smoothness cost coefficient to %2.3f\n", parms->l_smoothness);
+        printf("setting smoothness cost coefficient to %2.3f\n",
+               parms->l_smoothness);
       }
 
       // L2 loop over sigma levels. This is how much the MRI is
       // smoothed. Not to be confused with the the next higher loop
       // that controls the smoothing coeff which controls the how
       // smooth the mesh is. parms->levels applies to both loops
-      for (l2 = 0; l2 < parms->levels; l2++){  
-      
-	tnow = timer.milliseconds();
-	if(l2==0) tstart = tnow;
+      for (l2 = 0; l2 < parms->levels; l2++) {
 
-	printf("\n#GCAMreg# pass %d level1 %d level2 %d tsec %g sigma %g\n",
-	       passno,level,l2,(tnow-tstart)/1000.0,parms->sigma);
-	tstart = timer.milliseconds();
-	log_integration_parms(stdout,parms); 
-	printf("\n");
-	fflush(stdout);
+        tnow = timer.milliseconds();
+        if (l2 == 0)
+          tstart = tnow;
 
-        if(mri) {
+        printf("\n#GCAMreg# pass %d level1 %d level2 %d tsec %g sigma %g\n",
+               passno, level, l2, (tnow - tstart) / 1000.0, parms->sigma);
+        tstart = timer.milliseconds();
+        log_integration_parms(stdout, parms);
+        printf("\n");
+        fflush(stdout);
+
+        if (mri) {
           if (DZERO(parms->sigma)) {
             mri_smooth = MRIcopy(mri, mri_smooth);
-            if (parms->mri_binary) parms->mri_binary_smooth = MRIcopy(parms->mri_binary, parms->mri_binary_smooth);
-          }
-          else {
-            printf("blurring input image with Gaussian with sigma=%2.3f...\n", parms->sigma);
+            if (parms->mri_binary)
+              parms->mri_binary_smooth =
+                  MRIcopy(parms->mri_binary, parms->mri_binary_smooth);
+          } else {
+            printf("blurring input image with Gaussian with sigma=%2.3f...\n",
+                   parms->sigma);
             mri_kernel = MRIgaussian1d(parms->sigma, 100);
             if (parms->mri_binary)
-              parms->mri_binary_smooth = MRIconvolveGaussian(parms->mri_binary, parms->mri_binary_smooth, mri_kernel);
+              parms->mri_binary_smooth = MRIconvolveGaussian(
+                  parms->mri_binary, parms->mri_binary_smooth, mri_kernel);
             mri_smooth = MRIconvolveGaussian(mri, mri_smooth, mri_kernel);
             MRIfree(&mri_kernel);
           }
@@ -1093,14 +1100,16 @@ int GCAMregister(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
           start_t = parms->start_t;
         }
 
-	// This is the  part of this function that takes the longest
+        // This is the  part of this function that takes the longest
         // GCAMregister_pctLoop() - no loop
-	//   GCAMregisterPipelineAndComputeRMS() - no loop
-	//     GCAMregisterLevel() - Does not change opt params, just tries
-	//       to find min RMS given the current state. Runs a loop with
-	//         gcamComputeGradient(gcam, mri, mri_smooth, parms); (no loop)
-	//         gcamFindOptimalTimeStep() - loop to find opt step along gradient
-        GCAMregister_pctLoop(gcam, mri, parms, level, mri_smooth, &rms, &last_rms, &pct_change);
+        //   GCAMregisterPipelineAndComputeRMS() - no loop
+        //     GCAMregisterLevel() - Does not change opt params, just tries
+        //       to find min RMS given the current state. Runs a loop with
+        //         gcamComputeGradient(gcam, mri, mri_smooth, parms); (no loop)
+        //         gcamFindOptimalTimeStep() - loop to find opt step along
+        //         gradient
+        GCAMregister_pctLoop(gcam, mri, parms, level, mri_smooth, &rms,
+                             &last_rms, &pct_change);
 
         parms->sigma /= 4;
         if (parms->sigma < parms->min_sigma) {
@@ -1124,7 +1133,9 @@ int GCAMregister(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
       if (parms->regrid > 1 && level == 0 /*&& passno >= parms->npasses-1*/) {
         int steps = parms->start_t - start_t;
         pct_change = 100.0 * (start_rms - rms) / (steps * start_rms);
-        printf("checking regridding - %d steps and rms %2.3f --> %2.3f (%2.3f)\n", steps, start_rms, rms, pct_change);
+        printf(
+            "checking regridding - %d steps and rms %2.3f --> %2.3f (%2.3f)\n",
+            steps, start_rms, rms, pct_change);
         if (pct_change > (parms->tol / 10)) {
           GCAMregrid(gcam, mri, 0, parms, NULL);
           parms->navgs = navgs;
@@ -1144,7 +1155,8 @@ int GCAMregister(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
       parms->l_distance /= 4;
       l_smooth /= 4;
       parms->l_distance /= 4;
-      parms->l_elastic /= 4;  // relax elasticity slower as we want to find the solution with maximal elasticity
+      parms->l_elastic /= 4; // relax elasticity slower as we want to find the
+                             // solution with maximal elasticity
       l_elastic /= 4;
     }
     if (parms->navgs < parms->min_avgs) {
@@ -1153,7 +1165,9 @@ int GCAMregister(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
   }
 
   if (parms->noneg == -1 && gcam->neg > 0) {
-    printf("integration complete, checking for and removing negative nodes (noneg = %d)\n", parms->noneg);
+    printf("integration complete, checking for and removing negative nodes "
+           "(noneg = %d)\n",
+           parms->noneg);
     //    GCAMremoveNegativeNodes(gcam, mri, parms) ;
     if (parms->write_iterations && (Gdiag & DIAG_WRITE)) {
       write_snapshot(gcam, mri, parms, ++parms->start_t);
@@ -1174,16 +1188,18 @@ int GCAMregister(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
   parms->l_elastic = l_orig_elastic;
   parms->navgs = navgs;
   parms->dt = orig_dt;
-  if (parms->mri_dist_map) MRIfree(&parms->mri_dist_map);
-  if (parms->mri_atlas_dist_map) MRIfree(&parms->mri_atlas_dist_map);
+  if (parms->mri_dist_map)
+    MRIfree(&parms->mri_dist_map);
+  if (parms->mri_atlas_dist_map)
+    MRIfree(&parms->mri_atlas_dist_map);
 
-  printf("GCAMregister done in %g min\n",timer2.milliseconds()/1000.0/60.0);
+  printf("GCAMregister done in %g min\n",
+         timer2.milliseconds() / 1000.0 / 60.0);
 
   return (NO_ERROR);
 }
 
-GCA_MORPH *GCAMread(const char *fname)
-{
+GCA_MORPH *GCAMread(const char *fname) {
   GCA_MORPH *gcam;
   znzFile file;
   int x, y, z, width, height, depth;
@@ -1204,13 +1220,15 @@ GCA_MORPH *GCAMread(const char *fname)
   file = znzopen(fname, "rb", gzipped);
 
   if (znz_isnull(file)) {
-    ErrorReturn(NULL, (ERROR_BADPARM, "GCAMread(%s): could not open file", fname));
+    ErrorReturn(NULL,
+                (ERROR_BADPARM, "GCAMread(%s): could not open file", fname));
   }
 
   version = znzreadFloat(file);
   if (version != GCAM_VERSION) {
     znzclose(file);
-    ErrorReturn(NULL, (ERROR_BADFILE, "GCAMread(%s): invalid version # %2.3f\n", fname, version));
+    ErrorReturn(NULL, (ERROR_BADFILE, "GCAMread(%s): invalid version # %2.3f\n",
+                       fname, version));
   }
   width = znzreadInt(file);
   height = znzreadInt(file);
@@ -1246,12 +1264,12 @@ GCA_MORPH *GCAMread(const char *fname)
 
         // if all the positions are zero, then this is not a valid point
         // mark invalid = 1
-        if (FZERO(gcamn->origx) && FZERO(gcamn->origy) && FZERO(gcamn->origz) && FZERO(gcamn->x) && FZERO(gcamn->y) &&
-            FZERO(gcamn->z)) {
+        if (FZERO(gcamn->origx) && FZERO(gcamn->origy) && FZERO(gcamn->origz) &&
+            FZERO(gcamn->x) && FZERO(gcamn->y) && FZERO(gcamn->z)) {
           gcamn->invalid = GCAM_POSITION_INVALID;
-        }
-        else {
-          if (x == 0 || x == width - 1 || y == 0 || y == height - 1 || z == 0 || z == depth - 1)
+        } else {
+          if (x == 0 || x == width - 1 || y == 0 || y == height - 1 || z == 0 ||
+              z == depth - 1)
             gcamn->invalid = GCAM_AREA_INVALID;
           else
             gcamn->invalid = GCAM_VALID;
@@ -1260,61 +1278,62 @@ GCA_MORPH *GCAMread(const char *fname)
     }
   }
   gcam->det = 1;
-  gcam->image.valid = 0;  // make src invalid
-  gcam->atlas.valid = 0;  // makd dst invalid
+  gcam->image.valid = 0; // make src invalid
+  gcam->atlas.valid = 0; // makd dst invalid
   while (znzreadIntEx(&tag, file)) {
     switch (tag) {
-      case TAG_GCAMORPH_LABELS:
-        if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) {
-          printf("reading labels out of gcam file...\n");
-        }
-        gcam->status = GCAM_LABELED;
-        for (x = 0; x < width; x++) {
-          for (y = 0; y < height; y++) {
-            for (z = 0; z < depth; z++) {
-              gcamn = &gcam->nodes[x][y][z];
-              gcamn->label = znzreadInt(file);
-              if (gcamn->label != 0) {
-                DiagBreak();
-              }
+    case TAG_GCAMORPH_LABELS:
+      if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) {
+        printf("reading labels out of gcam file...\n");
+      }
+      gcam->status = GCAM_LABELED;
+      for (x = 0; x < width; x++) {
+        for (y = 0; y < height; y++) {
+          for (z = 0; z < depth; z++) {
+            gcamn = &gcam->nodes[x][y][z];
+            gcamn->label = znzreadInt(file);
+            if (gcamn->label != 0) {
+              DiagBreak();
             }
           }
         }
-        break;
-      case TAG_GCAMORPH_GEOM:
-        GCAMreadGeom(gcam, file);
-        if ((Gdiag & DIAG_SHOW) && DIAG_VERBOSE_ON) {
-          fprintf(stderr,
-                  "GCAMORPH_GEOM tag found.  "
-                  "Reading src and dst information.\n");
-          fprintf(stderr, "src geometry:\n");
-          writeVolGeom(stderr, &gcam->image);
-          fprintf(stderr, "dst geometry:\n");
-          writeVolGeom(stderr, &gcam->atlas);
-        }
-        break;
-      case TAG_GCAMORPH_TYPE:
-        gcam->type = znzreadInt(file);
-        if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) {
-          printf("gcam->type = %s\n", gcam->type == GCAM_VOX ? "vox" : "ras");
-        }
-        break;
-      case TAG_MGH_XFORM:
-        // gcam->m_affine = MatrixAsciiReadFrom(fp, NULL) ;
-        gcam->m_affine = znzReadMatrix(file);
-        gcam->det = MatrixDeterminant(gcam->m_affine);
-        break;
+      }
+      break;
+    case TAG_GCAMORPH_GEOM:
+      GCAMreadGeom(gcam, file);
+      if ((Gdiag & DIAG_SHOW) && DIAG_VERBOSE_ON) {
+        fprintf(stderr, "GCAMORPH_GEOM tag found.  "
+                        "Reading src and dst information.\n");
+        fprintf(stderr, "src geometry:\n");
+        writeVolGeom(stderr, &gcam->image);
+        fprintf(stderr, "dst geometry:\n");
+        writeVolGeom(stderr, &gcam->atlas);
+      }
+      break;
+    case TAG_GCAMORPH_TYPE:
+      gcam->type = znzreadInt(file);
+      if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) {
+        printf("gcam->type = %s\n", gcam->type == GCAM_VOX ? "vox" : "ras");
+      }
+      break;
+    case TAG_MGH_XFORM:
+      // gcam->m_affine = MatrixAsciiReadFrom(fp, NULL) ;
+      gcam->m_affine = znzReadMatrix(file);
+      gcam->det = MatrixDeterminant(gcam->m_affine);
+      break;
     }
   }
 
   znzclose(file);
 
-  if (gcam->det > 0)  // reset gcamn->orig_area fields to be those of linear transform
+  if (gcam->det >
+      0) // reset gcamn->orig_area fields to be those of linear transform
   {
     int x, y, z;
     double area;
     area = gcam->spacing * gcam->spacing * gcam->spacing / gcam->det;
-    printf("setting orig areas to linear transform determinant scaled %2.2f\n", area);
+    printf("setting orig areas to linear transform determinant scaled %2.2f\n",
+           area);
     for (x = 0; x < gcam->width; x++)
       for (y = 0; y < gcam->height; y++)
         for (z = 0; z < gcam->depth; z++) {
@@ -1330,13 +1349,13 @@ GCA_MORPH *GCAMread(const char *fname)
   return (gcam);
 }
 
-GCA_MORPH *GCAMalloc(const int width, const int height, const int depth)
-{
+GCA_MORPH *GCAMalloc(const int width, const int height, const int depth) {
   GCA_MORPH *gcam;
   int x, y, z;
 
   gcam = (GCA_MORPH *)calloc(1, sizeof(GCA_MORPH));
-  if (!gcam) ErrorExit(ERROR_NOMEMORY, "GCAMalloc: could not allocate GCA_MORPH struct");
+  if (!gcam)
+    ErrorExit(ERROR_NOMEMORY, "GCAMalloc: could not allocate GCA_MORPH struct");
 
   gcam->width = width;
   gcam->height = height;
@@ -1350,7 +1369,8 @@ GCA_MORPH *GCAMalloc(const int width, const int height, const int depth)
   }
 
   for (x = 0; x < gcam->width; x++) {
-    gcam->nodes[x] = (GCA_MORPH_NODE **)calloc(gcam->height, sizeof(GCA_MORPH_NODE *));
+    gcam->nodes[x] =
+        (GCA_MORPH_NODE **)calloc(gcam->height, sizeof(GCA_MORPH_NODE *));
     if (!gcam->nodes[x]) {
       ErrorExit(ERROR_NOMEMORY, "GCAMalloc: could not allocate %dth **", x);
     }
@@ -1360,24 +1380,25 @@ GCA_MORPH *GCAMalloc(const int width, const int height, const int depth)
     {
       GCA_MORPH_NODE *buf;
 
-      buf = (GCA_MORPH_NODE *)calloc(gcam->depth * gcam->height, sizeof(GCA_MORPH_NODE));
+      buf = (GCA_MORPH_NODE *)calloc(gcam->depth * gcam->height,
+                                     sizeof(GCA_MORPH_NODE));
       if (buf == NULL)
         ErrorExit(ERROR_NO_MEMORY,
                   "GCAMalloc(%d, %d, %d): could not allocate "
                   "%d bytes for %dth bslice\n",
-                  height,
-                  width,
-                  depth,
-                  (gcam->depth * gcam->height * sizeof(GCA_MORPH_NODE)),
-                  x);
+                  height, width, depth,
+                  (gcam->depth * gcam->height * sizeof(GCA_MORPH_NODE)), x);
       for (y = 0; y < gcam->height; y++) {
         gcam->nodes[x][y] = buf + (y * gcam->depth);
       }
     }
 #else
     for (y = 0; y < gcam->height; y++) {
-      gcam->nodes[x][y] = (GCA_MORPH_NODE *)calloc(gcam->depth, sizeof(GCA_MORPH_NODE));
-      if (!gcam->nodes[x][y]) ErrorExit(ERROR_NOMEMORY, "GCAMalloc: could not allocate %d,%dth *", x, y);
+      gcam->nodes[x][y] =
+          (GCA_MORPH_NODE *)calloc(gcam->depth, sizeof(GCA_MORPH_NODE));
+      if (!gcam->nodes[x][y])
+        ErrorExit(ERROR_NOMEMORY, "GCAMalloc: could not allocate %d,%dth *", x,
+                  y);
       for (z = 0; z < gcam->depth; z++) {
         gcam->nodes[x][y][z].origx = x;
         gcam->nodes[x][y][z].origy = y;
@@ -1394,8 +1415,7 @@ GCA_MORPH *GCAMalloc(const int width, const int height, const int depth)
   return (gcam);
 }
 
-int GCAMinitVolGeom(GCAM *gcam, MRI *mri_image, MRI *mri_atlas)
-{
+int GCAMinitVolGeom(GCAM *gcam, MRI *mri_image, MRI *mri_atlas) {
   if (gcam->type == GCAM_VOX) /* in some other voxel coords */
   {
     GCAMrasToVox(gcam, mri_image);
@@ -1409,8 +1429,7 @@ int GCAMinitVolGeom(GCAM *gcam, MRI *mri_image, MRI *mri_atlas)
   return (NO_ERROR);
 }
 
-int GCAMpreserveLabelMetricProperties(GCA_MORPH *gcam, LABEL *area, MRI *mri)
-{
+int GCAMpreserveLabelMetricProperties(GCA_MORPH *gcam, LABEL *area, MRI *mri) {
   int n, xv, yv, zv;
   GCA_MORPH_NODE *gcamn;
   double xvd, yvd, zvd;
@@ -1431,16 +1450,18 @@ int GCAMpreserveLabelMetricProperties(GCA_MORPH *gcam, LABEL *area, MRI *mri)
   }
   return (NO_ERROR);
 }
-int GCAMinit(GCA_MORPH *gcam, MRI *mri_image, GCA *gca, TRANSFORM *transform, int relabel)
-{
+int GCAMinit(GCA_MORPH *gcam, MRI *mri_image, GCA *gca, TRANSFORM *transform,
+             int relabel) {
   GCA_MORPH_NODE *gcamn;
   GC1D *gc;
   GCA_PRIOR *gcap;
-  int invalid = 0, x, y, z, width, height, depth, n, max_n, max_label, label, xform_allocated = 0;
+  int invalid = 0, x, y, z, width, height, depth, n, max_n, max_label, label,
+      xform_allocated = 0;
   float max_p, ox, oy, oz;
 
   if (!mri_image) {
-    ErrorExit(ERROR_BADPARM, "GCAMinit() must be called with valid mri_image.\n");
+    ErrorExit(ERROR_BADPARM,
+              "GCAMinit() must be called with valid mri_image.\n");
   }
 
   if (transform == NULL) {
@@ -1459,16 +1480,13 @@ int GCAMinit(GCA_MORPH *gcam, MRI *mri_image, GCA *gca, TRANSFORM *transform, in
   TransformInvert(transform, mri_image);
   if (gca) {
     // check consistency
-    GCAsetVolGeom(gca, &gcam->atlas);  // fname is still "unknown"
-    if (width != gca->prior_width || height != gca->prior_height || depth != gca->prior_depth) {
+    GCAsetVolGeom(gca, &gcam->atlas); // fname is still "unknown"
+    if (width != gca->prior_width || height != gca->prior_height ||
+        depth != gca->prior_depth) {
       fprintf(stderr,
               "GCA_MORPH (%d, %d, %d) must agree with GCA prior (%d, %d, %d)\n",
-              gcam->width,
-              gcam->height,
-              gcam->depth,
-              gca->prior_width,
-              gca->prior_height,
-              gca->prior_depth);
+              gcam->width, gcam->height, gcam->depth, gca->prior_width,
+              gca->prior_height, gca->prior_depth);
       ErrorExit(ERROR_BADPARM, "Exiting ....\n");
     }
     gcam->gca = gca;
@@ -1489,14 +1507,15 @@ int GCAMinit(GCA_MORPH *gcam, MRI *mri_image, GCA *gca, TRANSFORM *transform, in
 
           // find the label which has the max p
           for (n = 0; n < gcap->nlabels; n++) {
-            label = gcap->labels[n];  // get prior label
+            label = gcap->labels[n]; // get prior label
             if (label == Gdiag_no) {
               DiagBreak();
             }
             if (label >= MAX_CMA_LABEL) {
-              printf("invalid label %d at (%d, %d, %d) in prior volume\n", label, x, y, z);
+              printf("invalid label %d at (%d, %d, %d) in prior volume\n",
+                     label, x, y, z);
             }
-            if (gcap->priors[n] >= max_p)  // update the max_p and max_label
+            if (gcap->priors[n] >= max_p) // update the max_p and max_label
             {
               max_n = n;
               max_p = gcap->priors[n];
@@ -1507,9 +1526,12 @@ int GCAMinit(GCA_MORPH *gcam, MRI *mri_image, GCA *gca, TRANSFORM *transform, in
           gcamn->yn = y;
           gcamn->zn = z;
           // here mri info is used
-          if (!GCApriorToSourceVoxelFloat(gca, mri_image, transform, x, y, z, &ox, &oy, &oz) || 1)  // ALWAYS!!!
+          if (!GCApriorToSourceVoxelFloat(gca, mri_image, transform, x, y, z,
+                                          &ox, &oy, &oz) ||
+              1) // ALWAYS!!!
           {
-            if (x > 0 && x < width - 1 && y > 0 && y < height - 1 && z > 0 && z < depth - 1)
+            if (x > 0 && x < width - 1 && y > 0 && y < height - 1 && z > 0 &&
+                z < depth - 1)
               gcamn->invalid = GCAM_VALID;
             // if inside the volume, then
             gcamn->x = gcamn->origx = ox;
@@ -1533,18 +1555,10 @@ int GCAMinit(GCA_MORPH *gcam, MRI *mri_image, GCA *gca, TRANSFORM *transform, in
             gcamn->log_p = 0;
 #endif
             if (x == Gx && y == Gy && z == Gz) {
-              printf(
-                  "node(%d,%d,%d) --> MRI (%2.1f, %2.1f, %2.1f),"
-                  " label %s (%d) = %2.1f\n",
-                  x,
-                  y,
-                  z,
-                  ox,
-                  oy,
-                  oz,
-                  cma_label_to_name(max_label),
-                  max_label,
-                  gcamn->gc ? gcamn->gc->means[0] : -1);
+              printf("node(%d,%d,%d) --> MRI (%2.1f, %2.1f, %2.1f),"
+                     " label %s (%d) = %2.1f\n",
+                     x, y, z, ox, oy, oz, cma_label_to_name(max_label),
+                     max_label, gcamn->gc ? gcamn->gc->means[0] : -1);
               DiagBreak();
 #if 0
               Gvx = nint(ox) ;
@@ -1553,15 +1567,15 @@ int GCAMinit(GCA_MORPH *gcam, MRI *mri_image, GCA *gca, TRANSFORM *transform, in
               /* for writing out image views */
 #endif
             }
-          }     // !GCA
-          else  // went outside the volume but we must initialize
+          }    // !GCA
+          else // went outside the volume but we must initialize
           {
-            gcamn->invalid = GCAM_POSITION_INVALID;  // mark invalid
+            gcamn->invalid = GCAM_POSITION_INVALID; // mark invalid
             invalid++;
             gcamn->x = gcamn->origx = 0;
             gcamn->y = gcamn->origy = 0;
             gcamn->z = gcamn->origz = 0;
-            gcamn->label = 0;  // unknown
+            gcamn->label = 0; // unknown
             gcamn->n = 0;
             gcamn->prior = 1.;
             gcamn->gc = 0;
@@ -1573,12 +1587,10 @@ int GCAMinit(GCA_MORPH *gcam, MRI *mri_image, GCA *gca, TRANSFORM *transform, in
 
     if (relabel) {
       GCAMcomputeLabels(mri_image, gcam);
-    }
-    else {
+    } else {
       GCAMcomputeMaxPriorLabels(gcam);
     }
-  }
-  else /* no gca specified */
+  } else /* no gca specified */
   {
     VECTOR *v1, *v2;
     MATRIX *m_L;
@@ -1609,7 +1621,8 @@ int GCAMinit(GCA_MORPH *gcam, MRI *mri_image, GCA *gca, TRANSFORM *transform, in
           oy = V3_Y(v2);
           oz = V3_Z(v2);
           // here mri info is used
-          if ((MRIindexNotInVolume(mri_image, ox, oy, oz) == 0) || 1)  // ALWAYS!!
+          if ((MRIindexNotInVolume(mri_image, ox, oy, oz) == 0) ||
+              1) // ALWAYS!!
           {
             gcamn->invalid = GCAM_VALID;
             // if inside the volume, then
@@ -1620,20 +1633,21 @@ int GCAMinit(GCA_MORPH *gcam, MRI *mri_image, GCA *gca, TRANSFORM *transform, in
             gcamn->log_p = 0;
 
             if (x == Gx && y == Gy && z == Gz) {
-              printf("node(%d,%d,%d) --> MRI (%2.1f, %2.1f, %2.1f)\n", x, y, z, ox, oy, oz);
+              printf("node(%d,%d,%d) --> MRI (%2.1f, %2.1f, %2.1f)\n", x, y, z,
+                     ox, oy, oz);
               DiagBreak();
             }
-          }     // !GCA
-          else  // went outside the volume but we must initialize NEVER!!
+          }    // !GCA
+          else // went outside the volume but we must initialize NEVER!!
           {
             if (gcamn->label > 0) {
               DiagBreak();
             }
-            gcamn->invalid = GCAM_POSITION_INVALID;  // mark invalid
+            gcamn->invalid = GCAM_POSITION_INVALID; // mark invalid
             gcamn->x = gcamn->origx = 0;
             gcamn->y = gcamn->origy = 0;
             gcamn->z = gcamn->origz = 0;
-            gcamn->label = 0;  // unknown
+            gcamn->label = 0; // unknown
             gcamn->n = 0;
             gcamn->prior = 1.;
             gcamn->gc = 0;
@@ -1653,10 +1667,10 @@ int GCAMinit(GCA_MORPH *gcam, MRI *mri_image, GCA *gca, TRANSFORM *transform, in
     LTA *lta = (LTA *)transform->xform;
     gcam->m_affine = MatrixCopy(lta->xforms[0].m_L, NULL);
     gcam->det = MatrixDeterminant(gcam->m_affine);
-//    fprintf(stderr,
-//            "det(m_affine) = %2.2f (predicted orig area = %2.1f)\n",
-//            gcam->det,
-//            gcam->spacing * gcam->spacing * gcam->spacing / gcam->det);
+    //    fprintf(stderr,
+    //            "det(m_affine) = %2.2f (predicted orig area = %2.1f)\n",
+    //            gcam->det,
+    //            gcam->spacing * gcam->spacing * gcam->spacing / gcam->det);
   }
   gcamComputeMetricProperties(gcam);
   for (x = 0; x < width; x++)
@@ -1672,7 +1686,8 @@ int GCAMinit(GCA_MORPH *gcam, MRI *mri_image, GCA *gca, TRANSFORM *transform, in
              (gcam->nodes[x][y][z].area <= 0)) &&
             (gcam->nodes[x][y][z].invalid == GCAM_VALID))
 #endif
-        if (((gcam->nodes[x][y][z].orig_area1 <= 0) && (gcam->nodes[x][y][z].orig_area2 <= 0)) &&
+        if (((gcam->nodes[x][y][z].orig_area1 <= 0) &&
+             (gcam->nodes[x][y][z].orig_area2 <= 0)) &&
             (gcam->nodes[x][y][z].invalid == GCAM_VALID)) {
           gcam->nodes[x][y][z].invalid = GCAM_AREA_INVALID;
           invalid++;
@@ -1696,9 +1711,12 @@ int GCAMinit(GCA_MORPH *gcam, MRI *mri_image, GCA *gca, TRANSFORM *transform, in
     MRIfree(&gcam->mri_yind);
     MRIfree(&gcam->mri_zind);
   }
-  gcam->mri_xind = MRIalloc(mri_image->width, mri_image->height, mri_image->depth, MRI_FLOAT);
-  gcam->mri_yind = MRIalloc(mri_image->width, mri_image->height, mri_image->depth, MRI_FLOAT);
-  gcam->mri_zind = MRIalloc(mri_image->width, mri_image->height, mri_image->depth, MRI_FLOAT);
+  gcam->mri_xind = MRIalloc(mri_image->width, mri_image->height,
+                            mri_image->depth, MRI_FLOAT);
+  gcam->mri_yind = MRIalloc(mri_image->width, mri_image->height,
+                            mri_image->depth, MRI_FLOAT);
+  gcam->mri_zind = MRIalloc(mri_image->width, mri_image->height,
+                            mri_image->depth, MRI_FLOAT);
   for (x = 0; x < mri_image->width; x++)
     for (y = 0; y < mri_image->height; y++)
       for (z = 0; z < mri_image->depth; z++) {
@@ -1724,8 +1742,7 @@ int GCAMinit(GCA_MORPH *gcam, MRI *mri_image, GCA *gca, TRANSFORM *transform, in
 ////////////////////////////////////////////////
 // user is responsible for freeing gca inside
 // the gcam.
-int GCAMfree(GCA_MORPH **pgcam)
-{
+int GCAMfree(GCA_MORPH **pgcam) {
   GCA_MORPH *gcam;
 
   gcam = *pgcam;
@@ -1738,8 +1755,7 @@ int GCAMfree(GCA_MORPH **pgcam)
 ////////////////////////////////////////////////
 // user is responsible for freeing gca inside
 // the gcam.
-int GCAMfreeContents(GCA_MORPH *gcam)
-{
+int GCAMfreeContents(GCA_MORPH *gcam) {
   int x, y, z;
   GCA_MORPH_NODE *gcamn;
 
@@ -1748,7 +1764,7 @@ int GCAMfreeContents(GCA_MORPH *gcam)
     for (y = 0; y < gcam->height; y++) {
       for (z = 0; z < gcam->depth; z++) {
         gcamn = &gcam->nodes[x][y][z];
-        if (gcamn->gc && gcam->gca == NULL)  // don't free the gcs if
+        if (gcamn->gc && gcam->gca == NULL) // don't free the gcs if
         // they are part of the gca
         {
           free_gcs(gcamn->gc, 1, gcam->ninputs);
@@ -1761,7 +1777,6 @@ int GCAMfreeContents(GCA_MORPH *gcam)
   free(gcam->nodes);
   return (NO_ERROR);
 }
-
 
 // different_neighbor_labels is very hot.
 //
@@ -1783,72 +1798,79 @@ int GCAMfreeContents(GCA_MORPH *gcam)
 //
 // The loops do NOT apply it to all the points
 // I don't know how often the label is different
-// 
+//
 //
 struct different_neighbor_labels_context {
-    int xLo,xHi,yLo,yHi;
+  int xLo, xHi, yLo, yHi;
 };
-static void init_different_neighbor_labels_context(struct different_neighbor_labels_context * ctx, const GCA_MORPH *gcam, const int x, const int y) {
+static void init_different_neighbor_labels_context(
+    struct different_neighbor_labels_context *ctx, const GCA_MORPH *gcam,
+    const int x, const int y) {
   static const int whalf = 1;
-  ctx->xLo = MAX(0           , x - whalf    ); 
-  ctx->xHi = MIN(gcam->width , x + whalf + 1);
-  ctx->yLo = MAX(0           , y - whalf    ); 
-  ctx->yHi = MIN(gcam->height, y + whalf + 1); 
+  ctx->xLo = MAX(0, x - whalf);
+  ctx->xHi = MIN(gcam->width, x + whalf + 1);
+  ctx->yLo = MAX(0, y - whalf);
+  ctx->yHi = MIN(gcam->height, y + whalf + 1);
   if (x < ctx->xLo || ctx->xHi <= x || y < ctx->yLo || ctx->yHi <= y) {
     fprintf(stderr, "Code incorrectly assumes center is tested\n");
   }
 }
 
-static int different_neighbor_labels(struct different_neighbor_labels_context * ctx, int const label, const GCA_MORPH *gcam, const int x, const int y, const int z)
-{
+static int
+different_neighbor_labels(struct different_neighbor_labels_context *ctx,
+                          int const label, const GCA_MORPH *gcam, const int x,
+                          const int y, const int z) {
   static const int whalf = 1;
 
   static const bool debugging = false;
-//Restart:
+  // Restart:
 
   if (debugging && (gcam->height != gcam->depth)) {
-    fprintf(stderr, "The old code incorrectly assumed the height and depth were the same!\n");
+    fprintf(stderr, "The old code incorrectly assumed the height and depth "
+                    "were the same!\n");
     exit(1);
   }
-  
-  if (debugging) {
-    fprintf(stderr, "label:%d gcam->nodes[x:%d][y:%d][z:%d]:%d whalf:%d gcam->width:%d gcam->height:%d gcam->depth:%d\n",
-      label, x, y, z, gcam->nodes[x][y][z].label, whalf, gcam->width, gcam->height, gcam->depth);
-  }
-  
-  static const bool old_code = false;
-  static const bool new_code = true; 
 
-  const int cx = x, cy = y, cz = z;		// SURELY THIS IS RIGHT, but the old code had 0 0 0
+  if (debugging) {
+    fprintf(stderr,
+            "label:%d gcam->nodes[x:%d][y:%d][z:%d]:%d whalf:%d gcam->width:%d "
+            "gcam->height:%d gcam->depth:%d\n",
+            label, x, y, z, gcam->nodes[x][y][z].label, whalf, gcam->width,
+            gcam->height, gcam->depth);
+  }
+
+  static const bool old_code = false;
+  static const bool new_code = true;
+
+  const int cx = x, cy = y,
+            cz = z; // SURELY THIS IS RIGHT, but the old code had 0 0 0
 
   int new_num = 0;
   if (new_code) {
     // The old code has too many tests in the loops to run fast
     // This new code does not have these tests
-    // Instead it breaks the searched brick into upto subbricks bricks and then searches them rapidly
+    // Instead it breaks the searched brick into upto subbricks bricks and then
+    // searches them rapidly
 
-    int xLo = ctx->xLo,	// First impose the bounds the if statements in the old code induce 
-        xHi = ctx->xHi, 
-	yLo = ctx->yLo, 
-	yHi = ctx->yHi, 
-	zLo = MAX(0           , z - whalf    ),
-	zHi = MIN(gcam->depth , z + whalf + 1);
+    int xLo = ctx->xLo, // First impose the bounds the if statements in the old
+                        // code induce
+        xHi = ctx->xHi, yLo = ctx->yLo, yHi = ctx->yHi, zLo = MAX(0, z - whalf),
+        zHi = MIN(gcam->depth, z + whalf + 1);
 
     if (debugging && (cz < zLo || zHi <= cz)) {
       fprintf(stderr, "Code incorrectly assumes center is tested\n");
     }
-    
-    int i,j,k;
+
+    int i, j, k;
     if (1 && (zHi == zLo + 3)) { // VERY common case
       for (i = xLo; i < xHi; i++) {
         for (j = yLo; j < yHi; j++) {
-	  GMN const * const ptr = &gcam->nodes[i][j][zLo];
-          for (k = 0; k < 3; k++) {	// The compiler should unroll this
+          GMN const *const ptr = &gcam->nodes[i][j][zLo];
+          for (k = 0; k < 3; k++) { // The compiler should unroll this
             if (debugging) {
-              fprintf(stderr, "n3w i:%d j:%d k:%d\n",
-                i,j,k);
+              fprintf(stderr, "n3w i:%d j:%d k:%d\n", i, j, k);
             }
-            if (label != (ptr+k)->label) {
+            if (label != (ptr + k)->label) {
               if (debugging) {
                 fprintf(stderr, "  hit\n");
               }
@@ -1857,15 +1879,13 @@ static int different_neighbor_labels(struct different_neighbor_labels_context * 
           }
         }
       }
-    } 
-    else 
-    {
+    } else {
       for (i = xLo; i < xHi; i++) {
         for (j = yLo; j < yHi; j++) {
           for (k = zLo; k < zHi; k++) {
             if (debugging) {
-              fprintf(stderr, "new gcam->nodes[i:%d][j:%d][k:%d]:%d\n",
-                i,j,k,gcam->nodes[i][j][k].label);
+              fprintf(stderr, "new gcam->nodes[i:%d][j:%d][k:%d]:%d\n", i, j, k,
+                      gcam->nodes[i][j][k].label);
             }
             if (label != gcam->nodes[i][j][k].label) {
               if (debugging) {
@@ -1878,7 +1898,7 @@ static int different_neighbor_labels(struct different_neighbor_labels_context * 
       }
     }
   }
-  
+
   int old_num = new_num;
   if (old_code) {
     int num, i, j, k;
@@ -1891,15 +1911,15 @@ static int different_neighbor_labels(struct different_neighbor_labels_context * 
           continue;
         }
         for (k = z - whalf; k <= z + whalf; k++) {
-          if (k < 0 || k >= gcam->height) {			// SHOULDN'T THIS BE depth?
+          if (k < 0 || k >= gcam->height) { // SHOULDN'T THIS BE depth?
             continue;
           }
-          if (i == cx && j == cy && k == cz) {			// THIS IS WAS 0,0,0 WHICH MUST BE WRONG
+          if (i == cx && j == cy &&
+              k == cz) { // THIS IS WAS 0,0,0 WHICH MUST BE WRONG
             continue;
           }
           if (debugging) {
-            fprintf(stderr, "old i:%d j:%d k:%d\n",
-              i,j,k);
+            fprintf(stderr, "old i:%d j:%d k:%d\n", i, j, k);
           }
           if (label != gcam->nodes[i][j][k].label) {
             if (debugging) {
@@ -1912,26 +1932,26 @@ static int different_neighbor_labels(struct different_neighbor_labels_context * 
     }
     old_num = num;
   }
-  
+
   if (new_code && old_code) {
     if (new_num != old_num) {
-      fprintf(stderr, "%s:%d new and old code get different answers new:%d old:%d\n", 
-        __FILE__, __LINE__, new_num, old_num);
-//      if (debugging) 
-        exit(1);
-//      debugging = true;
-///     goto Restart;
+      fprintf(stderr,
+              "%s:%d new and old code get different answers new:%d old:%d\n",
+              __FILE__, __LINE__, new_num, old_num);
+      //      if (debugging)
+      exit(1);
+      //      debugging = true;
+      ///     goto Restart;
     }
     static int count = 0, limit = 1;
     if (count++ >= limit) {
       limit *= 10;
-      fprintf(stderr, "%s:%d new and old code get same answer:%d\n", __FILE__, __LINE__, 
-        new_num);
+      fprintf(stderr, "%s:%d new and old code get same answer:%d\n", __FILE__,
+              __LINE__, new_num);
     }
   }
-  return (new_code ? new_num : old_num) ;
+  return (new_code ? new_num : old_num);
 }
-
 
 /*
   Note:  d [ I(r)' C I(r), r] = delI * C * I(r)
@@ -1940,8 +1960,8 @@ static int different_neighbor_labels(struct different_neighbor_labels_context * 
 
 #define GCAM_LLT_OUTPUT 0
 
-int gcamLogLikelihoodTerm(GCA_MORPH *gcam, const MRI *mri, const MRI *mri_smooth, double l_log_likelihood)
-{
+int gcamLogLikelihoodTerm(GCA_MORPH *gcam, const MRI *mri,
+                          const MRI *mri_smooth, double l_log_likelihood) {
   int x = 0, y = 0, z = 0, n = 0 /*,label*/;
   int i;
   int nthreads = 1, tid = 0;
@@ -1993,47 +2013,60 @@ int gcamLogLikelihoodTerm(GCA_MORPH *gcam, const MRI *mri, const MRI *mri_smooth
     v_grad[i] = VectorAlloc(3, MATRIX_REAL);
   }
 
-//  TIMER_INTERVAL_BEGIN(loop)
-  
+  //  TIMER_INTERVAL_BEGIN(loop)
+
   ROMP_PF_begin
 #ifdef HAVE_OPENMP
-  #pragma omp parallel for if_ROMP(assume_reproducible) firstprivate(tid, y, z, gcamn, n, norm, dx, dy, dz, vals, m_delI, m_inv_cov, v_means, v_grad) \
-    shared(gcam, mri, Gx, Gy, Gz, Gvx, Gvy, Gvz) schedule(static, 1)
+#pragma omp parallel for if_ROMP(assume_reproducible)                          \
+    firstprivate(tid, y, z, gcamn, n, norm, dx, dy, dz, vals, m_delI,          \
+                 m_inv_cov, v_means, v_grad)                                   \
+        shared(gcam, mri, Gx, Gy, Gz, Gvx, Gvy, Gvz) schedule(static, 1)
 #endif
 
-  for (x = 0; x < gcam->width; x++) {
+      for (x = 0; x < gcam->width; x++) {
     ROMP_PFLB_begin
 #ifdef HAVE_OPENMP
-    tid = omp_get_thread_num();
+        tid = omp_get_thread_num();
 #else
-    tid = 0;
+        tid = 0;
 #endif
     for (y = 0; y < gcam->height; y++) {
-      struct different_neighbor_labels_context different_neighbor_labels_context;
-      init_different_neighbor_labels_context(&different_neighbor_labels_context,gcam,x,y);
+      struct different_neighbor_labels_context
+          different_neighbor_labels_context;
+      init_different_neighbor_labels_context(&different_neighbor_labels_context,
+                                             gcam, x, y);
       for (z = 0; z < gcam->depth; z++) {
-        if (x == Gx && y == Gy && z == Gz) DiagBreak();
+        if (x == Gx && y == Gy && z == Gz)
+          DiagBreak();
 
         gcamn = &gcam->nodes[x][y][z];
 
-        if (gcamn->invalid == GCAM_POSITION_INVALID) continue;
+        if (gcamn->invalid == GCAM_POSITION_INVALID)
+          continue;
 
-        if (fabs(gcamn->x - Gvx) < 1 && fabs(gcamn->y - Gvy) < 1 && fabs(gcamn->z - Gvz) < 1) DiagBreak();
+        if (fabs(gcamn->x - Gvx) < 1 && fabs(gcamn->y - Gvy) < 1 &&
+            fabs(gcamn->z - Gvz) < 1)
+          DiagBreak();
 
-        if (gcamn->status & (GCAM_IGNORE_LIKELIHOOD | GCAM_NEVER_USE_LIKELIHOOD)) continue;
+        if (gcamn->status &
+            (GCAM_IGNORE_LIKELIHOOD | GCAM_NEVER_USE_LIKELIHOOD))
+          continue;
 
         /* don't use unkown nodes unless they border
            something that's not unknown */
-        if (IS_UNKNOWN(gcamn->label) && different_neighbor_labels(&different_neighbor_labels_context, gcamn->label, gcam, x, y, z) == 0) continue;
+        if (IS_UNKNOWN(gcamn->label) &&
+            different_neighbor_labels(&different_neighbor_labels_context,
+                                      gcamn->label, gcam, x, y, z) == 0)
+          continue;
 
         load_vals(mri, gcamn->x, gcamn->y, gcamn->z, vals[tid], gcam->ninputs);
 
         if (!gcamn->gc) {
           MatrixClear(v_means[tid]);
           MatrixIdentity(gcam->ninputs, m_inv_cov[tid]);
-          MatrixScalarMul(m_inv_cov[tid], 1.0 / (MIN_VAR), m_inv_cov[tid]); /* variance=4 is min */
-        }
-        else {
+          MatrixScalarMul(m_inv_cov[tid], 1.0 / (MIN_VAR),
+                          m_inv_cov[tid]); /* variance=4 is min */
+        } else {
 #if 0
           if (parms->relabel)
           {
@@ -2048,11 +2081,13 @@ int gcamLogLikelihoodTerm(GCA_MORPH *gcam, const MRI *mri, const MRI *mri_smooth
           }
 #endif
           load_mean_vector(gcamn->gc, v_means[tid], gcam->ninputs);
-          load_inverse_covariance_matrix(gcamn->gc, m_inv_cov[tid], gcam->ninputs);
+          load_inverse_covariance_matrix(gcamn->gc, m_inv_cov[tid],
+                                         gcam->ninputs);
         }
 
         for (n = 0; n < gcam->ninputs; n++) {
-          MRIsampleVolumeGradientFrame(mri_smooth, gcamn->x, gcamn->y, gcamn->z, &dx, &dy, &dz, n);
+          MRIsampleVolumeGradientFrame(mri_smooth, gcamn->x, gcamn->y, gcamn->z,
+                                       &dx, &dy, &dz, n);
           norm = sqrt(dx * dx + dy * dy + dz * dz);
           if (!FZERO(norm)) /* don't worry about magnitude of gradient */
           {
@@ -2066,7 +2101,8 @@ int gcamLogLikelihoodTerm(GCA_MORPH *gcam, const MRI *mri, const MRI *mri_smooth
           VECTOR_ELT(v_means[tid], n + 1) -= vals[tid][n];
 #define MAX_ERROR 1000
           if (fabs(VECTOR_ELT(v_means[tid], n + 1)) > MAX_ERROR)
-            VECTOR_ELT(v_means[tid], n + 1) = MAX_ERROR * FSIGN(VECTOR_ELT(v_means[tid], n + 1));
+            VECTOR_ELT(v_means[tid], n + 1) =
+                MAX_ERROR * FSIGN(VECTOR_ELT(v_means[tid], n + 1));
         }
 
         MatrixMultiply(m_inv_cov[tid], v_means[tid], v_means[tid]);
@@ -2074,12 +2110,9 @@ int gcamLogLikelihoodTerm(GCA_MORPH *gcam, const MRI *mri, const MRI *mri_smooth
         if (IS_UNKNOWN(gcamn->label)) {
           if (zero_vals(vals[tid], gcam->ninputs)) {
             if (Gx == x && Gy == y && Gz == z)
-              printf(
-                  "discounting unknown label at (%d, %d, %d) "
-                  "due to skull strip difference\n",
-                  x,
-                  y,
-                  z);
+              printf("discounting unknown label at (%d, %d, %d) "
+                     "due to skull strip difference\n",
+                     x, y, z);
             /* probably difference in skull stripping (vessels present or
                absent) - don't let it dominate */
             if (VECTOR_ELT(v_means[tid], 1) > .5) /* don't let it be more
@@ -2103,35 +2136,26 @@ int gcamLogLikelihoodTerm(GCA_MORPH *gcam, const MRI *mri, const MRI *mri_smooth
         gcamn->dz += l_log_likelihood * V3_Z(v_grad[tid]);
 
         if (x == Gx && y == Gy && z == Gz) {
-          printf(
-              "ll_like: node(%d,%d,%d)-->vox(%2.0f,%2.0f,%2.0F): dI=(%2.1f,%2.1f,%2.1f), "
-              "grad=(%2.2f,%2.2f,%2.2f), "
-              "node %2.2f+-%2.2f, MRI=%2.1f\n",
-              x,
-              y,
-              z,
-              dx,
-              dy,
-              dz,
-              gcamn->x,
-              gcamn->y,
-              gcamn->z,
-              gcamn->dx,
-              gcamn->dy,
-              gcamn->dz,
-              gcamn->gc ? gcamn->gc->means[0] : 0.0,
-              gcamn->gc ? sqrt(covariance_determinant(gcamn->gc, gcam->ninputs)) : 0.0,
-              vals[tid][0]);
+          printf("ll_like: node(%d,%d,%d)-->vox(%2.0f,%2.0f,%2.0F): "
+                 "dI=(%2.1f,%2.1f,%2.1f), "
+                 "grad=(%2.2f,%2.2f,%2.2f), "
+                 "node %2.2f+-%2.2f, MRI=%2.1f\n",
+                 x, y, z, dx, dy, dz, gcamn->x, gcamn->y, gcamn->z, gcamn->dx,
+                 gcamn->dy, gcamn->dz, gcamn->gc ? gcamn->gc->means[0] : 0.0,
+                 gcamn->gc
+                     ? sqrt(covariance_determinant(gcamn->gc, gcam->ninputs))
+                     : 0.0,
+                 vals[tid][0]);
         }
       }
     }
     ROMP_PFLB_end
   }
   ROMP_PF_end
-  
-//  TIMER_INTERVAL_END(loop)
 
-  for (i = 0; i < nthreads; i++) {
+      //  TIMER_INTERVAL_END(loop)
+
+      for (i = 0; i < nthreads; i++) {
     MatrixFree(&m_delI[i]);
     MatrixFree(&m_inv_cov[i]);
     VectorFree(&v_means[i]);
@@ -2139,15 +2163,15 @@ int gcamLogLikelihoodTerm(GCA_MORPH *gcam, const MRI *mri, const MRI *mri_smooth
   }
 
   gcamLogLikelihoodTerm_nCalls++;
-  gcamLogLikelihoodTerm_tsec += (timer.milliseconds()/1000.0);
+  gcamLogLikelihoodTerm_tsec += (timer.milliseconds() / 1000.0);
 
   return (NO_ERROR);
 }
 
 /*
  */
-int gcamLikelihoodTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, double l_likelihood, GCA_MORPH_PARMS *parms)
-{
+int gcamLikelihoodTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth,
+                       double l_likelihood, GCA_MORPH_PARMS *parms) {
   int x, y, z, len, xi, yi, zi, x0, y0, z0, half_len;
   double dx, dy, dz;
   float val, mean, var;
@@ -2181,20 +2205,25 @@ int gcamLikelihoodTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, double l_like
           continue;
         }
 
-        if (fabs(gcamn->x - Gvx) < 1 && fabs(gcamn->y - Gvy) < 1 && fabs(gcamn->z - Gvz) < 1) {
+        if (fabs(gcamn->x - Gvx) < 1 && fabs(gcamn->y - Gvy) < 1 &&
+            fabs(gcamn->z - Gvz) < 1) {
           DiagBreak();
         }
-        if (gcamn->status & (GCAM_IGNORE_LIKELIHOOD | GCAM_NEVER_USE_LIKELIHOOD) || (gcamn->gc == NULL)) {
+        if (gcamn->status &
+                (GCAM_IGNORE_LIKELIHOOD | GCAM_NEVER_USE_LIKELIHOOD) ||
+            (gcamn->gc == NULL)) {
           continue;
         }
 
         x0 = nint(gcamn->x);
         y0 = nint(gcamn->y);
         z0 = nint(gcamn->z);
-        if ((x0 + half_len >= mri->width) || (y0 + half_len >= mri->height) || (z0 + half_len >= mri->depth)) {
+        if ((x0 + half_len >= mri->width) || (y0 + half_len >= mri->height) ||
+            (z0 + half_len >= mri->depth)) {
           continue;
         }
-        MRIextractInto(mri, mri_nbhd, x0 - half_len, y0 - half_len, z0 - half_len, len, len, len, 0, 0, 0);
+        MRIextractInto(mri, mri_nbhd, x0 - half_len, y0 - half_len,
+                       z0 - half_len, len, len, len, 0, 0, 0);
         if (gcam->ninputs == 1) {
           var = gcamn->gc->covars[0];
           mean = gcamn->gc->means[0];
@@ -2208,10 +2237,10 @@ int gcamLikelihoodTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, double l_like
               }
             }
           }
-        }
-        else /* haven't written the multi-input case yet */
+        } else /* haven't written the multi-input case yet */
         {
-          ErrorExit(ERROR_UNSUPPORTED, "vector-based likelihood not written yet");
+          ErrorExit(ERROR_UNSUPPORTED,
+                    "vector-based likelihood not written yet");
         }
         MRIconvolveGaussian(mri_nbhd, mri_nbhd, mri_kernel);
         dx = -MRIgetVoxDx(mri_nbhd, half_len, half_len, half_len, 0);
@@ -2228,17 +2257,13 @@ int gcamLikelihoodTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, double l_like
         gcamn->dz += l_likelihood * dz;
 
         if (x == Gx && y == Gy && z == Gz)
-          printf(
-              "l_like: node(%d,%d,%d): dp=(%2.2f,%2.2f,%2.2f), "
-              "node %2.2f+-%2.2f\n",
-              x,
-              y,
-              z,
-              gcamn->dx,
-              gcamn->dy,
-              gcamn->dz,
-              gcamn->gc ? gcamn->gc->means[0] : 0.0,
-              gcamn->gc ? sqrt(covariance_determinant(gcamn->gc, gcam->ninputs)) : 0.0);
+          printf("l_like: node(%d,%d,%d): dp=(%2.2f,%2.2f,%2.2f), "
+                 "node %2.2f+-%2.2f\n",
+                 x, y, z, gcamn->dx, gcamn->dy, gcamn->dz,
+                 gcamn->gc ? gcamn->gc->means[0] : 0.0,
+                 gcamn->gc
+                     ? sqrt(covariance_determinant(gcamn->gc, gcam->ninputs))
+                     : 0.0);
       }
 
   MRIfree(&mri_kernel);
@@ -2261,8 +2286,7 @@ static float ***last_sse = NULL;
    sensitive.
 #E#
  */
-double gcamLogLikelihoodEnergy(const GCA_MORPH *gcam, MRI *mri)
-{
+double gcamLogLikelihoodEnergy(const GCA_MORPH *gcam, MRI *mri) {
 /*
   NOTE: The only reason *mri is not declared 'const' is because
   I can't figure out how to make MRIwrite accept a const MRI
@@ -2278,7 +2302,8 @@ double gcamLogLikelihoodEnergy(const GCA_MORPH *gcam, MRI *mri)
     snprintf(fname, STRLEN - 1, "gcamLLEinput%04u", nCalls / gcamLLEoutputFreq);
     fname[STRLEN - 1] = '\0';
     WriteGCAMoneInput(gcam, fname);
-    snprintf(fname, STRLEN - 1, "mriLLEinput%04u.mgz", nCalls / gcamLLEoutputFreq);
+    snprintf(fname, STRLEN - 1, "mriLLEinput%04u.mgz",
+             nCalls / gcamLLEoutputFreq);
     MRIwrite(mri, fname);
   }
 #endif
@@ -2299,8 +2324,7 @@ double gcamLogLikelihoodEnergy(const GCA_MORPH *gcam, MRI *mri)
   }
 #endif
 
-
-// TIMER_INTERVAL_BEGIN(loop)
+  // TIMER_INTERVAL_BEGIN(loop)
 
   double sse = 0.0;
   extern int gcamLogLikelihoodEnergy_nCalls;
@@ -2313,132 +2337,132 @@ double gcamLogLikelihoodEnergy(const GCA_MORPH *gcam, MRI *mri)
 
 #ifdef BEVIN_GCAMLOGLIKELIHOODENERGY_REPRODUCIBLE
 
-  #define ROMP_VARIABLE       x
-  #define ROMP_LO             0
-  #define ROMP_HI             gcam->width
+#define ROMP_VARIABLE x
+#define ROMP_LO 0
+#define ROMP_HI gcam->width
 
-  #define ROMP_SUMREDUCTION0  sse
-    
-  #define ROMP_FOR_LEVEL      ROMP_level_assume_reproducible
-    
+#define ROMP_SUMREDUCTION0 sse
+
+#define ROMP_FOR_LEVEL ROMP_level_assume_reproducible
+
 #ifdef ROMP_SUPPORT_ENABLED
   const int romp_for_line = __LINE__;
 #endif
-  #include "romp_for_begin.h"
+#include "romp_for_begin.h"
   ROMP_for_begin
-    
-    #define sse  ROMP_PARTIALSUM(0)
+
+#define sse ROMP_PARTIALSUM(0)
 
 #else
 
   int x;
 
-  ROMP_PF_begin     // mri_ca_register
+  ROMP_PF_begin // mri_ca_register
 
 #ifdef HAVE_OPENMP
-  #pragma omp parallel for if_ROMP(fast) reduction(+ : sse) firstprivate(y, z, error) shared(gcam, mri) schedule(static, 1)
+#pragma omp parallel for if_ROMP(fast) reduction(+ : sse) firstprivate(y, z, error) shared(gcam, mri) schedule(static, 1)
 #endif
-  for (x = 0; x < gcam->width; x++) {
+      for (x = 0; x < gcam->width; x++) {
     ROMP_PFLB_begin
 
 #endif
 
-    int y;    
-    for (y = 0; y < gcam->height; y++) {
-      struct different_neighbor_labels_context different_neighbor_labels_context;
-      init_different_neighbor_labels_context(&different_neighbor_labels_context,gcam,x,y);
-      float vals[MAX_GCA_INPUTS];
-      int z;
-      for (z = 0; z < gcam->depth; z++) {
-        // Debugging breakpoint
-        if (x == Gx && y == Gy && z == Gz) {
-          DiagBreak();
-        }
+      int y;
+  for (y = 0; y < gcam->height; y++) {
+    struct different_neighbor_labels_context different_neighbor_labels_context;
+    init_different_neighbor_labels_context(&different_neighbor_labels_context,
+                                           gcam, x, y);
+    float vals[MAX_GCA_INPUTS];
+    int z;
+    for (z = 0; z < gcam->depth; z++) {
+      // Debugging breakpoint
+      if (x == Gx && y == Gy && z == Gz) {
+        DiagBreak();
+      }
 
-        // Shorthand way of accessing current node
-        const GCA_MORPH_NODE * /* const */ gcamn = &gcam->nodes[x][y][z];
+      // Shorthand way of accessing current node
+      const GCA_MORPH_NODE * /* const */ gcamn = &gcam->nodes[x][y][z];
 
-        // Don't operate on invalid nodes
-        if (gcamn->invalid == GCAM_POSITION_INVALID) {
-          continue;
-        }
-        check_gcam(gcam);
+      // Don't operate on invalid nodes
+      if (gcamn->invalid == GCAM_POSITION_INVALID) {
+        continue;
+      }
+      check_gcam(gcam);
 
-        // Check for ignore
-        if (gcamn->status & (GCAM_IGNORE_LIKELIHOOD | GCAM_NEVER_USE_LIKELIHOOD)) {
-          continue;
-        }
+      // Check for ignore
+      if (gcamn->status &
+          (GCAM_IGNORE_LIKELIHOOD | GCAM_NEVER_USE_LIKELIHOOD)) {
+        continue;
+      }
 
-        /* don't use unkown nodes unless they border
-           something that's not unknown */
-        if (IS_UNKNOWN(gcamn->label) && (different_neighbor_labels(&different_neighbor_labels_context, gcamn->label, gcam, x, y, z) == 0)) {
-          continue;
-        }
+      /* don't use unkown nodes unless they border
+         something that's not unknown */
+      if (IS_UNKNOWN(gcamn->label) &&
+          (different_neighbor_labels(&different_neighbor_labels_context,
+                                     gcamn->label, gcam, x, y, z) == 0)) {
+        continue;
+      }
 
-        check_gcam(gcam);
+      check_gcam(gcam);
 
-        // Load up the MRI values (which will do trilinear interpolation)
-        load_vals(mri, gcamn->x, gcamn->y, gcamn->z, vals, gcam->ninputs);
-        check_gcam(gcam);
+      // Load up the MRI values (which will do trilinear interpolation)
+      load_vals(mri, gcamn->x, gcamn->y, gcamn->z, vals, gcam->ninputs);
+      check_gcam(gcam);
 
-        // Compute 'error' for this node
-        double error;
-        if (gcamn->gc) {
-          error = GCAmahDist(gcamn->gc, vals, gcam->ninputs) + log(covariance_determinant(gcamn->gc, gcam->ninputs));
-        }
-        else {
-          int n;
-          // Note that the for loop sets error=0 on the first iteration
-          for (n = 0, error = 0.0; n < gcam->ninputs; n++) {
-            error += (vals[n] * vals[n] / MIN_VAR);
-          }
-        }
-
-        check_gcam(gcam);
-
-        // Random output
-        if (x == Gx && y == Gy && z == Gz)
-          printf(
-              "E_like: node(%d,%d,%d) -> "
-              "(%2.1f,%2.1f,%2.1f), target=%2.1f+-%2.1f, val=%2.1f\n",
-              x,
-              y,
-              z,
-              gcamn->x,
-              gcamn->y,
-              gcamn->z,
-              gcamn->gc ? gcamn->gc->means[0] : 0.0,
-              gcamn->gc ? sqrt(covariance_determinant(gcamn->gc, gcam->ninputs)) : 0.0,
-              vals[0]);
-
-        check_gcam(gcam);
-#if DEBUG_LL_SSE
-        if (last_sse[x][y][z] < (.9 * error) && !FZERO(last_sse[x][y][z])) {
-          DiagBreak();
-          increase = error - last_sse[x][y][z];
-          if (increase > max_increase) {
-            max_increase = increase;
-            max_x = x;
-            max_y = y;
-            max_z = z;
-          }
-        }
-        last_sse[x][y][z] = (error);
-#endif
-
-        // Accumulate onto main variable
-        sse += (error);
-
-        // Enable debugging breakpoint if not finite
-        if (!finitep(sse)) {
-          DiagBreak();
+      // Compute 'error' for this node
+      double error;
+      if (gcamn->gc) {
+        error = GCAmahDist(gcamn->gc, vals, gcam->ninputs) +
+                log(covariance_determinant(gcamn->gc, gcam->ninputs));
+      } else {
+        int n;
+        // Note that the for loop sets error=0 on the first iteration
+        for (n = 0, error = 0.0; n < gcam->ninputs; n++) {
+          error += (vals[n] * vals[n] / MIN_VAR);
         }
       }
+
+      check_gcam(gcam);
+
+      // Random output
+      if (x == Gx && y == Gy && z == Gz)
+        printf("E_like: node(%d,%d,%d) -> "
+               "(%2.1f,%2.1f,%2.1f), target=%2.1f+-%2.1f, val=%2.1f\n",
+               x, y, z, gcamn->x, gcamn->y, gcamn->z,
+               gcamn->gc ? gcamn->gc->means[0] : 0.0,
+               gcamn->gc
+                   ? sqrt(covariance_determinant(gcamn->gc, gcam->ninputs))
+                   : 0.0,
+               vals[0]);
+
+      check_gcam(gcam);
+#if DEBUG_LL_SSE
+      if (last_sse[x][y][z] < (.9 * error) && !FZERO(last_sse[x][y][z])) {
+        DiagBreak();
+        increase = error - last_sse[x][y][z];
+        if (increase > max_increase) {
+          max_increase = increase;
+          max_x = x;
+          max_y = y;
+          max_z = z;
+        }
+      }
+      last_sse[x][y][z] = (error);
+#endif
+
+      // Accumulate onto main variable
+      sse += (error);
+
+      // Enable debugging breakpoint if not finite
+      if (!finitep(sse)) {
+        DiagBreak();
+      }
     }
+  }
 #ifdef BEVIN_GCAMLOGLIKELIHOODENERGY_REPRODUCIBLE
 
-    #undef sse
-  #include "romp_for_end.h"
+#undef sse
+#include "romp_for_end.h"
 
 #else
     ROMP_PFLB_end
@@ -2446,10 +2470,12 @@ double gcamLogLikelihoodEnergy(const GCA_MORPH *gcam, MRI *mri)
   ROMP_PF_end
 #endif
 
-//  TIMER_INTERVAL_END(loop)
+  //  TIMER_INTERVAL_END(loop)
 
 #if DEBUG_LL_SSE
-  if (Gdiag & DIAG_SHOW) printf("max increase %2.2f at (%d, %d, %d)\n", max_increase, max_x, max_y, max_z);
+  if (Gdiag & DIAG_SHOW)
+    printf("max increase %2.2f at (%d, %d, %d)\n", max_increase, max_x, max_y,
+           max_z);
 #endif
 
 #if GCAM_LLENERGY_OUTPUT
@@ -2457,14 +2483,12 @@ double gcamLogLikelihoodEnergy(const GCA_MORPH *gcam, MRI *mri)
 #endif
 
   gcamLogLikelihoodEnergy_nCalls++;
-  gcamLogLikelihoodEnergy_tsec += (timer.milliseconds()/1000.0);
-
+  gcamLogLikelihoodEnergy_tsec += (timer.milliseconds() / 1000.0);
 
   return (sse);
 }
 
-int gcamDistanceTerm(GCA_MORPH *gcam, MRI *mri, double l_distance)
-{
+int gcamDistanceTerm(GCA_MORPH *gcam, MRI *mri, double l_distance) {
   double dx, dy, dz, error, d0, d, xdelta, ydelta, zdelta;
   int x, y, z, xk, yk, zk, xn, yn, zn, width, height, depth, num;
   GCA_MORPH_NODE *gcamn, *gcamn_nbr;
@@ -2483,7 +2507,8 @@ int gcamDistanceTerm(GCA_MORPH *gcam, MRI *mri, double l_distance)
         }
         gcamn = &gcam->nodes[x][y][z];
 
-        if ((gcamn->invalid == GCAM_POSITION_INVALID) || (gcamn->status & GCAM_IGNORE_DISTANCES)) {
+        if ((gcamn->invalid == GCAM_POSITION_INVALID) ||
+            (gcamn->status & GCAM_IGNORE_DISTANCES)) {
           continue;
         }
 
@@ -2544,7 +2569,8 @@ int gcamDistanceTerm(GCA_MORPH *gcam, MRI *mri, double l_distance)
         ydelta *= l_distance;
         zdelta *= l_distance;
         if (x == Gx && y == Gy && z == Gz)
-          printf("l_dist: node(%d,%d,%d) distance term (%2.2f,%2.2f,%2.2f)\n", x, y, z, xdelta, ydelta, zdelta);
+          printf("l_dist: node(%d,%d,%d) distance term (%2.2f,%2.2f,%2.2f)\n",
+                 x, y, z, xdelta, ydelta, zdelta);
         gcamn->dx += xdelta;
         gcamn->dy += ydelta;
         gcamn->dz += zdelta;
@@ -2553,8 +2579,7 @@ int gcamDistanceTerm(GCA_MORPH *gcam, MRI *mri, double l_distance)
   return (NO_ERROR);
 }
 
-double gcamDistanceEnergy(GCA_MORPH *gcam, MRI *mri)
-{
+double gcamDistanceEnergy(GCA_MORPH *gcam, MRI *mri) {
   double sse = 0.0, dx, dy, dz, error, node_sse, d0, d;
   int x, y, z, xk, yk, zk, xn, yn, zn, width, height, depth, num;
   GCA_MORPH_NODE *gcamn, *gcamn_nbr;
@@ -2570,7 +2595,8 @@ double gcamDistanceEnergy(GCA_MORPH *gcam, MRI *mri)
         }
         gcamn = &gcam->nodes[x][y][z];
 
-        if ((gcamn->invalid == GCAM_POSITION_INVALID) || (gcamn->status & GCAM_IGNORE_DISTANCES)) {
+        if ((gcamn->invalid == GCAM_POSITION_INVALID) ||
+            (gcamn->status & GCAM_IGNORE_DISTANCES)) {
           continue;
         }
 
@@ -2622,7 +2648,8 @@ double gcamDistanceEnergy(GCA_MORPH *gcam, MRI *mri)
           sse += node_sse / num;
         }
         if (x == Gx && y == Gy && z == Gz)
-          printf("E_dist: node(%d,%d,%d) distance sse %2.3f\n", x, y, z, node_sse / num);
+          printf("E_dist: node(%d,%d,%d) distance sse %2.3f\n", x, y, z,
+                 node_sse / num);
       }
 
   return (sse);
@@ -2631,8 +2658,8 @@ double gcamDistanceEnergy(GCA_MORPH *gcam, MRI *mri)
 #define AREA_NEIGHBORS 8
 const float jac_scale = 10;
 #if 1
-int gcamJacobianTerm(GCA_MORPH *gcam, const MRI *mri, double l_jacobian, double ratio_thresh)
-{
+int gcamJacobianTerm(GCA_MORPH *gcam, const MRI *mri, double l_jacobian,
+                     double ratio_thresh) {
   int i = 0, j = 0, k = 0, num /*, xi, yi, zi, xk, yk, zk = 0*/;
   int n_omp_threads = 1;
   double dx = 0.0, dy = 0.0, dz = 0.0, norm = 0.0;
@@ -2650,12 +2677,12 @@ int gcamJacobianTerm(GCA_MORPH *gcam, const MRI *mri, double l_jacobian, double 
   num = 0;
   ROMP_PF_begin
 #ifdef HAVE_OPENMP
-  #pragma omp parallel for if_ROMP(assume_reproducible) reduction (+:num) firstprivate (j,k,gcamn,ratio,orig_area,ratio_thresh) shared(gcam) schedule(static,1)
+#pragma omp parallel for if_ROMP(assume_reproducible) reduction (+:num) firstprivate (j,k,gcamn,ratio,orig_area,ratio_thresh) shared(gcam) schedule(static,1)
 #endif
-  for (i = 0; i < gcam->width; i++) {
+      for (i = 0; i < gcam->width; i++) {
     ROMP_PFLB_begin
-    
-    for (j = 0; j < gcam->height; j++) {
+
+        for (j = 0; j < gcam->height; j++) {
       for (k = 0; k < gcam->depth; k++) {
         gcamn = &gcam->nodes[i][j][k];
 
@@ -2674,12 +2701,12 @@ int gcamJacobianTerm(GCA_MORPH *gcam, const MRI *mri, double l_jacobian, double 
         }
       }
     }
-    
+
     ROMP_PFLB_end
   }
   ROMP_PF_end
 
-  if (DIAG_VERBOSE_ON) {
+      if (DIAG_VERBOSE_ON) {
     printf("  %d nodes compressed more than %2.2f\n", num, ratio_thresh);
   }
 
@@ -2697,23 +2724,24 @@ int gcamJacobianTerm(GCA_MORPH *gcam, const MRI *mri, double l_jacobian, double 
   }
 
   if (gcam->width < 4) {
-      static bool reported = false;
-      if (!reported) {
-        reported = true;
-	fprintf(stderr,"%s:%d width:%d too small for parallelism\n", 
-	  __FILE__, __LINE__, gcam->width);
-      }
+    static bool reported = false;
+    if (!reported) {
+      reported = true;
+      fprintf(stderr, "%s:%d width:%d too small for parallelism\n", __FILE__,
+              __LINE__, gcam->width);
+    }
   }
-  
 
   ROMP_PF_begin
 #ifdef HAVE_OPENMP
-  #pragma omp parallel for if_ROMP(assume_reproducible) firstprivate(j, k, gcamn, dx, dy, dz, norm, tid, mn) shared(gcam) schedule(static, 1)
+#pragma omp parallel for if_ROMP(assume_reproducible)                          \
+    firstprivate(j, k, gcamn, dx, dy, dz, norm, tid, mn) shared(gcam)          \
+        schedule(static, 1)
 #endif
-  for (i = 0; i < gcam->width; i++) {
+      for (i = 0; i < gcam->width; i++) {
     ROMP_PFLB_begin
-    
-    for (j = 0; j < gcam->height; j++) {
+
+        for (j = 0; j < gcam->height; j++) {
       for (k = 0; k < gcam->depth; k++) {
         gcamn = &gcam->nodes[i][j][k];
         dx = gcamn->dx;
@@ -2730,25 +2758,26 @@ int gcamJacobianTerm(GCA_MORPH *gcam, const MRI *mri, double l_jacobian, double 
         }
       }
     }
-    
+
     ROMP_PFLB_end
   }
   ROMP_PF_end
 
-  for (i = 0; i < n_omp_threads; i++)
-    if (mn[i] > max_norm) {
-      max_norm = mn[i];
-    }
+      for (i = 0; i < n_omp_threads; i++) if (mn[i] > max_norm) {
+    max_norm = mn[i];
+  }
 
   ROMP_PF_begin
 #ifdef HAVE_OPENMP
-  #pragma omp parallel for if_ROMP(assume_reproducible) firstprivate(j, k, gcamn, dx, dy, dz, norm) \
-    shared(gcam, mri, l_jacobian, Gx, Gy, Gz, max_norm) schedule(static, 1)
+#pragma omp parallel for if_ROMP(assume_reproducible)                          \
+    firstprivate(j, k, gcamn, dx, dy, dz, norm)                                \
+        shared(gcam, mri, l_jacobian, Gx, Gy, Gz, max_norm)                    \
+            schedule(static, 1)
 #endif
-  for (i = 0; i < gcam->width; i++) {
+      for (i = 0; i < gcam->width; i++) {
     ROMP_PFLB_begin
-    
-    for (j = 0; j < gcam->height; j++) {
+
+        for (j = 0; j < gcam->height; j++) {
       for (k = 0; k < gcam->depth; k++) {
         gcamn = &gcam->nodes[i][j][k];
         if (i == Gx && j == Gy && k == Gz) {
@@ -2778,16 +2807,16 @@ int gcamJacobianTerm(GCA_MORPH *gcam, const MRI *mri, double l_jacobian, double 
   }
   ROMP_PF_end
 
-  gcamJacobianTerm_nCalls++;
-  gcamJacobianTerm_tsec += (timer.milliseconds()/1000.0);
+      gcamJacobianTerm_nCalls++;
+  gcamJacobianTerm_tsec += (timer.milliseconds() / 1000.0);
 
   return (NO_ERROR);
 }
 
 #else
 
-int gcamJacobianTerm(GCA_MORPH *gcam, MRI *mri, double l_jacobian, double ratio_thresh)
-{
+int gcamJacobianTerm(GCA_MORPH *gcam, MRI *mri, double l_jacobian,
+                     double ratio_thresh) {
   int i, j, k, num, xi, yi, zi, xk, yk, zk = 0;
   double dx, dy, dz, norm, max_norm;
   GCA_MORPH_NODE *gcamn;
@@ -2918,7 +2947,8 @@ int gcamJacobianTerm(GCA_MORPH *gcam, MRI *mri, double l_jacobian, double ratio_
         }
 
         if (i == Gx && j == Gy && k == Gz) {
-          printf("node(%d,%d,%d) --> Jacobian term: (%2.1f, %2.1f, %2.1f)\n", i, j, k, gcamn->jx, gcamn->jy, gcamn->jz);
+          printf("node(%d,%d,%d) --> Jacobian term: (%2.1f, %2.1f, %2.1f)\n", i,
+                 j, k, gcamn->jx, gcamn->jy, gcamn->jz);
           DiagBreak();
         }
         gcamn->dx += gcamn->jx;
@@ -2932,8 +2962,7 @@ int gcamJacobianTerm(GCA_MORPH *gcam, MRI *mri, double l_jacobian, double ratio_
 }
 #endif
 
-int gcamAreaTerm(GCA_MORPH *gcam, double l_area)
-{
+int gcamAreaTerm(GCA_MORPH *gcam, double l_area) {
   int i, j, k;
   double dx, dy, dz;
   GCA_MORPH_NODE *gcamn;
@@ -2961,8 +2990,8 @@ int gcamAreaTerm(GCA_MORPH *gcam, double l_area)
   return (NO_ERROR);
 }
 
-int gcamAreaSmoothnessTerm(GCA_MORPH *gcam, MRI *mri, double l_area_smoothness)
-{
+int gcamAreaSmoothnessTerm(GCA_MORPH *gcam, MRI *mri,
+                           double l_area_smoothness) {
   int i, j, k;
   double dx, dy, dz, Ix, Iy, Iz, norm, nc;
   GCA_MORPH_NODE *gcamn;
@@ -2977,10 +3006,12 @@ int gcamAreaSmoothnessTerm(GCA_MORPH *gcam, MRI *mri, double l_area_smoothness)
           DiagBreak();
         }
         gcamn = &gcam->nodes[i][j][k];
-        if (gcamn->invalid == GCAM_AREA_INVALID || gcamn->invalid == GCAM_POSITION_INVALID) {
+        if (gcamn->invalid == GCAM_AREA_INVALID ||
+            gcamn->invalid == GCAM_POSITION_INVALID) {
           continue;
         }
-        MRIsampleVolumeGradientFrame(mri, gcamn->x, gcamn->y, gcamn->z, &Ix, &Iy, &Iz, 0);
+        MRIsampleVolumeGradientFrame(mri, gcamn->x, gcamn->y, gcamn->z, &Ix,
+                                     &Iy, &Iz, 0);
         gcamAreaTermAtNode(gcam, l_area_smoothness, i, j, k, &dx, &dy, &dz);
 
         // take out component in intensity gradient direction
@@ -2995,7 +3026,9 @@ int gcamAreaSmoothnessTerm(GCA_MORPH *gcam, MRI *mri, double l_area_smoothness)
         dx -= Ix * nc;
         dy -= Iy * nc;
         dz -= Iz * nc;
-        if (i == Gx && j == Gy && k == Gz) printf("l_AS(%d, %d, %d): (%2.2f, %2.2f, %2.2f)\n", i, j, k, dx, dy, dz);
+        if (i == Gx && j == Gy && k == Gz)
+          printf("l_AS(%d, %d, %d): (%2.2f, %2.2f, %2.2f)\n", i, j, k, dx, dy,
+                 dz);
         gcam->nodes[i][j][k].dx += dx;
         gcam->nodes[i][j][k].dy += dy;
         gcam->nodes[i][j][k].dz += dz;
@@ -3005,22 +3038,26 @@ int gcamAreaSmoothnessTerm(GCA_MORPH *gcam, MRI *mri, double l_area_smoothness)
   return (NO_ERROR);
 }
 
-int gcamJacobianTermAtNode(
-    GCA_MORPH *gcam, const MRI *mri, double l_jacobian, int i, int j, int k, double *pdx, double *pdy, double *pdz)
-{
+int gcamJacobianTermAtNode(GCA_MORPH *gcam, const MRI *mri, double l_jacobian,
+                           int i, int j, int k, double *pdx, double *pdy,
+                           double *pdz) {
   GCA_MORPH_NODE *gcamn, *gcamni, *gcamnj, *gcamnk;
   float delta, ratio;
   int n, width, height, depth, invert;
   /* these are all thread local variables */
   /* _MAX_FS_THREADS is defined in utils.h */
-  static VECTOR *v_i[_MAX_FS_THREADS] = {NULL}, *v_j[_MAX_FS_THREADS], *v_k[_MAX_FS_THREADS], *v_j_x_k[_MAX_FS_THREADS],
-                *v_i_x_j[_MAX_FS_THREADS], *v_k_x_i[_MAX_FS_THREADS], *v_grad[_MAX_FS_THREADS], *v_tmp[_MAX_FS_THREADS];
+  static VECTOR *v_i[_MAX_FS_THREADS] = {NULL}, *v_j[_MAX_FS_THREADS],
+                *v_k[_MAX_FS_THREADS], *v_j_x_k[_MAX_FS_THREADS],
+                *v_i_x_j[_MAX_FS_THREADS], *v_k_x_i[_MAX_FS_THREADS],
+                *v_grad[_MAX_FS_THREADS], *v_tmp[_MAX_FS_THREADS];
   double exponent, orig_area, area;
 
   *pdx = *pdy = *pdz = 0;
-  if (DZERO(l_jacobian)) return (NO_ERROR);
+  if (DZERO(l_jacobian))
+    return (NO_ERROR);
 
-  if (i == Gx && j == Gy && k == Gz) DiagBreak();
+  if (i == Gx && j == Gy && k == Gz)
+    DiagBreak();
 
 #ifdef HAVE_OPENMP
   int tid = omp_get_thread_num();
@@ -3048,8 +3085,7 @@ int gcamJacobianTermAtNode(
     v_i_x_j[tid] = VectorAlloc(3, MATRIX_REAL);
     v_k_x_i[tid] = VectorAlloc(3, MATRIX_REAL);
     v_tmp[tid] = VectorAlloc(3, MATRIX_REAL);
-  }
-  else {
+  } else {
     V3_CLEAR(v_grad[tid]);
   }
 
@@ -3057,90 +3093,89 @@ int gcamJacobianTermAtNode(
     /* assign gcamn pointers to appropriate nodes */
     invert = 1;
     switch (n) {
-      default:
-      case 0: /* first do central node */
-        if ((i + 1 >= width) || (j + 1 >= height) || (k + 1 >= depth)) {
-          continue;
-        }
-        gcamn = &gcam->nodes[i][j][k];
-        gcamni = &gcam->nodes[i + 1][j][k];
-        gcamnj = &gcam->nodes[i][j + 1][k];
-        gcamnk = &gcam->nodes[i][j][k + 1];
-        break;
-      case 1: /*  i-1 */
-        if ((i == 0) || (j + 1 >= height) || (k + 1 >= depth)) {
-          continue;
-        }
-        gcamn = &gcam->nodes[i - 1][j][k];
-        gcamni = &gcam->nodes[i][j][k];
-        gcamnj = &gcam->nodes[i - 1][j + 1][k];
-        gcamnk = &gcam->nodes[i - 1][j][k + 1];
-        break;
-      case 2: /* j-1 */
-        if ((i + 1 >= width) || (j == 0) || (k + 1 >= depth)) {
-          continue;
-        }
-        gcamn = &gcam->nodes[i][j - 1][k];
-        gcamni = &gcam->nodes[i + 1][j - 1][k];
-        gcamnj = &gcam->nodes[i][j][k];
-        gcamnk = &gcam->nodes[i][j - 1][k + 1];
-        break;
-      case 3: /* k-1 */
-        if ((i + 1 >= width) || (j + 1 >= height) || (k == 0)) {
-          continue;
-        }
-        gcamn = &gcam->nodes[i][j][k - 1];
-        gcamni = &gcam->nodes[i + 1][j][k - 1];
-        gcamnj = &gcam->nodes[i][j + 1][k - 1];
-        gcamnk = &gcam->nodes[i][j][k];
-        break;
-      case 4:  // left-handed central node
-        if ((i == 0) || (j == 0) || (k == 0)) {
-          continue;
-        }
-        invert = -1;
-        gcamn = &gcam->nodes[i][j][k];
-        gcamni = &gcam->nodes[i - 1][j][k];
-        gcamnj = &gcam->nodes[i][j - 1][k];
-        gcamnk = &gcam->nodes[i][j][k - 1];
-        break;
-      case 5: /*  i+1 */
-        if ((i + 1 >= width) || (j == 0) || (k == 0)) {
-          continue;
-        }
-        invert = -1;
-        gcamn = &gcam->nodes[i + 1][j][k];
-        gcamni = &gcam->nodes[i][j][k];
-        gcamnj = &gcam->nodes[i + 1][j - 1][k];
-        gcamnk = &gcam->nodes[i + 1][j][k - 1];
-        break;
-      case 6: /* j+1 */
-        if ((i == 0) || (j + 1 >= height) || (k == 0)) {
-          continue;
-        }
-        invert = -1;
-        gcamn = &gcam->nodes[i][j + 1][k];
-        gcamni = &gcam->nodes[i - 1][j + 1][k];
-        gcamnj = &gcam->nodes[i][j][k];
-        gcamnk = &gcam->nodes[i][j + 1][k - 1];
-        break;
-      case 7: /* k+1 */
-        if ((i == 0) || (j == 0) || (k + 1 >= depth)) {
-          continue;
-        }
-        invert = -1;
-        gcamn = &gcam->nodes[i][j][k + 1];
-        gcamni = &gcam->nodes[i - 1][j][k + 1];
-        gcamnj = &gcam->nodes[i][j - 1][k + 1];
-        gcamnk = &gcam->nodes[i][j][k];
-        break;
+    default:
+    case 0: /* first do central node */
+      if ((i + 1 >= width) || (j + 1 >= height) || (k + 1 >= depth)) {
+        continue;
+      }
+      gcamn = &gcam->nodes[i][j][k];
+      gcamni = &gcam->nodes[i + 1][j][k];
+      gcamnj = &gcam->nodes[i][j + 1][k];
+      gcamnk = &gcam->nodes[i][j][k + 1];
+      break;
+    case 1: /*  i-1 */
+      if ((i == 0) || (j + 1 >= height) || (k + 1 >= depth)) {
+        continue;
+      }
+      gcamn = &gcam->nodes[i - 1][j][k];
+      gcamni = &gcam->nodes[i][j][k];
+      gcamnj = &gcam->nodes[i - 1][j + 1][k];
+      gcamnk = &gcam->nodes[i - 1][j][k + 1];
+      break;
+    case 2: /* j-1 */
+      if ((i + 1 >= width) || (j == 0) || (k + 1 >= depth)) {
+        continue;
+      }
+      gcamn = &gcam->nodes[i][j - 1][k];
+      gcamni = &gcam->nodes[i + 1][j - 1][k];
+      gcamnj = &gcam->nodes[i][j][k];
+      gcamnk = &gcam->nodes[i][j - 1][k + 1];
+      break;
+    case 3: /* k-1 */
+      if ((i + 1 >= width) || (j + 1 >= height) || (k == 0)) {
+        continue;
+      }
+      gcamn = &gcam->nodes[i][j][k - 1];
+      gcamni = &gcam->nodes[i + 1][j][k - 1];
+      gcamnj = &gcam->nodes[i][j + 1][k - 1];
+      gcamnk = &gcam->nodes[i][j][k];
+      break;
+    case 4: // left-handed central node
+      if ((i == 0) || (j == 0) || (k == 0)) {
+        continue;
+      }
+      invert = -1;
+      gcamn = &gcam->nodes[i][j][k];
+      gcamni = &gcam->nodes[i - 1][j][k];
+      gcamnj = &gcam->nodes[i][j - 1][k];
+      gcamnk = &gcam->nodes[i][j][k - 1];
+      break;
+    case 5: /*  i+1 */
+      if ((i + 1 >= width) || (j == 0) || (k == 0)) {
+        continue;
+      }
+      invert = -1;
+      gcamn = &gcam->nodes[i + 1][j][k];
+      gcamni = &gcam->nodes[i][j][k];
+      gcamnj = &gcam->nodes[i + 1][j - 1][k];
+      gcamnk = &gcam->nodes[i + 1][j][k - 1];
+      break;
+    case 6: /* j+1 */
+      if ((i == 0) || (j + 1 >= height) || (k == 0)) {
+        continue;
+      }
+      invert = -1;
+      gcamn = &gcam->nodes[i][j + 1][k];
+      gcamni = &gcam->nodes[i - 1][j + 1][k];
+      gcamnj = &gcam->nodes[i][j][k];
+      gcamnk = &gcam->nodes[i][j + 1][k - 1];
+      break;
+    case 7: /* k+1 */
+      if ((i == 0) || (j == 0) || (k + 1 >= depth)) {
+        continue;
+      }
+      invert = -1;
+      gcamn = &gcam->nodes[i][j][k + 1];
+      gcamni = &gcam->nodes[i - 1][j][k + 1];
+      gcamnj = &gcam->nodes[i][j - 1][k + 1];
+      gcamnk = &gcam->nodes[i][j][k];
+      break;
     }
-    if (invert > 0)  // right-handed coordinate system
+    if (invert > 0) // right-handed coordinate system
     {
       orig_area = gcamn->orig_area1;
       area = gcamn->area1;
-    }
-    else  // left-handed coordinate system
+    } else // left-handed coordinate system
     {
       orig_area = gcamn->orig_area2;
       area = gcamn->area2;
@@ -3149,8 +3184,10 @@ int gcamJacobianTermAtNode(
       continue;
     }
 
-    if (gcamn->invalid == GCAM_POSITION_INVALID || gcamni->invalid == GCAM_POSITION_INVALID ||
-        gcamnj->invalid == GCAM_POSITION_INVALID || gcamnk->invalid == GCAM_POSITION_INVALID
+    if (gcamn->invalid == GCAM_POSITION_INVALID ||
+        gcamni->invalid == GCAM_POSITION_INVALID ||
+        gcamnj->invalid == GCAM_POSITION_INVALID ||
+        gcamnk->invalid == GCAM_POSITION_INVALID
 #if 0
 	gcamn->invalid == GCAM_AREA_INVALID ||
         gcamni->invalid == GCAM_AREA_INVALID ||
@@ -3160,7 +3197,8 @@ int gcamJacobianTermAtNode(
     ) {
       continue;
     }
-    if (gcamn->invalid || gcamni->invalid || gcamnj->invalid || gcamnk->invalid) {
+    if (gcamn->invalid || gcamni->invalid || gcamnj->invalid ||
+        gcamnk->invalid) {
       DiagBreak();
     }
 
@@ -3205,31 +3243,31 @@ int gcamJacobianTermAtNode(
       But there are still a lot of subtractions going on.
     */
     switch (n) {
-      default:
-      case 4:
-      case 0: /* first do central node */
-        V3_CROSS_PRODUCT(v_j[tid], v_k[tid], v_j_x_k[tid]);
-        V3_CROSS_PRODUCT(v_k[tid], v_i[tid], v_k_x_i[tid]);
-        V3_CROSS_PRODUCT(v_i[tid], v_j[tid], v_i_x_j[tid]);
-        V3_ADD(v_i_x_j[tid], v_j_x_k[tid], v_tmp[tid]);
-        V3_ADD(v_k_x_i[tid], v_tmp[tid], v_tmp[tid]);
-        V3_SCALAR_MUL(v_tmp[tid], -delta, v_tmp[tid]);
-        break;
-      case 5: /*  i+1 */
-      case 1: /*  i-1 */
-        V3_CROSS_PRODUCT(v_j[tid], v_k[tid], v_j_x_k[tid]);
-        V3_SCALAR_MUL(v_j_x_k[tid], delta, v_tmp[tid]);
-        break;
-      case 6: /* j+1 */
-      case 2: /* j-1 */
-        V3_CROSS_PRODUCT(v_k[tid], v_i[tid], v_k_x_i[tid]);
-        V3_SCALAR_MUL(v_k_x_i[tid], delta, v_tmp[tid]);
-        break;
-      case 7: /* k+1 */
-      case 3: /* k-1 */
-        V3_CROSS_PRODUCT(v_i[tid], v_j[tid], v_i_x_j[tid]);
-        V3_SCALAR_MUL(v_i_x_j[tid], delta, v_tmp[tid]);
-        break;
+    default:
+    case 4:
+    case 0: /* first do central node */
+      V3_CROSS_PRODUCT(v_j[tid], v_k[tid], v_j_x_k[tid]);
+      V3_CROSS_PRODUCT(v_k[tid], v_i[tid], v_k_x_i[tid]);
+      V3_CROSS_PRODUCT(v_i[tid], v_j[tid], v_i_x_j[tid]);
+      V3_ADD(v_i_x_j[tid], v_j_x_k[tid], v_tmp[tid]);
+      V3_ADD(v_k_x_i[tid], v_tmp[tid], v_tmp[tid]);
+      V3_SCALAR_MUL(v_tmp[tid], -delta, v_tmp[tid]);
+      break;
+    case 5: /*  i+1 */
+    case 1: /*  i-1 */
+      V3_CROSS_PRODUCT(v_j[tid], v_k[tid], v_j_x_k[tid]);
+      V3_SCALAR_MUL(v_j_x_k[tid], delta, v_tmp[tid]);
+      break;
+    case 6: /* j+1 */
+    case 2: /* j-1 */
+      V3_CROSS_PRODUCT(v_k[tid], v_i[tid], v_k_x_i[tid]);
+      V3_SCALAR_MUL(v_k_x_i[tid], delta, v_tmp[tid]);
+      break;
+    case 7: /* k+1 */
+    case 3: /* k-1 */
+      V3_CROSS_PRODUCT(v_i[tid], v_j[tid], v_i_x_j[tid]);
+      V3_SCALAR_MUL(v_i_x_j[tid], delta, v_tmp[tid]);
+      break;
     }
     V3_ADD(v_tmp[tid], v_grad[tid], v_grad[tid]);
   }
@@ -3243,17 +3281,9 @@ int gcamJacobianTermAtNode(
   }
   if (i == Gx && j == Gy && k == Gz) {
     gcamn = &gcam->nodes[i][j][k];
-    printf(
-        "l_jaco: node(%d,%d,%d): area=%2.4f, orig_area=%2.4f, "
-        "grad=(%2.3f,%2.3f,%2.3f)\n",
-        i,
-        j,
-        k,
-        gcamn->area,
-        gcamn->orig_area,
-        *pdx,
-        *pdy,
-        *pdz);
+    printf("l_jaco: node(%d,%d,%d): area=%2.4f, orig_area=%2.4f, "
+           "grad=(%2.3f,%2.3f,%2.3f)\n",
+           i, j, k, gcamn->area, gcamn->orig_area, *pdx, *pdy, *pdz);
     if (fabs(*pdx) > 0.02 || fabs(*pdy) > 0.02 || fabs(*pdz) > 0.02) {
       DiagBreak();
     }
@@ -3262,13 +3292,14 @@ int gcamJacobianTermAtNode(
 }
 #define NLT_PAD 10
 
-int gcamVolumeChangeTermAtNode(
-    GCA_MORPH *gcam, MRI *mri, double l_area, int i, int j, int k, double *pdx, double *pdy, double *pdz)
-{
+int gcamVolumeChangeTermAtNode(GCA_MORPH *gcam, MRI *mri, double l_area, int i,
+                               int j, int k, double *pdx, double *pdy,
+                               double *pdz) {
   GCA_MORPH_NODE *gcamn, *gcamni, *gcamnj, *gcamnk;
   float delta, total_delta = 0;
   int n, width = 0, height = 0, depth = 0, num, invert;
-  static VECTOR *v_i = NULL, *v_j, *v_k, *v_j_x_k, *v_i_x_j, *v_k_x_i, *v_grad, *v_tmp;
+  static VECTOR *v_i = NULL, *v_j, *v_k, *v_j_x_k, *v_i_x_j, *v_k_x_i, *v_grad,
+                *v_tmp;
   // double area, orig_area
   double del_v_scale, uk, image_val, error;
 
@@ -3287,8 +3318,7 @@ int gcamVolumeChangeTermAtNode(
     v_i_x_j = VectorAlloc(3, MATRIX_REAL);
     v_k_x_i = VectorAlloc(3, MATRIX_REAL);
     v_tmp = VectorAlloc(3, MATRIX_REAL);
-  }
-  else {
+  } else {
     V3_CLEAR(v_grad);
   }
 
@@ -3299,88 +3329,90 @@ int gcamVolumeChangeTermAtNode(
     /* assign gcamn pointers to appropriate nodes */
     invert = 1;
     switch (n) {
-      default:
-      case 0: /* first do central node */
-        if ((i + 1 >= width) || (j + 1 >= height) || (k + 1 >= depth)) {
-          continue;
-        }
-        gcamn = &gcam->nodes[i][j][k];
-        gcamni = &gcam->nodes[i + 1][j][k];
-        gcamnj = &gcam->nodes[i][j + 1][k];
-        gcamnk = &gcam->nodes[i][j][k + 1];
-        break;
-      case 1: /*  i-1 */
-        if ((i == 0) || (j + 1 >= height) || (k + 1 >= depth)) {
-          continue;
-        }
-        gcamn = &gcam->nodes[i - 1][j][k];
-        gcamni = &gcam->nodes[i][j][k];
-        gcamnj = &gcam->nodes[i - 1][j + 1][k];
-        gcamnk = &gcam->nodes[i - 1][j][k + 1];
-        break;
-      case 2: /* j-1 */
-        if ((i + 1 >= width) || (j == 0) || (k + 1 >= depth)) {
-          continue;
-        }
-        gcamn = &gcam->nodes[i][j - 1][k];
-        gcamni = &gcam->nodes[i + 1][j - 1][k];
-        gcamnj = &gcam->nodes[i][j][k];
-        gcamnk = &gcam->nodes[i][j - 1][k + 1];
-        break;
-      case 3: /* k-1 */
-        if ((i + 1 >= width) || (j + 1 >= height) || (k == 0)) {
-          continue;
-        }
-        gcamn = &gcam->nodes[i][j][k - 1];
-        gcamni = &gcam->nodes[i + 1][j][k - 1];
-        gcamnj = &gcam->nodes[i][j + 1][k - 1];
-        gcamnk = &gcam->nodes[i][j][k];
-        break;
-      case 4:
-        if ((i == 0) || (j == 0) || (k == 0)) {
-          continue;
-        }
-        invert = -1;
-        gcamn = &gcam->nodes[i][j][k];
-        gcamni = &gcam->nodes[i - 1][j][k];
-        gcamnj = &gcam->nodes[i][j - 1][k];
-        gcamnk = &gcam->nodes[i][j][k - 1];
-        break;
-      case 5: /*  i+1 */
-        if ((i + 1 >= width) || (j == 0) || (k == 0)) {
-          continue;
-        }
-        invert = -1;
-        gcamn = &gcam->nodes[i + 1][j][k];
-        gcamni = &gcam->nodes[i][j][k];
-        gcamnj = &gcam->nodes[i + 1][j - 1][k];
-        gcamnk = &gcam->nodes[i + 1][j][k - 1];
-        break;
-      case 6: /* j+1 */
-        if ((i == 0) || (j + 1 >= height) || (k == 0)) {
-          continue;
-        }
-        invert = -1;
-        gcamn = &gcam->nodes[i][j + 1][k];
-        gcamni = &gcam->nodes[i - 1][j + 1][k];
-        gcamnj = &gcam->nodes[i][j][k];
-        gcamnk = &gcam->nodes[i][j + 1][k - 1];
-        break;
-      case 7: /* k+1 */
-        if ((i == 0) || (j == 0) || (k + 1 >= depth)) {
-          continue;
-        }
-        invert = -1;
-        gcamn = &gcam->nodes[i][j][k + 1];
-        gcamni = &gcam->nodes[i - 1][j][k + 1];
-        gcamnj = &gcam->nodes[i][j - 1][k + 1];
-        gcamnk = &gcam->nodes[i][j][k];
-        break;
+    default:
+    case 0: /* first do central node */
+      if ((i + 1 >= width) || (j + 1 >= height) || (k + 1 >= depth)) {
+        continue;
+      }
+      gcamn = &gcam->nodes[i][j][k];
+      gcamni = &gcam->nodes[i + 1][j][k];
+      gcamnj = &gcam->nodes[i][j + 1][k];
+      gcamnk = &gcam->nodes[i][j][k + 1];
+      break;
+    case 1: /*  i-1 */
+      if ((i == 0) || (j + 1 >= height) || (k + 1 >= depth)) {
+        continue;
+      }
+      gcamn = &gcam->nodes[i - 1][j][k];
+      gcamni = &gcam->nodes[i][j][k];
+      gcamnj = &gcam->nodes[i - 1][j + 1][k];
+      gcamnk = &gcam->nodes[i - 1][j][k + 1];
+      break;
+    case 2: /* j-1 */
+      if ((i + 1 >= width) || (j == 0) || (k + 1 >= depth)) {
+        continue;
+      }
+      gcamn = &gcam->nodes[i][j - 1][k];
+      gcamni = &gcam->nodes[i + 1][j - 1][k];
+      gcamnj = &gcam->nodes[i][j][k];
+      gcamnk = &gcam->nodes[i][j - 1][k + 1];
+      break;
+    case 3: /* k-1 */
+      if ((i + 1 >= width) || (j + 1 >= height) || (k == 0)) {
+        continue;
+      }
+      gcamn = &gcam->nodes[i][j][k - 1];
+      gcamni = &gcam->nodes[i + 1][j][k - 1];
+      gcamnj = &gcam->nodes[i][j + 1][k - 1];
+      gcamnk = &gcam->nodes[i][j][k];
+      break;
+    case 4:
+      if ((i == 0) || (j == 0) || (k == 0)) {
+        continue;
+      }
+      invert = -1;
+      gcamn = &gcam->nodes[i][j][k];
+      gcamni = &gcam->nodes[i - 1][j][k];
+      gcamnj = &gcam->nodes[i][j - 1][k];
+      gcamnk = &gcam->nodes[i][j][k - 1];
+      break;
+    case 5: /*  i+1 */
+      if ((i + 1 >= width) || (j == 0) || (k == 0)) {
+        continue;
+      }
+      invert = -1;
+      gcamn = &gcam->nodes[i + 1][j][k];
+      gcamni = &gcam->nodes[i][j][k];
+      gcamnj = &gcam->nodes[i + 1][j - 1][k];
+      gcamnk = &gcam->nodes[i + 1][j][k - 1];
+      break;
+    case 6: /* j+1 */
+      if ((i == 0) || (j + 1 >= height) || (k == 0)) {
+        continue;
+      }
+      invert = -1;
+      gcamn = &gcam->nodes[i][j + 1][k];
+      gcamni = &gcam->nodes[i - 1][j + 1][k];
+      gcamnj = &gcam->nodes[i][j][k];
+      gcamnk = &gcam->nodes[i][j + 1][k - 1];
+      break;
+    case 7: /* k+1 */
+      if ((i == 0) || (j == 0) || (k + 1 >= depth)) {
+        continue;
+      }
+      invert = -1;
+      gcamn = &gcam->nodes[i][j][k + 1];
+      gcamni = &gcam->nodes[i - 1][j][k + 1];
+      gcamnj = &gcam->nodes[i][j - 1][k + 1];
+      gcamnk = &gcam->nodes[i][j][k];
+      break;
     }
 
     //
-    if (gcamn->invalid == GCAM_POSITION_INVALID || gcamni->invalid == GCAM_POSITION_INVALID ||
-        gcamnj->invalid == GCAM_POSITION_INVALID || gcamnk->invalid == GCAM_POSITION_INVALID || gcamn->gc == NULL ||
+    if (gcamn->invalid == GCAM_POSITION_INVALID ||
+        gcamni->invalid == GCAM_POSITION_INVALID ||
+        gcamnj->invalid == GCAM_POSITION_INVALID ||
+        gcamnk->invalid == GCAM_POSITION_INVALID || gcamn->gc == NULL ||
         DZERO(gcamn->sum_ci_vi_ui)) {
       continue;
     }
@@ -3395,12 +3427,16 @@ int gcamVolumeChangeTermAtNode(
 */
 #if 1
     del_v_scale =
-        (uk * (gcamn->sum_ci_vi - gcamn->area) - gcamn->sum_ci_vi_ui) / (gcamn->sum_ci_vi_ui * gcamn->sum_ci_vi_ui);
+        (uk * (gcamn->sum_ci_vi - gcamn->area) - gcamn->sum_ci_vi_ui) /
+        (gcamn->sum_ci_vi_ui * gcamn->sum_ci_vi_ui);
 #else
-    del_v_scale = (uk * (gcamn->sum_ci_vi - gcamn->area) - gcamn->sum_ci_vi_ui) / (gcamn->sum_ci_vi * gcamn->sum_ci_vi);
+    del_v_scale =
+        (uk * (gcamn->sum_ci_vi - gcamn->area) - gcamn->sum_ci_vi_ui) /
+        (gcamn->sum_ci_vi * gcamn->sum_ci_vi);
     del_v_scale /= (gcamn->sum_ci_vi_ui);
 #endif
-    MRIsampleVolumeFrameType(mri, gcamn->x, gcamn->y, gcamn->z, 0, SAMPLE_TRILINEAR, &image_val);
+    MRIsampleVolumeFrameType(mri, gcamn->x, gcamn->y, gcamn->z, 0,
+                             SAMPLE_TRILINEAR, &image_val);
     error = image_val - gcamn->predicted_val;
     del_v_scale *= error;
 
@@ -3421,7 +3457,7 @@ int gcamVolumeChangeTermAtNode(
     // }
 
     delta = invert * del_v_scale;
-    total_delta += delta;  // for diagnostic purposes
+    total_delta += delta; // for diagnostic purposes
 
     if (fabs(delta) > 10000) {
       DiagBreak();
@@ -3430,31 +3466,31 @@ int gcamVolumeChangeTermAtNode(
     /* compute cross-products and add the appropriate
       (i.e. scaled by area difference) cross-products to the gradient */
     switch (n) {
-      default:
-      case 4:
-      case 0: /* first do central node */
-        V3_CROSS_PRODUCT(v_j, v_k, v_j_x_k);
-        V3_CROSS_PRODUCT(v_k, v_i, v_k_x_i);
-        V3_CROSS_PRODUCT(v_i, v_j, v_i_x_j);
-        V3_ADD(v_i_x_j, v_j_x_k, v_tmp);
-        V3_ADD(v_k_x_i, v_tmp, v_tmp);
-        V3_SCALAR_MUL(v_tmp, -delta, v_tmp);
-        break;
-      case 5: /*  i+1 */
-      case 1: /*  i-1 */
-        V3_CROSS_PRODUCT(v_j, v_k, v_j_x_k);
-        V3_SCALAR_MUL(v_j_x_k, delta, v_tmp);
-        break;
-      case 6: /* j+1 */
-      case 2: /* j-1 */
-        V3_CROSS_PRODUCT(v_k, v_i, v_k_x_i);
-        V3_SCALAR_MUL(v_k_x_i, delta, v_tmp);
-        break;
-      case 7: /* k+1 */
-      case 3: /* k-1 */
-        V3_CROSS_PRODUCT(v_i, v_j, v_i_x_j);
-        V3_SCALAR_MUL(v_i_x_j, delta, v_tmp);
-        break;
+    default:
+    case 4:
+    case 0: /* first do central node */
+      V3_CROSS_PRODUCT(v_j, v_k, v_j_x_k);
+      V3_CROSS_PRODUCT(v_k, v_i, v_k_x_i);
+      V3_CROSS_PRODUCT(v_i, v_j, v_i_x_j);
+      V3_ADD(v_i_x_j, v_j_x_k, v_tmp);
+      V3_ADD(v_k_x_i, v_tmp, v_tmp);
+      V3_SCALAR_MUL(v_tmp, -delta, v_tmp);
+      break;
+    case 5: /*  i+1 */
+    case 1: /*  i-1 */
+      V3_CROSS_PRODUCT(v_j, v_k, v_j_x_k);
+      V3_SCALAR_MUL(v_j_x_k, delta, v_tmp);
+      break;
+    case 6: /* j+1 */
+    case 2: /* j-1 */
+      V3_CROSS_PRODUCT(v_k, v_i, v_k_x_i);
+      V3_SCALAR_MUL(v_k_x_i, delta, v_tmp);
+      break;
+    case 7: /* k+1 */
+    case 3: /* k-1 */
+      V3_CROSS_PRODUCT(v_i, v_j, v_i_x_j);
+      V3_SCALAR_MUL(v_i_x_j, delta, v_tmp);
+      break;
     }
     V3_ADD(v_tmp, v_grad, v_grad);
   }
@@ -3465,17 +3501,9 @@ int gcamVolumeChangeTermAtNode(
 
   if (i == Gx && j == Gy && k == Gz) {
     gcamn = &gcam->nodes[i][j][k];
-    printf(
-        "l_volume: node(%d,%d,%d): uk=%2.4f, "
-        "total_delta = %2.3f, grad=(%2.3f,%2.3f,%2.3f)\n",
-        i,
-        j,
-        k,
-        gcamn->gc->means[0],
-        del_v_scale,
-        *pdx,
-        *pdy,
-        *pdz);
+    printf("l_volume: node(%d,%d,%d): uk=%2.4f, "
+           "total_delta = %2.3f, grad=(%2.3f,%2.3f,%2.3f)\n",
+           i, j, k, gcamn->gc->means[0], del_v_scale, *pdx, *pdy, *pdz);
     if (fabs(*pdx) > 0.02 || fabs(*pdy) > 0.02 || fabs(*pdz) > 0.02) {
       DiagBreak();
     }
@@ -3483,12 +3511,13 @@ int gcamVolumeChangeTermAtNode(
   return (NO_ERROR);
 }
 
-int gcamAreaTermAtNode(GCA_MORPH *gcam, double l_area, int i, int j, int k, double *pdx, double *pdy, double *pdz)
-{
+int gcamAreaTermAtNode(GCA_MORPH *gcam, double l_area, int i, int j, int k,
+                       double *pdx, double *pdy, double *pdz) {
   GCA_MORPH_NODE *gcamn, *gcamni, *gcamnj, *gcamnk;
   float delta;
   int n, width = 0, height = 0, depth = 0, num, invert;
-  static VECTOR *v_i = NULL, *v_j, *v_k, *v_j_x_k, *v_i_x_j, *v_k_x_i, *v_grad, *v_tmp;
+  static VECTOR *v_i = NULL, *v_j, *v_k, *v_j_x_k, *v_i_x_j, *v_k_x_i, *v_grad,
+                *v_tmp;
   double orig_area;
 
   *pdx = *pdy = *pdz = 0.0;
@@ -3509,8 +3538,7 @@ int gcamAreaTermAtNode(GCA_MORPH *gcam, double l_area, int i, int j, int k, doub
     v_i_x_j = VectorAlloc(3, MATRIX_REAL);
     v_k_x_i = VectorAlloc(3, MATRIX_REAL);
     v_tmp = VectorAlloc(3, MATRIX_REAL);
-  }
-  else {
+  } else {
     V3_CLEAR(v_grad);
   }
 
@@ -3518,83 +3546,83 @@ int gcamAreaTermAtNode(GCA_MORPH *gcam, double l_area, int i, int j, int k, doub
     /* assign gcamn pointers to appropriate nodes */
     invert = 1;
     switch (n) {
-      default:
-      case 0: /* first do central node */
-        if ((i + 1 >= width) || (j + 1 >= height) || (k + 1 >= depth)) {
-          continue;
-        }
-        gcamn = &gcam->nodes[i][j][k];
-        gcamni = &gcam->nodes[i + 1][j][k];
-        gcamnj = &gcam->nodes[i][j + 1][k];
-        gcamnk = &gcam->nodes[i][j][k + 1];
-        break;
-      case 1: /*  i-1 */
-        if ((i == 0) || (j + 1 >= height) || (k + 1 >= depth)) {
-          continue;
-        }
-        gcamn = &gcam->nodes[i - 1][j][k];
-        gcamni = &gcam->nodes[i][j][k];
-        gcamnj = &gcam->nodes[i - 1][j + 1][k];
-        gcamnk = &gcam->nodes[i - 1][j][k + 1];
-        break;
-      case 2: /* j-1 */
-        if ((i + 1 >= width) || (j == 0) || (k + 1 >= depth)) {
-          continue;
-        }
-        gcamn = &gcam->nodes[i][j - 1][k];
-        gcamni = &gcam->nodes[i + 1][j - 1][k];
-        gcamnj = &gcam->nodes[i][j][k];
-        gcamnk = &gcam->nodes[i][j - 1][k + 1];
-        break;
-      case 3: /* k-1 */
-        if ((i + 1 >= width) || (j + 1 >= height) || (k == 0)) {
-          continue;
-        }
-        gcamn = &gcam->nodes[i][j][k - 1];
-        gcamni = &gcam->nodes[i + 1][j][k - 1];
-        gcamnj = &gcam->nodes[i][j + 1][k - 1];
-        gcamnk = &gcam->nodes[i][j][k];
-        break;
-      case 4:
-        if ((i == 0) || (j == 0) || (k == 0)) {
-          continue;
-        }
-        invert = -1;
-        gcamn = &gcam->nodes[i][j][k];
-        gcamni = &gcam->nodes[i - 1][j][k];
-        gcamnj = &gcam->nodes[i][j - 1][k];
-        gcamnk = &gcam->nodes[i][j][k - 1];
-        break;
-      case 5: /*  i+1 */
-        if ((i + 1 >= width) || (j == 0) || (k == 0)) {
-          continue;
-        }
-        invert = -1;
-        gcamn = &gcam->nodes[i + 1][j][k];
-        gcamni = &gcam->nodes[i][j][k];
-        gcamnj = &gcam->nodes[i + 1][j - 1][k];
-        gcamnk = &gcam->nodes[i + 1][j][k - 1];
-        break;
-      case 6: /* j+1 */
-        if ((i == 0) || (j + 1 >= height) || (k == 0)) {
-          continue;
-        }
-        invert = -1;
-        gcamn = &gcam->nodes[i][j + 1][k];
-        gcamni = &gcam->nodes[i - 1][j + 1][k];
-        gcamnj = &gcam->nodes[i][j][k];
-        gcamnk = &gcam->nodes[i][j + 1][k - 1];
-        break;
-      case 7: /* k+1 */
-        if ((i == 0) || (j == 0) || (k + 1 >= depth)) {
-          continue;
-        }
-        invert = -1;
-        gcamn = &gcam->nodes[i][j][k + 1];
-        gcamni = &gcam->nodes[i - 1][j][k + 1];
-        gcamnj = &gcam->nodes[i][j - 1][k + 1];
-        gcamnk = &gcam->nodes[i][j][k];
-        break;
+    default:
+    case 0: /* first do central node */
+      if ((i + 1 >= width) || (j + 1 >= height) || (k + 1 >= depth)) {
+        continue;
+      }
+      gcamn = &gcam->nodes[i][j][k];
+      gcamni = &gcam->nodes[i + 1][j][k];
+      gcamnj = &gcam->nodes[i][j + 1][k];
+      gcamnk = &gcam->nodes[i][j][k + 1];
+      break;
+    case 1: /*  i-1 */
+      if ((i == 0) || (j + 1 >= height) || (k + 1 >= depth)) {
+        continue;
+      }
+      gcamn = &gcam->nodes[i - 1][j][k];
+      gcamni = &gcam->nodes[i][j][k];
+      gcamnj = &gcam->nodes[i - 1][j + 1][k];
+      gcamnk = &gcam->nodes[i - 1][j][k + 1];
+      break;
+    case 2: /* j-1 */
+      if ((i + 1 >= width) || (j == 0) || (k + 1 >= depth)) {
+        continue;
+      }
+      gcamn = &gcam->nodes[i][j - 1][k];
+      gcamni = &gcam->nodes[i + 1][j - 1][k];
+      gcamnj = &gcam->nodes[i][j][k];
+      gcamnk = &gcam->nodes[i][j - 1][k + 1];
+      break;
+    case 3: /* k-1 */
+      if ((i + 1 >= width) || (j + 1 >= height) || (k == 0)) {
+        continue;
+      }
+      gcamn = &gcam->nodes[i][j][k - 1];
+      gcamni = &gcam->nodes[i + 1][j][k - 1];
+      gcamnj = &gcam->nodes[i][j + 1][k - 1];
+      gcamnk = &gcam->nodes[i][j][k];
+      break;
+    case 4:
+      if ((i == 0) || (j == 0) || (k == 0)) {
+        continue;
+      }
+      invert = -1;
+      gcamn = &gcam->nodes[i][j][k];
+      gcamni = &gcam->nodes[i - 1][j][k];
+      gcamnj = &gcam->nodes[i][j - 1][k];
+      gcamnk = &gcam->nodes[i][j][k - 1];
+      break;
+    case 5: /*  i+1 */
+      if ((i + 1 >= width) || (j == 0) || (k == 0)) {
+        continue;
+      }
+      invert = -1;
+      gcamn = &gcam->nodes[i + 1][j][k];
+      gcamni = &gcam->nodes[i][j][k];
+      gcamnj = &gcam->nodes[i + 1][j - 1][k];
+      gcamnk = &gcam->nodes[i + 1][j][k - 1];
+      break;
+    case 6: /* j+1 */
+      if ((i == 0) || (j + 1 >= height) || (k == 0)) {
+        continue;
+      }
+      invert = -1;
+      gcamn = &gcam->nodes[i][j + 1][k];
+      gcamni = &gcam->nodes[i - 1][j + 1][k];
+      gcamnj = &gcam->nodes[i][j][k];
+      gcamnk = &gcam->nodes[i][j + 1][k - 1];
+      break;
+    case 7: /* k+1 */
+      if ((i == 0) || (j == 0) || (k + 1 >= depth)) {
+        continue;
+      }
+      invert = -1;
+      gcamn = &gcam->nodes[i][j][k + 1];
+      gcamni = &gcam->nodes[i - 1][j][k + 1];
+      gcamnj = &gcam->nodes[i][j - 1][k + 1];
+      gcamnk = &gcam->nodes[i][j][k];
+      break;
     }
     orig_area = gcamn->orig_area;
     if (FZERO(orig_area)) {
@@ -3602,8 +3630,10 @@ int gcamAreaTermAtNode(GCA_MORPH *gcam, double l_area, int i, int j, int k, doub
     }
 
     //
-    if (gcamn->invalid == GCAM_POSITION_INVALID || gcamni->invalid == GCAM_POSITION_INVALID ||
-        gcamnj->invalid == GCAM_POSITION_INVALID || gcamnk->invalid == GCAM_POSITION_INVALID) {
+    if (gcamn->invalid == GCAM_POSITION_INVALID ||
+        gcamni->invalid == GCAM_POSITION_INVALID ||
+        gcamnj->invalid == GCAM_POSITION_INVALID ||
+        gcamnk->invalid == GCAM_POSITION_INVALID) {
       continue;
     }
 
@@ -3623,35 +3653,35 @@ int gcamAreaTermAtNode(GCA_MORPH *gcam, double l_area, int i, int j, int k, doub
     /* compute cross-products and add the appropriate
       (i.e. scaled by area difference) cross-products to the gradient */
     switch (n) {
-      default:
-      case 4:
-      case 0: /* first do central node */
-        V3_CROSS_PRODUCT(v_j, v_k, v_j_x_k);
-        V3_CROSS_PRODUCT(v_k, v_i, v_k_x_i);
-        V3_CROSS_PRODUCT(v_i, v_j, v_i_x_j);
-        V3_ADD(v_i_x_j, v_j_x_k, v_tmp);
-        V3_ADD(v_k_x_i, v_tmp, v_tmp);
-        V3_NORM(v_tmp);
-        V3_SCALAR_MUL(v_tmp, -delta, v_tmp);
-        break;
-      case 5: /*  i+1 */
-      case 1: /*  i-1 */
-        V3_CROSS_PRODUCT(v_j, v_k, v_j_x_k);
-        V3_NORM(v_j_x_k);
-        V3_SCALAR_MUL(v_j_x_k, delta, v_tmp);
-        break;
-      case 6: /* j+1 */
-      case 2: /* j-1 */
-        V3_CROSS_PRODUCT(v_k, v_i, v_k_x_i);
-        V3_NORM(v_k_x_i);
-        V3_SCALAR_MUL(v_k_x_i, delta, v_tmp);
-        break;
-      case 7: /* k+1 */
-      case 3: /* k-1 */
-        V3_CROSS_PRODUCT(v_i, v_j, v_i_x_j);
-        V3_NORM(v_i_x_j);
-        V3_SCALAR_MUL(v_i_x_j, delta, v_tmp);
-        break;
+    default:
+    case 4:
+    case 0: /* first do central node */
+      V3_CROSS_PRODUCT(v_j, v_k, v_j_x_k);
+      V3_CROSS_PRODUCT(v_k, v_i, v_k_x_i);
+      V3_CROSS_PRODUCT(v_i, v_j, v_i_x_j);
+      V3_ADD(v_i_x_j, v_j_x_k, v_tmp);
+      V3_ADD(v_k_x_i, v_tmp, v_tmp);
+      V3_NORM(v_tmp);
+      V3_SCALAR_MUL(v_tmp, -delta, v_tmp);
+      break;
+    case 5: /*  i+1 */
+    case 1: /*  i-1 */
+      V3_CROSS_PRODUCT(v_j, v_k, v_j_x_k);
+      V3_NORM(v_j_x_k);
+      V3_SCALAR_MUL(v_j_x_k, delta, v_tmp);
+      break;
+    case 6: /* j+1 */
+    case 2: /* j-1 */
+      V3_CROSS_PRODUCT(v_k, v_i, v_k_x_i);
+      V3_NORM(v_k_x_i);
+      V3_SCALAR_MUL(v_k_x_i, delta, v_tmp);
+      break;
+    case 7: /* k+1 */
+    case 3: /* k-1 */
+      V3_CROSS_PRODUCT(v_i, v_j, v_i_x_j);
+      V3_NORM(v_i_x_j);
+      V3_SCALAR_MUL(v_i_x_j, delta, v_tmp);
+      break;
     }
     V3_ADD(v_tmp, v_grad, v_grad);
   }
@@ -3662,17 +3692,9 @@ int gcamAreaTermAtNode(GCA_MORPH *gcam, double l_area, int i, int j, int k, doub
 
   if (i == Gx && j == Gy && k == Gz) {
     gcamn = &gcam->nodes[i][j][k];
-    printf(
-        "l_area: node(%d,%d,%d): area=%2.4f, "
-        "orig_area=%2.4f, grad=(%2.3f,%2.3f,%2.3f)\n",
-        i,
-        j,
-        k,
-        gcamn->area,
-        gcamn->orig_area,
-        *pdx,
-        *pdy,
-        *pdz);
+    printf("l_area: node(%d,%d,%d): area=%2.4f, "
+           "orig_area=%2.4f, grad=(%2.3f,%2.3f,%2.3f)\n",
+           i, j, k, gcamn->area, gcamn->orig_area, *pdx, *pdy, *pdz);
     if (fabs(*pdx) > 0.02 || fabs(*pdy) > 0.02 || fabs(*pdz) > 0.02) {
       DiagBreak();
     }
@@ -3692,8 +3714,7 @@ void SetGinvalid(const int val) { Ginvalid = val; }
   loop of mri_ca_register and so time sensitive.
 */
 #if 1
-int gcamComputeMetricProperties(GCA_MORPH *gcam)
-{
+int gcamComputeMetricProperties(GCA_MORPH *gcam) {
 #if GCAM_CMP_OUTPUT
   static unsigned int nCalls = 0;
   const unsigned int gcamCMPoutputFreq = 10;
@@ -3727,7 +3748,6 @@ int gcamComputeMetricProperties(GCA_MORPH *gcam)
   extern double gcamComputeMetricProperties_tsec;
   Timer timer;
 
-
   for (i = 0; i < nthreads; i++) {
     v_i[i] = VectorAlloc(3, MATRIX_REAL);
     v_j[i] = VectorAlloc(3, MATRIX_REAL);
@@ -3741,12 +3761,12 @@ int gcamComputeMetricProperties(GCA_MORPH *gcam)
   gcam->neg = 0;
 
   if (width < 4) {
-      static bool reported = false;
-      if (!reported) {
-        reported = true;
-	fprintf(stderr,"%s:%d width:%d too small for parallelism\n", 
-	  __FILE__, __LINE__, width);
-      }
+    static bool reported = false;
+    if (!reported) {
+      reported = true;
+      fprintf(stderr, "%s:%d width:%d too small for parallelism\n", __FILE__,
+              __LINE__, width);
+    }
   }
 
   /* This algorithm works by going through each node the the GCAM and
@@ -3771,19 +3791,21 @@ int gcamComputeMetricProperties(GCA_MORPH *gcam)
      because the volume of a PLP is computed twice: once when it is
      the "before" PLP and once when it is the "after" PLP. But these
      are two different PLPs and so new computations are needed.  */
-  
+
   ROMP_PF_begin
 #ifdef HAVE_OPENMP
-  #pragma omp parallel for if_ROMP(assume_reproducible) firstprivate(tid, j, k, gcamn, neg, num, gcamni, gcamnj, gcamnk, area1, area2) \
-    shared(gcam, Gx, Gy, Gz, v_i, v_j, v_k, gcam_neg_counter, Ginvalid_counter) schedule(static, 1)
+#pragma omp parallel for if_ROMP(assume_reproducible) firstprivate(            \
+    tid, j, k, gcamn, neg, num, gcamni, gcamnj, gcamnk, area1, area2)          \
+    shared(gcam, Gx, Gy, Gz, v_i, v_j, v_k, gcam_neg_counter,                  \
+           Ginvalid_counter) schedule(static, 1)
 #endif
-  for (i = 0; i < width; i++) {
+      for (i = 0; i < width; i++) {
     ROMP_PFLB_begin
-    
+
 #ifdef HAVE_OPENMP
-    tid = omp_get_thread_num();
+        tid = omp_get_thread_num();
 #else
-    tid = 0;
+        tid = 0;
 #endif
 
     for (j = 0; j < height; j++) {
@@ -3810,7 +3832,8 @@ int gcamComputeMetricProperties(GCA_MORPH *gcam)
           gcamnj = &gcam->nodes[i][j + 1][k];
           gcamnk = &gcam->nodes[i][j][k + 1];
 
-          if (gcamni->invalid != GCAM_POSITION_INVALID && gcamnj->invalid != GCAM_POSITION_INVALID &&
+          if (gcamni->invalid != GCAM_POSITION_INVALID &&
+              gcamnj->invalid != GCAM_POSITION_INVALID &&
               gcamnk->invalid != GCAM_POSITION_INVALID) {
             num++;
             GCAMN_SUB(gcamni, gcamn, v_i[tid]);
@@ -3829,8 +3852,7 @@ int gcamComputeMetricProperties(GCA_MORPH *gcam)
             // Accumulate onto common determinant
             gcamn->area += area1;
           }
-        }
-        else {
+        } else {
           // Going to the 'right' would fall out of the volume
           gcamn->area1 = 0;
         }
@@ -3842,11 +3864,13 @@ int gcamComputeMetricProperties(GCA_MORPH *gcam)
           gcamnj = &gcam->nodes[i][j - 1][k];
           gcamnk = &gcam->nodes[i][j][k - 1];
 
-          if (gcamni->invalid != GCAM_POSITION_INVALID && gcamnj->invalid != GCAM_POSITION_INVALID &&
+          if (gcamni->invalid != GCAM_POSITION_INVALID &&
+              gcamnj->invalid != GCAM_POSITION_INVALID &&
               gcamnk->invalid != GCAM_POSITION_INVALID) {
             /* invert v_i so that coordinate system is right-handed */
             num++;
-            GCAMN_SUB(gcamn, gcamni, v_i[tid]);  // Note args swapped compared to above
+            GCAMN_SUB(gcamn, gcamni,
+                      v_i[tid]); // Note args swapped compared to above
             GCAMN_SUB(gcamnj, gcamn, v_j[tid]);
             GCAMN_SUB(gcamnk, gcamn, v_k[tid]);
             // add two volume
@@ -3863,18 +3887,17 @@ int gcamComputeMetricProperties(GCA_MORPH *gcam)
             // Accumulate onto common determinant
             gcamn->area += area2;
           }
-        }
-        else {
+        } else {
           // Going to the 'left' would fall out of the volume
           gcamn->area2 = 0;
         }
 
         // Check if at least one Jacobian determinant was computed
         if (num > 0) {
-          // Store the average of computed determinants in the common determinant
-          gcamn->area = gcamn->area / (float)num;  // average volume
-        }
-        else {
+          // Store the average of computed determinants in the common
+          // determinant
+          gcamn->area = gcamn->area / (float)num; // average volume
+        } else {
           // If no determinants computed, this node becomes invalid
           if (i == Gx && j == Gy && k == Gz) {
             DiagBreak();
@@ -3885,17 +3908,14 @@ int gcamComputeMetricProperties(GCA_MORPH *gcam)
 
         // Keep track of determinants which have become negative
         if ((gcamn->invalid == GCAM_VALID) && neg && (gcamn->orig_area > 0)) {
-          if (i > 0 && j > 0 && k > 0 && i < gcam->width - 1 && j < gcam->height - 1 && k < gcam->depth - 1) {
+          if (i > 0 && j > 0 && k > 0 && i < gcam->width - 1 &&
+              j < gcam->height - 1 && k < gcam->depth - 1) {
             DiagBreak();
           }
 
           if (gcam->neg == 0 && getenv("SHOW_NEG")) {
-            printf("node (%d, %d, %d), label %s (%d) - NEGATIVE!\n",
-                   i,
-                   j,
-                   k,
-                   cma_label_to_name(gcamn->label),
-                   gcamn->label);
+            printf("node (%d, %d, %d), label %s (%d) - NEGATIVE!\n", i, j, k,
+                   cma_label_to_name(gcamn->label), gcamn->label);
           }
           /* gcam->neg++ ; */
           gcam_neg_counter[tid]++;
@@ -3914,8 +3934,8 @@ int gcamComputeMetricProperties(GCA_MORPH *gcam)
     ROMP_PFLB_end
   }
   ROMP_PF_end
-  
-  for (i = 0; i < nthreads; i++) {
+
+      for (i = 0; i < nthreads; i++) {
     VectorFree(&v_i[i]);
     VectorFree(&v_j[i]);
     VectorFree(&v_k[i]);
@@ -3939,13 +3959,12 @@ int gcamComputeMetricProperties(GCA_MORPH *gcam)
 #endif
 
   gcamComputeMetricProperties_nCalls++;
-  gcamComputeMetricProperties_tsec += (timer.milliseconds()/1000.0);
+  gcamComputeMetricProperties_tsec += (timer.milliseconds() / 1000.0);
 
   return (NO_ERROR);
 }
 #else
-int gcamComputeMetricProperties(GCA_MORPH *gcam)
-{
+int gcamComputeMetricProperties(GCA_MORPH *gcam) {
   double area;
   int i, j, k, width, height, depth, num, n, invert;
   GCA_MORPH_NODE *gcamn, *gcamni, *gcamnj, *gcamnk;
@@ -3974,92 +3993,94 @@ int gcamComputeMetricProperties(GCA_MORPH *gcam)
           continue;
         }
 
-	// AREA_NEIGHBORS=8
+        // AREA_NEIGHBORS=8
         for (area = 0.0, num = n = 0; n < AREA_NEIGHBORS; n++) {
           /* assign gcamn pointers to appropriate nodes */
           invert = 1;
           switch (n) {
-            default:
-            case 0: /* first do central node */
-              if ((i + 1 >= width) || (j + 1 >= height) || (k + 1 >= depth)) {
-                continue;
-              }
-              gcamn = &gcam->nodes[i][j][k];
-              gcamni = &gcam->nodes[i + 1][j][k];
-              gcamnj = &gcam->nodes[i][j + 1][k];
-              gcamnk = &gcam->nodes[i][j][k + 1];
-              break;
-            case 1: /*  i-1 */
-              if ((i == 0) || (j + 1 >= height) || (k + 1 >= depth)) {
-                continue;
-              }
-              gcamn = &gcam->nodes[i - 1][j][k];
-              gcamni = &gcam->nodes[i][j][k];
-              gcamnj = &gcam->nodes[i - 1][j + 1][k];
-              gcamnk = &gcam->nodes[i - 1][j][k + 1];
-              break;
-            case 2: /* j-1 */
-              if ((i + 1 >= width) || (j == 0) || (k + 1 >= depth)) {
-                continue;
-              }
-              gcamn = &gcam->nodes[i][j - 1][k];
-              gcamni = &gcam->nodes[i + 1][j - 1][k];
-              gcamnj = &gcam->nodes[i][j][k];
-              gcamnk = &gcam->nodes[i][j - 1][k + 1];
-              break;
-            case 3: /* k-1 */
-              if ((i + 1 >= width) || (j + 1 >= height) || (k == 0)) {
-                continue;
-              }
-              gcamn = &gcam->nodes[i][j][k - 1];
-              gcamni = &gcam->nodes[i + 1][j][k - 1];
-              gcamnj = &gcam->nodes[i][j + 1][k - 1];
-              gcamnk = &gcam->nodes[i][j][k];
-              break;
-            case 4:
-              if ((i == 0) || (j == 0) || (k == 0)) {
-                continue;
-              }
-              invert = -1;
-              gcamn = &gcam->nodes[i][j][k];
-              gcamni = &gcam->nodes[i - 1][j][k];
-              gcamnj = &gcam->nodes[i][j - 1][k];
-              gcamnk = &gcam->nodes[i][j][k - 1];
-              break;
-            case 5: /*  i+1 */
-              if ((i + 1 >= width) || (j == 0) || (k == 0)) {
-                continue;
-              }
-              invert = -1;
-              gcamn = &gcam->nodes[i + 1][j][k];
-              gcamni = &gcam->nodes[i][j][k];
-              gcamnj = &gcam->nodes[i + 1][j - 1][k];
-              gcamnk = &gcam->nodes[i + 1][j][k - 1];
-              break;
-            case 6: /* j+1 */
-              if ((i == 0) || (j + 1 >= height) || (k == 0)) {
-                continue;
-              }
-              invert = -1;
-              gcamn = &gcam->nodes[i][j + 1][k];
-              gcamni = &gcam->nodes[i - 1][j + 1][k];
-              gcamnj = &gcam->nodes[i][j][k];
-              gcamnk = &gcam->nodes[i][j + 1][k - 1];
-              break;
-            case 7: /* k+1 */
-              if ((i == 0) || (j == 0) || (k + 1 >= depth)) {
-                continue;
-              }
-              invert = -1;
-              gcamn = &gcam->nodes[i][j][k + 1];
-              gcamni = &gcam->nodes[i - 1][j][k + 1];
-              gcamnj = &gcam->nodes[i][j - 1][k + 1];
-              gcamnk = &gcam->nodes[i][j][k];
-              break;
+          default:
+          case 0: /* first do central node */
+            if ((i + 1 >= width) || (j + 1 >= height) || (k + 1 >= depth)) {
+              continue;
+            }
+            gcamn = &gcam->nodes[i][j][k];
+            gcamni = &gcam->nodes[i + 1][j][k];
+            gcamnj = &gcam->nodes[i][j + 1][k];
+            gcamnk = &gcam->nodes[i][j][k + 1];
+            break;
+          case 1: /*  i-1 */
+            if ((i == 0) || (j + 1 >= height) || (k + 1 >= depth)) {
+              continue;
+            }
+            gcamn = &gcam->nodes[i - 1][j][k];
+            gcamni = &gcam->nodes[i][j][k];
+            gcamnj = &gcam->nodes[i - 1][j + 1][k];
+            gcamnk = &gcam->nodes[i - 1][j][k + 1];
+            break;
+          case 2: /* j-1 */
+            if ((i + 1 >= width) || (j == 0) || (k + 1 >= depth)) {
+              continue;
+            }
+            gcamn = &gcam->nodes[i][j - 1][k];
+            gcamni = &gcam->nodes[i + 1][j - 1][k];
+            gcamnj = &gcam->nodes[i][j][k];
+            gcamnk = &gcam->nodes[i][j - 1][k + 1];
+            break;
+          case 3: /* k-1 */
+            if ((i + 1 >= width) || (j + 1 >= height) || (k == 0)) {
+              continue;
+            }
+            gcamn = &gcam->nodes[i][j][k - 1];
+            gcamni = &gcam->nodes[i + 1][j][k - 1];
+            gcamnj = &gcam->nodes[i][j + 1][k - 1];
+            gcamnk = &gcam->nodes[i][j][k];
+            break;
+          case 4:
+            if ((i == 0) || (j == 0) || (k == 0)) {
+              continue;
+            }
+            invert = -1;
+            gcamn = &gcam->nodes[i][j][k];
+            gcamni = &gcam->nodes[i - 1][j][k];
+            gcamnj = &gcam->nodes[i][j - 1][k];
+            gcamnk = &gcam->nodes[i][j][k - 1];
+            break;
+          case 5: /*  i+1 */
+            if ((i + 1 >= width) || (j == 0) || (k == 0)) {
+              continue;
+            }
+            invert = -1;
+            gcamn = &gcam->nodes[i + 1][j][k];
+            gcamni = &gcam->nodes[i][j][k];
+            gcamnj = &gcam->nodes[i + 1][j - 1][k];
+            gcamnk = &gcam->nodes[i + 1][j][k - 1];
+            break;
+          case 6: /* j+1 */
+            if ((i == 0) || (j + 1 >= height) || (k == 0)) {
+              continue;
+            }
+            invert = -1;
+            gcamn = &gcam->nodes[i][j + 1][k];
+            gcamni = &gcam->nodes[i - 1][j + 1][k];
+            gcamnj = &gcam->nodes[i][j][k];
+            gcamnk = &gcam->nodes[i][j + 1][k - 1];
+            break;
+          case 7: /* k+1 */
+            if ((i == 0) || (j == 0) || (k + 1 >= depth)) {
+              continue;
+            }
+            invert = -1;
+            gcamn = &gcam->nodes[i][j][k + 1];
+            gcamni = &gcam->nodes[i - 1][j][k + 1];
+            gcamnj = &gcam->nodes[i][j - 1][k + 1];
+            gcamnk = &gcam->nodes[i][j][k];
+            break;
           }
 
-          if (gcamn->invalid == GCAM_POSITION_INVALID || gcamni->invalid == GCAM_POSITION_INVALID ||
-              gcamnj->invalid == GCAM_POSITION_INVALID || gcamnk->invalid == GCAM_POSITION_INVALID) {
+          if (gcamn->invalid == GCAM_POSITION_INVALID ||
+              gcamni->invalid == GCAM_POSITION_INVALID ||
+              gcamnj->invalid == GCAM_POSITION_INVALID ||
+              gcamnk->invalid == GCAM_POSITION_INVALID) {
             continue;
           }
 
@@ -4072,9 +4093,8 @@ int gcamComputeMetricProperties(GCA_MORPH *gcam)
         }
         gcamn = &gcam->nodes[i][j][k];
         if (num > 0) {
-          gcamn->area = area / (float)num;  // average volume
-        }
-        else {
+          gcamn->area = area / (float)num; // average volume
+        } else {
           if (i == Gx && j == Gy && k == Gz) {
             DiagBreak();
           }
@@ -4085,7 +4105,8 @@ int gcamComputeMetricProperties(GCA_MORPH *gcam)
           DiagBreak();
         }
         if ((gcamn->invalid == 0) && (area <= 0) && (gcamn->orig_area > 0)) {
-          if (i > 0 && j > 0 && k > 0 && i < gcam->width - 1 && j < gcam->height - 1 && k < gcam->depth - 1) {
+          if (i > 0 && j > 0 && k > 0 && i < gcam->width - 1 &&
+              j < gcam->height - 1 && k < gcam->depth - 1) {
             DiagBreak();
           }
           gcam->neg++;
@@ -4116,8 +4137,7 @@ int gcamComputeMetricProperties(GCA_MORPH *gcam)
     mri_ca_register and so time sensitive.
 #E#
  */
-double gcamJacobianEnergy(const GCA_MORPH * const gcam, MRI *mri)
-{
+double gcamJacobianEnergy(const GCA_MORPH *const gcam, MRI *mri) {
   double sse = 0;
   extern int gcamJacobianEnergy_nCalls;
   extern double gcamJacobianEnergy_tsec;
@@ -4128,127 +4148,130 @@ double gcamJacobianEnergy(const GCA_MORPH * const gcam, MRI *mri)
   static unsigned int nCalls = 0;
   if ((nCalls % gcamJacobEnergyOutputFreq) == 0) {
     char fname[STRLEN];
-    snprintf(fname, STRLEN - 1, "gcamJacobEnergyInput%04u", nCalls / gcamJacobEnergyOutputFreq);
+    snprintf(fname, STRLEN - 1, "gcamJacobEnergyInput%04u",
+             nCalls / gcamJacobEnergyOutputFreq);
     fname[STRLEN - 1] = '\0';
     WriteGCAMoneInput(gcam, fname);
-    snprintf(fname, STRLEN - 1, "mriJacobEnergyInput%04u.mgz", nCalls / gcamJacobEnergyOutputFreq);
-    MRIwrite(mri, fname);  // 'mri' is not const because of this call
+    snprintf(fname, STRLEN - 1, "mriJacobEnergyInput%04u.mgz",
+             nCalls / gcamJacobEnergyOutputFreq);
+    MRIwrite(mri, fname); // 'mri' is not const because of this call
   }
 #endif
 
 #if SHOW_EXEC_LOC
   printf("%s: CPU call\n", __FUNCTION__);
 #endif
-  double const thick  = mri ? mri->thick : 1.0;
-  int    const width  = gcam->width;
-  int    const height = gcam->height;
-  int    const depth  = gcam->depth;
+  double const thick = mri ? mri->thick : 1.0;
+  int const width = gcam->width;
+  int const height = gcam->height;
+  int const depth = gcam->depth;
 
   // Note sse initialised to zero here
   sse = 0.0f;
 
 #ifdef BEVIN_GCAMJACOBIANENERGY_REPRODUCIBLE
 
-  #define ROMP_VARIABLE       i
-  #define ROMP_LO             0
-  #define ROMP_HI             width
-    
-  #define ROMP_SUMREDUCTION0  sse
-    
-  #define ROMP_FOR_LEVEL      ROMP_level_assume_reproducible
-    
+#define ROMP_VARIABLE i
+#define ROMP_LO 0
+#define ROMP_HI width
+
+#define ROMP_SUMREDUCTION0 sse
+
+#define ROMP_FOR_LEVEL ROMP_level_assume_reproducible
+
 #ifdef ROMP_SUPPORT_ENABLED
   const int romp_for_line = __LINE__;
 #endif
-  #include "romp_for_begin.h"
+#include "romp_for_begin.h"
   ROMP_for_begin
-    
-    #define sse  ROMP_PARTIALSUM(0)
-    
+
+#define sse ROMP_PARTIALSUM(0)
+
 #else
 
   int i;
 
-  ROMP_PF_begin     // important in mri_ca_register
+  ROMP_PF_begin // important in mri_ca_register
 #ifdef HAVE_OPENMP
-  #pragma omp parallel for if_ROMP(fast) reduction(+:sse) schedule(static,1)
+#pragma omp parallel for if_ROMP(fast) reduction(+ : sse) schedule(static, 1)
 #endif
-  for (i = 0; i < width; i++) {
+      for (i = 0; i < width; i++) {
     ROMP_PFLB_begin
 
 #endif
-    
-    int j = 0, k = 0;
-    
-    for (j = 0; j < height; j++) {
-      for (k = 0; k < depth; k++) {
-        GCA_MORPH_NODE const * const gcamn = &gcam->nodes[i][j][k];
 
-        if (gcamn->invalid) {
-          continue;
+      int j = 0,
+          k = 0;
+
+  for (j = 0; j < height; j++) {
+    for (k = 0; k < depth; k++) {
+      GCA_MORPH_NODE const *const gcamn = &gcam->nodes[i][j][k];
+
+      if (gcamn->invalid) {
+        continue;
+      }
+
+      /* scale up the area coefficient if the area of the current node is
+        close to 0 or already negative */
+
+      if (!FZERO(gcamn->orig_area1)) {
+        double const ratio = gcamn->area1 / gcamn->orig_area1;
+        double const exponent = -gcam->exp_k * ratio;
+
+        double delta;
+        if (exponent > MAX_EXP) {
+          delta = 0.0;
+        } else {
+          delta = log(1 + exp(exponent)) /*   / gcam->exp_k */;
         }
 
-        /* scale up the area coefficient if the area of the current node is
-          close to 0 or already negative */
+        sse += delta * thick;
 
-        if (!FZERO(gcamn->orig_area1)) {
-          double const ratio = gcamn->area1 / gcamn->orig_area1;
-          double const exponent = -gcam->exp_k * ratio;
-
-          double delta;
-          if (exponent > MAX_EXP) {
-            delta = 0.0;
-          }
-          else {
-            delta = log(1 + exp(exponent)) /*   / gcam->exp_k */;
-          }
-
-          sse += delta * thick;
-
-          if (!finitep(delta) || !finitep(sse)) {
-            DiagBreak();
-          }
-
-          if (i == Gx && j == Gy && k == Gz) {
-            printf("E_jaco: node(%d,%d,%d): area1=%2.4f, error=%2.3f\n", i, j, k, gcamn->area1, delta);
-          }
-
-          if (!FZERO(delta)) {
-            DiagBreak();
-          }
+        if (!finitep(delta) || !finitep(sse)) {
+          DiagBreak();
         }
 
-        if (!FZERO(gcamn->orig_area2)) {
-          double const ratio = gcamn->area2 / gcamn->orig_area2;
-          double const exponent = -gcam->exp_k * ratio;
+        if (i == Gx && j == Gy && k == Gz) {
+          printf("E_jaco: node(%d,%d,%d): area1=%2.4f, error=%2.3f\n", i, j, k,
+                 gcamn->area1, delta);
+        }
 
-          double delta;
-          if (exponent > MAX_EXP) {
-            delta = MAX_EXP;
-          }
-          else {
-            delta = log(1 + exp(exponent)) /*   / gcam->exp_k */;
-          }
+        if (!FZERO(delta)) {
+          DiagBreak();
+        }
+      }
 
-          sse += delta * thick;
+      if (!FZERO(gcamn->orig_area2)) {
+        double const ratio = gcamn->area2 / gcamn->orig_area2;
+        double const exponent = -gcam->exp_k * ratio;
 
-          if (!finitep(delta) || !finitep(sse)) {
-            DiagBreak();
-          }
+        double delta;
+        if (exponent > MAX_EXP) {
+          delta = MAX_EXP;
+        } else {
+          delta = log(1 + exp(exponent)) /*   / gcam->exp_k */;
+        }
 
-          if (i == Gx && j == Gy && k == Gz) {
-            printf("E_jaco: node(%d,%d,%d): area2=%2.4f, error=%2.3f\n", i, j, k, gcamn->area2, delta);
-          }
+        sse += delta * thick;
 
-          if (!FZERO(delta)) {
-            DiagBreak();
-          }
+        if (!finitep(delta) || !finitep(sse)) {
+          DiagBreak();
+        }
+
+        if (i == Gx && j == Gy && k == Gz) {
+          printf("E_jaco: node(%d,%d,%d): area2=%2.4f, error=%2.3f\n", i, j, k,
+                 gcamn->area2, delta);
+        }
+
+        if (!FZERO(delta)) {
+          DiagBreak();
         }
       }
     }
+  }
 #ifdef BEVIN_GCAMJACOBIANENERGY_REPRODUCIBLE
-    #undef sse
-  #include "romp_for_end.h"
+#undef sse
+#include "romp_for_end.h"
 #else
     ROMP_PFLB_end
   }
@@ -4260,13 +4283,12 @@ double gcamJacobianEnergy(const GCA_MORPH * const gcam, MRI *mri)
 #endif
 
   gcamJacobianEnergy_nCalls++;
-  gcamJacobianEnergy_tsec += (timer.milliseconds()/1000.0);
+  gcamJacobianEnergy_tsec += (timer.milliseconds() / 1000.0);
 
   return (sse);
 }
 
-double gcamAreaEnergy(GCA_MORPH *gcam)
-{
+double gcamAreaEnergy(GCA_MORPH *gcam) {
   double sse = 0.0, error;
   int i, j, k, width, height, depth;
   GCA_MORPH_NODE *gcamn;
@@ -4290,7 +4312,8 @@ double gcamAreaEnergy(GCA_MORPH *gcam)
           DiagBreak();
         }
         if (i == Gx && j == Gy && k == Gz)
-          printf("E_area: node(%d,%d,%d): area=%2.4f, error=%2.3f\n", i, j, k, gcamn->area, error);
+          printf("E_area: node(%d,%d,%d): area=%2.4f, error=%2.3f\n", i, j, k,
+                 gcamn->area, error);
       }
     }
   }
@@ -4303,9 +4326,9 @@ double gcamAreaEnergy(GCA_MORPH *gcam)
   Applied inverse gcam morph to input. Currently NN and non-NN interpolation
   cases are treated differently.
 */
-MRI *GCAMmorphFromAtlas(MRI *mri_in, GCA_MORPH *gcam, MRI *mri_morphed, int sample_type)
-{
-  if (1 || !sample_type)  // NN interpolation for everything
+MRI *GCAMmorphFromAtlas(MRI *mri_in, GCA_MORPH *gcam, MRI *mri_morphed,
+                        int sample_type) {
+  if (1 || !sample_type) // NN interpolation for everything
   {
     TRANSFORM _transform, *transform = &_transform;
     int x, y, z, f;
@@ -4314,12 +4337,14 @@ MRI *GCAMmorphFromAtlas(MRI *mri_in, GCA_MORPH *gcam, MRI *mri_morphed, int samp
 
     if (mri_morphed == NULL)
       mri_morphed =
-          MRIallocSequence(gcam->image.width, gcam->image.height, gcam->image.depth, mri_in->type, mri_in->nframes);
+          MRIallocSequence(gcam->image.width, gcam->image.height,
+                           gcam->image.depth, mri_in->type, mri_in->nframes);
 
     useVolGeomToMRI(&gcam->image, mri_morphed);
     transform->type = MORPH_3D_TYPE;
     transform->xform = (void *)gcam;
-    TransformInvert(transform, mri_morphed);  // NOTE: if inverse exists, it does nothing
+    TransformInvert(transform,
+                    mri_morphed); // NOTE: if inverse exists, it does nothing
     scale = 1;
     // scale = gcam->spacing / mri_in->xsize ;
 
@@ -4331,12 +4356,13 @@ MRI *GCAMmorphFromAtlas(MRI *mri_in, GCA_MORPH *gcam, MRI *mri_morphed, int samp
           }
 
           if (gcam->gca) {
-            if (GCAsourceVoxelToPriorReal(gcam->gca, mri_morphed, transform, x, y, z, &xr, &yr, &zr) != NO_ERROR) {
+            if (GCAsourceVoxelToPriorReal(gcam->gca, mri_morphed, transform, x,
+                                          y, z, &xr, &yr, &zr) != NO_ERROR) {
               continue;
             }
-          }
-          else {
-            if (GCAMsampleInverseMorph(gcam, (float)x, (float)y, (float)z, &xf, &yf, &zf) != NO_ERROR) {
+          } else {
+            if (GCAMsampleInverseMorph(gcam, (float)x, (float)y, (float)z, &xf,
+                                       &yf, &zf) != NO_ERROR) {
               continue;
             }
             xr = (double)xf;
@@ -4355,8 +4381,7 @@ MRI *GCAMmorphFromAtlas(MRI *mri_in, GCA_MORPH *gcam, MRI *mri_morphed, int samp
         }
 
     return (mri_morphed);
-  }
-  else {
+  } else {
 #if 0
     MRI *mri_warp ;
 
@@ -4379,8 +4404,11 @@ MRI *GCAMmorphFromAtlas(MRI *mri_in, GCA_MORPH *gcam, MRI *mri_morphed, int samp
 
     // GCAM is a non-linear voxel-to-voxel transform
     // it also assumes that the uniform voxel size
-    if ((mri_in->xsize != mri_in->ysize) || (mri_in->xsize != mri_in->zsize) || (mri_in->ysize != mri_in->zsize)) {
-      ErrorExit(ERROR_BADPARM, "non-uniform volumes cannot be used for GCAMmorphFromAtlas()\n");
+    if ((mri_in->xsize != mri_in->ysize) || (mri_in->xsize != mri_in->zsize) ||
+        (mri_in->ysize != mri_in->zsize)) {
+      ErrorExit(
+          ERROR_BADPARM,
+          "non-uniform volumes cannot be used for GCAMmorphFromAtlas()\n");
     }
 
     width = mri_in->width;
@@ -4413,7 +4441,8 @@ MRI *GCAMmorphFromAtlas(MRI *mri_in, GCA_MORPH *gcam, MRI *mri_morphed, int samp
           }
 
           /* compute voxel coordinates of this morph point */
-          if (!GCAMsampleMorph(gcam, (float)x * thick, (float)y * thick, (float)z * thick, &xd, &yd, &zd)) {
+          if (!GCAMsampleMorph(gcam, (float)x * thick, (float)y * thick,
+                               (float)z * thick, &xd, &yd, &zd)) {
             xd /= thick;
             yd /= thick;
             zd /= thick; /* voxel coords */
@@ -4444,9 +4473,9 @@ MRI *GCAMmorphFromAtlas(MRI *mri_in, GCA_MORPH *gcam, MRI *mri_morphed, int samp
             // if image is resampled often (e.g. in registration algo)
             {
               MRIsampleSeqBSpline(bspline, x, y, z, orig_vals, 0, frames - 1);
-            }
-            else {
-              MRIsampleSeqVolumeType(mri_in, x, y, z, orig_vals, 0, frames - 1, sample_type);
+            } else {
+              MRIsampleSeqVolumeType(mri_in, x, y, z, orig_vals, 0, frames - 1,
+                                     sample_type);
             }
 #else
             // orig_val = MRIgetVoxVal(mri_in, x, y, z, 0) ;
@@ -4460,7 +4489,8 @@ MRI *GCAMmorphFromAtlas(MRI *mri_in, GCA_MORPH *gcam, MRI *mri_morphed, int samp
             weight = (1 - dx) * (1 - dy) * (1 - dz);
             MRIFvox(mri_weights, xm1, ym1, zm1) += weight;
             for (f = 0; f < frames; f++) {
-              MRIFseq_vox(mri_s_morphed, xm1, ym1, zm1, f) += weight * orig_vals[f];
+              MRIFseq_vox(mri_s_morphed, xm1, ym1, zm1, f) +=
+                  weight * orig_vals[f];
             }
 
             if (xp1 == Gx && ym1 == Gy && zm1 == Gz) {
@@ -4469,7 +4499,8 @@ MRI *GCAMmorphFromAtlas(MRI *mri_in, GCA_MORPH *gcam, MRI *mri_morphed, int samp
             weight = (dx) * (1 - dy) * (1 - dz);
             MRIFvox(mri_weights, xp1, ym1, zm1) += weight;
             for (f = 0; f < frames; f++) {
-              MRIFseq_vox(mri_s_morphed, xp1, ym1, zm1, f) += weight * orig_vals[f];
+              MRIFseq_vox(mri_s_morphed, xp1, ym1, zm1, f) +=
+                  weight * orig_vals[f];
             }
 
             if (xm1 == Gx && yp1 == Gy && zm1 == Gz) {
@@ -4478,7 +4509,8 @@ MRI *GCAMmorphFromAtlas(MRI *mri_in, GCA_MORPH *gcam, MRI *mri_morphed, int samp
             weight = (1 - dx) * (dy) * (1 - dz);
             MRIFvox(mri_weights, xm1, yp1, zm1) += weight;
             for (f = 0; f < frames; f++) {
-              MRIFseq_vox(mri_s_morphed, xm1, yp1, zm1, f) += weight * orig_vals[f];
+              MRIFseq_vox(mri_s_morphed, xm1, yp1, zm1, f) +=
+                  weight * orig_vals[f];
             }
 
             if (xm1 == Gx && ym1 == Gy && zp1 == Gz) {
@@ -4487,7 +4519,8 @@ MRI *GCAMmorphFromAtlas(MRI *mri_in, GCA_MORPH *gcam, MRI *mri_morphed, int samp
             weight = (1 - dx) * (1 - dy) * (dz);
             MRIFvox(mri_weights, xm1, ym1, zp1) += weight;
             for (f = 0; f < frames; f++) {
-              MRIFseq_vox(mri_s_morphed, xm1, ym1, zp1, f) += weight * orig_vals[f];
+              MRIFseq_vox(mri_s_morphed, xm1, ym1, zp1, f) +=
+                  weight * orig_vals[f];
             }
 
             if (xp1 == Gx && yp1 == Gy && zm1 == Gz) {
@@ -4496,7 +4529,8 @@ MRI *GCAMmorphFromAtlas(MRI *mri_in, GCA_MORPH *gcam, MRI *mri_morphed, int samp
             weight = (dx) * (dy) * (1 - dz);
             MRIFvox(mri_weights, xp1, yp1, zm1) += weight;
             for (f = 0; f < frames; f++) {
-              MRIFseq_vox(mri_s_morphed, xp1, yp1, zm1, f) += weight * orig_vals[f];
+              MRIFseq_vox(mri_s_morphed, xp1, yp1, zm1, f) +=
+                  weight * orig_vals[f];
             }
 
             if (xp1 == Gx && ym1 == Gy && zp1 == Gz) {
@@ -4505,7 +4539,8 @@ MRI *GCAMmorphFromAtlas(MRI *mri_in, GCA_MORPH *gcam, MRI *mri_morphed, int samp
             weight = (dx) * (1 - dy) * (dz);
             MRIFvox(mri_weights, xp1, ym1, zp1) += weight;
             for (f = 0; f < frames; f++) {
-              MRIFseq_vox(mri_s_morphed, xp1, ym1, zp1, f) += weight * orig_vals[f];
+              MRIFseq_vox(mri_s_morphed, xp1, ym1, zp1, f) +=
+                  weight * orig_vals[f];
             }
 
             if (xm1 == Gx && yp1 == Gy && zp1 == Gz) {
@@ -4514,7 +4549,8 @@ MRI *GCAMmorphFromAtlas(MRI *mri_in, GCA_MORPH *gcam, MRI *mri_morphed, int samp
             weight = (1 - dx) * (dy) * (dz);
             MRIFvox(mri_weights, xm1, yp1, zp1) += weight;
             for (f = 0; f < frames; f++) {
-              MRIFseq_vox(mri_s_morphed, xm1, yp1, zp1, f) += weight * orig_vals[f];
+              MRIFseq_vox(mri_s_morphed, xm1, yp1, zp1, f) +=
+                  weight * orig_vals[f];
             }
 
             if (xp1 == Gx && yp1 == Gy && zp1 == Gz) {
@@ -4523,7 +4559,8 @@ MRI *GCAMmorphFromAtlas(MRI *mri_in, GCA_MORPH *gcam, MRI *mri_morphed, int samp
             weight = (dx) * (dy) * (dz);
             MRIFvox(mri_weights, xp1, yp1, zp1) += weight;
             for (f = 0; f < frames; f++) {
-              MRIFseq_vox(mri_s_morphed, xp1, yp1, zp1, f) += weight * orig_vals[f];
+              MRIFseq_vox(mri_s_morphed, xp1, yp1, zp1, f) +=
+                  weight * orig_vals[f];
             }
           }
         }
@@ -4550,12 +4587,12 @@ MRI *GCAMmorphFromAtlas(MRI *mri_in, GCA_MORPH *gcam, MRI *mri_morphed, int samp
             // if image is resampled often (e.g. in registration algo)
             {
               MRIsampleSeqBSpline(bspline, x, y, z, vals, 0, frames - 1);
-            }
-            else {
+            } else {
               MRIsampleSeqVolume(mri_s_morphed, x, y, z, vals, 0, frames - 1);
             }
             for (f = 0; f < frames; f++) {
-              MRIFseq_vox(mri_s_morphed, x, y, z, f) = (float)((double)vals[f] / weight);
+              MRIFseq_vox(mri_s_morphed, x, y, z, f) =
+                  (float)((double)vals[f] / weight);
             }
           }
         }
@@ -4568,8 +4605,7 @@ MRI *GCAMmorphFromAtlas(MRI *mri_in, GCA_MORPH *gcam, MRI *mri_morphed, int samp
     /* copy from short image to BUFTYPE one */
     if (!mri_morphed) {
       mri_morphed = MRIclone(mri_in, NULL);
-    }
-    else {
+    } else {
       MRIclear(mri_morphed);
     }
 
@@ -4581,25 +4617,29 @@ MRI *GCAMmorphFromAtlas(MRI *mri_in, GCA_MORPH *gcam, MRI *mri_morphed, int samp
           }
 
           switch (mri_morphed->type) {
-            case MRI_UCHAR:
-              for (f = 0; f < frames; f++) {
-                MRIseq_vox(mri_morphed, x, y, z, f) = (uchar)MRIFseq_vox(mri_s_morphed, x, y, z, f);
-              }
-              break;
-            case MRI_SHORT:
-              for (f = 0; f < frames; f++) {
-                MRISseq_vox(mri_morphed, x, y, z, f) = (short)MRIFseq_vox(mri_s_morphed, x, y, z, f);
-              }
-              break;
-            case MRI_FLOAT:
-              for (f = 0; f < frames; f++) {
-                MRIFseq_vox(mri_morphed, x, y, z, f) = MRIFseq_vox(mri_s_morphed, x, y, z, f);
-              }
-              break;
-            default:
-              ErrorReturn(NULL,
-                          (ERROR_UNSUPPORTED, "GCAMmorphFromAtlas: unsupported volume type %d", mri_morphed->type));
-              break;
+          case MRI_UCHAR:
+            for (f = 0; f < frames; f++) {
+              MRIseq_vox(mri_morphed, x, y, z, f) =
+                  (uchar)MRIFseq_vox(mri_s_morphed, x, y, z, f);
+            }
+            break;
+          case MRI_SHORT:
+            for (f = 0; f < frames; f++) {
+              MRISseq_vox(mri_morphed, x, y, z, f) =
+                  (short)MRIFseq_vox(mri_s_morphed, x, y, z, f);
+            }
+            break;
+          case MRI_FLOAT:
+            for (f = 0; f < frames; f++) {
+              MRIFseq_vox(mri_morphed, x, y, z, f) =
+                  MRIFseq_vox(mri_s_morphed, x, y, z, f);
+            }
+            break;
+          default:
+            ErrorReturn(NULL, (ERROR_UNSUPPORTED,
+                               "GCAMmorphFromAtlas: unsupported volume type %d",
+                               mri_morphed->type));
+            break;
           }
         }
       }
@@ -4624,8 +4664,7 @@ MRI *GCAMmorphFromAtlas(MRI *mri_in, GCA_MORPH *gcam, MRI *mri_morphed, int samp
           weight = (float)MRIFvox(mri_weights, x, y, z);
           if (weight > .1) {
             MRIvox(mri_ctrl, x, y, z) = 1;
-          }
-          else {
+          } else {
             MRIvox(mri_ctrl, x, y, z) = 0;
           }
         }
@@ -4641,7 +4680,7 @@ MRI *GCAMmorphFromAtlas(MRI *mri_in, GCA_MORPH *gcam, MRI *mri_morphed, int samp
       MRIbuildVoronoiDiagram(mri_morphed, mri_ctrl, mri_morphed) ;
     */
 
-    if (sample_type != 0)  // non-NN interpolation
+    if (sample_type != 0) // non-NN interpolation
     {
       MRIsoapBubble(mri_morphed, mri_ctrl, mri_morphed, 3 * gcam->spacing, -1);
     }
@@ -4658,12 +4697,12 @@ MRI *GCAMmorphFromAtlas(MRI *mri_in, GCA_MORPH *gcam, MRI *mri_morphed, int samp
   GCAMmorphPlistFromAtlas:
   Applies inverse gcam morph to input point list.
 */
-int GCAMmorphPlistFromAtlas(int N, float *points_in, GCA_MORPH *gcam, float *points_out)
-{
-  int sample_type = 0;  // more options for sampling types: on the to do list
+int GCAMmorphPlistFromAtlas(int N, float *points_in, GCA_MORPH *gcam,
+                            float *points_out) {
+  int sample_type = 0; // more options for sampling types: on the to do list
   int counter = 0;
 
-  if (!sample_type)  // NN interpolation
+  if (!sample_type) // NN interpolation
   {
     TRANSFORM _transform, *transform = &_transform;
     double x, y, z;
@@ -4671,7 +4710,9 @@ int GCAMmorphPlistFromAtlas(int N, float *points_in, GCA_MORPH *gcam, float *poi
 
     transform->type = MORPH_3D_TYPE;
     transform->xform = (void *)gcam;
-    TransformInvert(transform, NULL);  // NOTE: if inverse exists / mri = NULL, it does nothing
+    TransformInvert(
+        transform,
+        NULL); // NOTE: if inverse exists / mri = NULL, it does nothing
     scale = 1;
     // scale = gcam->spacing / mri_in->xsize ;
 
@@ -4684,7 +4725,9 @@ int GCAMmorphPlistFromAtlas(int N, float *points_in, GCA_MORPH *gcam, float *poi
       }
       // if (GCAsourceVoxelToPriorReal(gcam->gca, NULL, transform,
       //                              x, y, z, &xr, &yr, &zr) != NO_ERROR)
-      if (GCAsourceFloatVoxelToPriorReal(gcam->gca, NULL, transform, x, y, z, &xr, &yr, &zr) != NO_ERROR) continue;
+      if (GCAsourceFloatVoxelToPriorReal(gcam->gca, NULL, transform, x, y, z,
+                                         &xr, &yr, &zr) != NO_ERROR)
+        continue;
 
       xr *= scale;
       yr *= scale;
@@ -4701,12 +4744,12 @@ int GCAMmorphPlistFromAtlas(int N, float *points_in, GCA_MORPH *gcam, float *poi
   GCAMmorphPlistToSource:
   Transforms a list of points from the target space back to the source space.
 */
-int GCAMmorphPlistToSource(int N, float *points_in, GCA_MORPH *gcam, float *points_out)
-{
-  int sample_type = 0;  // more options for sampling types: on the to do list
+int GCAMmorphPlistToSource(int N, float *points_in, GCA_MORPH *gcam,
+                           float *points_out) {
+  int sample_type = 0; // more options for sampling types: on the to do list
   int counter = 0;
 
-  if (!sample_type)  // NN interpolation
+  if (!sample_type) // NN interpolation
   {
     TRANSFORM _transform, *transform = &_transform;
     float x, y, z;
@@ -4714,7 +4757,9 @@ int GCAMmorphPlistToSource(int N, float *points_in, GCA_MORPH *gcam, float *poin
 
     transform->type = MORPH_3D_TYPE;
     transform->xform = (void *)gcam;
-    TransformInvert(transform, NULL);  // NOTE: if inverse exists / mri = NULL, it does nothing
+    TransformInvert(
+        transform,
+        NULL); // NOTE: if inverse exists / mri = NULL, it does nothing
     scale = 1;
 
     for (counter = 0; counter < N; counter++) {
@@ -4724,7 +4769,8 @@ int GCAMmorphPlistToSource(int N, float *points_in, GCA_MORPH *gcam, float *poin
       if (x == Gx && y == Gy && z == Gz) {
         DiagBreak();
       }
-      if (GCApriorToSourceVoxelFloat(gcam->gca, NULL, transform, x, y, z, &xr, &yr, &zr) != NO_ERROR) {
+      if (GCApriorToSourceVoxelFloat(gcam->gca, NULL, transform, x, y, z, &xr,
+                                     &yr, &zr) != NO_ERROR) {
         continue;
       }
       xr *= scale;
@@ -4738,8 +4784,8 @@ int GCAMmorphPlistToSource(int N, float *points_in, GCA_MORPH *gcam, float *poin
   return (1);
 }
 
-MRI *GCAMmorphToAtlas(MRI *mri_src, GCA_MORPH *gcam, MRI *mri_morphed, int frame, int sample_type)
-{
+MRI *GCAMmorphToAtlas(MRI *mri_src, GCA_MORPH *gcam, MRI *mri_morphed,
+                      int frame, int sample_type) {
   int width, height, depth, x, y, z, start_frame, end_frame;
   int out_of_gcam;
   float xd, yd, zd;
@@ -4747,8 +4793,7 @@ MRI *GCAMmorphToAtlas(MRI *mri_src, GCA_MORPH *gcam, MRI *mri_morphed, int frame
 
   if (frame >= 0 && frame < mri_src->nframes) {
     start_frame = end_frame = frame;
-  }
-  else {
+  } else {
     start_frame = 0;
     end_frame = mri_src->nframes - 1;
   }
@@ -4757,14 +4802,14 @@ MRI *GCAMmorphToAtlas(MRI *mri_src, GCA_MORPH *gcam, MRI *mri_morphed, int frame
   height = gcam->atlas.height;
   depth = gcam->atlas.depth;
 
-  if (mri_morphed && (mri_morphed->width!=width
-                      || mri_morphed->height!=height
-                      || mri_morphed->depth!=depth)) {
-      ErrorExit(ERROR_BADPARM, "invalid input MRI size for GCAMmorphToAtlas()");
+  if (mri_morphed &&
+      (mri_morphed->width != width || mri_morphed->height != height ||
+       mri_morphed->depth != depth)) {
+    ErrorExit(ERROR_BADPARM, "invalid input MRI size for GCAMmorphToAtlas()");
   }
   if (!mri_morphed) {
     mri_morphed = MRIallocSequence(width, height, depth, mri_src->type,
-      frame < 0 ? mri_src->nframes : 1);
+                                   frame < 0 ? mri_src->nframes : 1);
   }
   useVolGeomToMRI(&gcam->atlas, mri_morphed);
 
@@ -4772,9 +4817,9 @@ MRI *GCAMmorphToAtlas(MRI *mri_src, GCA_MORPH *gcam, MRI *mri_morphed, int frame
     xoff = -7.42;
     yoff = 24.88;
     zoff = -18.85;
-    printf("INFO: adding MGH tal offset (%2.1f, %2.1f, %2.1f) to xform\n", xoff, yoff, zoff);
-  }
-  else {
+    printf("INFO: adding MGH tal offset (%2.1f, %2.1f, %2.1f) to xform\n", xoff,
+           yoff, zoff);
+  } else {
     xoff = yoff = zoff = 0;
   }
 
@@ -4798,7 +4843,8 @@ MRI *GCAMmorphToAtlas(MRI *mri_src, GCA_MORPH *gcam, MRI *mri_morphed, int frame
         //   &xd, &yd, &zd);
 
         // Convert target-crs to input-crs
-        out_of_gcam = GCAMsampleMorph(gcam, (float)x, (float)y, (float)z, &xd, &yd, &zd);
+        out_of_gcam =
+            GCAMsampleMorph(gcam, (float)x, (float)y, (float)z, &xd, &yd, &zd);
 
         if (!out_of_gcam) {
           // Should not divide by src thick. If anything,
@@ -4814,15 +4860,16 @@ MRI *GCAMmorphToAtlas(MRI *mri_src, GCA_MORPH *gcam, MRI *mri_morphed, int frame
               DiagBreak();
             }
 
-            if (xd > -1 && yd > -1 && zd > 0 && xd < mri_src->width && yd < mri_src->height && zd < mri_src->depth) {
+            if (xd > -1 && yd > -1 && zd > 0 && xd < mri_src->width &&
+                yd < mri_src->height && zd < mri_src->depth) {
               if (sample_type == SAMPLE_CUBIC_BSPLINE) {
                 MRIsampleBSpline(bspline, xd, yd, zd, frame, &val);
-              }
-              else
-                MRIsampleVolumeFrameType(mri_src, xd, yd, zd, frame, sample_type, &val);
-              // printf("Within GCAMmorphToAtlas: (%d, %d, %d): (%f, %f, %f): %f \n", x, y, z, xd, yd, zd, val) ;
-            }
-            else {
+              } else
+                MRIsampleVolumeFrameType(mri_src, xd, yd, zd, frame,
+                                         sample_type, &val);
+              // printf("Within GCAMmorphToAtlas: (%d, %d, %d): (%f, %f, %f): %f
+              // \n", x, y, z, xd, yd, zd, val) ;
+            } else {
               val = 0.0;
             }
             MRIsetVoxVal(mri_morphed, x, y, z, frame - start_frame, val);
@@ -4838,7 +4885,8 @@ MRI *GCAMmorphToAtlas(MRI *mri_src, GCA_MORPH *gcam, MRI *mri_morphed, int frame
   // copy the gcam dst information to the morphed volume
   if (getenv("USE_AVERAGE305")) {
     fprintf(stderr, "INFO: Environmental variable USE_AVERAGE305 set\n");
-    fprintf(stderr, "INFO: Modifying dst c_(r,a,s), using average_305 values\n");
+    fprintf(stderr,
+            "INFO: Modifying dst c_(r,a,s), using average_305 values\n");
     mri_morphed->c_r = -0.0950;
     mri_morphed->c_a = -16.5100;
     mri_morphed->c_s = 9.7500;
@@ -4849,14 +4897,15 @@ MRI *GCAMmorphToAtlas(MRI *mri_src, GCA_MORPH *gcam, MRI *mri_morphed, int frame
   }
   return (mri_morphed);
 }
-MRI *GCAMmorphToAtlasWithDensityCorrection(MRI *mri_src, GCA_MORPH *gcam, MRI *mri_morphed, int frame)
-{
+MRI *GCAMmorphToAtlasWithDensityCorrection(MRI *mri_src, GCA_MORPH *gcam,
+                                           MRI *mri_morphed, int frame) {
   int width, height, depth, x, y, z, start_frame, end_frame;
   float xd, yd, zd;
   double val, jacobian;
   MRI *mri_jacobian;
 
-  mri_morphed = GCAMmorphToAtlas(mri_src, gcam, mri_morphed, frame, SAMPLE_TRILINEAR);
+  mri_morphed =
+      GCAMmorphToAtlas(mri_src, gcam, mri_morphed, frame, SAMPLE_TRILINEAR);
   if (!mri_morphed) {
     return (NULL);
   }
@@ -4866,8 +4915,7 @@ MRI *GCAMmorphToAtlasWithDensityCorrection(MRI *mri_src, GCA_MORPH *gcam, MRI *m
   depth = mri_morphed->depth;
   if (frame >= 0 && frame < mri_src->nframes) {
     start_frame = end_frame = frame;
-  }
-  else {
+  } else {
     start_frame = 0;
     end_frame = mri_src->nframes - 1;
   }
@@ -4903,16 +4951,15 @@ MRI *GCAMmorphToAtlasWithDensityCorrection(MRI *mri_src, GCA_MORPH *gcam, MRI *m
 
   return (mri_morphed);
 }
-MRI *GCAMmorphToAtlasType(MRI *mri_src, GCA_MORPH *gcam, MRI *mri_morphed, int frame, int interp_type)
-{
+MRI *GCAMmorphToAtlasType(MRI *mri_src, GCA_MORPH *gcam, MRI *mri_morphed,
+                          int frame, int interp_type) {
   int width, height, depth, x, y, z, start_frame, end_frame;
   float xd, yd, zd;
   double val;
 
   if (frame >= 0 && frame < mri_src->nframes) {
     start_frame = end_frame = frame;
-  }
-  else {
+  } else {
     start_frame = 0;
     end_frame = mri_src->nframes - 1;
   }
@@ -4924,13 +4971,16 @@ MRI *GCAMmorphToAtlasType(MRI *mri_src, GCA_MORPH *gcam, MRI *mri_morphed, int f
   // GCAM is a non-linear voxel-to-voxel transform
   // it also assumes that the uniform voxel size
   if (mri_morphed) {
-    if ((mri_src->xsize != mri_src->ysize) || (mri_src->xsize != mri_src->zsize) ||
+    if ((mri_src->xsize != mri_src->ysize) ||
+        (mri_src->xsize != mri_src->zsize) ||
         (mri_src->ysize != mri_src->zsize)) {
-      ErrorExit(ERROR_BADPARM, "non-uniform volumes cannot be used for GCAMmorphToAtlas()\n");
+      ErrorExit(ERROR_BADPARM,
+                "non-uniform volumes cannot be used for GCAMmorphToAtlas()\n");
     }
   }
   if (!mri_morphed) {
-    mri_morphed = MRIallocSequence(width, height, depth, mri_src->type, frame < 0 ? mri_src->nframes : 1);
+    mri_morphed = MRIallocSequence(width, height, depth, mri_src->type,
+                                   frame < 0 ? mri_src->nframes : 1);
     MRIcopyHeader(mri_src, mri_morphed);
   }
 
@@ -4946,23 +4996,24 @@ MRI *GCAMmorphToAtlasType(MRI *mri_src, GCA_MORPH *gcam, MRI *mri_morphed, int f
           DiagBreak();
         }
 
-        if (!GCAMsampleMorph(
-                gcam, (float)x * mri_src->thick, (float)y * mri_src->thick, (float)z * mri_src->thick, &xd, &yd, &zd)) {
+        if (!GCAMsampleMorph(gcam, (float)x * mri_src->thick,
+                             (float)y * mri_src->thick,
+                             (float)z * mri_src->thick, &xd, &yd, &zd)) {
           xd /= mri_src->thick;
           yd /= mri_src->thick;
           zd /= mri_src->thick;
           for (frame = start_frame; frame <= end_frame; frame++) {
-            if (xd > -1 && yd > -1 && zd > 0 && xd < width && yd < height && zd < depth) {
+            if (xd > -1 && yd > -1 && zd > 0 && xd < width && yd < height &&
+                zd < depth) {
               if (interp_type == SAMPLE_CUBIC_BSPLINE)
               // recommended to externally call this and keep mri_coeff
               // if image is resampled often (e.g. in registration algo)
               {
                 MRIsampleBSpline(bspline, xd, yd, zd, frame, &val);
-              }
-              else
-                MRIsampleVolumeFrameType(mri_src, xd, yd, zd, frame, interp_type, &val);
-            }
-            else {
+              } else
+                MRIsampleVolumeFrameType(mri_src, xd, yd, zd, frame,
+                                         interp_type, &val);
+            } else {
               val = 0.0;
             }
             MRIsetVoxVal(mri_morphed, x, y, z, frame - start_frame, val);
@@ -4981,20 +5032,19 @@ MRI *GCAMmorphToAtlasType(MRI *mri_src, GCA_MORPH *gcam, MRI *mri_morphed, int f
   return (mri_morphed);
 }
 
-int log_integration_parms(FILE *fp, GCA_MORPH_PARMS *parms)
-{
+int log_integration_parms(FILE *fp, GCA_MORPH_PARMS *parms) {
   char *cp, host_name[STRLEN];
 
   cp = getenv("HOST");
   if (cp) {
     strcpy(host_name, cp);
-  }
-  else {
+  } else {
     strcpy(host_name, "unknown");
   }
 
   if (!DZERO(parms->l_elastic)) {
-    fprintf(fp, "l_elastic=%2.2f, lambda=%2.2f, mu=%2.2f ", parms->l_elastic, parms->lame_lambda, parms->lame_mu);
+    fprintf(fp, "l_elastic=%2.2f, lambda=%2.2f, mu=%2.2f ", parms->l_elastic,
+            parms->lame_lambda, parms->lame_mu);
   }
   if (!DZERO(parms->l_binary)) {
     fprintf(fp, "l_binary=%2.2f ", parms->l_binary);
@@ -5040,17 +5090,9 @@ int log_integration_parms(FILE *fp, GCA_MORPH_PARMS *parms)
           "\ntol=%2.2e, dt=%2.2e, exp_k=%2.1f, momentum=%2.2f, "
           "levels=%d, niter=%d, "
           "lbl_dist=%2.2f, avgs=%d, sigma=%2.1f,type=%d, relabel=%d, neg=%s\n",
-          parms->tol,
-          parms->dt,
-          parms->exp_k,
-          parms->momentum,
-          parms->levels,
-          parms->niterations,
-          parms->label_dist,
-          parms->navgs,
-          parms->sigma,
-          parms->integration_type,
-          parms->relabel,
+          parms->tol, parms->dt, parms->exp_k, parms->momentum, parms->levels,
+          parms->niterations, parms->label_dist, parms->navgs, parms->sigma,
+          parms->integration_type, parms->relabel,
           parms->noneg > 0 ? "no" : parms->noneg == 0 ? "yes" : "yes+");
   return (NO_ERROR);
 }
@@ -5137,16 +5179,18 @@ static int inconsistentLabelNodes;
 static float maxGradient, gradientArea;
 
 /*!
-  \fn int GCAMregisterLevel(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PARMS *parms)
-  \brief One of the lowest levels of mri_ca_register
+  \fn int GCAMregisterLevel(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth,
+GCA_MORPH_PARMS *parms) \brief One of the lowest levels of mri_ca_register
 #GCMRL#
  */
 
-int GCAMregisterLevel(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PARMS *parms)
-{
-  int n, nsmall, done = 0, which = GCAM_INTEGRATE_OPTIMAL, max_small, increasing, good_step, good_step_ever;
+int GCAMregisterLevel(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth,
+                      GCA_MORPH_PARMS *parms) {
+  int n, nsmall, done = 0, which = GCAM_INTEGRATE_OPTIMAL, max_small,
+                 increasing, good_step, good_step_ever;
   // int reduced;
-  double rms, last_rms, pct_change, orig_dt, min_dt, orig_j, tol, last_pct_change;
+  double rms, last_rms, pct_change, orig_dt, min_dt, orig_j, tol,
+      last_pct_change;
   GCA_MORPH_PARMS jacobian_parms;
   Timer timer;
   double tFOTS, tGradient;
@@ -5158,7 +5202,8 @@ int GCAMregisterLevel(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PARM
   max_small = parms->nsmall;
   gcamClearMomentum(gcam);
   jacobian_parms = *parms;
-  jacobian_parms.l_likelihood = jacobian_parms.l_label = jacobian_parms.l_distance = jacobian_parms.l_smoothness = 0.0;
+  jacobian_parms.l_likelihood = jacobian_parms.l_label =
+      jacobian_parms.l_distance = jacobian_parms.l_smoothness = 0.0;
   orig_dt = parms->dt;
   nsmall = 0;
   pct_change = 0.0;
@@ -5174,9 +5219,7 @@ int GCAMregisterLevel(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PARM
       fprintf(parms->log_fp,
               "GCAMregisterLevel: using voxel thickness %2.1f, "
               "navgs=%d, relabel=%d\n",
-              mri->xsize,
-              parms->navgs,
-              parms->relabel);
+              mri->xsize, parms->navgs, parms->relabel);
     log_integration_parms(parms->log_fp, parms);
     fflush(parms->log_fp);
   }
@@ -5184,7 +5227,8 @@ int GCAMregisterLevel(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PARM
     log_integration_parms(stdout, parms);
   }
 
-  if (parms->start_t == 0 && parms->l_area_smoothness > 0 && (Gdiag & DIAG_WRITE)) {
+  if (parms->start_t == 0 && parms->l_area_smoothness > 0 &&
+      (Gdiag & DIAG_WRITE)) {
     char fname[STRLEN];
     HISTOGRAM *h;
     sprintf(fname, "%s_jac%4.4d.plt", parms->base_name, parms->start_t);
@@ -5203,14 +5247,14 @@ int GCAMregisterLevel(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PARM
   GCAMremoveStatus(gcam, GCAM_LABEL_NODE);
   GCAMremoveStatus(gcam, GCAM_IGNORE_LIKELIHOOD);
   last_rms = GCAMcomputeRMS(gcam, mri, parms);
-  printf("GCAMRegisterLevel(): init RMS %g\n",last_rms);
+  printf("GCAMRegisterLevel(): init RMS %g\n", last_rms);
   if (parms->log_fp) {
-    fprintf(parms->log_fp, "%04d: dt=%2.3f, rms=%2.3f, neg=%d, invalid=%d", 0, 0.0f, last_rms, gcam->neg, Ginvalid);
+    fprintf(parms->log_fp, "%04d: dt=%2.3f, rms=%2.3f, neg=%d, invalid=%d", 0,
+            0.0f, last_rms, gcam->neg, Ginvalid);
     if (parms->l_binary > 0)
-      fprintf(parms->log_fp,
-              ", aligned = %d (%2.3f%%)\n",
-              Galigned,
-              100.0 * Galigned / ((gcam->width * gcam->height * gcam->depth) - Ginvalid));
+      fprintf(parms->log_fp, ", aligned = %d (%2.3f%%)\n", Galigned,
+              100.0 * Galigned /
+                  ((gcam->width * gcam->height * gcam->depth) - Ginvalid));
     else {
       fprintf(parms->log_fp, "\n");
     }
@@ -5239,42 +5283,45 @@ int GCAMregisterLevel(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PARM
     GCAMremoveStatus(gcam, GCAM_IGNORE_LIKELIHOOD);
     tnow = timer.milliseconds();
     gcamComputeGradient(gcam, mri, mri_smooth, parms);
-    tGradient = (timer.milliseconds() - tnow)/1000.0;
+    tGradient = (timer.milliseconds() - tnow) / 1000.0;
     parms->l_jacobian = orig_j;
-    if ((Gdiag & DIAG_WRITE) && DIAG_VERBOSE_ON) gcamWriteDiagnostics(gcam);
+    if ((Gdiag & DIAG_WRITE) && DIAG_VERBOSE_ON)
+      gcamWriteDiagnostics(gcam);
 
     tFOTS = 0;
     switch (parms->integration_type) {
-      case GCAM_INTEGRATE_OPTIMAL:
-        parms->dt = (sqrt(parms->navgs) + 1.0f) * orig_dt; /* will search around this value */
+    case GCAM_INTEGRATE_OPTIMAL:
+      parms->dt = (sqrt(parms->navgs) + 1.0f) *
+                  orig_dt; /* will search around this value */
+      min_dt = gcamFindOptimalTimeStep(gcam, parms, mri);
+      parms->dt = min_dt;
+      break;
+    case GCAM_INTEGRATE_FIXED:
+      min_dt = parms->dt = (sqrt(parms->navgs) + 1.0f) * orig_dt;
+      break;
+    case GCAM_INTEGRATE_BOTH:
+      if (which == GCAM_INTEGRATE_OPTIMAL) {
+        check_gcam(gcam);
+        parms->dt = (sqrt(parms->navgs) + 1.0f) *
+                    orig_dt; /* will search around  this value */
+        // FOTS is one of the slowest parts
+        tnow = timer.milliseconds();
         min_dt = gcamFindOptimalTimeStep(gcam, parms, mri);
+        tFOTS = (timer.milliseconds() - tnow) / 1000.0;
+        check_gcam(gcam);
         parms->dt = min_dt;
-        break;
-      case GCAM_INTEGRATE_FIXED:
-        min_dt = parms->dt = (sqrt(parms->navgs) + 1.0f) * orig_dt;
-        break;
-      case GCAM_INTEGRATE_BOTH:
-        if (which == GCAM_INTEGRATE_OPTIMAL) {
-          check_gcam(gcam);
-          parms->dt = (sqrt(parms->navgs) + 1.0f) * orig_dt; /* will search around  this value */
-	  // FOTS is one of the slowest parts
-	  tnow = timer.milliseconds();
-          min_dt = gcamFindOptimalTimeStep(gcam, parms, mri);
-	  tFOTS = (timer.milliseconds() - tnow)/1000.0;
-          check_gcam(gcam);
-          parms->dt = min_dt;
-          max_small = parms->nsmall;
-          tol = parms->tol;
-        }
-        else /* take some momentum steps */
-        {
-          max_small = 2 * parms->nsmall;
-          tol = parms->tol / 2;
-        }
-        break;
-      default:
-        min_dt = parms->dt;
-        ErrorExit(ERROR_BADPARM, "GCAMregisterLevel: unknown integration type %d", parms->integration_type);
+        max_small = parms->nsmall;
+        tol = parms->tol;
+      } else /* take some momentum steps */
+      {
+        max_small = 2 * parms->nsmall;
+        tol = parms->tol / 2;
+      }
+      break;
+    default:
+      min_dt = parms->dt;
+      ErrorExit(ERROR_BADPARM, "GCAMregisterLevel: unknown integration type %d",
+                parms->integration_type);
     }
 
     GCAMcopyNodePositions(gcam, CURRENT_POSITIONS, SAVED2_POSITIONS);
@@ -5282,7 +5329,7 @@ int GCAMregisterLevel(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PARM
     gcamComputeMetricProperties(gcam);
     gcamCheck(gcam, mri);
     if (gcam->neg > 0) {
-      if (gcam_write_neg){  // diagnostic
+      if (gcam_write_neg) { // diagnostic
         MRI *mri;
         char fname[STRLEN];
         mri = GCAMwriteMRI(gcam, NULL, GCAM_NEG);
@@ -5320,7 +5367,9 @@ int GCAMregisterLevel(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PARM
     if (gcam->neg > 0 && parms->noneg == True) {
       int i = 0;
 
-      if (Gdiag & DIAG_SHOW) printf("%3.3d: %d negative nodes - clearing momentum...\n", i + 1, gcam->neg);
+      if (Gdiag & DIAG_SHOW)
+        printf("%3.3d: %d negative nodes - clearing momentum...\n", i + 1,
+               gcam->neg);
       GCAMcopyNodePositions(gcam, SAVED2_POSITIONS, CURRENT_POSITIONS);
       gcamClearMomentum(gcam);
       gcamComputeMetricProperties(gcam);
@@ -5329,7 +5378,8 @@ int GCAMregisterLevel(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PARM
       while (gcam->neg > 0) {
         parms->dt *= 0.5;
         if (Gdiag & DIAG_SHOW)
-          printf("%3.3d: %d negative nodes - reducing timestep to %2.6f...\n", i + 1, gcam->neg, parms->dt);
+          printf("%3.3d: %d negative nodes - reducing timestep to %2.6f...\n",
+                 i + 1, gcam->neg, parms->dt);
         gcamUndoGradient(gcam);
         gcamComputeMetricProperties(gcam);
         gcamApplyGradient(gcam, parms);
@@ -5348,9 +5398,10 @@ int GCAMregisterLevel(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PARM
 
     if (parms->noneg >= 0) {
       GCAMremoveNegativeNodes(gcam, mri, parms);
-      if (gcam->neg > 0)  // couldn't unfold everything
+      if (gcam->neg > 0) // couldn't unfold everything
       {
-        printf("---------- unfolding failed - restoring original position --------------------\n");
+        printf("---------- unfolding failed - restoring original position "
+               "--------------------\n");
         GCAMcopyNodePositions(gcam, SAVED2_POSITIONS, CURRENT_POSITIONS);
         gcamComputeMetricProperties(gcam);
       }
@@ -5365,7 +5416,8 @@ int GCAMregisterLevel(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PARM
       HISTOfree(&h);
     }
 
-    if (parms->write_iterations > 0 && !((n + 1) % parms->write_iterations) && (Gdiag & DIAG_WRITE)) {
+    if (parms->write_iterations > 0 && !((n + 1) % parms->write_iterations) &&
+        (Gdiag & DIAG_WRITE)) {
       write_snapshot(gcam, mri, parms, n + 1);
     }
 
@@ -5374,8 +5426,7 @@ int GCAMregisterLevel(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PARM
     last_pct_change = pct_change;
     if (FZERO(last_rms)) {
       pct_change = 0.0;
-    }
-    else {
+    } else {
       pct_change = 100.0 * (last_rms - rms) / last_rms;
     }
 
@@ -5384,8 +5435,7 @@ int GCAMregisterLevel(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PARM
         printf("pct change decreased\n");
       }
       increasing = 0;
-    }
-    else /* could check for last_pct_change == 0 here */
+    } else /* could check for last_pct_change == 0 here */
     {
       increasing = 1;
     }
@@ -5396,8 +5446,9 @@ int GCAMregisterLevel(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PARM
       }
       increasing = 0;
       if (parms->constrain_jacobian == 0) {
-        if (parms->uncompress == False)  // otherwise it could be the
-                                         // uncompressing that caused the sse to dec.
+        if (parms->uncompress ==
+            False) // otherwise it could be the
+                   // uncompressing that caused the sse to dec.
         {
           done = 1;
         }
@@ -5409,11 +5460,12 @@ int GCAMregisterLevel(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PARM
 
     if (parms->log_fp) {
       fprintf(parms->log_fp,
-              "%04d: dt=%2.6f, rms=%2.3f (%2.3f%%), neg=%d, invalid=%d",
-              n + 1, min_dt, rms,pct_change,gcam->neg, Ginvalid);
+              "%04d: dt=%2.6f, rms=%2.3f (%2.3f%%), neg=%d, invalid=%d", n + 1,
+              min_dt, rms, pct_change, gcam->neg, Ginvalid);
       if (parms->l_binary > 0)
-        fprintf(parms->log_fp,", aligned = %d (%2.3f%%)\n",Galigned,
-                100.0 * Galigned / ((gcam->width * gcam->height * gcam->depth) - Ginvalid));
+        fprintf(parms->log_fp, ", aligned = %d (%2.3f%%)\n", Galigned,
+                100.0 * Galigned /
+                    ((gcam->width * gcam->height * gcam->depth) - Ginvalid));
       else {
         fprintf(parms->log_fp, "\n");
       }
@@ -5424,21 +5476,24 @@ int GCAMregisterLevel(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PARM
       int compressed;
 
       if ((max_small > 1) && (Gdiag & DIAG_SHOW))
-        printf("\tpct change < tol %2.3f, nsmall = %d of %d\n", tol, nsmall + 1, max_small);
+        printf("\tpct change < tol %2.3f, nsmall = %d of %d\n", tol, nsmall + 1,
+               max_small);
       // if we ever took a good step since the last regridding,
       // and we tried to uncomress and failed, regrid
       gcamCheck(gcam, mri);
       if (good_step_ever && parms->regrid > 1 &&
-          ((compressed = GCAMcountCompressedNodes(gcam, parms->ratio_thresh)) > 0) && 0) {
+          ((compressed = GCAMcountCompressedNodes(gcam, parms->ratio_thresh)) >
+           0) &&
+          0) {
         // lattice is messed up - regrid if regridding
-        printf("could not remove %d compressed nodes - regridding....\n", compressed);
+        printf("could not remove %d compressed nodes - regridding....\n",
+               compressed);
         GCAMregrid(gcam, mri, 0, parms, NULL);
         nsmall = 0;
         which = GCAM_INTEGRATE_OPTIMAL;
         rms = GCAMcomputeRMS(gcam, mri, parms);
         good_step = good_step_ever = done = 0;
-      }
-      else if ((++nsmall >= max_small) || (pct_change <= 0)) {
+      } else if ((++nsmall >= max_small) || (pct_change <= 0)) {
         if (parms->integration_type == GCAM_INTEGRATE_BOTH) {
           if (!good_step) {
             done++;
@@ -5452,13 +5507,11 @@ int GCAMregisterLevel(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PARM
               which = GCAM_INTEGRATE_OPTIMAL;
               rms = GCAMcomputeRMS(gcam, mri, parms);
               good_step = good_step_ever = done = 0;
-            }
-            else {
+            } else {
               n++;
               break;
             }
-          }
-          else /* switch integration types */
+          } else /* switch integration types */
           {
             // reduced = 0;
             if (which == GCAM_INTEGRATE_FIXED) {
@@ -5466,19 +5519,18 @@ int GCAMregisterLevel(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PARM
               which = GCAM_INTEGRATE_OPTIMAL;
               parms->dt = (sqrt(parms->navgs) + 1.0f) * orig_dt;
               if (parms->uncompress) {
-                gcamRemoveCompressedNodes(gcam, mri, parms, parms->ratio_thresh);
+                gcamRemoveCompressedNodes(gcam, mri, parms,
+                                          parms->ratio_thresh);
               }
               /* will search around this value */
-            }
-            else {
+            } else {
               {
                 increasing = /*1 */ 0;
                 pct_change = 0.0;
                 which = GCAM_INTEGRATE_FIXED;
                 if (!DZERO(min_dt)) {
                   parms->dt = min_dt;
-                }
-                else {
+                } else {
                   min_dt = parms->dt = (sqrt(parms->navgs) + 1.0f) * orig_dt;
                 }
               }
@@ -5490,25 +5542,26 @@ int GCAMregisterLevel(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PARM
             good_step = nsmall = 0;
             gcamClearMomentum(gcam);
           }
-        }
-        else {
+        } else {
           n++;
           break;
         }
       }
-    }
-    else if (pct_change >= tol) /* took at least one good step */
+    } else if (pct_change >= tol) /* took at least one good step */
     {
       good_step = good_step_ever = 1;
       done = 0;   /* for integration type == BOTH, apply both types again */
       nsmall = 0; /* start counting small steps again */
     }
 
-    printf("#GCMRL# %4d dt %10.6f rms %6.3f %6.3f%% neg %d  invalid %d tFOTS %6.4f tGradient %6.4f tsec %6.4f",
-	   n, min_dt, rms, pct_change, gcam->neg,  Ginvalid, tFOTS, tGradient, timer.milliseconds()/1000.0);
+    printf("#GCMRL# %4d dt %10.6f rms %6.3f %6.3f%% neg %d  invalid %d tFOTS "
+           "%6.4f tGradient %6.4f tsec %6.4f",
+           n, min_dt, rms, pct_change, gcam->neg, Ginvalid, tFOTS, tGradient,
+           timer.milliseconds() / 1000.0);
     if (parms->l_binary > 0)
       printf(", aligned = %d (%2.3f%%)\n", Galigned,
-	     100.0 * Galigned / ((gcam->width * gcam->height * gcam->depth) - Ginvalid));
+             100.0 * Galigned /
+                 ((gcam->width * gcam->height * gcam->depth) - Ginvalid));
     else {
       printf("\n");
     }
@@ -5531,8 +5584,7 @@ int GCAMregisterLevel(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PARM
   return (NO_ERROR);
 }
 
-int mriFillRegion(MRI *mri, int x, int y, int z, int fill_val, int whalf)
-{
+int mriFillRegion(MRI *mri, int x, int y, int z, int fill_val, int whalf) {
   int xi, xk, yi, yk, zi, zk;
 
   for (xk = -whalf; xk <= whalf; xk++) {
@@ -5548,8 +5600,8 @@ int mriFillRegion(MRI *mri, int x, int y, int z, int fill_val, int whalf)
   return (NO_ERROR);
 }
 
-int write_snapshot(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms, int iter)
-{
+int write_snapshot(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms,
+                   int iter) {
   char fname[STRLEN], base_name[STRLEN];
   MRI *mri_morphed, *mri_samples;
   GCA_MORPH_NODE *gcamn;
@@ -5559,15 +5611,16 @@ int write_snapshot(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms, int iter)
   /* hack to do things differently for hires->lowres registration */
   if (parms->diag_morph_from_atlas /*!DZERO(parms->l_binary)*/)
     mri_morphed = GCAMmorphFieldFromAtlas(
-        gcam, parms->mri_diag ? parms->mri_diag : parms->mri, parms->diag_volume, 0, parms->diag_mode_filter);
+        gcam, parms->mri_diag ? parms->mri_diag : parms->mri,
+        parms->diag_volume, 0, parms->diag_mode_filter);
   else
     mri_morphed =
-        GCAMmorphToAtlas(parms->mri_diag ? parms->mri_diag : parms->mri, gcam, NULL, -1, parms->diag_sample_type);
+        GCAMmorphToAtlas(parms->mri_diag ? parms->mri_diag : parms->mri, gcam,
+                         NULL, -1, parms->diag_sample_type);
   sprintf(base_name, "%s_%4.4d", parms->base_name, iter);
   if (getenv("DONT_COMPRESS")) {
     sprintf(fname, "%s.mgh", base_name);
-  }
-  else {
+  } else {
     sprintf(fname, "%s.mgz", base_name);
   }
   printf("writing snapshot to %s\n", fname);
@@ -5576,14 +5629,17 @@ int write_snapshot(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms, int iter)
   if (getenv("GCAM_WRITE_MEAN") != NULL) {
     /* hack to do things differently for hires->lowres registration */
     if (parms->diag_morph_from_atlas)
-      mri_morphed = GCAMmorphFieldFromAtlas(gcam, parms->mri_diag ? parms->mri_diag : parms->mri, GCAM_MEANS, 0, 0);
+      mri_morphed = GCAMmorphFieldFromAtlas(
+          gcam, parms->mri_diag ? parms->mri_diag : parms->mri, GCAM_MEANS, 0,
+          0);
     else
-      mri_morphed = GCAMmorphToAtlas(parms->mri_diag ? parms->mri_diag : parms->mri, gcam, NULL, -1, SAMPLE_TRILINEAR);
+      mri_morphed =
+          GCAMmorphToAtlas(parms->mri_diag ? parms->mri_diag : parms->mri, gcam,
+                           NULL, -1, SAMPLE_TRILINEAR);
     sprintf(base_name, "%s_%4.4d", parms->base_name, iter);
     if (getenv("DONT_COMPRESS")) {
       sprintf(fname, "%s_intensity.mgh", base_name);
-    }
-    else {
+    } else {
       sprintf(fname, "%s_intensity.mgz", base_name);
     }
     printf("writing snapshot to %s\n", fname);
@@ -5598,14 +5654,16 @@ int write_snapshot(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms, int iter)
   if (parms->mri_diag2) {
     /* hack to do things differently for hires->lowres registration */
     if (parms->diag_morph_from_atlas /*!DZERO(parms->l_binary)*/)
-      mri_morphed = GCAMmorphFieldFromAtlas(gcam, parms->mri_diag2, parms->diag_volume, 0, parms->diag_mode_filter);
+      mri_morphed =
+          GCAMmorphFieldFromAtlas(gcam, parms->mri_diag2, parms->diag_volume, 0,
+                                  parms->diag_mode_filter);
     else
-      mri_morphed = GCAMmorphToAtlas(parms->mri_diag2, gcam, NULL, -1, parms->diag_sample_type);
+      mri_morphed = GCAMmorphToAtlas(parms->mri_diag2, gcam, NULL, -1,
+                                     parms->diag_sample_type);
     sprintf(base_name, "d2.%s_%4.4d", parms->base_name, iter);
     if (getenv("DONT_COMPRESS")) {
       sprintf(fname, "%s.mgh", base_name);
-    }
-    else {
+    } else {
       sprintf(fname, "%s.mgz", base_name);
     }
     printf("writing snapshot to %s\n", fname);
@@ -5614,15 +5672,17 @@ int write_snapshot(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms, int iter)
     if (getenv("GCAM_WRITE_MEAN") != NULL) {
       /* hack to do things differently for hires->lowres registration */
       if (parms->diag_morph_from_atlas)
-        mri_morphed = GCAMmorphFieldFromAtlas(gcam, parms->mri_diag ? parms->mri_diag : parms->mri, GCAM_MEANS, 0, 0);
+        mri_morphed = GCAMmorphFieldFromAtlas(
+            gcam, parms->mri_diag ? parms->mri_diag : parms->mri, GCAM_MEANS, 0,
+            0);
       else
         mri_morphed =
-            GCAMmorphToAtlas(parms->mri_diag ? parms->mri_diag : parms->mri, gcam, NULL, -1, SAMPLE_TRILINEAR);
+            GCAMmorphToAtlas(parms->mri_diag ? parms->mri_diag : parms->mri,
+                             gcam, NULL, -1, SAMPLE_TRILINEAR);
       sprintf(base_name, "d2.%s_%4.4d", parms->base_name, iter);
       if (getenv("DONT_COMPRESS")) {
         sprintf(fname, "%s_intensity.mgh", base_name);
-      }
-      else {
+      } else {
         sprintf(fname, "%s_intensity.mgz", base_name);
       }
       printf("writing snapshot to %s\n", fname);
@@ -5679,7 +5739,8 @@ int write_snapshot(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms, int iter)
           yv = mri_samples->yi[nint(gcamn->y)];
           zv = mri_samples->zi[nint(gcamn->z)];
 #endif
-          if (gcamn->status & (GCAM_IGNORE_LIKELIHOOD | GCAM_NEVER_USE_LIKELIHOOD)) {
+          if (gcamn->status &
+              (GCAM_IGNORE_LIKELIHOOD | GCAM_NEVER_USE_LIKELIHOOD)) {
             mriFillRegion(mri_samples, xv, yv, zv, gcamn->label, 1);
           }
         }
@@ -5692,27 +5753,20 @@ int write_snapshot(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms, int iter)
   return (NO_ERROR);
 }
 
-int boundsCheckf(float x, float y, float z, int width, int height, int depth)
-{
+int boundsCheckf(float x, float y, float z, int width, int height, int depth) {
   if (x >= width) {
     return ERROR_BADPARM;
-  }
-  else if (y >= height) {
+  } else if (y >= height) {
     return ERROR_BADPARM;
-  }
-  else if (z >= depth) {
+  } else if (z >= depth) {
     return ERROR_BADPARM;
-  }
-  else if (x < 0) {
+  } else if (x < 0) {
     return ERROR_BADPARM;
-  }
-  else if (y < 0) {
+  } else if (y < 0) {
     return ERROR_BADPARM;
-  }
-  else if (z < 0) {
+  } else if (z < 0) {
     return ERROR_BADPARM;
-  }
-  else {
+  } else {
     return NO_ERROR;
   }
 }
@@ -5730,8 +5784,8 @@ int boundsCheckf(float x, float y, float z, int width, int height, int depth)
   (but not really), computes the CRS in the UnMorphed-anatomical-space
   volume. This should produce the inverse of GCAMsampleInverseMorph().
   ---------------------------------------------------------------------------*/
-int GCAMsampleMorph(const GCA_MORPH *gcam, float x, float y, float z, float *pxd, float *pyd, float *pzd)
-{
+int GCAMsampleMorph(const GCA_MORPH *gcam, float x, float y, float z,
+                    float *pxd, float *pyd, float *pzd) {
   int xm, xp, ym, yp, zm, zp, width, height, depth;
   float xmd, ymd, zmd, xpd, ypd, zpd; /* d's are distances */
   int errCode = NO_ERROR;
@@ -5772,18 +5826,30 @@ int GCAMsampleMorph(const GCA_MORPH *gcam, float x, float y, float z, float *pxd
     return (ERROR_BADPARM);
   }
 
-  *pxd = xpd * ypd * zpd * gcam->nodes[xm][ym][zm].x + xpd * ypd * zmd * gcam->nodes[xm][ym][zp].x +
-         xpd * ymd * zpd * gcam->nodes[xm][yp][zm].x + xpd * ymd * zmd * gcam->nodes[xm][yp][zp].x +
-         xmd * ypd * zpd * gcam->nodes[xp][ym][zm].x + xmd * ypd * zmd * gcam->nodes[xp][ym][zp].x +
-         xmd * ymd * zpd * gcam->nodes[xp][yp][zm].x + xmd * ymd * zmd * gcam->nodes[xp][yp][zp].x;
-  *pyd = xpd * ypd * zpd * gcam->nodes[xm][ym][zm].y + xpd * ypd * zmd * gcam->nodes[xm][ym][zp].y +
-         xpd * ymd * zpd * gcam->nodes[xm][yp][zm].y + xpd * ymd * zmd * gcam->nodes[xm][yp][zp].y +
-         xmd * ypd * zpd * gcam->nodes[xp][ym][zm].y + xmd * ypd * zmd * gcam->nodes[xp][ym][zp].y +
-         xmd * ymd * zpd * gcam->nodes[xp][yp][zm].y + xmd * ymd * zmd * gcam->nodes[xp][yp][zp].y;
-  *pzd = xpd * ypd * zpd * gcam->nodes[xm][ym][zm].z + xpd * ypd * zmd * gcam->nodes[xm][ym][zp].z +
-         xpd * ymd * zpd * gcam->nodes[xm][yp][zm].z + xpd * ymd * zmd * gcam->nodes[xm][yp][zp].z +
-         xmd * ypd * zpd * gcam->nodes[xp][ym][zm].z + xmd * ypd * zmd * gcam->nodes[xp][ym][zp].z +
-         xmd * ymd * zpd * gcam->nodes[xp][yp][zm].z + xmd * ymd * zmd * gcam->nodes[xp][yp][zp].z;
+  *pxd = xpd * ypd * zpd * gcam->nodes[xm][ym][zm].x +
+         xpd * ypd * zmd * gcam->nodes[xm][ym][zp].x +
+         xpd * ymd * zpd * gcam->nodes[xm][yp][zm].x +
+         xpd * ymd * zmd * gcam->nodes[xm][yp][zp].x +
+         xmd * ypd * zpd * gcam->nodes[xp][ym][zm].x +
+         xmd * ypd * zmd * gcam->nodes[xp][ym][zp].x +
+         xmd * ymd * zpd * gcam->nodes[xp][yp][zm].x +
+         xmd * ymd * zmd * gcam->nodes[xp][yp][zp].x;
+  *pyd = xpd * ypd * zpd * gcam->nodes[xm][ym][zm].y +
+         xpd * ypd * zmd * gcam->nodes[xm][ym][zp].y +
+         xpd * ymd * zpd * gcam->nodes[xm][yp][zm].y +
+         xpd * ymd * zmd * gcam->nodes[xm][yp][zp].y +
+         xmd * ypd * zpd * gcam->nodes[xp][ym][zm].y +
+         xmd * ypd * zmd * gcam->nodes[xp][ym][zp].y +
+         xmd * ymd * zpd * gcam->nodes[xp][yp][zm].y +
+         xmd * ymd * zmd * gcam->nodes[xp][yp][zp].y;
+  *pzd = xpd * ypd * zpd * gcam->nodes[xm][ym][zm].z +
+         xpd * ypd * zmd * gcam->nodes[xm][ym][zp].z +
+         xpd * ymd * zpd * gcam->nodes[xm][yp][zm].z +
+         xpd * ymd * zmd * gcam->nodes[xm][yp][zp].z +
+         xmd * ypd * zpd * gcam->nodes[xp][ym][zm].z +
+         xmd * ypd * zmd * gcam->nodes[xp][ym][zp].z +
+         xmd * ymd * zpd * gcam->nodes[xp][yp][zm].z +
+         xmd * ymd * zmd * gcam->nodes[xp][yp][zp].z;
 
   return (NO_ERROR);
 }
@@ -5792,9 +5858,9 @@ int GCAMsampleMorph(const GCA_MORPH *gcam, float x, float y, float z, float *pxd
   the CRS in the Morph volume. GCAM must have been inverted. This should
   produce the inverse of GCAMsampleMorph().
   ---------------------------------------------------------------------------*/
-int GCAMsampleInverseMorph(
-    GCA_MORPH *gcam, float cAnat, float rAnat, float sAnat, float *cMorph, float *rMorph, float *sMorph)
-{
+int GCAMsampleInverseMorph(GCA_MORPH *gcam, float cAnat, float rAnat,
+                           float sAnat, float *cMorph, float *rMorph,
+                           float *sMorph) {
   int err;
   double v;
 
@@ -5830,8 +5896,8 @@ int GCAMsampleInverseMorph(
   if there was some other problem. Typical distances are less than 0.5, which
   does not seem all that great to me. Also, not all input CRSs will be valid.
   -------------------------------------------------------------------------*/
-int GCAMsampleMorphCheck(GCA_MORPH *gcam, float thresh, float cMorph, float rMorph, float sMorph)
-{
+int GCAMsampleMorphCheck(GCA_MORPH *gcam, float thresh, float cMorph,
+                         float rMorph, float sMorph) {
   int err;
   float cAnat, rAnat, sAnat;
   float cMorph2, rMorph2, sMorph2;
@@ -5844,30 +5910,22 @@ int GCAMsampleMorphCheck(GCA_MORPH *gcam, float thresh, float cMorph, float rMor
   }
 
   // Feedback the CRS in the Anat space to compute the CRS in the Morph space
-  err = GCAMsampleInverseMorph(gcam, cAnat, rAnat, sAnat, &cMorph2, &rMorph2, &sMorph2);
+  err = GCAMsampleInverseMorph(gcam, cAnat, rAnat, sAnat, &cMorph2, &rMorph2,
+                               &sMorph2);
   if (err) {
     return (-1);
   }
 
   // Compare CRS in Morph space
-  d = sqrt((cMorph - cMorph2) * (cMorph - cMorph2) + (rMorph - rMorph2) * (rMorph - rMorph2) +
+  d = sqrt((cMorph - cMorph2) * (cMorph - cMorph2) +
+           (rMorph - rMorph2) * (rMorph - rMorph2) +
            (sMorph - sMorph2) * (sMorph - sMorph2));
 
   if (Gdiag_no > 0) {
-    printf(
-        "Mcrs=(%5.1f,%5.1f,%5.1f) Mcrs2=(%5.1f,%5.1f,%5.1f), "
-        "d=%5.2f th=%g Acrs=(%5.1f,%5.1f,%5.1f)\n",
-        cMorph,
-        rMorph,
-        sMorph,
-        cMorph2,
-        rMorph2,
-        sMorph2,
-        d,
-        thresh,
-        cAnat,
-        rAnat,
-        sAnat);
+    printf("Mcrs=(%5.1f,%5.1f,%5.1f) Mcrs2=(%5.1f,%5.1f,%5.1f), "
+           "d=%5.2f th=%g Acrs=(%5.1f,%5.1f,%5.1f)\n",
+           cMorph, rMorph, sMorph, cMorph2, rMorph2, sMorph2, d, thresh, cAnat,
+           rAnat, sAnat);
   }
 
   if (d > thresh) {
@@ -5881,9 +5939,8 @@ int GCAMsampleMorphCheck(GCA_MORPH *gcam, float thresh, float cMorph, float rMor
   space RAS is in "tkregister" or "surface" space (ie, cras=0). See
   also GCAMsampleInverseMorphRAS().
   --------------------------------------------------------------------------*/
-int GCAMsampleMorphRAS(
-    GCA_MORPH *gcam, float xMorph, float yMorph, float zMorph, float *xAnat, float *yAnat, float *zAnat)
-{
+int GCAMsampleMorphRAS(GCA_MORPH *gcam, float xMorph, float yMorph,
+                       float zMorph, float *xAnat, float *yAnat, float *zAnat) {
   static int init_needed = 1, err;
   static MATRIX *ras = NULL, *crs = NULL, *vox2ras = NULL, *ras2vox = NULL;
   float cMorph, rMorph, sMorph;
@@ -5941,9 +5998,9 @@ int GCAMsampleMorphRAS(
   space RAS is in "tkregister" or "surface" space (ie, cras=0). See
   also GCAMsampleMorphRAS().
   --------------------------------------------------------------------------*/
-int GCAMsampleInverseMorphRAS(
-    GCA_MORPH *gcam, float xAnat, float yAnat, float zAnat, float *xMorph, float *yMorph, float *zMorph)
-{
+int GCAMsampleInverseMorphRAS(GCA_MORPH *gcam, float xAnat, float yAnat,
+                              float zAnat, float *xMorph, float *yMorph,
+                              float *zMorph) {
   static int init_needed = 1, err;
   static MATRIX *ras = NULL, *crs = NULL, *vox2ras = NULL, *ras2vox = NULL;
   float cMorph = 0., rMorph = 0., sMorph = 0.;
@@ -5979,7 +6036,8 @@ int GCAMsampleInverseMorphRAS(
   rAnat = crs->rptr[2][1];
   sAnat = crs->rptr[3][1];
 
-  err = GCAMsampleInverseMorph(gcam, cAnat, rAnat, sAnat, &cMorph, &rMorph, &sMorph);
+  err = GCAMsampleInverseMorph(gcam, cAnat, rAnat, sAnat, &cMorph, &rMorph,
+                               &sMorph);
   if (err) {
     return (1);
   }
@@ -5999,13 +6057,12 @@ int GCAMsampleInverseMorphRAS(
   GCAMmorphSurf() - compute the vertex xyz in the morph space. Replaces
   vertex xyz. Does not recompute the metric properties of the surface.
   ---------------------------------------------------------------------*/
-int GCAMmorphSurf(MRIS *mris, GCA_MORPH *gcam)
-{
+int GCAMmorphSurf(MRIS *mris, GCA_MORPH *gcam) {
   // printf("Applying Inverse Morph \n");
 
   MRISfreeDistsButNotOrig(mris);
-    // MRISsetXYZ will invalidate all of these,
-    // so make sure they are recomputed before being used again!
+  // MRISsetXYZ will invalidate all of these,
+  // so make sure they are recomputed before being used again!
 
   int vtxno;
   for (vtxno = 0; vtxno < mris->nvertices; vtxno++) {
@@ -6014,10 +6071,11 @@ int GCAMmorphSurf(MRIS *mris, GCA_MORPH *gcam)
     int err = GCAMsampleInverseMorphRAS(gcam, v->x, v->y, v->z, &Mx, &My, &Mz);
     if (err) {
       printf("WARNING: GCAMmorphSurf(): error converting vertex %d\n", vtxno);
-      printf("  Avxyz = (%g,%g,%g), Mvxyz = (%g,%g,%g), \n", v->x, v->y, v->z, Mx, My, Mz);
+      printf("  Avxyz = (%g,%g,%g), Mvxyz = (%g,%g,%g), \n", v->x, v->y, v->z,
+             Mx, My, Mz);
       printf(" ... Continuing\n");
     }
-    MRISsetXYZ(mris,vtxno,Mx,My,Mz);
+    MRISsetXYZ(mris, vtxno, Mx, My, Mz);
   }
   // Copy the volume geometry of the destination volume
   copyVolGeom(&(gcam->atlas), &(mris->vg));
@@ -6025,8 +6083,7 @@ int GCAMmorphSurf(MRIS *mris, GCA_MORPH *gcam)
   return (0);
 }
 
-double GCAMcomputeRMS(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
-{
+double GCAMcomputeRMS(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms) {
   double rms, sse;
   float nvoxels;
 
@@ -6040,8 +6097,7 @@ double GCAMcomputeRMS(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
 }
 
 #define BIN_SCALE 1
-double gcamComputeSSE(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
-{
+double gcamComputeSSE(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms) {
   double sse;
 
   double elastic_sse = 0;
@@ -6054,28 +6110,33 @@ double gcamComputeSSE(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
   }
 
   nvox = gcam->width * gcam->height * gcam->depth;
-  area_intensity_sse = binary_sse = spring_sse = ls_sse = exp_sse = dtrans_sse = label_sse = map_sse = a_sse = sse =
-      ms_sse = l_sse = s_sse = j_sse = d_sse = 0.0;
+  area_intensity_sse = binary_sse = spring_sse = ls_sse = exp_sse = dtrans_sse =
+      label_sse = map_sse = a_sse = sse = ms_sse = l_sse = s_sse = j_sse =
+          d_sse = 0.0;
 
   check_gcam(gcam);
   gcamComputeMetricProperties(gcam);
   check_gcam(gcam);
   if (!DZERO(parms->l_log_likelihood) || !DZERO(parms->l_likelihood))
-    l_sse = MAX(parms->l_log_likelihood, parms->l_likelihood) * gcamLogLikelihoodEnergy(gcam, mri);
+    l_sse = MAX(parms->l_log_likelihood, parms->l_likelihood) *
+            gcamLogLikelihoodEnergy(gcam, mri);
   if (!DZERO(parms->l_multiscale)) {
     ms_sse = parms->l_multiscale * gcamMultiscaleEnergy(gcam, mri);
   }
 
   if (!DZERO(parms->l_dtrans)) {
-    dtrans_sse = gcamDistanceTransformEnergy(gcam, mri, parms->mri_dist_map, parms);
+    dtrans_sse =
+        gcamDistanceTransformEnergy(gcam, mri, parms->mri_dist_map, parms);
   }
   check_gcam(gcam);
-  if (!DZERO(parms->l_label)) label_sse = parms->l_label * gcamLabelEnergy(gcam, mri, parms->label_dist);
+  if (!DZERO(parms->l_label))
+    label_sse = parms->l_label * gcamLabelEnergy(gcam, mri, parms->label_dist);
   if (!DZERO(parms->l_binary)) {
     binary_sse = parms->l_binary * gcamBinaryEnergy(gcam, parms->mri_binary);
   }
   if (!DZERO(parms->l_area_intensity))
-    area_intensity_sse = parms->l_area_intensity * gcamAreaIntensityEnergy(gcam, parms->mri, parms->nlt);
+    area_intensity_sse = parms->l_area_intensity *
+                         gcamAreaIntensityEnergy(gcam, parms->mri, parms->nlt);
 
   check_gcam(gcam);
   if (!DZERO(parms->l_map)) {
@@ -6152,13 +6213,14 @@ double gcamComputeSSE(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
     }
     printf("\n");
   }
-  sse = spring_sse + area_intensity_sse + binary_sse + l_sse + ms_sse + s_sse + j_sse + d_sse + a_sse + label_sse +
-        map_sse + exp_sse + dtrans_sse + elastic_sse;
+  sse = spring_sse + area_intensity_sse + binary_sse + l_sse + ms_sse + s_sse +
+        j_sse + d_sse + a_sse + label_sse + map_sse + exp_sse + dtrans_sse +
+        elastic_sse;
   return (sse);
 }
 
-int gcamComputeGradient(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PARMS *parms)
-{
+int gcamComputeGradient(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth,
+                        GCA_MORPH_PARMS *parms) {
   static int i = 0;
   extern int gcamComputeGradient_nCalls;
   extern double gcamComputeGradient_tsec;
@@ -6169,11 +6231,14 @@ int gcamComputeGradient(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PA
   gcamComputeMetricProperties(gcam);
   gcamMapTerm(gcam, mri, mri_smooth, parms->l_map);
   gcamLabelTerm(gcam, mri, parms->l_label, parms->label_dist, parms->mri_twm);
-  gcamAreaIntensityTerm(gcam, mri, mri_smooth, parms->l_area_intensity, parms->nlt, parms->sigma);
-  gcamBinaryTerm(gcam, parms->mri_binary, parms->mri_binary_smooth, parms->mri_dist_map, parms->l_binary);
+  gcamAreaIntensityTerm(gcam, mri, mri_smooth, parms->l_area_intensity,
+                        parms->nlt, parms->sigma);
+  gcamBinaryTerm(gcam, parms->mri_binary, parms->mri_binary_smooth,
+                 parms->mri_dist_map, parms->l_binary);
   gcamExpansionTerm(gcam, mri, parms->l_expansion);
   gcamLikelihoodTerm(gcam, mri, mri_smooth, parms->l_likelihood, parms);
-  gcamDistanceTransformTerm(gcam, mri, parms->mri_dist_map, parms->l_dtrans, parms);
+  gcamDistanceTransformTerm(gcam, mri, parms->mri_dist_map, parms->l_dtrans,
+                            parms);
   gcamLogLikelihoodTerm(gcam, mri, mri_smooth, parms->l_log_likelihood);
   gcamMultiscaleTerm(gcam, mri, mri_smooth, parms->l_multiscale);
   gcamDistanceTerm(gcam, mri, parms->l_distance);
@@ -6192,7 +6257,8 @@ int gcamComputeGradient(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PA
   if (i == Gdiag_no) {
     DiagBreak();
   }
-  if (parms->write_iterations > 0 && (Gdiag & DIAG_WRITE) && getenv("GCAM_YGRAD") != NULL && (parms->l_label > 0)) {
+  if (parms->write_iterations > 0 && (Gdiag & DIAG_WRITE) &&
+      getenv("GCAM_YGRAD") != NULL && (parms->l_label > 0)) {
     char fname[STRLEN];
     MRI *mri_grad;
 
@@ -6207,10 +6273,12 @@ int gcamComputeGradient(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PA
     MRIfree(&mri_grad);
   }
 
-  if ((Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) || (gcam_write_grad && i < 10) || (gcam_write_grad > 1)) {
+  if ((Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) || (gcam_write_grad && i < 10) ||
+      (gcam_write_grad > 1)) {
     char fname[STRLEN];
     MRI *mri;
-    printf("writing gradients to ...%s_d[xyz]b_%4.4d.mgz\n", parms->base_name, i);
+    printf("writing gradients to ...%s_d[xyz]b_%4.4d.mgz\n", parms->base_name,
+           i);
     mri = GCAMwriteMRI(gcam, NULL, GCAM_X_GRAD);
     sprintf(fname, "%s_dxb_%4.4d.mgz", parms->base_name, i);
     MRIwrite(mri, fname);
@@ -6229,7 +6297,8 @@ int gcamComputeGradient(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PA
   gcamSmoothGradient(gcam, parms->navgs);
   fix_borders(gcam);
 
-  if (parms->write_iterations > 0 && (Gdiag & DIAG_WRITE) && getenv("GCAM_YGRAD_AFTER") != NULL) {
+  if (parms->write_iterations > 0 && (Gdiag & DIAG_WRITE) &&
+      getenv("GCAM_YGRAD_AFTER") != NULL) {
     char fname[STRLEN];
     MRI *mri_grad;
 
@@ -6244,10 +6313,12 @@ int gcamComputeGradient(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PA
     MRIfree(&mri_grad);
   }
 
-  if ((Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) || (gcam_write_grad && i < 10) || (gcam_write_grad > 1)) {
+  if ((Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) || (gcam_write_grad && i < 10) ||
+      (gcam_write_grad > 1)) {
     MRI *mri;
     char fname[STRLEN];
-    printf("writing gradients to ...%s_d[xyz]_%4.4d.mgz\n", parms->base_name, i);
+    printf("writing gradients to ...%s_d[xyz]_%4.4d.mgz\n", parms->base_name,
+           i);
     mri = GCAMwriteMRI(gcam, NULL, GCAM_X_GRAD);
     sprintf(fname, "%s_dx_%4.4d.mgz", parms->base_name, i);
     MRIwrite(mri, fname);
@@ -6262,13 +6333,12 @@ int gcamComputeGradient(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, GCA_MORPH_PA
   i++; /* for debugging */
 
   gcamComputeGradient_nCalls++;
-  gcamComputeGradient_tsec += (timer.milliseconds()/1000.0);
+  gcamComputeGradient_tsec += (timer.milliseconds() / 1000.0);
 
   return (NO_ERROR);
 }
 
-double gcamMaxGradient(GCA_MORPH *gcam)
-{
+double gcamMaxGradient(GCA_MORPH *gcam) {
   int x, y, z;
   double dx, dy, dz, norm, max_grad;
   GCA_MORPH_NODE *gcamn;
@@ -6289,8 +6359,8 @@ double gcamMaxGradient(GCA_MORPH *gcam)
   return (max_grad);
 }
 
-int gcamLimitGradientMagnitude(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms, MRI *mri)
-{
+int gcamLimitGradientMagnitude(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms,
+                               MRI *mri) {
   /*!
     This appears to be a null operation, according to the #ifdefs
     both here and in gcamJacobianTerm
@@ -6308,7 +6378,9 @@ int gcamLimitGradientMagnitude(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms, MRI *mri
       for (z = 0; z < gcam->depth; z++) {
         gcamn = &gcam->nodes[x][y][z];
 
-        if ((FZERO(gcamn->orig_area) || !devFinite(gcamn->area / gcamn->orig_area)) && gcamn->invalid == GCAM_VALID)
+        if ((FZERO(gcamn->orig_area) ||
+             !devFinite(gcamn->area / gcamn->orig_area)) &&
+            gcamn->invalid == GCAM_VALID)
           DiagBreak();
 #if 0
         if (FZERO(gcamn->orig_area))
@@ -6346,7 +6418,8 @@ int gcamLimitGradientMagnitude(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms, MRI *mri
           xmax = x;
           ymax = y;
           zmax = z;
-          if (gcamn->invalid != GCAM_VALID || FZERO(gcamn->orig_area)) DiagBreak();
+          if (gcamn->invalid != GCAM_VALID || FZERO(gcamn->orig_area))
+            DiagBreak();
         }
         if (norm > parms->max_grad) {
           double scale = parms->max_grad / norm;
@@ -6354,13 +6427,9 @@ int gcamLimitGradientMagnitude(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms, MRI *mri
           gcamn->dy *= scale;
           gcamn->dz *= scale;
           if (x == Gx && y == Gy && z == Gz)
-            printf("scaling gradient @ (%d, %d, %d) --> (%2.2f, %2.2f, %2.2f)\n",
-                   x,
-                   y,
-                   z,
-                   gcamn->dx,
-                   gcamn->dy,
-                   gcamn->dz);
+            printf(
+                "scaling gradient @ (%d, %d, %d) --> (%2.2f, %2.2f, %2.2f)\n",
+                x, y, z, gcamn->dx, gcamn->dy, gcamn->dz);
         }
       }
   {
@@ -6375,34 +6444,33 @@ int gcamLimitGradientMagnitude(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms, MRI *mri
     gradientArea = gcam->nodes[xmax][ymax][zmax].area;
     if (Gdiag & DIAG_SHOW) {
       if (!finitep(gcam->nodes[xmax][ymax][zmax].area) ||
-          !finitep(gcam->nodes[xmax][ymax][zmax].area / gcam->nodes[xmax][ymax][zmax].orig_area))
+          !finitep(gcam->nodes[xmax][ymax][zmax].area /
+                   gcam->nodes[xmax][ymax][zmax].orig_area))
         DiagBreak();
-      printf(
-          "   max grad %2.3f mm @ (%d, %d, %d), "
-          "Invalid = %d, Status = %d, Area=%2.3f, new/orig=%2.3f, l=%s ",
-          max_norm,
-          xmax,
-          ymax,
-          zmax,
-          gcam->nodes[xmax][ymax][zmax].invalid,
-          gcam->nodes[xmax][ymax][zmax].status,
-          gcam->nodes[xmax][ymax][zmax].area,
-          gcam->nodes[xmax][ymax][zmax].area / gcam->nodes[xmax][ymax][zmax].orig_area,
-          cma_label_to_name(gcam->nodes[xmax][ymax][zmax].label));
+      printf("   max grad %2.3f mm @ (%d, %d, %d), "
+             "Invalid = %d, Status = %d, Area=%2.3f, new/orig=%2.3f, l=%s ",
+             max_norm, xmax, ymax, zmax, gcam->nodes[xmax][ymax][zmax].invalid,
+             gcam->nodes[xmax][ymax][zmax].status,
+             gcam->nodes[xmax][ymax][zmax].area,
+             gcam->nodes[xmax][ymax][zmax].area /
+                 gcam->nodes[xmax][ymax][zmax].orig_area,
+             cma_label_to_name(gcam->nodes[xmax][ymax][zmax].label));
       fflush(stdout);
       if (parms->l_dtrans > 0) {
         double dist = -10000;
         ;
         int frame = dtrans_label_to_frame(parms, gcamn->label);
         if (frame >= 0)
-          MRIsampleVolumeFrameType(parms->mri_dist_map, gcamn->x, gcamn->y, gcamn->z, frame, SAMPLE_TRILINEAR, &dist);
+          MRIsampleVolumeFrameType(parms->mri_dist_map, gcamn->x, gcamn->y,
+                                   gcamn->z, frame, SAMPLE_TRILINEAR, &dist);
 
         printf("dist:target = %2.2f:%2.2f ", dist, gcamn->target_dist);
-      }
-      else {
+      } else {
         printf("vals(means) = ");
         load_vals(mri, gcamn->x, gcamn->y, gcamn->z, vals, gcam->ninputs);
-        for (r = 0; r < gcam->ninputs; r++) printf("%2.1f (%2.1f)  ", vals[r], gcamn->gc ? gcamn->gc->means[r] : -0.0);
+        for (r = 0; r < gcam->ninputs; r++)
+          printf("%2.1f (%2.1f)  ", vals[r],
+                 gcamn->gc ? gcamn->gc->means[r] : -0.0);
       }
       fflush(stdout);
 #if 0
@@ -6447,12 +6515,13 @@ int gcamLimitGradientMagnitude(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms, MRI *mri
 }
 
 /*!
-  \fn int gcamSmoothnessTerm(GCA_MORPH *gcam, const MRI *mri, const double l_smoothness)
-  \brief Compute derivative of mesh smoothness cost. Derivatives are approximate.
-  Consumes a lot of time in mri_ca_register. Can be sped up by about a factor of 6.
+  \fn int gcamSmoothnessTerm(GCA_MORPH *gcam, const MRI *mri, const double
+  l_smoothness) \brief Compute derivative of mesh smoothness cost. Derivatives
+  are approximate. Consumes a lot of time in mri_ca_register. Can be sped up by
+  about a factor of 6.
  */
-int gcamSmoothnessTerm(GCA_MORPH *gcam, const MRI *mri, const double l_smoothness)
-{
+int gcamSmoothnessTerm(GCA_MORPH *gcam, const MRI *mri,
+                       const double l_smoothness) {
   double vx = 0.0, vy = 0.0, vz = 0.0, vnx = 0.0, vny = 0.0, vnz = 0.0;
   double dx = 0.0, dy = 0.0, dz = 0.0;
   int x = 0, y = 0, z = 0, xk = 0, yk = 0, zk = 0, xn = 0, yn = 0, zn = 0;
@@ -6466,21 +6535,22 @@ int gcamSmoothnessTerm(GCA_MORPH *gcam, const MRI *mri, const double l_smoothnes
     return (NO_ERROR);
   }
 
-  gcamSmoothnessTerm_nCalls ++;
+  gcamSmoothnessTerm_nCalls++;
 
   width = gcam->width;
   height = gcam->height;
   depth = gcam->depth;
   ROMP_PF_begin
 #ifdef HAVE_OPENMP
-  #pragma omp parallel for if_ROMP(assume_reproducible) firstprivate(                                                          \
-    y, z, gcamn, vx, vy, vz, dx, dy, dz, num, xk, xn, yk, yn, zk, zn, gcamn_nbr, vnx, vny, vnz) \
-    shared(gcam, Gx, Gy, Gz) schedule(static, 1)
+#pragma omp parallel for if_ROMP(assume_reproducible)                          \
+    firstprivate(y, z, gcamn, vx, vy, vz, dx, dy, dz, num, xk, xn, yk, yn, zk, \
+                 zn, gcamn_nbr, vnx, vny, vnz) shared(gcam, Gx, Gy, Gz)        \
+        schedule(static, 1)
 #endif
-  for (x = 0; x < gcam->width; x++) {
+      for (x = 0; x < gcam->width; x++) {
     ROMP_PFLB_begin
-    
-    for (y = 0; y < gcam->height; y++) {
+
+        for (y = 0; y < gcam->height; y++) {
       for (z = 0; z < gcam->depth; z++) {
         if (x == Gx && y == Gy && z == Gz) {
           DiagBreak();
@@ -6496,7 +6566,8 @@ int gcamSmoothnessTerm(GCA_MORPH *gcam, const MRI *mri, const double l_smoothnes
         vz = gcamn->z - gcamn->origz;
         dx = dy = dz = 0.0f;
         if (x == Gx && y == Gy && z == Gz)
-          printf("l_smoo: node(%d,%d,%d): V=(%2.2f,%2.2f,%2.2f)\n", x, y, z, vx, vy, vz);
+          printf("l_smoo: node(%d,%d,%d): V=(%2.2f,%2.2f,%2.2f)\n", x, y, z, vx,
+                 vy, vz);
         num = 0;
 
         for (xk = -1; xk <= 1; xk++) {
@@ -6532,9 +6603,11 @@ int gcamSmoothnessTerm(GCA_MORPH *gcam, const MRI *mri, const double l_smoothnes
               dy += (vny - vy);
               dz += (vnz - vz);
 
-              if ((x == Gx && y == Gy && z == Gz) && (Gdiag & DIAG_SHOW) && DIAG_VERBOSE_ON) {
+              if ((x == Gx && y == Gy && z == Gz) && (Gdiag & DIAG_SHOW) &&
+                  DIAG_VERBOSE_ON) {
                 printf("\tnode(%d,%d,%d): V=(%2.2f,%2.2f,%2.2f), "
-                    "DX=(%2.2f,%2.2f,%2.2f)\n",xn,yn,zn,vnx,vny,vnz,vnx - vx,vny - vy,vnz - vz);
+                       "DX=(%2.2f,%2.2f,%2.2f)\n",
+                       xn, yn, zn, vnx, vny, vnz, vnx - vx, vny - vy, vnz - vz);
               }
 
               num++;
@@ -6549,7 +6622,8 @@ int gcamSmoothnessTerm(GCA_MORPH *gcam, const MRI *mri, const double l_smoothnes
         }
 
         if (x == Gx && y == Gy && z == Gz) {
-          printf("l_smoo: node(%d,%d,%d): DX=(%2.2f,%2.2f,%2.2f)\n", x, y, z, dx, dy, dz);
+          printf("l_smoo: node(%d,%d,%d): DX=(%2.2f,%2.2f,%2.2f)\n", x, y, z,
+                 dx, dy, dz);
         }
 
         gcamn->dx += dx;
@@ -6557,29 +6631,29 @@ int gcamSmoothnessTerm(GCA_MORPH *gcam, const MRI *mri, const double l_smoothnes
         gcamn->dz += dz;
       }
     }
-    
+
     ROMP_PFLB_end
   }
   ROMP_PF_end
 
-  gcamSmoothnessTerm_tsec += (timer.milliseconds()/1000.0);
+      gcamSmoothnessTerm_tsec += (timer.milliseconds() / 1000.0);
 
   return (NO_ERROR);
 }
 
 #define GCAM_SMOOTHNESS_OUTPUT 0
 
-double gcamElasticEnergy(const GCA_MORPH *gcam, GCA_MORPH_PARMS *parms)
-{
+double gcamElasticEnergy(const GCA_MORPH *gcam, GCA_MORPH_PARMS *parms) {
   MRI *mri_warp, *mri_sobel[3];
   int x, y, z, dim1, dim2;
-  double energy, val1, val2, lambda, mu, rigid_energy, volume_change, svals[3][3];
+  double energy, val1, val2, lambda, mu, rigid_energy, volume_change,
+      svals[3][3];
 
   if (FZERO(parms->l_elastic)) {
     return (0.0);
   }
   lambda = 0.57692;
-  mu = 0.38462;  // matches CVS
+  mu = 0.38462; // matches CVS
   mri_warp = GCAMwriteWarpToMRI(gcam, NULL);
   mri_sobel[0] = MRIsobelFrame(mri_warp, NULL, NULL, 0);
   mri_sobel[1] = MRIsobelFrame(mri_warp, NULL, NULL, 1);
@@ -6614,9 +6688,9 @@ double gcamElasticEnergy(const GCA_MORPH *gcam, GCA_MORPH_PARMS *parms)
   return (energy);
 }
 
-int gcamElasticTerm(const GCA_MORPH *gcam, GCA_MORPH_PARMS *parms)
-{
-  MRI *mri_warp, *mri_tmp, *mri_divergence, *mri_laplacian, *mri_grad, *mri_kernel;
+int gcamElasticTerm(const GCA_MORPH *gcam, GCA_MORPH_PARMS *parms) {
+  MRI *mri_warp, *mri_tmp, *mri_divergence, *mri_laplacian, *mri_grad,
+      *mri_kernel;
   int x, y, z, dim;
   double val1, val2, grad[3], lambda, mu;
   GCA_MORPH_NODE *gcamn;
@@ -6627,13 +6701,13 @@ int gcamElasticTerm(const GCA_MORPH *gcam, GCA_MORPH_PARMS *parms)
 
   mri_kernel = MRIgaussian1d(parms->sigma, 100);
   lambda = parms->lame_lambda;
-  mu = parms->lame_mu;  // matches CVS
+  mu = parms->lame_mu; // matches CVS
   mri_warp = GCAMwriteWarpToMRI(gcam, NULL);
 
   mri_tmp = MRIdivergence(mri_warp, NULL);
   mri_divergence = MRIconvolveGaussian(mri_tmp, NULL, mri_kernel);
   MRIfree(&mri_tmp);
-  mri_grad = MRIsobel(mri_divergence, NULL, NULL);  // gradient of the divergence
+  mri_grad = MRIsobel(mri_divergence, NULL, NULL); // gradient of the divergence
   MRIfree(&mri_divergence);
   mri_tmp = MRIlaplacian(mri_warp, NULL);
   mri_laplacian = MRIconvolveGaussian(mri_tmp, NULL, mri_kernel);
@@ -6650,12 +6724,8 @@ int gcamElasticTerm(const GCA_MORPH *gcam, GCA_MORPH_PARMS *parms)
           grad[dim] = val1 * (lambda + mu) + val2 * mu;
         }
         if (x == Gx && y == Gy && z == Gz)
-          printf("node(%d, %d, %d), elastic term = (%2.2f, %2.2f, %2.2f)\n",
-                 x,
-                 y,
-                 z,
-                 parms->l_elastic * grad[0],
-                 parms->l_elastic * grad[1],
+          printf("node(%d, %d, %d), elastic term = (%2.2f, %2.2f, %2.2f)\n", x,
+                 y, z, parms->l_elastic * grad[0], parms->l_elastic * grad[1],
                  parms->l_elastic * grad[2]);
         gcamn->dx += parms->l_elastic * grad[0];
         gcamn->dy += parms->l_elastic * grad[1];
@@ -6674,7 +6744,7 @@ static double gcamSmoothnessEnergy_new(const GCA_MORPH *gcam, const MRI *mri);
 #endif
 
 /*!
-  \fn double gcamSmoothnessEnergy(const GCA_MORPH *gcam, const MRI *mri) 
+  \fn double gcamSmoothnessEnergy(const GCA_MORPH *gcam, const MRI *mri)
   \brief Computes the smoothness energy. The smoothness is a measure
   of the variation in edge length around a node.  This function is in
   the deepest loop of mri_ca_register and so time sensitive.  The "new"
@@ -6682,38 +6752,42 @@ static double gcamSmoothnessEnergy_new(const GCA_MORPH *gcam, const MRI *mri);
   each time by using a static lookup table (it won't change).
 #E#
  */
-double gcamSmoothnessEnergy(const GCA_MORPH *gcam, const MRI *mri) 
+double gcamSmoothnessEnergy(const GCA_MORPH *gcam, const MRI *mri)
 #ifdef FASTER_gcamSmoothnessEnergy
 {
-    static bool const do_old = false;
-    static bool const do_new = true;
-    double old_result = 0.0;
-    double new_result = 0.0;
-    extern int gcamSmoothnessEnergy_nCalls;
-    extern double gcamSmoothnessEnergy_tsec;
-    Timer timer;
+  static bool const do_old = false;
+  static bool const do_new = true;
+  double old_result = 0.0;
+  double new_result = 0.0;
+  extern int gcamSmoothnessEnergy_nCalls;
+  extern double gcamSmoothnessEnergy_tsec;
+  Timer timer;
 
-    if (do_new && do_old) fprintf(stderr,"\n\n\n");
-    if (do_new) {
-        if (do_old) fprintf(stderr,"Doing new way\n");
-        new_result = gcamSmoothnessEnergy_new(gcam, mri);
+  if (do_new && do_old)
+    fprintf(stderr, "\n\n\n");
+  if (do_new) {
+    if (do_old)
+      fprintf(stderr, "Doing new way\n");
+    new_result = gcamSmoothnessEnergy_new(gcam, mri);
+  }
+  if (do_old) {
+    if (do_new)
+      fprintf(stderr, "Doing old way\n");
+    old_result = gcamSmoothnessEnergy_old(gcam, mri);
+  }
+  if (do_old && do_new) {
+    double diff = fabs(old_result - new_result);
+    double max = MAX(fabs(old_result), fabs(new_result));
+    if ((diff > 1e-6) && (diff / max > 1e-6)) {
+      fprintf(stderr, "%s:%d gcamSmoothnessEnergy big diff old:%g new:%g\n",
+              __FILE__, __LINE__, old_result, new_result);
+      exit(1);
     }
-    if (do_old) {
-        if (do_new) fprintf(stderr,"Doing old way\n");
-        old_result = gcamSmoothnessEnergy_old(gcam, mri);
-    }
-    if (do_old && do_new) {
-        double diff = fabs(old_result - new_result);
-        double max  = MAX(fabs(old_result), fabs(new_result));
-	if ((diff > 1e-6) && (diff/max > 1e-6)) {
-	    fprintf(stderr, "%s:%d gcamSmoothnessEnergy big diff old:%g new:%g\n", __FILE__, __LINE__, old_result, new_result);
-	    exit(1);
-	}
-    }
-    gcamSmoothnessEnergy_nCalls++;
-    gcamSmoothnessEnergy_tsec += (timer.milliseconds()/1000.0);
+  }
+  gcamSmoothnessEnergy_nCalls++;
+  gcamSmoothnessEnergy_tsec += (timer.milliseconds() / 1000.0);
 
-    return do_old ? old_result : new_result;
+  return do_old ? old_result : new_result;
 }
 
 static double gcamSmoothnessEnergy_old(const GCA_MORPH *gcam, const MRI *mri)
@@ -6731,7 +6805,8 @@ static double gcamSmoothnessEnergy_old(const GCA_MORPH *gcam, const MRI *mri)
   static unsigned int nCalls = 0;
   if ((nCalls % gcamSmoothnessOutputFreq) == 0) {
     char fname[STRLEN];
-    snprintf(fname, STRLEN - 1, "gcamSmoothInput%04u", nCalls / gcamSmoothnessOutputFreq);
+    snprintf(fname, STRLEN - 1, "gcamSmoothInput%04u",
+             nCalls / gcamSmoothnessOutputFreq);
     fname[STRLEN - 1] = '\0';
     WriteGCAMoneInput(gcam, fname);
   }
@@ -6741,7 +6816,8 @@ static double gcamSmoothnessEnergy_old(const GCA_MORPH *gcam, const MRI *mri)
 #if SHOW_EXEC_LOC
   printf("%s: CPU call\n", __FUNCTION__);
 #endif
-  double vx = 0, vy = 0, vz = 0, vnx = 0, vny = 0, vnz = 0, error = 0, node_sse = 0;
+  double vx = 0, vy = 0, vz = 0, vnx = 0, vny = 0, vnz = 0, error = 0,
+         node_sse = 0;
   double dx = 0, dy = 0, dz = 0;
   int x = 0, y = 0, z = 0, xk = 0, yk = 0, zk = 0, xn = 0, yn = 0, zn = 0;
   int width = 0, height = 0, depth = 0, num = 0;
@@ -6753,13 +6829,13 @@ static double gcamSmoothnessEnergy_old(const GCA_MORPH *gcam, const MRI *mri)
 
   ROMP_PF_begin
 #ifdef HAVE_OPENMP
-  #pragma omp parallel for if_ROMP(experimental) firstprivate(y,z,vx,vy,vz,vnx,vny,vnz,error,node_sse,dx,dy,dz,xk,yk,zk,xn,yn,zn,num,gcamn,gcamn_nbr) reduction(+:sse) shared(gcam,Gx,Gy,Gz) schedule(static,1)
+#pragma omp parallel for if_ROMP(experimental) firstprivate(y,z,vx,vy,vz,vnx,vny,vnz,error,node_sse,dx,dy,dz,xk,yk,zk,xn,yn,zn,num,gcamn,gcamn_nbr) reduction(+:sse) shared(gcam,Gx,Gy,Gz) schedule(static,1)
 #endif
-  // Loop over all voxels
-  for (x = 0; x < gcam->width; x++) {
+      // Loop over all voxels
+      for (x = 0; x < gcam->width; x++) {
     ROMP_PFLB_begin
-    
-    for (y = 0; y < gcam->height; y++) {
+
+        for (y = 0; y < gcam->height; y++) {
       for (z = 0; z < gcam->depth; z++) {
         if (x == Gx && y == Gy && z == Gz) {
           DiagBreak();
@@ -6832,7 +6908,8 @@ static double gcamSmoothnessEnergy_old(const GCA_MORPH *gcam, const MRI *mri)
         }
 
         if (x == Gx && y == Gy && z == Gz) {
-          printf("E_smoo: node(%d,%d,%d) smoothness sse %2.3f (%d nbrs)\n", x, y, z, node_sse / num, num);
+          printf("E_smoo: node(%d,%d,%d) smoothness sse %2.3f (%d nbrs)\n", x,
+                 y, z, node_sse / num, num);
         }
       }
     }
@@ -6840,12 +6917,11 @@ static double gcamSmoothnessEnergy_old(const GCA_MORPH *gcam, const MRI *mri)
   }
   ROMP_PF_end
 
-  return (sse);
+      return (sse);
 }
 
 #ifdef FASTER_gcamSmoothnessEnergy
-static double gcamSmoothnessEnergy_new(const GCA_MORPH *gcam, const MRI *mri)
-{
+static double gcamSmoothnessEnergy_new(const GCA_MORPH *gcam, const MRI *mri) {
   /*!
     Computes a load of derivatives (of some description).
     I don't know the purpose of the MRI argument, since it's
@@ -6856,7 +6932,8 @@ static double gcamSmoothnessEnergy_new(const GCA_MORPH *gcam, const MRI *mri)
   static unsigned int nCalls = 0;
   if ((nCalls % gcamSmoothnessOutputFreq) == 0) {
     char fname[STRLEN];
-    snprintf(fname, STRLEN - 1, "gcamSmoothInput%04u", nCalls / gcamSmoothnessOutputFreq);
+    snprintf(fname, STRLEN - 1, "gcamSmoothInput%04u",
+             nCalls / gcamSmoothnessOutputFreq);
     fname[STRLEN - 1] = '\0';
     WriteGCAMoneInput(gcam, fname);
   }
@@ -6867,248 +6944,249 @@ static double gcamSmoothnessEnergy_new(const GCA_MORPH *gcam, const MRI *mri)
   printf("%s: CPU call\n", __FUNCTION__);
 #endif
 
-  int const width  = gcam->width;
+  int const width = gcam->width;
   int const height = gcam->height;
-  int const depth  = gcam->depth;
+  int const depth = gcam->depth;
 
   double sse = 0.0;
 
-  int const nt = 
+  int const nt =
 #ifdef HAVE_OPENMP
-    omp_get_max_threads();
+      omp_get_max_threads();
 #else
-    1;
+      1;
 #endif
 
   typedef float BufferElt;
   struct buffer {
-    BufferElt* vec_vxyz;
-    char*   vec_valid;
-    int     validCount;
-  } * buffers = (struct buffer*)calloc(nt, sizeof(struct buffer));
+    BufferElt *vec_vxyz;
+    char *vec_valid;
+    int validCount;
+  } *buffers = (struct buffer *)calloc(nt, sizeof(struct buffer));
 
-  const int xStride = (width + nt-1) / nt;
+  const int xStride = (width + nt - 1) / nt;
 
   if (width < 4) {
-      static bool reported = false;
-      if (!reported) {
-        reported = true;
-	fprintf(stderr,"%s:%d width:%d too small for parallelism\n", 
-	  __FILE__, __LINE__, width);
-      }
+    static bool reported = false;
+    if (!reported) {
+      reported = true;
+      fprintf(stderr, "%s:%d width:%d too small for parallelism\n", __FILE__,
+              __LINE__, width);
+    }
   }
 
 #ifdef BEVIN_GCAMSMOOTHNESSENERGY_REPRODUCIBLE
 
   int const numberOfStrides = (width + xStride - 1) / xStride;
-  
-  #define ROMP_VARIABLE       xLoDividedByXStride
-  #define ROMP_LO             0
-  #define ROMP_HI             numberOfStrides
-    
-  #define ROMP_SUMREDUCTION0  sse
-    
-  #define ROMP_FOR_LEVEL      ROMP_level_assume_reproducible
-    
+
+#define ROMP_VARIABLE xLoDividedByXStride
+#define ROMP_LO 0
+#define ROMP_HI numberOfStrides
+
+#define ROMP_SUMREDUCTION0 sse
+
+#define ROMP_FOR_LEVEL ROMP_level_assume_reproducible
+
 #ifdef ROMP_SUPPORT_ENABLED
   const int romp_for_line = __LINE__;
 #endif
-  #include "romp_for_begin.h"
+#include "romp_for_begin.h"
   ROMP_for_begin
-    
-    #define sse  ROMP_PARTIALSUM(0)
 
-    int const xLo = xLoDividedByXStride * xStride;
+#define sse ROMP_PARTIALSUM(0)
+
+      int const xLo = xLoDividedByXStride * xStride;
 #else
 
   int xLo;
 
   ROMP_PF_begin
-#ifdef HAVE_OPENMP  // Important during mri_ca_register
-  #pragma omp parallel for if_ROMP(fast) reduction(+:sse) shared(gcam,Gx,Gy,Gz) schedule(static,1)
+#ifdef HAVE_OPENMP // Important during mri_ca_register
+#pragma omp parallel for if_ROMP(fast) reduction(+:sse) shared(gcam,Gx,Gy,Gz) schedule(static,1)
 #endif
-  for (xLo = 0; xLo < width; xLo += xStride) {
+      for (xLo = 0; xLo < width; xLo += xStride) {
     ROMP_PFLB_begin
 
 #endif
 
-    int const xHi = MIN(xLo + xStride, width);
-   
-    // Compute all the (gcamn->x - gcamn->origx) for the valid nodes
-    // This avoids the recomputation and makes all the accessed reasonably dense.
-    // Add frontiers so we don't have to test for them.
-    //
-    int const paddedHeight = height + 2;
-    int const paddedDepth  = depth  + 2;
-    int const paddedArea   = paddedHeight * paddedDepth;
-    int const paddedVolume = (xStride+2)  * paddedArea;
-  
-    // To index [xStride+2, paddedHeight, paddedDepth]
-    // use        (x-least x) * paddedHeight * paddedDepth
-    //          + (y-least y) * paddedDepth
-    //          +  z-least z
-    //
-#define INDEX(XM,YM,ZM)             \
-    (  ((XM)-(xLo-1))*paddedArea  + \
-       ((YM)-(   -1))*paddedDepth + \
-     + ((ZM)+1)                     \
-    ) // end of macro
+  int const xHi = MIN(xLo + xStride, width);
 
-    int const thread_num =
+  // Compute all the (gcamn->x - gcamn->origx) for the valid nodes
+  // This avoids the recomputation and makes all the accessed reasonably dense.
+  // Add frontiers so we don't have to test for them.
+  //
+  int const paddedHeight = height + 2;
+  int const paddedDepth = depth + 2;
+  int const paddedArea = paddedHeight * paddedDepth;
+  int const paddedVolume = (xStride + 2) * paddedArea;
+
+  // To index [xStride+2, paddedHeight, paddedDepth]
+  // use        (x-least x) * paddedHeight * paddedDepth
+  //          + (y-least y) * paddedDepth
+  //          +  z-least z
+  //
+#define INDEX(XM, YM, ZM)                                                      \
+  (((XM) - (xLo - 1)) * paddedArea + ((YM) - (-1)) * paddedDepth +             \
+   +((ZM) + 1)) // end of macro
+
+  int const thread_num =
 #ifdef HAVE_OPENMP
-        omp_get_thread_num();
+      omp_get_thread_num();
 #else
         0;
 #endif
-    struct buffer* buf = &buffers[thread_num];
-    BufferElt* vec_vxyz  = buf->vec_vxyz;
-    char*      vec_valid = buf->vec_valid;
-      
-    // Make the vectors for this thread unless already made
-    //
-    if (!vec_vxyz) {
-  
-      vec_vxyz = buf->vec_vxyz = (BufferElt*)malloc(
-        paddedVolume *
-        3 *                     // xyz
-        sizeof(BufferElt));     // the stored data  
-  
-      vec_valid = buf->vec_valid = (char*)malloc(
-        paddedVolume *
-        sizeof(char));          // the stored       gcamn->invalid == GCAM_POSITION_INVALID
-    }
+  struct buffer *buf = &buffers[thread_num];
+  BufferElt *vec_vxyz = buf->vec_vxyz;
+  char *vec_valid = buf->vec_valid;
 
-    bzero(vec_valid, paddedVolume * sizeof(char));
-	
-    // Fill the entries in and decide
-    // how important it is to skip the invalid ones
-    //
-    {
-      int xm,ym,zm;
-      for (xm = xLo-1; xm < xHi+1; xm++) {
-        int xn = xm;
-        xn = MAX(0, xn);
-        xn = MIN(width - 1, xn);
-    
-        for (ym = -1; ym < height+1; ym++) {
-          int yn = ym;
-          yn = MAX(0, yn);
-          yn = MIN(height - 1, yn);
-    
-          GMN * gcam_nodes_xn_yn = gcam->nodes[xn][yn];
-    
-#define INNER_LOOP_BODY_1 \
-            const GCA_MORPH_NODE * const gcamn = &gcam_nodes_xn_yn[zn]; \
-            if (gcamn->invalid == GCAM_POSITION_INVALID) {  \
-              continue;                                     \
-            }                                               \
-            // end of macro
-              
-#define INNER_LOOP_BODY_2                                   \
-            int const index = INDEX(xm,ym,zm);              \
-            vec_valid[index] = 1;                           \
-            double const vx = gcamn->x - gcamn->origx;      \
-            double const vy = gcamn->y - gcamn->origy;      \
-            double const vz = gcamn->z - gcamn->origz;      \
-            vec_vxyz[index*3+0] = (BufferElt)vx;            \
-            vec_vxyz[index*3+1] = (BufferElt)vy;            \
-            vec_vxyz[index*3+2] = (BufferElt)vz;            \
-            // end of macro
-  
-          zm = -1; {
-            int zn = 0;
-            INNER_LOOP_BODY_1
-            INNER_LOOP_BODY_2
-          }
-  
-          for (zm = 0; zm < depth; zm++) {
-            int zn = zm;
-            INNER_LOOP_BODY_1
-            INNER_LOOP_BODY_2
-          }
-            
-          zm = depth; {
-            int zn = depth - 1;
-            INNER_LOOP_BODY_1
-            INNER_LOOP_BODY_2
-          }
-  
-#undef INNER_LOOP_BODY
-  
+  // Make the vectors for this thread unless already made
+  //
+  if (!vec_vxyz) {
+
+    vec_vxyz = buf->vec_vxyz =
+        (BufferElt *)malloc(paddedVolume * 3 *  // xyz
+                            sizeof(BufferElt)); // the stored data
+
+    vec_valid = buf->vec_valid = (char *)malloc(
+        paddedVolume *
+        sizeof(
+            char)); // the stored       gcamn->invalid == GCAM_POSITION_INVALID
+  }
+
+  bzero(vec_valid, paddedVolume * sizeof(char));
+
+  // Fill the entries in and decide
+  // how important it is to skip the invalid ones
+  //
+  {
+    int xm, ym, zm;
+    for (xm = xLo - 1; xm < xHi + 1; xm++) {
+      int xn = xm;
+      xn = MAX(0, xn);
+      xn = MIN(width - 1, xn);
+
+      for (ym = -1; ym < height + 1; ym++) {
+        int yn = ym;
+        yn = MAX(0, yn);
+        yn = MIN(height - 1, yn);
+
+        GMN *gcam_nodes_xn_yn = gcam->nodes[xn][yn];
+
+#define INNER_LOOP_BODY_1                                                      \
+  const GCA_MORPH_NODE *const gcamn = &gcam_nodes_xn_yn[zn];                   \
+  if (gcamn->invalid == GCAM_POSITION_INVALID) {                               \
+    continue;                                                                  \
+  }                                                                            \
+  // end of macro
+
+#define INNER_LOOP_BODY_2                                                      \
+  int const index = INDEX(xm, ym, zm);                                         \
+  vec_valid[index] = 1;                                                        \
+  double const vx = gcamn->x - gcamn->origx;                                   \
+  double const vy = gcamn->y - gcamn->origy;                                   \
+  double const vz = gcamn->z - gcamn->origz;                                   \
+  vec_vxyz[index * 3 + 0] = (BufferElt)vx;                                     \
+  vec_vxyz[index * 3 + 1] = (BufferElt)vy;                                     \
+  vec_vxyz[index * 3 + 2] = (BufferElt)vz;                                     \
+  // end of macro
+
+        zm = -1;
+        {
+          int zn = 0;
+          INNER_LOOP_BODY_1
+          INNER_LOOP_BODY_2
         }
+
+        for (zm = 0; zm < depth; zm++) {
+          int zn = zm;
+          INNER_LOOP_BODY_1
+          INNER_LOOP_BODY_2
+        }
+
+        zm = depth;
+        {
+          int zn = depth - 1;
+          INNER_LOOP_BODY_1
+          INNER_LOOP_BODY_2
+        }
+
+#undef INNER_LOOP_BODY
       }
-    } // filling in the entries
-  
-    // Compute the contribution from the slices voxels
-    //
-    int x;
-    for (x = xLo; x < xHi; x++) {
-      int y,z;    
-      for (y = 0; y < height; y++) {
-        for (z = 0; z < depth; z++) {
-  
-          int const index_xyz = INDEX(x,y,z);
-                
-          if (!vec_valid[index_xyz]) continue;
-	  buf->validCount++;
-	    
-          // Get the differences from original
-          //
-          BufferElt const vx = vec_vxyz[index_xyz*3+0];
-          BufferElt const vy = vec_vxyz[index_xyz*3+1];
-          BufferElt const vz = vec_vxyz[index_xyz*3+2];
-  
-          int    num = -1;        // account for counting self below
-          double node_sse = 0.0;
-  
-          // Loop over 3^3 voxels centred on xyz
-          // 
-          int xm,ym,zm;
-          for (xm = x-1; xm < x+2; xm++) {
-            for (ym = y-1; ym < y+2; ym++) {
-              for (zm = z-1; zm < z+2; zm++) {
-  
-                // Using self is ok, because 
-                // (a) dx, dy, and dz will be zero, and (b) num started at -1
-  
-                int const index_xmymzm = INDEX(xm,ym,zm);
-                
-                if (!vec_valid[index_xmymzm]) { // this test is almost always true
-                  continue;                     // if actually_valid is close to possibly_valid
-                }
-  
-                BufferElt const vnx = vec_vxyz[index_xmymzm*3+0];
-                BufferElt const vny = vec_vxyz[index_xmymzm*3+1];
-                BufferElt const vnz = vec_vxyz[index_xmymzm*3+2];
-  
-                double const dx = (double)(vnx - vx);
-                double const dy = (double)(vny - vy);
-                double const dz = (double)(vnz - vz);
-  
-                double const error = dx*dx + dy*dy + dz*dz;
-  
-                num++;
-                node_sse += error;
+    }
+  } // filling in the entries
+
+  // Compute the contribution from the slices voxels
+  //
+  int x;
+  for (x = xLo; x < xHi; x++) {
+    int y, z;
+    for (y = 0; y < height; y++) {
+      for (z = 0; z < depth; z++) {
+
+        int const index_xyz = INDEX(x, y, z);
+
+        if (!vec_valid[index_xyz])
+          continue;
+        buf->validCount++;
+
+        // Get the differences from original
+        //
+        BufferElt const vx = vec_vxyz[index_xyz * 3 + 0];
+        BufferElt const vy = vec_vxyz[index_xyz * 3 + 1];
+        BufferElt const vz = vec_vxyz[index_xyz * 3 + 2];
+
+        int num = -1; // account for counting self below
+        double node_sse = 0.0;
+
+        // Loop over 3^3 voxels centred on xyz
+        //
+        int xm, ym, zm;
+        for (xm = x - 1; xm < x + 2; xm++) {
+          for (ym = y - 1; ym < y + 2; ym++) {
+            for (zm = z - 1; zm < z + 2; zm++) {
+
+              // Using self is ok, because
+              // (a) dx, dy, and dz will be zero, and (b) num started at -1
+
+              int const index_xmymzm = INDEX(xm, ym, zm);
+
+              if (!vec_valid[index_xmymzm]) { // this test is almost always true
+                continue; // if actually_valid is close to possibly_valid
               }
+
+              BufferElt const vnx = vec_vxyz[index_xmymzm * 3 + 0];
+              BufferElt const vny = vec_vxyz[index_xmymzm * 3 + 1];
+              BufferElt const vnz = vec_vxyz[index_xmymzm * 3 + 2];
+
+              double const dx = (double)(vnx - vx);
+              double const dy = (double)(vny - vy);
+              double const dz = (double)(vnz - vz);
+
+              double const error = dx * dx + dy * dy + dz * dz;
+
+              num++;
+              node_sse += error;
             }
           }
-  
-          /*        num = 1 ;*/
-          if (num > 0) {
-            sse += node_sse / num;
-          }
-  
-          if (x == Gx && y == Gy && z == Gz) {
-            printf("E_smoo: node(%d,%d,%d) smoothness sse %2.3f (%d nbrs)\n", x, y, z, node_sse / num, num);
-          }
+        }
+
+        /*        num = 1 ;*/
+        if (num > 0) {
+          sse += node_sse / num;
+        }
+
+        if (x == Gx && y == Gy && z == Gz) {
+          printf("E_smoo: node(%d,%d,%d) smoothness sse %2.3f (%d nbrs)\n", x,
+                 y, z, node_sse / num, num);
         }
       }
-    } // compute the contribution for the slice
+    }
+  } // compute the contribution for the slice
 
 #ifdef BEVIN_GCAMSMOOTHNESSENERGY_REPRODUCIBLE
 
-    #undef sse
-  #include "romp_for_end.h"
+#undef sse
+#include "romp_for_end.h"
 
 #else
 
@@ -7127,23 +7205,24 @@ static double gcamSmoothnessEnergy_new(const GCA_MORPH *gcam, const MRI *mri)
     static int limit = 1;
     int thread_num;
     bool show = (++count >= limit);
-    if (show) { 
-      limit = (limit < 100) ? count+1 : limit+100; 
-      fprintf(stderr, "thread workload "); 
+    if (show) {
+      limit = (limit < 100) ? count + 1 : limit + 100;
+      fprintf(stderr, "thread workload ");
     }
     for (thread_num = 0; thread_num < nt; thread_num++) {
-      struct buffer* buf = &buffers[thread_num];
+      struct buffer *buf = &buffers[thread_num];
       if (show) {
-    	fprintf(stderr, "%d:%d ", thread_num, buf->validCount);
+        fprintf(stderr, "%d:%d ", thread_num, buf->validCount);
       }
     }
-    if (show) fprintf(stderr, "freeing buffers for %d threads...\n",nt);
+    if (show)
+      fprintf(stderr, "freeing buffers for %d threads...\n", nt);
   }
 
   {
     int thread_num;
     for (thread_num = 0; thread_num < nt; thread_num++) {
-      struct buffer* buf = &buffers[thread_num];
+      struct buffer *buf = &buffers[thread_num];
       free(buf->vec_vxyz);
       free(buf->vec_valid);
     }
@@ -7154,8 +7233,7 @@ static double gcamSmoothnessEnergy_new(const GCA_MORPH *gcam, const MRI *mri)
 }
 #endif
 
-int gcamLSmoothnessTerm(GCA_MORPH *gcam, MRI *mri, double l_smoothness)
-{
+int gcamLSmoothnessTerm(GCA_MORPH *gcam, MRI *mri, double l_smoothness) {
   double vx, vy, vz, vnx, vny, vnz, dx, dy, dz;
   int x, y, z, xk, yk, zk, xn, yn, zn, width, height, depth, num;
   GCA_MORPH_NODE *gcamn, *gcamn_nbr;
@@ -7183,7 +7261,8 @@ int gcamLSmoothnessTerm(GCA_MORPH *gcam, MRI *mri, double l_smoothness)
         vz = gcamn->z - gcamn->origz;
         dx = dy = dz = 0.0f;
         if (x == Gx && y == Gy && z == Gz)
-          printf("l_smoo: node(%d,%d,%d): V=(%2.2f,%2.2f,%2.2f)\n", x, y, z, vx, vy, vz);
+          printf("l_smoo: node(%d,%d,%d): V=(%2.2f,%2.2f,%2.2f)\n", x, y, z, vx,
+                 vy, vz);
         num = 0;
         for (xk = -1; xk <= 1; xk++) {
           xn = x + xk;
@@ -7215,19 +7294,11 @@ int gcamLSmoothnessTerm(GCA_MORPH *gcam, MRI *mri, double l_smoothness)
               dx += (vnx - vx);
               dy += (vny - vy);
               dz += (vnz - vz);
-              if ((x == Gx && y == Gy && z == Gz) && (Gdiag & DIAG_SHOW) && DIAG_VERBOSE_ON)
-                printf(
-                    "\tnode(%d,%d,%d): V=(%2.2f,%2.2f,%2.2f), "
-                    "DX=(%2.2f,%2.2f,%2.2f)\n",
-                    xn,
-                    yn,
-                    zn,
-                    vnx,
-                    vny,
-                    vnz,
-                    vnx - vx,
-                    vny - vy,
-                    vnz - vz);
+              if ((x == Gx && y == Gy && z == Gz) && (Gdiag & DIAG_SHOW) &&
+                  DIAG_VERBOSE_ON)
+                printf("\tnode(%d,%d,%d): V=(%2.2f,%2.2f,%2.2f), "
+                       "DX=(%2.2f,%2.2f,%2.2f)\n",
+                       xn, yn, zn, vnx, vny, vnz, vnx - vx, vny - vy, vnz - vz);
               num++;
             }
           }
@@ -7239,7 +7310,8 @@ int gcamLSmoothnessTerm(GCA_MORPH *gcam, MRI *mri, double l_smoothness)
           dz = dz * l_smoothness / num;
         }
         if (x == Gx && y == Gy && z == Gz)
-          printf("l_smoo: node(%d,%d,%d): DX=(%2.2f,%2.2f,%2.2f)\n", x, y, z, dx, dy, dz);
+          printf("l_smoo: node(%d,%d,%d): DX=(%2.2f,%2.2f,%2.2f)\n", x, y, z,
+                 dx, dy, dz);
         gcamn->dx += dx;
         gcamn->dy += dy;
         gcamn->dz += dz;
@@ -7247,8 +7319,7 @@ int gcamLSmoothnessTerm(GCA_MORPH *gcam, MRI *mri, double l_smoothness)
   return (NO_ERROR);
 }
 
-double gcamLSmoothnessEnergy(GCA_MORPH *gcam, MRI *mri)
-{
+double gcamLSmoothnessEnergy(GCA_MORPH *gcam, MRI *mri) {
   double sse = 0.0, vx, vy, vz, vnx, vny, vnz, error, node_sse, dx, dy, dz;
   int x, y, z, xk, yk, zk, xn, yn, zn, width, height, depth, num;
   GCA_MORPH_NODE *gcamn, *gcamn_nbr;
@@ -7313,13 +7384,13 @@ double gcamLSmoothnessEnergy(GCA_MORPH *gcam, MRI *mri)
           sse += node_sse / num;
         }
         if (x == Gx && y == Gy && z == Gz)
-          printf("E_smoo: node(%d,%d,%d) smoothness sse %2.3f (%d nbrs)\n", x, y, z, node_sse / num, num);
+          printf("E_smoo: node(%d,%d,%d) smoothness sse %2.3f (%d nbrs)\n", x,
+                 y, z, node_sse / num, num);
       }
   return (sse);
 }
 
-int gcamSpringTerm(GCA_MORPH *gcam, double l_spring, double ratio_thresh)
-{
+int gcamSpringTerm(GCA_MORPH *gcam, double l_spring, double ratio_thresh) {
   double xc, yc, zc, dx, dy, dz;
   int x, y, z, xk, yk, zk, xn, yn, zn, num;
   // int width, height, depth;
@@ -7393,15 +7464,9 @@ int gcamSpringTerm(GCA_MORPH *gcam, double l_spring, double ratio_thresh)
         gcamn->dy += l_spring * dy;
         gcamn->dz += l_spring * dz;
         if (x == Gx && y == Gy && z == Gz)
-          printf(
-              "l_spring: node(%d,%d,%d) "
-              "spring term (%2.3f, %2.3f, %2.3f))\n",
-              x,
-              y,
-              z,
-              l_spring * dx,
-              l_spring * dy,
-              l_spring * dz);
+          printf("l_spring: node(%d,%d,%d) "
+                 "spring term (%2.3f, %2.3f, %2.3f))\n",
+                 x, y, z, l_spring * dx, l_spring * dy, l_spring * dz);
       }
   return (NO_ERROR);
 }
@@ -7495,8 +7560,7 @@ gcamInvalidSpringTerm(GCA_MORPH *gcam, double l_spring)
 }
 #endif
 
-double gcamSpringEnergy(GCA_MORPH *gcam, double ratio_thresh)
-{
+double gcamSpringEnergy(GCA_MORPH *gcam, double ratio_thresh) {
   double sse = 0.0, xc, yc, zc, node_sse, dx, dy, dz;
   int x, y, z, xk, yk, zk, xn, yn, zn, num;
   // int width, height, depth;
@@ -7561,24 +7625,24 @@ double gcamSpringEnergy(GCA_MORPH *gcam, double ratio_thresh)
           sse += node_sse / num;
         }
         if (x == Gx && y == Gy && z == Gz)
-          printf("E_spring: node(%d,%d,%d) spring sse %2.3f (%d nbrs)\n", x, y, z, node_sse / num, num);
+          printf("E_spring: node(%d,%d,%d) spring sse %2.3f (%d nbrs)\n", x, y,
+                 z, node_sse / num, num);
       }
   return (sse);
 }
 
-int gcamClearGradient(GCA_MORPH *gcam)
-{
+int gcamClearGradient(GCA_MORPH *gcam) {
   int x, y, z;
 
   for (x = 0; x < gcam->width; x++)
     for (y = 0; y < gcam->height; y++)
       for (z = 0; z < gcam->depth; z++)
-        gcam->nodes[x][y][z].dx = gcam->nodes[x][y][z].dy = gcam->nodes[x][y][z].dz = 0.0;
+        gcam->nodes[x][y][z].dx = gcam->nodes[x][y][z].dy =
+            gcam->nodes[x][y][z].dz = 0.0;
   return (NO_ERROR);
 }
 
-int gcamApplyGradient(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms)
-{
+int gcamApplyGradient(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms) {
   int x, y, z;
   float dx, dy, dz, dt, momentum;
   GCA_MORPH_NODE *gcamn;
@@ -7605,18 +7669,9 @@ int gcamApplyGradient(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms)
         gcamn->odz = dz;
 
         if (x == Gx && y == Gy && z == Gz)
-          printf(
-              "GRAD: node(%d,%d,%d): moving by (%2.3f, %2.3f, %2.3f) from "
-              "(%2.2f,%2.2f,%2.2f) to ",
-              x,
-              y,
-              z,
-              dx,
-              dy,
-              dz,
-              gcamn->x,
-              gcamn->y,
-              gcamn->z);
+          printf("GRAD: node(%d,%d,%d): moving by (%2.3f, %2.3f, %2.3f) from "
+                 "(%2.2f,%2.2f,%2.2f) to ",
+                 x, y, z, dx, dy, dz, gcamn->x, gcamn->y, gcamn->z);
         gcamn->x += dx;
         gcamn->y += dy;
         gcamn->z += dz;
@@ -7630,8 +7685,7 @@ int gcamApplyGradient(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms)
   return (NO_ERROR);
 }
 
-int gcamClearMomentum(GCA_MORPH *gcam)
-{
+int gcamClearMomentum(GCA_MORPH *gcam) {
   int x, y, z;
   GCA_MORPH_NODE *gcamn;
 
@@ -7653,8 +7707,7 @@ int gcamClearMomentum(GCA_MORPH *gcam)
 
   Description
   ------------------------------------------------------*/
-int finitep(float f)
-{
+int finitep(float f) {
   if (!isfinite(f)) {
     return (0);
   }
@@ -7664,8 +7717,7 @@ int finitep(float f)
   return (1);
 }
 
-int GCAMcomputeLabels(MRI *mri, GCA_MORPH *gcam)
-{
+int GCAMcomputeLabels(MRI *mri, GCA_MORPH *gcam) {
   int x, y, z, width, height, depth, label, n, nchanged = 0;
   float vals[MAX_GCA_INPUTS];
   GCA_MORPH_NODE *gcamn;
@@ -7719,7 +7771,8 @@ int GCAMcomputeLabels(MRI *mri, GCA_MORPH *gcam)
 
         // get the grey scale values from mri at floating point voxel position
         load_vals(mri, gcamn->x, gcamn->y, gcamn->z, vals, gcam->ninputs);
-        label = GCAcomputeMAPlabelAtLocation(gcam->gca, x, y, z, vals, &n, &gcamn->log_p);
+        label = GCAcomputeMAPlabelAtLocation(gcam->gca, x, y, z, vals, &n,
+                                             &gcamn->log_p);
         // n is the most probable index in labels array
         gcap = &gcam->gca->priors[x][y][z];
 
@@ -7733,37 +7786,25 @@ int GCAMcomputeLabels(MRI *mri, GCA_MORPH *gcam)
           gcamn->gc = gc = GCAfindPriorGC(gcam->gca, x, y, z, label);
 
           if (x == Gx && y == Gy && z == Gz)
-            printf(
-                "RELABEL: node(%d, %d, %d): label %s (%d), "
-                "mean %2.1f+-%2.1f, prior %2.1f, MRI=%2.0f\n",
-                x,
-                y,
-                z,
-                cma_label_to_name(label),
-                label,
-                gcamn->gc ? gcamn->gc->means[0] : 0.0,
-                gcamn->gc ? sqrt(covariance_determinant(gcamn->gc, gcam->ninputs)) : 0.0,
-                gcamn->prior,
-                vals[0]);
-        }
-        else /* out of FOV probably */
+            printf("RELABEL: node(%d, %d, %d): label %s (%d), "
+                   "mean %2.1f+-%2.1f, prior %2.1f, MRI=%2.0f\n",
+                   x, y, z, cma_label_to_name(label), label,
+                   gcamn->gc ? gcamn->gc->means[0] : 0.0,
+                   gcamn->gc
+                       ? sqrt(covariance_determinant(gcamn->gc, gcam->ninputs))
+                       : 0.0,
+                   gcamn->prior, vals[0]);
+        } else /* out of FOV probably */
         {
           gcamn->label = label;
           gcamn->n = 0;
           gcamn->prior = 1.0;
           gcamn->gc = GCAfindPriorGC(gcam->gca, x, y, z, label);
           if (x == Gx && y == Gy && z == Gz)
-            printf(
-                "RELABEL: node(%d, %d, %d): label %s (%d), "
-                "mean %2.1f+-%2.1f, prior %2.1f\n",
-                x,
-                y,
-                z,
-                cma_label_to_name(label),
-                label,
-                0.0,
-                0.0,
-                gcamn->prior);
+            printf("RELABEL: node(%d, %d, %d): label %s (%d), "
+                   "mean %2.1f+-%2.1f, prior %2.1f\n",
+                   x, y, z, cma_label_to_name(label), label, 0.0, 0.0,
+                   gcamn->prior);
         }
         if (gcamn->gc == NULL) {
           int xn, yn, zn;
@@ -7772,15 +7813,12 @@ int GCAMcomputeLabels(MRI *mri, GCA_MORPH *gcam)
         }
       }
 
-  fprintf(stderr,
-          "label assignment complete, %d changed (%2.2f%%)\n",
-          nchanged,
+  fprintf(stderr, "label assignment complete, %d changed (%2.2f%%)\n", nchanged,
           100.0 * (float)nchanged / (width * height * depth));
 
   return (nchanged);
 }
-int GCAMcomputeMaxPriorLabels(GCA_MORPH *gcam)
-{
+int GCAMcomputeMaxPriorLabels(GCA_MORPH *gcam) {
   int x, y, z, width, height, depth, label, n, nchanged = 0, max_n;
   GCA_MORPH_NODE *gcamn;
   GC1D *gc;
@@ -7822,14 +7860,14 @@ int GCAMcomputeMaxPriorLabels(GCA_MORPH *gcam)
           gcamn->n = n;
           gcamn->prior = gcap->priors[n];
           gcamn->gc = gc = GCAfindPriorGC(gcam->gca, x, y, z, label);
-          if (gc == NULL && gcam->gca != NULL)  // find a nearby one
+          if (gc == NULL && gcam->gca != NULL) // find a nearby one
           {
             int xn, yn, zn;
             GCApriorToNode(gcam->gca, x, y, z, &xn, &yn, &zn);
-            gcamn->gc = gc = GCAfindClosestValidGC(gcam->gca, xn, yn, zn, label, 0);
+            gcamn->gc = gc =
+                GCAfindClosestValidGC(gcam->gca, xn, yn, zn, label, 0);
           }
-        }
-        else /* out of FOV probably */
+        } else /* out of FOV probably */
         {
           int xn, yn, zn;
           GCApriorToNode(gcam->gca, x, y, z, &xn, &yn, &zn);
@@ -7837,38 +7875,36 @@ int GCAMcomputeMaxPriorLabels(GCA_MORPH *gcam)
           gcamn->label = label = 0;
           gcamn->n = 0;
           gcamn->prior = 1.0;
-          gcamn->gc = gc = GCAfindClosestValidGC(gcam->gca, xn, yn, zn, label, 0);  // was NULL
+          gcamn->gc = gc = GCAfindClosestValidGC(gcam->gca, xn, yn, zn, label,
+                                                 0); // was NULL
         }
         if (x == Gx && y == Gy && z == Gz)
-          printf(
-              "MPRIOR: node(%d, %d, %d): label %s (%d), "
-              "mean %2.1f+-%2.1f, prior %2.1f\n",
-              x,
-              y,
-              z,
-              cma_label_to_name(label),
-              label,
-              gcamn->gc ? gcamn->gc->means[0] : 0.0,
-              gcamn->gc ? sqrt(covariance_determinant(gcamn->gc, gcam->ninputs)) : 0.0,
-              gcamn->prior);
+          printf("MPRIOR: node(%d, %d, %d): label %s (%d), "
+                 "mean %2.1f+-%2.1f, prior %2.1f\n",
+                 x, y, z, cma_label_to_name(label), label,
+                 gcamn->gc ? gcamn->gc->means[0] : 0.0,
+                 gcamn->gc
+                     ? sqrt(covariance_determinant(gcamn->gc, gcam->ninputs))
+                     : 0.0,
+                 gcamn->prior);
       }
 
-  fprintf(stderr,
-          "label assignment complete, %d changed (%2.2f%%)\n",
-          nchanged,
+  fprintf(stderr, "label assignment complete, %d changed (%2.2f%%)\n", nchanged,
           100.0 * (float)nchanged / (width * height * depth));
 
   return (NO_ERROR);
 }
-MRI *GCAMbuildMostLikelyVolume(GCA_MORPH *gcam, MRI *mri)
-{
+MRI *GCAMbuildMostLikelyVolume(GCA_MORPH *gcam, MRI *mri) {
   int x, y, z, xn, yn, zn, width, depth, height, n;
   GCA_MORPH_NODE *gcamn;
   float val;
 
   // error check
-  if (!mri) ErrorExit(ERROR_BADPARM, "GCAMbuildMostLikelyVolume called with null MRI.\n");
-  if (mri->width != gcam->atlas.width || mri->height != gcam->atlas.height || mri->depth != gcam->atlas.depth)
+  if (!mri)
+    ErrorExit(ERROR_BADPARM,
+              "GCAMbuildMostLikelyVolume called with null MRI.\n");
+  if (mri->width != gcam->atlas.width || mri->height != gcam->atlas.height ||
+      mri->depth != gcam->atlas.depth)
     ErrorExit(ERROR_BADPARM,
               "GCAMbuildMostLikelyVolume called with mri dimension "
               "being different from M3D.\n");
@@ -7901,33 +7937,34 @@ MRI *GCAMbuildMostLikelyVolume(GCA_MORPH *gcam, MRI *mri)
             for (n = 0; n < gcam->ninputs; n++) {
               if (gcamn->gc) {
                 val = gcamn->gc->means[n];
-              }
-              else {
+              } else {
                 val = 0;
               }
 
               switch (mri->type) {
-                default:
-                  ErrorReturn(NULL,
-                              (ERROR_UNSUPPORTED, "GCAMbuildMostLikelyVolume: unsupported image type %d", mri->type));
-                  break;
-                case MRI_SHORT:
-                  MRISseq_vox(mri, x, y, z, n) = nint(val);
-                  break;
-                case MRI_UCHAR:
-                  MRIseq_vox(mri, x, y, z, n) = nint(val);
-                  break;
-                case MRI_FLOAT:
-                  MRIFseq_vox(mri, x, y, z, n) = val;
-                  break;
+              default:
+                ErrorReturn(
+                    NULL,
+                    (ERROR_UNSUPPORTED,
+                     "GCAMbuildMostLikelyVolume: unsupported image type %d",
+                     mri->type));
+                break;
+              case MRI_SHORT:
+                MRISseq_vox(mri, x, y, z, n) = nint(val);
+                break;
+              case MRI_UCHAR:
+                MRIseq_vox(mri, x, y, z, n) = nint(val);
+                break;
+              case MRI_FLOAT:
+                MRIFseq_vox(mri, x, y, z, n) = val;
+                break;
               }
             }
-          }  // !GCA
+          } // !GCA
         }
       }
     }
-  }
-  else  // no gca
+  } else // no gca
   {
     for (z = 0; z < depth; z++) {
       for (y = 0; y < height; y++) {
@@ -7945,25 +7982,26 @@ MRI *GCAMbuildMostLikelyVolume(GCA_MORPH *gcam, MRI *mri)
           for (n = 0; n < gcam->ninputs; n++) {
             if (gcamn->gc) {
               val = gcamn->gc->means[n];
-            }
-            else {
+            } else {
               val = 0;
             }
 
             switch (mri->type) {
-              default:
-                ErrorReturn(NULL,
-                            (ERROR_UNSUPPORTED, "GCAMbuildMostLikelyVolume: unsupported image type %d", mri->type));
-                break;
-              case MRI_SHORT:
-                MRISseq_vox(mri, x, y, z, n) = nint(val);
-                break;
-              case MRI_UCHAR:
-                MRIseq_vox(mri, x, y, z, n) = nint(val);
-                break;
-              case MRI_FLOAT:
-                MRIFseq_vox(mri, x, y, z, n) = val;
-                break;
+            default:
+              ErrorReturn(
+                  NULL, (ERROR_UNSUPPORTED,
+                         "GCAMbuildMostLikelyVolume: unsupported image type %d",
+                         mri->type));
+              break;
+            case MRI_SHORT:
+              MRISseq_vox(mri, x, y, z, n) = nint(val);
+              break;
+            case MRI_UCHAR:
+              MRIseq_vox(mri, x, y, z, n) = nint(val);
+              break;
+            case MRI_FLOAT:
+              MRIFseq_vox(mri, x, y, z, n) = val;
+              break;
             }
           }
         }
@@ -7974,18 +8012,18 @@ MRI *GCAMbuildMostLikelyVolume(GCA_MORPH *gcam, MRI *mri)
   return (mri);
 }
 
-MRI *GCAMbuildVolume(GCA_MORPH *gcam, MRI *mri)
-{
+MRI *GCAMbuildVolume(GCA_MORPH *gcam, MRI *mri) {
   int x, y, z, xn, yn, zn, width, depth, height, n;
   GCA_MORPH_NODE *gcamn;
   float val;
 
   // error check
-  if (!mri) ErrorExit(ERROR_BADPARM, "GCAMbuildVolume called with null MRI.\n");
-  if (mri->width != gcam->atlas.width || mri->height != gcam->atlas.height || mri->depth != gcam->atlas.depth)
-    ErrorExit(ERROR_BADPARM,
-              "GCAMbuildVolume called with mri dimension "
-              "being different from M3D.\n");
+  if (!mri)
+    ErrorExit(ERROR_BADPARM, "GCAMbuildVolume called with null MRI.\n");
+  if (mri->width != gcam->atlas.width || mri->height != gcam->atlas.height ||
+      mri->depth != gcam->atlas.depth)
+    ErrorExit(ERROR_BADPARM, "GCAMbuildVolume called with mri dimension "
+                             "being different from M3D.\n");
 
   // set direction cosines etc.
   useVolGeomToMRI(&gcam->atlas, mri);
@@ -8010,27 +8048,28 @@ MRI *GCAMbuildVolume(GCA_MORPH *gcam, MRI *mri)
           for (n = 0; n < gcam->ninputs; n++) {
             if (gcamn->gc) {
               val = gcamn->gc->means[n];
-            }
-            else {
+            } else {
               val = 0;
             }
 
             switch (mri->type) {
-              default:
-                ErrorReturn(NULL, (ERROR_UNSUPPORTED, "GCAMbuildVolume: unsupported image type %d", mri->type));
-                break;
-              case MRI_SHORT:
-                MRISseq_vox(mri, x, y, z, n) = nint(val);
-                break;
-              case MRI_UCHAR:
-                MRIseq_vox(mri, x, y, z, n) = nint(val);
-                break;
-              case MRI_FLOAT:
-                MRIFseq_vox(mri, x, y, z, n) = val;
-                break;
+            default:
+              ErrorReturn(NULL, (ERROR_UNSUPPORTED,
+                                 "GCAMbuildVolume: unsupported image type %d",
+                                 mri->type));
+              break;
+            case MRI_SHORT:
+              MRISseq_vox(mri, x, y, z, n) = nint(val);
+              break;
+            case MRI_UCHAR:
+              MRIseq_vox(mri, x, y, z, n) = nint(val);
+              break;
+            case MRI_FLOAT:
+              MRIFseq_vox(mri, x, y, z, n) = val;
+              break;
             }
           }
-        }  // !GCA
+        } // !GCA
       }
     }
   }
@@ -8038,8 +8077,7 @@ MRI *GCAMbuildVolume(GCA_MORPH *gcam, MRI *mri)
   return (mri);
 }
 
-int GCAMinvert(GCA_MORPH *gcam, MRI *mri)
-{
+int GCAMinvert(GCA_MORPH *gcam, MRI *mri) {
   int x, y, z, width, height, depth;
   MRI *mri_ctrl, *mri_counts;
   GCA_MORPH_NODE *gcamn;
@@ -8064,16 +8102,13 @@ int GCAMinvert(GCA_MORPH *gcam, MRI *mri)
 #endif
 
   // verify the volume size ////////////////////////////////////////////
-  if (mri->width != gcam->image.width || mri->height != gcam->image.height || mri->depth != gcam->image.depth)
+  if (mri->width != gcam->image.width || mri->height != gcam->image.height ||
+      mri->depth != gcam->image.depth)
     ErrorExit(ERROR_BADPARM,
               "mri passed volume size ( %d %d %d ) is different from "
               "the one used to create M3D data ( %d %d %d )\n",
-              mri->width,
-              mri->height,
-              mri->depth,
-              gcam->image.width,
-              gcam->image.height,
-              gcam->image.depth);
+              mri->width, mri->height, mri->depth, gcam->image.width,
+              gcam->image.height, gcam->image.depth);
 
   // use mri
   width = mri->width;
@@ -8093,7 +8128,9 @@ int GCAMinvert(GCA_MORPH *gcam, MRI *mri)
   MRIcopyHeader(mri, mri_ctrl);
 
   if (!gcam->mri_xind || !gcam->mri_yind || !gcam->mri_zind || !mri_ctrl)
-    ErrorExit(ERROR_NOMEMORY, "GCAMinvert: could not allocated %dx%dx%d index volumes", width, height, depth);
+    ErrorExit(ERROR_NOMEMORY,
+              "GCAMinvert: could not allocated %dx%dx%d index volumes", width,
+              height, depth);
 
   // going through gcam volume (x,y,z)
   // gcam volume points could be mapped to many points in xind, yind, and zind
@@ -8144,13 +8181,17 @@ int GCAMinvert(GCA_MORPH *gcam, MRI *mri)
         if (abs(xf - Gx) < 1 && abs(yf - Gy) < 1 && abs(zf - Gz) < 1) {
           DiagBreak();
         }
-        MRIinterpolateIntoVolume(gcam->mri_xind, (double)xf, (double)yf, (double)zf, (double)x);
+        MRIinterpolateIntoVolume(gcam->mri_xind, (double)xf, (double)yf,
+                                 (double)zf, (double)x);
         // src -> gcam volume position
-        MRIinterpolateIntoVolume(gcam->mri_yind, (double)xf, (double)yf, (double)zf, (double)y);
-        MRIinterpolateIntoVolume(gcam->mri_zind, (double)xf, (double)yf, (double)zf, (double)z);
+        MRIinterpolateIntoVolume(gcam->mri_yind, (double)xf, (double)yf,
+                                 (double)zf, (double)y);
+        MRIinterpolateIntoVolume(gcam->mri_zind, (double)xf, (double)yf,
+                                 (double)zf, (double)z);
 
         // mark counts (how many went in)
-        MRIinterpolateIntoVolume(mri_counts, (double)xf, (double)yf, (double)zf, (double)1.0);
+        MRIinterpolateIntoVolume(mri_counts, (double)xf, (double)yf, (double)zf,
+                                 (double)1.0);
       }
     }
   }
@@ -8173,11 +8214,15 @@ int GCAMinvert(GCA_MORPH *gcam, MRI *mri)
           continue; /* nothing there */
         }
         // give average gcam position for this points
-        MRIFvox(gcam->mri_xind, x, y, z) = MRIFvox(gcam->mri_xind, x, y, z) / (float)num;
-        MRIFvox(gcam->mri_yind, x, y, z) = MRIFvox(gcam->mri_yind, x, y, z) / (float)num;
-        MRIFvox(gcam->mri_zind, x, y, z) = MRIFvox(gcam->mri_zind, x, y, z) / (float)num;
+        MRIFvox(gcam->mri_xind, x, y, z) =
+            MRIFvox(gcam->mri_xind, x, y, z) / (float)num;
+        MRIFvox(gcam->mri_yind, x, y, z) =
+            MRIFvox(gcam->mri_yind, x, y, z) / (float)num;
+        MRIFvox(gcam->mri_zind, x, y, z) =
+            MRIFvox(gcam->mri_zind, x, y, z) / (float)num;
         MRIvox(mri_ctrl, x, y, z) = CONTROL_MARKED;
-        if (num < .1) MRIsetVoxVal(mri_ctrl, x, y, z, 0, 0);
+        if (num < .1)
+          MRIsetVoxVal(mri_ctrl, x, y, z, 0, 0);
       }
     }
   }
@@ -8215,8 +8260,7 @@ int GCAMinvert(GCA_MORPH *gcam, MRI *mri)
   return (NO_ERROR);
 }
 
-int GCAMfreeInverse(GCA_MORPH *gcam)
-{
+int GCAMfreeInverse(GCA_MORPH *gcam) {
   if (gcam->mri_xind) {
     MRIfree(&gcam->mri_xind);
   }
@@ -8229,8 +8273,7 @@ int GCAMfreeInverse(GCA_MORPH *gcam)
   return (NO_ERROR);
 }
 
-int gcamUndoGradient(GCA_MORPH *gcam)
-{
+int gcamUndoGradient(GCA_MORPH *gcam) {
   int x, y, z;
   float dx, dy, dz;
   GCA_MORPH_NODE *gcamn;
@@ -8253,19 +8296,10 @@ int gcamUndoGradient(GCA_MORPH *gcam)
         gcamn->odx = gcamn->ody = gcamn->odz = 0; /* turn off momentum */
 
         if (x == Gx && y == Gy && z == Gz)
-          printf(
-              "UNGRAD: node(%d,%d,%d): "
-              "moving by (%2.3f, %2.3f, %2.3f) from "
-              "(%2.1f,%2.1f,%2.1f) to ",
-              x,
-              y,
-              z,
-              dx,
-              dy,
-              dz,
-              gcamn->x,
-              gcamn->y,
-              gcamn->z);
+          printf("UNGRAD: node(%d,%d,%d): "
+                 "moving by (%2.3f, %2.3f, %2.3f) from "
+                 "(%2.1f,%2.1f,%2.1f) to ",
+                 x, y, z, dx, dy, dz, gcamn->x, gcamn->y, gcamn->z);
         gcamn->x -= dx;
         gcamn->y -= dy;
         gcamn->z -= dz;
@@ -8276,8 +8310,7 @@ int gcamUndoGradient(GCA_MORPH *gcam)
   return (NO_ERROR);
 }
 
-int gcamReadMRI(GCA_MORPH *gcam, MRI *mri, int which)
-{
+int gcamReadMRI(GCA_MORPH *gcam, MRI *mri, int which) {
   int x, y, z, i;
   float d;
   GCA_MORPH_NODE *gcamn;
@@ -8299,88 +8332,89 @@ int gcamReadMRI(GCA_MORPH *gcam, MRI *mri, int which)
 
         d = MRIFvox(mri, x, y, z);
         switch (which) {
-          default:
-            ErrorExit(ERROR_BADPARM, "gcamReadMRI(%d): unknown which parameter", which);
-            break;
-          case GCAM_X:
-            gcamn->x = d;
-            break;
-          case GCAM_Y:
-            gcamn->y = d;
-            break;
-          case GCAM_Z:
-            gcamn->z = d;
-            break;
-          case GCAM_X_GRAD:
-            gcamn->dx = d;
-            break;
-          case GCAM_Y_GRAD:
-            gcamn->dy = d;
-            break;
-          case GCAM_Z_GRAD:
-            gcamn->dz = d;
-            break;
-          case GCAM_LABEL:
-            gcamn->label = nint(d);
-            break;
-          case GCAM_ORIGX:
-            gcamn->origx = d;
-            break;
-          case GCAM_ORIGY:
-            gcamn->origy = d;
-            break;
-          case GCAM_ORIGZ:
-            gcamn->origz = d;
-            break;
-          case GCAM_NODEX:
-            gcamn->xn = d;
-            break;
-          case GCAM_NODEY:
-            gcamn->yn = d;
-            break;
-          case GCAM_NODEZ:
-            gcamn->zn = d;
-            break;
-          case GCAM_MEANS:
-            if (gcamn->gc != NULL) {
-              for (i = 0; i < mri->nframes; i++) {
-                d = MRIFseq_vox(mri, x, y, z, i);
-                gcamn->gc->means[i] = d;
+        default:
+          ErrorExit(ERROR_BADPARM, "gcamReadMRI(%d): unknown which parameter",
+                    which);
+          break;
+        case GCAM_X:
+          gcamn->x = d;
+          break;
+        case GCAM_Y:
+          gcamn->y = d;
+          break;
+        case GCAM_Z:
+          gcamn->z = d;
+          break;
+        case GCAM_X_GRAD:
+          gcamn->dx = d;
+          break;
+        case GCAM_Y_GRAD:
+          gcamn->dy = d;
+          break;
+        case GCAM_Z_GRAD:
+          gcamn->dz = d;
+          break;
+        case GCAM_LABEL:
+          gcamn->label = nint(d);
+          break;
+        case GCAM_ORIGX:
+          gcamn->origx = d;
+          break;
+        case GCAM_ORIGY:
+          gcamn->origy = d;
+          break;
+        case GCAM_ORIGZ:
+          gcamn->origz = d;
+          break;
+        case GCAM_NODEX:
+          gcamn->xn = d;
+          break;
+        case GCAM_NODEY:
+          gcamn->yn = d;
+          break;
+        case GCAM_NODEZ:
+          gcamn->zn = d;
+          break;
+        case GCAM_MEANS:
+          if (gcamn->gc != NULL) {
+            for (i = 0; i < mri->nframes; i++) {
+              d = MRIFseq_vox(mri, x, y, z, i);
+              gcamn->gc->means[i] = d;
+            }
+          }
+          break;
+        case GCAM_COVARS:
+          if (gcamn->gc != NULL) {
+            for (i = 0; i < mri->nframes; i++) {
+              d = MRIFseq_vox(mri, x, y, z, i);
+              gcamn->gc->covars[i] = d;
+              if (FZERO(d)) {
+                DiagBreak();
               }
             }
-            break;
-          case GCAM_COVARS:
-            if (gcamn->gc != NULL) {
-              for (i = 0; i < mri->nframes; i++) {
-                d = MRIFseq_vox(mri, x, y, z, i);
-                gcamn->gc->covars[i] = d;
-                if (FZERO(d)) {
-                  DiagBreak();
-                }
-              }
-            }
-            break;
+          }
+          break;
         }
       }
   return (NO_ERROR);
 }
 
-MRI *GCAMwriteMRI(GCA_MORPH *gcam, MRI *mri, int which)
-{
+MRI *GCAMwriteMRI(GCA_MORPH *gcam, MRI *mri, int which) {
   int x, y, z;
   float d;
   GCA_MORPH_NODE *gcamn;
 
-
   if (!mri) {
     mri = MRIalloc(gcam->width, gcam->height, gcam->depth, MRI_FLOAT);
     MRIcopyVolGeomToMRI(mri, &gcam->atlas);
-    MRIsetResolution(
-        mri, gcam->atlas.xsize * gcam->spacing, gcam->atlas.ysize * gcam->spacing, gcam->atlas.zsize * gcam->spacing);
+    MRIsetResolution(mri, gcam->atlas.xsize * gcam->spacing,
+                     gcam->atlas.ysize * gcam->spacing,
+                     gcam->atlas.zsize * gcam->spacing);
     MRIreInitCache(mri);
   }
   if (!mri)
-    ErrorExit(ERROR_NOMEMORY, "gcamWrite: could not allocate %dx%dx%d MRI\n", gcam->width, gcam->height, gcam->depth);
+    ErrorExit(ERROR_NOMEMORY, "gcamWrite: could not allocate %dx%dx%d MRI\n",
+              gcam->width, gcam->height, gcam->depth);
 
   for (x = 0; x < gcam->width; x++)
     for (y = 0; y < gcam->height; y++)
@@ -8391,116 +8425,124 @@ MRI *GCAMwriteMRI(GCA_MORPH *gcam, MRI *mri, int which)
         }
 
         switch (which) {
-          default:
-            ErrorExit(ERROR_BADPARM, "GCAMwriteMRI(%d): unknown which parameter", which);
-            d = 0;
-            break;
-          case GCAM_NEG:
+        default:
+          ErrorExit(ERROR_BADPARM, "GCAMwriteMRI(%d): unknown which parameter",
+                    which);
+          d = 0;
+          break;
+        case GCAM_NEG:
 #if 0
 	  if (gcamn->invalid == 0 && gcamn->orig_area1 > 0 && gcamn->orig_area2 > 0)
 	    d = (gcamn->area1 <= 0 || gcamn->area2 <= 0) ;
 	  else
 	    d = 0 ;
 #else
-            if ((gcamn->invalid != GCAM_POSITION_INVALID) &&
-                ((gcamn->orig_area1 > 0 && gcamn->area1 <= 0) || (gcamn->orig_area2 > 0 && gcamn->area2 <= 0)))
-              d = 1;
-            else
-              d = 0;
+          if ((gcamn->invalid != GCAM_POSITION_INVALID) &&
+              ((gcamn->orig_area1 > 0 && gcamn->area1 <= 0) ||
+               (gcamn->orig_area2 > 0 && gcamn->area2 <= 0)))
+            d = 1;
+          else
+            d = 0;
 #endif
 
-            if (d > 0) DiagBreak();
-            if (gcamn->area1 < 0 || gcamn->area2 <= 0) {
+          if (d > 0)
+            DiagBreak();
+          if (gcamn->area1 < 0 || gcamn->area2 <= 0) {
+            DiagBreak();
+            if (FZERO(d))
               DiagBreak();
-              if (FZERO(d)) DiagBreak();
-            }
+          }
 
-            break;
-          case GCAM_MIN_AREA:
-            if (gcamn->invalid == 0)
-              d = MIN(gcamn->area1, gcamn->area2);
-            else
+          break;
+        case GCAM_MIN_AREA:
+          if (gcamn->invalid == 0)
+            d = MIN(gcamn->area1, gcamn->area2);
+          else
+            d = 0;
+          break;
+        case GCAM_LOG_MIN_AREA:
+          if (gcamn->invalid == 0) {
+            d = MIN(gcamn->area1, gcamn->area2);
+            if (d > 1)
               d = 0;
-            break;
-          case GCAM_LOG_MIN_AREA:
-            if (gcamn->invalid == 0) {
-              d = MIN(gcamn->area1, gcamn->area2);
-              if (d > 1)
-                d = 0;
-              else if (d > 0)
-                d = -log10(fabs(d));
-              else
-                d = log10(fabs(d));
-            }
+            else if (d > 0)
+              d = -log10(fabs(d));
             else
-              d = 0;
-            break;
-          case GCAM_X_GRAD:
-            d = gcamn->dx;
-            break;
-          case GCAM_Y_GRAD:
-            d = gcamn->dy;
-            break;
-          case GCAM_Z_GRAD:
-            d = gcamn->dz;
-            break;
-          case GCAM_JACOBIAN:
-            d = FZERO(gcamn->orig_area) ? 1.0 : gcamn->area / gcamn->orig_area;
-            break;
-          case GCAM_LOG_JACOBIAN:
-            d = FZERO(gcamn->orig_area) ? 1.0 : gcamn->area / gcamn->orig_area;
-            if (d < 0)
-              d = -100;
-            else
-              d = log(d);
-            break;
-          case GCAM_AREA:
-            d = gcamn->area;
-            break;
-          case GCAM_ORIG_AREA:
-            d = gcamn->orig_area;
-            break;
-          case GCAM_X:
-            d = gcamn->x;
-            break;
-          case GCAM_Y:
-            d = gcamn->y;
-            break;
-          case GCAM_Z:
-            d = gcamn->z;
-            break;
-          case GCAM_ORIGX:
-            d = gcamn->origx;
-            break;
-          case GCAM_ORIGY:
-            d = gcamn->origy;
-            break;
-          case GCAM_ORIGZ:
-            d = gcamn->origz;
-            break;
-          case GCAM_LABEL:
-            d = gcamn->label;
-            break;
-          case GCAM_MEANS:
-            d = gcamn->gc ? gcamn->gc->means[0] : 0;
-            break;
-          case GCAM_STATUS:
-            d = gcamn->status;
-            break;
-          case GCAM_INVALID:
-            d = gcamn->invalid;
-            break;
-	case GCAM_NODEX: d = gcamn->xn ; break ;
-	case GCAM_NODEY: d = gcamn->yn ; break ;
-	case GCAM_NODEZ: d = gcamn->zn ; break ;
+              d = log10(fabs(d));
+          } else
+            d = 0;
+          break;
+        case GCAM_X_GRAD:
+          d = gcamn->dx;
+          break;
+        case GCAM_Y_GRAD:
+          d = gcamn->dy;
+          break;
+        case GCAM_Z_GRAD:
+          d = gcamn->dz;
+          break;
+        case GCAM_JACOBIAN:
+          d = FZERO(gcamn->orig_area) ? 1.0 : gcamn->area / gcamn->orig_area;
+          break;
+        case GCAM_LOG_JACOBIAN:
+          d = FZERO(gcamn->orig_area) ? 1.0 : gcamn->area / gcamn->orig_area;
+          if (d < 0)
+            d = -100;
+          else
+            d = log(d);
+          break;
+        case GCAM_AREA:
+          d = gcamn->area;
+          break;
+        case GCAM_ORIG_AREA:
+          d = gcamn->orig_area;
+          break;
+        case GCAM_X:
+          d = gcamn->x;
+          break;
+        case GCAM_Y:
+          d = gcamn->y;
+          break;
+        case GCAM_Z:
+          d = gcamn->z;
+          break;
+        case GCAM_ORIGX:
+          d = gcamn->origx;
+          break;
+        case GCAM_ORIGY:
+          d = gcamn->origy;
+          break;
+        case GCAM_ORIGZ:
+          d = gcamn->origz;
+          break;
+        case GCAM_LABEL:
+          d = gcamn->label;
+          break;
+        case GCAM_MEANS:
+          d = gcamn->gc ? gcamn->gc->means[0] : 0;
+          break;
+        case GCAM_STATUS:
+          d = gcamn->status;
+          break;
+        case GCAM_INVALID:
+          d = gcamn->invalid;
+          break;
+        case GCAM_NODEX:
+          d = gcamn->xn;
+          break;
+        case GCAM_NODEY:
+          d = gcamn->yn;
+          break;
+        case GCAM_NODEZ:
+          d = gcamn->zn;
+          break;
         }
         MRIsetVoxVal(mri, x, y, z, 0, d);
       }
   return (mri);
 }
 
-int gcamSmoothGradient(GCA_MORPH *gcam, int navgs)
-{
+int gcamSmoothGradient(GCA_MORPH *gcam, int navgs) {
 
 #if 1
   MRI *mri_tmp = NULL, *mri_kernel;
@@ -8516,10 +8558,8 @@ int gcamSmoothGradient(GCA_MORPH *gcam, int navgs)
   mri_kernel = MRIgaussian1d(sqrt((float)navgs * 2 / M_PI), 0);
 #endif
   if ((Gx >= 0 && Gy >= 0 && Gz >= 0) && (Gdiag & DIAG_SHOW))
-    printf("before smoothing %d times: grad = (%2.3f, %2.3f, %2.3f)\n",
-           navgs,
-           gcam->nodes[Gx][Gy][Gz].dx,
-           gcam->nodes[Gx][Gy][Gz].dy,
+    printf("before smoothing %d times: grad = (%2.3f, %2.3f, %2.3f)\n", navgs,
+           gcam->nodes[Gx][Gy][Gz].dx, gcam->nodes[Gx][Gy][Gz].dy,
            gcam->nodes[Gx][Gy][Gz].dz);
 
   for (i = GCAM_X_GRAD; i <= GCAM_Z_GRAD; i++) {
@@ -8550,28 +8590,33 @@ int gcamSmoothGradient(GCA_MORPH *gcam, int navgs)
   }
 
   if (!dz) {
-    dx = (double *)calloc(gcam->width * gcam->height * gcam->depth, sizeof(double));
-    dy = (double *)calloc(gcam->width * gcam->height * gcam->depth, sizeof(double));
-    dz = (double *)calloc(gcam->width * gcam->height * gcam->depth, sizeof(double));
-    if (!dx || !dy || !dz) ErrorExit(ERROR_NOMEMORY, "gcamSmoothGradient: could not allocate grad buffers");
+    dx = (double *)calloc(gcam->width * gcam->height * gcam->depth,
+                          sizeof(double));
+    dy = (double *)calloc(gcam->width * gcam->height * gcam->depth,
+                          sizeof(double));
+    dz = (double *)calloc(gcam->width * gcam->height * gcam->depth,
+                          sizeof(double));
+    if (!dx || !dy || !dz)
+      ErrorExit(ERROR_NOMEMORY,
+                "gcamSmoothGradient: could not allocate grad buffers");
   }
 
   if ((Gx >= 0 && Gy >= 0 && Gz >= 0) && (Gdiag & DIAG_SHOW))
-    printf("before smoothing %d times: grad = (%2.3f, %2.3f, %2.3f)\n",
-           navgs,
-           gcam->nodes[Gx][Gy][Gz].dx,
-           gcam->nodes[Gx][Gy][Gz].dy,
+    printf("before smoothing %d times: grad = (%2.3f, %2.3f, %2.3f)\n", navgs,
+           gcam->nodes[Gx][Gy][Gz].dx, gcam->nodes[Gx][Gy][Gz].dy,
            gcam->nodes[Gx][Gy][Gz].dz);
 
   for (i = 0; i < navgs; i++) {
     for (index = x = 0; x < gcam->width; x++)
       for (y = 0; y < gcam->height; y++)
         for (z = 0; z < gcam->depth; z++, index++) {
-          if (x == Gx && y == Gy && z == Gz) DiagBreak();
+          if (x == Gx && y == Gy && z == Gz)
+            DiagBreak();
 
           gcamn = &gcam->nodes[x][y][z];
 
-          if (gcamn->invalid == GCAM_POSITION_INVALID) continue;
+          if (gcamn->invalid == GCAM_POSITION_INVALID)
+            continue;
 
           dx[index] = gcamn->dx;
           dy[index] = gcamn->dy;
@@ -8589,27 +8634,35 @@ int gcamSmoothGradient(GCA_MORPH *gcam, int navgs)
 #endif
           for (num = 1, xk = -1; xk <= 1; xk++) {
             xi = x + xk;
-            if (xi < 0) xi = 0;
+            if (xi < 0)
+              xi = 0;
 
-            if (xi >= gcam->width) xi = gcam->width - 1;
+            if (xi >= gcam->width)
+              xi = gcam->width - 1;
 
             for (yk = -1; yk <= 1; yk++) {
               yi = y + yk;
-              if (yi < 0) yi = 0;
+              if (yi < 0)
+                yi = 0;
 
-              if (yi >= gcam->height) yi = gcam->height - 1;
+              if (yi >= gcam->height)
+                yi = gcam->height - 1;
 
               for (zk = -1; zk <= 1; zk++) {
                 zi = z + zk;
-                if (zi < 0) zi = 0;
+                if (zi < 0)
+                  zi = 0;
 
-                if (zi >= gcam->depth) zi = gcam->depth - 1;
+                if (zi >= gcam->depth)
+                  zi = gcam->depth - 1;
 
                 gcamn_nbr = &gcam->nodes[xi][yi][zi];
 
-                if (gcamn_nbr->invalid /* == GCAM_POSITION_INVALID*/) continue;
+                if (gcamn_nbr->invalid /* == GCAM_POSITION_INVALID*/)
+                  continue;
 #if 1
-                if (gcamn_nbr->label != gcamn->label) continue;
+                if (gcamn_nbr->label != gcamn->label)
+                  continue;
 #endif
                 num++;
                 dx[index] += gcamn_nbr->dx;
@@ -8627,7 +8680,8 @@ int gcamSmoothGradient(GCA_MORPH *gcam, int navgs)
         for (z = 0; z < gcam->depth; z++, index++) {
           gcamn = &gcam->nodes[x][y][z];
 
-          if (gcamn->invalid == GCAM_POSITION_INVALID) continue;
+          if (gcamn->invalid == GCAM_POSITION_INVALID)
+            continue;
 
           gcamn->dx = dx[index];
           gcamn->dy = dy[index];
@@ -8638,17 +8692,14 @@ int gcamSmoothGradient(GCA_MORPH *gcam, int navgs)
 #endif
 
   if ((Gx >= 0 && Gy >= 0 && Gz >= 0) && (Gdiag & DIAG_SHOW))
-    printf("after smoothing %d times: grad = (%2.3f, %2.3f, %2.3f)\n",
-           navgs,
-           gcam->nodes[Gx][Gy][Gz].dx,
-           gcam->nodes[Gx][Gy][Gz].dy,
+    printf("after smoothing %d times: grad = (%2.3f, %2.3f, %2.3f)\n", navgs,
+           gcam->nodes[Gx][Gy][Gz].dx, gcam->nodes[Gx][Gy][Gz].dy,
            gcam->nodes[Gx][Gy][Gz].dz);
 
   return (NO_ERROR);
 }
 
-int GCAMsetStatus(GCA_MORPH *gcam, int status)
-{
+int GCAMsetStatus(GCA_MORPH *gcam, int status) {
   int x, y, z;
   GCA_MORPH_NODE *gcamn;
 
@@ -8665,8 +8716,7 @@ int GCAMsetStatus(GCA_MORPH *gcam, int status)
   return (NO_ERROR);
 }
 
-int GCAMsetLabelStatus(GCA_MORPH *gcam, int label, int status)
-{
+int GCAMsetLabelStatus(GCA_MORPH *gcam, int label, int status) {
   int x, y, z;
   GCA_MORPH_NODE *gcamn;
 
@@ -8690,14 +8740,13 @@ int GCAMsetLabelStatus(GCA_MORPH *gcam, int label, int status)
 #define GCAM_FOTS_TIMERS 0
 
 /*!
-  \fn double gcamFindOptimalTimeStep(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms, MRI *mri)
-  \brief Steps along the gradient to find the optimum (min RMS). This is in
-  one of mri_ca_register's lowest loops and so time sensitive. Takes about 16000ms.
-  Could probably be sped up (see notes).
-#FOTS#
+  \fn double gcamFindOptimalTimeStep(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms,
+MRI *mri) \brief Steps along the gradient to find the optimum (min RMS). This is
+in one of mri_ca_register's lowest loops and so time sensitive. Takes about
+16000ms. Could probably be sped up (see notes). #FOTS#
 */
-double gcamFindOptimalTimeStep(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms, MRI *mri)
-{
+double gcamFindOptimalTimeStep(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms,
+                               MRI *mri) {
 #if GCAM_FOTS_TIMERS
   Timer tFOTS;
 #endif
@@ -8705,7 +8754,8 @@ double gcamFindOptimalTimeStep(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms, MRI *mri
   double min_dt;
 
   MATRIX *mX, *m_xTx, *m_xTx_inv, *m_xTy, *mP, *m_xT;
-  double rms, min_rms, dt_in[MAX_SAMPLES], rms_out[MAX_SAMPLES], orig_dt, a, b, c, max_dt, start_dt;
+  double rms, min_rms, dt_in[MAX_SAMPLES], rms_out[MAX_SAMPLES], orig_dt, a, b,
+      c, max_dt, start_dt;
   // double start_rms, pct_change;
   VECTOR *vY;
   int N, i, Gxs, Gys, Gzs, suppressed = 0, prev_neg;
@@ -8713,7 +8763,7 @@ double gcamFindOptimalTimeStep(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms, MRI *mri
   long diag;
   int GotBetter;
   double old_min_rms, old_min_dt;
-  //extern int nFOTS_Calls;
+  // extern int nFOTS_Calls;
 
 #if GCAM_FOTS_OUTPUT
   const unsigned int outputFreq = 10;
@@ -8778,21 +8828,23 @@ double gcamFindOptimalTimeStep(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms, MRI *mri
         //    if (pct_change < parms->tol)
         {
           if (getenv("SHOW_NEG")) {
-            printf("!!!!!!!!!!reducing gradient magnitude around %d negative nodes\n", gcam->neg);
+            printf("!!!!!!!!!!reducing gradient magnitude around %d negative "
+                   "nodes\n",
+                   gcam->neg);
           }
           gcamSuppressNegativeGradients(gcam, 0.5);
-          if (suppressed++ < 1000 && ((gcam->neg < prev_neg) || (prev_neg <= 0))) {
+          if (suppressed++ < 1000 &&
+              ((gcam->neg < prev_neg) || (prev_neg <= 0))) {
             prev_neg = gcam->neg;
-            parms->dt /= 4;  // try again at this scale
+            parms->dt /= 4; // try again at this scale
             continue;
           }
         }
-      }
-      else {
+      } else {
         prev_neg = suppressed = 0;
       }
 
-      if (gcam->neg > 0 && gcam_write_grad > 1)  // diagnostic
+      if (gcam->neg > 0 && gcam_write_grad > 1) // diagnostic
       {
         int x, y, z, k;
         GCA_MORPH_NODE *gcamn;
@@ -8802,7 +8854,8 @@ double gcamFindOptimalTimeStep(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms, MRI *mri
               gcamn = &gcam->nodes[x][y][z];
               if (gcamn->invalid == GCAM_VALID && gcamn->area < 0) {
                 if (k++ < 10) {
-                  printf("gcam(%d, %d, %d) neg, areas = %2.2f, %2.2f\n", x, y, z, gcamn->area1, gcamn->area2);
+                  printf("gcam(%d, %d, %d) neg, areas = %2.2f, %2.2f\n", x, y,
+                         z, gcamn->area1, gcamn->area2);
                 }
               }
             }
@@ -8836,19 +8889,20 @@ double gcamFindOptimalTimeStep(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms, MRI *mri
     max_dt = start_dt * 10; /* will only iterate if min was at start_dt */
   } while (DEQUAL(min_dt, start_dt));
 
-
   // Fit RMS/stepsize to a quadradic using 5 points. This could
   // probably be done only at the final stages. It is also possible
   // that previous samples could be used instead of computing more.
-  GotBetter=0; // Keep track over whether this operation actually makes things better
-  old_min_dt  = min_dt;
+  GotBetter =
+      0; // Keep track over whether this operation actually makes things better
+  old_min_dt = min_dt;
   old_min_rms = min_rms;
 
   // Start with the current best
   dt_in[0] = min_dt;
   rms_out[0] = min_rms;
 
-  // Sample RMS at four locations (-0.4, -0.2, 0.2, 0.4). Takes about 3800ms for all four
+  // Sample RMS at four locations (-0.4, -0.2, 0.2, 0.4). Takes about 3800ms for
+  // all four
   parms->dt = dt_in[1] = dt_in[0] - dt_in[0] * .2;
   gcamApplyGradient(gcam, parms);
   rms = rms_out[1] = GCAMcomputeRMS(gcam, mri, parms);
@@ -8856,7 +8910,7 @@ double gcamFindOptimalTimeStep(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms, MRI *mri
   if (rms < min_rms && (gcam->neg == 0 || parms->noneg <= 0)) {
     min_rms = rms;
     min_dt = parms->dt;
-    GotBetter=1;
+    GotBetter = 1;
   }
 
   parms->dt = dt_in[2] = dt_in[0] - dt_in[0] * .4;
@@ -8865,7 +8919,7 @@ double gcamFindOptimalTimeStep(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms, MRI *mri
   if (rms < min_rms && (gcam->neg == 0 || parms->noneg <= 0)) {
     min_rms = rms;
     min_dt = parms->dt;
-    GotBetter=1;
+    GotBetter = 1;
   }
   gcamUndoGradient(gcam);
 
@@ -8876,7 +8930,7 @@ double gcamFindOptimalTimeStep(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms, MRI *mri
   if (rms < min_rms && (gcam->neg == 0 || parms->noneg <= 0)) {
     min_rms = rms;
     min_dt = parms->dt;
-    GotBetter=1;
+    GotBetter = 1;
   }
 
   parms->dt = dt_in[4] = dt_in[0] + dt_in[0] * .4;
@@ -8886,7 +8940,7 @@ double gcamFindOptimalTimeStep(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms, MRI *mri
   if (rms < min_rms && (gcam->neg == 0 || parms->noneg <= 0)) {
     min_rms = rms;
     min_dt = parms->dt;
-    GotBetter=1;
+    GotBetter = 1;
   }
 
   /* now compute location of minimum of best quadratic fit */
@@ -8913,7 +8967,9 @@ double gcamFindOptimalTimeStep(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms, MRI *mri
     b = RVECTOR_ELT(mP, 2);
     c = RVECTOR_ELT(mP, 3);
     if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
-      fprintf(stdout, "(a,b,c) = (%2.3f, %2.3f, %2.3f), predicted min at %2.3f\n", a, b, c, -b / a);
+      fprintf(stdout,
+              "(a,b,c) = (%2.3f, %2.3f, %2.3f), predicted min at %2.3f\n", a, b,
+              c, -b / a);
     if (!finitep(a)) {
       DiagBreak();
     }
@@ -8928,7 +8984,7 @@ double gcamFindOptimalTimeStep(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms, MRI *mri
       if (rms < min_rms && (gcam->neg == 0 || parms->noneg <= 0)) {
         min_rms = rms;
         min_dt = parms->dt;
-	GotBetter=1;
+        GotBetter = 1;
       }
     }
   }
@@ -8937,9 +8993,10 @@ double gcamFindOptimalTimeStep(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms, MRI *mri
   MatrixFree(&mX);
   VectorFree(&vY);
 
-  if(GotBetter){
-    printf("#FOTS# QuadFit found better minimum quadopt=(dt=%g,rms=%g) vs oldopt=(dt=%g,rms=%g)\n",
-	   min_dt,min_rms,old_min_dt,old_min_rms);
+  if (GotBetter) {
+    printf("#FOTS# QuadFit found better minimum quadopt=(dt=%g,rms=%g) vs "
+           "oldopt=(dt=%g,rms=%g)\n",
+           min_dt, min_rms, old_min_dt, old_min_rms);
     fflush(stdout);
   }
 
@@ -8964,20 +9021,21 @@ double gcamFindOptimalTimeStep(GCA_MORPH *gcam, GCA_MORPH_PARMS *parms, MRI *mri
 #define GCAM_LABELENERGY_OUTPUT 0
 
 /*!
-  \fn double gcamLabelEnergy(const GCA_MORPH *gcam, const MRI *mri, const double label_dist)
-  \brief Computes the label energy by summing up the gcamn->label_dist
+  \fn double gcamLabelEnergy(const GCA_MORPH *gcam, const MRI *mri, const double
+label_dist) \brief Computes the label energy by summing up the gcamn->label_dist
    across valid nodes.  This function is in the deepest loop of
    mri_ca_register and so time sensitive.
 #E#
  */
-double gcamLabelEnergy(const GCA_MORPH *gcam, const MRI *mri, const double label_dist)
-{
+double gcamLabelEnergy(const GCA_MORPH *gcam, const MRI *mri,
+                       const double label_dist) {
 #if GCAM_LABELENERGY_OUTPUT
   const unsigned int gcamLabelEnergyOutputFreq = 10;
   static unsigned int nCalls = 0;
   if ((nCalls % gcamLabelEnergyOutputFreq) == 0) {
     char fname[STRLEN];
-    snprintf(fname, STRLEN - 1, "gcamLabelEnergyinput%04u", nCalls / gcamLabelEnergyOutputFreq);
+    snprintf(fname, STRLEN - 1, "gcamLabelEnergyinput%04u",
+             nCalls / gcamLabelEnergyOutputFreq);
     fname[STRLEN - 1] = '\0';
     WriteGCAMoneInput(gcam, fname);
   }
@@ -9005,11 +9063,14 @@ double gcamLabelEnergy(const GCA_MORPH *gcam, const MRI *mri, const double label
 
         gcamn = &gcam->nodes[x][y][z];
 
-	//if ((gcamn->invalid == GCAM_POSITION_INVALID) || ((gcamn->status & GCAM_LABEL_NODE) == 0)) {
-	// Doing it in this order makes this function about 30% faster because the status
-	// comparison is often false so it never gets to the invalid comparison
-	// In the grand scheme of things, it does not make much of a diff though
-        if (((gcamn->status & GCAM_LABEL_NODE) == 0) || (gcamn->invalid == GCAM_POSITION_INVALID)) {
+        // if ((gcamn->invalid == GCAM_POSITION_INVALID) || ((gcamn->status &
+        // GCAM_LABEL_NODE) == 0)) {
+        // Doing it in this order makes this function about 30% faster because
+        // the status comparison is often false so it never gets to the invalid
+        // comparison In the grand scheme of things, it does not make much of a
+        // diff though
+        if (((gcamn->status & GCAM_LABEL_NODE) == 0) ||
+            (gcamn->invalid == GCAM_POSITION_INVALID)) {
           continue;
         }
 
@@ -9019,7 +9080,7 @@ double gcamLabelEnergy(const GCA_MORPH *gcam, const MRI *mri, const double label
   }
 
   gcamLabelEnergy_nCalls++;
-  gcamLabelEnergy_tsec += (timer.milliseconds()/1000.0);
+  gcamLabelEnergy_tsec += (timer.milliseconds() / 1000.0);
 
   return (sse);
 }
@@ -9030,8 +9091,8 @@ double gcamLabelEnergy(const GCA_MORPH *gcam, const MRI *mri, const double label
 
 #define GCAM_REMOVE_LABEL_OUTLIERS_OUTPUT 0
 
-int remove_label_outliers(GCA_MORPH *gcam, MRI *mri_dist, const int whalf, const double thresh)
-{
+int remove_label_outliers(GCA_MORPH *gcam, MRI *mri_dist, const int whalf,
+                          const double thresh) {
   int nremoved, nremoved_total, n, i, vox_to_examine, niters;
   MRI *mri_std, *mri_ctrl, *mri_tmp, *mri_ctrl_tmp;
   VOXEL_LIST *vl;
@@ -9088,7 +9149,8 @@ int remove_label_outliers(GCA_MORPH *gcam, MRI *mri_dist, const int whalf, const
         DiagBreak();
       }
 
-      if ((gcamn->status & GCAM_LABEL_NODE) == 0 || (gcamn->status & GCAM_MANUAL_LABEL)) {
+      if ((gcamn->status & GCAM_LABEL_NODE) == 0 ||
+          (gcamn->status & GCAM_MANUAL_LABEL)) {
         continue;
       }
 
@@ -9122,7 +9184,8 @@ int remove_label_outliers(GCA_MORPH *gcam, MRI *mri_dist, const int whalf, const
         gcamn->dy = 0;
         //        gcamn->status = GCAM_USE_LIKELIHOOD ;
         gcamn_inf = &gcam->nodes[x][y + 1][z];
-        if ((gcamn_inf->status & GCAM_LABEL_NODE) && ((gcamn_inf->status & GCAM_MANUAL_LABEL) == 0)) {
+        if ((gcamn_inf->status & GCAM_LABEL_NODE) &&
+            ((gcamn_inf->status & GCAM_MANUAL_LABEL) == 0)) {
           nremoved++;
           //          gcamn_inf->status = GCAM_USE_LIKELIHOOD ;
           MRIsetVoxVal(mri_dist, x, y + 1, z, 0, 0);
@@ -9130,7 +9193,8 @@ int remove_label_outliers(GCA_MORPH *gcam, MRI *mri_dist, const int whalf, const
           gcamn_inf->dy = 0;
         }
         gcamn_sup = &gcam->nodes[x][y - 1][z];
-        if ((gcamn_sup->status & GCAM_LABEL_NODE) && ((gcamn_sup->status & GCAM_MANUAL_LABEL) == 0)) {
+        if ((gcamn_sup->status & GCAM_LABEL_NODE) &&
+            ((gcamn_sup->status & GCAM_MANUAL_LABEL) == 0)) {
           nremoved++;
           //          gcamn_sup->status = GCAM_USE_LIKELIHOOD ;
           gcamn_sup->dy = 0;
@@ -9147,12 +9211,12 @@ int remove_label_outliers(GCA_MORPH *gcam, MRI *mri_dist, const int whalf, const
     }
     nremoved_total += nremoved;
     MRIfree(&mri_std);
-    if (nremoved == 0)  // nothing happened
+    if (nremoved == 0) // nothing happened
     {
       break;
     }
 
-    VLSTfree(&vl);  // keep it for last iteration
+    VLSTfree(&vl); // keep it for last iteration
   }
 
   // now use soap bubble smoothing to estimate label offset of deleted locations
@@ -9173,7 +9237,8 @@ int remove_label_outliers(GCA_MORPH *gcam, MRI *mri_dist, const int whalf, const
           }
           gcamn = &gcam->nodes[x][y][z];
 
-          if (MRIgetVoxVal(mri_ctrl, x, y, z, 0) == CONTROL_MARKED || (gcamn->status & GCAM_LABEL_NODE) == 0) {
+          if (MRIgetVoxVal(mri_ctrl, x, y, z, 0) == CONTROL_MARKED ||
+              (gcamn->status & GCAM_LABEL_NODE) == 0) {
             continue;
           }
 
@@ -9229,7 +9294,8 @@ int remove_label_outliers(GCA_MORPH *gcam, MRI *mri_dist, const int whalf, const
 
 #if GCAM_REMOVE_LABEL_OUTLIERS_OUTPUT
   if (nremoved != 0) {
-    printf("%s: nremoved = %i on nCall %i\n", __FUNCTION__, nremoved, nCalls - 1);
+    printf("%s: nremoved = %i on nCall %i\n", __FUNCTION__, nremoved,
+           nCalls - 1);
   }
 #endif
 
@@ -9243,8 +9309,8 @@ int remove_label_outliers(GCA_MORPH *gcam, MRI *mri_dist, const int whalf, const
 
 #define GCAM_LABEL_COPYDELTAS_OUTPUT 0
 
-void gcamLabelTermCopyDeltas(GCA_MORPH *gcam, const MRI *mri_dist, const double l_label)
-{
+void gcamLabelTermCopyDeltas(GCA_MORPH *gcam, const MRI *mri_dist,
+                             const double l_label) {
   int x, y, z;
   GCA_MORPH_NODE *gcamn;
 
@@ -9274,7 +9340,8 @@ void gcamLabelTermCopyDeltas(GCA_MORPH *gcam, const MRI *mri_dist, const double 
 
         gcamn = &gcam->nodes[x][y][z];
 
-        if ((gcamn->invalid /* == GCAM_POSITION_INVALID*/) || ((gcamn->status & GCAM_LABEL_NODE) == 0)) {
+        if ((gcamn->invalid /* == GCAM_POSITION_INVALID*/) ||
+            ((gcamn->status & GCAM_LABEL_NODE) == 0)) {
           continue;
         }
 
@@ -9295,8 +9362,7 @@ void gcamLabelTermCopyDeltas(GCA_MORPH *gcam, const MRI *mri_dist, const double 
 
 #define GCAM_LABEL_POSTANTCONSIST_OUTPUT 0
 
-int gcamLabelTermPostAntConsistency(GCA_MORPH *gcam, MRI *mri_dist)
-{
+int gcamLabelTermPostAntConsistency(GCA_MORPH *gcam, MRI *mri_dist) {
   /*!
     The main loop within this routine is very nasty.
     Each voxel depends on those on either side in x,
@@ -9334,7 +9400,8 @@ int gcamLabelTermPostAntConsistency(GCA_MORPH *gcam, MRI *mri_dist)
       for (z = 0; z < gcam->depth; z++) {
         gcamn = &gcam->nodes[x][y][z];
 
-        if ((gcamn->invalid /* == GCAM_POSITION_INVALID*/) || ((gcamn->status & GCAM_LABEL_NODE) == 0) ||
+        if ((gcamn->invalid /* == GCAM_POSITION_INVALID*/) ||
+            ((gcamn->status & GCAM_LABEL_NODE) == 0) ||
             ((gcam->status & GCAM_MANUAL_LABEL))) {
           continue;
         }
@@ -9342,7 +9409,8 @@ int gcamLabelTermPostAntConsistency(GCA_MORPH *gcam, MRI *mri_dist)
         if (x == Gx && y == Gy && z == Gz) {
           DiagBreak();
         }
-        if ((fabs(gcamn->x - Gvx) <= gcam->spacing) && (fabs(gcamn->y - Gvy) <= gcam->spacing) &&
+        if ((fabs(gcamn->x - Gvx) <= gcam->spacing) &&
+            (fabs(gcamn->y - Gvy) <= gcam->spacing) &&
             (fabs(gcamn->z - Gvz) <= gcam->spacing)) {
           DiagBreak();
         }
@@ -9354,13 +9422,15 @@ int gcamLabelTermPostAntConsistency(GCA_MORPH *gcam, MRI *mri_dist)
         if ((x < gcam->width - 1) && (x > 0)) {
           gcamn_medial = &gcam->nodes[x - 1][y][z];
           gcamn_lateral = &gcam->nodes[x + 1][y][z];
-          if (((gcamn_medial->status & GCAM_LABEL_NODE) == 0) || ((gcamn_lateral->status & GCAM_LABEL_NODE) == 0))
+          if (((gcamn_medial->status & GCAM_LABEL_NODE) == 0) ||
+              ((gcamn_lateral->status & GCAM_LABEL_NODE) == 0))
           /* only if they are both label nodes */
           {
             continue;
           }
 
-          if ((gcamn_medial->dy * gcamn_lateral->dy > 0) && (gcamn_medial->dy * gcamn->dy < 0)) {
+          if ((gcamn_medial->dy * gcamn_lateral->dy > 0) &&
+              (gcamn_medial->dy * gcamn->dy < 0)) {
             gcamn->status = GCAM_USE_LIKELIHOOD;
             MRIsetVoxVal(mri_dist, x, y, z, 0, 0);
             nremoved++;
@@ -9370,13 +9440,15 @@ int gcamLabelTermPostAntConsistency(GCA_MORPH *gcam, MRI *mri_dist)
         if ((z < gcam->depth - 1) && (z > 0)) {
           gcamn_post = &gcam->nodes[x][y][z - 1];
           gcamn_ant = &gcam->nodes[x][y][z + 1];
-          if (((gcamn_ant->status & GCAM_LABEL_NODE) == 0) || ((gcamn_post->status & GCAM_LABEL_NODE) == 0))
+          if (((gcamn_ant->status & GCAM_LABEL_NODE) == 0) ||
+              ((gcamn_post->status & GCAM_LABEL_NODE) == 0))
           /* only if they are both label nodes */
           {
             continue;
           }
 
-          if ((gcamn_ant->dy * gcamn_post->dy > 0) && (gcamn_ant->dy * gcamn->dy < 0)) {
+          if ((gcamn_ant->dy * gcamn_post->dy > 0) &&
+              (gcamn_ant->dy * gcamn->dy < 0)) {
             gcamn->status = GCAM_USE_LIKELIHOOD;
             MRIsetVoxVal(mri_dist, x, y, z, 0, 0);
             nremoved++;
@@ -9394,8 +9466,8 @@ int gcamLabelTermPostAntConsistency(GCA_MORPH *gcam, MRI *mri_dist)
 
 #define GCAM_LABELFINAL_OUTPUT 0
 
-int gcamLabelTermFinalUpdate(GCA_MORPH *gcam, const MRI *mri_dist, const double l_label)
-{
+int gcamLabelTermFinalUpdate(GCA_MORPH *gcam, const MRI *mri_dist,
+                             const double l_label) {
   int num, x, y, z;
   GCA_MORPH_NODE *gcamn;
 
@@ -9423,7 +9495,8 @@ int gcamLabelTermFinalUpdate(GCA_MORPH *gcam, const MRI *mri_dist, const double 
       for (z = 0; z < gcam->depth; z++) {
         gcamn = &gcam->nodes[x][y][z];
 
-        if ((gcamn->invalid /* == GCAM_POSITION_INVALID*/) || ((gcamn->status & GCAM_LABEL_NODE) == 0)) {
+        if ((gcamn->invalid /* == GCAM_POSITION_INVALID*/) ||
+            ((gcamn->status & GCAM_LABEL_NODE) == 0)) {
           continue;
         }
 
@@ -9445,9 +9518,9 @@ int gcamLabelTermFinalUpdate(GCA_MORPH *gcam, const MRI *mri_dist, const double 
 #define GCAM_LABEL_MAINLOOP_OUTPUT 0
 
 //! Sliced out of gcamLabelTerm
-void gcamLabelTermMainLoop(
-    GCA_MORPH *gcam, const MRI *mri, MRI *mri_dist, const double l_label, const double label_dist, MRI *mri_twm)
-{
+void gcamLabelTermMainLoop(GCA_MORPH *gcam, const MRI *mri, MRI *mri_dist,
+                           const double l_label, const double label_dist,
+                           MRI *mri_twm) {
   int x, y, z;
   int xn, yn, zn, ctrl_point_found;
   int best_label, sup_wm, sup_ven, wm_label;
@@ -9483,7 +9556,8 @@ void gcamLabelTermMainLoop(
 #endif
 
   if (mri_twm != NULL) {
-    MRI *mri_morphed = GCAMmorphToAtlas(mri_twm, gcam, NULL, -1, SAMPLE_NEAREST);
+    MRI *mri_morphed =
+        GCAMmorphToAtlas(mri_twm, gcam, NULL, -1, SAMPLE_NEAREST);
     MRIwrite(mri_morphed, "twm.morphed.mgz");
     MRIfree(&mri_morphed);
   }
@@ -9515,7 +9589,8 @@ void gcamLabelTermMainLoop(
           continue;
         }
 
-        if ((fabs(gcamn->x - Gvx) <= gcam->spacing) && (fabs(gcamn->y - Gvy) <= gcam->spacing) &&
+        if ((fabs(gcamn->x - Gvx) <= gcam->spacing) &&
+            (fabs(gcamn->y - Gvy) <= gcam->spacing) &&
             (fabs(gcamn->z - Gvz) <= gcam->spacing)) {
           DiagBreak();
         }
@@ -9523,14 +9598,18 @@ void gcamLabelTermMainLoop(
         /* only process nodes which are hippocampus superior to something else,
            or white matter inferior to hippocampus
         */
-        if (y == 0 || y == gcam->height - 1 || gcamn->y == 0 || gcamn->y == mri->height - 1) continue;
+        if (y == 0 || y == gcam->height - 1 || gcamn->y == 0 ||
+            gcamn->y == mri->height - 1)
+          continue;
 
-        if (!IS_HIPPO(gcamn->label) && !IS_WM(gcamn->label)) continue;
+        if (!IS_HIPPO(gcamn->label) && !IS_WM(gcamn->label))
+          continue;
 
         if (!IS_WM(gcamn->label)) /* only do white matter for now */
           continue;
 
-        if ((x == Gx && y == Gy && z == Gz) || (x == Gx && (y - 1) == Gy && z == Gz) ||
+        if ((x == Gx && y == Gy && z == Gz) ||
+            (x == Gx && (y - 1) == Gy && z == Gz) ||
             (x == Gx && (y + 1) == Gy && z == Gz))
           DiagBreak();
         gcamn_inf = &gcam->nodes[x][y + 1][z];
@@ -9539,7 +9618,8 @@ void gcamLabelTermMainLoop(
              (IS_WM(gcamn->label) && IS_HIPPO(gcamn_sup->label))) == 0)
           continue; /* only hippo above wm, or wm below hippo */
 
-        if (nint(gcamn->x) == Gsx && nint(gcamn->z) == Gsz) DiagBreak();
+        if (nint(gcamn->x) == Gsx && nint(gcamn->z) == Gsz)
+          DiagBreak();
 
 #if 0
 	load_vals(mri, gcamn->x, gcamn->y, gcamn->z, vals, gcam->ninputs);
@@ -9557,7 +9637,8 @@ void gcamLabelTermMainLoop(
         if (IS_WM(label))  /* already has wm immediately inferior */
           continue ;
 #endif
-        if (GCApriorToNode(gcam->gca, x, y, z, &xn, &yn, &zn) != NO_ERROR) continue;
+        if (GCApriorToNode(gcam->gca, x, y, z, &xn, &yn, &zn) != NO_ERROR)
+          continue;
 
         if ((IS_HIPPO(gcamn->label) && gcamn->label == Left_Hippocampus) ||
             (IS_WM(gcamn->label) && gcamn->label == Left_Cerebral_White_Matter))
@@ -9567,13 +9648,15 @@ void gcamLabelTermMainLoop(
 
         wm_gc = GCAfindPriorGC(gcam->gca, x, y, z, wm_label);
 
-        if (wm_gc == NULL) continue;
+        if (wm_gc == NULL)
+          continue;
 
         gcan = GCAbuildRegionalGCAN(gcam->gca, xn, yn, zn, 3);
 
         // ventral DC is indistinguishible from temporal wm pretty much
         for (n = 0; n < gcan->nlabels; n++) {
-          if ((gcan->labels[n] == Left_VentralDC || gcan->labels[n] == Right_VentralDC ||
+          if ((gcan->labels[n] == Left_VentralDC ||
+               gcan->labels[n] == Right_VentralDC ||
                gcan->labels[n] == Brain_Stem) &&
               gcan->gcs[n].means[0] > 90) {
             gcan->labels[n] = wm_label;
@@ -9587,9 +9670,11 @@ void gcamLabelTermMainLoop(
 #define SAMPLE_DIST 0.1
         for (yk = -label_dist; yk <= label_dist; yk += SAMPLE_DIST) {
           yi = gcamn->y + yk; /* sample inferiorly */
-          if ((yi >= (mri->height - 1)) || (yi <= 0)) break;
+          if ((yi >= (mri->height - 1)) || (yi <= 0))
+            break;
 
-          if (mri_twm && MRIgetVoxVal(mri_twm, nint(gcamn->x), nint(yi), nint(gcamn->z), 0) > 0) {
+          if (mri_twm && MRIgetVoxVal(mri_twm, nint(gcamn->x), nint(yi),
+                                      nint(gcamn->z), 0) > 0) {
             min_dist = yk;
             ctrl_point_found = 1;
             break;
@@ -9607,12 +9692,16 @@ void gcamLabelTermMainLoop(
             // shouldn't have to go through CSF to get to wm superiorly
             min_dist = label_dist + 1;
 
-          if (best_label != gcamn->label) continue;
+          if (best_label != gcamn->label)
+            continue;
 
-          if (yk < 0 && IS_WM(best_label)) sup_wm = 1;
+          if (yk < 0 && IS_WM(best_label))
+            sup_wm = 1;
 
           if (fabs(yk) < fabs(min_dist)) {
-            if (is_temporal_wm(gcam, mri, gcan, gcamn->x, yi, gcamn->z, gcam->ninputs)) min_dist = yk;
+            if (is_temporal_wm(gcam, mri, gcan, gcamn->x, yi, gcamn->z,
+                               gcam->ninputs))
+              min_dist = yk;
           }
         }
 
@@ -9620,7 +9709,8 @@ void gcamLabelTermMainLoop(
            temporal horn) and can't find any
            wm above then it means the wm is partial-volumed
            and don't trust estimate */
-        if (sup_ven && sup_wm == 0) min_dist = label_dist + 1;
+        if (sup_ven && sup_wm == 0)
+          min_dist = label_dist + 1;
 
         if (min_dist > label_dist) /* couldn't find any labels that match */
         {
@@ -9632,17 +9722,19 @@ void gcamLabelTermMainLoop(
           max_log_p = -1e20;
           for (yk = -label_dist / 3; yk <= label_dist / 3; yk += SAMPLE_DIST) {
             yi = gcamn->y + yk;
-            if ((yi >= (mri->height - 1)) || (yi <= 0)) break;
+            if ((yi >= (mri->height - 1)) || (yi <= 0))
+              break;
 
             load_vals(mri, gcamn->x, yi, gcamn->z, vals, gcam->ninputs);
-            log_p = GCAcomputeConditionalLogDensity(wm_gc, vals, gcam->ninputs, wm_label);
+            log_p = GCAcomputeConditionalLogDensity(wm_gc, vals, gcam->ninputs,
+                                                    wm_label);
             if (log_p > max_log_p) {
               max_log_p = log_p;
               min_dist = yk;
             }
           }
-        }
-        else if (!ctrl_point_found)  // adjust estimated position to be at most likely value
+        } else if (!ctrl_point_found) // adjust estimated position to be at most
+                                      // likely value
         {
           double log_p, max_log_p;
           double ykmin, ykmax;
@@ -9658,10 +9750,12 @@ void gcamLabelTermMainLoop(
               break;
             }
             load_vals(mri, gcamn->x, yi, gcamn->z, vals, gcam->ninputs);
-            log_p = GCAcomputeConditionalLogDensity(wm_gc, vals, gcam->ninputs, wm_label);
-            if (mri_twm && MRIgetVoxVal(mri_twm, nint(gcamn->x), nint(yi), nint(gcamn->z), 0) > 0) {
+            log_p = GCAcomputeConditionalLogDensity(wm_gc, vals, gcam->ninputs,
+                                                    wm_label);
+            if (mri_twm && MRIgetVoxVal(mri_twm, nint(gcamn->x), nint(yi),
+                                        nint(gcamn->z), 0) > 0) {
               ctrl_point_found = 1;
-              log_p = 0;  // manually specified temporal lobe wm point
+              log_p = 0; // manually specified temporal lobe wm point
             }
             if (log_p > max_log_p) {
               max_log_p = log_p;
@@ -9670,13 +9764,17 @@ void gcamLabelTermMainLoop(
           }
         }
 
-        if (fabs(min_dist) > 7) DiagBreak();
+        if (fabs(min_dist) > 7)
+          DiagBreak();
 
-        if (x == Gx && y == Gy && z == Gz) DiagBreak();
+        if (x == Gx && y == Gy && z == Gz)
+          DiagBreak();
 
-        if (x == Gx && y == (Gy - 1) && z == Gz) DiagBreak();
+        if (x == Gx && y == (Gy - 1) && z == Gz)
+          DiagBreak();
 
-        if (x == Gx && y == (Gy + 1) && z == Gz) DiagBreak();
+        if (x == Gx && y == (Gy + 1) && z == Gz)
+          DiagBreak();
 
         gcamn->label_dist = MRIFvox(mri_dist, x, y, z) = min_dist;
 #if 1
@@ -9690,25 +9788,31 @@ void gcamLabelTermMainLoop(
           if (ctrl_point_found) {
             gcamn->status |= GCAM_MANUAL_LABEL;
           }
-          if (IS_WM(gcamn_inf->label) && ((gcamn_inf->status & GCAM_LABEL_NODE) == 0)) {
+          if (IS_WM(gcamn_inf->label) &&
+              ((gcamn_inf->status & GCAM_LABEL_NODE) == 0)) {
             gcamn_inf->status = (GCAM_IGNORE_LIKELIHOOD | GCAM_LABEL_NODE);
             gcamn_inf->dy += (l_label)*dy;
             if (ctrl_point_found) {
               gcamn_inf->status |= GCAM_MANUAL_LABEL;
             }
-            gcamn_inf->label_dist = MRIFvox(mri_dist, x, y + 1, z) = gcamn->label_dist;
+            gcamn_inf->label_dist = MRIFvox(mri_dist, x, y + 1, z) =
+                gcamn->label_dist;
             if (x == Gx && (y + 1) == Gy && z == Gz)
-              printf("l_label: node(%d,%d,%d): dy = %2.2f\n", x, y + 1, z, gcamn_inf->dy);
+              printf("l_label: node(%d,%d,%d): dy = %2.2f\n", x, y + 1, z,
+                     gcamn_inf->dy);
           }
-          if (IS_HIPPO(gcamn_sup->label) && ((gcamn_sup->status & GCAM_LABEL_NODE) == 0)) {
+          if (IS_HIPPO(gcamn_sup->label) &&
+              ((gcamn_sup->status & GCAM_LABEL_NODE) == 0)) {
             gcamn_sup->status = (GCAM_IGNORE_LIKELIHOOD | GCAM_LABEL_NODE);
             if (ctrl_point_found) {
               gcamn_sup->status |= GCAM_MANUAL_LABEL;
             }
             gcamn_sup->dy += (l_label)*dy;
-            gcamn_sup->label_dist = MRIFvox(mri_dist, x, y - 1, z) = gcamn->label_dist;
+            gcamn_sup->label_dist = MRIFvox(mri_dist, x, y - 1, z) =
+                gcamn->label_dist;
             if (x == Gx && (y - 1) == Gy && z == Gz) {
-              printf("l_label: node(%d,%d,%d): dy = %2.2f\n", x, y - 1, z, gcamn_sup->dy);
+              printf("l_label: node(%d,%d,%d): dy = %2.2f\n", x, y - 1, z,
+                     gcamn_sup->dy);
             }
           }
         }
@@ -9723,8 +9827,7 @@ void gcamLabelTermMainLoop(
 
 #define GCAM_LABEL_TERM_TIMERS 0
 
-void SetInconsistentLabelNodes(const int val)
-{
+void SetInconsistentLabelNodes(const int val) {
   /*!
     I'm not sure if the inconsistentLabelNodes global is ever actually used.
   */
@@ -9733,8 +9836,8 @@ void SetInconsistentLabelNodes(const int val)
 
 #define GCAM_LABEL_TERM_OUTPUT 0
 
-int gcamLabelTerm(GCA_MORPH *gcam, const MRI *mri, double l_label, double label_dist, MRI *mri_twm)
-{
+int gcamLabelTerm(GCA_MORPH *gcam, const MRI *mri, double l_label,
+                  double label_dist, MRI *mri_twm) {
   int num, nremoved;
   MRI *mri_dist;
   extern int gcamLabelTerm_nCalls;
@@ -9807,13 +9910,12 @@ int gcamLabelTerm(GCA_MORPH *gcam, const MRI *mri, double l_label, double label_
   }
 
   gcamLabelTerm_nCalls++;
-  gcamLabelTerm_tsec += (timer.milliseconds()/1000.0);
+  gcamLabelTerm_tsec += (timer.milliseconds() / 1000.0);
 
   return (NO_ERROR);
 }
 
-int gcamMapTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, double l_map)
-{
+int gcamMapTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, double l_map) {
   int x = 0, y = 0, z = 0, n = 0, i = 0;
   int xn[_MAX_FS_THREADS], yn[_MAX_FS_THREADS], zn[_MAX_FS_THREADS];
   int tid;
@@ -9846,13 +9948,14 @@ int gcamMapTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, double l_map)
 
   ROMP_PF_begin
 #ifdef HAVE_OPENMP
-  #pragma omp parallel for if_ROMP(experimental) firstprivate(tid, i, y, z, gcamn, gcap, n, norm, dx, dy, dz, gc, node_prob, prob) \
+#pragma omp parallel for if_ROMP(experimental) firstprivate(                   \
+    tid, i, y, z, gcamn, gcap, n, norm, dx, dy, dz, gc, node_prob, prob)       \
     shared(gcam, Gx, Gy, Gz, mri_smooth, l_map) schedule(static, 1)
 #endif
-  for (x = 0; x < gcam->width; x++) {
+      for (x = 0; x < gcam->width; x++) {
     ROMP_PFLB_begin
-    
-    for (y = 0; y < gcam->height; y++) {
+
+        for (y = 0; y < gcam->height; y++) {
       for (z = 0; z < gcam->depth; z++) {
         if (x == Gx && y == Gy && z == Gz) {
           DiagBreak();
@@ -9864,7 +9967,8 @@ int gcamMapTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, double l_map)
           continue;
         }
 
-        if (gcamn->status & (GCAM_IGNORE_LIKELIHOOD | GCAM_NEVER_USE_LIKELIHOOD)) {
+        if (gcamn->status &
+            (GCAM_IGNORE_LIKELIHOOD | GCAM_NEVER_USE_LIKELIHOOD)) {
           continue;
         }
         /////////////////////
@@ -9872,11 +9976,13 @@ int gcamMapTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, double l_map)
           // gcan = &gcam->gca->nodes[xn[tid]][yn[tid]][zn[tid]];
           gcap = &gcam->gca->priors[x][y][z];
           // get the values from mri
-          load_vals(mri, gcamn->x, gcamn->y, gcamn->z, vals[tid], gcam->ninputs);
+          load_vals(mri, gcamn->x, gcamn->y, gcamn->z, vals[tid],
+                    gcam->ninputs);
 
           for (n = 0; n < gcam->ninputs; n++) {
             // get dx, dy, dz
-            MRIsampleVolumeGradientFrame(mri_smooth, gcamn->x, gcamn->y, gcamn->z, &dx, &dy, &dz, n);
+            MRIsampleVolumeGradientFrame(mri_smooth, gcamn->x, gcamn->y,
+                                         gcamn->z, &dx, &dy, &dz, n);
             // magnitude
             norm = sqrt(dx * dx + dy * dy + dz * dz);
             // non-zero, then normalize
@@ -9893,12 +9999,14 @@ int gcamMapTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, double l_map)
           }
 
           if (x == Gx && y == Gy && z == Gz && (Gdiag & DIAG_SHOW)) {
-            printf("l_map: node(%d,%d,%d), delI=(%2.2f, %2.2f, %2.2f)\n", x, y, z, dx, dy, dz);
+            printf("l_map: node(%d,%d,%d), delI=(%2.2f, %2.2f, %2.2f)\n", x, y,
+                   z, dx, dy, dz);
           }
 
           dx = dy = dz = 0.0f;
           for (node_prob = 0.0, n = 0; n < gcap->nlabels; n++) {
-            gc = GCAfindGC(gcam->gca, xn[tid], yn[tid], zn[tid], gcap->labels[n]);
+            gc = GCAfindGC(gcam->gca, xn[tid], yn[tid], zn[tid],
+                           gcap->labels[n]);
             if (!gc) {
               continue;
             }
@@ -9907,7 +10015,8 @@ int gcamMapTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, double l_map)
             // inv_cov
             load_inverse_covariance_matrix(gc, m_inv_cov[tid], gcam->ninputs);
             // get prob
-            prob = GCAcomputeConditionalDensity(gc, vals[tid], gcam->ninputs, gcap->labels[n]);
+            prob = GCAcomputeConditionalDensity(gc, vals[tid], gcam->ninputs,
+                                                gcap->labels[n]);
             // v_mean = mean - vals
             for (i = 0; i < gcam->ninputs; i++) {
               VECTOR_ELT(v_means[tid], i + 1) -= vals[tid][i];
@@ -9918,16 +10027,11 @@ int gcamMapTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, double l_map)
             MatrixMultiply(m_delI[tid], v_means[tid], v_grad[tid]);
 
             if (x == Gx && y == Gy && z == Gz && (Gdiag & DIAG_SHOW))
-              printf("l_map: node(%d,%d,%d), label %s: p=%2.3f (%2.3f), D=(%2.1f,%2.1f,%2.1f)\n",
-                     x,
-                     y,
-                     z,
-                     cma_label_to_name(gcap->labels[n]),
-                     prob,
-                     gcap->priors[n],
-                     prob * V3_X(v_grad[tid]),
-                     prob * V3_Y(v_grad[tid]),
-                     prob * V3_Z(v_grad[tid]));
+              printf("l_map: node(%d,%d,%d), label %s: p=%2.3f (%2.3f), "
+                     "D=(%2.1f,%2.1f,%2.1f)\n",
+                     x, y, z, cma_label_to_name(gcap->labels[n]), prob,
+                     gcap->priors[n], prob * V3_X(v_grad[tid]),
+                     prob * V3_Y(v_grad[tid]), prob * V3_Z(v_grad[tid]));
 
             dx += prob * V3_X(v_grad[tid]);
             dy += prob * V3_Y(v_grad[tid]);
@@ -9945,27 +10049,27 @@ int gcamMapTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, double l_map)
           dz *= (1.0 / node_prob);
           if (x == Gx && y == Gy && z == Gz && (Gdiag & DIAG_SHOW))
             printf(
-                "l_map: node(%d,%d,%d), 1/p=%2.3f, grad=(%2.2f,%2.2f,%2.2f)\n", x, y, z, 1.0 / node_prob, dx, dy, dz);
+                "l_map: node(%d,%d,%d), 1/p=%2.3f, grad=(%2.2f,%2.2f,%2.2f)\n",
+                x, y, z, 1.0 / node_prob, dx, dy, dz);
 
           gcamn->dx += l_map * dx;
           gcamn->dy += l_map * dy;
           gcamn->dz += l_map * dz;
-        }  //! GCA
+        } //! GCA
       }
     }
     ROMP_PFLB_end
   }
   ROMP_PF_end
-  
-  MatrixFree(&m_delI[tid]);
+
+      MatrixFree(&m_delI[tid]);
   MatrixFree(&m_inv_cov[tid]);
   VectorFree(&v_means[tid]);
   VectorFree(&v_grad[tid]);
   return (NO_ERROR);
 }
 
-double gcamMapEnergy(GCA_MORPH *gcam, MRI *mri)
-{
+double gcamMapEnergy(GCA_MORPH *gcam, MRI *mri) {
   int x, y, z, n, xn, yn, zn;
   double sse, node_prob, prob;
   GCA_MORPH_NODE *gcamn;
@@ -9987,7 +10091,8 @@ double gcamMapEnergy(GCA_MORPH *gcam, MRI *mri)
           continue;
         }
 
-        if (gcamn->status & (GCAM_IGNORE_LIKELIHOOD | GCAM_NEVER_USE_LIKELIHOOD)) {
+        if (gcamn->status &
+            (GCAM_IGNORE_LIKELIHOOD | GCAM_NEVER_USE_LIKELIHOOD)) {
           continue;
         }
         if (!GCApriorToNode(gcam->gca, x, y, z, &xn, &yn, &zn)) {
@@ -10000,26 +10105,24 @@ double gcamMapEnergy(GCA_MORPH *gcam, MRI *mri)
               continue;
             }
 
-            prob = GCAcomputeConditionalDensity(gc, vals, gcam->ninputs, gcap->labels[n]);
+            prob = GCAcomputeConditionalDensity(gc, vals, gcam->ninputs,
+                                                gcap->labels[n]);
             if (x == Gx && y == Gy && z == Gz && (Gdiag & DIAG_SHOW))
-              printf("E_map: node(%d,%d,%d), label %s: p=%2.3f (%2.3f)\n",
-                     x,
-                     y,
-                     z,
-                     cma_label_to_name(gcap->labels[n]),
-                     prob,
+              printf("E_map: node(%d,%d,%d), label %s: p=%2.3f (%2.3f)\n", x, y,
+                     z, cma_label_to_name(gcap->labels[n]), prob,
                      gcap->priors[n]);
             node_prob += prob;
           }
 
           if (x == Gx && y == Gy && z == Gz && (Gdiag & DIAG_SHOW)) {
-            printf("E_map: node(%d,%d,%d), -log(p)=%2.3f\n", x, y, z, -log(node_prob));
+            printf("E_map: node(%d,%d,%d), -log(p)=%2.3f\n", x, y, z,
+                   -log(node_prob));
           }
           if (FZERO(node_prob)) {
             node_prob = 1e-6; /* something big?? */
           }
           sse -= log(node_prob);
-        }  // !GCA
+        } // !GCA
       }
 
   return (sse);
@@ -10036,22 +10139,23 @@ gcamMLElabelAtLocation(GCA_MORPH *gcam, int x, int y, int z, float *vals)
 }
 #endif
 
-int GCAMstoreMetricProperties(GCA_MORPH *gcam)
-{
+int GCAMstoreMetricProperties(GCA_MORPH *gcam) {
   int x, y, z;
 
   gcamComputeMetricProperties(gcam);
   for (x = 0; x < gcam->width; x++)
     for (y = 0; y < gcam->height; y++)
       for (z = 0; z < gcam->depth; z++) {
-        if (x == Gx && y == Gy && z == Gz) DiagBreak();
-        if (FZERO(gcam->det))  // only if no linear transform existed
+        if (x == Gx && y == Gy && z == Gz)
+          DiagBreak();
+        if (FZERO(gcam->det)) // only if no linear transform existed
         {
           gcam->nodes[x][y][z].orig_area = gcam->nodes[x][y][z].area;
           gcam->nodes[x][y][z].orig_area1 = gcam->nodes[x][y][z].area1;
           gcam->nodes[x][y][z].orig_area2 = gcam->nodes[x][y][z].area2;
         }
-        if ((FZERO(gcam->nodes[x][y][z].orig_area) || (gcam->nodes[x][y][z].orig_area < 0)) &&
+        if ((FZERO(gcam->nodes[x][y][z].orig_area) ||
+             (gcam->nodes[x][y][z].orig_area < 0)) &&
             (gcam->nodes[x][y][z].invalid == 0)) {
           gcam->nodes[x][y][z].invalid = GCAM_AREA_INVALID;
         }
@@ -10059,8 +10163,7 @@ int GCAMstoreMetricProperties(GCA_MORPH *gcam)
   return (NO_ERROR);
 }
 
-int GCAMcomputeOriginalProperties(GCA_MORPH *gcam)
-{
+int GCAMcomputeOriginalProperties(GCA_MORPH *gcam) {
   GCAMcopyNodePositions(gcam, CURRENT_POSITIONS, SAVED_POSITIONS);
   GCAMcopyNodePositions(gcam, ORIGINAL_POSITIONS, CURRENT_POSITIONS);
   gcamComputeMetricProperties(gcam);
@@ -10070,8 +10173,7 @@ int GCAMcomputeOriginalProperties(GCA_MORPH *gcam)
   return (NO_ERROR);
 }
 
-int GCAMcopyNodePositions(GCA_MORPH *gcam, int from, int to)
-{
+int GCAMcopyNodePositions(GCA_MORPH *gcam, int from, int to) {
   int x, y, z;
   GCA_MORPH_NODE *gcamn;
 
@@ -10084,157 +10186,174 @@ int GCAMcopyNodePositions(GCA_MORPH *gcam, int from, int to)
         gcamn = &gcam->nodes[x][y][z];
 
         switch (from) {
+        default:
+          ErrorReturn(ERROR_BADPARM,
+                      (ERROR_BADPARM,
+                       "GCAMcopyNodePositions: unsupported from %d", from));
+        case ORIGINAL_POSITIONS:
+          switch (to) {
           default:
-            ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "GCAMcopyNodePositions: unsupported from %d", from));
-          case ORIGINAL_POSITIONS:
-            switch (to) {
-              default:
-                ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "GCAMcopyNodePositions: unsupported to %d", to));
-              case SAVED_ORIGINAL_POSITIONS:
-                gcamn->saved_origx = gcamn->origx;
-                gcamn->saved_origy = gcamn->origy;
-                gcamn->saved_origz = gcamn->origz;
-                break;
-              case SAVED_POSITIONS:
-                gcamn->xs = gcamn->origx;
-                gcamn->ys = gcamn->origy;
-                gcamn->zs = gcamn->origz;
-                break;
-              case CURRENT_POSITIONS:
-                gcamn->x = gcamn->origx;
-                gcamn->y = gcamn->origy;
-                gcamn->z = gcamn->origz;
-                break;
-            }
-            break;
-
+            ErrorReturn(ERROR_BADPARM,
+                        (ERROR_BADPARM,
+                         "GCAMcopyNodePositions: unsupported to %d", to));
           case SAVED_ORIGINAL_POSITIONS:
-            switch (to) {
-              default:
-                ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "GCAMcopyNodePositions: unsupported to %d", to));
-              case SAVED_POSITIONS:
-                gcamn->xs = gcamn->saved_origx;
-                gcamn->ys = gcamn->saved_origy;
-                gcamn->zs = gcamn->saved_origz;
-                break;
-              case CURRENT_POSITIONS:
-                gcamn->x = gcamn->saved_origx;
-                gcamn->y = gcamn->saved_origy;
-                gcamn->z = gcamn->saved_origz;
-                break;
-              case ORIGINAL_POSITIONS:
-                gcamn->origx = gcamn->saved_origx;
-                gcamn->origy = gcamn->saved_origy;
-                gcamn->origz = gcamn->saved_origz;
-                break;
-            }
+            gcamn->saved_origx = gcamn->origx;
+            gcamn->saved_origy = gcamn->origy;
+            gcamn->saved_origz = gcamn->origz;
             break;
-
           case SAVED_POSITIONS:
-            switch (to) {
-              default:
-                ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "GCAMcopyNodePositions: unsupported to %d", to));
-              case ORIGINAL_POSITIONS:
-                gcamn->origx = gcamn->xs;
-                gcamn->origy = gcamn->ys;
-                gcamn->origz = gcamn->zs;
-                break;
-              case CURRENT_POSITIONS:
-                gcamn->x = gcamn->xs;
-                gcamn->y = gcamn->ys;
-                gcamn->z = gcamn->zs;
-                break;
-              case SAVED_ORIGINAL_POSITIONS:
-                gcamn->saved_origx = gcamn->xs;
-                gcamn->saved_origy = gcamn->ys;
-                gcamn->saved_origz = gcamn->zs;
-                break;
-            }
+            gcamn->xs = gcamn->origx;
+            gcamn->ys = gcamn->origy;
+            gcamn->zs = gcamn->origz;
             break;
-
-          case SAVED2_POSITIONS:
-            switch (to) {
-              default:
-                ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "GCAMcopyNodePositions: unsupported to %d", to));
-              case ORIGINAL_POSITIONS:
-                gcamn->origx = gcamn->xs2;
-                gcamn->origy = gcamn->ys2;
-                gcamn->origz = gcamn->zs2;
-                break;
-              case CURRENT_POSITIONS:
-                gcamn->x = gcamn->xs2;
-                gcamn->y = gcamn->ys2;
-                gcamn->z = gcamn->zs2;
-                break;
-              case SAVED_ORIGINAL_POSITIONS:
-                gcamn->saved_origx = gcamn->xs2;
-                gcamn->saved_origy = gcamn->ys2;
-                gcamn->saved_origz = gcamn->zs2;
-                break;
-            }
-            break;
-
           case CURRENT_POSITIONS:
-            switch (to) {
-              default:
-                ErrorReturn(ERROR_BADPARM, (ERROR_BADPARM, "GCAMcopyNodePositions: unsupported to %d", to));
-              case ORIGINAL_POSITIONS:
-                gcamn->origx = gcamn->x;
-                gcamn->origy = gcamn->y;
-                gcamn->origz = gcamn->z;
-                break;
-              case SAVED_POSITIONS:
-                gcamn->xs = gcamn->x;
-                gcamn->ys = gcamn->y;
-                gcamn->zs = gcamn->z;
-                break;
-              case SAVED2_POSITIONS:
-                gcamn->xs2 = gcamn->x;
-                gcamn->ys2 = gcamn->y;
-                gcamn->zs2 = gcamn->z;
-                break;
-              case SAVED_ORIGINAL_POSITIONS:
-                gcamn->saved_origx = gcamn->x;
-                gcamn->saved_origy = gcamn->y;
-                gcamn->saved_origz = gcamn->z;
-                break;
-            }
-
+            gcamn->x = gcamn->origx;
+            gcamn->y = gcamn->origy;
+            gcamn->z = gcamn->origz;
             break;
+          }
+          break;
+
+        case SAVED_ORIGINAL_POSITIONS:
+          switch (to) {
+          default:
+            ErrorReturn(ERROR_BADPARM,
+                        (ERROR_BADPARM,
+                         "GCAMcopyNodePositions: unsupported to %d", to));
+          case SAVED_POSITIONS:
+            gcamn->xs = gcamn->saved_origx;
+            gcamn->ys = gcamn->saved_origy;
+            gcamn->zs = gcamn->saved_origz;
+            break;
+          case CURRENT_POSITIONS:
+            gcamn->x = gcamn->saved_origx;
+            gcamn->y = gcamn->saved_origy;
+            gcamn->z = gcamn->saved_origz;
+            break;
+          case ORIGINAL_POSITIONS:
+            gcamn->origx = gcamn->saved_origx;
+            gcamn->origy = gcamn->saved_origy;
+            gcamn->origz = gcamn->saved_origz;
+            break;
+          }
+          break;
+
+        case SAVED_POSITIONS:
+          switch (to) {
+          default:
+            ErrorReturn(ERROR_BADPARM,
+                        (ERROR_BADPARM,
+                         "GCAMcopyNodePositions: unsupported to %d", to));
+          case ORIGINAL_POSITIONS:
+            gcamn->origx = gcamn->xs;
+            gcamn->origy = gcamn->ys;
+            gcamn->origz = gcamn->zs;
+            break;
+          case CURRENT_POSITIONS:
+            gcamn->x = gcamn->xs;
+            gcamn->y = gcamn->ys;
+            gcamn->z = gcamn->zs;
+            break;
+          case SAVED_ORIGINAL_POSITIONS:
+            gcamn->saved_origx = gcamn->xs;
+            gcamn->saved_origy = gcamn->ys;
+            gcamn->saved_origz = gcamn->zs;
+            break;
+          }
+          break;
+
+        case SAVED2_POSITIONS:
+          switch (to) {
+          default:
+            ErrorReturn(ERROR_BADPARM,
+                        (ERROR_BADPARM,
+                         "GCAMcopyNodePositions: unsupported to %d", to));
+          case ORIGINAL_POSITIONS:
+            gcamn->origx = gcamn->xs2;
+            gcamn->origy = gcamn->ys2;
+            gcamn->origz = gcamn->zs2;
+            break;
+          case CURRENT_POSITIONS:
+            gcamn->x = gcamn->xs2;
+            gcamn->y = gcamn->ys2;
+            gcamn->z = gcamn->zs2;
+            break;
+          case SAVED_ORIGINAL_POSITIONS:
+            gcamn->saved_origx = gcamn->xs2;
+            gcamn->saved_origy = gcamn->ys2;
+            gcamn->saved_origz = gcamn->zs2;
+            break;
+          }
+          break;
+
+        case CURRENT_POSITIONS:
+          switch (to) {
+          default:
+            ErrorReturn(ERROR_BADPARM,
+                        (ERROR_BADPARM,
+                         "GCAMcopyNodePositions: unsupported to %d", to));
+          case ORIGINAL_POSITIONS:
+            gcamn->origx = gcamn->x;
+            gcamn->origy = gcamn->y;
+            gcamn->origz = gcamn->z;
+            break;
+          case SAVED_POSITIONS:
+            gcamn->xs = gcamn->x;
+            gcamn->ys = gcamn->y;
+            gcamn->zs = gcamn->z;
+            break;
+          case SAVED2_POSITIONS:
+            gcamn->xs2 = gcamn->x;
+            gcamn->ys2 = gcamn->y;
+            gcamn->zs2 = gcamn->z;
+            break;
+          case SAVED_ORIGINAL_POSITIONS:
+            gcamn->saved_origx = gcamn->x;
+            gcamn->saved_origy = gcamn->y;
+            gcamn->saved_origz = gcamn->z;
+            break;
+          }
+
+          break;
         }
       }
 
   return (NO_ERROR);
 }
 
-int gcamRemoveCompressedNodes(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms, float compression_ratio)
-{
+int gcamRemoveCompressedNodes(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms,
+                              float compression_ratio) {
   GCA_MORPH_PARMS saved_parms = *parms;
   double min_dt, orig_dt, rms, last_rms, pct_change, max_grad, lattice_spacing;
-  int old_compressed, new_compressed, i, delta, integration_type, done, nsmall, good_step, nfixed = 0, start_neg;
+  int old_compressed, new_compressed, i, delta, integration_type, done, nsmall,
+      good_step, nfixed = 0, start_neg;
 
   new_compressed = GCAMcountCompressedNodes(gcam, compression_ratio);
   if (new_compressed <= 0) {
     return (NO_ERROR);
   }
 
-  parms->l_distance = parms->l_log_likelihood = parms->l_spring = parms->l_multiscale = parms->l_area_intensity =
-      parms->l_expansion = parms->l_area_smoothness = parms->l_binary = parms->l_area = parms->l_elastic =
-          parms->l_smoothness = parms->l_label = 0.0;
+  parms->l_distance = parms->l_log_likelihood = parms->l_spring =
+      parms->l_multiscale = parms->l_area_intensity = parms->l_expansion =
+          parms->l_area_smoothness = parms->l_binary = parms->l_area =
+              parms->l_elastic = parms->l_smoothness = parms->l_label = 0.0;
   parms->navgs = 0;
   parms->l_area = 0.0;
   parms->l_jacobian = 1;
   parms->dt = 0.1;
   parms->ratio_thresh = compression_ratio;
   parms->exp_k = 5;
-  parms->integration_type = GCAM_INTEGRATE_BOTH;  // iterate between fixed and optimal
-  integration_type = GCAM_INTEGRATE_OPTIMAL;      // start with optimal
+  parms->integration_type =
+      GCAM_INTEGRATE_BOTH; // iterate between fixed and optimal
+  integration_type = GCAM_INTEGRATE_OPTIMAL; // start with optimal
   parms->navgs = 0;
   parms->dt = orig_dt = 1e-6;
   start_neg = gcam->neg;
 
   last_rms = rms = GCAMcomputeRMS(gcam, mri, parms);
-  printf(" starting rms=%2.5f, compressed=%d, removing compressions in lattice....\n", rms, new_compressed);
+  printf(" starting rms=%2.5f, compressed=%d, removing compressions in "
+         "lattice....\n",
+         rms, new_compressed);
   if (Gdiag & DIAG_SHOW) {
     gcamShowCompressed(gcam, stdout);
   }
@@ -10243,7 +10362,8 @@ int gcamRemoveCompressedNodes(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms,
     gcamShowCompressed(gcam, parms->log_fp);
   }
   done = good_step = nsmall = i = 0;
-  lattice_spacing = MIN(gcam->atlas.xsize, MIN(gcam->atlas.ysize, gcam->atlas.zsize));
+  lattice_spacing =
+      MIN(gcam->atlas.xsize, MIN(gcam->atlas.ysize, gcam->atlas.zsize));
   do {
     old_compressed = new_compressed;
     gcamComputeGradient(gcam, mri, mri, parms);
@@ -10256,20 +10376,20 @@ int gcamRemoveCompressedNodes(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms,
       max_grad = 1;
     }
     switch (integration_type) {
-      case GCAM_INTEGRATE_OPTIMAL:
-        parms->dt = .1 * lattice_spacing;
-        parms->dt = MIN(parms->dt, 0.01 * lattice_spacing / max_grad);
-        min_dt = gcamFindOptimalTimeStep(gcam, parms, mri);
-        break;
-      default:
-      case GCAM_INTEGRATE_FIXED:
-        nfixed++;
-        min_dt = .1 * lattice_spacing / (2 * max_grad);
-        min_dt = .1 * lattice_spacing;
-        if (min_dt < orig_dt) {
-          min_dt = orig_dt;
-        }
-        break;
+    case GCAM_INTEGRATE_OPTIMAL:
+      parms->dt = .1 * lattice_spacing;
+      parms->dt = MIN(parms->dt, 0.01 * lattice_spacing / max_grad);
+      min_dt = gcamFindOptimalTimeStep(gcam, parms, mri);
+      break;
+    default:
+    case GCAM_INTEGRATE_FIXED:
+      nfixed++;
+      min_dt = .1 * lattice_spacing / (2 * max_grad);
+      min_dt = .1 * lattice_spacing;
+      if (min_dt < orig_dt) {
+        min_dt = orig_dt;
+      }
+      break;
     }
     parms->dt = min_dt;
     gcamApplyGradient(gcam, parms);
@@ -10285,13 +10405,10 @@ int gcamRemoveCompressedNodes(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms,
     pct_change = 100.0 * (last_rms - rms) / (last_rms);
     delta = old_compressed - new_compressed;
 
-    printf("  iter %d, %c dt=%2.6f: new compressed %d, old_compressed %d, delta %d, rms=%2.5f\n",
-           ++i,
-           integration_type == GCAM_INTEGRATE_OPTIMAL ? 'O' : 'F',
-           min_dt,
-           new_compressed,
-           old_compressed,
-           old_compressed - new_compressed,
+    printf("  iter %d, %c dt=%2.6f: new compressed %d, old_compressed %d, "
+           "delta %d, rms=%2.5f\n",
+           ++i, integration_type == GCAM_INTEGRATE_OPTIMAL ? 'O' : 'F', min_dt,
+           new_compressed, old_compressed, old_compressed - new_compressed,
            rms);
     if (Gdiag & DIAG_SHOW) {
       gcamShowCompressed(gcam, stdout);
@@ -10299,11 +10416,12 @@ int gcamRemoveCompressedNodes(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms,
     if (new_compressed == 0) {
       break;
     }
-    // iterate until compressed nodes don't decrease, but always for at least 3 iters
+    // iterate until compressed nodes don't decrease, but always for at least 3
+    // iters
     if (pct_change < parms->tol && delta <= 0) {
       if (integration_type == GCAM_INTEGRATE_FIXED) {
         if (nsmall++ > 1) {
-          if (good_step == 0)  // couldn't take any steps
+          if (good_step == 0) // couldn't take any steps
           {
             done = 1;
           }
@@ -10311,14 +10429,12 @@ int gcamRemoveCompressedNodes(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms,
           good_step = 0;
           printf("switching integration type to optimal\n");
         }
-      }
-      else {
+      } else {
         printf("switching integration type to fixed\n");
         nfixed = 0;
         integration_type = GCAM_INTEGRATE_FIXED;
       }
-    }
-    else {
+    } else {
       nsmall = 0;
       good_step = 1;
     }
@@ -10343,8 +10459,7 @@ int gcamRemoveCompressedNodes(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms,
 
 #define MAX_NEG_ITER 100
 
-int GCAMremoveNegativeNodes(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
-{
+int GCAMremoveNegativeNodes(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms) {
   GCA_MORPH_PARMS saved_parms = *parms;
   double min_dt, orig_dt = parms->orig_dt, rms, last_rms, pct_change;
   int old_neg, new_neg, i, run;
@@ -10362,8 +10477,9 @@ int GCAMremoveNegativeNodes(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
     return (NO_ERROR);
   }
   parms->noneg = 0;
-  parms->l_distance = parms->l_log_likelihood = parms->l_binary = parms->l_multiscale = parms->l_spring =
-      parms->l_area = parms->l_elastic = parms->l_smoothness = parms->l_label = 0.0;
+  parms->l_distance = parms->l_log_likelihood = parms->l_binary =
+      parms->l_multiscale = parms->l_spring = parms->l_area = parms->l_elastic =
+          parms->l_smoothness = parms->l_label = 0.0;
   parms->navgs = 0;
   parms->l_area = 0.0;
   parms->l_jacobian = 1;
@@ -10371,7 +10487,8 @@ int GCAMremoveNegativeNodes(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
   parms->tol = 0.01;
 
   last_rms = rms = GCAMcomputeRMS(gcam, mri, parms);
-  printf("starting rms=%2.3f, neg=%d, removing folds in lattice....\n", rms, gcam->neg);
+  printf("starting rms=%2.3f, neg=%d, removing folds in lattice....\n", rms,
+         gcam->neg);
   new_neg = gcam->neg;
   run = i = 0;
   do {
@@ -10385,14 +10502,9 @@ int GCAMremoveNegativeNodes(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
     parms->dt = orig_dt;
     new_neg = gcam->neg;
     pct_change = 100.0 * (last_rms - rms) / (last_rms);
-    printf("iter %d, dt=%2.6f: new neg %d, old_neg %d, delta %d, rms=%2.3f (%2.3f%%)\n",
-           ++i,
-           min_dt,
-           new_neg,
-           old_neg,
-           old_neg - new_neg,
-           rms,
-           pct_change);
+    printf("iter %d, dt=%2.6f: new neg %d, old_neg %d, delta %d, rms=%2.3f "
+           "(%2.3f%%)\n",
+           ++i, min_dt, new_neg, old_neg, old_neg - new_neg, rms, pct_change);
     if (new_neg == 1 && old_neg == 1)
       run++;
     else
@@ -10402,14 +10514,10 @@ int GCAMremoveNegativeNodes(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
       GCA_MORPH_NODE *gcamn;
       DiagBreak();
       gcamn = &gcam->nodes[Gxneg][Gyneg][Gzneg];
-      printf("neg @ (%d, %d, %d): invalid = %d, status = %d, orig_area = %f, area = %f\n",
-             Gxneg,
-             Gyneg,
-             Gzneg,
-             gcamn->invalid,
-             gcamn->status,
-             gcamn->orig_area,
-             gcamn->area);
+      printf("neg @ (%d, %d, %d): invalid = %d, status = %d, orig_area = %f, "
+             "area = %f\n",
+             Gxneg, Gyneg, Gzneg, gcamn->invalid, gcamn->status,
+             gcamn->orig_area, gcamn->area);
       DiagBreak();
     }
   } while ((new_neg > 0) && (pct_change > parms->tol) && (i < MAX_NEG_ITER));
@@ -10418,11 +10526,12 @@ int GCAMremoveNegativeNodes(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
   return (NO_ERROR);
 }
 
-int check_gcam(const GCAM *gcam)
-{
-  if ((abs(gcam->width) > 10000) || (abs(gcam->height) > 10000) || (abs(gcam->depth) > 10000)) {
+int check_gcam(const GCAM *gcam) {
+  if ((abs(gcam->width) > 10000) || (abs(gcam->height) > 10000) ||
+      (abs(gcam->depth) > 10000)) {
     DiagBreak();
-    printf("gcam dimensions invalid - (%d, %d, %d)\n", gcam->width, gcam->height, gcam->depth);
+    printf("gcam dimensions invalid - (%d, %d, %d)\n", gcam->width,
+           gcam->height, gcam->depth);
     return (ERROR_BADPARM);
   }
 #if 0
@@ -10456,9 +10565,8 @@ int check_gcam(const GCAM *gcam)
 
 #define MAX_TEMPORAL_WM 3
 
-int is_temporal_wm(
-    const GCA_MORPH *gcam, const MRI *mri, const GCA_NODE *gcan, float xf, float yf, float zf, int ninputs)
-{
+int is_temporal_wm(const GCA_MORPH *gcam, const MRI *mri, const GCA_NODE *gcan,
+                   float xf, float yf, float zf, int ninputs) {
   int yk, label, nwhite;
   float vals[MAX_GCA_INPUTS], yi;
 
@@ -10483,17 +10591,18 @@ int is_temporal_wm(
     label = GCAmaxLikelihoodLabel(gcan, vals, gcam->ninputs, NULL);
     if (IS_WM(label) || IS_THALAMUS(label)) {
       nwhite++;
-    }
-    else {
-      break; /* if moving inferiorly and find non-wm voxel, then stop counting - should be hippo */
+    } else {
+      break; /* if moving inferiorly and find non-wm voxel, then stop counting -
+                should be hippo */
     }
   }
 
-  return (nwhite <= MAX_TEMPORAL_WM); /* must be main body of white matter - too much of it */
+  return (
+      nwhite <=
+      MAX_TEMPORAL_WM); /* must be main body of white matter - too much of it */
 }
 
-int GCAMapplyTransform(GCA_MORPH *gcam, TRANSFORM *transform)
-{
+int GCAMapplyTransform(GCA_MORPH *gcam, TRANSFORM *transform) {
   int x, y, z;
   float xf, yf, zf;
   GCA_MORPH_NODE *gcamn;
@@ -10505,12 +10614,14 @@ int GCAMapplyTransform(GCA_MORPH *gcam, TRANSFORM *transform)
         if (x == Gx && y == Gy && z == Gz) {
           DiagBreak();
         }
-        TransformSample(transform, (float)gcamn->x, (float)gcamn->y, (float)gcamn->z, &xf, &yf, &zf);
+        TransformSample(transform, (float)gcamn->x, (float)gcamn->y,
+                        (float)gcamn->z, &xf, &yf, &zf);
         gcamn->x = xf;
         gcamn->y = yf;
         gcamn->z = zf;
 
-        TransformSample(transform, (float)gcamn->origx, (float)gcamn->origy, (float)gcamn->origz, &xf, &yf, &zf);
+        TransformSample(transform, (float)gcamn->origx, (float)gcamn->origy,
+                        (float)gcamn->origz, &xf, &yf, &zf);
         gcamn->origx = xf;
         gcamn->origy = yf;
         gcamn->origz = zf;
@@ -10525,15 +10636,15 @@ int GCAMapplyTransform(GCA_MORPH *gcam, TRANSFORM *transform)
     gcamComputeMetricProperties(gcam);
     GCAMmarkNegativeNodesInvalid(gcam);
     gcamComputeMetricProperties(gcam);
-    mri_tmp = MRIalloc(gcam->image.width, gcam->image.height, gcam->image.depth, MRI_UCHAR);
+    mri_tmp = MRIalloc(gcam->image.width, gcam->image.height, gcam->image.depth,
+                       MRI_UCHAR);
     memset(&parms, 0, sizeof(parms));
     GCAMremoveNegativeNodes(gcam, mri_tmp, &parms);
     MRIfree(&mri_tmp);
   }
   return (NO_ERROR);
 }
-int GCAMapplyInverseTransform(GCA_MORPH *gcam, const TRANSFORM *transform)
-{
+int GCAMapplyInverseTransform(GCA_MORPH *gcam, const TRANSFORM *transform) {
   int x, y, z, out_of_bounds;
   float xf, yf, zf;
   GCA_MORPH_NODE *gcamn;
@@ -10545,9 +10656,9 @@ int GCAMapplyInverseTransform(GCA_MORPH *gcam, const TRANSFORM *transform)
         if (x == Gx && y == Gy && z == Gz) {
           DiagBreak();
         }
-        out_of_bounds = TransformSampleInverseFloat(transform,
-          gcamn->x, gcamn->y, gcamn->z, &xf, &yf, &zf);
-        
+        out_of_bounds = TransformSampleInverseFloat(
+            transform, gcamn->x, gcamn->y, gcamn->z, &xf, &yf, &zf);
+
         if (out_of_bounds) {
           // Marking as invalid is insufficient, as not written to disk. Set
           // x/y/z and origx/origy/origz to zero (see GCAMread).
@@ -10570,15 +10681,15 @@ int GCAMapplyInverseTransform(GCA_MORPH *gcam, const TRANSFORM *transform)
     gcamComputeMetricProperties(gcam);
     GCAMmarkNegativeNodesInvalid(gcam);
     gcamComputeMetricProperties(gcam);
-    mri_tmp = MRIalloc(gcam->image.width, gcam->image.height, gcam->image.depth, MRI_UCHAR);
+    mri_tmp = MRIalloc(gcam->image.width, gcam->image.height, gcam->image.depth,
+                       MRI_UCHAR);
     memset(&parms, 0, sizeof(parms));
     GCAMremoveNegativeNodes(gcam, mri_tmp, &parms);
     MRIfree(&mri_tmp);
   }
   return (NO_ERROR);
 }
-int GCAMmarkNegativeNodesInvalid(GCA_MORPH *gcam)
-{
+int GCAMmarkNegativeNodesInvalid(GCA_MORPH *gcam) {
   int x, y, z;
   GCA_MORPH_NODE *gcamn;
 
@@ -10586,7 +10697,8 @@ int GCAMmarkNegativeNodesInvalid(GCA_MORPH *gcam)
     for (y = 0; y < gcam->height; y++) {
       for (x = 0; x < gcam->width; x++) {
         gcamn = &gcam->nodes[x][y][z];
-        if ((gcamn->area <= 0 || gcamn->area1 <= 0 || gcamn->area2 <= 0 || gcamn->orig_area <= 0) &&
+        if ((gcamn->area <= 0 || gcamn->area1 <= 0 || gcamn->area2 <= 0 ||
+             gcamn->orig_area <= 0) &&
             (gcamn->invalid == 0)) {
           gcamn->invalid = GCAM_AREA_INVALID;
         }
@@ -10595,19 +10707,20 @@ int GCAMmarkNegativeNodesInvalid(GCA_MORPH *gcam)
   }
   return (NO_ERROR);
 }
-int GCAMmarkNegativeBorderNodesInvalid(GCA_MORPH *gcam)
-{
+int GCAMmarkNegativeBorderNodesInvalid(GCA_MORPH *gcam) {
   int x, y, z;
   GCA_MORPH_NODE *gcamn;
 
   for (z = 0; z < gcam->depth; z++) {
     for (y = 0; y < gcam->height; y++) {
       for (x = 0; x < gcam->width; x++) {
-        if (x != 0 && y != 0 && z != 0 && x != gcam->width - 1 && y != gcam->height - 1 && z != gcam->depth - 1) {
-          continue;  // must be on at least one border plane
+        if (x != 0 && y != 0 && z != 0 && x != gcam->width - 1 &&
+            y != gcam->height - 1 && z != gcam->depth - 1) {
+          continue; // must be on at least one border plane
         }
         gcamn = &gcam->nodes[x][y][z];
-        if ((gcamn->area <= 0 || gcamn->area1 <= 0 || gcamn->area2 <= 0 || gcamn->orig_area <= 0) &&
+        if ((gcamn->area <= 0 || gcamn->area1 <= 0 || gcamn->area2 <= 0 ||
+             gcamn->orig_area <= 0) &&
             (gcamn->invalid == 0)) {
           gcamn->invalid = GCAM_AREA_INVALID;
         }
@@ -10617,8 +10730,7 @@ int GCAMmarkNegativeBorderNodesInvalid(GCA_MORPH *gcam)
   return (NO_ERROR);
 }
 
-int zero_vals(float *vals, int nvals)
-{
+int zero_vals(float *vals, int nvals) {
   int n, z;
 
   for (z = 1, n = 0; n < nvals; n++)
@@ -10630,8 +10742,7 @@ int zero_vals(float *vals, int nvals)
   return (z);
 }
 
-MRI *gcamCreateJacobianImage(GCA_MORPH *gcam)
-{
+MRI *gcamCreateJacobianImage(GCA_MORPH *gcam) {
   GCA_MORPH_NODE *gcamn;
   MRI *mri;
   int x, y, z;
@@ -10646,12 +10757,10 @@ MRI *gcamCreateJacobianImage(GCA_MORPH *gcam)
         gcamn = &gcam->nodes[x][y][z];
         if (!FZERO(gcamn->area)) {
           jacobian = gcamn->orig_area / gcamn->area;
-        }
-        else {
+        } else {
           if (FZERO(gcamn->orig_area)) {
             jacobian = 1;
-          }
-          else {
+          } else {
             jacobian = .001;
           }
         }
@@ -10667,8 +10776,8 @@ MRI *gcamCreateJacobianImage(GCA_MORPH *gcam)
   return (mri);
 }
 
-MRI *GCAMextract_density_map(MRI *mri_seg, MRI *mri_intensity, GCA_MORPH *gcam, int target_label, MRI *mri_out)
-{
+MRI *GCAMextract_density_map(MRI *mri_seg, MRI *mri_intensity, GCA_MORPH *gcam,
+                             int target_label, MRI *mri_out) {
   int whalf, x, y, z /*, xv, yv, zv*/;
   //  float  xa, ya, za ;
   MRI *mri_density;
@@ -10684,17 +10793,22 @@ MRI *GCAMextract_density_map(MRI *mri_seg, MRI *mri_intensity, GCA_MORPH *gcam, 
     MRIreInitCache(mri_out);
   }
   if (mri_out->type != MRI_FLOAT)
-    ErrorReturn(NULL,
-                (ERROR_BADPARM, "GCAMextract_density_map: output volume type must be MRI_FLOAT (%d)", mri_out->type));
+    ErrorReturn(
+        NULL,
+        (ERROR_BADPARM,
+         "GCAMextract_density_map: output volume type must be MRI_FLOAT (%d)",
+         mri_out->type));
 
   /* go through each source voxel.
      If it is the right label, partial volume correct it, then map it into the
      destination space, and trilinearly interpolate it into that volume
   */
 
-  mri_density = MRImakeDensityMap(mri_seg, mri_intensity, target_label, NULL, mri_seg->xsize);
+  mri_density = MRImakeDensityMap(mri_seg, mri_intensity, target_label, NULL,
+                                  mri_seg->xsize);
   if (Gx >= 0) {
-    printf("density at (%d, %d, %d) = %2.3f\n", Gx, Gy, Gz, MRIgetVoxVal(mri_density, Gx, Gy, Gz, 0));
+    printf("density at (%d, %d, %d) = %2.3f\n", Gx, Gy, Gz,
+           MRIgetVoxVal(mri_density, Gx, Gy, Gz, 0));
   }
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
     MRIwrite(mri_density, "density.mgz");
@@ -10750,7 +10864,8 @@ MRI *GCAMextract_density_map(MRI *mri_seg, MRI *mri_intensity, GCA_MORPH *gcam, 
         gcamn = &gcam->nodes[x][y][z];
         MRIsampleVolume(mri_density, gcamn->x, gcamn->y, gcamn->z, &volume);
         if (volume > 0) {
-          m_L = gcamComputeOptimalLinearTransformInRegion(gcam, mri_density, m_L, x, y, z, whalf);
+          m_L = gcamComputeOptimalLinearTransformInRegion(gcam, mri_density,
+                                                          m_L, x, y, z, whalf);
           det = MatrixDeterminant(m_L);
           volume *= det;
         }
@@ -10773,14 +10888,16 @@ MRI *GCAMextract_density_map(MRI *mri_seg, MRI *mri_intensity, GCA_MORPH *gcam, 
   return (mri_out);
 }
 
-int GCAMsample(GCA_MORPH *gcam, float xv, float yv, float zv, float *px, float *py, float *pz)
-{
+int GCAMsample(GCA_MORPH *gcam, float xv, float yv, float zv, float *px,
+               float *py, float *pz) {
   double xt, yt, zt;
 #if 0
   int             xi, yi, zi ;
 #endif
   if (!gcam->mri_xind)
-    ErrorReturn(ERROR_UNSUPPORTED, (ERROR_UNSUPPORTED, "TransformSample: gcam has not been inverted!"));
+    ErrorReturn(
+        ERROR_UNSUPPORTED,
+        (ERROR_UNSUPPORTED, "TransformSample: gcam has not been inverted!"));
 
   // the following should not happen /////////////////
   if (xv < 0) {
@@ -10819,8 +10936,7 @@ int GCAMsample(GCA_MORPH *gcam, float xv, float yv, float zv, float *px, float *
   *pz = zt;
   return (NO_ERROR);
 }
-int GCAMinitLabels(GCA_MORPH *gcam, MRI *mri_labeled)
-{
+int GCAMinitLabels(GCA_MORPH *gcam, MRI *mri_labeled) {
   int x, y, z;
   GCA_MORPH_NODE *gcamn;
 
@@ -10833,14 +10949,12 @@ int GCAMinitLabels(GCA_MORPH *gcam, MRI *mri_labeled)
         gcamn = &gcam->nodes[x][y][z];
         if (mri_labeled == NULL) {
           gcamn->label = gcamn->gc ? 128 : 0;
-        }
-        else {
+        } else {
           gcamn->label = MRIgetVoxVal(mri_labeled, x, y, z, 0);
         }
         if (gcamn->label > 0) {
           DiagBreak();
-        }
-        else {
+        } else {
           DiagBreak();
         }
       }
@@ -10851,9 +10965,10 @@ int GCAMinitLabels(GCA_MORPH *gcam, MRI *mri_labeled)
 #define MAX_NODES 1000
 #define AINT_NBHD_SIZE 0
 
-double gcamAreaIntensityEnergy(GCA_MORPH *gcam, MRI *mri, NODE_LOOKUP_TABLE *nlt)
-{
-  double sse, val, image_val, sum_v, sum_uv, error, c, distsq, dx, dy, dz, max_increase;
+double gcamAreaIntensityEnergy(GCA_MORPH *gcam, MRI *mri,
+                               NODE_LOOKUP_TABLE *nlt) {
+  double sse, val, image_val, sum_v, sum_uv, error, c, distsq, dx, dy, dz,
+      max_increase;
   // double  x0, y0, z0;
   int x, y, z, xn, yn, zn, i, nbrs = 0, x1, y1, z1, xk, yk, zk, xi, yi, zi;
   // int debug = 0, xmax, ymax, zmax;
@@ -10874,7 +10989,8 @@ double gcamAreaIntensityEnergy(GCA_MORPH *gcam, MRI *mri, NODE_LOOKUP_TABLE *nlt
           DiagBreak();
         }
 
-        MRIsampleVolumeFrameType(mri, gcamn->x, gcamn->y, gcamn->z, 0, SAMPLE_TRILINEAR, &image_val);
+        MRIsampleVolumeFrameType(mri, gcamn->x, gcamn->y, gcamn->z, 0,
+                                 SAMPLE_TRILINEAR, &image_val);
         xn = nint(gcamn->x);
         yn = nint(gcamn->y);
         zn = nint(gcamn->z);
@@ -10933,7 +11049,7 @@ double gcamAreaIntensityEnergy(GCA_MORPH *gcam, MRI *mri, NODE_LOOKUP_TABLE *nlt
           }
         }
 
-        if (nbrs == 0)  // out of bounds - shouldn't happen I don't think
+        if (nbrs == 0) // out of bounds - shouldn't happen I don't think
         {
           sum_v = gcamn->area;
           sum_uv = gcamn->area * gcamn->gc->means[0];
@@ -10942,21 +11058,17 @@ double gcamAreaIntensityEnergy(GCA_MORPH *gcam, MRI *mri, NODE_LOOKUP_TABLE *nlt
           DiagBreak();
           error = image_val;
           continue;
-        }
-        else {
+        } else {
           error = image_val - sum_uv / sum_v;
         }
         if (x == Gx && y == Gy && z == Gz) {
           DiagBreak();
-          printf("E_area_int: node(%d,%d,%d): image %2.1f, node=%2.3f (v=%2.4f)\n",
-                 x,
-                 y,
-                 z,
-                 image_val,
-                 gcamn->gc->means[0],
-                 gcamn->area);
           printf(
-              "            partial volume intensity = %2.1f (error = %2.1f, nbrs=%d)\n", sum_uv / sum_v, error, nbrs);
+              "E_area_int: node(%d,%d,%d): image %2.1f, node=%2.3f (v=%2.4f)\n",
+              x, y, z, image_val, gcamn->gc->means[0], gcamn->area);
+          printf("            partial volume intensity = %2.1f (error = %2.1f, "
+                 "nbrs=%d)\n",
+                 sum_uv / sum_v, error, nbrs);
         }
         if (!finitep(error)) {
           DiagBreak();
@@ -10981,8 +11093,7 @@ double gcamAreaIntensityEnergy(GCA_MORPH *gcam, MRI *mri, NODE_LOOKUP_TABLE *nlt
   return (sse);
 }
 
-double gcamBinaryEnergy(GCA_MORPH *gcam, MRI *mri)
-{
+double gcamBinaryEnergy(GCA_MORPH *gcam, MRI *mri) {
   int x, y, z;
   double sse, error;
   double val;
@@ -10997,17 +11108,16 @@ double gcamBinaryEnergy(GCA_MORPH *gcam, MRI *mri)
           DiagBreak();
         }
         gcamn = &gcam->nodes[x][y][z];
-        MRIsampleVolumeType(mri, gcamn->x, gcamn->y, gcamn->z, &val, SAMPLE_TRILINEAR);
+        MRIsampleVolumeType(mri, gcamn->x, gcamn->y, gcamn->z, &val,
+                            SAMPLE_TRILINEAR);
         if ((gcamn->label == 0) || (gcamn->status & GCAM_BINARY_ZERO)) {
           error = 0 - val;
-        }
-        else {
+        } else {
           error = 1 - val;
         }
         if ((abs(error) < .1) && gcamn->invalid == GCAM_VALID) {
           Galigned++;
-        }
-        else {
+        } else {
           DiagBreak();
           if (gcamn->label > 0) {
             DiagBreak();
@@ -11016,13 +11126,9 @@ double gcamBinaryEnergy(GCA_MORPH *gcam, MRI *mri)
 
         sse += (error * error);
         if (x == Gx && y == Gy && z == Gz)
-          printf("E_bnry: node(%d,%d,%d) binary se %2.3f (label=%d, val=%2.3f)\n",
-                 x,
-                 y,
-                 z,
-                 error * error,
-                 gcamn->label,
-                 val);
+          printf(
+              "E_bnry: node(%d,%d,%d) binary se %2.3f (label=%d, val=%2.3f)\n",
+              x, y, z, error * error, gcamn->label, val);
 
         if (error * error > gcamn->last_se) {
           DiagBreak();
@@ -11035,10 +11141,11 @@ double gcamBinaryEnergy(GCA_MORPH *gcam, MRI *mri)
 
 #define MAX_NBR_NODES 30000
 
-int gcamAreaIntensityTerm(
-    GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, double l_area_intensity, NODE_LOOKUP_TABLE *nlt, float sigma)
-{
-  double val, image_val, error, dx, dy, dz, sum_cv, Ix, Iy, Iz, c, distsq, sum_cuv, dxI, dyI, dzI, predicted_val, norm;
+int gcamAreaIntensityTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth,
+                          double l_area_intensity, NODE_LOOKUP_TABLE *nlt,
+                          float sigma) {
+  double val, image_val, error, dx, dy, dz, sum_cv, Ix, Iy, Iz, c, distsq,
+      sum_cuv, dxI, dyI, dzI, predicted_val, norm;
   int x, y, z, xn, yn, zn, i, x1, y1, z1, wsize, xi, yi, zi, xk, yk, zk, nbrs;
   GCA_MORPH_NODE *gcamn, *gcamn_nbr;
   MRI *mri_dx, *mri_dy, *mri_dz, *mri_ctrl, *mri_kernel, *mri_nbhd;
@@ -11051,7 +11158,8 @@ int gcamAreaIntensityTerm(
   mri_kernel = MRIgaussian1d(sigma, -1);
   wsize = MAX(MIN((2 * nint(4 * sigma) / 2) + 1, 7), 21);
   if ((Gdiag & DIAG_SHOW) && DIAG_VERBOSE_ON) {
-    printf("allocating %d x %d x %d nbhd (sigma=%2.1f)...\n", wsize, wsize, wsize, sigma);
+    printf("allocating %d x %d x %d nbhd (sigma=%2.1f)...\n", wsize, wsize,
+           wsize, sigma);
   }
   mri_nbhd = MRIalloc(wsize, wsize, wsize, MRI_FLOAT);
 
@@ -11072,7 +11180,8 @@ int gcamAreaIntensityTerm(
           DiagBreak();
         }
 
-        MRIsampleVolumeFrameType(mri, gcamn->x, gcamn->y, gcamn->z, 0, SAMPLE_TRILINEAR, &image_val);
+        MRIsampleVolumeFrameType(mri, gcamn->x, gcamn->y, gcamn->z, 0,
+                                 SAMPLE_TRILINEAR, &image_val);
         xn = nint(gcamn->x);
         yn = nint(gcamn->y);
         zn = nint(gcamn->z);
@@ -11121,7 +11230,8 @@ int gcamAreaIntensityTerm(
           }
         }
 
-        if (FZERO(sum_cv) || nbrs == 0)  // out of bounds - shouldn't happen I don't think
+        if (FZERO(sum_cv) ||
+            nbrs == 0) // out of bounds - shouldn't happen I don't think
         {
           sum_cv = gcamn->area;
           sum_cuv = gcamn->area * gcamn->gc->means[0];
@@ -11146,18 +11256,21 @@ int gcamAreaIntensityTerm(
           DiagBreak();
         }
 
-        MRIsampleVolumeFrameType(mri, gcamn->x, gcamn->y, gcamn->z, 0, SAMPLE_TRILINEAR, &image_val);
+        MRIsampleVolumeFrameType(mri, gcamn->x, gcamn->y, gcamn->z, 0,
+                                 SAMPLE_TRILINEAR, &image_val);
         xn = nint(gcamn->x);
         yn = nint(gcamn->y);
         zn = nint(gcamn->z);
 
         /* gradient has two compononents,
-          one that pushes the node towards the image location with the predicted intensity
-          one that squeezes or expands the node if it is brighter than the predicted val.
+          one that pushes the node towards the image location with the predicted
+          intensity one that squeezes or expands the node if it is brighter than
+          the predicted val.
         */
         error = image_val - gcamn->predicted_val;
-        gcamComputeMostLikelyDirection(
-            gcam, mri, gcamn->x, gcamn->y, gcamn->z, gcamn->predicted_val, mri_kernel, mri_nbhd, &Ix, &Iy, &Iz);
+        gcamComputeMostLikelyDirection(gcam, mri, gcamn->x, gcamn->y, gcamn->z,
+                                       gcamn->predicted_val, mri_kernel,
+                                       mri_nbhd, &Ix, &Iy, &Iz);
 
         norm = sqrt(Ix * Ix + Iy * Iy + Iz * Iz);
         if (!FZERO(norm)) /* don't worry about magnitude of gradient */
@@ -11170,17 +11283,21 @@ int gcamAreaIntensityTerm(
         dyI = fabs(error) * l_area_intensity * Iy / sqrt(gcamn->gc->covars[0]);
         dzI = fabs(error) * l_area_intensity * Iz / sqrt(gcamn->gc->covars[0]);
 
-        gcamVolumeChangeTermAtNode(gcam, mri, l_area_intensity, x, y, z, &dx, &dy, &dz);
+        gcamVolumeChangeTermAtNode(gcam, mri, l_area_intensity, x, y, z, &dx,
+                                   &dy, &dz);
 #define DISABLE_VOLUME_CHANGE_TERM 0
 #if DISABLE_VOLUME_CHANGE_TERM
         dx = dy = dz = 0;
 #endif
         if (Gx == x && y == Gy && z == Gz) {
-          printf("            volume    grad=(%2.3f, %2.3f, %2.3f)\n", dx, dy, dz);
-          printf("            intensity grad=(%2.3f, %2.3f, %2.3f)\n", dxI, dyI, dzI);
+          printf("            volume    grad=(%2.3f, %2.3f, %2.3f)\n", dx, dy,
+                 dz);
+          printf("            intensity grad=(%2.3f, %2.3f, %2.3f)\n", dxI, dyI,
+                 dzI);
         }
 
-        if (!finitep(dx) || !finitep(dy) || !finitep(dz) || !finitep(dxI) || !finitep(dyI) || !finitep(dzI)) {
+        if (!finitep(dx) || !finitep(dy) || !finitep(dz) || !finitep(dxI) ||
+            !finitep(dyI) || !finitep(dzI)) {
           DiagBreak();
         }
 #if !DISABLE_VOLUME_CHANGE_TERM
@@ -11203,20 +11320,14 @@ int gcamAreaIntensityTerm(
 
         if (Gx == x && y == Gy && z == Gz) {
           DiagBreak();
-          printf("l_area_int: node(%d,%d,%d): image %2.1f, uk=%2.1f (v=%2.4f)\n",
-                 x,
-                 y,
-                 z,
-                 image_val,
-                 gcamn->gc->means[0],
-                 gcamn->area);
-          printf("            partial volume intensity = %2.1f (error = %2.1f), gradI(%2.3f, %2.3f, %2.3f)\n",
-                 gcamn->predicted_val,
-                 error,
-                 dxI,
-                 dyI,
-                 dzI);
-          printf("            volume change gradient = (%2.3f, %2.3f, %2.3f)\n", dx, dy, dz);
+          printf(
+              "l_area_int: node(%d,%d,%d): image %2.1f, uk=%2.1f (v=%2.4f)\n",
+              x, y, z, image_val, gcamn->gc->means[0], gcamn->area);
+          printf("            partial volume intensity = %2.1f (error = "
+                 "%2.1f), gradI(%2.3f, %2.3f, %2.3f)\n",
+                 gcamn->predicted_val, error, dxI, dyI, dzI);
+          printf("            volume change gradient = (%2.3f, %2.3f, %2.3f)\n",
+                 dx, dy, dz);
         }
       }
 
@@ -11280,8 +11391,8 @@ int gcamAreaIntensityTerm(
   return (NO_ERROR);
 }
 
-int gcamBinaryTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, MRI *mri_dist, double l_binary)
-{
+int gcamBinaryTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, MRI *mri_dist,
+                   double l_binary) {
   int x, y, z;
   double sse, error, dx, dy, dz, odx, ody, odz, norm;
   double val;
@@ -11301,14 +11412,16 @@ int gcamBinaryTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, MRI *mri_dist, do
           DiagBreak();
         }
         gcamn = &gcam->nodes[x][y][z];
-        MRIsampleVolumeType(mri, gcamn->x, gcamn->y, gcamn->z, &val, SAMPLE_TRILINEAR);
+        MRIsampleVolumeType(mri, gcamn->x, gcamn->y, gcamn->z, &val,
+                            SAMPLE_TRILINEAR);
 #if 0
         MRIsampleVolumeGradientFrame(mri_smooth, gcamn->x, gcamn->y, gcamn->z, &odx, &ody, &odz, 0) ;
 #else
-        MRIsampleVolumeGradientFrame(mri_dist, gcamn->x, gcamn->y, gcamn->z, &odx, &ody, &odz, 0);
+        MRIsampleVolumeGradientFrame(mri_dist, gcamn->x, gcamn->y, gcamn->z,
+                                     &odx, &ody, &odz, 0);
         odx *= -1;
         ody *= -1;
-        odz *= -1;  // because distance map gradient is neg of what we want
+        odz *= -1; // because distance map gradient is neg of what we want
 #endif
         norm = sqrt(odx * odx + ody * ody + odz * odz);
         if (DZERO(norm)) {
@@ -11319,8 +11432,7 @@ int gcamBinaryTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, MRI *mri_dist, do
         odz /= norm;
         if ((gcamn->label == 0) || (gcamn->status & GCAM_BINARY_ZERO)) {
           error = 0 - val;
-        }
-        else {
+        } else {
           error = 1 - val;
         }
 
@@ -11339,23 +11451,11 @@ int gcamBinaryTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, MRI *mri_dist, do
         gcamn->dy += dy;
         gcamn->dz += dz;
         if (x == Gx && y == Gy && z == Gz) {
-          printf(
-              "node(%d,%d,%d) --> (%2.2f, %2.2f, %2.2f), dI=(%2.3f, %2.3f, %2.3f), label %d, binary %2.3f, "
-              "grad=(%2.4f,%2.4f,%2.4f)\n",
-              x,
-              y,
-              z,
-              gcamn->x,
-              gcamn->y,
-              gcamn->z,
-              odx,
-              ody,
-              odz,
-              gcamn->label,
-              val,
-              dx,
-              dy,
-              dz);
+          printf("node(%d,%d,%d) --> (%2.2f, %2.2f, %2.2f), dI=(%2.3f, %2.3f, "
+                 "%2.3f), label %d, binary %2.3f, "
+                 "grad=(%2.4f,%2.4f,%2.4f)\n",
+                 x, y, z, gcamn->x, gcamn->y, gcamn->z, odx, ody, odz,
+                 gcamn->label, val, dx, dy, dz);
           DiagBreak();
         }
       }
@@ -12798,8 +12898,8 @@ GCAMmorphFieldFromAtlas(GCA_MORPH *gcam, MRI *mri, int which, int save_inversion
   return(mri_morphed) ;
 }
 #else
-MRI *GCAMmorphFieldFromAtlas(GCA_MORPH *gcam, MRI *mri, int which, int save_inversions, int filter)
-{
+MRI *GCAMmorphFieldFromAtlas(GCA_MORPH *gcam, MRI *mri, int which,
+                             int save_inversions, int filter) {
   MRI *mri_morphed, *mri_atlas;
   int x, y, z, xm, ym, zm, type, frame;
   double val;
@@ -12813,32 +12913,33 @@ MRI *GCAMmorphFieldFromAtlas(GCA_MORPH *gcam, MRI *mri, int which, int save_inve
     MRIfree(&gcam->mri_zind);
   GCAMinvert(gcam, mri);
   switch (which) {
-    case GCAM_LABEL:
-      type = MRI_SHORT /*mri->type*/;
-      break;
-    case GCAM_DIAG_VOL:
-    case GCAM_NODEX:
-    case GCAM_NODEY:
-    case GCAM_NODEZ:
-    case GCAM_ORIGX:
-    case GCAM_ORIGY:
-    case GCAM_ORIGZ:
-    case GCAM_X_GRAD:
-    case GCAM_Y_GRAD:
-    case GCAM_Z_GRAD:
-    case GCAM_JACOBIAN:
-    case GCAM_AREA:
-    case GCAM_ORIG_AREA:
-      type = MRI_FLOAT;
-      break;
-    case GCAM_MEANS:
-      type = MRI_FLOAT;
-      break;
-    case GCAM_COVARS:
-      type = MRI_FLOAT;
-      break;
-    default:
-      ErrorReturn(NULL, (ERROR_UNSUPPORTED, "GCAMmorphFieldFromAtlas: unsupported field %d", which));
+  case GCAM_LABEL:
+    type = MRI_SHORT /*mri->type*/;
+    break;
+  case GCAM_DIAG_VOL:
+  case GCAM_NODEX:
+  case GCAM_NODEY:
+  case GCAM_NODEZ:
+  case GCAM_ORIGX:
+  case GCAM_ORIGY:
+  case GCAM_ORIGZ:
+  case GCAM_X_GRAD:
+  case GCAM_Y_GRAD:
+  case GCAM_Z_GRAD:
+  case GCAM_JACOBIAN:
+  case GCAM_AREA:
+  case GCAM_ORIG_AREA:
+    type = MRI_FLOAT;
+    break;
+  case GCAM_MEANS:
+    type = MRI_FLOAT;
+    break;
+  case GCAM_COVARS:
+    type = MRI_FLOAT;
+    break;
+  default:
+    ErrorReturn(NULL, (ERROR_UNSUPPORTED,
+                       "GCAMmorphFieldFromAtlas: unsupported field %d", which));
   }
 
   // allocate an initial morphed volume and see if morphed image will fit
@@ -12847,15 +12948,18 @@ MRI *GCAMmorphFieldFromAtlas(GCA_MORPH *gcam, MRI *mri, int which, int save_inve
   for (x = 0; x < mri_morphed->width; x++) {
     for (y = 0; y < mri_morphed->height; y++) {
       for (z = 0; z < mri_morphed->depth; z++) {
-        if (x == Gx && y == Gy && z == Gz) DiagBreak();
+        if (x == Gx && y == Gy && z == Gz)
+          DiagBreak();
 
         xm = nint(MRIgetVoxVal(gcam->mri_xind, x, y, z, 0));
         ym = nint(MRIgetVoxVal(gcam->mri_yind, x, y, z, 0));
         zm = nint(MRIgetVoxVal(gcam->mri_zind, x, y, z, 0));
 
-        if (xm == Gx && ym == Gy && zm == Gz) DiagBreak();
+        if (xm == Gx && ym == Gy && zm == Gz)
+          DiagBreak();
 
-        if (xm >= mri_atlas->width || ym >= mri_atlas->height || zm >= mri_atlas->depth || xm < 0 || ym < 0 || zm < 0)
+        if (xm >= mri_atlas->width || ym >= mri_atlas->height ||
+            zm >= mri_atlas->depth || xm < 0 || ym < 0 || zm < 0)
           continue;
 
         for (frame = 0; frame < mri_atlas->nframes; frame++) {
@@ -12939,7 +13043,8 @@ MRI *GCAMmorphFieldFromAtlas(GCA_MORPH *gcam, MRI *mri, int which, int save_inve
 	  break ;
 	}
 #endif
-        if (xm == Gx && ym == Gy && zm == Gz) DiagBreak();
+        if (xm == Gx && ym == Gy && zm == Gz)
+          DiagBreak();
       }
     }
   }
@@ -12947,8 +13052,7 @@ MRI *GCAMmorphFieldFromAtlas(GCA_MORPH *gcam, MRI *mri, int which, int save_inve
   return (mri_morphed);
 }
 #endif
-int GCAMexpand(GCA_MORPH *gcam, float distance)
-{
+int GCAMexpand(GCA_MORPH *gcam, float distance) {
   int i, j, k, num;
   double cx, cy, cz, dx, dy, dz, norm;
   GCA_MORPH_NODE *gcamn;
@@ -12975,7 +13079,8 @@ int GCAMexpand(GCA_MORPH *gcam, float distance)
   for (i = 0; i < gcam->width; i++) {
     for (j = 0; j < gcam->height; j++) {
       for (k = 0; k < gcam->depth; k++) {
-        if (i > 0 && j > 0 && k > 0 && i < gcam->width - 1 && j < gcam->height - 1 && k < gcam->depth - 1) {
+        if (i > 0 && j > 0 && k > 0 && i < gcam->width - 1 &&
+            j < gcam->height - 1 && k < gcam->depth - 1) {
           continue; /* not a border node */
         }
         gcamn = &gcam->nodes[i][j][k];
@@ -12999,10 +13104,10 @@ int GCAMexpand(GCA_MORPH *gcam, float distance)
   return (NO_ERROR);
 }
 
-GCA_MORPH *GCAMregrid(GCA_MORPH *gcam, MRI *mri_dst, int pad, GCA_MORPH_PARMS *parms, MRI **pmri)
-{
-  MRI *mri_tmp, *mri_labeled, *mri_means, *mri_covars, *mri_origx, *mri_origy, *mri_origz, *mri_tmp2, *mri_xn, *mri_yn,
-      *mri_zn;
+GCA_MORPH *GCAMregrid(GCA_MORPH *gcam, MRI *mri_dst, int pad,
+                      GCA_MORPH_PARMS *parms, MRI **pmri) {
+  MRI *mri_tmp, *mri_labeled, *mri_means, *mri_covars, *mri_origx, *mri_origy,
+      *mri_origz, *mri_tmp2, *mri_xn, *mri_yn, *mri_zn;
   MRI_REGION box;
   MATRIX *m_I, *m_vox2vox;
   TRANSFORM *transform;
@@ -13105,8 +13210,7 @@ GCA_MORPH *GCAMregrid(GCA_MORPH *gcam, MRI *mri_dst, int pad, GCA_MORPH_PARMS *p
     if (DIAG_VERBOSE_ON && Gdiag & DIAG_WRITE) {
       MRIwrite(mri_means, "m.mgz");
     }
-  }
-  else {
+  } else {
     mri_means = mri_covars = NULL;
   }
 
@@ -13169,9 +13273,10 @@ GCA_MORPH *GCAMregrid(GCA_MORPH *gcam, MRI *mri_dst, int pad, GCA_MORPH_PARMS *p
   spacing = gcam->spacing;
 
   GCAMfreeContents(gcam); /*MRIfree(&parms->mri_binary) ;*/
-  gcam_new = GCAMalloc(mri_labeled->width, mri_labeled->height, mri_labeled->depth);
+  gcam_new =
+      GCAMalloc(mri_labeled->width, mri_labeled->height, mri_labeled->depth);
 
-  *gcam = *gcam_new;  // copy new one into current one
+  *gcam = *gcam_new; // copy new one into current one
 
   // restore saved settings
   gcam->exp_k = exp_k;
@@ -13184,7 +13289,8 @@ GCA_MORPH *GCAMregrid(GCA_MORPH *gcam, MRI *mri_dst, int pad, GCA_MORPH_PARMS *p
 
   free(gcam_new);
 
-  if (Gx < 0 || Gy < 0 || Gz < 0 || Gx >= gcam->width || Gy >= gcam->height || Gz >= gcam->depth) {
+  if (Gx < 0 || Gy < 0 || Gz < 0 || Gx >= gcam->width || Gy >= gcam->height ||
+      Gz >= gcam->depth) {
     Gx = Gy = Gz = -1;
   }
   GCAMinit(gcam, mri_labeled, NULL, transform, 0);
@@ -13245,8 +13351,7 @@ GCA_MORPH *GCAMregrid(GCA_MORPH *gcam, MRI *mri_dst, int pad, GCA_MORPH_PARMS *p
   TransformFree(&transform);
   if (pmri) {
     *pmri = mri_labeled;
-  }
-  else {
+  } else {
     MRIfree(&mri_labeled);
   }
   if (DIAG_VERBOSE_ON) {
@@ -13297,11 +13402,9 @@ GCA_MORPH *GCAMregrid(GCA_MORPH *gcam, MRI *mri_dst, int pad, GCA_MORPH_PARMS *p
   return (gcam);
 }
 
-MRI *GCAMinitDensities(GCA_MORPH *gcam,
-                       MRI *mri_lowres_seg,
+MRI *GCAMinitDensities(GCA_MORPH *gcam, MRI *mri_lowres_seg,
                        MRI *mri_intensities,
-                       GCAM_LABEL_TRANSLATION_TABLE *gcam_ltt)
-{
+                       GCAM_LABEL_TRANSLATION_TABLE *gcam_ltt) {
   GCA_MORPH_NODE *gcamn;
   int i, in_label, out_label, bin, x, y, z, x1, y1, z1, x2, y2, z2, n;
   MATRIX *m_vox2vox;
@@ -13317,7 +13420,8 @@ MRI *GCAMinitDensities(GCA_MORPH *gcam,
   GCAMrasToVox(gcam, mri_intensities);
   m_vox2vox = MRIgetVoxelToVoxelXform(mri_lowres_seg, mri_intensities);
   mri_xformed_aseg = MRIclone(mri_intensities, NULL);
-  MRIlinearTransformInterp(mri_lowres_seg, mri_xformed_aseg, m_vox2vox, SAMPLE_NEAREST);
+  MRIlinearTransformInterp(mri_lowres_seg, mri_xformed_aseg, m_vox2vox,
+                           SAMPLE_NEAREST);
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
     MRIwrite(mri_intensities, "int.mgz");
     MRIwrite(mri_xformed_aseg, "aseg_xformed.mgz");
@@ -13390,7 +13494,8 @@ MRI *GCAMinitDensities(GCA_MORPH *gcam,
       MRI *mri_tmp, *mri_eroded;
       mri_tmp = MRIclone(mri_xformed_aseg, NULL);
       MRIcopyLabel(mri_xformed_aseg, mri_tmp, out_label);
-      mri_eroded = MRIerode6(mri_tmp, NULL);  // account for residual misregistration/distortion
+      mri_eroded = MRIerode6(
+          mri_tmp, NULL); // account for residual misregistration/distortion
       MRIfree(&mri_tmp);
       if (MRIvoxelsInLabel(mri_eroded, out_label) >= 5000) {
         mri_tmp = MRIerode6(mri_eroded, NULL);
@@ -13398,11 +13503,12 @@ MRI *GCAMinitDensities(GCA_MORPH *gcam,
         mri_eroded = mri_tmp;
       }
       if (MRIvoxelsInLabel(mri_eroded, out_label) >= 25) {
-        h = MRIhistogramLabelRegion(mri_intensities, mri_eroded, &bbox, out_label, 0);
+        h = MRIhistogramLabelRegion(mri_intensities, mri_eroded, &bbox,
+                                    out_label, 0);
         HISTOfillHoles(h);
-      }
-      else {
-        h = MRIhistogramLabelRegion(mri_intensities, mri_xformed_aseg, &bbox, out_label, 0);
+      } else {
+        h = MRIhistogramLabelRegion(mri_intensities, mri_xformed_aseg, &bbox,
+                                    out_label, 0);
       }
       MRIfree(&mri_eroded);
       HISTOclearZeroBin(h);
@@ -13411,31 +13517,30 @@ MRI *GCAMinitDensities(GCA_MORPH *gcam,
       HISTOplot(hsmooth, "hsmooth.plt");
       if (IS_LAT_VENT(out_label)) {
         bin = HISTOfindFirstPeak(hsmooth, 3, .1);
-      }
-      else {
+      } else {
         bin = HISTOfindHighestPeakInRegion(hsmooth, 0, hsmooth->nbins);
       }
       val = hsmooth->bins[bin];
       HISTOfree(&h);
       HISTOfree(&hsmooth);
-      if (out_label != in_label && FZERO(means[out_label]) && (gcam_ltt->second_labels[i] != 0))
-        printf("setting intensity of label %d (%s) to %2.1f\n", out_label, cma_label_to_name(out_label), val);
+      if (out_label != in_label && FZERO(means[out_label]) &&
+          (gcam_ltt->second_labels[i] != 0))
+        printf("setting intensity of label %d (%s) to %2.1f\n", out_label,
+               cma_label_to_name(out_label), val);
 
       means[out_label] = val;
       means[in_label] = gcam_ltt->scales[i] * val;
-    }
-    else {
+    } else {
       means[in_label] = gcam_ltt->means[i];
     }
-    if (gcam_ltt->second_labels[i] == 0)  // otherwise will reestimate later
-      printf("setting intensity of label %d (%s-->%s) to %2.1f\n",
-             in_label,
-             cma_label_to_name(in_label),
-             cma_label_to_name(out_label),
+    if (gcam_ltt->second_labels[i] == 0) // otherwise will reestimate later
+      printf("setting intensity of label %d (%s-->%s) to %2.1f\n", in_label,
+             cma_label_to_name(in_label), cma_label_to_name(out_label),
              means[in_label]);
   }
 
-  // now estimate densities for classes that are linear combinations of others (e.g. choroid)
+  // now estimate densities for classes that are linear combinations of others
+  // (e.g. choroid)
   for (i = 0; i < gcam_ltt->nlabels; i++) {
     in_label = gcam_ltt->input_labels[i];
     out_label = gcam_ltt->output_labels[i];
@@ -13445,12 +13550,11 @@ MRI *GCAMinitDensities(GCA_MORPH *gcam,
     if (gcam_ltt->second_labels[i] > 0) {
       double pct;
       pct = gcam_ltt->second_label_pct[i];
-      means[in_label] = (1 - pct) * means[in_label] + pct * means[gcam_ltt->second_labels[i]];
+      means[in_label] =
+          (1 - pct) * means[in_label] + pct * means[gcam_ltt->second_labels[i]];
       printf("setting linear combo intensity of label %d (%s-->%s) to %2.1f\n",
-             in_label,
-             cma_label_to_name(in_label),
-             cma_label_to_name(out_label),
-             means[in_label]);
+             in_label, cma_label_to_name(in_label),
+             cma_label_to_name(out_label), means[in_label]);
     }
   }
 
@@ -13489,9 +13593,10 @@ MRI *GCAMinitDensities(GCA_MORPH *gcam,
           continue;
         }
         gcamn->gc = alloc_gcs(1, GCA_NO_MRF, 1);
-        if (FZERO(means[gcamn->label]))  // hasn't been estimated yet
+        if (FZERO(means[gcamn->label])) // hasn't been estimated yet
         {
-          h = MRIhistogramLabelRegion(mri_intensities, mri_xformed_aseg, &bbox, gcamn->label, 0);
+          h = MRIhistogramLabelRegion(mri_intensities, mri_xformed_aseg, &bbox,
+                                      gcamn->label, 0);
           HISTOclearZeroBin(h);
           hsmooth = HISTOsmooth(h, NULL, 2);
           HISTOplot(h, "h.plt");
@@ -13499,10 +13604,8 @@ MRI *GCAMinitDensities(GCA_MORPH *gcam,
           bin = HISTOfindHighestPeakInRegion(hsmooth, 0, hsmooth->nbins);
           val = hsmooth->bins[bin];
           means[gcamn->label] = val;
-          printf("setting intensity of label %d (%s) to %2.1f\n",
-                 gcamn->label,
-                 cma_label_to_name(gcamn->label),
-                 means[gcamn->label]);
+          printf("setting intensity of label %d (%s) to %2.1f\n", gcamn->label,
+                 cma_label_to_name(gcamn->label), means[gcamn->label]);
         }
 
         gcamn->gc->means[0] = means[gcamn->label];
@@ -13539,8 +13642,8 @@ MRI *GCAMinitDensities(GCA_MORPH *gcam,
   }
   return (mri_xformed_aseg);
 }
-GCA_MORPH *GCAMlinearTransform(GCA_MORPH *gcam_src, MATRIX *m_vox2vox, GCA_MORPH *gcam_dst)
-{
+GCA_MORPH *GCAMlinearTransform(GCA_MORPH *gcam_src, MATRIX *m_vox2vox,
+                               GCA_MORPH *gcam_dst) {
   int x, y, z;
   VECTOR *v1, *v2;
   GCA_MORPH_NODE *gcamn_src, *gcamn_dst;
@@ -13573,8 +13676,7 @@ GCA_MORPH *GCAMlinearTransform(GCA_MORPH *gcam_src, MATRIX *m_vox2vox, GCA_MORPH
   return (gcam_dst);
 }
 
-int GCAMrasToVox(GCA_MORPH *gcam, MRI *mri)
-{
+int GCAMrasToVox(GCA_MORPH *gcam, MRI *mri) {
   MATRIX *m;
   int x, y, z;
   GCA_MORPH_NODE *gcamn;
@@ -13591,8 +13693,7 @@ int GCAMrasToVox(GCA_MORPH *gcam, MRI *mri)
     // output of GCAMrasToVox() unchanged, we swapped the following
     // function invocation:
     m = VGgetVoxelToRasXform(&gcam->image, NULL, 0);
-  }
-  else {
+  } else {
     m = MRIgetRasToVoxelXform(mri);
   }
   if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) {
@@ -13622,7 +13723,8 @@ int GCAMrasToVox(GCA_MORPH *gcam, MRI *mri)
         gcamn->x = V3_X(v2);
         gcamn->y = V3_Y(v2);
         gcamn->z = V3_Z(v2);
-        if (nint(gcamn->x) == Gx && nint(gcamn->y) == Gy && nint(gcamn->z) == Gz) {
+        if (nint(gcamn->x) == Gx && nint(gcamn->y) == Gy &&
+            nint(gcamn->z) == Gz) {
           DiagBreak();
         }
 
@@ -13640,7 +13742,8 @@ int GCAMrasToVox(GCA_MORPH *gcam, MRI *mri)
     }
   }
 
-  GCAMcomputeOriginalProperties(gcam);  // orig node positions have changed to vox coords
+  GCAMcomputeOriginalProperties(
+      gcam); // orig node positions have changed to vox coords
   gcam->type = GCAM_VOX;
   MatrixFree(&m);
   if (mri) {
@@ -13650,8 +13753,7 @@ int GCAMrasToVox(GCA_MORPH *gcam, MRI *mri)
   return (NO_ERROR);
 }
 
-int GCAMvoxToRas(GCA_MORPH *gcam)
-{
+int GCAMvoxToRas(GCA_MORPH *gcam) {
   MATRIX *m;
   int x, y, z;
   GCA_MORPH_NODE *gcamn;
@@ -13704,8 +13806,8 @@ int GCAMvoxToRas(GCA_MORPH *gcam)
   return (NO_ERROR);
 }
 
-NODE_LOOKUP_TABLE *gcamCreateNodeLookupTable(GCA_MORPH *gcam, MRI *mri, NODE_LOOKUP_TABLE *nlt)
-{
+NODE_LOOKUP_TABLE *gcamCreateNodeLookupTable(GCA_MORPH *gcam, MRI *mri,
+                                             NODE_LOOKUP_TABLE *nlt) {
   int x, y, z, xi, yi, zi, index;
   GCA_MORPH_NODE *gcamn;
   MRI *mri_tmp;
@@ -13716,26 +13818,31 @@ NODE_LOOKUP_TABLE *gcamCreateNodeLookupTable(GCA_MORPH *gcam, MRI *mri, NODE_LOO
   }
   nlt = (NODE_LOOKUP_TABLE *)calloc(1, sizeof(NODE_LOOKUP_TABLE));
   if (!nlt) {
-    ErrorExit(ERROR_NOMEMORY, "gcamCreateNodeLookupTable: could not allocate NLT");
+    ErrorExit(ERROR_NOMEMORY,
+              "gcamCreateNodeLookupTable: could not allocate NLT");
   }
   nlt->width = 2 * NLT_PAD + mri->width;
   nlt->height = 2 * NLT_PAD + mri->height;
   nlt->depth = 2 * NLT_PAD + mri->depth;
   nlt->nodes = (NODE_BUCKET ***)calloc(nlt->width, sizeof(NODE_BUCKET **));
   if (!nlt->nodes) {
-    ErrorExit(ERROR_NOMEMORY, "gcamCreateNodeLookupTable: could not allocate ***");
+    ErrorExit(ERROR_NOMEMORY,
+              "gcamCreateNodeLookupTable: could not allocate ***");
   }
 
   for (x = 0; x < nlt->width; x++) {
     nlt->nodes[x] = (NODE_BUCKET **)calloc(nlt->height, sizeof(NODE_BUCKET *));
     if (!nlt->nodes[x]) {
-      ErrorExit(ERROR_NOMEMORY, "gcamCreateNodeLookupTable: could not allocate %dth **", x);
+      ErrorExit(ERROR_NOMEMORY,
+                "gcamCreateNodeLookupTable: could not allocate %dth **", x);
     }
 
     for (y = 0; y < nlt->height; y++) {
       nlt->nodes[x][y] = (NODE_BUCKET *)calloc(nlt->depth, sizeof(NODE_BUCKET));
       if (!nlt->nodes[x][y]) {
-        ErrorExit(ERROR_NOMEMORY, "gcamCreateNodeLookupTable: could not allocate %d,%dth *", x, y);
+        ErrorExit(ERROR_NOMEMORY,
+                  "gcamCreateNodeLookupTable: could not allocate %d,%dth *", x,
+                  y);
       }
     }
   }
@@ -13778,15 +13885,13 @@ NODE_LOOKUP_TABLE *gcamCreateNodeLookupTable(GCA_MORPH *gcam, MRI *mri, NODE_LOO
           continue;
         }
         MRISvox(mri_tmp, x, y, z) = nlt->nodes[x][y][z].nnodes;
-        nlt->nodes[x][y][z].node_bins = (NODE_BIN *)calloc(nlt->nodes[x][y][z].nnodes, sizeof(NODE_BIN));
+        nlt->nodes[x][y][z].node_bins =
+            (NODE_BIN *)calloc(nlt->nodes[x][y][z].nnodes, sizeof(NODE_BIN));
         if (NULL == nlt->nodes[x][y][z].node_bins)
           ErrorExit(ERROR_NOMEMORY,
                     "gcamCreateNodeLookupTable: "
                     "could not allocate %d bins at (%d, %d, %d)",
-                    nlt->nodes[x][y][z].nnodes,
-                    x,
-                    y,
-                    z);
+                    nlt->nodes[x][y][z].nnodes, x, y, z);
         nlt->nodes[x][y][z].nnodes = 0; /* reset counts to 0 */
       }
 
@@ -13815,7 +13920,8 @@ NODE_LOOKUP_TABLE *gcamCreateNodeLookupTable(GCA_MORPH *gcam, MRI *mri, NODE_LOO
         if (index >= max) {
           DiagBreak();
         }
-        if (xi < 0 || xi >= nlt->width || yi < 0 || yi >= nlt->height || zi < 0 || zi >= nlt->depth) {
+        if (xi < 0 || xi >= nlt->width || yi < 0 || yi >= nlt->height ||
+            zi < 0 || zi >= nlt->depth) {
           DiagBreak();
         }
         nb = &nlt->nodes[xi][yi][zi];
@@ -13828,8 +13934,7 @@ NODE_LOOKUP_TABLE *gcamCreateNodeLookupTable(GCA_MORPH *gcam, MRI *mri, NODE_LOO
   return (nlt);
 }
 
-int gcamFreeNodeLookupTable(NODE_LOOKUP_TABLE **pnlt)
-{
+int gcamFreeNodeLookupTable(NODE_LOOKUP_TABLE **pnlt) {
   NODE_LOOKUP_TABLE *nlt;
   int x, y, z;
 
@@ -13855,15 +13960,13 @@ int gcamFreeNodeLookupTable(NODE_LOOKUP_TABLE **pnlt)
   free(nlt);
   return (NO_ERROR);
 }
-int GCAMresetLabelNodeStatus(GCA_MORPH *gcam)
-{
+int GCAMresetLabelNodeStatus(GCA_MORPH *gcam) {
   GCAMremoveStatus(gcam, GCAM_LABEL_NODE);
   GCAMremoveStatus(gcam, GCAM_IGNORE_LIKELIHOOD);
   return (NO_ERROR);
 }
 
-int GCAMaddStatus(GCA_MORPH *gcam, int status)
-{
+int GCAMaddStatus(GCA_MORPH *gcam, int status) {
   int x, y, z;
   GCA_MORPH_NODE *gcamn;
 
@@ -13879,8 +13982,7 @@ int GCAMaddStatus(GCA_MORPH *gcam, int status)
   return (NO_ERROR);
 }
 
-int GCAMremoveStatus(GCA_MORPH *gcam, int status)
-{
+int GCAMremoveStatus(GCA_MORPH *gcam, int status) {
   int x, y, z;
   GCA_MORPH_NODE *gcamn;
 
@@ -13953,22 +14055,20 @@ gcamSetGradientToNbrAverage(GCA_MORPH *gcam, int x, int y, int z)
   return(NO_ERROR) ;
 }
 #endif
-int GCAMremoveCompressedRegions(GCA_MORPH *gcam, float min_ratio)
-{
+int GCAMremoveCompressedRegions(GCA_MORPH *gcam, float min_ratio) {
   int ncompressed_before, ncompressed_after, niter;
   GCA_MORPH_PARMS parms;
 
-  ncompressed_before = ncompressed_after = GCAMcountCompressedNodes(gcam, min_ratio);
+  ncompressed_before = ncompressed_after =
+      GCAMcountCompressedNodes(gcam, min_ratio);
   if (ncompressed_before <= 0) {
     return (NO_ERROR);
   }
 
   if (Gdiag & DIAG_SHOW)
-    printf(
-        "%d nodes compressed more than %2.2f - "
-        "using Jacobian term to decompress\n",
-        ncompressed_before,
-        min_ratio);
+    printf("%d nodes compressed more than %2.2f - "
+           "using Jacobian term to decompress\n",
+           ncompressed_before, min_ratio);
   memset(&parms, 0, sizeof(parms));
 
   parms.l_jacobian = 1.0;
@@ -13990,7 +14090,8 @@ int GCAMremoveCompressedRegions(GCA_MORPH *gcam, float min_ratio)
     GCAMregister(gcam, NULL, &parms);
     ncompressed_after = GCAMcountCompressedNodes(gcam, min_ratio);
     if (Gdiag & DIAG_SHOW)
-      printf("after decompression - %d nodes compressed more than %2.2f\n", ncompressed_after, min_ratio);
+      printf("after decompression - %d nodes compressed more than %2.2f\n",
+             ncompressed_after, min_ratio);
     if (niter++ > 5) {
       break;
     }
@@ -13998,8 +14099,7 @@ int GCAMremoveCompressedRegions(GCA_MORPH *gcam, float min_ratio)
   return (NO_ERROR);
 }
 
-int GCAMcountCompressedNodes(GCA_MORPH *gcam, float min_ratio)
-{
+int GCAMcountCompressedNodes(GCA_MORPH *gcam, float min_ratio) {
   int i, j, k, ncompressed, compressed;
   GCA_MORPH_NODE *gcamn;
   float ratio1, ratio2;
@@ -14012,7 +14112,8 @@ int GCAMcountCompressedNodes(GCA_MORPH *gcam, float min_ratio)
         if (i == Gx && j == Gy && k == Gz) {
           DiagBreak();
         }
-        if (gcamn->invalid == GCAM_AREA_INVALID || gcamn->invalid == GCAM_POSITION_INVALID) {
+        if (gcamn->invalid == GCAM_AREA_INVALID ||
+            gcamn->invalid == GCAM_POSITION_INVALID) {
           continue;
         }
 
@@ -14038,18 +14139,10 @@ int GCAMcountCompressedNodes(GCA_MORPH *gcam, float min_ratio)
   return (ncompressed);
 }
 
-int gcamComputeMostLikelyDirection(GCA_MORPH *gcam,
-                                   MRI *mri,
-                                   double x0,
-                                   double y0,
-                                   double z0,
-                                   double target,
-                                   MRI *mri_kernel,
-                                   MRI *mri_nbhd,
-                                   double *pdx,
-                                   double *pdy,
-                                   double *pdz)
-{
+int gcamComputeMostLikelyDirection(GCA_MORPH *gcam, MRI *mri, double x0,
+                                   double y0, double z0, double target,
+                                   MRI *mri_kernel, MRI *mri_nbhd, double *pdx,
+                                   double *pdy, double *pdz) {
   int xi, yi, zi, xk, yk, zk, x, y, z, whalf, x1, y1, z1;
   double val, max_val, max_dist, dist;
   // double max_x, max_y, max_z;
@@ -14062,8 +14155,9 @@ int gcamComputeMostLikelyDirection(GCA_MORPH *gcam,
   MRIclear(mri_nbhd);
   MRIsampleVolume(mri, x0, y0, z0, &val);
   if (mri_int == NULL) {
-    mri_int = MRIextractInto(
-        mri, mri_int, x0 - whalf, y0 - whalf, z0 - whalf, mri_nbhd->width, mri_nbhd->height, mri_nbhd->depth, 0, 0, 0);
+    mri_int = MRIextractInto(mri, mri_int, x0 - whalf, y0 - whalf, z0 - whalf,
+                             mri_nbhd->width, mri_nbhd->height, mri_nbhd->depth,
+                             0, 0, 0);
     MRIcopyHeader(mri_int, mri_nbhd);
   }
   // transform origin to local coordinates
@@ -14095,14 +14189,15 @@ int gcamComputeMostLikelyDirection(GCA_MORPH *gcam,
         val = MRIgetVoxVal(mri, xi, yi, zi, 0);
         x1 = xk + whalf;
         y1 = yk + whalf;
-        z1 = zk + whalf;  // mri_nbhd voxel coords
+        z1 = zk + whalf; // mri_nbhd voxel coords
         MRIsetVoxVal(mri_int, x1, y1, z1, 0, val);
-        val = -SQR(val - target);  // sort of log(likelihood)
+        val = -SQR(val - target); // sort of log(likelihood)
         MRIsetVoxVal(mri_nbhd, x1, y1, z1, 0, val);
-        if (FEQUAL(val, max_val) || (val > max_val))  // if same likelihood, pick closer one
+        if (FEQUAL(val, max_val) ||
+            (val > max_val)) // if same likelihood, pick closer one
         {
           dist = sqrt(SQR(x1 - x0) + SQR(y1 - y0) + SQR(z1 - z0));
-          if ((val > max_val) || (dist < max_dist))  // new maximum
+          if ((val > max_val) || (dist < max_dist)) // new maximum
           {
             // max_x = (double)x1;
             // max_y = (double)y1;
@@ -14135,8 +14230,7 @@ int gcamComputeMostLikelyDirection(GCA_MORPH *gcam,
   return (NO_ERROR);
 }
 
-int GCAMaddIntensitiesFromImage(GCA_MORPH *gcam, MRI *mri_target)
-{
+int GCAMaddIntensitiesFromImage(GCA_MORPH *gcam, MRI *mri_target) {
   int x, y, z, num;
   double val, mean;
   GCA_MORPH_NODE *gcamn;
@@ -14160,7 +14254,8 @@ int GCAMaddIntensitiesFromImage(GCA_MORPH *gcam, MRI *mri_target)
         }
 #endif
         gcamn = &gcam->nodes[x][y][z];
-        if (x == 0 || x == gcam->width - 1 || y == 0 || y == gcam->height - 1 || z == 0 || z == gcam->depth - 1)
+        if (x == 0 || x == gcam->width - 1 || y == 0 || y == gcam->height - 1 ||
+            z == 0 || z == gcam->depth - 1)
           gcamn->invalid = GCAM_AREA_INVALID;
 
         gcamn->gc = alloc_gcs(1, GCA_NO_MRF, gcam->ninputs);
@@ -14168,17 +14263,16 @@ int GCAMaddIntensitiesFromImage(GCA_MORPH *gcam, MRI *mri_target)
         if (!DZERO(val)) {
           num++;
           mean += val;
-          gcamn->label = 128;  // something real here
-        }
-        else {
+          gcamn->label = 128; // something real here
+        } else {
           DiagBreak();
         }
-        gcamn->gc->covars[0] = SQR(0.05 * val);  // assume SNR=20 or so
+        gcamn->gc->covars[0] = SQR(0.05 * val); // assume SNR=20 or so
       }
     }
   }
 
-  if (num > 0)  // fill in 0 variances
+  if (num > 0) // fill in 0 variances
   {
     mean /= num;
     for (x = 0; x < gcam->width; x++) {
@@ -14217,8 +14311,8 @@ int GCAMaddIntensitiesFromImage(GCA_MORPH *gcam, MRI *mri_target)
   return (NO_ERROR);
 }
 
-GCA_MORPH *GCAMcreateFromIntensityImage(MRI *mri_source, MRI *mri_target, TRANSFORM *transform)
-{
+GCA_MORPH *GCAMcreateFromIntensityImage(MRI *mri_source, MRI *mri_target,
+                                        TRANSFORM *transform) {
   GCA_MORPH *gcam;
   int x, y, z, num;
   double val, mean;
@@ -14248,17 +14342,16 @@ GCA_MORPH *GCAMcreateFromIntensityImage(MRI *mri_source, MRI *mri_target, TRANSF
         if (!DZERO(val)) {
           num++;
           mean += val;
-          gcamn->label = 128;  // something real here
-        }
-        else {
+          gcamn->label = 128; // something real here
+        } else {
           DiagBreak();
         }
-        gcamn->gc->covars[0] = SQR(0.05 * val);  // assume SNR=20 or so
+        gcamn->gc->covars[0] = SQR(0.05 * val); // assume SNR=20 or so
       }
     }
   }
 
-  if (num > 0)  // fill in 0 variances
+  if (num > 0) // fill in 0 variances
   {
     mean /= num;
     for (x = 0; x < gcam->width; x++) {
@@ -14298,8 +14391,7 @@ GCA_MORPH *GCAMcreateFromIntensityImage(MRI *mri_source, MRI *mri_target, TRANSF
   // GCAMinitLabels(gcam, NULL) ;
   return (gcam);
 }
-int GCAMsetVariances(GCA_MORPH *gcam, float var)
-{
+int GCAMsetVariances(GCA_MORPH *gcam, float var) {
   int x, y, z, r;
   GCA_MORPH_NODE *gcamn;
 
@@ -14322,8 +14414,7 @@ int GCAMsetVariances(GCA_MORPH *gcam, float var)
   return (NO_ERROR);
 }
 
-int GCAMthresholdLikelihoodStatus(GCAM *gcam, MRI *mri, float thresh)
-{
+int GCAMthresholdLikelihoodStatus(GCAM *gcam, MRI *mri, float thresh) {
   int x, y, z;
   double val;
   GCA_MORPH_NODE *gcamn;
@@ -14338,8 +14429,7 @@ int GCAMthresholdLikelihoodStatus(GCAM *gcam, MRI *mri, float thresh)
         val = MRIgetVoxVal(mri, x, y, z, 0);
         if (val <= thresh) {
           gcamn->status |= (GCAM_IGNORE_LIKELIHOOD | GCAM_NEVER_USE_LIKELIHOOD);
-        }
-        else {
+        } else {
           DiagBreak();
         }
       }
@@ -14348,8 +14438,7 @@ int GCAMthresholdLikelihoodStatus(GCAM *gcam, MRI *mri, float thresh)
   return (NO_ERROR);
 }
 
-int gcamConstrainJacobian(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
-{
+int gcamConstrainJacobian(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms) {
   double alpha, delta, lower_alpha, upper_alpha, min_jacobian, max_jacobian;
   // double  rms, start_rms;
   int done = 0;
@@ -14366,7 +14455,8 @@ int gcamConstrainJacobian(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
   }
 
   // not currently valid, reduce total movement
-  GCAMcopyNodePositions(gcam, CURRENT_POSITIONS, SAVED_POSITIONS);  // store current
+  GCAMcopyNodePositions(gcam, CURRENT_POSITIONS,
+                        SAVED_POSITIONS); // store current
 
   upper_alpha = 1;
 
@@ -14374,7 +14464,7 @@ int gcamConstrainJacobian(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
   for (lower_alpha = upper_alpha * .75; lower_alpha > 0; lower_alpha *= .75) {
     gcamSetTotalMovement(gcam, lower_alpha);
     if (gcamCheckJacobian(gcam, min_jacobian, max_jacobian)) {
-      break;  // found a valid movement
+      break; // found a valid movement
     }
   }
   // rms =
@@ -14389,8 +14479,7 @@ int gcamConstrainJacobian(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
       lower_alpha = alpha;
       // rms =
       GCAMcomputeRMS(gcam, mri, parms);
-    }
-    else  // invalid movement - make upper alpha lower
+    } else // invalid movement - make upper alpha lower
     {
       delta = upper_alpha - alpha;
       upper_alpha = alpha;
@@ -14402,8 +14491,7 @@ int gcamConstrainJacobian(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
   return (NO_ERROR);
 }
 
-int gcamCheckJacobian(GCA_MORPH *gcam, float min_jacobian, float max_jacobian)
-{
+int gcamCheckJacobian(GCA_MORPH *gcam, float min_jacobian, float max_jacobian) {
   int i, j, k;
   GCA_MORPH_NODE *gcamn;
   float ratio;
@@ -14416,7 +14504,9 @@ int gcamCheckJacobian(GCA_MORPH *gcam, float min_jacobian, float max_jacobian)
         if (i == Gx && j == Gy && k == Gz) {
           DiagBreak();
         }
-        if (gcamn->invalid == GCAM_AREA_INVALID || gcamn->invalid == GCAM_POSITION_INVALID || DZERO(gcamn->orig_area)) {
+        if (gcamn->invalid == GCAM_AREA_INVALID ||
+            gcamn->invalid == GCAM_POSITION_INVALID ||
+            DZERO(gcamn->orig_area)) {
           continue;
         }
 
@@ -14430,8 +14520,7 @@ int gcamCheckJacobian(GCA_MORPH *gcam, float min_jacobian, float max_jacobian)
   return (1);
 }
 
-int gcamSetTotalMovement(GCA_MORPH *gcam, float alpha)
-{
+int gcamSetTotalMovement(GCA_MORPH *gcam, float alpha) {
   int i, j, k;
   double dx, dy, dz;
   GCA_MORPH_NODE *gcamn;
@@ -14454,8 +14543,8 @@ int gcamSetTotalMovement(GCA_MORPH *gcam, float alpha)
   return (NO_ERROR);
 }
 
-int GCAMreinitWithLTA(GCA_MORPH *gcam, LTA *lta, MRI *mri, GCA_MORPH_PARMS *parms)
-{
+int GCAMreinitWithLTA(GCA_MORPH *gcam, LTA *lta, MRI *mri,
+                      GCA_MORPH_PARMS *parms) {
   GCA_MORPH_NODE *gcamn;
   GCA *gca;
   int x, y, z, width, height, depth, i, level, navgs, first = 1;
@@ -14470,19 +14559,18 @@ int GCAMreinitWithLTA(GCA_MORPH *gcam, LTA *lta, MRI *mri, GCA_MORPH_PARMS *parm
     if (parms->log_fp == NULL) {
       if (parms->start_t == 0) {
         parms->log_fp = fopen(fname, "w");
-      }
-      else {
+      } else {
         parms->log_fp = fopen(fname, "a");
       }
     }
-  }
-  else {
+  } else {
     parms->log_fp = NULL;
   }
 
   *lin_parms = *parms;
-  lin_parms->l_smoothness = lin_parms->l_elastic = lin_parms->l_expansion = lin_parms->l_distance =
-      lin_parms->l_lsmoothness = lin_parms->l_spring = 0.0;
+  lin_parms->l_smoothness = lin_parms->l_elastic = lin_parms->l_expansion =
+      lin_parms->l_distance = lin_parms->l_lsmoothness = lin_parms->l_spring =
+          0.0;
   m_avg = MatrixCopy(lta->xforms[0].m_L, NULL);
   for (i = 1; i < lta->num_xforms; i++) {
     MatrixAdd(lta->xforms[i].m_L, m_avg, m_avg);
@@ -14501,16 +14589,13 @@ int GCAMreinitWithLTA(GCA_MORPH *gcam, LTA *lta, MRI *mri, GCA_MORPH_PARMS *parm
   depth = gcam->depth;
 
   // check consistency
-  GCAsetVolGeom(gca, &gcam->atlas);  // fname is still "unknown"
-  if (width != gca->prior_width || height != gca->prior_height || depth != gca->prior_depth) {
+  GCAsetVolGeom(gca, &gcam->atlas); // fname is still "unknown"
+  if (width != gca->prior_width || height != gca->prior_height ||
+      depth != gca->prior_depth) {
     fprintf(stderr,
             "GCA_MORPH (%d, %d, %d) must agree with GCA prior (%d, %d, %d)\n",
-            gcam->width,
-            gcam->height,
-            gcam->depth,
-            gca->prior_width,
-            gca->prior_height,
-            gca->prior_depth);
+            gcam->width, gcam->height, gcam->depth, gca->prior_width,
+            gca->prior_height, gca->prior_depth);
     ErrorExit(ERROR_BADPARM, "Exiting ....\n");
   }
   gcam->gca = gca;
@@ -14520,17 +14605,13 @@ int GCAMreinitWithLTA(GCA_MORPH *gcam, LTA *lta, MRI *mri, GCA_MORPH_PARMS *parm
 
   last_rms = GCAMcomputeRMS(gcam, mri, parms);
   if (parms->log_fp) {
-    fprintf(parms->log_fp,
-            "%04d: dt=%2.6f, rms=%2.3f, neg=%d, invalid=%d\n",
-            parms->start_t,
-            0.0,
-            last_rms,
-            gcam->neg,
-            Ginvalid);
+    fprintf(parms->log_fp, "%04d: dt=%2.6f, rms=%2.3f, neg=%d, invalid=%d\n",
+            parms->start_t, 0.0, last_rms, gcam->neg, Ginvalid);
     fflush(parms->log_fp);
   }
   if ((parms->write_iterations > 0) && (Gdiag & DIAG_WRITE)) {
-    write_snapshot(gcam, mri, parms, parms->start_t++);  // snap before changing initialization
+    write_snapshot(gcam, mri, parms,
+                   parms->start_t++); // snap before changing initialization
   }
 
   // compute target positions from polyaffine transform
@@ -14554,7 +14635,8 @@ int GCAMreinitWithLTA(GCA_MORPH *gcam, LTA *lta, MRI *mri, GCA_MORPH_PARMS *parm
         V3_Y(v_src) = gcamn->y;
         V3_Z(v_src) = gcamn->z;
         MatrixMultiply(m_avg, v_src, v_dst);
-        if (i < lta->num_xforms)  // measure distance between label specific xform and avg one
+        if (i < lta->num_xforms) // measure distance between label specific
+                                 // xform and avg one
         {
           MatrixMultiply(lta->xforms[i].m_L, v_src, v_dst);
           gcamn->dx = V3_X(v_dst) - gcamn->x;
@@ -14564,8 +14646,7 @@ int GCAMreinitWithLTA(GCA_MORPH *gcam, LTA *lta, MRI *mri, GCA_MORPH_PARMS *parm
           gcamn->ys = V3_Y(v_dst);
           gcamn->zs = V3_Z(v_dst);
           gcamn->status |= GCAM_TARGET_DEFINED;
-        }
-        else  // no label specific xform - don't know where it should go
+        } else // no label specific xform - don't know where it should go
         {
           gcamn->xs = gcamn->x;
           gcamn->ys = gcamn->y;
@@ -14611,35 +14692,26 @@ int GCAMreinitWithLTA(GCA_MORPH *gcam, LTA *lta, MRI *mri, GCA_MORPH_PARMS *parm
           write_snapshot(gcam, mri, parms, parms->start_t);
         }
         if (parms->log_fp) {
-          fprintf(parms->log_fp,
-                  "%04d: dt=%2.6f, rms=%2.3f (%2.3f%%), neg=%d, invalid=%d, LIN",
-                  parms->start_t,
-                  0.0,
-                  rms,
-                  pct_change,
-                  gcam->neg,
-                  Ginvalid);
+          fprintf(
+              parms->log_fp,
+              "%04d: dt=%2.6f, rms=%2.3f (%2.3f%%), neg=%d, invalid=%d, LIN",
+              parms->start_t, 0.0, rms, pct_change, gcam->neg, Ginvalid);
           if (parms->l_binary > 0)
-            fprintf(parms->log_fp,
-                    ", aligned = %d (%2.3f%%)\n",
-                    Galigned,
-                    100.0 * Galigned / ((gcam->width * gcam->height * gcam->depth) - Ginvalid));
+            fprintf(
+                parms->log_fp, ", aligned = %d (%2.3f%%)\n", Galigned,
+                100.0 * Galigned /
+                    ((gcam->width * gcam->height * gcam->depth) - Ginvalid));
           else {
             fprintf(parms->log_fp, "\n");
           }
           fflush(parms->log_fp);
         }
         printf("%04d: dt=%2.6f, rms=%2.3f (%2.3f%%), neg=%d, invalid=%d, LIN",
-               parms->start_t,
-               0.0,
-               rms,
-               pct_change,
-               gcam->neg,
-               Ginvalid);
+               parms->start_t, 0.0, rms, pct_change, gcam->neg, Ginvalid);
         if (parms->l_binary > 0)
-          printf(", aligned = %d (%2.3f%%)\n",
-                 Galigned,
-                 100.0 * Galigned / ((gcam->width * gcam->height * gcam->depth) - Ginvalid));
+          printf(", aligned = %d (%2.3f%%)\n", Galigned,
+                 100.0 * Galigned /
+                     ((gcam->width * gcam->height * gcam->depth) - Ginvalid));
         else {
           printf("\n");
         }
@@ -14694,19 +14766,14 @@ int GCAMreinitWithLTA(GCA_MORPH *gcam, LTA *lta, MRI *mri, GCA_MORPH_PARMS *parm
       last_rms = rms;
       if (parms->log_fp) {
         fprintf(parms->log_fp,
-                "%04d: dt=%2.6f, rms=%2.3f (%2.3f%%), neg=%d, invalid=%d, PA, navgs=%d",
-                parms->start_t,
-                min_dt,
-                rms,
-                pct_change,
-                gcam->neg,
-                Ginvalid,
+                "%04d: dt=%2.6f, rms=%2.3f (%2.3f%%), neg=%d, invalid=%d, PA, "
+                "navgs=%d",
+                parms->start_t, min_dt, rms, pct_change, gcam->neg, Ginvalid,
                 navgs);
         if (parms->l_binary > 0)
-          fprintf(parms->log_fp,
-                  ", aligned = %d (%2.3f%%)\n",
-                  Galigned,
-                  100.0 * Galigned / ((gcam->width * gcam->height * gcam->depth) - Ginvalid));
+          fprintf(parms->log_fp, ", aligned = %d (%2.3f%%)\n", Galigned,
+                  100.0 * Galigned /
+                      ((gcam->width * gcam->height * gcam->depth) - Ginvalid));
         else {
           fprintf(parms->log_fp, "\n");
         }
@@ -14714,18 +14781,14 @@ int GCAMreinitWithLTA(GCA_MORPH *gcam, LTA *lta, MRI *mri, GCA_MORPH_PARMS *parm
       }
 
       if (Gdiag & DIAG_SHOW) {
-        printf("%04d: dt=%2.6f, rms=%2.3f (%2.3f%%), neg=%d, invalid=%d, PA, navgs=%d",
-               parms->start_t,
-               min_dt,
-               rms,
-               pct_change,
-               gcam->neg,
-               Ginvalid,
+        printf("%04d: dt=%2.6f, rms=%2.3f (%2.3f%%), neg=%d, invalid=%d, PA, "
+               "navgs=%d",
+               parms->start_t, min_dt, rms, pct_change, gcam->neg, Ginvalid,
                navgs);
         if (parms->l_binary > 0)
-          printf(", aligned = %d (%2.3f%%)\n",
-                 Galigned,
-                 100.0 * Galigned / ((gcam->width * gcam->height * gcam->depth) - Ginvalid));
+          printf(", aligned = %d (%2.3f%%)\n", Galigned,
+                 100.0 * Galigned /
+                     ((gcam->width * gcam->height * gcam->depth) - Ginvalid));
         else {
           printf("\n");
         }
@@ -14746,8 +14809,7 @@ int GCAMreinitWithLTA(GCA_MORPH *gcam, LTA *lta, MRI *mri, GCA_MORPH_PARMS *parm
   return (NO_ERROR);
 }
 
-int gcamComputeTargetGradient(GCA_MORPH *gcam)
-{
+int gcamComputeTargetGradient(GCA_MORPH *gcam) {
   int x, y, z;
   GCA_MORPH_NODE *gcamn;
 
@@ -14755,13 +14817,13 @@ int gcamComputeTargetGradient(GCA_MORPH *gcam)
     for (y = 0; y < gcam->height; y++) {
       for (z = 0; z < gcam->depth; z++) {
         gcamn = &gcam->nodes[x][y][z];
-        if (gcamn->status & GCAM_TARGET_DEFINED)  // drive it towards the target position
+        if (gcamn->status &
+            GCAM_TARGET_DEFINED) // drive it towards the target position
         {
           gcamn->dx = gcamn->xs - gcamn->x;
           gcamn->dy = gcamn->ys - gcamn->y;
           gcamn->dz = gcamn->zs - gcamn->z;
-        }
-        else  // no label specific xform - don't know where it should go
+        } else // no label specific xform - don't know where it should go
         {
           gcamn->dx = gcamn->dy = gcamn->dz = 0;
         }
@@ -14771,8 +14833,8 @@ int gcamComputeTargetGradient(GCA_MORPH *gcam)
   return (NO_ERROR);
 }
 
-MATRIX *gcamComputeOptimalTargetLinearTransform(GCA_MORPH *gcam, MATRIX *m_L, double reg)
-{
+MATRIX *gcamComputeOptimalTargetLinearTransform(GCA_MORPH *gcam, MATRIX *m_L,
+                                                double reg) {
   int x, y, z, ncols, col;
   GCA_MORPH_NODE *gcamn;
   MATRIX *m_U, *m_V, *m_Uinv, *m_I;
@@ -14781,7 +14843,8 @@ MATRIX *gcamComputeOptimalTargetLinearTransform(GCA_MORPH *gcam, MATRIX *m_L, do
     for (y = 0; y < gcam->height; y++) {
       for (z = 0; z < gcam->depth; z++) {
         gcamn = &gcam->nodes[x][y][z];
-        if (gcamn->status & GCAM_TARGET_DEFINED)  // drive it towards the target position
+        if (gcamn->status &
+            GCAM_TARGET_DEFINED) // drive it towards the target position
         {
           ncols++;
         }
@@ -14795,7 +14858,8 @@ MATRIX *gcamComputeOptimalTargetLinearTransform(GCA_MORPH *gcam, MATRIX *m_L, do
     for (y = 0; y < gcam->height; y++) {
       for (z = 0; z < gcam->depth; z++) {
         gcamn = &gcam->nodes[x][y][z];
-        if (gcamn->status & GCAM_TARGET_DEFINED)  // drive it towards the target position
+        if (gcamn->status &
+            GCAM_TARGET_DEFINED) // drive it towards the target position
         {
           col++;
           *MATRIX_RELT(m_U, 1, col) = gcamn->x;
@@ -14884,8 +14948,7 @@ MATRIX *gcamComputeOptimalTargetLinearTransform(GCA_MORPH *gcam, MATRIX *m_L, do
   return (m_L);
 }
 
-int gcamApplyLinearTransform(GCA_MORPH *gcam, MATRIX *m_L)
-{
+int gcamApplyLinearTransform(GCA_MORPH *gcam, MATRIX *m_L) {
   VECTOR *v_src, *v_dst;
   int x, y, z;
   GCA_MORPH_NODE *gcamn;
@@ -14914,19 +14977,19 @@ int gcamApplyLinearTransform(GCA_MORPH *gcam, MATRIX *m_L)
   return (NO_ERROR);
 }
 
-int gcamShowCompressed(GCA_MORPH *gcam, FILE *fp)
-{
+int gcamShowCompressed(GCA_MORPH *gcam, FILE *fp) {
   int n1, n2, n3, n4;
   n1 = GCAMcountCompressedNodes(gcam, 0.5);
   n2 = GCAMcountCompressedNodes(gcam, 0.25);
   n3 = GCAMcountCompressedNodes(gcam, 0.1);
   n4 = GCAMcountCompressedNodes(gcam, 0.025);
-  if (n1 || n2 || n3 || n4) fprintf(fp, "%d nodes compressed > 0.5, %d > 0.25, %d > .1, %d > 0.025\n", n1, n2, n3, n4);
+  if (n1 || n2 || n3 || n4)
+    fprintf(fp, "%d nodes compressed > 0.5, %d > 0.25, %d > .1, %d > 0.025\n",
+            n1, n2, n3, n4);
   return (n1 + n2 + n3 + n4);
 }
 
-int gcamSuppressNegativeGradients(GCA_MORPH *gcam, float scale)
-{
+int gcamSuppressNegativeGradients(GCA_MORPH *gcam, float scale) {
   int i, j, k /*, in, jn, kn, i1, j1, k1 */;
   GCA_MORPH_NODE *gcamn;
 
@@ -14987,8 +15050,7 @@ int gcamSuppressNegativeGradients(GCA_MORPH *gcam, float scale)
   return (NO_ERROR);
 }
 
-int gcamWriteDiagnostics(GCA_MORPH *gcam)
-{
+int gcamWriteDiagnostics(GCA_MORPH *gcam) {
   FILE *fp;
   static int dbg = 0;
   static int callno = 0;
@@ -15021,8 +15083,7 @@ int gcamWriteDiagnostics(GCA_MORPH *gcam)
   return (NO_ERROR);
 }
 
-int gcamCheck(GCA_MORPH *gcam, MRI *mri)
-{
+int gcamCheck(GCA_MORPH *gcam, MRI *mri) {
   GCA_MORPH_NODE *gcamn;
   int x, y, z, first = 1, num;
   float orig_area, dif1, dif2;
@@ -15038,10 +15099,12 @@ int gcamCheck(GCA_MORPH *gcam, MRI *mri)
     for (y = 0; y < gcam->height; y++)
       for (z = 0; z < gcam->depth; z++) {
         gcamn = &gcam->nodes[x][y][z];
-        if (fabs(gcamn->x - 120) < 1 && fabs(gcamn->y - 125) < 1 && fabs(gcamn->z - 123) < 1) {
+        if (fabs(gcamn->x - 120) < 1 && fabs(gcamn->y - 125) < 1 &&
+            fabs(gcamn->z - 123) < 1) {
           DiagBreak();
         }
-        if (gcamn->label == 0 || gcamn->status & GCAM_BINARY_ZERO || gcamn->invalid == GCAM_AREA_INVALID) {
+        if (gcamn->label == 0 || gcamn->status & GCAM_BINARY_ZERO ||
+            gcamn->invalid == GCAM_AREA_INVALID) {
           continue;
         }
         num += 2;
@@ -15062,16 +15125,10 @@ int gcamCheck(GCA_MORPH *gcam, MRI *mri)
         dif2 = fabs(gcamn->orig_area2 - orig_area);
         if ((dif1 > (0.01 * orig_area)) || (dif2 > (0.01 * orig_area))) {
           if (first) {
-            printf(
-                "node(%d, %d, %d): "
-                "orig areas (%2.3f, %2.3f, %2.3f), should be %2.3f\n",
-                x,
-                y,
-                z,
-                gcamn->orig_area1,
-                gcamn->orig_area2,
-                gcamn->orig_area,
-                orig_area);
+            printf("node(%d, %d, %d): "
+                   "orig areas (%2.3f, %2.3f, %2.3f), should be %2.3f\n",
+                   x, y, z, gcamn->orig_area1, gcamn->orig_area2,
+                   gcamn->orig_area, orig_area);
             first = 0;
           }
           DiagBreak();
@@ -15080,8 +15137,7 @@ int gcamCheck(GCA_MORPH *gcam, MRI *mri)
   return (NO_ERROR);
 }
 
-GCA_MORPH *GCAMupsample2(GCA_MORPH *gcam)
-{
+GCA_MORPH *GCAMupsample2(GCA_MORPH *gcam) {
   int xn, yn, zn, xo, yo, zo;
   GCA_MORPH *gcam_new;
   GCA_MORPH_NODE *gcamn_old, *gcamn_new;
@@ -15114,17 +15170,23 @@ GCA_MORPH *GCAMupsample2(GCA_MORPH *gcam)
               gcamn_new = &gcam_new->nodes[xn][yn][zn];
 
               // get morphed coords interpolated
-              MRIsampleVolume(mri_x, (float)xn / 2.0, (float)yn / 2.0, (float)zn / 2.0, &xd);
-              MRIsampleVolume(mri_y, (float)xn / 2.0, (float)yn / 2.0, (float)zn / 2.0, &yd);
-              MRIsampleVolume(mri_z, (float)xn / 2.0, (float)yn / 2.0, (float)zn / 2.0, &zd);
+              MRIsampleVolume(mri_x, (float)xn / 2.0, (float)yn / 2.0,
+                              (float)zn / 2.0, &xd);
+              MRIsampleVolume(mri_y, (float)xn / 2.0, (float)yn / 2.0,
+                              (float)zn / 2.0, &yd);
+              MRIsampleVolume(mri_z, (float)xn / 2.0, (float)yn / 2.0,
+                              (float)zn / 2.0, &zd);
               gcamn_new->x = xd;
               gcamn_new->y = yd;
               gcamn_new->z = zd;
 
               // get orig coords interpolated
-              MRIsampleVolume(mri_origx, (float)xn / 2.0, (float)yn / 2.0, (float)zn / 2.0, &xd);
-              MRIsampleVolume(mri_origy, (float)xn / 2.0, (float)yn / 2.0, (float)zn / 2.0, &yd);
-              MRIsampleVolume(mri_origz, (float)xn / 2.0, (float)yn / 2.0, (float)zn / 2.0, &zd);
+              MRIsampleVolume(mri_origx, (float)xn / 2.0, (float)yn / 2.0,
+                              (float)zn / 2.0, &xd);
+              MRIsampleVolume(mri_origy, (float)xn / 2.0, (float)yn / 2.0,
+                              (float)zn / 2.0, &yd);
+              MRIsampleVolume(mri_origz, (float)xn / 2.0, (float)yn / 2.0,
+                              (float)zn / 2.0, &zd);
               gcamn_new->origx = xd;
               gcamn_new->origy = yd;
               gcamn_new->origz = zd;
@@ -15167,8 +15229,7 @@ GCA_MORPH *GCAMupsample2(GCA_MORPH *gcam)
   return (NO_ERROR);
 }
 
-int GCAMignoreZero(GCA_MORPH *gcam, MRI *mri_target)
-{
+int GCAMignoreZero(GCA_MORPH *gcam, MRI *mri_target) {
   int x, y, z;
   double val;
   GCA_MORPH_NODE *gcamn;
@@ -15194,8 +15255,7 @@ int GCAMignoreZero(GCA_MORPH *gcam, MRI *mri_target)
   return (NO_ERROR);
 }
 
-int GCAMremoveIgnoreZero(GCA_MORPH *gcam, MRI *mri_target)
-{
+int GCAMremoveIgnoreZero(GCA_MORPH *gcam, MRI *mri_target) {
   int x, y, z;
   double val;
   GCA_MORPH_NODE *gcamn;
@@ -15203,7 +15263,8 @@ int GCAMremoveIgnoreZero(GCA_MORPH *gcam, MRI *mri_target)
   for (x = 0; x < gcam->width; x++) {
     for (y = 0; y < gcam->height; y++) {
       for (z = 0; z < gcam->depth; z++) {
-        if (x == Gx && y == Gy && z == Gz) DiagBreak();
+        if (x == Gx && y == Gy && z == Gz)
+          DiagBreak();
 
         gcamn = &gcam->nodes[x][y][z];
         MRIsampleVolume(mri_target, gcamn->x, gcamn->y, gcamn->z, &val);
@@ -15219,15 +15280,16 @@ int GCAMremoveIgnoreZero(GCA_MORPH *gcam, MRI *mri_target)
   return (NO_ERROR);
 }
 
-MATRIX *gcamComputeOptimalLinearTransformInRegion(
-    GCA_MORPH *gcam, MRI *mri_mask, MATRIX *m_L, int x0, int y0, int z0, int whalf)
-{
+MATRIX *gcamComputeOptimalLinearTransformInRegion(GCA_MORPH *gcam,
+                                                  MRI *mri_mask, MATRIX *m_L,
+                                                  int x0, int y0, int z0,
+                                                  int whalf) {
   int ncols, col, xi, yi, zi, xk, yk, zk;
   GCA_MORPH_NODE *gcamn;
   MATRIX *m_U, *m_V, *m_Uinv;
   double mask;
 
-  ncols = 0;  // first count the # of measurements
+  ncols = 0; // first count the # of measurements
   for (xk = -whalf; xk <= whalf; xk++) {
     xi = x0 + xk;
     if (xi < 0 || xi >= gcam->width) {
@@ -15363,8 +15425,7 @@ MATRIX *gcamComputeOptimalLinearTransformInRegion(
   return (m_L);
 }
 
-int gcamExpansionTerm(GCA_MORPH *gcam, MRI *mri, double l_expansion)
-{
+int gcamExpansionTerm(GCA_MORPH *gcam, MRI *mri, double l_expansion) {
   // double sse;
   double error_0, error_n, dx, dy, dz;
   int x, y, z, xi, yi, zi, xk, yk, zk;
@@ -15388,7 +15449,8 @@ int gcamExpansionTerm(GCA_MORPH *gcam, MRI *mri, double l_expansion)
           continue;
         }
         check_gcam(gcam);
-        if (gcamn->status & (GCAM_IGNORE_LIKELIHOOD | GCAM_NEVER_USE_LIKELIHOOD)) {
+        if (gcamn->status &
+            (GCAM_IGNORE_LIKELIHOOD | GCAM_NEVER_USE_LIKELIHOOD)) {
           continue;
         }
         if (IS_UNKNOWN(gcamn->label)) {
@@ -15425,14 +15487,16 @@ int gcamExpansionTerm(GCA_MORPH *gcam, MRI *mri, double l_expansion)
                 continue;
               }
 
-              load_vals(mri, gcamn_nbr->x, gcamn_nbr->y, gcamn_nbr->z, vals, gcam->ninputs);
+              load_vals(mri, gcamn_nbr->x, gcamn_nbr->y, gcamn_nbr->z, vals,
+                        gcam->ninputs);
               if (gcamn_nbr->gc == NULL) {
                 continue;
               }
               error_0 = sqrt(GCAmahDist(gcamn->gc, vals, gcam->ninputs)) +
                         log(covariance_determinant(gcamn->gc, gcam->ninputs));
-              error_n = sqrt(GCAmahDist(gcamn_nbr->gc, vals, gcam->ninputs)) +
-                        log(covariance_determinant(gcamn_nbr->gc, gcam->ninputs));
+              error_n =
+                  sqrt(GCAmahDist(gcamn_nbr->gc, vals, gcam->ninputs)) +
+                  log(covariance_determinant(gcamn_nbr->gc, gcam->ninputs));
               if (error_n <= error_0) {
                 continue;
               }
@@ -15443,18 +15507,10 @@ int gcamExpansionTerm(GCA_MORPH *gcam, MRI *mri, double l_expansion)
               dy *= l_expansion * (error_n - error_0);
               dz *= l_expansion * (error_n - error_0);
               if (x == Gx && y == Gy && z == Gz)
-                printf("(%d, %d, %d, %s): nbr at (%d, %d, %d, %s), I=%2.0f, D=(%2.2f, %2.2f, %2.2f)\n",
-                       x,
-                       y,
-                       z,
-                       cma_label_to_name(gcamn->label),
-                       xi,
-                       yi,
-                       zi,
-                       cma_label_to_name(gcamn_nbr->label),
-                       vals[0],
-                       dx,
-                       dy,
+                printf("(%d, %d, %d, %s): nbr at (%d, %d, %d, %s), I=%2.0f, "
+                       "D=(%2.2f, %2.2f, %2.2f)\n",
+                       x, y, z, cma_label_to_name(gcamn->label), xi, yi, zi,
+                       cma_label_to_name(gcamn_nbr->label), vals[0], dx, dy,
                        dz);
               gcamn->dx += dx;
               gcamn->dy += dy;
@@ -15493,13 +15549,15 @@ int gcamExpansionTerm(GCA_MORPH *gcam, MRI *mri, double l_expansion)
               }
               error_0 = sqrt(GCAmahDist(gcamn->gc, vals, gcam->ninputs)) +
                         log(covariance_determinant(gcamn->gc, gcam->ninputs));
-              error_n = sqrt(GCAmahDist(gcamn_nbr->gc, vals, gcam->ninputs)) +
-                        log(covariance_determinant(gcamn_nbr->gc, gcam->ninputs));
+              error_n =
+                  sqrt(GCAmahDist(gcamn_nbr->gc, vals, gcam->ninputs)) +
+                  log(covariance_determinant(gcamn_nbr->gc, gcam->ninputs));
               if (error_0 <= error_n) {
                 continue;
               }
 
-              // move away from nbr if it explains central intensity better than this node
+              // move away from nbr if it explains central intensity better than
+              // this node
               dx = gcamn->x - gcamn_nbr->x;
               dy = gcamn->y - gcamn_nbr->y;
               dz = gcamn->z - gcamn_nbr->z;
@@ -15507,18 +15565,10 @@ int gcamExpansionTerm(GCA_MORPH *gcam, MRI *mri, double l_expansion)
               dy *= l_expansion * (error_0 - error_n);
               dz *= l_expansion * (error_0 - error_n);
               if (x == Gx && y == Gy && z == Gz)
-                printf("(%d, %d, %d, %s): Inbr at (%d, %d, %d, %s), I=%2.0f, D=(%2.2f, %2.2f, %2.2f)\n",
-                       x,
-                       y,
-                       z,
-                       cma_label_to_name(gcamn->label),
-                       xi,
-                       yi,
-                       zi,
-                       cma_label_to_name(gcamn_nbr->label),
-                       vals[0],
-                       dx,
-                       dy,
+                printf("(%d, %d, %d, %s): Inbr at (%d, %d, %d, %s), I=%2.0f, "
+                       "D=(%2.2f, %2.2f, %2.2f)\n",
+                       x, y, z, cma_label_to_name(gcamn->label), xi, yi, zi,
+                       cma_label_to_name(gcamn_nbr->label), vals[0], dx, dy,
                        dz);
               gcamn->dx += dx;
               gcamn->dy += dy;
@@ -15530,8 +15580,7 @@ int gcamExpansionTerm(GCA_MORPH *gcam, MRI *mri, double l_expansion)
   return (NO_ERROR);
 }
 
-double gcamExpansionEnergy(GCA_MORPH *gcam, MRI *mri)
-{
+double gcamExpansionEnergy(GCA_MORPH *gcam, MRI *mri) {
   double sse, error_0, error_n, sse_node;
   int x, y, z, xi, yi, zi, xk, yk, zk;
   GCA_MORPH_NODE *gcamn, *gcamn_nbr;
@@ -15550,7 +15599,8 @@ double gcamExpansionEnergy(GCA_MORPH *gcam, MRI *mri)
           continue;
         }
         check_gcam(gcam);
-        if (gcamn->status & (GCAM_IGNORE_LIKELIHOOD | GCAM_NEVER_USE_LIKELIHOOD)) {
+        if (gcamn->status &
+            (GCAM_IGNORE_LIKELIHOOD | GCAM_NEVER_USE_LIKELIHOOD)) {
           continue;
         }
         if (IS_UNKNOWN(gcamn->label)) {
@@ -15589,14 +15639,16 @@ double gcamExpansionEnergy(GCA_MORPH *gcam, MRI *mri)
                 continue;
               }
 
-              load_vals(mri, gcamn_nbr->x, gcamn_nbr->y, gcamn_nbr->z, vals, gcam->ninputs);
+              load_vals(mri, gcamn_nbr->x, gcamn_nbr->y, gcamn_nbr->z, vals,
+                        gcam->ninputs);
               if (gcamn_nbr->gc == NULL) {
                 continue;
               }
               error_0 = sqrt(GCAmahDist(gcamn->gc, vals, gcam->ninputs)) +
                         log(covariance_determinant(gcamn->gc, gcam->ninputs));
-              error_n = sqrt(GCAmahDist(gcamn_nbr->gc, vals, gcam->ninputs)) +
-                        log(covariance_determinant(gcamn_nbr->gc, gcam->ninputs));
+              error_n =
+                  sqrt(GCAmahDist(gcamn_nbr->gc, vals, gcam->ninputs)) +
+                  log(covariance_determinant(gcamn_nbr->gc, gcam->ninputs));
               if (error_n <= error_0) {
                 continue;
               }
@@ -15637,9 +15689,11 @@ double gcamExpansionEnergy(GCA_MORPH *gcam, MRI *mri)
               }
               error_0 = sqrt(GCAmahDist(gcamn->gc, vals, gcam->ninputs)) +
                         log(covariance_determinant(gcamn->gc, gcam->ninputs));
-              error_n = sqrt(GCAmahDist(gcamn_nbr->gc, vals, gcam->ninputs)) +
-                        log(covariance_determinant(gcamn_nbr->gc, gcam->ninputs));
-              if (error_0 <= error_n)  // check to make sure nbr doesn't explain my vals better
+              error_n =
+                  sqrt(GCAmahDist(gcamn_nbr->gc, vals, gcam->ninputs)) +
+                  log(covariance_determinant(gcamn_nbr->gc, gcam->ninputs));
+              if (error_0 <= error_n) // check to make sure nbr doesn't explain
+                                      // my vals better
               {
                 continue;
               }
@@ -15662,8 +15716,7 @@ double gcamExpansionEnergy(GCA_MORPH *gcam, MRI *mri)
   return (sse);
 }
 
-int GCAMmatchVentricles(GCA_MORPH *gcam, MRI *mri)
-{
+int GCAMmatchVentricles(GCA_MORPH *gcam, MRI *mri) {
   int label, ven_nbr, x, y, z, xi, yi, zi, xk, yk, zk, nchanged = 0, n;
   GCA_MORPH_NODE *gcamn, *gcamn_nbr;
   float vals[MAX_GCA_INPUTS];
@@ -15683,13 +15736,16 @@ int GCAMmatchVentricles(GCA_MORPH *gcam, MRI *mri)
         if (gcamn->invalid == GCAM_POSITION_INVALID || gcamn->gc == NULL) {
           continue;
         }
-        if (IS_UNKNOWN(gcamn->label) || (gcamn->label == Left_Lateral_Ventricle) ||
+        if (IS_UNKNOWN(gcamn->label) ||
+            (gcamn->label == Left_Lateral_Ventricle) ||
             (gcamn->label == Right_Lateral_Ventricle)) {
-          continue;  // already ventricle, don't change it
+          continue; // already ventricle, don't change it
         }
         load_vals(mri, gcamn->x, gcamn->y, gcamn->z, vals, gcam->ninputs);
-        label = GCAcomputeMLElabelAtLocation(gcam->gca, x, y, z, vals, &n, &gcamn->log_p);
-        if (label != Left_Lateral_Ventricle && label != Right_Lateral_Ventricle) {
+        label = GCAcomputeMLElabelAtLocation(gcam->gca, x, y, z, vals, &n,
+                                             &gcamn->log_p);
+        if (label != Left_Lateral_Ventricle &&
+            label != Right_Lateral_Ventricle) {
           continue;
         }
         ven_nbr = 0;
@@ -15716,7 +15772,8 @@ int GCAMmatchVentricles(GCA_MORPH *gcam, MRI *mri)
               if (gcamn_nbr->gc == NULL) {
                 continue;
               }
-              if (gcamn_nbr->label == Left_Lateral_Ventricle || gcamn_nbr->label == Right_Lateral_Ventricle) {
+              if (gcamn_nbr->label == Left_Lateral_Ventricle ||
+                  gcamn_nbr->label == Right_Lateral_Ventricle) {
                 ven_nbr = 1;
               }
             }
@@ -15737,32 +15794,24 @@ int GCAMmatchVentricles(GCA_MORPH *gcam, MRI *mri)
           gcamn->gc = gc = GCAfindPriorGC(gcam->gca, x, y, z, label);
 
           if (x == Gx && y == Gy && z == Gz)
-            printf("RELABEL: node(%d, %d, %d): label %s (%d), mean %2.1f+-%2.1f, prior %2.1f, MRI=%2.0f\n",
-                   x,
-                   y,
-                   z,
-                   cma_label_to_name(label),
-                   label,
+            printf("RELABEL: node(%d, %d, %d): label %s (%d), mean "
+                   "%2.1f+-%2.1f, prior %2.1f, MRI=%2.0f\n",
+                   x, y, z, cma_label_to_name(label), label,
                    gcamn->gc ? gcamn->gc->means[0] : 0.0,
-                   gcamn->gc ? sqrt(covariance_determinant(gcamn->gc, gcam->ninputs)) : 0.0,
-                   gcamn->prior,
-                   vals[0]);
-        }
-        else /* out of FOV probably */
+                   gcamn->gc
+                       ? sqrt(covariance_determinant(gcamn->gc, gcam->ninputs))
+                       : 0.0,
+                   gcamn->prior, vals[0]);
+        } else /* out of FOV probably */
         {
           gcamn->label = label;
           gcamn->n = 0;
           gcamn->prior = 1.0;
           gcamn->gc = NULL;
           if (x == Gx && y == Gy && z == Gz)
-            printf("RELABEL: node(%d, %d, %d): label %s (%d), mean %2.1f+-%2.1f, prior %2.1f\n",
-                   x,
-                   y,
-                   z,
-                   cma_label_to_name(label),
-                   label,
-                   0.0,
-                   0.0,
+            printf("RELABEL: node(%d, %d, %d): label %s (%d), mean "
+                   "%2.1f+-%2.1f, prior %2.1f\n",
+                   x, y, z, cma_label_to_name(label), label, 0.0, 0.0,
                    gcamn->prior);
         }
       }
@@ -15771,8 +15820,7 @@ int GCAMmatchVentricles(GCA_MORPH *gcam, MRI *mri)
   return (NO_ERROR);
 }
 
-int GCAMdeformVentricles(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
-{
+int GCAMdeformVentricles(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms) {
   double rms, last_rms, orig_dt, min_dt, pct_change;
   int navgs, level;
 
@@ -15783,13 +15831,11 @@ int GCAMdeformVentricles(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
     if (parms->log_fp == NULL) {
       if (parms->start_t == 0) {
         parms->log_fp = fopen(fname, "w");
-      }
-      else {
+      } else {
         parms->log_fp = fopen(fname, "a");
       }
     }
-  }
-  else {
+  } else {
     parms->log_fp = NULL;
   }
   orig_dt = parms->dt;
@@ -15833,18 +15879,12 @@ int GCAMdeformVentricles(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
         fprintf(parms->log_fp,
                 "%04d: dt=%2.6f, rms=%2.3f (%2.3f%%), neg=%d, "
                 "invalid=%d, VD, navgs=%d",
-                parms->start_t,
-                min_dt,
-                rms,
-                pct_change,
-                gcam->neg,
-                Ginvalid,
+                parms->start_t, min_dt, rms, pct_change, gcam->neg, Ginvalid,
                 navgs);
         if (parms->l_binary > 0)
-          fprintf(parms->log_fp,
-                  ", aligned = %d (%2.3f%%)\n",
-                  Galigned,
-                  100.0 * Galigned / ((gcam->width * gcam->height * gcam->depth) - Ginvalid));
+          fprintf(parms->log_fp, ", aligned = %d (%2.3f%%)\n", Galigned,
+                  100.0 * Galigned /
+                      ((gcam->width * gcam->height * gcam->depth) - Ginvalid));
         else {
           fprintf(parms->log_fp, "\n");
         }
@@ -15852,20 +15892,14 @@ int GCAMdeformVentricles(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
       }
 
       if (Gdiag & DIAG_SHOW) {
-        printf(
-            "%04d: dt=%2.6f, rms=%2.3f (%2.3f%%), "
-            "neg=%d, invalid=%d, VD, navgs=%d",
-            parms->start_t,
-            min_dt,
-            rms,
-            pct_change,
-            gcam->neg,
-            Ginvalid,
-            navgs);
+        printf("%04d: dt=%2.6f, rms=%2.3f (%2.3f%%), "
+               "neg=%d, invalid=%d, VD, navgs=%d",
+               parms->start_t, min_dt, rms, pct_change, gcam->neg, Ginvalid,
+               navgs);
         if (parms->l_binary > 0)
-          printf(", aligned = %d (%2.3f%%)\n",
-                 Galigned,
-                 100.0 * Galigned / ((gcam->width * gcam->height * gcam->depth) - Ginvalid));
+          printf(", aligned = %d (%2.3f%%)\n", Galigned,
+                 100.0 * Galigned /
+                     ((gcam->width * gcam->height * gcam->depth) - Ginvalid));
         else {
           printf("\n");
         }
@@ -15883,8 +15917,7 @@ int GCAMdeformVentricles(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
   return (NO_ERROR);
 }
 
-int gcamComputePeriventricularWMDeformation(GCA_MORPH *gcam, MRI *mri)
-{
+int gcamComputePeriventricularWMDeformation(GCA_MORPH *gcam, MRI *mri) {
   int ven_nbr, x, y, z, xi, yi, zi, xk, yk, zk;
   GCA_MORPH_NODE *gcamn, *gcamn_nbr;
   float vals[MAX_GCA_INPUTS];
@@ -15908,7 +15941,8 @@ int gcamComputePeriventricularWMDeformation(GCA_MORPH *gcam, MRI *mri)
           continue ;
         }
 #endif
-        if (gcamn->label == Left_Lateral_Ventricle || gcamn->label == Right_Lateral_Ventricle) {
+        if (gcamn->label == Left_Lateral_Ventricle ||
+            gcamn->label == Right_Lateral_Ventricle) {
           continue;
         }
 
@@ -15938,7 +15972,8 @@ int gcamComputePeriventricularWMDeformation(GCA_MORPH *gcam, MRI *mri)
               if (gcamn_nbr->gc == NULL) {
                 continue;
               }
-              if (gcamn_nbr->label == Left_Lateral_Ventricle || gcamn_nbr->label == Right_Lateral_Ventricle) {
+              if (gcamn_nbr->label == Left_Lateral_Ventricle ||
+                  gcamn_nbr->label == Right_Lateral_Ventricle) {
                 ven_nbr++;
                 dx += (gcamn->x - gcamn_nbr->x);
                 dy += (gcamn->y - gcamn_nbr->y);
@@ -15964,15 +15999,9 @@ int gcamComputePeriventricularWMDeformation(GCA_MORPH *gcam, MRI *mri)
         dy /= norm;
         dz /= norm;
         if (Gx == x && Gy == y && Gz == z)
-          printf(
-              "searching node (%d, %d, %d) along "
-              "direction (%2.1f, %2.1f, %2.1f)\n",
-              Gx,
-              Gy,
-              Gz,
-              dx,
-              dy,
-              dz);
+          printf("searching node (%d, %d, %d) along "
+                 "direction (%2.1f, %2.1f, %2.1f)\n",
+                 Gx, Gy, Gz, dx, dy, dz);
 
 // now move away from avg ventricle position until we get
 // to an intensity that looks like wm
@@ -15993,9 +16022,7 @@ int gcamComputePeriventricularWMDeformation(GCA_MORPH *gcam, MRI *mri)
         }
         if (Gx == x && Gy == y && Gz == z)
           printf("MLE location at min_d=%2.1f, X = (%2.0f, %2.0f, %2.0f)\n",
-                 min_d,
-                 gcamn->x + min_d * dx,
-                 gcamn->y + min_d * dy,
+                 min_d, gcamn->x + min_d * dx, gcamn->y + min_d * dy,
                  gcamn->z + min_d * dz);
         gcamn->dx += min_d * dx;
         gcamn->dy += min_d * dy;
@@ -16004,8 +16031,7 @@ int gcamComputePeriventricularWMDeformation(GCA_MORPH *gcam, MRI *mri)
   return (NO_ERROR);
 }
 
-HISTOGRAM *gcamJacobianHistogram(GCA_MORPH *gcam, HISTOGRAM *h)
-{
+HISTOGRAM *gcamJacobianHistogram(GCA_MORPH *gcam, HISTOGRAM *h) {
   int i, j, k, bin_no, nbins;
   GCA_MORPH_NODE *gcamn;
   double jmin, jmax, jac, orig_area;
@@ -16024,8 +16050,9 @@ HISTOGRAM *gcamJacobianHistogram(GCA_MORPH *gcam, HISTOGRAM *h)
         }
         gcamn = &gcam->nodes[i][j][k];
 
-        if (gcamn->invalid || gcamn->gc == NULL || IS_UNKNOWN(gcamn->label) || FZERO(gcamn->area) ||
-            FZERO(gcamn->orig_area1) || FZERO(gcamn->orig_area2)) {
+        if (gcamn->invalid || gcamn->gc == NULL || IS_UNKNOWN(gcamn->label) ||
+            FZERO(gcamn->area) || FZERO(gcamn->orig_area1) ||
+            FZERO(gcamn->orig_area2)) {
           continue;
         }
         jac = (gcamn->area / orig_area);
@@ -16041,15 +16068,13 @@ HISTOGRAM *gcamJacobianHistogram(GCA_MORPH *gcam, HISTOGRAM *h)
     nbins = 512;
     bin_size = (jmax - jmin + 1) / (float)nbins;
     printf("setting bin_size to %2.2f\n", bin_size);
-  }
-  else {
+  } else {
     nbins = ceil((jmax - jmin + 1) / bin_size);
     printf("using %d bins\n", nbins);
   }
   if (h == NULL) {
     h = HISTOalloc(nbins);
-  }
-  else {
+  } else {
     HISTOrealloc(h, nbins);
   }
 
@@ -16064,8 +16089,9 @@ HISTOGRAM *gcamJacobianHistogram(GCA_MORPH *gcam, HISTOGRAM *h)
         }
         gcamn = &gcam->nodes[i][j][k];
 
-        if (gcamn->invalid || gcamn->gc == NULL || IS_UNKNOWN(gcamn->label) || FZERO(gcamn->area) ||
-            FZERO(gcamn->orig_area1) || FZERO(gcamn->orig_area2)) {
+        if (gcamn->invalid || gcamn->gc == NULL || IS_UNKNOWN(gcamn->label) ||
+            FZERO(gcamn->area) || FZERO(gcamn->orig_area1) ||
+            FZERO(gcamn->orig_area2)) {
           continue;
         }
         jac = (gcamn->area / orig_area);
@@ -16074,8 +16100,7 @@ HISTOGRAM *gcamJacobianHistogram(GCA_MORPH *gcam, HISTOGRAM *h)
       }
   return (h);
 }
-int GCAMnormalizeIntensities(GCA_MORPH *gcam, MRI *mri_target)
-{
+int GCAMnormalizeIntensities(GCA_MORPH *gcam, MRI *mri_target) {
   int x, y, z, num, peak;
   double val, mean, std, low_thresh, hi_thresh;
   GCA_MORPH_NODE *gcamn;
@@ -16101,8 +16126,9 @@ int GCAMnormalizeIntensities(GCA_MORPH *gcam, MRI *mri_target)
           continue;
         }
         if (mri_target->depth > 5 &&
-            MRIlabelsInNbhd(mri_target, nint(gcamn->x), nint(gcamn->y), nint(gcamn->z), 1, 0) > 0) {
-          continue;  // stay away from skull stripped areas
+            MRIlabelsInNbhd(mri_target, nint(gcamn->x), nint(gcamn->y),
+                            nint(gcamn->z), 1, 0) > 0) {
+          continue; // stay away from skull stripped areas
         }
         val /= gcamn->gc->means[0];
         HISTOaddSample(h, val, 0, 0);
@@ -16113,17 +16139,18 @@ int GCAMnormalizeIntensities(GCA_MORPH *gcam, MRI *mri_target)
     }
   }
 
-  if (Gdiag & DIAG_WRITE) HISTOplot(h, "hratio.plt");
+  if (Gdiag & DIAG_WRITE)
+    HISTOplot(h, "hratio.plt");
 
   if (!num)
-    printf(
-        " GCAMnormalizeIntensities - no valid "
-        "gc->means information found.\n");
+    printf(" GCAMnormalizeIntensities - no valid "
+           "gc->means information found.\n");
   mean /= (float)num;
   std = sqrt(std / (float)num - mean * mean);
   low_thresh = mean - 2 * std;
   hi_thresh = mean + 2 * std;
-  printf("trimming scaling estimates to be in [%2.4f %2.4f]\n", low_thresh, hi_thresh);
+  printf("trimming scaling estimates to be in [%2.4f %2.4f]\n", low_thresh,
+         hi_thresh);
 
   // now trim means to get more accurate estimate (ignoring outliers)
   mean = 0.0;
@@ -16143,8 +16170,9 @@ int GCAMnormalizeIntensities(GCA_MORPH *gcam, MRI *mri_target)
           continue;
         }
         if (mri_target->depth > 5 &&
-            MRIlabelsInNbhd(mri_target, nint(gcamn->x), nint(gcamn->y), nint(gcamn->z), 1, 0) > 0) {
-          continue;  // stay away from skull stripped areas
+            MRIlabelsInNbhd(mri_target, nint(gcamn->x), nint(gcamn->y),
+                            nint(gcamn->z), 1, 0) > 0) {
+          continue; // stay away from skull stripped areas
         }
         val /= gcamn->gc->means[0];
         if (val < low_thresh || val > hi_thresh) {
@@ -16161,7 +16189,8 @@ int GCAMnormalizeIntensities(GCA_MORPH *gcam, MRI *mri_target)
   printf("renormalizing gcam intensities by %2.4f\n", mean);
 
   peak = HISTOfindHighestPeakInRegion(h, 2, h->nbins - 2);
-  if (peak >= 0) mean = h->bins[peak];
+  if (peak >= 0)
+    mean = h->bins[peak];
   HISTOfree(&h);
   printf("renormalizing gcam intensities using histo estimate %2.4f\n", mean);
   for (x = 0; x < gcam->width; x++) {
@@ -16181,8 +16210,7 @@ int GCAMnormalizeIntensities(GCA_MORPH *gcam, MRI *mri_target)
   return (NO_ERROR);
 }
 
-int GCAMsmoothConditionalDensities(GCA_MORPH *gcam, float sigma)
-{
+int GCAMsmoothConditionalDensities(GCA_MORPH *gcam, float sigma) {
   MRI *mri, *mri_kernel, *mri_smooth;
 
   mri = GCAMwriteMRI(gcam, NULL, GCAM_MEANS);
@@ -16195,8 +16223,7 @@ int GCAMsmoothConditionalDensities(GCA_MORPH *gcam, float sigma)
   return (NO_ERROR);
 }
 
-int dtrans_label_to_frame(GCA_MORPH_PARMS *mp, int label)
-{
+int dtrans_label_to_frame(GCA_MORPH_PARMS *mp, int label) {
   int frame;
 
 #if 1
@@ -16207,78 +16234,78 @@ int dtrans_label_to_frame(GCA_MORPH_PARMS *mp, int label)
   return (-1);
 #else
   switch (label) {
-    case Left_Thalamus:
-      frame = 0;
-      break;
-    case Right_Thalamus:
-      frame = 1;
-      break;
-    case Left_Putamen:
-      frame = 2;
-      break;
-    case Right_Putamen:
-      frame = 3;
-      break;
-    case Left_Pallidum:
-      frame = 4;
-      break;
-    case Right_Pallidum:
-      frame = 5;
-      break;
-    case Left_Lateral_Ventricle:
-      frame = 6;
-      break;
-    case Right_Lateral_Ventricle:
-      frame = 7;
-      break;
-    case Left_Caudate:
-      frame = 8;
-      break;
-    case Right_Caudate:
-      frame = 9;
-      break;
-    case Left_Cerebral_White_Matter:
-      frame = 10;
-      break;
-    case Right_Cerebral_White_Matter:
-      frame = 11;
-      break;
-    case Left_Hippocampus:
-      frame = 12;
-      break;
-    case Right_Hippocampus:
-      frame = 13;
-      break;
-    case Left_Amygdala:
-      frame = 14;
-      break;
-    case Right_Amygdala:
-      frame = 15;
-      break;
-    case Left_VentralDC:
-      frame = 16;
-      break;
-    case Right_VentralDC:
-      frame = 17;
-      break;
-    case Brain_Stem:
-      frame = 18;
-      break;
-    case Left_Inf_Lat_Vent:
-      frame = 19;
-      break;
-    case Right_Inf_Lat_Vent:
-      frame = 20;
-      break;
-    default:
-      frame = -1;  // not one of the labels that has a dtrans frame
+  case Left_Thalamus:
+    frame = 0;
+    break;
+  case Right_Thalamus:
+    frame = 1;
+    break;
+  case Left_Putamen:
+    frame = 2;
+    break;
+  case Right_Putamen:
+    frame = 3;
+    break;
+  case Left_Pallidum:
+    frame = 4;
+    break;
+  case Right_Pallidum:
+    frame = 5;
+    break;
+  case Left_Lateral_Ventricle:
+    frame = 6;
+    break;
+  case Right_Lateral_Ventricle:
+    frame = 7;
+    break;
+  case Left_Caudate:
+    frame = 8;
+    break;
+  case Right_Caudate:
+    frame = 9;
+    break;
+  case Left_Cerebral_White_Matter:
+    frame = 10;
+    break;
+  case Right_Cerebral_White_Matter:
+    frame = 11;
+    break;
+  case Left_Hippocampus:
+    frame = 12;
+    break;
+  case Right_Hippocampus:
+    frame = 13;
+    break;
+  case Left_Amygdala:
+    frame = 14;
+    break;
+  case Right_Amygdala:
+    frame = 15;
+    break;
+  case Left_VentralDC:
+    frame = 16;
+    break;
+  case Right_VentralDC:
+    frame = 17;
+    break;
+  case Brain_Stem:
+    frame = 18;
+    break;
+  case Left_Inf_Lat_Vent:
+    frame = 19;
+    break;
+  case Right_Inf_Lat_Vent:
+    frame = 20;
+    break;
+  default:
+    frame = -1; // not one of the labels that has a dtrans frame
   }
 #endif
   return (frame);
 }
 
-int gcamDistanceTransformTerm(GCA_MORPH *gcam, MRI *mri_source, MRI *mri, double l_dtrans, GCA_MORPH_PARMS *mp)
-{
+int gcamDistanceTransformTerm(GCA_MORPH *gcam, MRI *mri_source, MRI *mri,
+                              double l_dtrans, GCA_MORPH_PARMS *mp) {
   int x, y, z, frame, label;
   GCA_MORPH_NODE *gcamn;
   double dist, dx, dy, dz, error;
@@ -16294,30 +16321,27 @@ int gcamDistanceTransformTerm(GCA_MORPH *gcam, MRI *mri_source, MRI *mri, double
         }
         gcamn = &gcam->nodes[x][y][z];
 
-        if (gcamn->invalid == GCAM_POSITION_INVALID) continue;
+        if (gcamn->invalid == GCAM_POSITION_INVALID)
+          continue;
 
         check_gcam(gcam);
-        if (gcamn->status & (GCAM_IGNORE_LIKELIHOOD | GCAM_NEVER_USE_LIKELIHOOD)) continue;
+        if (gcamn->status &
+            (GCAM_IGNORE_LIKELIHOOD | GCAM_NEVER_USE_LIKELIHOOD))
+          continue;
 
         frame = dtrans_label_to_frame(mp, gcamn->label);
-        if (frame >= 0)  //  one that distance transform applies to
+        if (frame >= 0) //  one that distance transform applies to
         {
-          MRIsampleVolumeGradientFrame(mri, gcamn->x, gcamn->y, gcamn->z, &dx, &dy, &dz, frame);
-          MRIsampleVolumeFrameType(mri, gcamn->x, gcamn->y, gcamn->z, frame, SAMPLE_TRILINEAR, &dist);
+          MRIsampleVolumeGradientFrame(mri, gcamn->x, gcamn->y, gcamn->z, &dx,
+                                       &dy, &dz, frame);
+          MRIsampleVolumeFrameType(mri, gcamn->x, gcamn->y, gcamn->z, frame,
+                                   SAMPLE_TRILINEAR, &dist);
           error = (dist - gcamn->target_dist);
           if (x == Gx && y == Gy && z == Gz)
-            printf("l_dtrans: node(%d,%d,%d, %s) -> (%2.1f,%2.1f,%2.1f), dist=%2.2f, T=%2.2f, D=(%2.1f,%2.1f,%2.1f)\n",
-                   x,
-                   y,
-                   z,
-                   cma_label_to_name(gcamn->label),
-                   gcamn->x,
-                   gcamn->y,
-                   gcamn->z,
-                   dist,
-                   gcamn->target_dist,
-                   -error * dx,
-                   -error * dy,
+            printf("l_dtrans: node(%d,%d,%d, %s) -> (%2.1f,%2.1f,%2.1f), "
+                   "dist=%2.2f, T=%2.2f, D=(%2.1f,%2.1f,%2.1f)\n",
+                   x, y, z, cma_label_to_name(gcamn->label), gcamn->x, gcamn->y,
+                   gcamn->z, dist, gcamn->target_dist, -error * dx, -error * dy,
                    -error * dz);
           gcamn->dx -= l_dtrans * error * dx;
           gcamn->dy -= l_dtrans * error * dy;
@@ -16326,26 +16350,22 @@ int gcamDistanceTransformTerm(GCA_MORPH *gcam, MRI *mri_source, MRI *mri, double
 
         label = MRIgetVoxVal(mri_source, x, y, z, 0);
         frame = dtrans_label_to_frame(mp, label);
-        if (frame >= 0)  // add in gradients from voxels in source that are this label
+        if (frame >=
+            0) // add in gradients from voxels in source that are this label
         {
           double target_dist;
-          MRIsampleVolumeGradientFrame(mp->mri_atlas_dist_map, x, y, z, &dx, &dy, &dz, frame);
-          MRIsampleVolumeFrameType(mri, gcamn->x, gcamn->y, gcamn->z, frame, SAMPLE_TRILINEAR, &dist);
-          MRIsampleVolumeFrameType(mp->mri_atlas_dist_map, x, y, z, frame, SAMPLE_TRILINEAR, &target_dist);
+          MRIsampleVolumeGradientFrame(mp->mri_atlas_dist_map, x, y, z, &dx,
+                                       &dy, &dz, frame);
+          MRIsampleVolumeFrameType(mri, gcamn->x, gcamn->y, gcamn->z, frame,
+                                   SAMPLE_TRILINEAR, &dist);
+          MRIsampleVolumeFrameType(mp->mri_atlas_dist_map, x, y, z, frame,
+                                   SAMPLE_TRILINEAR, &target_dist);
           error = (target_dist - dist);
           if (x == Gx && y == Gy && z == Gz)
-            printf("l_dtrans: node(%d,%d,%d, %s) -> (%2.1f,%2.1f,%2.1f), dist=%2.2f, T=%2.2f, D=(%2.1f,%2.1f,%2.1f)\n",
-                   x,
-                   y,
-                   z,
-                   cma_label_to_name(label),
-                   gcamn->x,
-                   gcamn->y,
-                   gcamn->z,
-                   dist,
-                   target_dist,
-                   -error * dx,
-                   -error * dy,
+            printf("l_dtrans: node(%d,%d,%d, %s) -> (%2.1f,%2.1f,%2.1f), "
+                   "dist=%2.2f, T=%2.2f, D=(%2.1f,%2.1f,%2.1f)\n",
+                   x, y, z, cma_label_to_name(label), gcamn->x, gcamn->y,
+                   gcamn->z, dist, target_dist, -error * dx, -error * dy,
                    -error * dz);
 
           gcamn->dx += l_dtrans * error * dx;
@@ -16358,8 +16378,8 @@ int gcamDistanceTransformTerm(GCA_MORPH *gcam, MRI *mri_source, MRI *mri, double
   return (NO_ERROR);
 }
 
-double gcamDistanceTransformEnergy(GCA_MORPH *gcam, MRI *mri_source, MRI *mri, GCA_MORPH_PARMS *mp)
-{
+double gcamDistanceTransformEnergy(GCA_MORPH *gcam, MRI *mri_source, MRI *mri,
+                                   GCA_MORPH_PARMS *mp) {
   double sse = 0.0;
   int x, y, z, frame, label;
   GCA_MORPH_NODE *gcamn;
@@ -16368,56 +16388,53 @@ double gcamDistanceTransformEnergy(GCA_MORPH *gcam, MRI *mri_source, MRI *mri, G
   for (x = 0; x < gcam->width; x++)
     for (y = 0; y < gcam->height; y++)
       for (z = 0; z < gcam->depth; z++) {
-        if (x == Gx && y == Gy && z == Gz) DiagBreak();
+        if (x == Gx && y == Gy && z == Gz)
+          DiagBreak();
 
         gcamn = &gcam->nodes[x][y][z];
 
-        if (gcamn->invalid == GCAM_POSITION_INVALID) continue;
+        if (gcamn->invalid == GCAM_POSITION_INVALID)
+          continue;
 
         check_gcam(gcam);
-        if (gcamn->status & (GCAM_IGNORE_LIKELIHOOD | GCAM_NEVER_USE_LIKELIHOOD)) continue;
+        if (gcamn->status &
+            (GCAM_IGNORE_LIKELIHOOD | GCAM_NEVER_USE_LIKELIHOOD))
+          continue;
 
         frame = dtrans_label_to_frame(mp, gcamn->label);
-        if (frame >= 0)  // there is a distance transform for this label
+        if (frame >= 0) // there is a distance transform for this label
         {
-          MRIsampleVolumeFrameType(mri, gcamn->x, gcamn->y, gcamn->z, frame, SAMPLE_TRILINEAR, &dist);
+          MRIsampleVolumeFrameType(mri, gcamn->x, gcamn->y, gcamn->z, frame,
+                                   SAMPLE_TRILINEAR, &dist);
           if (x == Gx && y == Gy && z == Gz)
-            printf("E_dtrans: node(%d,%d,%d, %s) -> (%2.1f,%2.1f,%2.1f), dist=%2.2f, target=%2.2f\n",
-                   x,
-                   y,
-                   z,
-                   cma_label_to_name(gcamn->label),
-                   gcamn->x,
-                   gcamn->y,
-                   gcamn->z,
-                   dist,
-                   gcamn->target_dist);
+            printf("E_dtrans: node(%d,%d,%d, %s) -> (%2.1f,%2.1f,%2.1f), "
+                   "dist=%2.2f, target=%2.2f\n",
+                   x, y, z, cma_label_to_name(gcamn->label), gcamn->x, gcamn->y,
+                   gcamn->z, dist, gcamn->target_dist);
 
           check_gcam(gcam);
           dist -= (gcamn->target_dist);
           sse += (dist * dist);
-          if (!finitep(sse)) DiagBreak();
+          if (!finitep(sse))
+            DiagBreak();
         }
 
         label = MRIgetVoxVal(mri_source, x, y, z, 0);
         frame = dtrans_label_to_frame(mp, label);
-        if (frame >= 0)  // add in gradients from voxels in source that are this label
+        if (frame >=
+            0) // add in gradients from voxels in source that are this label
         {
           double target_dist;
-          MRIsampleVolumeFrameType(mri, gcamn->x, gcamn->y, gcamn->z, frame, SAMPLE_TRILINEAR, &dist);
-          MRIsampleVolumeFrameType(mp->mri_atlas_dist_map, x, y, z, frame, SAMPLE_TRILINEAR, &target_dist);
+          MRIsampleVolumeFrameType(mri, gcamn->x, gcamn->y, gcamn->z, frame,
+                                   SAMPLE_TRILINEAR, &dist);
+          MRIsampleVolumeFrameType(mp->mri_atlas_dist_map, x, y, z, frame,
+                                   SAMPLE_TRILINEAR, &target_dist);
 
           if (x == Gx && y == Gy && z == Gz)
-            printf("E_dtrans: node(%d,%d,%d, %s) -> (%2.1f,%2.1f,%2.1f), dist=%2.2f, target=%2.2f\n",
-                   x,
-                   y,
-                   z,
-                   cma_label_to_name(gcamn->label),
-                   gcamn->x,
-                   gcamn->y,
-                   gcamn->z,
-                   dist,
-                   target_dist);
+            printf("E_dtrans: node(%d,%d,%d, %s) -> (%2.1f,%2.1f,%2.1f), "
+                   "dist=%2.2f, target=%2.2f\n",
+                   x, y, z, cma_label_to_name(gcamn->label), gcamn->x, gcamn->y,
+                   gcamn->z, dist, target_dist);
 
           check_gcam(gcam);
           dist -= (target_dist);
@@ -16427,8 +16444,8 @@ double gcamDistanceTransformEnergy(GCA_MORPH *gcam, MRI *mri_source, MRI *mri, G
   return (sse);
 }
 
-int GCAMsetTargetDistancesForLabel(GCA_MORPH *gcam, MRI *mri_labels, MRI *mri_dist, int label)
-{
+int GCAMsetTargetDistancesForLabel(GCA_MORPH *gcam, MRI *mri_labels,
+                                   MRI *mri_dist, int label) {
   int x, y, z, l, xv, yv, zv;
   GCA_MORPH_NODE *gcamn;
 
@@ -16441,14 +16458,13 @@ int GCAMsetTargetDistancesForLabel(GCA_MORPH *gcam, MRI *mri_labels, MRI *mri_di
         gcamn = &gcam->nodes[x][y][z];
         if (gcam->gca) {
           GCApriorToVoxel(gcam->gca, mri_labels, x, y, z, &xv, &yv, &zv);
-        }
-        else {
+        } else {
           xv = x;
           yv = y;
           zv = z;
         }
         l = MRIgetVoxVal(mri_labels, xv, yv, zv, 0);
-        if (l != label)  // only sample for this label
+        if (l != label) // only sample for this label
         {
           continue;
         }
@@ -16461,8 +16477,8 @@ int GCAMsetTargetDistancesForLabel(GCA_MORPH *gcam, MRI *mri_labels, MRI *mri_di
   }
   return (NO_ERROR);
 }
-int GCAMsetMeansForLabel(GCA_MORPH *gcam, MRI *mri_labels, MRI *mri_vals, int label)
-{
+int GCAMsetMeansForLabel(GCA_MORPH *gcam, MRI *mri_labels, MRI *mri_vals,
+                         int label) {
   int x, y, z, l, r, xv, yv, zv;
   GCA_MORPH_NODE *gcamn;
 
@@ -16475,14 +16491,13 @@ int GCAMsetMeansForLabel(GCA_MORPH *gcam, MRI *mri_labels, MRI *mri_vals, int la
         gcamn = &gcam->nodes[x][y][z];
         if (gcam->gca) {
           GCApriorToVoxel(gcam->gca, mri_labels, x, y, z, &xv, &yv, &zv);
-        }
-        else {
+        } else {
           xv = x;
           yv = y;
           zv = z;
         }
         l = MRIgetVoxVal(mri_labels, xv, yv, zv, 0);
-        if (l != label)  // only sample for this label
+        if (l != label) // only sample for this label
         {
           continue;
         }
@@ -16500,17 +16515,17 @@ int GCAMsetMeansForLabel(GCA_MORPH *gcam, MRI *mri_labels, MRI *mri_vals, int la
   }
   return (NO_ERROR);
 }
-MRI *GCAMbuildLabelVolume(GCA_MORPH *gcam, MRI *mri)
-{
+MRI *GCAMbuildLabelVolume(GCA_MORPH *gcam, MRI *mri) {
   int x, y, z, xn, yn, zn, width, depth, height, label;
   GCA_MORPH_NODE *gcamn;
 
   // error check
-  if (!mri) ErrorExit(ERROR_BADPARM, "GCAbuildLabelVolume called with null MRI.\n");
-  if (mri->width != gcam->atlas.width || mri->height != gcam->atlas.height || mri->depth != gcam->atlas.depth)
-    ErrorExit(ERROR_BADPARM,
-              "GCAMbuildLabelVolume called with mri dimension "
-              "being different from M3D.\n");
+  if (!mri)
+    ErrorExit(ERROR_BADPARM, "GCAbuildLabelVolume called with null MRI.\n");
+  if (mri->width != gcam->atlas.width || mri->height != gcam->atlas.height ||
+      mri->depth != gcam->atlas.depth)
+    ErrorExit(ERROR_BADPARM, "GCAMbuildLabelVolume called with mri dimension "
+                             "being different from M3D.\n");
 
   // set direction cosines etc.
   useVolGeomToMRI(&gcam->atlas, mri);
@@ -16539,12 +16554,11 @@ MRI *GCAMbuildLabelVolume(GCA_MORPH *gcam, MRI *mri)
 
             label = GCAgetMaxPriorLabel(gcam->gca, xn, yn, zn, NULL);
             MRIsetVoxVal(mri, x, y, z, 0, label);
-          }  // !GCA
+          } // !GCA
         }
       }
     }
-  }
-  else  // no gca
+  } else // no gca
   {
     for (z = 0; z < depth; z++) {
       for (y = 0; y < height; y++) {
@@ -16568,8 +16582,7 @@ MRI *GCAMbuildLabelVolume(GCA_MORPH *gcam, MRI *mri)
   return (mri);
 }
 
-double gcamMultiscaleEnergy(GCA_MORPH *gcam, MRI *mri)
-{
+double gcamMultiscaleEnergy(GCA_MORPH *gcam, MRI *mri) {
   GCAM_MS *gcam_ms = (GCAM_MS *)gcam->vgcam_ms;
   double vox_pval, total_log_pval, pval;
   int x, y, z, s, xn, yn, zn, n;
@@ -16597,7 +16610,8 @@ double gcamMultiscaleEnergy(GCA_MORPH *gcam, MRI *mri)
           gcan = &gca->nodes[xn][yn][zn];
           gcap = &gca->priors[x][y][z];
           for (n = 0; n < gcap->nlabels; n++) {
-            pval = GCAcomputePosteriorDensity(gcap, gcan, -1, n, vals, gca->ninputs, xn, yn, zn, gca);
+            pval = GCAcomputePosteriorDensity(gcap, gcan, -1, n, vals,
+                                              gca->ninputs, xn, yn, zn, gca);
             if (!isfinite(pval)) {
               DiagBreak();
             }
@@ -16609,8 +16623,7 @@ double gcamMultiscaleEnergy(GCA_MORPH *gcam, MRI *mri)
         }
         if (DZERO(vox_pval)) {
           DiagBreak();
-        }
-        else {
+        } else {
           total_log_pval += log(vox_pval);
         }
       }
@@ -16618,8 +16631,8 @@ double gcamMultiscaleEnergy(GCA_MORPH *gcam, MRI *mri)
   return (-total_log_pval);
 }
 
-int gcamMultiscaleTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, double l_multiscale)
-{
+int gcamMultiscaleTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth,
+                       double l_multiscale) {
   GCAM_MS *gcam_ms = (GCAM_MS *)gcam->vgcam_ms;
   double pval, dx, dy, dz, Ix, Iy, Iz, Ierror, norm;
   int x, y, z, s, xn, yn, zn, n;
@@ -16647,7 +16660,8 @@ int gcamMultiscaleTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, double l_mult
     mri_aseg = MRIcloneDifferentType(mri, MRI_SHORT);
     mri_s_index = MRIcloneDifferentType(mri, MRI_SHORT);
     mri_pvals = MRIcloneDifferentType(mri, MRI_FLOAT);
-    mri_sigma = GCAMMScomputeOptimalScale(gcam_ms, &transform, mri, NULL, mri_aseg, mri_pvals, mri_s_index);
+    mri_sigma = GCAMMScomputeOptimalScale(gcam_ms, &transform, mri, NULL,
+                                          mri_aseg, mri_pvals, mri_s_index);
     sprintf(fname, "sigma%d.mgz", callno);
     printf("writing optimal sigma to %s...\n", fname);
     MRIwrite(mri_sigma, fname);
@@ -16678,10 +16692,10 @@ int gcamMultiscaleTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, double l_mult
         }
         load_vals(mri, gcamn->x, gcamn->y, gcamn->z, vals, gcam->ninputs);
         GCApriorToNode(gcam->gca, x, y, z, &xn, &yn, &zn);
-        MRIsampleVolumeGradientFrame(
-            mri_smooth, gcamn->x, gcamn->y, gcamn->z, &Ix, &Iy, &Iz, 0);  // should be vectorized
+        MRIsampleVolumeGradientFrame(mri_smooth, gcamn->x, gcamn->y, gcamn->z,
+                                     &Ix, &Iy, &Iz, 0); // should be vectorized
         norm = sqrt(Ix * Ix + Iy * Iy + Iz * Iz);
-        if (FZERO(norm))  // no gradient - don't know which way to go
+        if (FZERO(norm)) // no gradient - don't know which way to go
         {
           continue;
         }
@@ -16692,7 +16706,8 @@ int gcamMultiscaleTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, double l_mult
 
         for (dx = dy = dz = 0.0, s = 0; s < gcam_ms->nsigmas; s++) {
           if (Gx == x && y == Gy && z == Gz)
-            printf("s = %2.3f, I=%d, delI = (%2.2f, %2.2f, %2.2f)\n", gcam_ms->sigmas[s], (int)vals[0], Ix, Iy, Iz);
+            printf("s = %2.3f, I=%d, delI = (%2.2f, %2.2f, %2.2f)\n",
+                   gcam_ms->sigmas[s], (int)vals[0], Ix, Iy, Iz);
           gca = gcam_ms->gcas[s];
           gcap = &gca->priors[x][y][z];
           gcan = &gca->nodes[xn][yn][zn];
@@ -16702,14 +16717,15 @@ int gcamMultiscaleTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, double l_mult
             if (gc == NULL) {
               continue;
             }
-            Ierror = gc->means[0] - vals[0];  // divided by covars[0]?
-            pval = GCAcomputePosteriorDensity(gcap, gcan, -1, n, vals, gca->ninputs, xn, yn, zn, gca);
+            Ierror = gc->means[0] - vals[0]; // divided by covars[0]?
+            pval = GCAcomputePosteriorDensity(gcap, gcan, -1, n, vals,
+                                              gca->ninputs, xn, yn, zn, gca);
             if (!isfinite(pval)) {
               DiagBreak();
             }
             if (Gx == x && y == Gy && z == Gz && !FZERO(pval)) {
-              printf(
-                  "               MS(%d, %s) = %2.5f * %2.0f\n", n, cma_label_to_name(gcap->labels[n]), pval, Ierror);
+              printf("               MS(%d, %s) = %2.5f * %2.0f\n", n,
+                     cma_label_to_name(gcap->labels[n]), pval, Ierror);
             }
             dx += pval * Ix * Ierror;
             dy += pval * Iy * Ierror;
@@ -16717,7 +16733,8 @@ int gcamMultiscaleTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, double l_mult
           }
         }
         if (Gx == x && y == Gy && z == Gz) {
-          printf("            multiscale grad=(%2.3f, %2.3f, %2.3f)\n", dx, dy, dz);
+          printf("            multiscale grad=(%2.3f, %2.3f, %2.3f)\n", dx, dy,
+                 dz);
         }
         gcamn->dx += l_multiscale * dx;
         gcamn->dy += l_multiscale * dy;
@@ -16727,13 +16744,9 @@ int gcamMultiscaleTerm(GCA_MORPH *gcam, MRI *mri, MRI *mri_smooth, double l_mult
   return (NO_ERROR);
 }
 
-MRI *GCAMMScomputeOptimalScale(GCAM_MS *gcam_ms,
-                               TRANSFORM *transform,
-                               MRI *mri_inputs,
-                               MRI *mri_sigma,
-                               MRI *mri_aseg,
-                               MRI *mri_pvals,
-                               MRI *mri_s_index)
+MRI *GCAMMScomputeOptimalScale(GCAM_MS *gcam_ms, TRANSFORM *transform,
+                               MRI *mri_inputs, MRI *mri_sigma, MRI *mri_aseg,
+                               MRI *mri_pvals, MRI *mri_s_index)
 
 {
   int x, y, z, s, best_s;
@@ -16768,10 +16781,12 @@ MRI *GCAMMScomputeOptimalScale(GCAM_MS *gcam_ms,
           DiagBreak();
         }
 
-        if (!GCAsourceVoxelToNode(gcam_ms->gcas[0], mri_inputs, transform, x, y, z, &xn, &yn, &zn)) {
+        if (!GCAsourceVoxelToNode(gcam_ms->gcas[0], mri_inputs, transform, x, y,
+                                  z, &xn, &yn, &zn)) {
           load_vals(mri_inputs, x, y, z, vals, gcam_ms->gcas[0]->ninputs);
 
-          GCAsourceVoxelToPrior(gcam_ms->gcas[0], mri_inputs, transform, x, y, z, &xp, &yp, &zp);
+          GCAsourceVoxelToPrior(gcam_ms->gcas[0], mri_inputs, transform, x, y,
+                                z, &xp, &yp, &zp);
           if (x == Ggca_x && y == Ggca_y && z == Ggca_z) {
             DiagBreak();
           }
@@ -16787,7 +16802,8 @@ MRI *GCAMMScomputeOptimalScale(GCAM_MS *gcam_ms,
             sigma = gcam_ms->sigmas[s];
             gca = gcam_ms->gcas[s];
             gcap = &gca->priors[xp][yp][zp];
-            if (GCAsourceVoxelToNode(gca, mri_inputs, transform, x, y, z, &xn, &yn, &zn) != NO_ERROR) {
+            if (GCAsourceVoxelToNode(gca, mri_inputs, transform, x, y, z, &xn,
+                                     &yn, &zn) != NO_ERROR) {
               continue;
             }
             gcan = &gca->nodes[xn][yn][zn];
@@ -16797,15 +16813,13 @@ MRI *GCAMMScomputeOptimalScale(GCAM_MS *gcam_ms,
             max_p = -1.0;
             max_label = -1;
             for (n = 0; n < gcap->nlabels; n++) {
-              p = GCAcomputePosteriorDensity(gcap, gcan, -1, n, vals, gca->ninputs, xn, yn, zn, gca);
-              if (Gdiag_no == gcap->labels[n] && x == Gx2 && y == Gy2 && z == Gz2)
-                printf("\ts %2.1f: l %s, p = %2.5f, xp=(%d, %d, %d), prior=%2.5f\n",
-                       sigma,
-                       cma_label_to_name(Gdiag_no),
-                       p,
-                       xp,
-                       yp,
-                       zp,
+              p = GCAcomputePosteriorDensity(gcap, gcan, -1, n, vals,
+                                             gca->ninputs, xn, yn, zn, gca);
+              if (Gdiag_no == gcap->labels[n] && x == Gx2 && y == Gy2 &&
+                  z == Gz2)
+                printf("\ts %2.1f: l %s, p = %2.5f, xp=(%d, %d, %d), "
+                       "prior=%2.5f\n",
+                       sigma, cma_label_to_name(Gdiag_no), p, xp, yp, zp,
                        gcap->priors[n]);
               if (p > max_p) {
                 max_p = p;
@@ -16828,14 +16842,11 @@ MRI *GCAMMScomputeOptimalScale(GCAM_MS *gcam_ms,
           }
 
           sigma = gcam_ms->sigmas[best_s];
-          if ((x == Ggca_x && y == Ggca_y && z == Ggca_z) || (x == Gx2 && y == Gy2 && z == Gz2))
-            printf("setting optimal scale at (%d, %d, %d) to %2.3f, l=%s, p=%2.5f\n",
-                   x,
-                   y,
-                   z,
-                   sigma,
-                   cma_label_to_name(best_label),
-                   best_p);
+          if ((x == Ggca_x && y == Ggca_y && z == Ggca_z) ||
+              (x == Gx2 && y == Gy2 && z == Gz2))
+            printf("setting optimal scale at (%d, %d, %d) to %2.3f, l=%s, "
+                   "p=%2.5f\n",
+                   x, y, z, sigma, cma_label_to_name(best_label), best_p);
 
           MRIsetVoxVal(mri_sigma, x, y, z, 0, sigma);
         }
@@ -16859,10 +16870,12 @@ MRI *GCAMMScomputeOptimalScale(GCAM_MS *gcam_ms,
           DiagBreak();
         }
 
-        if (!GCAsourceVoxelToNode(gcam_ms->gcas[0], mri_inputs, transform, x, y, z, &xn, &yn, &zn)) {
+        if (!GCAsourceVoxelToNode(gcam_ms->gcas[0], mri_inputs, transform, x, y,
+                                  z, &xn, &yn, &zn)) {
           load_vals(mri_inputs, x, y, z, vals, gcam_ms->gcas[0]->ninputs);
 
-          GCAsourceVoxelToPrior(gcam_ms->gcas[0], mri_inputs, transform, x, y, z, &xp, &yp, &zp);
+          GCAsourceVoxelToPrior(gcam_ms->gcas[0], mri_inputs, transform, x, y,
+                                z, &xp, &yp, &zp);
           if (x == Ggca_x && y == Ggca_y && z == Ggca_z) {
             DiagBreak();
           }
@@ -16887,7 +16900,8 @@ MRI *GCAMMScomputeOptimalScale(GCAM_MS *gcam_ms,
           }
 
           gca = gcam_ms->gcas[best_s];
-          GCAsourceVoxelToNode(gca, mri_inputs, transform, x, y, z, &xn, &yn, &zn);
+          GCAsourceVoxelToNode(gca, mri_inputs, transform, x, y, z, &xn, &yn,
+                               &zn);
           gcan = &gca->nodes[xn][yn][zn];
           gcap = &gca->priors[xp][yp][zp];
 
@@ -16896,7 +16910,8 @@ MRI *GCAMMScomputeOptimalScale(GCAM_MS *gcam_ms,
           max_p = -1.0;
           max_label = -1;
           for (n = 0; n < gcap->nlabels; n++) {
-            p = GCAcomputePosteriorDensity(gcap, gcan, -1, n, vals, gca->ninputs, xn, yn, zn, gca);
+            p = GCAcomputePosteriorDensity(gcap, gcan, -1, n, vals,
+                                           gca->ninputs, xn, yn, zn, gca);
             if (p > best_p) {
               best_p = p;
               best_label = gcap->labels[n];
@@ -16908,27 +16923,24 @@ MRI *GCAMMScomputeOptimalScale(GCAM_MS *gcam_ms,
           if (mri_aseg) {
             MRIsetVoxVal(mri_aseg, x, y, z, 0, best_label);
           }
-          if (mri_pvals)  // normalize p-value
+          if (mri_pvals) // normalize p-value
           {
             int s, second_label = 0, second_s = 0;
             double second_p = 0;
 
             MRIsetVoxVal(mri_pvals, x, y, z, 0, best_p);
             if (x == Gx2 && y == Gy2 && z == Gz2)
-              printf("setting optimal scale at (%d, %d, %d) to %2.3f, l=%s, p=%2.5f\n",
-                     x,
-                     y,
-                     z,
-                     sigma,
-                     cma_label_to_name(best_label),
-                     best_p);
+              printf("setting optimal scale at (%d, %d, %d) to %2.3f, l=%s, "
+                     "p=%2.5f\n",
+                     x, y, z, sigma, cma_label_to_name(best_label), best_p);
             if (mri_aseg->nframes > 1) {
               MRIsetVoxVal(mri_aseg, x, y, z, 1, best_p);
 
               // find 2nd optimal label and scale
               for (s = 0; s < gcam_ms->nsigmas; s++) {
                 gca = gcam_ms->gcas[s];
-                if (GCAsourceVoxelToNode(gca, mri_inputs, transform, x, y, z, &xn, &yn, &zn) != NO_ERROR) {
+                if (GCAsourceVoxelToNode(gca, mri_inputs, transform, x, y, z,
+                                         &xn, &yn, &zn) != NO_ERROR) {
                   continue;
                 }
                 gcan = &gca->nodes[xn][yn][zn];
@@ -16936,7 +16948,8 @@ MRI *GCAMMScomputeOptimalScale(GCAM_MS *gcam_ms,
 
                 // marginalize over labels
                 for (n = 0; n < gcap->nlabels; n++) {
-                  p = GCAcomputePosteriorDensity(gcap, gcan, -1, n, vals, gca->ninputs, xn, yn, zn, gca);
+                  p = GCAcomputePosteriorDensity(gcap, gcan, -1, n, vals,
+                                                 gca->ninputs, xn, yn, zn, gca);
                   if ((gcap->labels[n] != best_label) && (p > second_p)) {
                     second_p = p;
                     second_label = gcap->labels[n];
@@ -16946,30 +16959,31 @@ MRI *GCAMMScomputeOptimalScale(GCAM_MS *gcam_ms,
               }
 
               gca = gcam_ms->gcas[second_s];
-              GCAsourceVoxelToNode(gca, mri_inputs, transform, x, y, z, &xn, &yn, &zn);
+              GCAsourceVoxelToNode(gca, mri_inputs, transform, x, y, z, &xn,
+                                   &yn, &zn);
               gcan = &gca->nodes[xn][yn][zn];
               gcap = &gca->priors[xp][yp][zp];
               total_p = 0;
               for (n = 0; n < gcap->nlabels; n++) {
-                p = GCAcomputePosteriorDensity(gcap, gcan, -1, n, vals, gca->ninputs, xn, yn, zn, gca);
+                p = GCAcomputePosteriorDensity(gcap, gcan, -1, n, vals,
+                                               gca->ninputs, xn, yn, zn, gca);
                 total_p += p;
               }
               //              second_p /= total_p ;
               MRIsetVoxVal(mri_aseg, x, y, z, 2, second_label);
               MRIsetVoxVal(mri_aseg, x, y, z, 3, second_p);
               if (x == Gx2 && y == Gy2 && z == Gz2)
-                printf("setting 2nd optimal scale at (%d, %d, %d) to %2.3f, l=%s, p=%2.5f\n",
-                       x,
-                       y,
-                       z,
-                       gcam_ms->sigmas[second_s],
-                       cma_label_to_name(second_label),
-                       second_p);
+                printf("setting 2nd optimal scale at (%d, %d, %d) to %2.3f, "
+                       "l=%s, p=%2.5f\n",
+                       x, y, z, gcam_ms->sigmas[second_s],
+                       cma_label_to_name(second_label), second_p);
             }
           }
           sigma = gcam_ms->sigmas[best_s];
-          if ((x == Ggca_x && y == Ggca_y && z == Ggca_z) || (x == Gx2 && y == Gy2 && z == Gz2)) {
-            printf("setting optimal scale at (%d, %d, %d) to %2.3f\n", x, y, z, sigma);
+          if ((x == Ggca_x && y == Ggca_y && z == Ggca_z) ||
+              (x == Gx2 && y == Gy2 && z == Gz2)) {
+            printf("setting optimal scale at (%d, %d, %d) to %2.3f\n", x, y, z,
+                   sigma);
           }
 
           MRIsetVoxVal(mri_sigma, x, y, z, 0, sigma);
@@ -16982,8 +16996,7 @@ MRI *GCAMMScomputeOptimalScale(GCAM_MS *gcam_ms,
   return (mri_sigma);
 }
 #if 1
-double GCAMlogPosterior(GCA_MORPH *gcam, MRI *mri_inputs)
-{
+double GCAMlogPosterior(GCA_MORPH *gcam, MRI *mri_inputs) {
   double total_log_posterior, logp;
   int x, y, z, real_label;
   GCA_NODE *gcan;
@@ -17024,7 +17037,8 @@ double GCAMlogPosterior(GCA_MORPH *gcam, MRI *mri_inputs)
             continue;
           }
           real_label = 1;
-          p = GCAcomputePosteriorDensity(gcap, gcan, -1, n, vals, gca->ninputs, xn, yn, zn, gca);
+          p = GCAcomputePosteriorDensity(gcap, gcan, -1, n, vals, gca->ninputs,
+                                         xn, yn, zn, gca);
           if (p > max_p) {
             max_p = p;
             // best_label = gcap->labels[n];
@@ -17033,16 +17047,10 @@ double GCAMlogPosterior(GCA_MORPH *gcam, MRI *mri_inputs)
             p = 0;
           }
           if (Gx == x && Gy == y && Gz == z)
-            printf("node (%d, %d, %d) --> MRI(%2.0f, %2.0f, %2.0f) = %d, label = %s, pval = %2.5f\n",
-                   x,
-                   y,
-                   z,
-                   gcamn->x,
-                   gcamn->y,
-                   gcamn->z,
-                   (int)(vals[0]),
-                   cma_label_to_name(gcap->labels[n]),
-                   p);
+            printf("node (%d, %d, %d) --> MRI(%2.0f, %2.0f, %2.0f) = %d, label "
+                   "= %s, pval = %2.5f\n",
+                   x, y, z, gcamn->x, gcamn->y, gcamn->z, (int)(vals[0]),
+                   cma_label_to_name(gcap->labels[n]), p);
           total_p += p;
         }
         if (real_label == 0) {
@@ -17057,8 +17065,7 @@ double GCAMlogPosterior(GCA_MORPH *gcam, MRI *mri_inputs)
   return (total_log_posterior);
 }
 #else
-double GCAMlogPosteriorDensity(GCA_MORPH *gcam, MRI *mri_inputs)
-{
+double GCAMlogPosteriorDensity(GCA_MORPH *gcam, MRI *mri_inputs) {
   double total_log_posterior;
   int x, y, z;
   GCA_NODE *gcan;
@@ -17086,10 +17093,12 @@ double GCAMlogPosteriorDensity(GCA_MORPH *gcam, MRI *mri_inputs)
           DiagBreak();
         }
 
-        if (!GCAsourceVoxelToNode(gca, mri_inputs, transform, x, y, z, &xn, &yn, &zn)) {
+        if (!GCAsourceVoxelToNode(gca, mri_inputs, transform, x, y, z, &xn, &yn,
+                                  &zn)) {
           load_vals(mri_inputs, x, y, z, vals, gca->ninputs);
 
-          GCAsourceVoxelToPrior(gca, mri_inputs, transform, x, y, z, &xp, &yp, &zp);
+          GCAsourceVoxelToPrior(gca, mri_inputs, transform, x, y, z, &xp, &yp,
+                                &zp);
           if (x == Ggca_x && y == Ggca_y && z == Ggca_z) {
             DiagBreak();
           }
@@ -17101,7 +17110,8 @@ double GCAMlogPosteriorDensity(GCA_MORPH *gcam, MRI *mri_inputs)
           // marginalize over labels
           total_p = 0;
           for (n = 0; n < gcap->nlabels; n++) {
-            p = GCAcomputePosteriorDensity(gcap, gcan, -1, n, vals, gca->ninputs, gca, xn, yn, zn);
+            p = GCAcomputePosteriorDensity(gcap, gcan, -1, n, vals,
+                                           gca->ninputs, gca, xn, yn, zn);
             if (p > max_p) {
               max_p = p;
               best_label = gcap->labels[n];
@@ -17117,42 +17127,50 @@ double GCAMlogPosteriorDensity(GCA_MORPH *gcam, MRI *mri_inputs)
   return (total_log_posterior);
 }
 #endif
-MRI *GCAMcreateDistanceTransforms(
-    MRI *mri_source, MRI *mri_target, MRI *mri_all_dtrans, float max_dist, GCA_MORPH *gcam, MRI **pmri_atlas_dist_map)
-{
+MRI *GCAMcreateDistanceTransforms(MRI *mri_source, MRI *mri_target,
+                                  MRI *mri_all_dtrans, float max_dist,
+                                  GCA_MORPH *gcam, MRI **pmri_atlas_dist_map) {
   MRI *mri_dtrans, *mri_atlas_dtrans, *mri_atlas_dist_map;
   int frame, label;
   char fname[STRLEN];
 
   mri_all_dtrans =
-      MRIallocSequence(mri_source->width, mri_source->height, mri_source->depth, MRI_FLOAT, NDTRANS_LABELS);
-  MRIcopyHeader(mri_target, mri_all_dtrans);  // should this be mri_source????
+      MRIallocSequence(mri_source->width, mri_source->height, mri_source->depth,
+                       MRI_FLOAT, NDTRANS_LABELS);
+  MRIcopyHeader(mri_target, mri_all_dtrans); // should this be mri_source????
 
   mri_atlas_dist_map =
-      MRIallocSequence(mri_target->width, mri_target->height, mri_target->depth, MRI_FLOAT, NDTRANS_LABELS);
+      MRIallocSequence(mri_target->width, mri_target->height, mri_target->depth,
+                       MRI_FLOAT, NDTRANS_LABELS);
 
   MRIcopyHeader(mri_target, mri_all_dtrans);
 
   ROMP_PF_begin
 #ifdef HAVE_OPENMP
-  label = 0;
+      label = 0;
   mri_atlas_dtrans = mri_dtrans = NULL;
-  #pragma omp parallel for if_ROMP(experimental) firstprivate(                                                                            \
-    label, fname, mri_atlas_dtrans, mri_source, mri_target, mri_all_dtrans, mri_dtrans, max_dist, Gdiag_no, gcam) \
-    schedule(static, 1)
+#pragma omp parallel for if_ROMP(experimental)                                 \
+    firstprivate(label, fname, mri_atlas_dtrans, mri_source, mri_target,       \
+                 mri_all_dtrans, mri_dtrans, max_dist, Gdiag_no, gcam)         \
+        schedule(static, 1)
 #endif
   for (frame = 0; frame < NDTRANS_LABELS; frame++) {
     ROMP_PFLB_begin
-    
-    label = dtrans_labels[frame];
-    printf("creating distance transform for %s, frame %d...\n", cma_label_to_name(label), frame);
 
-    mri_dtrans = MRIdistanceTransform(mri_source, NULL, label, max_dist, DTRANS_MODE_SIGNED, NULL);
+        label = dtrans_labels[frame];
+    printf("creating distance transform for %s, frame %d...\n",
+           cma_label_to_name(label), frame);
+
+    mri_dtrans = MRIdistanceTransform(mri_source, NULL, label, max_dist,
+                                      DTRANS_MODE_SIGNED, NULL);
     MRIcopyFrame(mri_dtrans, mri_all_dtrans, 0, frame);
-    mri_atlas_dtrans = MRIdistanceTransform(mri_target, NULL, label, max_dist, DTRANS_MODE_SIGNED, NULL);
-    MRInormalizeInteriorDistanceTransform(mri_atlas_dtrans, mri_dtrans, mri_atlas_dtrans);
+    mri_atlas_dtrans = MRIdistanceTransform(mri_target, NULL, label, max_dist,
+                                            DTRANS_MODE_SIGNED, NULL);
+    MRInormalizeInteriorDistanceTransform(mri_atlas_dtrans, mri_dtrans,
+                                          mri_atlas_dtrans);
     MRIcopyFrame(mri_atlas_dtrans, mri_atlas_dist_map, 0, frame);
-    GCAMsetTargetDistancesForLabel(gcam, mri_target, mri_atlas_dtrans, dtrans_labels[frame]);
+    GCAMsetTargetDistancesForLabel(gcam, mri_target, mri_atlas_dtrans,
+                                   dtrans_labels[frame]);
 
     if (Gdiag & DIAG_WRITE && (DIAG_VERBOSE_ON || Gdiag_no == label)) {
       sprintf(fname, "source.%s.mgz", cma_label_to_name(label));
@@ -17164,12 +17182,12 @@ MRI *GCAMcreateDistanceTransforms(
     }
     MRIfree(&mri_dtrans);
     MRIfree(&mri_atlas_dtrans);
-    
+
     ROMP_PFLB_end
   }
   ROMP_PF_end
 
-  mri_all_dtrans->outside_val = max_dist;
+      mri_all_dtrans->outside_val = max_dist;
   mri_atlas_dist_map->outside_val = max_dist;
   if (pmri_atlas_dist_map)
     *pmri_atlas_dist_map = mri_atlas_dist_map;
@@ -17201,13 +17219,14 @@ GCAMcreateDistanceTransforms(GCA_MORPH *gcam, MRI *mri, MRI *mri_all_dtrans,
   MRIwrite(mri_labels, "labels.mgz") ;
   ROMP_PF_begin
 #ifdef HAVE_OPENMP
-  #pragma omp parallel for if_ROMP(experimental) firstprivate( \
-    fname, mri_labels, mri_all_dtrans, dtrans_labels, mri_dtrans, mri, max_dist, Gdiag_no, gcam) schedule(static, 1)
+#pragma omp parallel for if_ROMP(experimental)                                 \
+    firstprivate(fname, mri_labels, mri_all_dtrans, dtrans_labels, mri_dtrans, \
+                 mri, max_dist, Gdiag_no, gcam) schedule(static, 1)
 #endif
   for (frame = 0 ; frame < NDTRANS_LABELS ; frame++)
   {
     ROMP_PFLB_begin
-    
+
     printf("creating distance transform for %s, frame %d...\n", cma_label_to_name(dtrans_labels[frame]), frame) ;
     if (dtrans_labels[frame] == Gdiag_no)
     {
@@ -17231,7 +17250,7 @@ GCAMcreateDistanceTransforms(GCA_MORPH *gcam, MRI *mri, MRI *mri_all_dtrans,
     GCAMsetTargetDistancesForLabel(gcam, mri_labels, mri_dtrans, dtrans_labels[frame]);
     MRIcopyFrame(mri_dtrans, *pmri_atlas_dtrans, 0, frame) ;
     MRIfree(&mri_dtrans) ;
-    
+
     ROMP_PFLB_end
   }
   ROMP_PF_end
@@ -17243,50 +17262,58 @@ GCAMcreateDistanceTransforms(GCA_MORPH *gcam, MRI *mri, MRI *mri_all_dtrans,
 }
 #endif
 
-int GCAMwriteDistanceTransforms(GCA_MORPH *gcam,
-                                MRI *mri_source_dist_map,
+int GCAMwriteDistanceTransforms(GCA_MORPH *gcam, MRI *mri_source_dist_map,
                                 MRI *mri_atlas_dist_map,
-                                const char *dist_name)
-{
+                                const char *dist_name) {
   char fname[STRLEN];
   int i, label;
 
   for (i = 0; i < NDTRANS_LABELS; i++) {
     label = dtrans_labels[i];
-    sprintf(fname, "%s_source_frame%d_%s.mgz", dist_name, i, cma_label_to_name(label));
+    sprintf(fname, "%s_source_frame%d_%s.mgz", dist_name, i,
+            cma_label_to_name(label));
     MRIwriteFrame(mri_source_dist_map, fname, i);
-    sprintf(fname, "%s_atlas_frame%d_%s.mgz", dist_name, i, cma_label_to_name(label));
+    sprintf(fname, "%s_atlas_frame%d_%s.mgz", dist_name, i,
+            cma_label_to_name(label));
     MRIwriteFrame(mri_atlas_dist_map, fname, i);
   }
   return (NO_ERROR);
 }
-MRI *GCAMreadDistanceTransforms(
-    GCA_MORPH *gcam, MRI *mri, MRI *mri_all_dtrans, MRI **pmri_atlas_dtrans, const char *dist_name, double max_dist)
-{
+MRI *GCAMreadDistanceTransforms(GCA_MORPH *gcam, MRI *mri, MRI *mri_all_dtrans,
+                                MRI **pmri_atlas_dtrans, const char *dist_name,
+                                double max_dist) {
   MRI *mri_tmp;
   int i, label;
   char fname[STRLEN];
 
   if (mri_all_dtrans == NULL)
-    mri_all_dtrans = MRIallocSequence(mri->width, mri->height, mri->depth, MRI_FLOAT, NDTRANS_LABELS);
+    mri_all_dtrans = MRIallocSequence(mri->width, mri->height, mri->depth,
+                                      MRI_FLOAT, NDTRANS_LABELS);
   if (*pmri_atlas_dtrans == NULL)
-    *pmri_atlas_dtrans = MRIallocSequence(mri->width, mri->height, mri->depth, MRI_FLOAT, NDTRANS_LABELS);
+    *pmri_atlas_dtrans = MRIallocSequence(mri->width, mri->height, mri->depth,
+                                          MRI_FLOAT, NDTRANS_LABELS);
 
   MRIcopyHeader(mri, mri_all_dtrans);
 
   for (i = 0; i < NDTRANS_LABELS; i++) {
     label = dtrans_labels[i];
-    sprintf(fname, "%s_source_frame%d_%s.mgz", dist_name, i, cma_label_to_name(label));
+    sprintf(fname, "%s_source_frame%d_%s.mgz", dist_name, i,
+            cma_label_to_name(label));
     mri_tmp = MRIread(fname);
     if (mri_tmp == NULL) {
-      ErrorReturn(NULL, (ERROR_NOFILE, "GCAMreadDistanceTransforms: could not read volume %s", fname));
+      ErrorReturn(NULL, (ERROR_NOFILE,
+                         "GCAMreadDistanceTransforms: could not read volume %s",
+                         fname));
     }
     MRIcopyFrame(mri_tmp, mri_all_dtrans, 0, i);
 
-    sprintf(fname, "%s_atlas_frame%d_%s.mgz", dist_name, i, cma_label_to_name(label));
+    sprintf(fname, "%s_atlas_frame%d_%s.mgz", dist_name, i,
+            cma_label_to_name(label));
     mri_tmp = MRIread(fname);
     if (mri_tmp == NULL) {
-      ErrorReturn(NULL, (ERROR_NOFILE, "GCAMreadDistanceTransforms: could not read volume %s", fname));
+      ErrorReturn(NULL, (ERROR_NOFILE,
+                         "GCAMreadDistanceTransforms: could not read volume %s",
+                         fname));
     }
     MRIcopyFrame(mri_tmp, *pmri_atlas_dtrans, 0, i);
   }
@@ -17300,8 +17327,8 @@ MRI *GCAMreadDistanceTransforms(
   compute a gauss-newton step matching the source and atlas images
   and put the resulting vector field into mri_v
 */
-int MRIcomputeGaussNewtonStep(MRI *mri_source, MRI *mri_atlas, MRI *mri_v, MRI *mri_labels, GCA_MORPH_PARMS *parms)
-{
+int MRIcomputeGaussNewtonStep(MRI *mri_source, MRI *mri_atlas, MRI *mri_v,
+                              MRI *mri_labels, GCA_MORPH_PARMS *parms) {
   MATRIX *m_J, *m_J_t, *m_inv, *m_tmp = NULL, *v_r, *v_v, *m_tmp2 = NULL, *m_D;
   // MATRIX *m_I;
   int x, y, z, frame, label;
@@ -17354,8 +17381,10 @@ int MRIcomputeGaussNewtonStep(MRI *mri_source, MRI *mri_atlas, MRI *mri_v, MRI *
             DiagBreak();
           }
           tval = MRIgetVoxVal(mri_atlas, x, y, z, frame);
-          MRIsampleVolumeFrameType(mri_source, x + dx, y + dy, z + dz, frame, SAMPLE_TRILINEAR, &sval);
-          MRIsampleVolumeGradientFrame(mri_source, x + dx, y + dy, z + dz, &Ix, &Iy, &Iz, frame);
+          MRIsampleVolumeFrameType(mri_source, x + dx, y + dy, z + dz, frame,
+                                   SAMPLE_TRILINEAR, &sval);
+          MRIsampleVolumeGradientFrame(mri_source, x + dx, y + dy, z + dz, &Ix,
+                                       &Iy, &Iz, frame);
 #if 0
           if (sval > 2.0)
           {
@@ -17373,7 +17402,7 @@ int MRIcomputeGaussNewtonStep(MRI *mri_source, MRI *mri_atlas, MRI *mri_v, MRI *
 #endif
         MatrixTranspose(m_J, m_J_t);
         m_tmp = MatrixMultiply(m_J_t, m_J, m_tmp);
-        MatrixAdd(m_tmp, m_D, m_tmp);  // Marquardt-Levemberg
+        MatrixAdd(m_tmp, m_D, m_tmp); // Marquardt-Levemberg
         if (MatrixInverse(m_tmp, m_inv) == NULL) {
           continue;
         }
@@ -17389,7 +17418,8 @@ int MRIcomputeGaussNewtonStep(MRI *mri_source, MRI *mri_atlas, MRI *mri_v, MRI *
         MRIsetVoxVal(mri_v, x, y, z, 1, V3_Y(v_v));
         MRIsetVoxVal(mri_v, x, y, z, 2, V3_Z(v_v));
         if (x == Gx && y == Gy && z == Gz) {
-          printf("Gauss-Newton(%d, %d, %d): v = (%2.2f, %2.2f, %2.2f)\n", Gx, Gy, Gz, V3_X(v_v), V3_Y(v_v), V3_Z(v_v));
+          printf("Gauss-Newton(%d, %d, %d): v = (%2.2f, %2.2f, %2.2f)\n", Gx,
+                 Gy, Gz, V3_X(v_v), V3_Y(v_v), V3_Z(v_v));
         }
       }
 
@@ -17404,8 +17434,7 @@ int MRIcomputeGaussNewtonStep(MRI *mri_source, MRI *mri_atlas, MRI *mri_v, MRI *
 }
 
 #if 1
-int gcamScaleAndSquare(MRI *mri_s_old, MRI *mri_s_new)
-{
+int gcamScaleAndSquare(MRI *mri_s_old, MRI *mri_s_new) {
   int x, y, z;
   double dx, dy, dz, dx_old, dy_old, dz_old;
 
@@ -17424,9 +17453,12 @@ int gcamScaleAndSquare(MRI *mri_s_old, MRI *mri_s_new)
         dy_old = MRIFseq_vox(mri_s_old, x, y, z, 1);
         dz_old = MRIFseq_vox(mri_s_old, x, y, z, 2);
 #endif
-        MRIsampleVolumeFrameType(mri_s_old, x + dx_old, y + dy_old, z + dz_old, 0, SAMPLE_TRILINEAR, &dx);
-        MRIsampleVolumeFrameType(mri_s_old, x + dx_old, y + dy_old, z + dz_old, 1, SAMPLE_TRILINEAR, &dy);
-        MRIsampleVolumeFrameType(mri_s_old, x + dx_old, y + dy_old, z + dz_old, 2, SAMPLE_TRILINEAR, &dz);
+        MRIsampleVolumeFrameType(mri_s_old, x + dx_old, y + dy_old, z + dz_old,
+                                 0, SAMPLE_TRILINEAR, &dx);
+        MRIsampleVolumeFrameType(mri_s_old, x + dx_old, y + dy_old, z + dz_old,
+                                 1, SAMPLE_TRILINEAR, &dy);
+        MRIsampleVolumeFrameType(mri_s_old, x + dx_old, y + dy_old, z + dz_old,
+                                 2, SAMPLE_TRILINEAR, &dz);
 #if 0
         MRIsetVoxVal(mri_s_new, x, y, z, 0, dx_old+dx) ;
         MRIsetVoxVal(mri_s_new, x, y, z, 1, dy_old+dy) ;
@@ -17438,20 +17470,14 @@ int gcamScaleAndSquare(MRI *mri_s_old, MRI *mri_s_new)
 #endif
         if (x == Gx && y == Gy && z == Gz) {
           printf("gcamScaleAndSquare(%d, %d, %d): Dx = (%2.2f, %2.2f, %2.2f)\n",
-                 Gx,
-                 Gy,
-                 Gz,
-                 dx_old + dx,
-                 dy_old + dy,
-                 dz_old + dz);
+                 Gx, Gy, Gz, dx_old + dx, dy_old + dy, dz_old + dz);
         }
       }
 
   return (NO_ERROR);
 }
 #endif
-MRI *MRIcomposeWarps(MRI *mri_warp1, MRI *mri_warp2, MRI *mri_dst)
-{
+MRI *MRIcomposeWarps(MRI *mri_warp1, MRI *mri_warp2, MRI *mri_dst) {
   int x, y, z;
   double dx2, dy2, dz2, dx1, dy1, dz1;
 
@@ -17467,7 +17493,7 @@ MRI *MRIcomposeWarps(MRI *mri_warp1, MRI *mri_warp2, MRI *mri_dst)
         }
 
 // should use new update to sample old warp, then do vector addition
-#if 0  // used to be 0 before Thomas broke everything
+#if 0 // used to be 0 before Thomas broke everything
         dx2 = MRIgetVoxVal(mri_warp2, x, y, z, 0) ;
         dy2 = MRIgetVoxVal(mri_warp2, x, y, z, 1) ;
         dz2 = MRIgetVoxVal(mri_warp2, x, y, z, 2) ;
@@ -17503,22 +17529,12 @@ MRI *MRIcomposeWarps(MRI *mri_warp1, MRI *mri_warp2, MRI *mri_dst)
           printf(
               "MRIcomposeWarps(%d, %d, %d): dx1 = (%2.2f, %2.2f, %2.2f), "
               "dx2 = (%2.2f, %2.2f, %2.2f), dx_total = (%2.2f, %2.2f, %2.2f)\n",
-              Gx,
-              Gy,
-              Gz,
-              dx1,
-              dy1,
-              dz1,
-              dx2,
-              dy2,
-              dz2,
-              dx1 + dx2,
-              dy1 + dy2,
+              Gx, Gy, Gz, dx1, dy1, dz1, dx2, dy2, dz2, dx1 + dx2, dy1 + dy2,
               dz1 + dz2);
         }
       }
 
-  if (Gx2 >= 0)  // find the atlas node that most closes maps to this voxel
+  if (Gx2 >= 0) // find the atlas node that most closes maps to this voxel
   {
     float min_dist, dist, x2, y2, z2, xf, yf, zf;
 
@@ -17547,15 +17563,17 @@ MRI *MRIcomposeWarps(MRI *mri_warp1, MRI *mri_warp2, MRI *mri_dst)
           }
         }
     DiagBreak();
-    printf("I (%d, %d, %d) <=- A (%2.1f, %2.1f, %2.1f), dist=%2.1f\n", Gx2, Gy2, Gz2, xf, yf, zf, min_dist);
+    printf("I (%d, %d, %d) <=- A (%2.1f, %2.1f, %2.1f), dist=%2.1f\n", Gx2, Gy2,
+           Gz2, xf, yf, zf, min_dist);
   }
 
   return (mri_dst);
 }
 double MRImorphSSE(MRI *mri_source, MRI *mri_atlas, MRI *mri_morph);
 
-MRI *MRIcomputeDistanceTransformStep(
-    MRI *mri_source, MRI *mri_atlas, MRI *mri_delta, MRI *mri_labels, GCA_MORPH_PARMS *parms);
+MRI *MRIcomputeDistanceTransformStep(MRI *mri_source, MRI *mri_atlas,
+                                     MRI *mri_delta, MRI *mri_labels,
+                                     GCA_MORPH_PARMS *parms);
 
 /*
   mri_source and mri_atlas are distance transforms of labeled volume.
@@ -17591,24 +17609,22 @@ check_inverse(MRI *mri_fwd, MRI *mri_inv)
 }
 #endif
 
-int GCAMdemonsRegister(GCA_MORPH *gcam,
-                       MRI *mri_source_labels,
-                       MRI *mri_atlas_labels,
-                       GCA_MORPH_PARMS *parms,
-                       double max_dist,
-                       MRI *mri_pvals,
-                       MRI *mri_atlas_dtrans_orig)
-{
+int GCAMdemonsRegister(GCA_MORPH *gcam, MRI *mri_source_labels,
+                       MRI *mri_atlas_labels, GCA_MORPH_PARMS *parms,
+                       double max_dist, MRI *mri_pvals,
+                       MRI *mri_atlas_dtrans_orig) {
   double vmax_allowed, dt, N, old_sse, new_sse, vmax, pct_change;
-  MRI *mri_s_new, *mri_s_old, *mri_kernel, *mri_morphed, *mri_current_dtrans = NULL, *mri_warp, *mri_current_labels,
-                                                         *mri_dtrans, *mri_atlas_dtrans;
+  MRI *mri_s_new, *mri_s_old, *mri_kernel, *mri_morphed,
+      *mri_current_dtrans = NULL, *mri_warp, *mri_current_labels, *mri_dtrans,
+      *mri_atlas_dtrans;
   int done, step;
   char fname[STRLEN];
 
   mri_s_old =
-      MRIallocSequence(mri_atlas_labels->width, mri_atlas_labels->height, mri_atlas_labels->depth, MRI_FLOAT, 3);
+      MRIallocSequence(mri_atlas_labels->width, mri_atlas_labels->height,
+                       mri_atlas_labels->depth, MRI_FLOAT, 3);
   mri_s_new = MRIclone(mri_s_old, NULL);
-  mri_warp = MRIclone(mri_s_old, NULL);  // start with identity warp
+  mri_warp = MRIclone(mri_s_old, NULL); // start with identity warp
   GCAMwriteWarpToMRI(gcam, mri_warp);
 
   parms->mri = mri_source_labels;
@@ -17618,13 +17634,11 @@ int GCAMdemonsRegister(GCA_MORPH *gcam,
     if (parms->log_fp == NULL) {
       if (parms->start_t == 0) {
         parms->log_fp = fopen(fname, "w");
-      }
-      else {
+      } else {
         parms->log_fp = fopen(fname, "a");
       }
     }
-  }
-  else {
+  } else {
     parms->log_fp = NULL;
   }
 
@@ -17633,15 +17647,11 @@ int GCAMdemonsRegister(GCA_MORPH *gcam,
     x = mri_atlas_labels->xi[nint(Gx + MRIgetVoxVal(mri_warp, Gx, Gy, Gz, 0))];
     y = mri_atlas_labels->yi[nint(Gy + MRIgetVoxVal(mri_warp, Gx, Gy, Gz, 1))];
     z = mri_atlas_labels->zi[nint(Gz + MRIgetVoxVal(mri_warp, Gx, Gy, Gz, 2))];
-    printf("GCAMdemonsRegister: (%d, %d, %d) = %s in source, and (%d, %d, %d) = %s in atlas\n",
-           Gx,
-           Gy,
-           Gz,
-           cma_label_to_name(MRIgetVoxVal(mri_source_labels, Gx, Gy, Gz, 0)),
-           x,
-           y,
-           z,
-           cma_label_to_name(MRIgetVoxVal(mri_atlas_labels, x, y, z, 0)));
+    printf("GCAMdemonsRegister: (%d, %d, %d) = %s in source, and (%d, %d, %d) "
+           "= %s in atlas\n",
+           Gx, Gy, Gz,
+           cma_label_to_name(MRIgetVoxVal(mri_source_labels, Gx, Gy, Gz, 0)), x,
+           y, z, cma_label_to_name(MRIgetVoxVal(mri_atlas_labels, x, y, z, 0)));
   }
 
   if (Gx2 >= 0) {
@@ -17652,14 +17662,11 @@ int GCAMdemonsRegister(GCA_MORPH *gcam,
     Gx = nint(xf);
     Gy = nint(yf);
     Gz = nint(zf);
-    printf("GCAMdemonsRegister: (%d, %d, %d) = %s in source, and (%d, %d, %d) = %s in atlas\n",
-           Gx2,
-           Gy2,
-           Gz2,
+    printf("GCAMdemonsRegister: (%d, %d, %d) = %s in source, and (%d, %d, %d) "
+           "= %s in atlas\n",
+           Gx2, Gy2, Gz2,
            cma_label_to_name(MRIgetVoxVal(mri_source_labels, Gx2, Gy2, Gz2, 0)),
-           Gx,
-           Gy,
-           Gz,
+           Gx, Gy, Gz,
            cma_label_to_name(MRIgetVoxVal(mri_atlas_labels, Gx, Gy, Gz, 0)));
   }
 
@@ -17688,7 +17695,8 @@ int GCAMdemonsRegister(GCA_MORPH *gcam,
   mri_atlas_dtrans = mri_atlas_dtrans_orig;
 #endif
   step = parms->start_t;
-  mri_current_labels = MRIapplyMorph(mri_source_labels, mri_warp, NULL, SAMPLE_NEAREST);
+  mri_current_labels =
+      MRIapplyMorph(mri_source_labels, mri_warp, NULL, SAMPLE_NEAREST);
   /*
     mri_current_labels is the label map using the current warp.
     mri_source_labels are the original (unwarped labels)
@@ -17715,7 +17723,8 @@ int GCAMdemonsRegister(GCA_MORPH *gcam,
       MRIwriteImageViews(mri, fname, IMAGE_SIZE);
       MRIfree(&mri);
     }
-    mri_morphed = GCAMmorphFromAtlas(mri_atlas_labels, gcam, NULL, SAMPLE_NEAREST);
+    mri_morphed =
+        GCAMmorphFromAtlas(mri_atlas_labels, gcam, NULL, SAMPLE_NEAREST);
     sprintf(fname, "%s_atlas%3.3d.mgh", parms->base_name, parms->start_t);
     MRIwrite(mri_morphed, fname);
     MRIfree(&mri_morphed);
@@ -17726,7 +17735,8 @@ int GCAMdemonsRegister(GCA_MORPH *gcam,
       mri_warp2 = MRIclone(mri_warp, NULL);
       GCAMwriteWarpToMRI(gcam, mri_warp2);
 
-      mri_morphed = GCAMmorphToAtlas(mri_source_labels, gcam, NULL, 0, SAMPLE_NEAREST);
+      mri_morphed =
+          GCAMmorphToAtlas(mri_source_labels, gcam, NULL, 0, SAMPLE_NEAREST);
       sprintf(fname, "%s_source_gcam.mgh", parms->base_name);
       MRIwrite(mri_morphed, fname);
       MRIfree(&mri_morphed);
@@ -17734,16 +17744,19 @@ int GCAMdemonsRegister(GCA_MORPH *gcam,
     }
   }
   /*
-    normalize the interior (<0) distances in the atlas to have the same min val (max neg)
-    as the src images so that we can compute true voxel distances.
+    normalize the interior (<0) distances in the atlas to have the same min val
+    (max neg) as the src images so that we can compute true voxel distances.
   */
-  mri_dtrans = MRIcreateDistanceTransforms(mri_current_labels, NULL, max_dist, parms->dtrans_labels, parms->ndtrans);
-  MRInormalizeInteriorDistanceTransform(mri_atlas_dtrans, mri_dtrans, mri_atlas_dtrans);
+  mri_dtrans = MRIcreateDistanceTransforms(
+      mri_current_labels, NULL, max_dist, parms->dtrans_labels, parms->ndtrans);
+  MRInormalizeInteriorDistanceTransform(mri_atlas_dtrans, mri_dtrans,
+                                        mri_atlas_dtrans);
   old_sse = MRIlabelMorphSSE(mri_source_labels, mri_atlas_labels, mri_warp);
   mri_current_dtrans = MRIcopy(mri_dtrans, mri_current_dtrans);
-  do  // run demons on the current and atlas distance transforms
+  do // run demons on the current and atlas distance transforms
   {
-    MRIcomputeDistanceTransformStep(mri_current_dtrans, mri_atlas_dtrans, mri_s_old, mri_atlas_labels, parms);
+    MRIcomputeDistanceTransformStep(mri_current_dtrans, mri_atlas_dtrans,
+                                    mri_s_old, mri_atlas_labels, parms);
     if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
       sprintf(fname, "%s_dtstep%3.3d.mgz", parms->base_name, step);
       printf("writing step direction to %s\n", fname);
@@ -17751,8 +17764,8 @@ int GCAMdemonsRegister(GCA_MORPH *gcam,
     }
 
     vmax = MRImaxNorm(mri_s_old);
-    vmax_allowed = 0.125;  // actually 0.5 of pixel spacing would ok
-    vmax_allowed = 0.25;   // actually 0.5 of pixel spacing would ok
+    vmax_allowed = 0.125; // actually 0.5 of pixel spacing would ok
+    vmax_allowed = 0.25;  // actually 0.5 of pixel spacing would ok
     N = ceil(log2(vmax / vmax_allowed));
     N = MAX(6.0, N);
     dt = 1.0 / pow(2, N);
@@ -17782,16 +17795,20 @@ int GCAMdemonsRegister(GCA_MORPH *gcam,
 
     MRIapplyMorph(mri_current_dtrans, mri_s_new, mri_dtrans, SAMPLE_TRILINEAR);
     MRIcopy(mri_dtrans, mri_current_dtrans);
-    MRIapplyMorph(mri_source_labels, mri_warp, mri_current_labels, SAMPLE_NEAREST);
+    MRIapplyMorph(mri_source_labels, mri_warp, mri_current_labels,
+                  SAMPLE_NEAREST);
     new_sse = MRIlabelMorphSSE(mri_source_labels, mri_atlas_labels, mri_warp);
     pct_change = 100 * (old_sse - new_sse) / (old_sse);
-    printf("step %d: old sse %2.3f, new sse %2.3f (%2.3f%%)\n", step, old_sse, new_sse, pct_change);
+    printf("step %d: old sse %2.3f, new sse %2.3f (%2.3f%%)\n", step, old_sse,
+           new_sse, pct_change);
     if (parms->log_fp) {
-      fprintf(parms->log_fp, "step %d: old sse %2.3f, new sse %2.3f (%2.3f%%)\n", step, old_sse, new_sse, pct_change);
+      fprintf(parms->log_fp,
+              "step %d: old sse %2.3f, new sse %2.3f (%2.3f%%)\n", step,
+              old_sse, new_sse, pct_change);
       fflush(parms->log_fp);
     }
 
-    done = pct_change < parms->tol;  // (new_sse > old_sse) ;
+    done = pct_change < parms->tol; // (new_sse > old_sse) ;
     if (Gdiag & DIAG_WRITE) {
       char fname[STRLEN];
 
@@ -17814,7 +17831,8 @@ int GCAMdemonsRegister(GCA_MORPH *gcam,
         printf("writing results of level to %s...\n", parms->write_fname);
         //            GCAMvoxToRas(gcam) ;
         GCAMwrite(gcam, parms->write_fname);
-        mri = GCAMmorphToAtlas(mri_source_labels, gcam, NULL, -1, SAMPLE_NEAREST);
+        mri =
+            GCAMmorphToAtlas(mri_source_labels, gcam, NULL, -1, SAMPLE_NEAREST);
 
         sprintf(fname, "%s_gcam%3.3d.mgh", parms->base_name, step);
         MRIwrite(mri, fname);
@@ -17828,7 +17846,8 @@ int GCAMdemonsRegister(GCA_MORPH *gcam,
         }
         GCAMreadWarpFromMRI(gcam, mri_warp);
         GCAMinvert(gcam, mri_source_labels);
-        mri_morphed = GCAMmorphFromAtlas(mri_atlas_labels, gcam, NULL, SAMPLE_NEAREST);
+        mri_morphed =
+            GCAMmorphFromAtlas(mri_atlas_labels, gcam, NULL, SAMPLE_NEAREST);
         sprintf(fname, "%s_atlas%3.3d.mgh", parms->base_name, step);
         MRIwrite(mri_morphed, fname);
         MRIfree(&mri_morphed);
@@ -17842,7 +17861,8 @@ int GCAMdemonsRegister(GCA_MORPH *gcam,
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
     char fname[STRLEN];
     step++;
-    mri_morphed = MRIapplyMorph(mri_source_labels, mri_warp, NULL, SAMPLE_NEAREST);
+    mri_morphed =
+        MRIapplyMorph(mri_source_labels, mri_warp, NULL, SAMPLE_NEAREST);
     sprintf(fname, "%s_source%3.3d.mgz", parms->base_name, step);
     MRIwrite(mri_morphed, fname);
     sprintf(fname, "%s_source%3.3d", parms->base_name, step);
@@ -17859,7 +17879,8 @@ int GCAMdemonsRegister(GCA_MORPH *gcam,
     mri_warp2 = MRIclone(mri_warp, NULL);
     GCAMwriteWarpToMRI(gcam, mri_warp2);
 
-    mri_morphed = GCAMmorphToAtlas(mri_source_labels, gcam, NULL, 0, SAMPLE_NEAREST);
+    mri_morphed =
+        GCAMmorphToAtlas(mri_source_labels, gcam, NULL, 0, SAMPLE_NEAREST);
     sprintf(fname, "%s_source_gcam.mgz", parms->base_name);
 
     mri_m1 = MRIapplyMorph(mri_source_labels, mri_warp, NULL, SAMPLE_NEAREST);
@@ -17891,8 +17912,7 @@ int GCAMdemonsRegister(GCA_MORPH *gcam,
 
   return (NO_ERROR);
 }
-int GCAMcompose(GCA_MORPH *gcam, MRI *mri_warp)
-{
+int GCAMcompose(GCA_MORPH *gcam, MRI *mri_warp) {
   int xp, yp, zp, xv, yv, zv;
   double dx, dy, dz;
   GCA_MORPH_NODE *gcamn;
@@ -17902,9 +17922,12 @@ int GCAMcompose(GCA_MORPH *gcam, MRI *mri_warp)
       for (zp = 0; zp < gcam->depth; zp++) {
         GCApriorToVoxel(gcam->gca, mri_warp, xp, yp, zp, &xv, &yv, &zv);
         gcamn = &gcam->nodes[xp][yp][zp];
-        MRIsampleVolumeFrameType(mri_warp, gcamn->x, gcamn->y, gcamn->z, 0, SAMPLE_TRILINEAR, &dx);
-        MRIsampleVolumeFrameType(mri_warp, gcamn->x, gcamn->y, gcamn->z, 1, SAMPLE_TRILINEAR, &dy);
-        MRIsampleVolumeFrameType(mri_warp, gcamn->x, gcamn->y, gcamn->z, 2, SAMPLE_TRILINEAR, &dz);
+        MRIsampleVolumeFrameType(mri_warp, gcamn->x, gcamn->y, gcamn->z, 0,
+                                 SAMPLE_TRILINEAR, &dx);
+        MRIsampleVolumeFrameType(mri_warp, gcamn->x, gcamn->y, gcamn->z, 1,
+                                 SAMPLE_TRILINEAR, &dy);
+        MRIsampleVolumeFrameType(mri_warp, gcamn->x, gcamn->y, gcamn->z, 2,
+                                 SAMPLE_TRILINEAR, &dz);
         gcamn->x += dx;
         gcamn->y += dy;
         gcamn->z += dz;
@@ -17913,13 +17936,13 @@ int GCAMcompose(GCA_MORPH *gcam, MRI *mri_warp)
   }
   return (NO_ERROR);
 }
-int GCAMreadWarpFromMRI(GCA_MORPH *gcam, const MRI *mri_warp)
-{
+int GCAMreadWarpFromMRI(GCA_MORPH *gcam, const MRI *mri_warp) {
   int xp, yp, zp, xv, yv, zv;
   double dx, dy, dz;
   GCA_MORPH_NODE *gcamn;
 
-  if (gcam->width == mri_warp->width && gcam->height == mri_warp->height && gcam->depth == mri_warp->depth) {
+  if (gcam->width == mri_warp->width && gcam->height == mri_warp->height &&
+      gcam->depth == mri_warp->depth) {
     for (xp = 0; xp < gcam->width; xp++)
       for (yp = 0; yp < gcam->height; yp++)
         for (zp = 0; zp < gcam->depth; zp++) {
@@ -17946,11 +17969,15 @@ int GCAMreadWarpFromMRI(GCA_MORPH *gcam, const MRI *mri_warp)
           DiagBreak();
         }
         zv = (zp * gcam->spacing);
-        //        GCApriorToVoxel(gcam->gca, mri_warp, xp, yp, zp, &xv, &yv, &zv) ;
+        //        GCApriorToVoxel(gcam->gca, mri_warp, xp, yp, zp, &xv, &yv,
+        //        &zv) ;
         gcamn = &gcam->nodes[xp][yp][zp];
-        MRIsampleVolumeFrameType(mri_warp, xv, yv, zv, 0, SAMPLE_TRILINEAR, &dx);
-        MRIsampleVolumeFrameType(mri_warp, xv, yv, zv, 1, SAMPLE_TRILINEAR, &dy);
-        MRIsampleVolumeFrameType(mri_warp, xv, yv, zv, 2, SAMPLE_TRILINEAR, &dz);
+        MRIsampleVolumeFrameType(mri_warp, xv, yv, zv, 0, SAMPLE_TRILINEAR,
+                                 &dx);
+        MRIsampleVolumeFrameType(mri_warp, xv, yv, zv, 1, SAMPLE_TRILINEAR,
+                                 &dy);
+        MRIsampleVolumeFrameType(mri_warp, xv, yv, zv, 2, SAMPLE_TRILINEAR,
+                                 &dz);
         gcamn->x = xv + dx;
         gcamn->y = yv + dy;
         gcamn->z = zv + dz;
@@ -17959,13 +17986,13 @@ int GCAMreadWarpFromMRI(GCA_MORPH *gcam, const MRI *mri_warp)
   }
   return (NO_ERROR);
 }
-int GCAMreadPositionsFromMRI(GCA_MORPH *gcam, const MRI *mri_pos)
-{
+int GCAMreadPositionsFromMRI(GCA_MORPH *gcam, const MRI *mri_pos) {
   int xp, yp, zp, xv, yv, zv;
   double x, y, z;
   GCA_MORPH_NODE *gcamn;
 
-  if (gcam->width == mri_pos->width && gcam->height == mri_pos->height && gcam->depth == mri_pos->depth) {
+  if (gcam->width == mri_pos->width && gcam->height == mri_pos->height &&
+      gcam->depth == mri_pos->depth) {
     for (xp = 0; xp < gcam->width; xp++)
       for (yp = 0; yp < gcam->height; yp++)
         for (zp = 0; zp < gcam->depth; zp++) {
@@ -17992,7 +18019,8 @@ int GCAMreadPositionsFromMRI(GCA_MORPH *gcam, const MRI *mri_pos)
           DiagBreak();
         }
         zv = (zp * gcam->spacing);
-        //        GCApriorToVoxel(gcam->gca, mri_pos, xp, yp, zp, &xv, &yv, &zv) ;
+        //        GCApriorToVoxel(gcam->gca, mri_pos, xp, yp, zp, &xv, &yv, &zv)
+        //        ;
         gcamn = &gcam->nodes[xp][yp][zp];
         MRIsampleVolumeFrameType(mri_pos, xv, yv, zv, 0, SAMPLE_TRILINEAR, &x);
         MRIsampleVolumeFrameType(mri_pos, xv, yv, zv, 1, SAMPLE_TRILINEAR, &y);
@@ -18006,8 +18034,7 @@ int GCAMreadPositionsFromMRI(GCA_MORPH *gcam, const MRI *mri_pos)
   return (NO_ERROR);
 }
 
-int GCAMreadInverseWarpFromMRI(GCA_MORPH *gcam, MRI *mri_warp)
-{
+int GCAMreadInverseWarpFromMRI(GCA_MORPH *gcam, MRI *mri_warp) {
   int xv, yv, zv;
   double dx, dy, dz;
 
@@ -18017,9 +18044,12 @@ int GCAMreadInverseWarpFromMRI(GCA_MORPH *gcam, MRI *mri_warp)
     MRIfree(&gcam->mri_zind);
   }
 
-  gcam->mri_xind = MRIalloc(mri_warp->width, mri_warp->height, mri_warp->depth, MRI_FLOAT);
-  gcam->mri_yind = MRIalloc(mri_warp->width, mri_warp->height, mri_warp->depth, MRI_FLOAT);
-  gcam->mri_zind = MRIalloc(mri_warp->width, mri_warp->height, mri_warp->depth, MRI_FLOAT);
+  gcam->mri_xind =
+      MRIalloc(mri_warp->width, mri_warp->height, mri_warp->depth, MRI_FLOAT);
+  gcam->mri_yind =
+      MRIalloc(mri_warp->width, mri_warp->height, mri_warp->depth, MRI_FLOAT);
+  gcam->mri_zind =
+      MRIalloc(mri_warp->width, mri_warp->height, mri_warp->depth, MRI_FLOAT);
   for (xv = 0; xv < mri_warp->width; xv++) {
     for (yv = 0; yv < mri_warp->height; yv++) {
       for (zv = 0; zv < mri_warp->depth; zv++) {
@@ -18035,8 +18065,8 @@ int GCAMreadInverseWarpFromMRI(GCA_MORPH *gcam, MRI *mri_warp)
   return (NO_ERROR);
 }
 
-MRI *MRIapplyMorph(MRI *mri_source, MRI *mri_warp, MRI *mri_dst, int sample_type)
-{
+MRI *MRIapplyMorph(MRI *mri_source, MRI *mri_warp, MRI *mri_dst,
+                   int sample_type) {
   int x, y, z, f;
   double dx, dy, dz, xd, yd, zd, val;
 
@@ -18052,25 +18082,25 @@ MRI *MRIapplyMorph(MRI *mri_source, MRI *mri_warp, MRI *mri_dst, int sample_type
   for (x = 0; x < mri_dst->width; x++)
     for (y = 0; y < mri_dst->height; y++)
       for (z = 0; z < mri_dst->depth; z++) {
-	if (x == Gx &&  y == Gy && z == Gz)
-	  DiagBreak() ;
+        if (x == Gx && y == Gy && z == Gz)
+          DiagBreak();
         dx = MRIgetVoxVal(mri_warp, x, y, z, 0);
         dy = MRIgetVoxVal(mri_warp, x, y, z, 1);
         dz = MRIgetVoxVal(mri_warp, x, y, z, 2);
         xd = x + dx;
         yd = y + dy;
         zd = z + dz;
-	if ((fabs(xd-Gx) < 1) && (fabs(yd-Gy)<1) && (fabs(zd-Gz)<1))
-	  DiagBreak() ;
+        if ((fabs(xd - Gx) < 1) && (fabs(yd - Gy) < 1) && (fabs(zd - Gz) < 1))
+          DiagBreak();
         for (f = 0; f < mri_source->nframes; f++) {
           if (sample_type == SAMPLE_CUBIC_BSPLINE)
           // recommended to externally call this and keep mri_coeff
           // if image is resampled often (e.g. in registration algo)
           {
             MRIsampleBSpline(bspline, xd, yd, zd, f, &val);
-          }
-          else {
-            MRIsampleVolumeFrameType(mri_source, xd, yd, zd, f, sample_type, &val);
+          } else {
+            MRIsampleVolumeFrameType(mri_source, xd, yd, zd, f, sample_type,
+                                     &val);
           }
           MRIsetVoxVal(mri_dst, x, y, z, f, val);
         }
@@ -18085,8 +18115,7 @@ MRI *MRIapplyMorph(MRI *mri_source, MRI *mri_warp, MRI *mri_dst, int sample_type
   return (mri_dst);
 }
 
-double MRImorphSSE(MRI *mri_source, MRI *mri_atlas, MRI *mri_warp)
-{
+double MRImorphSSE(MRI *mri_source, MRI *mri_atlas, MRI *mri_warp) {
   int x, y, z, f;
   double dx, dy, dz, xd, yd, zd, sval, tval, error, sse;
 
@@ -18104,23 +18133,26 @@ double MRImorphSSE(MRI *mri_source, MRI *mri_atlas, MRI *mri_warp)
         zd = z + dz;
         for (f = 0; f < mri_source->nframes; f++) {
           tval = MRIgetVoxVal(mri_atlas, x, y, z, f);
-          MRIsampleVolumeFrameType(mri_source, xd, yd, zd, f, SAMPLE_TRILINEAR, &sval);
+          MRIsampleVolumeFrameType(mri_source, xd, yd, zd, f, SAMPLE_TRILINEAR,
+                                   &sval);
           error = tval - sval;
           sse += (error * error);
         }
       }
 
-  sse = sse / (mri_atlas->width * mri_atlas->height * mri_atlas->depth * mri_atlas->nframes);
+  sse = sse / (mri_atlas->width * mri_atlas->height * mri_atlas->depth *
+               mri_atlas->nframes);
   return (sse);
 }
-MRI *MRIcreateDistanceTransforms(MRI *mri, MRI *mri_all_dtrans, float max_dist, int *labels, int nlabels)
-{
+MRI *MRIcreateDistanceTransforms(MRI *mri, MRI *mri_all_dtrans, float max_dist,
+                                 int *labels, int nlabels) {
   MRI *mri_dtrans;
   int frame;
   char fname[STRLEN];
 
   if (mri_all_dtrans == NULL)
-    mri_all_dtrans = MRIallocSequence(mri->width, mri->height, mri->depth, MRI_FLOAT, nlabels);
+    mri_all_dtrans = MRIallocSequence(mri->width, mri->height, mri->depth,
+                                      MRI_FLOAT, nlabels);
 
   MRIcopyHeader(mri, mri_all_dtrans);
 
@@ -18128,11 +18160,13 @@ MRI *MRIcreateDistanceTransforms(MRI *mri, MRI *mri_all_dtrans, float max_dist, 
     MRIwrite(mri, "labels.mgz");
   }
   for (frame = 0; frame < nlabels; frame++) {
-    printf("creating distance transform for %s, frame %d...\n", cma_label_to_name(labels[frame]), frame);
+    printf("creating distance transform for %s, frame %d...\n",
+           cma_label_to_name(labels[frame]), frame);
     if (dtrans_labels[frame] == Gdiag_no) {
       DiagBreak();
     }
-    mri_dtrans = MRIdistanceTransform(mri, NULL, labels[frame], max_dist, DTRANS_MODE_SIGNED, NULL);
+    mri_dtrans = MRIdistanceTransform(mri, NULL, labels[frame], max_dist,
+                                      DTRANS_MODE_SIGNED, NULL);
     if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) {
       sprintf(fname, "%s.mgz", cma_label_to_name(dtrans_labels[frame]));
       MRIwrite(mri_dtrans, fname);
@@ -18144,8 +18178,8 @@ MRI *MRIcreateDistanceTransforms(MRI *mri, MRI *mri_all_dtrans, float max_dist, 
   mri_all_dtrans->outside_val = max_dist;
   return (mri_all_dtrans);
 }
-MRI *MRInormalizeInteriorDistanceTransform(MRI *mri_src_dist, MRI *mri_ref_dist, MRI *mri_dst_dist)
-{
+MRI *MRInormalizeInteriorDistanceTransform(MRI *mri_src_dist, MRI *mri_ref_dist,
+                                           MRI *mri_dst_dist) {
   int frame;
   float min_ref_dist, max_val, min_src_dist;
 
@@ -18158,21 +18192,22 @@ MRI *MRInormalizeInteriorDistanceTransform(MRI *mri_src_dist, MRI *mri_ref_dist,
     if (FZERO(min_src_dist)) {
       continue;
     }
-    MRIscalarMulFrame(mri_src_dist, mri_dst_dist, min_ref_dist / min_src_dist, frame);
+    MRIscalarMulFrame(mri_src_dist, mri_dst_dist, min_ref_dist / min_src_dist,
+                      frame);
   }
   return (mri_dst_dist);
 }
-MRI *MRIcomputeDistanceTransformStep(
-    MRI *mri_source, MRI *mri_atlas, MRI *mri_delta, MRI *mri_atlas_labels, GCA_MORPH_PARMS *parms)
-{
+MRI *MRIcomputeDistanceTransformStep(MRI *mri_source, MRI *mri_atlas,
+                                     MRI *mri_delta, MRI *mri_atlas_labels,
+                                     GCA_MORPH_PARMS *parms) {
   int x, y, z, frame, label;
   double Ix, Iy, Iz, tval, sval, error, norm;
   // double dx, dy, dz;
 
   if (mri_delta == NULL) {
-    mri_delta = MRIallocSequence(mri_atlas->width, mri_atlas->height, mri_atlas->depth, MRI_FLOAT, 3);
-  }
-  else {
+    mri_delta = MRIallocSequence(mri_atlas->width, mri_atlas->height,
+                                 mri_atlas->depth, MRI_FLOAT, 3);
+  } else {
     MRIclear(mri_delta);
   }
 
@@ -18218,23 +18253,16 @@ MRI *MRIcomputeDistanceTransformStep(
         MRIsetVoxVal(mri_delta, x, y, z, 2, error * Iz);
 
         if (x == Gx && y == Gy && z == Gz) {
-          printf("MRIcomputeDistanceTransformStep: v(%d, %d, %d) %s = (%2.2f, %2.2f, %2.2f), A=%2.1f, I=%2.1f\n",
-                 Gx,
-                 Gy,
-                 Gz,
-                 cma_label_to_name(label),
-                 error * Ix,
-                 error * Iy,
-                 error * Iz,
-                 tval,
-                 sval);
+          printf("MRIcomputeDistanceTransformStep: v(%d, %d, %d) %s = (%2.2f, "
+                 "%2.2f, %2.2f), A=%2.1f, I=%2.1f\n",
+                 Gx, Gy, Gz, cma_label_to_name(label), error * Ix, error * Iy,
+                 error * Iz, tval, sval);
         }
       }
 
   return (mri_delta);
 }
-double MRIlabelMorphSSE(MRI *mri_source, MRI *mri_atlas, MRI *mri_warp)
-{
+double MRIlabelMorphSSE(MRI *mri_source, MRI *mri_atlas, MRI *mri_warp) {
   int x, y, z, src_label, atlas_label, nvox;
   double dx, dy, dz, xd, yd, zd, sval, sse;
 
@@ -18255,44 +18283,37 @@ double MRIlabelMorphSSE(MRI *mri_source, MRI *mri_atlas, MRI *mri_warp)
         yd = y + dy;
         zd = z + dz;
         src_label = (int)MRIgetVoxVal(mri_source, x, y, z, 0);
-        MRIsampleVolumeFrameType(mri_source, xd, yd, zd, 0, SAMPLE_NEAREST, &sval);
+        MRIsampleVolumeFrameType(mri_source, xd, yd, zd, 0, SAMPLE_NEAREST,
+                                 &sval);
         src_label = nint(sval);
         if (src_label != atlas_label) {
           sse += 1;
         }
         if (x == Gx && y == Gy && z == Gz)
-          printf("atlas: %s (%d, %d, %d) + (%2.1f, %2.1f, %2.1f) = %s (%2.1f, %2.1f, %2.1f)\n",
-                 cma_label_to_name(atlas_label),
-                 x,
-                 y,
-                 z,
-                 dx,
-                 dy,
-                 dz,
-                 cma_label_to_name(src_label),
-                 xd,
-                 yd,
-                 zd);
+          printf("atlas: %s (%d, %d, %d) + (%2.1f, %2.1f, %2.1f) = %s (%2.1f, "
+                 "%2.1f, %2.1f)\n",
+                 cma_label_to_name(atlas_label), x, y, z, dx, dy, dz,
+                 cma_label_to_name(src_label), xd, yd, zd);
       }
 
-  //  sse = sse / (mri_atlas->width*mri_atlas->height*mri_atlas->depth*mri_atlas->nframes);
+  //  sse = sse /
+  //  (mri_atlas->width*mri_atlas->height*mri_atlas->depth*mri_atlas->nframes);
   sse = sse / nvox;
   return (sse);
 }
-MRI *GCAMwriteWarpToMRI(const GCA_MORPH *gcam, MRI *mri_warp)
-{
+MRI *GCAMwriteWarpToMRI(const GCA_MORPH *gcam, MRI *mri_warp) {
   int x, y, z;
   double xp, yp, zp;
   float xw, yw, zw;
 
-  if (mri_warp == NULL)  // warp is same dimensions as gcam by construction
+  if (mri_warp == NULL) // warp is same dimensions as gcam by construction
   {
     GCA_MORPH_NODE *gcamn;
 
-    mri_warp = MRIallocSequence(gcam->width, gcam->height, gcam->depth, MRI_FLOAT, 3);
+    mri_warp =
+        MRIallocSequence(gcam->width, gcam->height, gcam->depth, MRI_FLOAT, 3);
     MRIcopyVolGeomToMRI(mri_warp, &gcam->atlas);
-    MRIsetResolution(mri_warp,
-                     gcam->atlas.xsize * gcam->spacing,
+    MRIsetResolution(mri_warp, gcam->atlas.xsize * gcam->spacing,
                      gcam->atlas.ysize * gcam->spacing,
                      gcam->atlas.zsize * gcam->spacing);
     for (x = 0; x < mri_warp->width; x++)
@@ -18304,11 +18325,7 @@ MRI *GCAMwriteWarpToMRI(const GCA_MORPH *gcam, MRI *mri_warp)
           MRIsetVoxVal(mri_warp, x, y, z, 2, gcamn->z - gcamn->origz);
           if (x == Gx && y == Gy && z == Gz)
             printf("voxel (%2.1f, %2.1f, %2.1f) --> (%2.1f, %2.1f, %2.1f)\n",
-                   gcamn->origx,
-                   gcamn->origy,
-                   gcamn->origz,
-                   gcamn->x,
-                   gcamn->y,
+                   gcamn->origx, gcamn->origy, gcamn->origz, gcamn->x, gcamn->y,
                    gcamn->z);
         }
     return (mri_warp);
@@ -18320,36 +18337,35 @@ MRI *GCAMwriteWarpToMRI(const GCA_MORPH *gcam, MRI *mri_warp)
       for (z = 0; z < mri_warp->depth; z++) {
         if (gcam->gca) {
           GCAvoxelToPriorReal(gcam->gca, mri_warp, x, y, z, &xp, &yp, &zp);
-        }
-        else {
+        } else {
           xp = x;
           yp = y;
-          zp = z;  // same resolution
+          zp = z; // same resolution
         }
         GCAMsampleMorph(gcam, x, y, z, &xw, &yw, &zw);
         MRIsetVoxVal(mri_warp, x, y, z, 0, xw - x);
         MRIsetVoxVal(mri_warp, x, y, z, 1, yw - y);
         MRIsetVoxVal(mri_warp, x, y, z, 2, zw - z);
         if (x == Gx && y == Gy && z == Gz)
-          printf("voxel (%d, %d, %d) --> (%2.1f, %2.1f, %2.1f)\n", x, y, z, xw, yw, zw);
+          printf("voxel (%d, %d, %d) --> (%2.1f, %2.1f, %2.1f)\n", x, y, z, xw,
+                 yw, zw);
       }
   return (mri_warp);
 }
 
-MRI *GCAMwritePositionsToMRI(const GCA_MORPH *gcam, MRI *mri_pos)
-{
+MRI *GCAMwritePositionsToMRI(const GCA_MORPH *gcam, MRI *mri_pos) {
   int x, y, z;
   double xp, yp, zp;
   float xw, yw, zw;
 
-  if (mri_pos == NULL)  // warp is same dimensions as gcam by construction
+  if (mri_pos == NULL) // warp is same dimensions as gcam by construction
   {
     GCA_MORPH_NODE *gcamn;
 
-    mri_pos = MRIallocSequence(gcam->width, gcam->height, gcam->depth, MRI_FLOAT, 3);
+    mri_pos =
+        MRIallocSequence(gcam->width, gcam->height, gcam->depth, MRI_FLOAT, 3);
     MRIcopyVolGeomToMRI(mri_pos, &gcam->atlas);
-    MRIsetResolution(mri_pos,
-                     gcam->atlas.xsize * gcam->spacing,
+    MRIsetResolution(mri_pos, gcam->atlas.xsize * gcam->spacing,
                      gcam->atlas.ysize * gcam->spacing,
                      gcam->atlas.zsize * gcam->spacing);
     for (x = 0; x < mri_pos->width; x++)
@@ -18361,11 +18377,7 @@ MRI *GCAMwritePositionsToMRI(const GCA_MORPH *gcam, MRI *mri_pos)
           MRIsetVoxVal(mri_pos, x, y, z, 2, gcamn->z);
           if (x == Gx && y == Gy && z == Gz)
             printf("voxel (%2.1f, %2.1f, %2.1f) --> (%2.1f, %2.1f, %2.1f)\n",
-                   gcamn->origx,
-                   gcamn->origy,
-                   gcamn->origz,
-                   gcamn->x,
-                   gcamn->y,
+                   gcamn->origx, gcamn->origy, gcamn->origz, gcamn->x, gcamn->y,
                    gcamn->z);
         }
     return (mri_pos);
@@ -18377,30 +18389,30 @@ MRI *GCAMwritePositionsToMRI(const GCA_MORPH *gcam, MRI *mri_pos)
       for (z = 0; z < mri_pos->depth; z++) {
         if (gcam->gca) {
           GCAvoxelToPriorReal(gcam->gca, mri_pos, x, y, z, &xp, &yp, &zp);
-        }
-        else {
+        } else {
           xp = x;
           yp = y;
-          zp = z;  // same resolution
+          zp = z; // same resolution
         }
         GCAMsampleMorph(gcam, x, y, z, &xw, &yw, &zw);
         MRIsetVoxVal(mri_pos, x, y, z, 0, xw);
         MRIsetVoxVal(mri_pos, x, y, z, 1, yw);
         MRIsetVoxVal(mri_pos, x, y, z, 2, zw);
         if (x == Gx && y == Gy && z == Gz)
-          printf("voxel (%d, %d, %d) --> (%2.1f, %2.1f, %2.1f)\n", x, y, z, xw, yw, zw);
+          printf("voxel (%d, %d, %d) --> (%2.1f, %2.1f, %2.1f)\n", x, y, z, xw,
+                 yw, zw);
       }
   return (mri_pos);
 }
 
-MRI *GCAMwriteInverseWarpToMRI(GCA_MORPH *gcam, MRI *mri_warp)
-{
+MRI *GCAMwriteInverseWarpToMRI(GCA_MORPH *gcam, MRI *mri_warp) {
   int x, y, z;
   double xp, yp, zp;
   double xw, yw, zw;
 
   if (mri_warp == NULL) {
-    mri_warp = MRIallocSequence(gcam->width, gcam->height, gcam->depth, MRI_FLOAT, 3);
+    mri_warp =
+        MRIallocSequence(gcam->width, gcam->height, gcam->depth, MRI_FLOAT, 3);
   }
 
   MRIcopyVolGeomToMRI(mri_warp, &gcam->image);
@@ -18418,7 +18430,8 @@ MRI *GCAMwriteInverseWarpToMRI(GCA_MORPH *gcam, MRI *mri_warp)
         MRIsetVoxVal(mri_warp, x, y, z, 1, yw - y);
         MRIsetVoxVal(mri_warp, x, y, z, 2, zw - z);
         if (x == Gx && y == Gy && z == Gz)
-          printf("voxel (%d, %d, %d) --> (%2.1f, %2.1f, %2.1f)\n", x, y, z, xw, yw, zw);
+          printf("voxel (%d, %d, %d) --> (%2.1f, %2.1f, %2.1f)\n", x, y, z, xw,
+                 yw, zw);
       }
   return (mri_warp);
 }
@@ -18427,16 +18440,13 @@ extern int gca_write_iterations;
 extern char *gca_write_fname;
 
 #if 1
-MRI *GCAMSreclassifyUsingGibbsPriors(MRI *mri_inputs,
-                                     GCAM_MS *gcam_ms,
-                                     MRI *mri_dst,
-                                     TRANSFORM *transform,
-                                     int max_iter,
-                                     int restart,
+MRI *GCAMSreclassifyUsingGibbsPriors(MRI *mri_inputs, GCAM_MS *gcam_ms,
+                                     MRI *mri_dst, TRANSFORM *transform,
+                                     int max_iter, int restart,
                                      void (*update_func)(MRI *),
-                                     MRI *mri_s_index)
-{
-  int x, y, z, width, height, depth, label, iter, n, nchanged, min_changed, index, nindices, old_label, s, max_s;
+                                     MRI *mri_s_index) {
+  int x, y, z, width, height, depth, label, iter, n, nchanged, min_changed,
+      index, nindices, old_label, s, max_s;
   // int val;
   short *x_indices, *y_indices, *z_indices;
   GCA_PRIOR *gcap;
@@ -18449,9 +18459,8 @@ MRI *GCAMSreclassifyUsingGibbsPriors(MRI *mri_inputs,
   y_indices = (short *)calloc(nindices, sizeof(short));
   z_indices = (short *)calloc(nindices, sizeof(short));
   if (!x_indices || !y_indices || !z_indices)
-    ErrorExit(ERROR_NOMEMORY,
-              "GCAMSreclassifyUsingGibbsPriors: "
-              "could not allocate index set");
+    ErrorExit(ERROR_NOMEMORY, "GCAMSreclassifyUsingGibbsPriors: "
+                              "could not allocate index set");
 
   width = mri_inputs->width;
   height = mri_inputs->height;
@@ -18460,7 +18469,8 @@ MRI *GCAMSreclassifyUsingGibbsPriors(MRI *mri_inputs,
   if (!mri_dst) {
     mri_dst = MRIalloc(width, height, depth, MRI_UCHAR);
     if (!mri_dst) {
-      ErrorExit(ERROR_NOMEMORY, "GCAMSreclassifyUsingGibbsPriors: could not allocate dst");
+      ErrorExit(ERROR_NOMEMORY,
+                "GCAMSreclassifyUsingGibbsPriors: could not allocate dst");
     }
     MRIcopyHeader(mri_inputs, mri_dst);
   }
@@ -18480,11 +18490,11 @@ MRI *GCAMSreclassifyUsingGibbsPriors(MRI *mri_inputs,
 
   if (!restart) {
     // calculate the statistics
-    old_posterior = GCAMMSgibbsImageLogPosterior(gcam_ms, mri_dst, mri_inputs, transform, mri_s_index);
+    old_posterior = GCAMMSgibbsImageLogPosterior(gcam_ms, mri_dst, mri_inputs,
+                                                 transform, mri_s_index);
     // get the per voxel value
     old_posterior /= (double)(width * depth * height);
-  }
-  else {
+  } else {
     old_posterior = 0;
   }
 
@@ -18502,8 +18512,7 @@ MRI *GCAMSreclassifyUsingGibbsPriors(MRI *mri_inputs,
             }
           }
       nindices = index;
-    }
-    else if (iter == 0) {
+    } else if (iter == 0) {
       /*      char  fname[STRLEN], *cp ;*/
 
       if (gca_write_iterations) {
@@ -18513,19 +18522,20 @@ MRI *GCAMSreclassifyUsingGibbsPriors(MRI *mri_inputs,
         MRIwrite(mri_dst, fname);
       }
       // probs has 0 to 255 values
-      mri_probs = GCAlabelProbabilities(mri_inputs, gcam_ms->gcas[0], NULL, transform);
+      mri_probs =
+          GCAlabelProbabilities(mri_inputs, gcam_ms->gcas[0], NULL, transform);
       // sorted according to ascending order of probs
       MRIorderIndices(mri_probs, x_indices, y_indices, z_indices);
       MRIfree(&mri_probs);
-    }
-    else
+    } else
       // randomize the indices value ((0 -> width*height*depth)
       MRIcomputeVoxelPermutation(mri_inputs, x_indices, y_indices, z_indices);
 
     ///////////////  relabel with neighborhood likelihood  //////////////
     nchanged = 0;
     if (G_write_probs && !mri_probs) {
-      mri_probs = MRIalloc(mri_inputs->width, mri_inputs->height, mri_inputs->depth, MRI_FLOAT);
+      mri_probs = MRIalloc(mri_inputs->width, mri_inputs->height,
+                           mri_inputs->depth, MRI_FLOAT);
       MRIcopyHeader(mri_inputs, mri_probs);
     }
     for (index = 0; index < nindices; index++) {
@@ -18549,7 +18559,8 @@ MRI *GCAMSreclassifyUsingGibbsPriors(MRI *mri_inputs,
       // calculate neighborhood likelihood
       max_s = MRIgetVoxVal(mri_s_index, x, y, z, 0);
       gca = gcam_ms->gcas[max_s];
-      max_posterior = GCAnbhdGibbsLogPosterior(gca, mri_dst, mri_inputs, x, y, z, transform, 1);
+      max_posterior = GCAnbhdGibbsLogPosterior(gca, mri_dst, mri_inputs, x, y,
+                                               z, transform, 1);
       label = old_label = nint(MRIgetVoxVal(mri_dst, x, y, z, 0));
       /* find the node associated with this coordinate and classify */
       //      for (s = 0 ; s < gcam_ms->nsigmas ; s++)
@@ -18578,21 +18589,18 @@ MRI *GCAMSreclassifyUsingGibbsPriors(MRI *mri_inputs,
           // assign the new label
           MRIsetVoxVal(mri_dst, x, y, z, 0, gcap->labels[n]);
           // calculate neighborhood likelihood
-          new_posterior = GCAnbhdGibbsLogPosterior(gca, mri_dst, mri_inputs, x, y, z, transform, 1);
+          new_posterior = GCAnbhdGibbsLogPosterior(gca, mri_dst, mri_inputs, x,
+                                                   y, z, transform, 1);
           // if it is bigger than the old one, then replace the label
           // and change max_posterior
           if (new_posterior > max_posterior) {
             if (x == Ggca_x && y == Ggca_y && z == Ggca_z &&
-                (label == Ggca_label || old_label == Ggca_label || Ggca_label < 0))
+                (label == Ggca_label || old_label == Ggca_label ||
+                 Ggca_label < 0))
               fprintf(stdout,
                       "NbhdGibbsLogLikelihood at (%d, %d, %d):"
                       " old = %d (ll=%.2f) new = %d (ll=%.2f)\n",
-                      x,
-                      y,
-                      z,
-                      old_label,
-                      max_posterior,
-                      gcap->labels[n],
+                      x, y, z, old_label, max_posterior, gcap->labels[n],
                       new_posterior);
 
             max_posterior = new_posterior;
@@ -18603,24 +18611,19 @@ MRI *GCAMSreclassifyUsingGibbsPriors(MRI *mri_inputs,
 
         /*#ifndef __OPTIMIZE__*/
         if (x == Ggca_x && y == Ggca_y && z == Ggca_z &&
-            (label == Ggca_label || old_label == Ggca_label || Ggca_label < 0)) {
+            (label == Ggca_label || old_label == Ggca_label ||
+             Ggca_label < 0)) {
           int xn, yn, zn;
           // GCA_NODE *gcan;
 
-          if (!GCAsourceVoxelToNode(gca, mri_inputs, transform, x, y, z, &xn, &yn, &zn)) {
+          if (!GCAsourceVoxelToNode(gca, mri_inputs, transform, x, y, z, &xn,
+                                    &yn, &zn)) {
             // gcan = &gca->nodes[xn][yn][zn];
-            printf(
-                "sigma=%2.0f, (%d, %d, %d): old label %s (%d), "
-                "new label %s (%d) (log(p)=%2.3f)\n",
-                gcam_ms->sigmas[max_s],
-                x,
-                y,
-                z,
-                cma_label_to_name(old_label),
-                old_label,
-                cma_label_to_name(label),
-                label,
-                max_posterior);
+            printf("sigma=%2.0f, (%d, %d, %d): old label %s (%d), "
+                   "new label %s (%d) (log(p)=%2.3f)\n",
+                   gcam_ms->sigmas[max_s], x, y, z,
+                   cma_label_to_name(old_label), old_label,
+                   cma_label_to_name(label), label, max_posterior);
           }
         }
       }
@@ -18632,8 +18635,7 @@ MRI *GCAMSreclassifyUsingGibbsPriors(MRI *mri_inputs,
         nchanged++;
         // mark it as changed
         MRIvox(mri_changed, x, y, z) = 1;
-      }
-      else {
+      } else {
         MRIvox(mri_changed, x, y, z) = 0;
       }
       // assign new label
@@ -18654,21 +18656,18 @@ MRI *GCAMSreclassifyUsingGibbsPriors(MRI *mri_inputs,
     /////////////////////////////////////////////////////////////////////////
     // print info
     if (nchanged > 10000 && iter < 2 && !restart) {
-      ll = GCAMMSgibbsImageLogPosterior(gcam_ms, mri_dst, mri_inputs, transform, mri_s_index);
+      ll = GCAMMSgibbsImageLogPosterior(gcam_ms, mri_dst, mri_inputs, transform,
+                                        mri_s_index);
       // get the average value
       ll /= (double)(width * depth * height);
       if (!FZERO(lcma))
-        printf(
-            "pass %d: %d changed. image ll: %2.3f "
-            "(CMA=%2.3f)\n",
-            iter + 1,
-            nchanged,
-            ll,
-            lcma);
-      else  // currently this is executed
-        printf("pass %d: %d changed. image ll: %2.3f\n", iter + 1, nchanged, ll);
-    }
-    else {
+        printf("pass %d: %d changed. image ll: %2.3f "
+               "(CMA=%2.3f)\n",
+               iter + 1, nchanged, ll, lcma);
+      else // currently this is executed
+        printf("pass %d: %d changed. image ll: %2.3f\n", iter + 1, nchanged,
+               ll);
+    } else {
       printf("pass %d: %d changed.\n", iter + 1, nchanged);
     }
 
@@ -18723,9 +18722,9 @@ MRI *GCAMSreclassifyUsingGibbsPriors(MRI *mri_inputs,
   return (mri_dst);
 }
 #endif
-double GCAMMSgibbsImageLogPosterior(
-    GCAM_MS *gcam_ms, MRI *mri_labels, MRI *mri_inputs, TRANSFORM *transform, MRI *mri_s_index)
-{
+double GCAMMSgibbsImageLogPosterior(GCAM_MS *gcam_ms, MRI *mri_labels,
+                                    MRI *mri_inputs, TRANSFORM *transform,
+                                    MRI *mri_s_index) {
   int x, y, z, width, depth, height, s;
   double total_log_posterior, log_posterior;
   GCA *gca;
@@ -18739,7 +18738,8 @@ double GCAMMSgibbsImageLogPosterior(
       for (z = 0; z < depth; z++) {
         s = MRIgetVoxVal(mri_s_index, x, y, z, 0);
         gca = gcam_ms->gcas[s];
-        log_posterior = GCAvoxelGibbsLogPosterior(gca, mri_labels, mri_inputs, x, y, z, transform, 1.0);
+        log_posterior = GCAvoxelGibbsLogPosterior(gca, mri_labels, mri_inputs,
+                                                  x, y, z, transform, 1.0);
         if (check_finite("gcaGibbsImageLogposterior", log_posterior) == 0) {
           DiagBreak();
         }
@@ -18753,8 +18753,9 @@ double GCAMMSgibbsImageLogPosterior(
   return (total_log_posterior);
 }
 
-static MRI *GCAMreplaceWarpAtInvalidNodes(GCAM *gcam, MRI *mri_warp, MRI *mri_warp_dst, MRI *mri_neg_atlas)
-{
+static MRI *GCAMreplaceWarpAtInvalidNodes(GCAM *gcam, MRI *mri_warp,
+                                          MRI *mri_warp_dst,
+                                          MRI *mri_neg_atlas) {
   int x, y, z, f, num, xi, yi, zi, xk, yk, zk;
   double means[3];
   MRI *mri_dilated = MRIdilate(mri_neg_atlas, NULL);
@@ -18763,10 +18764,13 @@ static MRI *GCAMreplaceWarpAtInvalidNodes(GCAM *gcam, MRI *mri_warp, MRI *mri_wa
   for (x = 0; x < mri_warp->width; x++) {
     for (y = 0; y < mri_warp->height; y++)
       for (z = 0; z < mri_warp->depth; z++) {
-        if ((MRIgetVoxVal(mri_dilated, x, y, z, 0) > 0) &&  // in nbhd of negative node
-            (gcam->nodes[x][y][z].invalid > 0))             // and it's invalid area or position
+        if ((MRIgetVoxVal(mri_dilated, x, y, z, 0) >
+             0) && // in nbhd of negative node
+            (gcam->nodes[x][y][z].invalid >
+             0)) // and it's invalid area or position
         {
-          if (x == Gx && y == Gy && z == Gz) DiagBreak();
+          if (x == Gx && y == Gy && z == Gz)
+            DiagBreak();
           num = 0;
           memset(means, 0, sizeof(means));
           ;
@@ -18776,19 +18780,23 @@ static MRI *GCAMreplaceWarpAtInvalidNodes(GCAM *gcam, MRI *mri_warp, MRI *mri_wa
                 xi = x + xk;
                 yi = y + yk;
                 zi = z + zk;
-                if (xi < 0 || yi < 0 || zi < 0 || xi >= mri_warp->width || yi >= mri_warp->height ||
-                    zi >= mri_warp->depth)
+                if (xi < 0 || yi < 0 || zi < 0 || xi >= mri_warp->width ||
+                    yi >= mri_warp->height || zi >= mri_warp->depth)
                   continue;
-                if (gcam->nodes[xi][yi][zi].invalid)  // don't compute average warp from invalid  nodes
+                if (gcam->nodes[xi][yi][zi].invalid) // don't compute average
+                                                     // warp from invalid  nodes
                   continue;
                 num++;
-                for (f = 0; f < 3; f++) means[f] += MRIgetVoxVal(mri_warp, xi, yi, zi, f);
+                for (f = 0; f < 3; f++)
+                  means[f] += MRIgetVoxVal(mri_warp, xi, yi, zi, f);
               }
             }
           }
-          if (num > 0)  // otherwise only invalid nodes in the nbhd - don't do anything
+          if (num >
+              0) // otherwise only invalid nodes in the nbhd - don't do anything
           {
-            for (f = 0; f < 3; f++) MRIsetVoxVal(mri_warp_dst, x, y, z, f, means[f] / num);
+            for (f = 0; f < 3; f++)
+              MRIsetVoxVal(mri_warp_dst, x, y, z, f, means[f] / num);
           }
         }
       }
@@ -18799,9 +18807,9 @@ static MRI *GCAMreplaceWarpAtInvalidNodes(GCAM *gcam, MRI *mri_warp, MRI *mri_wa
   return (mri_warp_dst);
 }
 
-int GCAMremoveSingularitiesAndReadWarpFromMRI(GCA_MORPH *gcam, MRI *mri_warp)
-{
-  int xp, last_neg, wsize, iter, max_iter, nbhd = 1, max_noprogress, noprogress, min_neg, i;
+int GCAMremoveSingularitiesAndReadWarpFromMRI(GCA_MORPH *gcam, MRI *mri_warp) {
+  int xp, last_neg, wsize, iter, max_iter, nbhd = 1, max_noprogress, noprogress,
+                                           min_neg, i;
   double max_nbhd;
   MRI *mri_warp_tmp = NULL, *mri_neg, *mri_neg_orig, *mri_neg_atlas;
 
@@ -18813,15 +18821,17 @@ int GCAMremoveSingularitiesAndReadWarpFromMRI(GCA_MORPH *gcam, MRI *mri_warp)
     return (NO_ERROR);
   }
 
-  mri_neg = MRIalloc(gcam->image.width, gcam->image.height, gcam->image.depth, MRI_UCHAR);
+  mri_neg = MRIalloc(gcam->image.width, gcam->image.height, gcam->image.depth,
+                     MRI_UCHAR);
   //  MRIcopyVolGeomToMRI(mri_warp, &gcam->image);
 
-  mri_neg_orig = MRIalloc(gcam->image.width, gcam->image.height, gcam->image.depth, MRI_UCHAR);
+  mri_neg_orig = MRIalloc(gcam->image.width, gcam->image.height,
+                          gcam->image.depth, MRI_UCHAR);
   MRIcopyVolGeomToMRI(mri_neg_orig, &gcam->image);
 
-  mri_neg_atlas = MRIalloc(mri_warp->width, mri_warp->height, mri_warp->depth, MRI_UCHAR);
-  MRIsetResolution(mri_neg_atlas,
-                   gcam->atlas.xsize * gcam->spacing,
+  mri_neg_atlas =
+      MRIalloc(mri_warp->width, mri_warp->height, mri_warp->depth, MRI_UCHAR);
+  MRIsetResolution(mri_neg_atlas, gcam->atlas.xsize * gcam->spacing,
                    gcam->atlas.ysize * gcam->spacing,
                    gcam->atlas.zsize * gcam->spacing);
   //  MRIcopyVolGeomToMRI(mri_neg_atlas, &gcam->atlas);
@@ -18838,9 +18848,11 @@ int GCAMremoveSingularitiesAndReadWarpFromMRI(GCA_MORPH *gcam, MRI *mri_warp)
   do {
     MRIclear(mri_neg);
     mri_neg_atlas = GCAMwriteMRI(gcam, mri_neg_atlas, GCAM_NEG);
-    for (i = 0; i < nbhd; i++) MRIdilate(mri_neg_atlas, mri_neg_atlas);
+    for (i = 0; i < nbhd; i++)
+      MRIdilate(mri_neg_atlas, mri_neg_atlas);
     MRIcopyHeader(mri_neg_atlas, mri_warp);
-    mri_warp_tmp = GCAMreplaceWarpAtInvalidNodes(gcam, mri_warp, mri_warp_tmp, mri_neg_atlas);
+    mri_warp_tmp = GCAMreplaceWarpAtInvalidNodes(gcam, mri_warp, mri_warp_tmp,
+                                                 mri_neg_atlas);
     MRIcopy(mri_warp_tmp, mri_warp);
     last_neg = gcam->neg;
     for (xp = 0; xp < gcam->width; xp++) {
@@ -18849,28 +18861,34 @@ int GCAMremoveSingularitiesAndReadWarpFromMRI(GCA_MORPH *gcam, MRI *mri_warp)
       double dx, dy, dz;
       for (yp = 0; yp < gcam->height; yp++) {
         for (zp = 0; zp < gcam->depth; zp++) {
-          if (xp == Gx && yp == Gy && zp == Gz) DiagBreak();
+          if (xp == Gx && yp == Gy && zp == Gz)
+            DiagBreak();
 
           gcamn = &gcam->nodes[xp][yp][zp];
-          if (gcamn->area1 < 0 || gcamn->area2 < 0)  // diagnostics
+          if (gcamn->area1 < 0 || gcamn->area2 < 0) // diagnostics
           {
             int xv, yv, zv;
             xv = nint(gcamn->x);
             yv = nint(gcamn->y);
             zv = nint(gcamn->z);
-            if (xp == Gx && yp == Gy && zp == Gz) DiagBreak();
-            if (xv >= 0 && xv < mri_neg->width && yv >= 0 && yv < mri_neg->height && zv >= 0 && zv < mri_neg->depth)
-              MRIsetVoxVal(mri_neg, nint(gcamn->x), nint(gcamn->y), nint(gcamn->z), 0, 128);
+            if (xp == Gx && yp == Gy && zp == Gz)
+              DiagBreak();
+            if (xv >= 0 && xv < mri_neg->width && yv >= 0 &&
+                yv < mri_neg->height && zv >= 0 && zv < mri_neg->depth)
+              MRIsetVoxVal(mri_neg, nint(gcamn->x), nint(gcamn->y),
+                           nint(gcamn->z), 0, 128);
 
             xv = nint(gcamn->origx);
             yv = nint(gcamn->origy);
             zv = nint(gcamn->origz);
-            if (xv >= 0 && xv < mri_neg->width && yv >= 0 && yv < mri_neg->height && zv >= 0 && zv < mri_neg->depth)
+            if (xv >= 0 && xv < mri_neg->width && yv >= 0 &&
+                yv < mri_neg->height && zv >= 0 && zv < mri_neg->depth)
               MRIsetVoxVal(mri_neg_orig, xv, yv, zv, 0, 128);
             MRIsetVoxVal(mri_neg_atlas, xp, yp, zp, 0, 128);
           }
 
-          if (MRIgetVoxVal(mri_neg_atlas, xp, yp, zp, 0) > 0)  // in nbhd of neg node
+          if (MRIgetVoxVal(mri_neg_atlas, xp, yp, zp, 0) >
+              0) // in nbhd of neg node
           {
             dx = MRIvoxelMean(mri_warp_tmp, xp, yp, zp, wsize, 0);
             dy = MRIvoxelMean(mri_warp_tmp, xp, yp, zp, wsize, 1);
@@ -18895,9 +18913,9 @@ int GCAMremoveSingularitiesAndReadWarpFromMRI(GCA_MORPH *gcam, MRI *mri_warp)
     }
     if (gcam->neg >= min_neg) {
       if (noprogress++ >= max_noprogress) {
-        min_neg = gcam->neg + 1;  // reset min neg found
+        min_neg = gcam->neg + 1; // reset min neg found
         nbhd++;
-        if (nbhd > max_nbhd)  // try it starting with just nearest nbrs again
+        if (nbhd > max_nbhd) // try it starting with just nearest nbrs again
         {
           nbhd = 1;
 #if 0
@@ -18914,13 +18932,13 @@ int GCAMremoveSingularitiesAndReadWarpFromMRI(GCA_MORPH *gcam, MRI *mri_warp)
           printf("neg = %d, increasing nbhd size to %d\n", gcam->neg, nbhd);
         }
       }
-    }
-    else {
+    } else {
       noprogress = 0;
       min_neg = gcam->neg;
     }
   } while (gcam->neg > 0 && (++iter < max_iter || gcam->neg < last_neg));
-  printf("after %d iterations, nbhd size=%d, neg = %d\n", iter, nbhd, gcam->neg);
+  printf("after %d iterations, nbhd size=%d, neg = %d\n", iter, nbhd,
+         gcam->neg);
   if (gcam->neg > 0) {
     DiagBreak();
   }
@@ -18930,27 +18948,27 @@ int GCAMremoveSingularitiesAndReadWarpFromMRI(GCA_MORPH *gcam, MRI *mri_warp)
   MRIfree(&mri_neg_orig);
   return (NO_ERROR);
 }
-MRI *replace_labels(
-    MRI *mri_src_labels, MRI *mri_dst_labels, int combine_labels[8][2], int ncombine_labels, GCA_MORPH_PARMS *parms)
-{
+MRI *replace_labels(MRI *mri_src_labels, MRI *mri_dst_labels,
+                    int combine_labels[8][2], int ncombine_labels,
+                    GCA_MORPH_PARMS *parms) {
   int n, *dtrans_labels, ndtrans, n2;
 
   mri_dst_labels = MRIcopy(mri_src_labels, mri_dst_labels);
   if (parms) {
     ndtrans = parms->ndtrans;
-  }
-  else {
+  } else {
     ndtrans = 0;
   }
   for (n = 0; n < ncombine_labels; n++) {
     printf("replacing label %s with %s\n",
            cma_label_to_name(combine_labels[n][0]),
            cma_label_to_name(combine_labels[n][1]));
-    MRIreplaceValuesOnly(mri_src_labels, mri_dst_labels, combine_labels[n][0], combine_labels[n][1]);
+    MRIreplaceValuesOnly(mri_src_labels, mri_dst_labels, combine_labels[n][0],
+                         combine_labels[n][1]);
     if (parms) {
       for (n2 = 0; n2 < parms->ndtrans; n2++)
         if (parms->dtrans_labels[n2] == combine_labels[n][0]) {
-          parms->dtrans_labels[n2] = -1;  // remove it
+          parms->dtrans_labels[n2] = -1; // remove it
           ndtrans--;
           break;
         }
@@ -18969,8 +18987,7 @@ MRI *replace_labels(
   return (mri_dst_labels);
 }
 
-int fix_borders(GCA_MORPH *gcam)
-{
+int fix_borders(GCA_MORPH *gcam) {
   int x, y, z;
   GCA_MORPH_NODE *gcamn0, *gcamn1;
 
@@ -19021,16 +19038,16 @@ int fix_borders(GCA_MORPH *gcam)
 
   return (NO_ERROR);
 }
-MRI *GCAMestimateLameConstants(GCA_MORPH *gcam)
-{
+MRI *GCAMestimateLameConstants(GCA_MORPH *gcam) {
   MRI *mri_lame, *mri_warp, *mri_sobel[3];
   int x, y, z, dim1, dim2;
   double energy, val1, val2, lambda, mu, rigid_energy, volume_change;
 
   lambda = 0.57692;
-  mu = 0.38462;  // matches CVS
+  mu = 0.38462; // matches CVS
   mri_warp = GCAMwriteWarpToMRI(gcam, NULL);
-  mri_lame = MRIallocSequence(mri_warp->width, mri_warp->height, mri_warp->depth, MRI_FLOAT, 5);
+  mri_lame = MRIallocSequence(mri_warp->width, mri_warp->height,
+                              mri_warp->depth, MRI_FLOAT, 5);
   mri_sobel[0] = MRIsobelFrame(mri_warp, NULL, NULL, 0);
   mri_sobel[1] = MRIsobelFrame(mri_warp, NULL, NULL, 1);
   mri_sobel[2] = MRIsobelFrame(mri_warp, NULL, NULL, 2);
@@ -19067,18 +19084,18 @@ MRI *GCAMestimateLameConstants(GCA_MORPH *gcam)
 
 // Create composite morph for warping a source image -> GCAM1 -> GCAM2 -> atlas/
 // destination image. Coordinates undergo the inverse transformation.
-GCA_MORPH *GCAMconcat2(GCAM *gcam1, GCAM *gcam2, GCAM *out)
-{
+GCA_MORPH *GCAMconcat2(GCAM *gcam1, GCAM *gcam2, GCAM *out) {
   int c, r, s, out_of_gcam1;
   float xd, yd, zd, xdd, ydd, zdd; // Deformed coordinates.
   GCA_MORPH_NODE *node2, *node_out;
-  
+
   if (!vg_isEqual(&gcam1->atlas, &gcam2->image)) {
     ErrorExit(ERROR_BADPARM, "ERROR: GCAMconcat2(): geometry does not match");
   }
   if (out && (out->width != gcam2->width || out->height != gcam2->height ||
               out->depth != gcam2->depth)) {
-    ErrorExit(ERROR_BADPARM, "ERROR: GCAMconcat2(): output size does not match");
+    ErrorExit(ERROR_BADPARM,
+              "ERROR: GCAMconcat2(): output size does not match");
   }
   if (out == gcam1) {
     ErrorExit(ERROR_BADPARM, "ERROR: GCAMconcat2(): output cannot be GCAM 1");
@@ -19086,7 +19103,7 @@ GCA_MORPH *GCAMconcat2(GCAM *gcam1, GCAM *gcam2, GCAM *out)
   if (!out) {
     out = GCAMalloc(gcam2->width, gcam2->height, gcam2->depth);
   }
-  
+
   if (gcam1->type == GCAM_RAS) {
     printf("GCAMconcat2(): converting GCAM 1 from GCAM_RAS to GCAM_VOX\n");
     GCAMrasToVox(gcam1, NULL);
@@ -19095,12 +19112,13 @@ GCA_MORPH *GCAMconcat2(GCAM *gcam1, GCAM *gcam2, GCAM *out)
     printf("GCAMconcat2(): converting GCAM 2 from GCAM_RAS to GCAM_VOX\n");
     GCAMrasToVox(gcam2, NULL);
   }
-  copyVolGeom(/*from*/&gcam1->image, /*to*/&out->image);
-  if (out != gcam2) copyVolGeom(/*from*/&gcam2->atlas, /*to*/&out->atlas);
+  copyVolGeom(/*from*/ &gcam1->image, /*to*/ &out->image);
+  if (out != gcam2)
+    copyVolGeom(/*from*/ &gcam2->atlas, /*to*/ &out->atlas);
   GCAMfreeInverse(out); // Will be invalid.
   out->spacing = gcam2->spacing;
   out->type = GCAM_VOX;
-  
+
   for (c = 0; c < gcam2->width; c++) {
     for (r = 0; r < gcam2->height; r++) {
       for (s = 0; s < gcam2->depth; s++) {
@@ -19113,7 +19131,7 @@ GCA_MORPH *GCAMconcat2(GCAM *gcam1, GCAM *gcam2, GCAM *out)
         zd = node2->z;
         out_of_gcam1 = GCAMsampleMorph(gcam1, xd, yd, zd, &xdd, &ydd, &zdd);
         node_out = &out->nodes[c][r][s];
-        
+
         if (out_of_gcam1) {
           // Marking as invalid is insufficient, as not written to disk. Set
           // x/y/z and origx/origy/origz to zero (see GCAMread).
@@ -19140,70 +19158,69 @@ GCA_MORPH *GCAMconcat2(GCAM *gcam1, GCAM *gcam2, GCAM *out)
 
 // Create composite morph for warping a source image -> LTA1 -> GCAM -> LTA2 ->
 // atlas/destination image. Coordinates undergo the inverse transformation.
-GCA_MORPH *GCAMconcat3(LTA *lta1, GCAM *gcam, LTA *lta2, GCAM *out)
-{
+GCA_MORPH *GCAMconcat3(LTA *lta1, GCAM *gcam, LTA *lta2, GCAM *out) {
   int c, r, s, out_of_gcam;
   GCA_MORPH_NODE *node;
   VECTOR *orig, *v, *w;
-  
+
   if (lta2) {
     lta2 = LTAreduce(lta2); // Reduce to single matrix, allocation.
     if (!vg_isEqual(&gcam->atlas, &lta2->xforms[0].src)) {
       if (vg_isEqual(&gcam->atlas, &lta2->xforms[0].dst)) {
         printf("WARNING: GCAMconcat3(): inverting LTA 2 to match geometry\n");
-        lta2 = LTAinvert(lta2, /*output*/lta2);
-      }
-      else {
-        ErrorExit(ERROR_BADPARM, "ERROR: GCAMconcat3(): LTA 2 geometry does not match");
+        lta2 = LTAinvert(lta2, /*output*/ lta2);
+      } else {
+        ErrorExit(ERROR_BADPARM,
+                  "ERROR: GCAMconcat3(): LTA 2 geometry does not match");
       }
     }
-  }
-  else {
-    lta2 = LTAalloc(/*nxforms*/1, NULL); // Identity.
+  } else {
+    lta2 = LTAalloc(/*nxforms*/ 1, NULL); // Identity.
     lta2->xforms[0].src = lta2->xforms[0].dst = gcam->atlas;
   }
-  
+
   if (lta1) {
     lta1 = LTAreduce(lta1);
     if (!vg_isEqual(&lta1->xforms[0].dst, &gcam->image)) {
       if (vg_isEqual(&lta1->xforms[0].src, &gcam->image)) {
         printf("WARNING: GCAMconcat3(): inverting LTA 1 to match geometry\n");
-        lta1 = LTAinvert(lta1, /*output*/lta1);
-      }
-      else {
-        ErrorExit(ERROR_BADPARM, "ERROR: GCAMconcat3(): LTA 1 geometry does not match");
+        lta1 = LTAinvert(lta1, /*output*/ lta1);
+      } else {
+        ErrorExit(ERROR_BADPARM,
+                  "ERROR: GCAMconcat3(): LTA 1 geometry does not match");
       }
     }
-  }
-  else {
-    lta1 = LTAalloc(/*nxforms*/1, NULL);
+  } else {
+    lta1 = LTAalloc(/*nxforms*/ 1, NULL);
     lta1->xforms[0].src = lta1->xforms[0].dst = gcam->image;
   }
   LTAchangeType(lta2, LINEAR_VOX_TO_VOX); // NOOP if same type.
   LTAchangeType(lta1, LINEAR_VOX_TO_VOX);
   LTAfillInverse(lta2);
   LTAfillInverse(lta1);
-  
+
   int width = lta2->xforms[0].dst.width / gcam->spacing;
   int height = lta2->xforms[0].dst.height / gcam->spacing;
   int depth = lta2->xforms[0].dst.depth / gcam->spacing;
   if (gcam == out)
     ErrorExit(ERROR_BADPARM, "ERROR: GCAMconcat3(): output cannot be input");
-  if (out && (out->width!=width || out->height!=height ||out->depth!=depth))
-    ErrorExit(ERROR_BADPARM, "ERROR: GCAMconcat3(): output size does not match");
+  if (out &&
+      (out->width != width || out->height != height || out->depth != depth))
+    ErrorExit(ERROR_BADPARM,
+              "ERROR: GCAMconcat3(): output size does not match");
   if (!out)
     out = GCAMalloc(width, height, depth);
-  
+
   if (gcam->type == GCAM_RAS) {
     printf("GCAMconcat3(): converting from GCAM_RAS to GCAM_VOX\n");
     GCAMrasToVox(gcam, NULL);
   }
-  copyVolGeom(/*from*/&lta1->xforms[0].src, /*to*/&out->image);
-  copyVolGeom(/*from*/&lta2->xforms[0].dst, /*to*/&out->atlas);
+  copyVolGeom(/*from*/ &lta1->xforms[0].src, /*to*/ &out->image);
+  copyVolGeom(/*from*/ &lta2->xforms[0].dst, /*to*/ &out->atlas);
   GCAMfreeInverse(out); // Will be invalid.
   out->spacing = gcam->spacing;
   out->type = GCAM_VOX;
-  
+
   orig = VectorAlloc(4, MATRIX_REAL);
   v = VectorAlloc(4, MATRIX_REAL);
   w = VectorAlloc(4, MATRIX_REAL);
@@ -19218,8 +19235,8 @@ GCA_MORPH *GCAMconcat3(LTA *lta1, GCAM *gcam, LTA *lta2, GCAM *out)
         VECTOR3_LOAD(orig, c, r, s);
         V3_SCALAR_MUL(orig, out->spacing, orig); // MRI voxel coords.
         MatrixMultiplyD(lta2->inv_xforms[0].m_L, orig, v);
-        out_of_gcam = GCAMsampleMorph(gcam, V3_X(v), V3_Y(v), V3_Z(v),
-                                      &V3_X(w), &V3_Y(w), &V3_Z(w));
+        out_of_gcam = GCAMsampleMorph(gcam, V3_X(v), V3_Y(v), V3_Z(v), &V3_X(w),
+                                      &V3_Y(w), &V3_Z(w));
         node = &out->nodes[c][r][s];
         if (out_of_gcam) {
           // Marking as invalid is insufficient, as not written to disk. Set
@@ -19250,8 +19267,7 @@ GCA_MORPH *GCAMconcat3(LTA *lta1, GCAM *gcam, LTA *lta2, GCAM *out)
   return (out);
 }
 
-GCA_MORPH *GCAMfillInverse(GCA_MORPH *gcam)
-{
+GCA_MORPH *GCAMfillInverse(GCA_MORPH *gcam) {
   MRI *mri;
   char tmpstr[2000];
   int width, height, depth;
@@ -19259,8 +19275,11 @@ GCA_MORPH *GCAMfillInverse(GCA_MORPH *gcam)
   GCA_MORPH_NODE *gcamn, *invgcamn;
   GCA_MORPH *inv_gcam;
 
-  printf("Allocating inv_gcam...(%d, %d, %d)\n", gcam->width, gcam->height, gcam->depth);
-  inv_gcam = GCAMalloc(gcam->width, gcam->height, gcam->depth);  // NOTE: forces same moving and target coordinate spaces!!
+  printf("Allocating inv_gcam...(%d, %d, %d)\n", gcam->width, gcam->height,
+         gcam->depth);
+  inv_gcam = GCAMalloc(
+      gcam->width, gcam->height,
+      gcam->depth); // NOTE: forces same moving and target coordinate spaces!!
   inv_gcam->image = gcam->atlas;
   inv_gcam->atlas = gcam->image;
 
@@ -19270,7 +19289,8 @@ GCA_MORPH *GCAMfillInverse(GCA_MORPH *gcam)
     printf("ERROR: reading %s\n", tmpstr);
     return (NULL);
   }
-  if ((gcam->mri_xind == NULL) || (gcam->mri_yind == NULL) || (gcam->mri_zind == NULL)) {
+  if ((gcam->mri_xind == NULL) || (gcam->mri_yind == NULL) ||
+      (gcam->mri_zind == NULL)) {
     // Must invert explicitly
     printf("GCAMfillInverse: Must invert gcam explicitely! \n");
     GCAMinvert(gcam, mri);
@@ -19310,8 +19330,7 @@ GCA_MORPH *GCAMfillInverse(GCA_MORPH *gcam)
   }
   return (inv_gcam);
 }
-GCA_MORPH *GCAMdownsample2(GCA_MORPH *gcam)
-{
+GCA_MORPH *GCAMdownsample2(GCA_MORPH *gcam) {
   int xd, yd, zd;
   GCA_MORPH_NODE *node_src, *node_dst;
   GCA_MORPH *gcam_dst;
@@ -19333,8 +19352,8 @@ GCA_MORPH *GCAMdownsample2(GCA_MORPH *gcam)
     for (yd = 0; yd < gcam_dst->height; yd++) {
       for (zd = 0; zd < gcam_dst->depth; zd++) {
         node_dst = &gcam_dst->nodes[xd][yd][zd];
-        node_src = &gcam->nodes[xd*2][yd*2][zd*2];
-        
+        node_src = &gcam->nodes[xd * 2][yd * 2][zd * 2];
+
         node_dst->x = node_src->x;
         node_dst->y = node_src->y;
         node_dst->z = node_src->z;
@@ -19374,8 +19393,7 @@ GCA_MORPH *GCAMdownsample2(GCA_MORPH *gcam)
   return (gcam_dst);
 }
 
-int GCAMdilateUseLikelihood(GCA_MORPH *gcam, int ndilations)
-{
+int GCAMdilateUseLikelihood(GCA_MORPH *gcam, int ndilations) {
   MRI *mri;
   int x, y, z, i;
   GCA_MORPH_NODE *gcamn;
@@ -19388,7 +19406,8 @@ int GCAMdilateUseLikelihood(GCA_MORPH *gcam, int ndilations)
           DiagBreak();
         }
         gcamn = &gcam->nodes[x][y][z];
-        if (gcamn->status & GCAM_IGNORE_LIKELIHOOD || gcamn->status & GCAM_NEVER_USE_LIKELIHOOD) {
+        if (gcamn->status & GCAM_IGNORE_LIKELIHOOD ||
+            gcamn->status & GCAM_NEVER_USE_LIKELIHOOD) {
           continue;
         }
         MRIsetVoxVal(mri, x, y, z, 0, 1);
@@ -19403,7 +19422,8 @@ int GCAMdilateUseLikelihood(GCA_MORPH *gcam, int ndilations)
           DiagBreak();
         }
         gcamn = &gcam->nodes[x][y][z];
-        if (gcamn->status & GCAM_IGNORE_LIKELIHOOD || gcamn->status & GCAM_NEVER_USE_LIKELIHOOD) {
+        if (gcamn->status & GCAM_IGNORE_LIKELIHOOD ||
+            gcamn->status & GCAM_NEVER_USE_LIKELIHOOD) {
           if (MRIgetVoxVal(mri, x, y, z, 0)) {
             gcamn->status = GCAM_USE_LIKELIHOOD;
           }
@@ -19414,16 +19434,16 @@ int GCAMdilateUseLikelihood(GCA_MORPH *gcam, int ndilations)
   return (NO_ERROR);
 }
 
-static MRI *gcamLabelToMRI(GCA_MORPH *gcam, MRI *mri, int label)
-{
+static MRI *gcamLabelToMRI(GCA_MORPH *gcam, MRI *mri, int label) {
   int x, y, z;
   GCA_MORPH_NODE *gcamn;
 
   if (mri == NULL) {
     mri = MRIalloc(gcam->width, gcam->height, gcam->depth, MRI_SHORT);
     //    MRIcopyVolGeomToMRI(mri, &gcam->atlas) ;
-    MRIsetResolution(
-        mri, gcam->atlas.xsize * gcam->spacing, gcam->atlas.ysize * gcam->spacing, gcam->atlas.zsize * gcam->spacing);
+    MRIsetResolution(mri, gcam->atlas.xsize * gcam->spacing,
+                     gcam->atlas.ysize * gcam->spacing,
+                     gcam->atlas.zsize * gcam->spacing);
     MRIreInitCache(mri);
     //    useVolGeomToMRI(&gcam->atlas, mri) ;
   }
@@ -19446,8 +19466,8 @@ static MRI *gcamLabelToMRI(GCA_MORPH *gcam, MRI *mri, int label)
 #include "mrisegment.h"
 #include "voxlist.h"
 
-static int grow_ventricles(MRI *mri_vent, MRI *mri_inputs, int whalf, int thresh)
-{
+static int grow_ventricles(MRI *mri_vent, MRI *mri_inputs, int whalf,
+                           int thresh) {
   VOXLIST *vl = NULL;
   int nadded, x, y, z, i, wsize, pass = 0;
   MRI *mri_dilated = NULL, *mri_border = NULL;
@@ -19462,7 +19482,8 @@ static int grow_ventricles(MRI *mri_vent, MRI *mri_inputs, int whalf, int thresh
       x = vl->xi[i];
       y = vl->yi[i];
       z = vl->zi[i];
-      if (x == Gx && y == Gy && z == Gz) DiagBreak();
+      if (x == Gx && y == Gy && z == Gz)
+        DiagBreak();
       if (MRImaxInNbhd(mri_inputs, wsize, x, y, z, 0) < thresh) {
         nadded++;
         MRIsetVoxVal(mri_vent, x, y, z, 0, 1);
@@ -19483,7 +19504,8 @@ static int grow_ventricles(MRI *mri_vent, MRI *mri_inputs, int whalf, int thresh
       x = vl->xi[i];
       y = vl->yi[i];
       z = vl->zi[i];
-      if (x == Gx && y == Gy && z == Gz) DiagBreak();
+      if (x == Gx && y == Gy && z == Gz)
+        DiagBreak();
       if (MRImaxInNbhd(mri_inputs, wsize, x, y, z, 0) < thresh) {
         nadded++;
         MRIsetVoxVal(mri_vent, x, y, z, 0, 1);
@@ -19502,15 +19524,16 @@ static int grow_ventricles(MRI *mri_vent, MRI *mri_inputs, int whalf, int thresh
   return (NO_ERROR);
 }
 
-int GCAMcomputeVentricleExpansionGradient(GCA_MORPH *gcam, MRI *mri, MRI *mri_vent, int navgs)
-{
+int GCAMcomputeVentricleExpansionGradient(GCA_MORPH *gcam, MRI *mri,
+                                          MRI *mri_vent, int navgs) {
   int x, y, z;
   GCA_MORPH_NODE *gcamn;
   MRI *mri_vent_atlas_dist, *mri_vent_atlas, *mri_vent_atlas_dist_grad;
   double val;
   // double outside_scale;
   static int i;
-  float thresh, lh_means[MAX_GCA_INPUTS], rh_means[MAX_GCA_INPUTS], lh_var[MAX_GCA_INPUTS], rh_var[MAX_GCA_INPUTS], std;
+  float thresh, lh_means[MAX_GCA_INPUTS], rh_means[MAX_GCA_INPUTS],
+      lh_var[MAX_GCA_INPUTS], rh_var[MAX_GCA_INPUTS], std;
 
   GCAlabelMean(gcam->gca, Left_Lateral_Ventricle, lh_means);
   GCAlabelMean(gcam->gca, Right_Lateral_Ventricle, rh_means);
@@ -19527,19 +19550,24 @@ int GCAMcomputeVentricleExpansionGradient(GCA_MORPH *gcam, MRI *mri, MRI *mri_ve
   gcamLabelToMRI(gcam, mri_vent_atlas, Third_Ventricle);
   gcamLabelToMRI(gcam, mri_vent_atlas, Fourth_Ventricle);
   MRIbinarize(mri_vent_atlas, mri_vent_atlas, 1, 0, 1);
-  mri_vent_atlas_dist = MRIdistanceTransform(mri_vent_atlas, NULL, 1, -1, DTRANS_MODE_SIGNED, NULL);
+  mri_vent_atlas_dist = MRIdistanceTransform(mri_vent_atlas, NULL, 1, -1,
+                                             DTRANS_MODE_SIGNED, NULL);
   mri_vent_atlas_dist_grad = MRIsobel(mri_vent_atlas_dist, NULL, NULL);
 
   MRIfree(&mri_vent_atlas);
 
-TIMER_INTERVAL_BEGIN(loop)
+  TIMER_INTERVAL_BEGIN(loop)
 
 #define MAX_DIST_FROM_VENTS 35
-#define IS_VENT_NBR(l) (IS_CAUDATE(l) || IS_WHITE_CLASS(l) || IS_THALAMUS(l) || IS_WMSA(l) || IS_HIPPO(l))
+#define IS_VENT_NBR(l)                                                         \
+  (IS_CAUDATE(l) || IS_WHITE_CLASS(l) || IS_THALAMUS(l) || IS_WMSA(l) ||       \
+   IS_HIPPO(l))
   for (x = 0; x < gcam->width; x++) {
     for (y = 0; y < gcam->height; y++) {
-      struct different_neighbor_labels_context different_neighbor_labels_context;
-      init_different_neighbor_labels_context(&different_neighbor_labels_context,gcam,x,y);
+      struct different_neighbor_labels_context
+          different_neighbor_labels_context;
+      init_different_neighbor_labels_context(&different_neighbor_labels_context,
+                                             gcam, x, y);
       for (z = 0; z < gcam->depth; z++) {
         if (x == Gx && y == Gy && z == Gz) {
           DiagBreak();
@@ -19548,28 +19576,32 @@ TIMER_INTERVAL_BEGIN(loop)
 
         MRIsampleVolume(mri_vent, gcamn->x, gcamn->y, gcamn->z, &val);
         if (val > 0) {
-          if (IS_LAT_VENT(gcamn->label)) DiagBreak();
+          if (IS_LAT_VENT(gcamn->label))
+            DiagBreak();
 
-          if (IS_LAT_VENT(gcamn->label) == 0)  // should be vent, but not mapped to a gcamn that is vent
+          if (IS_LAT_VENT(gcamn->label) ==
+              0) // should be vent, but not mapped to a gcamn that is vent
           {
             gcamn->dx = MRIgetVoxVal(mri_vent_atlas_dist_grad, x, y, z, 0);
             gcamn->dy = MRIgetVoxVal(mri_vent_atlas_dist_grad, x, y, z, 1);
             gcamn->dz = MRIgetVoxVal(mri_vent_atlas_dist_grad, x, y, z, 2);
-          }
-          else  // it is ventricle in the atlas. If it's not ventricle in image move away from vents
+          } else // it is ventricle in the atlas. If it's not ventricle in image
+                 // move away from vents
           {
             MRIsampleVolume(mri, gcamn->x, gcamn->y, gcamn->z, &val);
-            if (val > thresh)  // too bright to be ventricle
+            if (val > thresh) // too bright to be ventricle
             {
               gcamn->dx = -MRIgetVoxVal(mri_vent_atlas_dist_grad, x, y, z, 0);
               gcamn->dy = -MRIgetVoxVal(mri_vent_atlas_dist_grad, x, y, z, 1);
               gcamn->dz = -MRIgetVoxVal(mri_vent_atlas_dist_grad, x, y, z, 2);
             }
           }
-        }
-        else if (IS_UNKNOWN(gcamn->label) && (different_neighbor_labels(&different_neighbor_labels_context, gcamn->label, gcam, x, y, z) >
-                                              0)) {  // use a ring of unknowns outside brain to prevent surface of
-                                                     // brain from moving too far  inward
+        } else if (IS_UNKNOWN(gcamn->label) &&
+                   (different_neighbor_labels(
+                        &different_neighbor_labels_context, gcamn->label, gcam,
+                        x, y, z) >
+                    0)) { // use a ring of unknowns outside brain to prevent
+                          // surface of brain from moving too far  inward
 #if 0
           gcamn->dx = -outside_scale*MRIgetVoxVal(mri_vent_atlas_dist_grad, x, y, z, 0) ;
           gcamn->dy = -outside_scale*MRIgetVoxVal(mri_vent_atlas_dist_grad, x, y, z, 1) ;
@@ -19579,11 +19611,13 @@ TIMER_INTERVAL_BEGIN(loop)
       }
     }
   }
-  if (++i == Gdiag_no) DiagBreak();
+  if (++i == Gdiag_no)
+    DiagBreak();
 
-TIMER_INTERVAL_END(loop)
+  TIMER_INTERVAL_END(loop)
 
-  if ((Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) || (gcam_write_grad && i < 20) || (gcam_write_grad > 1)) {
+  if ((Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON) || (gcam_write_grad && i < 20) ||
+      (gcam_write_grad > 1)) {
     MRI *mri;
     char fname[STRLEN];
     printf("writing gradients to ...d[xyz]_%4.4d.mgz\n", i);
@@ -19603,17 +19637,19 @@ TIMER_INTERVAL_END(loop)
   return (NO_ERROR);
 }
 
-int GCAMregisterVentricles(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
-{
+int GCAMregisterVentricles(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms) {
   char fname[STRLEN];
   int navgs, which, fixed_steps = 0, n, label, x, y, z, xp, yp, zp, passno = 0;
-  double val, base_sigma, pct_change, rms, last_rms = 0.0, orig_dt, l_orig_smooth, min_dt, tol, start_rms, end_rms;
+  double val, base_sigma, pct_change, rms,
+      last_rms = 0.0, orig_dt, l_orig_smooth, min_dt, tol, start_rms, end_rms;
   // double l_elastic;
   MRI_SEGMENTATION *mseg;
-  MRI *mri_vent, *mri_lh, *mri_rh, *mri_vent_atlas, *mri_smooth, *mri_kernel, *mri_lhi, *mri_rhi;
+  MRI *mri_vent, *mri_lh, *mri_rh, *mri_vent_atlas, *mri_smooth, *mri_kernel,
+      *mri_lhi, *mri_rhi;
   TRANSFORM *trans;
   GCA_MORPH_NODE *gcamn;
-  float thresh, lh_means[MAX_GCA_INPUTS], rh_means[MAX_GCA_INPUTS], lh_var[MAX_GCA_INPUTS], rh_var[MAX_GCA_INPUTS], std;
+  float thresh, lh_means[MAX_GCA_INPUTS], rh_means[MAX_GCA_INPUTS],
+      lh_var[MAX_GCA_INPUTS], rh_var[MAX_GCA_INPUTS], std;
   float fmin, fmax, new_thresh;
   HISTOGRAM *hv, *hvs, *hc, *hcs;
   double likelihoods[MAX_GCA_LABELS], lmax;
@@ -19642,18 +19678,13 @@ int GCAMregisterVentricles(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
   GCAlabelVar(gcam->gca, Right_Caudate, rh_var);
   GCAlabelVar(gcam->gca, Left_Caudate, lh_var);
   csigma = sqrt((lh_var[0] + rh_var[0]) / 2.0);
-  printf(
-      "using threshold %2.1f from atlas ventricle (%2.1f +- %2.1f) and caudate (%2.1f +- %2.1f) distributions for "
-      "initial ventricular estimate\n",
-      thresh,
-      vmean,
-      vsigma,
-      cmean,
-      csigma);
+  printf("using threshold %2.1f from atlas ventricle (%2.1f +- %2.1f) and "
+         "caudate (%2.1f +- %2.1f) distributions for "
+         "initial ventricular estimate\n",
+         thresh, vmean, vsigma, cmean, csigma);
 
   mri_vent_atlas = MRIalloc(gcam->width, gcam->height, gcam->depth, MRI_SHORT);
-  MRIsetResolution(mri_vent_atlas,
-                   gcam->atlas.xsize * gcam->spacing,
+  MRIsetResolution(mri_vent_atlas, gcam->atlas.xsize * gcam->spacing,
                    gcam->atlas.ysize * gcam->spacing,
                    gcam->atlas.zsize * gcam->spacing);
   MRIreInitCache(mri_vent_atlas);
@@ -19667,28 +19698,33 @@ int GCAMregisterVentricles(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
   for (x = 0; x < gcam->width; x++)
     for (y = 0; y < gcam->height; y++)
       for (z = 0; z < gcam->depth; z++) {
-        if (x == Gx && y == Gy && z == Gz) DiagBreak();
+        if (x == Gx && y == Gy && z == Gz)
+          DiagBreak();
         gcamn = &gcam->nodes[x][y][z];
-        if (nint(gcamn->x) == Gvx && nint(gcamn->y) == Gvy && nint(gcamn->z) == Gvz) DiagBreak();
+        if (nint(gcamn->x) == Gvx && nint(gcamn->y) == Gvy &&
+            nint(gcamn->z) == Gvz)
+          DiagBreak();
         MRIsampleVolume(mri, gcamn->x, gcamn->y, gcamn->z, &val);
-        if (val > thresh) continue;
-        if (!IS_VENTRICLE(gcamn->label)) continue;
+        if (val > thresh)
+          continue;
+        if (!IS_VENTRICLE(gcamn->label))
+          continue;
         label = most_likely_label(gcam, trans, x, y, z, mri);
         switch (label) {
-          case Left_Inf_Lat_Vent:
-            MRIsetVoxVal(mri_lhi, x, y, z, 0, 1);
-            break;
-          case Right_Inf_Lat_Vent:
-            MRIsetVoxVal(mri_rhi, x, y, z, 0, 1);
-            break;
-          case Left_Lateral_Ventricle:
-            MRIsetVoxVal(mri_lh, x, y, z, 0, 1);
-            break;
-          case Right_Lateral_Ventricle:
-            MRIsetVoxVal(mri_rh, x, y, z, 0, 1);
-            break;
-          default:
-            break;
+        case Left_Inf_Lat_Vent:
+          MRIsetVoxVal(mri_lhi, x, y, z, 0, 1);
+          break;
+        case Right_Inf_Lat_Vent:
+          MRIsetVoxVal(mri_rhi, x, y, z, 0, 1);
+          break;
+        case Left_Lateral_Ventricle:
+          MRIsetVoxVal(mri_lh, x, y, z, 0, 1);
+          break;
+        case Right_Lateral_Ventricle:
+          MRIsetVoxVal(mri_rh, x, y, z, 0, 1);
+          break;
+        default:
+          break;
         }
       }
 
@@ -19735,8 +19771,10 @@ int GCAMregisterVentricles(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
   for (x = 0; x < mri->width; x++)
     for (y = 0; y < mri->height; y++)
       for (z = 0; z < mri->depth; z++) {
-        if (x == Gvx && y == Gvy && z == Gvz) DiagBreak();
-        nlabels = GCAcomputeVoxelLikelihoods(gcam->gca, mri, x, y, z, &transform, labels, likelihoods);
+        if (x == Gvx && y == Gvy && z == Gvz)
+          DiagBreak();
+        nlabels = GCAcomputeVoxelLikelihoods(gcam->gca, mri, x, y, z,
+                                             &transform, labels, likelihoods);
         max_label = -1;
         for (n = 0, lmax = -100000; n < nlabels; n++) {
           if (likelihoods[n] > lmax) {
@@ -19744,12 +19782,18 @@ int GCAMregisterVentricles(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
             max_label = labels[n];
           }
         }
-        if (IS_VENTRICLE(max_label)) HISTOaddSample(hv, MRIgetVoxVal(mri, x, y, z, 0), -1, -1);
-        if (IS_CAUDATE(max_label)) HISTOaddSample(hc, MRIgetVoxVal(mri, x, y, z, 0), -1, -1);
+        if (IS_VENTRICLE(max_label))
+          HISTOaddSample(hv, MRIgetVoxVal(mri, x, y, z, 0), -1, -1);
+        if (IS_CAUDATE(max_label))
+          HISTOaddSample(hc, MRIgetVoxVal(mri, x, y, z, 0), -1, -1);
 
-        if (x == Gx && y == Gy && z == Gz) DiagBreak();
-        if (GCAsourceVoxelToPrior(gcam->gca, mri, trans, x, y, z, &xp, &yp, &zp) != NO_ERROR) continue;
-        if ((MRIgetVoxVal(mri_vent_atlas, xp, yp, zp, 0) > 0) && MRIgetVoxVal(mri, x, y, z, 0) <= thresh)
+        if (x == Gx && y == Gy && z == Gz)
+          DiagBreak();
+        if (GCAsourceVoxelToPrior(gcam->gca, mri, trans, x, y, z, &xp, &yp,
+                                  &zp) != NO_ERROR)
+          continue;
+        if ((MRIgetVoxVal(mri_vent_atlas, xp, yp, zp, 0) > 0) &&
+            MRIgetVoxVal(mri, x, y, z, 0) <= thresh)
           MRIsetVoxVal(mri_vent, x, y, z, 0, 1);
       }
   hvs = HISTOsmooth(hv, NULL, 2);
@@ -19762,28 +19806,23 @@ int GCAMregisterVentricles(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
     HISTOplot(hc, "h.caudate.plt");
     HISTOplot(hcs, "hs.caudate.plt");
   }
-  if (cmean < vmean + 2 * vsigma)  // caudate mean must be wrong - don't use it in threshold
+  if (cmean <
+      vmean +
+          2 * vsigma) // caudate mean must be wrong - don't use it in threshold
   {
     GCAlabelMean(gcam->gca, Left_Caudate, cmeans_lh);
     GCAlabelMean(gcam->gca, Right_Caudate, cmeans_rh);
     cmean = (cmeans_lh[0] + cmeans_rh[0]) / 2;
     new_thresh = MIN(vmean + 3 * vsigma, (3 * vmean + 2 * cmean) / 5);
-    printf(
-        "caudate distribution could not be robustly estimated - using atlas caudate (%2.1f) and ventricle density "
-        "(%2.1f + 2*%2.1f) to set threshold %2.1f\n",
-        cmean,
-        vmean,
-        vsigma,
-        new_thresh);
-  }
-  else {
+    printf("caudate distribution could not be robustly estimated - using atlas "
+           "caudate (%2.1f) and ventricle density "
+           "(%2.1f + 2*%2.1f) to set threshold %2.1f\n",
+           cmean, vmean, vsigma, new_thresh);
+  } else {
     new_thresh = (csigma * vmean + vsigma * cmean) / (csigma + vsigma);
-    printf("using robust Gaussian fitting - new thresh at %2.1f (V: %2.1f +- %2.1f, C: %2.1f +- %2.1f, )\n",
-           new_thresh,
-           vmean,
-           vsigma,
-           cmean,
-           csigma);
+    printf("using robust Gaussian fitting - new thresh at %2.1f (V: %2.1f +- "
+           "%2.1f, C: %2.1f +- %2.1f, )\n",
+           new_thresh, vmean, vsigma, cmean, csigma);
   }
 
   /* do some sanity checking on threshold. Don't let it get crazy big, but also
@@ -19832,8 +19871,7 @@ int GCAMregisterVentricles(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
   }
   if (parms->levels < 0) {
     parms->levels = DEFAULT_PYRAMID_LEVELS;
-  }
-  else if (parms->levels >= MAX_PYRAMID_LEVELS) {
+  } else if (parms->levels >= MAX_PYRAMID_LEVELS) {
     parms->levels = MAX_PYRAMID_LEVELS;
   }
 
@@ -19845,15 +19883,13 @@ int GCAMregisterVentricles(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
     if (parms->log_fp == NULL) {
       if (parms->start_t == 0) {
         parms->log_fp = fopen(fname, "w");
-      }
-      else {
+      } else {
         parms->log_fp = fopen(fname, "a");
       }
     }
     fprintf(parms->log_fp, "expanding ventricular system\n");
     log_integration_parms(parms->log_fp, parms);
-  }
-  else {
+  } else {
     parms->log_fp = NULL;
   }
 
@@ -19866,8 +19902,7 @@ int GCAMregisterVentricles(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
   // make node to have the max_prior label values
   if (parms->relabel_avgs >= parms->navgs && parms->relabel) {
     GCAMcomputeLabels(mri, gcam);
-  }
-  else {
+  } else {
     GCAMcomputeMaxPriorLabels(gcam);
   }
 
@@ -19878,15 +19913,18 @@ int GCAMregisterVentricles(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
   n = 0;
   do {
     printf("pass %d of ventricular alignment\n", ++passno);
-    if (parms->log_fp) fprintf(parms->log_fp, "ventricle registration, pass %d of ventricular alignment\n", passno);
+    if (parms->log_fp)
+      fprintf(parms->log_fp,
+              "ventricle registration, pass %d of ventricular alignment\n",
+              passno);
     start_rms = GCAMcomputeRMS(gcam, mri, parms);
 
     for (navgs = parms->navgs; parms->navgs >= 0; parms->navgs /= 4) {
       parms->l_smoothness = l_orig_smooth / (sqrt(parms->navgs) + 1);
-      if (parms->integration_type == GCAM_INTEGRATE_OPTIMAL || parms->integration_type == GCAM_INTEGRATE_BOTH) {
+      if (parms->integration_type == GCAM_INTEGRATE_OPTIMAL ||
+          parms->integration_type == GCAM_INTEGRATE_BOTH) {
         which = GCAM_INTEGRATE_OPTIMAL;
-      }
-      else {
+      } else {
         which = GCAM_INTEGRATE_FIXED;
       }
 
@@ -19894,19 +19932,15 @@ int GCAMregisterVentricles(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
       if (FZERO(parms->start_t) && n == 0) {
         if (parms->log_fp) {
           fprintf(parms->log_fp,
-                  "%04d: dt=%2.6f, rms=%2.3f (%2.3f%%), neg=%d, invalid=%d, PA, navgs=%d",
-                  parms->start_t,
-                  0.0,
-                  last_rms,
-                  0.0,
-                  gcam->neg,
-                  Ginvalid,
+                  "%04d: dt=%2.6f, rms=%2.3f (%2.3f%%), neg=%d, invalid=%d, "
+                  "PA, navgs=%d",
+                  parms->start_t, 0.0, last_rms, 0.0, gcam->neg, Ginvalid,
                   navgs);
           if (parms->l_binary > 0)
-            fprintf(parms->log_fp,
-                    ", aligned = %d (%2.3f%%)\n",
-                    Galigned,
-                    100.0 * Galigned / ((gcam->width * gcam->height * gcam->depth) - Ginvalid));
+            fprintf(
+                parms->log_fp, ", aligned = %d (%2.3f%%)\n", Galigned,
+                100.0 * Galigned /
+                    ((gcam->width * gcam->height * gcam->depth) - Ginvalid));
           else {
             fprintf(parms->log_fp, "\n");
           }
@@ -19914,18 +19948,14 @@ int GCAMregisterVentricles(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
         }
 
         if (Gdiag & DIAG_SHOW) {
-          printf("%04d: dt=%2.6f, rms=%2.3f (%2.3f%%), neg=%d, invalid=%d, PA, navgs=%d",
-                 parms->start_t,
-                 0.0,
-                 last_rms,
-                 0.0,
-                 gcam->neg,
-                 Ginvalid,
+          printf("%04d: dt=%2.6f, rms=%2.3f (%2.3f%%), neg=%d, invalid=%d, PA, "
+                 "navgs=%d",
+                 parms->start_t, 0.0, last_rms, 0.0, gcam->neg, Ginvalid,
                  navgs);
           if (parms->l_binary > 0)
-            printf(", aligned = %d (%2.3f%%)\n",
-                   Galigned,
-                   100.0 * Galigned / ((gcam->width * gcam->height * gcam->depth) - Ginvalid));
+            printf(", aligned = %d (%2.3f%%)\n", Galigned,
+                   100.0 * Galigned /
+                       ((gcam->width * gcam->height * gcam->depth) - Ginvalid));
           else {
             printf("\n");
           }
@@ -19934,32 +19964,33 @@ int GCAMregisterVentricles(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
       do {
         GCAMcopyNodePositions(gcam, CURRENT_POSITIONS, SAVED2_POSITIONS);
         gcamClearGradient(gcam);
-        GCAMcomputeVentricleExpansionGradient(gcam, mri, mri_vent, parms->navgs);
+        GCAMcomputeVentricleExpansionGradient(gcam, mri, mri_vent,
+                                              parms->navgs);
         gcamLogLikelihoodTerm(gcam, mri, mri_smooth, parms->l_log_likelihood);
         gcamSmoothnessTerm(gcam, mri, parms->l_smoothness);
         gcamLSmoothnessTerm(gcam, mri, parms->l_lsmoothness);
         gcamSpringTerm(gcam, parms->l_spring, parms->ratio_thresh);
         gcamJacobianTerm(gcam, mri, parms->l_jacobian, parms->ratio_thresh);
-        // The following appears to be a null operation, based on current #ifdefs
+        // The following appears to be a null operation, based on current
+        // #ifdefs
         gcamLimitGradientMagnitude(gcam, parms, mri);
         gcamSmoothGradient(gcam, parms->navgs);
 
         if (which == GCAM_INTEGRATE_OPTIMAL) {
-          parms->dt = (sqrt(parms->navgs) + 1.0f) * orig_dt; /* will search around
-                                                                this value */
+          parms->dt =
+              (sqrt(parms->navgs) + 1.0f) * orig_dt; /* will search around
+                                                        this value */
           min_dt = gcamFindOptimalTimeStep(gcam, parms, mri);
-          if (FZERO(min_dt))  // try a momentum step
+          if (FZERO(min_dt)) // try a momentum step
           {
             fixed_steps++;
             which = GCAM_INTEGRATE_FIXED;
             min_dt = parms->dt = (sqrt(parms->navgs) + 1.0f) * orig_dt;
-          }
-          else {
+          } else {
             fixed_steps = 0;
           }
           parms->dt = min_dt;
-        }
-        else {
+        } else {
           fixed_steps++;
           min_dt = parms->dt = (sqrt(parms->navgs) + 1.0f) * orig_dt;
         }
@@ -19975,9 +20006,10 @@ int GCAMregisterVentricles(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
         }
 
         GCAMremoveNegativeNodes(gcam, mri, parms);
-        if (gcam->neg > 0)  // couldn't unfold everything
+        if (gcam->neg > 0) // couldn't unfold everything
         {
-          printf("---------- unfolding failed - restoring original position --------------------\n");
+          printf("---------- unfolding failed - restoring original position "
+                 "--------------------\n");
           GCAMcopyNodePositions(gcam, SAVED2_POSITIONS, CURRENT_POSITIONS);
           gcamComputeMetricProperties(gcam);
         }
@@ -19993,7 +20025,8 @@ int GCAMregisterVentricles(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
           gcamClearMomentum(gcam);
           continue;
         }
-        if (pct_change < 2 * tol && parms->integration_type == GCAM_INTEGRATE_BOTH && fixed_steps > 5) {
+        if (pct_change < 2 * tol &&
+            parms->integration_type == GCAM_INTEGRATE_BOTH && fixed_steps > 5) {
           printf("switching integration type back to optimal\n");
           which = GCAM_INTEGRATE_OPTIMAL;
         }
@@ -20001,26 +20034,23 @@ int GCAMregisterVentricles(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
         if (!FZERO(parms->start_t)) {
           DiagBreak();
         }
-        if (parms->write_iterations > 0 && !((n + 1) % parms->write_iterations) && (Gdiag & DIAG_WRITE)) {
+        if (parms->write_iterations > 0 &&
+            !((n + 1) % parms->write_iterations) && (Gdiag & DIAG_WRITE)) {
           write_snapshot(gcam, mri, parms, parms->start_t + n + 1);
         }
 
         last_rms = rms;
         if (parms->log_fp) {
           fprintf(parms->log_fp,
-                  "%04d: dt=%2.6f, rms=%2.3f (%2.3f%%), neg=%d, invalid=%d, PA, navgs=%d",
-                  parms->start_t + n + 1,
-                  min_dt,
-                  rms,
-                  pct_change,
-                  gcam->neg,
-                  Ginvalid,
-                  parms->navgs);
+                  "%04d: dt=%2.6f, rms=%2.3f (%2.3f%%), neg=%d, invalid=%d, "
+                  "PA, navgs=%d",
+                  parms->start_t + n + 1, min_dt, rms, pct_change, gcam->neg,
+                  Ginvalid, parms->navgs);
           if (parms->l_binary > 0)
-            fprintf(parms->log_fp,
-                    ", aligned = %d (%2.3f%%)\n",
-                    Galigned,
-                    100.0 * Galigned / ((gcam->width * gcam->height * gcam->depth) - Ginvalid));
+            fprintf(
+                parms->log_fp, ", aligned = %d (%2.3f%%)\n", Galigned,
+                100.0 * Galigned /
+                    ((gcam->width * gcam->height * gcam->depth) - Ginvalid));
           else {
             fprintf(parms->log_fp, "\n");
           }
@@ -20028,18 +20058,14 @@ int GCAMregisterVentricles(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
         }
 
         if (Gdiag & DIAG_SHOW) {
-          printf("%04d: dt=%2.6f, rms=%2.3f (%2.3f%%), neg=%d, invalid=%d, PA, navgs=%d",
-                 parms->start_t + n + 1,
-                 min_dt,
-                 rms,
-                 pct_change,
-                 gcam->neg,
-                 Ginvalid,
-                 parms->navgs);
+          printf("%04d: dt=%2.6f, rms=%2.3f (%2.3f%%), neg=%d, invalid=%d, PA, "
+                 "navgs=%d",
+                 parms->start_t + n + 1, min_dt, rms, pct_change, gcam->neg,
+                 Ginvalid, parms->navgs);
           if (parms->l_binary > 0)
-            printf(", aligned = %d (%2.3f%%)\n",
-                   Galigned,
-                   100.0 * Galigned / ((gcam->width * gcam->height * gcam->depth) - Ginvalid));
+            printf(", aligned = %d (%2.3f%%)\n", Galigned,
+                   100.0 * Galigned /
+                       ((gcam->width * gcam->height * gcam->depth) - Ginvalid));
           else {
             printf("\n");
           }
@@ -20051,14 +20077,14 @@ int GCAMregisterVentricles(GCA_MORPH *gcam, MRI *mri, GCA_MORPH_PARMS *parms)
       }
     }
     end_rms = GCAMcomputeRMS(gcam, mri, parms);
-    printf("end_rms %2.3f, pct change = %2.1f%%\n", end_rms, 100 * (start_rms - end_rms) / (start_rms + end_rms));
+    printf("end_rms %2.3f, pct change = %2.1f%%\n", end_rms,
+           100 * (start_rms - end_rms) / (start_rms + end_rms));
     if (parms->log_fp)
-      fprintf(parms->log_fp,
-              "end_rms %2.3f, pct change = %2.1f%%\n",
-              end_rms,
+      fprintf(parms->log_fp, "end_rms %2.3f, pct change = %2.1f%%\n", end_rms,
               100 * (start_rms - end_rms) / (start_rms + end_rms));
     break;
-  } while (100 * (start_rms - end_rms) / (start_rms + end_rms) > 10 * parms->tol);
+  } while (100 * (start_rms - end_rms) / (start_rms + end_rms) >
+           10 * parms->tol);
   parms->navgs = navgs;
   parms->sigma = base_sigma;
   parms->l_smoothness = l_orig_smooth;
@@ -20101,8 +20127,8 @@ GCAMsetNegativeNodeStatus(GCA_MORPH *gcam, int status)
 }
 #endif
 
-static int most_likely_label(GCA_MORPH *gcam, TRANSFORM *transform, int xp, int yp, int zp, MRI *mri_inputs)
-{
+static int most_likely_label(GCA_MORPH *gcam, TRANSFORM *transform, int xp,
+                             int yp, int zp, MRI *mri_inputs) {
   int n, best_label;
   float p, max_p, x, y, z;
   GCA_PRIOR *gcap;
@@ -20110,9 +20136,11 @@ static int most_likely_label(GCA_MORPH *gcam, TRANSFORM *transform, int xp, int 
   max_p = -1;
   best_label = -1;
   gcap = &gcam->gca->priors[xp][yp][zp];
-  GCApriorToSourceVoxelFloat(gcam->gca, mri_inputs, transform, xp, yp, zp, &x, &y, &z);
+  GCApriorToSourceVoxelFloat(gcam->gca, mri_inputs, transform, xp, yp, zp, &x,
+                             &y, &z);
   for (n = 0; n < gcap->nlabels; n++) {
-    p = GCAcomputeLabelPosterior(gcam->gca, transform, mri_inputs, x, y, z, gcap->labels[n]);
+    p = GCAcomputeLabelPosterior(gcam->gca, transform, mri_inputs, x, y, z,
+                                 gcap->labels[n]);
     if (p > max_p) {
       max_p = p;
       best_label = gcap->labels[n];
@@ -20128,18 +20156,19 @@ static int most_likely_label(GCA_MORPH *gcam, TRANSFORM *transform, int xp, int 
   the col, row, slice in the source image. The geometry
   is set to match that of the atlas image.
  */
-MRI *GCAMtoMRI(GCAM *gcam, MRI *mri)
-{
+MRI *GCAMtoMRI(GCAM *gcam, MRI *mri) {
   int c;
 
   if (mri == NULL) {
-    mri = MRIallocSequence(gcam->width, gcam->height, gcam->depth, MRI_FLOAT, 3);
-    if (mri == NULL) return (NULL);
+    mri =
+        MRIallocSequence(gcam->width, gcam->height, gcam->depth, MRI_FLOAT, 3);
+    if (mri == NULL)
+      return (NULL);
     useVolGeomToMRI(&(gcam->atlas), mri);
-    mri->width = gcam->width;  // this gets overwritten by VolGeom
+    mri->width = gcam->width; // this gets overwritten by VolGeom
     mri->height = gcam->height;
     mri->depth = gcam->depth;
-    mri->xsize *= gcam->spacing;  // Adapt to the node spacing
+    mri->xsize *= gcam->spacing; // Adapt to the node spacing
     mri->ysize *= gcam->spacing;
     mri->zsize *= gcam->spacing;
   }
@@ -20153,9 +20182,9 @@ MRI *GCAMtoMRI(GCAM *gcam, MRI *mri)
         // The "x,y,z" tell you the col, row, slice in the original image
         // to which the crs in the gcam maps (ie, it maps from gcam CRS
         // to image CRS)
-        MRIsetVoxVal(mri, c, r, s, 0, gcan->x);  // col (LR)
-        MRIsetVoxVal(mri, c, r, s, 1, gcan->y);  // row (SI)
-        MRIsetVoxVal(mri, c, r, s, 2, gcan->z);  // slice (AP)
+        MRIsetVoxVal(mri, c, r, s, 0, gcan->x); // col (LR)
+        MRIsetVoxVal(mri, c, r, s, 1, gcan->y); // row (SI)
+        MRIsetVoxVal(mri, c, r, s, 2, gcan->z); // slice (AP)
       }
     }
   }
@@ -20163,12 +20192,11 @@ MRI *GCAMtoMRI(GCAM *gcam, MRI *mri)
   return (mri);
 }
 
-GCA_MORPH *GCAMcopy(const GCA_MORPH *gcamsrc, GCA_MORPH *gcamdst)
-{
+GCA_MORPH *GCAMcopy(const GCA_MORPH *gcamsrc, GCA_MORPH *gcamdst) {
   int c, r, s;
-  if (gcamdst && (gcamdst->width != gcamsrc->width ||
-                  gcamdst->height != gcamsrc->height ||
-                  gcamdst->depth != gcamsrc->depth) ) {
+  if (gcamdst &&
+      (gcamdst->width != gcamsrc->width || gcamdst->height != gcamsrc->height ||
+       gcamdst->depth != gcamsrc->depth)) {
     ErrorExit(ERROR_BADPARM, "GCAMcopy: incompatible size.\n");
   }
   if (!gcamdst) {
@@ -20182,25 +20210,24 @@ GCA_MORPH *GCAMcopy(const GCA_MORPH *gcamsrc, GCA_MORPH *gcamdst)
   gcamdst->exp_k = gcamsrc->exp_k;
   gcamdst->spacing = gcamsrc->spacing;
   if (gcamsrc->mri_xind) {
-    MRIcopy(/*mri_src*/gcamsrc->mri_xind, /*mri_dst*/gcamdst->mri_xind);
-    MRIcopy(/*mri_src*/gcamsrc->mri_yind, /*mri_dst*/gcamdst->mri_yind);
-    MRIcopy(/*mri_src*/gcamsrc->mri_zind, /*mri_dst*/gcamdst->mri_zind);
-  }
-  else {
+    MRIcopy(/*mri_src*/ gcamsrc->mri_xind, /*mri_dst*/ gcamdst->mri_xind);
+    MRIcopy(/*mri_src*/ gcamsrc->mri_yind, /*mri_dst*/ gcamdst->mri_yind);
+    MRIcopy(/*mri_src*/ gcamsrc->mri_zind, /*mri_dst*/ gcamdst->mri_zind);
+  } else {
     gcamdst->mri_xind = gcamdst->mri_yind = gcamdst->mri_zind = NULL;
   }
-  copyVolGeom(/*from*/&gcamsrc->image, /*to*/&gcamdst->image);
-  copyVolGeom(/*from*/&gcamsrc->atlas, /*to*/&gcamdst->atlas);
+  copyVolGeom(/*from*/ &gcamsrc->image, /*to*/ &gcamdst->image);
+  copyVolGeom(/*from*/ &gcamsrc->atlas, /*to*/ &gcamdst->atlas);
   gcamdst->ninputs = gcamsrc->ninputs;
   gcamdst->type = gcamsrc->type;
   gcamdst->status = gcamsrc->status;
-  MatrixCopy(/*mIn*/gcamsrc->m_affine, /*mOut*/gcamdst->m_affine);
+  MatrixCopy(/*mIn*/ gcamsrc->m_affine, /*mOut*/ gcamdst->m_affine);
   gcamdst->det = gcamsrc->det;
   gcamdst->type = gcamsrc->type;
   // Only GC1D pointer in node, target doesn't not get saved.
-  for (c=0; c<gcamsrc->width; c++) {
-    for (r=0; r<gcamsrc->height; r++) {
-      for (s=0; s<gcamsrc->depth; s++) {
+  for (c = 0; c < gcamsrc->width; c++) {
+    for (r = 0; r < gcamsrc->height; r++) {
+      for (s = 0; s < gcamsrc->depth; s++) {
         memcpy(&gcamdst->nodes[c][r][s], &gcamsrc->nodes[c][r][s], sizeof(GMN));
       }
     }
@@ -20212,15 +20239,14 @@ GCA_MORPH *GCAMcopy(const GCA_MORPH *gcamsrc, GCA_MORPH *gcamdst)
 // In contrast to LTAs, the geometry of GCA_MORPHs is igored when resampling,
 // e.g. by mri_convert or mri_vol2vol. This function changes the
 // source/destination geometry and modifies the morph accordingly.
-GCA_MORPH *GCAMchangeVolGeom(GCA_MORPH *gcam, MRI *mri_src, MRI *mri_dst)
-{
+GCA_MORPH *GCAMchangeVolGeom(GCA_MORPH *gcam, MRI *mri_src, MRI *mri_dst) {
   LTA *lta_src = NULL;
   LTA *lta_dst = NULL;
   GCAM *gcam_out = NULL;
   MATRIX *src_i_to_r;
   MATRIX *trg_r_to_i;
   LT *lt;
-  if (mri_src==NULL && mri_dst==NULL) {
+  if (mri_src == NULL && mri_dst == NULL) {
     return (gcam_out);
   }
   if (mri_src) {
@@ -20254,4 +20280,3 @@ GCA_MORPH *GCAMchangeVolGeom(GCA_MORPH *gcam, MRI *mri_src, MRI *mri_dst)
   }
   return (gcam_out);
 }
-

@@ -25,7 +25,6 @@
  *
  */
 
-#include <cstdio>
 #include "diag.h"
 #include "error.h"
 #include "icosahedron.h"

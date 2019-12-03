@@ -45,15 +45,10 @@
 #include "error.h"
 #include "diag.h"
 #include "proto.h"
-#include "mrimorph.h"
 #include "mri_conform.h"
 #include "utils.h"
 #include "timer.h"
-#include "matrix.h"
-#include "transform.h"
 #include "version.h"
-#include "label.h"
-#include "mrinorm.h"
 #define DEBUG 0
 #define TEST 1
 #define normflag 0

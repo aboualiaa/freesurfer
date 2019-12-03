@@ -30,7 +30,6 @@
 #include "SurfaceOverlay.h"
 #include "vtkLookupTable.h"
 #include "vtkRGBAColorTransferFunction.h"
-#include "vtkMath.h"
 #include "LayerSurface.h"
 #include "SurfaceOverlayProperty.h"
 #include "FSSurface.h"

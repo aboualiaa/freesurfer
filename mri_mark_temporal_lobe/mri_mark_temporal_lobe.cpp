@@ -25,7 +25,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
 #include <cctype>
 
 #include "mri.h"
@@ -35,9 +34,7 @@
 #include "proto.h"
 #include "utils.h"
 #include "timer.h"
-#include "transform.h"
 #include "cma.h"
-#include "mri.h"
 #include "version.h"
 
 int main(int argc, char *argv[]);

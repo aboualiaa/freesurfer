@@ -27,7 +27,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <sys/stat.h>
-#include <sys/types.h>
 
 #include "bfileio.h"
 #include "cma.h"
@@ -35,7 +34,6 @@
 #include "diag.h"
 #include "error.h"
 #include "fio.h"
-#include "fmriutils.h"
 #include "mri.h"
 #include "mriBSpline.h"
 #include "mrisurf.h"

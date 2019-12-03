@@ -2,7 +2,6 @@
 
 #include <itkMath.h>
 #include "kvlTetrahedronInteriorConstIterator.h"
-// #include "itkTimeProbe.h"
 
 #define SUBTRACT_MARGINAL_ENTROPY 0
 

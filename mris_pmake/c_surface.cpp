@@ -26,7 +26,6 @@
 
 #include "c_surface.h"
 #include "c_vertex.h"
-#include "c_label.h"
 
 #include <sstream>
 

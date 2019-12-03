@@ -42,7 +42,6 @@
 #include <unistd.h>
 #include <sys/utsname.h>
 
-#include "macros.h"
 #include "utils.h"
 #include "fio.h"
 #include "version.h"
@@ -50,20 +49,12 @@
 #include "error.h"
 #include "diag.h"
 #include "mri.h"
-#include "macros.h"
-#include "diag.h"
-#include "minc.h"
-#include "fio.h"
 #include "mrisurf.h"
-#include "fsenv.h"
-#include "registerio.h"
 #include "timer.h"
 #include "matrix.h"
-#include "matfile.h"
 #include "mri2.h"
 #include "mrisutils.h"
 #include "transform.h"
-#include "resample.h"
 #include "volcluster.h"
 #include "numerics.h"
 #include "romp_support.h"

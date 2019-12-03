@@ -25,7 +25,6 @@
  */
 
 #include <iostream>
-#include <iomanip>
 
 #include "mri.h"
 #include "mrisurf.h"

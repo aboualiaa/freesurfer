@@ -26,7 +26,6 @@
 #include "VolumeFilterClose.h"
 #include <math.h>
 #include "LayerMRI.h"
-#include <vtkImageData.h>
 #include "ProgressCallback.h"
 
 #include "utils.h"

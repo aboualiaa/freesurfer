@@ -23,7 +23,6 @@
  *
  */
 
-#include <cctype>
 #include <math.h>
 #include <cstdio>
 #include <cstdlib>
@@ -33,7 +32,6 @@
 
 #include "diag.h"
 #include "error.h"
-#include "fio.h"
 #include "macros.h"
 #include "proto.h"
 #include "svm.h"

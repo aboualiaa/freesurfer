@@ -1,6 +1,5 @@
 #include "kvlImageViewer.h"
 #include "itkMath.h"
-#include <cmath>
 #include "itkMinimumMaximumImageCalculator.h"
 #include "vtkCellArray.h"
 #include "vtkClipPolyData.h"

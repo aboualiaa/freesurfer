@@ -34,10 +34,8 @@
 #include <memory.h>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <unistd.h> /* for SEEK_ constants */
 
-#include "hmem.h"
 #include "hips.h"
 
 #include "diag.h"

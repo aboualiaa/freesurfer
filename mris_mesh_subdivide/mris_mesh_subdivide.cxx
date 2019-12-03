@@ -35,18 +35,8 @@
 #include "diag.h"
 #include "timer.h"
 
-#include "mri.h"
 #include "mrisurf.h"
-#include "gcamorph.h"
 
-#include "registerio.h"
-
-#include "resample.h"
-
-// string_to_type
-#include "mri_identify.h"
-
-#include <vtkVersion.h>
 #include <vtkSmartPointer.h>
 #include <vtkCellData.h>
 #include <vtkCellArray.h>

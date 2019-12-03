@@ -39,8 +39,6 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstdio>
-#include <cstring>
-#include "gcamorph.h"
 #include "mri.h"
 #include "proto.h"
 #include "macros.h"
@@ -49,10 +47,8 @@
 #include "diag.h"
 #include "utils.h"
 #include "matrix.h"
-#include "gca.h"
 #include "mrisegment.h"
 #include "cma.h"
-#include "version.h"
 
 const char *Progname;
 static void usage_exit(int ecode);

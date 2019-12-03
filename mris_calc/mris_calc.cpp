@@ -34,13 +34,7 @@
 #include <cmath>
 #include <cctype>
 #include <sys/stat.h>
-#include <libgen.h>
 
-#include <cassert>
-#include <cerrno>
-
-#include <getopt.h>
-#include <cstdarg>
 #include <cfloat>
 
 #include "macros.h"
@@ -49,7 +43,6 @@
 #include "proto.h"
 #include "mrisurf.h"
 #include "mri.h"
-#include "macros.h"
 #include "version.h"
 #include "fio.h"
 #include "mri_identify.h"

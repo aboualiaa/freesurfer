@@ -30,14 +30,10 @@
 #include "SurfaceAnnotation.h"
 #include "vtkLookupTable.h"
 #include "vtkRGBAColorTransferFunction.h"
-#include "vtkMath.h"
 #include "LayerSurface.h"
 #include "FSSurface.h"
 #include <QFileInfo>
 #include <vtkActor.h>
-#include <vtkAppendPolyData.h>
-#include <vtkCellArray.h>
-#include <vtkPolyData.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
 #include <QDebug>

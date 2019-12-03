@@ -96,7 +96,6 @@ ENDHELP --------------------------------------------------------------
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
-#include <unistd.h>
 #include <cstring>
 
 #include "macros.h"
@@ -108,18 +107,12 @@ ENDHELP --------------------------------------------------------------
 #include "mri.h"
 #include "version.h"
 #include "mri2.h"
-#include "mri_identify.h"
-#include "MRIio_old.h"
 #include "registerio.h"
 #include "resample.h"
 #include "gca.h"
-#include "gcamorph.h"
-#include "fio.h"
 #include "cmdargs.h"
-#include "pdf.h"
 #include "timer.h"
 #include "numerics.h"
-#include "mri_circulars.h"
 
 #ifdef X
 #undef X
@@ -1130,7 +1123,7 @@ static int istringnmatch(char *str1, const char *str2, int n) {
 
 /*-------------------------------------------------------*/
 #if 0
-double *GetCosts(MRI *mri_reg, MRI *seg, MATRIX *R0, MATRIX *R, 
+double *GetCosts(MRI *mri_reg, MRI *seg, MATRIX *R0, MATRIX *R,
 		 double *p, double *costs)
 {
   double angles[0];
@@ -1165,13 +1158,13 @@ double *GetCosts(MRI *mri_reg, MRI *seg, MATRIX *R0, MATRIX *R,
   // vox2vox = invTin*R*Ttemp
   vox2vox = MatrixMultiply(invTin,R,vox2vox);
   MatrixMultiply(vox2vox,Ttemp,vox2vox);
-  
+
   // resample
   MRIvol2Vol(mri_reg,out,vox2vox,interpcode,sinchw);
-  
+
   // compute costs
   costs = SegRegCost(regseg,out,costs);
-  
+
   MatrixFree(&Mrot);
   MatrixFree(&Mtrans);
   MatrixFree(&vox2vox);
@@ -1184,7 +1177,7 @@ double *GetCosts(MRI *mri_reg, MRI *seg, MATRIX *R0, MATRIX *R,
 }
 
 /*---------------------------------------------------------------------*/
-int Min1D(MRI *mri_reg, MRI_SURFACE *mris, MATRIX *R, double *p, 
+int Min1D(MRI *mri_reg, MRI_SURFACE *mris, MATRIX *R, double *p,
 	  char *costfile, double *costs)
 {
   double q, q0, pp[6], c, copt=0, qopt=0, costsopt[8];
@@ -1196,7 +1189,7 @@ int Min1D(MRI *mri_reg, MRI_SURFACE *mris, MATRIX *R, double *p,
   if(p==NULL) exit(1);
   if(costs==NULL) exit(1);
 
-  for(nthp = 0; nthp < 6; nthp++) 
+  for(nthp = 0; nthp < 6; nthp++)
     pp[nthp] = p[nthp];
   R0 = MatrixCopy(R,NULL);
   Rtmp = MatrixAlloc(4,4,MATRIX_REAL);
@@ -1227,7 +1220,7 @@ int Min1D(MRI *mri_reg, MRI_SURFACE *mris, MATRIX *R, double *p,
 	fprintf(fp,"\n");
 	fclose(fp);
       }
-      
+
       fp = stdout;
       fprintf(fp,"%5d ",nth);
       fprintf(fp,"%7.3lf %7.3lf %7.3lf ",pp[0],pp[1],pp[2]);
@@ -2238,7 +2231,7 @@ static int
 write_register_dat(MATRIX *B, char *fname, MRI_SURFACE *mris, MRI *mri, char *subject)
 {
   MATRIX *Ta, *Sa, *invTa, *A, *R, *S, *invS, *T, *m1, *m2 ;
-  MRI *mri_surf = MRIallocHeader(mris->vg.width, mris->vg.height, 
+  MRI *mri_surf = MRIallocHeader(mris->vg.width, mris->vg.height,
                                  mris->vg.depth, MRI_UCHAR) ;
 
   MRIcopyVolGeomToMRI(mri_surf, &mris->vg) ;
@@ -2250,7 +2243,7 @@ write_register_dat(MATRIX *B, char *fname, MRI_SURFACE *mris, MRI *mri, char *su
   Sa = MRIgetVoxelToRasXform(mri_surf);
   invTa = MatrixInverse(Ta,NULL);
   A  = MatrixMultiply(Sa,invTa, NULL);
-  
+
   m1 = MatrixMultiply(A, B, NULL) ;
   m2 = MatrixMultiply(invS, m1, NULL) ;
   R = MatrixMultiply(T, m2, NULL) ;

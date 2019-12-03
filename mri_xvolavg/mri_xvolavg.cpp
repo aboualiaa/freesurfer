@@ -32,10 +32,8 @@
   ----------------------------------------------------------*/
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
 #include <cstring>
 
-#include "MRIio_old.h"
 #include "error.h"
 #include "diag.h"
 #include "mri.h"

@@ -24,6 +24,7 @@
  */
 
 #include <ANALYZE.h>
+#include <stdio.h>
 
 extern void swab2(char *a);
 extern void swab4(char *a);

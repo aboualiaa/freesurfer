@@ -25,9 +25,7 @@
 
 #include "JointHisto.h"
 #include <iostream>
-#include <fstream>
 #include <vnl/vnl_matlab_print.h>
-#include <iomanip>
 
 using namespace std;
 

@@ -24,7 +24,6 @@
  */
 
 #include <iostream>
-#include <iomanip>
 
 #include "macros.h"
 #include "mri.h"

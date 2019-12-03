@@ -22,12 +22,10 @@
  *
  */
 
-#include <cctype>
 #include <math.h>
 #include <memory.h>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <unistd.h>
 #ifdef _POSIX_MAPPED_FILES
 #include <sys/mman.h>

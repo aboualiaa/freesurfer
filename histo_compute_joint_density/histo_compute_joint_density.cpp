@@ -24,20 +24,12 @@
  */
 
 #include <cstdio>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <cstring>
 #include <cctype>
-#include <ctime>
 #include "const.h"
-#include "machine.h"
-#include "fio.h"
 #include "utils.h"
 #include "error.h"
 #include "diag.h"
 #include "version.h"
-#include "mghendian.h"
-#include "image.h"
 #include "density.h"
 #include "mrisegment.h"
 #include "proto.h"

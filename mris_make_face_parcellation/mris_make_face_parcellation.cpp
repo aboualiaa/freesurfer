@@ -39,7 +39,6 @@
 #include "proto.h"
 #include "mrisurf.h"
 #include "mri.h"
-#include "macros.h"
 #include "version.h"
 #include "mrishash.h"
 #include "fio.h"
@@ -348,7 +347,7 @@ int main(int argc, char *argv[]) {
         for (vno = 0; vno < mris->nvertices; vno++)
           mris->vertices[vno].marked = mris->vertices[vnos[vno]].marked2;
 #if 0
-        mri_rand = MRIdrand48(mri_cmatrix->width, mri_cmatrix->height, mri_cmatrix->depth, 
+        mri_rand = MRIdrand48(mri_cmatrix->width, mri_cmatrix->height, mri_cmatrix->depth,
                               mri_cmatrix->nframes, 0, 1, NULL) ;
 #else
         mri_rand = nullptr;
@@ -964,8 +963,8 @@ static int compute_parcellation_statistics(MRI_SURFACE *mris, MRI *mri_cmatrix,
     norm = sqrt(SQR(parms->stats.cx[parcel]) + SQR(parms->stats.cy[parcel]) +
                 SQR(parms->stats.cz[parcel]));
 #if 0
-    parms->stats.cx[parcel] /= norm ; 
-    parms->stats.cy[parcel] /= norm ; 
+    parms->stats.cx[parcel] /= norm ;
+    parms->stats.cy[parcel] /= norm ;
     parms->stats.cz[parcel] /= norm ;
 #endif
   }
@@ -1509,7 +1508,7 @@ static double compute_parcellation_energy_change(MRI_SURFACE *mris,
         MRIsetVoxVal(mri_var, parcel_to_move_to, 0, 0, var + (val*val)) ;
       }
 
-      
+
 
       // compute new means and vars for these two parcels
       for (frame = 0 ; frame < nframes ; frame++)

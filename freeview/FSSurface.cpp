@@ -25,35 +25,24 @@
 
 #include "FSSurface.h"
 #include <stdexcept>
-#include "vtkShortArray.h"
-#include "vtkLongArray.h"
-#include "vtkUnsignedCharArray.h"
 #include "vtkFloatArray.h"
 #include "vtkPointData.h"
 #include "vtkCellData.h"
 #include "vtkCellArray.h"
-#include "vtkIntArray.h"
 #include "vtkSmartPointer.h"
-#include "vtkImageReslice.h"
 #include "vtkMatrix4x4.h"
 #include "vtkTransform.h"
-#include "vtkImageChangeInformation.h"
 #include "vtkPolyData.h"
-#include "vtkTubeFilter.h"
 #include "vtkMath.h"
 #include "vtkLine.h"
 #include "vtkPlane.h"
 #include "vtkCutter.h"
-#include "vtkSelectEnclosedPoints.h"
-#include "vtkDelaunay3D.h"
 #include "vtkUnstructuredGrid.h"
 #include "FSVolume.h"
 #include "MyUtils.h"
 #include <QFileInfo>
 #include <QDebug>
 #include <QDir>
-
-#include "mri_identify.h"
 
 using namespace std;
 

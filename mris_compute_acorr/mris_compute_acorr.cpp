@@ -36,8 +36,6 @@
 #include "error.h"
 #include "diag.h"
 #include "proto.h"
-#include "macros.h"
-#include "fio.h"
 #include "sig.h"
 #include "version.h"
 

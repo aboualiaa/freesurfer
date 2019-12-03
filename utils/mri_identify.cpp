@@ -26,7 +26,6 @@
 #include <cstdio>
 #include <cstring>
 #include <sys/stat.h>
-#include <unistd.h>
 
 #include "mri.h"
 

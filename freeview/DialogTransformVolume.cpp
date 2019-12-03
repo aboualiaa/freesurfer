@@ -36,7 +36,6 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QPixmap>
-#include <QDebug>
 #include <QButtonGroup>
 
 #define ROTATION_INCREMENT 0.5

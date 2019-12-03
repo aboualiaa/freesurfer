@@ -22,14 +22,10 @@
  *
  */
 
-#include <cctype>
 #include <math.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <unistd.h>
 
 #include "mrisutils.h"
 #include "surfgrad.h"
@@ -41,12 +37,10 @@
 #include "mrisurf_sseTerms.h"
 #include "mrisurf_vals.h"
 
-#include "chklc.h"
 #include "cma.h"
 #include "const.h"
 #include "diag.h"
 #include "error.h"
-#include "fio.h"
 #include "fsenv.h"
 #include "gca.h"
 #include "gcamorph.h"
@@ -58,9 +52,7 @@
 #include "mrishash.h"
 #include "proto.h"
 #include "sig.h"
-#include "stats.h"
 #include "timer.h"
-#include "tritri.h"
 #include "resample.h"
 #include "mri2.h"
 

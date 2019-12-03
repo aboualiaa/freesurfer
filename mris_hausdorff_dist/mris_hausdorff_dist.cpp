@@ -24,8 +24,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
-#include <cmath>
 #include <cctype>
 
 #include "macros.h"
@@ -35,10 +33,8 @@
 #include "timer.h"
 #include "mrisurf.h"
 #include "mri.h"
-#include "macros.h"
 #include "version.h"
 #include "label.h"
-#include "MARS_DT_Boundary.h"
 #include "mri_identify.h"
 
 static char vcid[] =

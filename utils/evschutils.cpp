@@ -28,12 +28,8 @@
 #include <cstdlib>
 
 #include "diag.h"
-#include "error.h"
 
-#include "matfile.h"
 #include "matrix.h"
-#include "proto.h"
-#include "utils.h"
 
 #include "evschutils.h"
 

@@ -23,13 +23,10 @@
  */
 
 #include "error.h"
-#include "gca.h"
 #include "gcalinearnode.hpp"
 #include "gcalinearprior.hpp"
 #include "gcamorph.h"
 #include "mri.h"
-
-#include "gcamcomputeLabelsLinearCPU.h"
 
 int GCAMcomputeLabelsLinearCPU(MRI *mri, GCA_MORPH *gcam) {
   int nchanged = 0;

@@ -66,8 +66,6 @@
 
 #include "romp_support.h"
 
-#include "bfileio.h"
-#include "corio.h"
 #include "diag.h"
 #include "label.h"
 #include "matrix.h"

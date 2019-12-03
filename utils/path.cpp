@@ -26,7 +26,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <unistd.h>
 
 #include "error.h"
 #include "getline.h"

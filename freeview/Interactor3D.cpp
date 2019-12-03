@@ -30,7 +30,6 @@
 #include "CursorFactory.h"
 #include "LayerPropertyMRI.h"
 #include "LayerMRI.h"
-#include "CursorFactory.h"
 #include "VolumeCropper.h"
 #include "SurfaceROI.h"
 #include <vtkRenderer.h>
@@ -190,7 +189,7 @@ bool Interactor3D::ProcessKeyDownEvent(QKeyEvent *event,
   } else if (nKeyCode == Qt::Key_Right) {
     view->MoveRight();
   } else if (nKeyCode == Qt::Key_R) //|| nKeyCode == 'F' || nKeyCode == 'S' ||
-                                    //nKeyCode == 'W' )
+                                    // nKeyCode == 'W' )
   {
     // do nothing, just intercept these keycodes
   } else if (nKeyCode == Qt::Key_Delete) {

@@ -29,9 +29,6 @@
 #include <pwd.h>
 #include <cstdio>
 #include <cstring>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <ctime>
 #include <unistd.h>
 
 #include "error.h" // return codes

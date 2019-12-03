@@ -24,17 +24,10 @@
  */
 
 #include "MyCmdLineParser.h"
-#include "MyUtils.h"
-#include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <string>
 #include <vector>
 #include <iostream>
-#include <QDebug>
-
-#include <fstream>
-#include <stdarg.h>
 
 using namespace std;
 

@@ -27,7 +27,6 @@
 #include "DICOMRead.h"
 #include <stdexcept>
 #include <vector>
-#include <iterator>
 #include <algorithm>
 #include "cmd_line_interface.h"
 const char *Progname;

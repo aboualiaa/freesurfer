@@ -30,7 +30,6 @@
 #include <QSettings>
 #include <QScrollBar>
 #include <iostream>
-#include <stdlib.h>
 
 #define BUFFER_SIZE 8192
 char stdout_buffer[BUFFER_SIZE] = {0};

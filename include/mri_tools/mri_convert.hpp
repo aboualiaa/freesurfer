@@ -8,9 +8,7 @@
 #include "DICOMRead.h"
 #include "cma.h"
 #include "diag.h"
-#include "error.h"
 #include "fio.h"
-#include "fmriutils.h"
 #include "fmriutils.h"
 #include "fsgdf.h"
 #include "fsinit.h"
@@ -24,19 +22,13 @@
 #include "utils.h"
 #include "version.h"
 
-#include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <fmt/printf.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
-#include <cctype>
 #include <cerrno>
-#include <cmath>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
 #include <unistd.h>
 
 struct CMDARGS {

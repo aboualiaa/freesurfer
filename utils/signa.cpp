@@ -29,7 +29,6 @@
 #include "error.h"
 #include "machine.h"
 #include "macros.h"
-#include "mghendian.h"
 #include "mri.h"
 #include "signa.h"
 #include "utils.h"

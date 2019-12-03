@@ -40,13 +40,10 @@
 #include "const.h"
 #include "timer.h"
 #include "version.h"
-#include "transform.h"
 #include "mrisurf.h"
 #include "cma.h"
-#include "icosahedron.h"
 #include "voxlist.h"
 #include "pdf.h"
-#include "tritri.h"
 #include "cmat.h"
 #include "fsinit.h"
 
@@ -760,7 +757,7 @@ compute_migration_probabilities(MRI_SURFACE *mris, MRI *mri_intensity, MRI *mri_
   MATRIX *m_intensity2aseg, *v_aseg, *v_intensity ;
   double gm_mean, gm_var, val, wm_mean, wm_var, entropy=1.0 ;
   VERTEX  *v;
-  MRI    *mri_wm_interior, *mri_wm_dist, *mri_kernel, *mri_tmp, *mri_posterior, 
+  MRI    *mri_wm_interior, *mri_wm_dist, *mri_kernel, *mri_tmp, *mri_posterior,
     *mri_entropy, *mri_total_posterior,
     *mri_eroded_aseg, *mri_possible_migration_paths,*mri_path_grad, *mri_splines;
   VOXEL_LIST *vl, *vl_spline, *vl_posterior ;
@@ -774,9 +771,9 @@ compute_migration_probabilities(MRI_SURFACE *mris, MRI *mri_intensity, MRI *mri_
   {
     char fname[STRLEN], path[STRLEN] ;
 
-    sprintf(fname, "%s/%s.splines.mgz", 
-	    FileNamePath(mris->fname, path), 
-	    mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh"); 
+    sprintf(fname, "%s/%s.splines.mgz",
+	    FileNamePath(mris->fname, path),
+	    mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh");
     printf("reading optimal splines from %s\n", fname) ;
     mri_splines = MRIread(fname) ;
     if (mri_splines == NULL)
@@ -808,7 +805,7 @@ compute_migration_probabilities(MRI_SURFACE *mris, MRI *mri_intensity, MRI *mri_
   VECTOR_ELT(v_aseg, 4) = 1.0 ;
   VECTOR_ELT(v_intensity, 4) = 1.0 ;
   m_intensity2aseg = MRIgetVoxelToVoxelXform(mri_intensity, mri_aseg) ;
-  
+
   for (nvox_wm = nvox = x = 0 ; x < mri_intensity->width ; x++)
     for (y = 0 ; y < mri_intensity->height ; y++)
       for (z = 0 ; z < mri_intensity->depth ; z++)
@@ -907,7 +904,7 @@ compute_migration_probabilities(MRI_SURFACE *mris, MRI *mri_intensity, MRI *mri_
       {
 	double     init_energy, energy ;
 	VOXEL_LIST *vl_init_spline, *vl_interp ;
-	
+
 	energy = compute_spline_energy(vl_spline, mri_intensity, mri_aseg, mri_wm_dist, gm_mean, energy_flags,
 				       spline_length_penalty, spline_nonwm_penalty, spline_interior_penalty) ;
 	printf("vno %d: final energy = %2.2f\n", vno, energy) ;
@@ -916,7 +913,7 @@ compute_migration_probabilities(MRI_SURFACE *mris, MRI *mri_intensity, MRI *mri_
 	VLSTwriteLabel(vl_interp, "spline.optimal.label", mris, mri_aseg) ;
 	val = compute_spline_energy(vl_spline, mri_intensity, mri_aseg, mri_wm_dist, gm_mean, energy_flags,
 				    spline_length_penalty, spline_nonwm_penalty, spline_interior_penalty) ;
-	
+
 	vl_init_spline = VLSTsplineFit(vl, min_spline_control_points) ;
 	VLSTwriteLabel(vl, "spline.init.label", mris, mri_aseg) ;
 	VLSTwriteLabel(vl_init_spline, "spline.init.cpts.label", mris, mri_aseg) ;
@@ -931,7 +928,7 @@ compute_migration_probabilities(MRI_SURFACE *mris, MRI *mri_intensity, MRI *mri_
     }
     else
       vl_spline = VLSTfromMRI(mri_splines, vno) ;
-    val = compute_spline_energy(vl_spline, mri_intensity, mri_eroded_aseg, mri_wm_dist, wm_mean, 
+    val = compute_spline_energy(vl_spline, mri_intensity, mri_eroded_aseg, mri_wm_dist, wm_mean,
 				SPLINE_ABOVE, spline_length_penalty, 0, spline_interior_penalty) ;
 
 
@@ -944,103 +941,103 @@ compute_migration_probabilities(MRI_SURFACE *mris, MRI *mri_intensity, MRI *mri_
     VLSTfree(&vl_spline) ;
 //    MRIsetVoxVal(mri_pvals, vno, 0, 0, 0, exp(val/100.0)) ;
     MRIsetVoxVal(mri_pvals, vno, 0, 0, 0, val) ;
-    
+
     ROMP_PFLB_end
   }
   ROMP_PF_end
-  
+
   if (read_flag == 0)
   {
     if (randomize_data)
-      sprintf(fname, "%s/%s.splines.rand.mgz", 
-	      FileNamePath(mris->fname, path), 
-	      mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh"); 
+      sprintf(fname, "%s/%s.splines.rand.mgz",
+	      FileNamePath(mris->fname, path),
+	      mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh");
     else
-      sprintf(fname, "%s/%s.splines.mgz", 
-	      FileNamePath(mris->fname, path), 
-	      mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh"); 
+      sprintf(fname, "%s/%s.splines.mgz",
+	      FileNamePath(mris->fname, path),
+	      mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh");
     printf("writing optimal splines to %s\n", fname) ;
     MRIwrite(mri_splines, fname) ;
 
     if (randomize_data)
-      sprintf(fname, "%s/%s.entropy.rand.mgz", 
-	      FileNamePath(mris->fname, path), 
-	      mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh"); 
+      sprintf(fname, "%s/%s.entropy.rand.mgz",
+	      FileNamePath(mris->fname, path),
+	      mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh");
     else
-      sprintf(fname, "%s/%s.entropy.mgz", 
-	      FileNamePath(mris->fname, path), 
-	      mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh"); 
+      sprintf(fname, "%s/%s.entropy.mgz",
+	      FileNamePath(mris->fname, path),
+	      mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh");
 
     printf("writing entropies to to %s\n", fname) ;
     MRIwrite(mri_entropy, fname) ;
     if (randomize_data)
-      sprintf(fname, "%s/%s.posterior.rand.mgz", 
-	      FileNamePath(mris->fname, path), 
-	      mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh"); 
+      sprintf(fname, "%s/%s.posterior.rand.mgz",
+	      FileNamePath(mris->fname, path),
+	      mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh");
     else
-      sprintf(fname, "%s/%s.posterior.mgz", 
-	      FileNamePath(mris->fname, path), 
-	      mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh"); 
+      sprintf(fname, "%s/%s.posterior.mgz",
+	      FileNamePath(mris->fname, path),
+	      mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh");
     printf("writing integrated posterior to %s\n", fname) ;
     MRIwrite(mri_total_posterior, fname) ;
   }
   else    // read previously computed data in
   {
     if (randomize_data)
-      sprintf(fname, "%s/%s.splines.rand.mgz", 
-	      FileNamePath(mris->fname, path), 
-	      mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh"); 
+      sprintf(fname, "%s/%s.splines.rand.mgz",
+	      FileNamePath(mris->fname, path),
+	      mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh");
     else
-      sprintf(fname, "%s/%s.splines.mgz", 
-	      FileNamePath(mris->fname, path), 
-	      mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh"); 
+      sprintf(fname, "%s/%s.splines.mgz",
+	      FileNamePath(mris->fname, path),
+	      mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh");
     printf("reading optimal splines from %s\n", fname) ;
     mri_splines = MRIread(fname) ;
 
     if (randomize_data)
-      sprintf(fname, "%s/%s.entropy.rand.mgz", 
-	      FileNamePath(mris->fname, path), 
-	      mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh"); 
+      sprintf(fname, "%s/%s.entropy.rand.mgz",
+	      FileNamePath(mris->fname, path),
+	      mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh");
     else
-      sprintf(fname, "%s/%s.entropy.mgz", 
-	      FileNamePath(mris->fname, path), 
-	      mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh"); 
+      sprintf(fname, "%s/%s.entropy.mgz",
+	      FileNamePath(mris->fname, path),
+	      mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh");
 
     printf("reading entropies from to %s\n", fname) ;
     mri_entropy = MRIread(fname) ;
     if (randomize_data)
-      sprintf(fname, "%s/%s.posterior.rand.mgz", 
-	      FileNamePath(mris->fname, path), 
-	      mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh"); 
+      sprintf(fname, "%s/%s.posterior.rand.mgz",
+	      FileNamePath(mris->fname, path),
+	      mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh");
     else
-      sprintf(fname, "%s/%s.posterior.mgz", 
-	      FileNamePath(mris->fname, path), 
-	      mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh"); 
+      sprintf(fname, "%s/%s.posterior.mgz",
+	      FileNamePath(mris->fname, path),
+	      mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh");
     printf("reading integrated posterior from %s\n", fname) ;
     mri_total_posterior = MRIread(fname) ;
 
   }
   mri_posterior_on_splines = compute_posterior_on_paths(mris, mri_splines, mri_total_posterior, mri_aseg,NULL) ;
   if (randomize_data)
-    sprintf(fname, "%s/%s.spline_posterior.rand.mgz", 
-	    FileNamePath(mris->fname, path), 
-	    mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh"); 
+    sprintf(fname, "%s/%s.spline_posterior.rand.mgz",
+	    FileNamePath(mris->fname, path),
+	    mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh");
   else
-    sprintf(fname, "%s/%s.spline_posterior.mgz", 
-	    FileNamePath(mris->fname, path), 
-	    mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh"); 
+    sprintf(fname, "%s/%s.spline_posterior.mgz",
+	    FileNamePath(mris->fname, path),
+	    mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh");
   printf("writing posterior projected onto optimal splines to %s\n", fname) ;
   MRIwrite(mri_posterior_on_splines, fname) ;
 
   mri_filtered_posterior_on_spline = compute_filtered_posterior_on_paths(mris, mri_splines, mri_total_posterior, mri_aseg,NULL) ;
   if (randomize_data)
-    sprintf(fname, "%s/%s.spline_posterior.filtered.rand.mgz", 
-	    FileNamePath(mris->fname, path), 
-	    mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh"); 
+    sprintf(fname, "%s/%s.spline_posterior.filtered.rand.mgz",
+	    FileNamePath(mris->fname, path),
+	    mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh");
   else
-    sprintf(fname, "%s/%s.spline_posterior.filtered.mgz", 
-	    FileNamePath(mris->fname, path), 
-	    mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh"); 
+    sprintf(fname, "%s/%s.spline_posterior.filtered.mgz",
+	    FileNamePath(mris->fname, path),
+	    mris->hemisphere == LEFT_HEMISPHERE ? "lh" : "rh");
   printf("writing posterior projected and filtered onto optimal splines  to %s\n", fname) ;
   MRIwrite(mri_filtered_posterior_on_spline, fname) ;
 
@@ -1109,7 +1106,7 @@ compute_posterior_on_paths(MRI_SURFACE *mris, MRI *mri_splines, MRI *mri_total_p
 #define ANGLE_STEP RADIANS(10)
 
 static MRI *
-compute_filtered_posterior_on_paths(MRI_SURFACE *mris, MRI *mri_splines, MRI *mri_total_posterior, MRI *mri_aseg, MRI *mri_filtered_posterior_on_spline) 
+compute_filtered_posterior_on_paths(MRI_SURFACE *mris, MRI *mri_splines, MRI *mri_total_posterior, MRI *mri_aseg, MRI *mri_filtered_posterior_on_spline)
 {
   int         vno, nm1, np1, nsamples, n, nspline, outside_bad ;
   VOXEL_LIST  *vl_spline, *vl ;

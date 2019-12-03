@@ -40,8 +40,6 @@
 
 #include <cassert>
 #include <iostream>
-#include <fstream>
-#include <sstream>
 #include <vnl/vnl_inverse.h>
 #include <vnl/vnl_matrix.h>
 #include <vnl/vnl_matrix_fixed.h>

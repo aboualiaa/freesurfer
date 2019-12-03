@@ -31,10 +31,8 @@
 #include <cstring>
 
 #include "diag.h"
-#include "error.h"
 #include "matrix.h"
 #include "mri.h"
-#include "resample.h"
 #include "timer.h"
 
 // This must be included prior to volcluster.c (I think)

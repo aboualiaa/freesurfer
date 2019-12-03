@@ -33,7 +33,6 @@
 #include <QDebug>
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
-#include <QDropEvent>
 
 QRect MyItemDelegate::GetCheckBoxRect(
     const QModelIndex &index, const QStyleOptionViewItem &option) const {

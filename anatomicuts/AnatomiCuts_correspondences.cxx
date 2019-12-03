@@ -2,34 +2,24 @@
 #include "itkImage.h"
 #include <map>
 #include <vnl/vnl_matrix.h>
-#include <vnl/vnl_vector.h>
-#include <vnl/vnl_vector_ref.h>
 #include "itkDefaultStaticMeshTraits.h"
 #include "itkMesh.h"
 #include <vnl/vnl_hungarian_algorithm.h>
 
 #include <limits>
-#include <vnl/vnl_matrix.h>
-#include "itkImage.h"
 #include "itkVector.h"
-#include "itkMesh.h"
 
 #include "vtkPolyData.h"
 #include "vtkPolyDataReader.h"
 #include "vtkPolyDataWriter.h"
-#include "itkDefaultStaticMeshTraits.h"
 
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
 #include "PolylineMeshToVTKPolyDataFilter.h"
 #include "VTKPolyDataToPolylineMeshFilter.h"
-//#include "AppendBundleFilter.h"
-#include "LabelVariableLengthVector.h"
-//#include "FixedVTKSamplingFilter.h"
 #include "HierarchicalClusteringPruner.h"
 #include "LabelPerPointVariableLengthVector.h"
 #include "LabelsEntropyAndIntersectionMembershipFunction.h"
-#include <set>
 #include "GetPot.h"
 #include <string>
 #include "vtkSplineFilter.h"
@@ -223,7 +213,7 @@ std::vector<MeasurementVectorType> SetDirectionalNeighbors(
         if (symmetry) {
           label = SymmetricLabelId(labelOrig);
           //					std::cout << " labeled " <<
-          //labelOrig
+          // labelOrig
           //<< " mirrowed label " << label << std::endl;
         }
 

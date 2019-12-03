@@ -521,13 +521,11 @@ ENDHELP --------------------------------------------------------------
 #include <cmath>
 double round(double x);
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/utsname.h>
 #include <unistd.h>
 #include <cfloat>
 #include <cerrno>
 
-#include "macros.h"
 #include "utils.h"
 #include "mrisurf.h"
 #include "mrisutils.h"
@@ -539,7 +537,6 @@ double round(double x);
 #include "version.h"
 #include "label.h"
 #include "matrix.h"
-#include "annotation.h"
 #include "fmriutils.h"
 #include "cmdargs.h"
 #include "fsglm.h"

@@ -37,7 +37,6 @@
 #include "mri_conform.h"
 #include "utils.h"
 #include "timer.h"
-#include "matrix.h"
 #include "version.h"
 
 static int computeErrorSurface(char *fname, MRI **mri_flash, int nflash, int x,

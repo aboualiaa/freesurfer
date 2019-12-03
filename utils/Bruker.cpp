@@ -144,10 +144,7 @@
 
 #include <math.h>
 #include <cstdio>
-#include <cstdlib>
 #include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 
 #include "matrix.h"
 #include "mri.h"

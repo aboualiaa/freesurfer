@@ -30,14 +30,12 @@
 #include <memory.h>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 
 #include "diag.h"
 #include "error.h"
 #include "fio.h"
 #include "histo.h"
 #include "macros.h"
-#include "proto.h"
 #include "utils.h"
 
 /*-----------------------------------------------------

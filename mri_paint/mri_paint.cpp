@@ -25,8 +25,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
-#include <cmath>
 #include <cctype>
 
 #include "macros.h"

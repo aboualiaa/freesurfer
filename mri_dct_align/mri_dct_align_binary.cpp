@@ -37,16 +37,12 @@
 #include "diag.h"
 #include "mrimorph.h"
 #include "utils.h"
-#include "gca.h"
 #include "cma.h"
 #include "numerics.h"
-#include "version.h"
 #include "transform.h"
-#include "fastmarching.h"
 #include "gcamorph.h"
 #include "voxlist.h"
 #include "dct.h"
-#include "voxlist.h"
 
 #define NONMAX 0
 #define PAD 10
@@ -886,7 +882,7 @@ static double compute_distance_transform_sse(VOXEL_LIST *vl_target,
 
 #if 0
   /* now count target voxels that weren't mapped to in union */
-  for (i = 0 ; i < vl_target->nvox ; i++) 
+  for (i = 0 ; i < vl_target->nvox ; i++)
   {
     x = vl_target->xi[i] ;
     y = vl_target->yi[i] ;

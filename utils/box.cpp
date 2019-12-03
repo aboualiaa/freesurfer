@@ -26,16 +26,11 @@
 /*-----------------------------------------------------
                     INCLUDE FILES
 -------------------------------------------------------*/
-#include <math.h>
-#include <memory.h>
 #include <cstdio>
-#include <cstdlib>
-#include <cstring>
 
 #include "box.h"
 #include "error.h"
 #include "macros.h"
-#include "proto.h"
 
 int BoxPrint(BOX *box, FILE *fp) {
   fprintf(fp, "BOX: x: %d --> %d, y: %d --> %d, z: %d --> %d\n", box->x0,

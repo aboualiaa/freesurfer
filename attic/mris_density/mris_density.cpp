@@ -27,7 +27,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <math.h>
 #include <ctype.h>
 
@@ -37,7 +36,6 @@
 #include "proto.h"
 #include "mrisurf.h"
 #include "mri.h"
-#include "macros.h"
 #include "version.h"
 
 static char vcid[] =

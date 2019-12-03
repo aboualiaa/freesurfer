@@ -1,13 +1,8 @@
 #ifndef __LabelsPointToPointMembershipFunction_txx
 #define __LabelsPointToPointMembershipFunction_txx
 
-#include <iostream>
-
-#include <fstream>
 #include "LabelsPointToPointMembershipFunction.h"
-#include <limits>
 
-#include <set>
 template <class TVector>
 double LabelsPointToPointMembershipFunction<TVector>::Evaluate(
     const MeasurementVectorType *m1, const MeasurementVectorType *m2) const {

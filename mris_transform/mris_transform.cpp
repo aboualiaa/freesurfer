@@ -26,15 +26,12 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <cmath>
-#include <cctype>
 
 #include "macros.h"
 #include "error.h"
 #include "diag.h"
 #include "proto.h"
 #include "mrisurf.h"
-#include "macros.h"
 #include "transform.h"
 #include "version.h"
 

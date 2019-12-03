@@ -28,11 +28,7 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
 #include <cctype>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <unistd.h>
 
 #include "mri.h"
 #include "macros.h"
@@ -40,17 +36,10 @@
 #include "mrisurf.h"
 #include "matrix.h"
 #include "proto.h"
-#include "stats.h"
-#include "timer.h"
 #include "const.h"
 #include "mrishash.h"
-#include "icosahedron.h"
-#include "tritri.h"
-#include "timer.h"
-#include "chklc.h"
 #include "diag.h"
 #include "mri_topology.h"
-#include "gca.h"
 #include "mri_tess.h"
 #include "mrisutils.h"
 #include "cma.h"

@@ -30,11 +30,8 @@
 
 #include "mri.h"
 #include "macros.h"
-#include "minc.h"
 #include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "utils.h"
 #include "mrisurf.h"
 #include "label.h"
 #include "version.h"

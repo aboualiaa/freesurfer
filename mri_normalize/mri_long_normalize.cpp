@@ -30,17 +30,14 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
 #include <cctype>
 
 #include "mri.h"
 #include "macros.h"
 #include "error.h"
 #include "diag.h"
-#include "timer.h"
 #include "proto.h"
 #include "mrinorm.h"
-#include "mri_conform.h"
 #include "tags.h"
 #include "version.h"
 #include "cma.h"
@@ -380,7 +377,7 @@ static MRI *remove_points_not_in_range(MRI *mri_brain, MRI *mri_ctrl_src,
 }
 #if 0
 static MRI *
-remove_gradient_outliers(MRI *mri_norm, MRI *mri_ctrl_src, MRI *mri_ctrl_dst, double max_grad) 
+remove_gradient_outliers(MRI *mri_norm, MRI *mri_ctrl_src, MRI *mri_ctrl_dst, double max_grad)
 {
   int  x, y, z, f, xk, yk, zk, xi, yi, zi, removed, nremoved = 0 ;
   float val0, val ;
@@ -431,7 +428,7 @@ remove_gradient_outliers(MRI *mri_norm, MRI *mri_ctrl_src, MRI *mri_ctrl_dst, do
   return(mri_ctrl_dst) ;
 }
 static MRI *
-remove_absolute_outliers(MRI *mri_norm, MRI *mri_ctrl_src, MRI *mri_ctrl_dst, double min_intensity) 
+remove_absolute_outliers(MRI *mri_norm, MRI *mri_ctrl_src, MRI *mri_ctrl_dst, double min_intensity)
 {
   int  x, y, z, f, removed, nremoved = 0 ;
   float val ;

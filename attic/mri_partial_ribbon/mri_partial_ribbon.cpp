@@ -30,10 +30,8 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <math.h>
 #include "mri.h"
 #include "mrisurf.h"
-#include "macros.h"
 #include "version.h"
 
 #define IMGSIZE 256

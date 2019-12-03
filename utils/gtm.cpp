@@ -28,15 +28,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cerrno>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/utsname.h>
-#include <unistd.h>
 
 #include "cma.h"
-#include "cmdargs.h"
 #include "diag.h"
-#include "error.h"
 #include "fio.h"
 #include "fmriutils.h"
 #include "macros.h"
@@ -51,7 +45,6 @@
 #include "resample.h"
 #include "timer.h"
 #include "utils.h"
-#include "version.h"
 
 #include "romp_support.h"
 

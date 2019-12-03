@@ -2,7 +2,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <math.h>
 #include "min_heap.h"
 
 #define BIG_NO 100000000.0

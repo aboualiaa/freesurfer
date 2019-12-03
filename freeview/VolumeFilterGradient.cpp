@@ -24,17 +24,13 @@
  */
 
 #include "VolumeFilterGradient.h"
-#include <math.h>
 #include "LayerMRI.h"
 #include <vtkImageData.h>
 #include <vtkImageGradientMagnitude.h>
 #include <vtkImageShiftScale.h>
-#include <vtkImageChangeInformation.h>
-#include <vtkImageAnisotropicDiffusion3D.h>
 #include <vtkImageGaussianSmooth.h>
 #include <vtkPointData.h>
 #include <vtkDataArray.h>
-#include <vtkImageShiftScale.h>
 
 VolumeFilterGradient::VolumeFilterGradient(LayerMRI *input, LayerMRI *output,
                                            QObject *parent)

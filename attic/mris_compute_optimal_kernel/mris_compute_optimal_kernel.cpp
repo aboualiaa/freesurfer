@@ -38,8 +38,6 @@
 #include "diag.h"
 #include "proto.h"
 #include "mrisurf.h"
-#include "mri.h"
-#include "macros.h"
 #include "version.h"
 #include "label.h"
 

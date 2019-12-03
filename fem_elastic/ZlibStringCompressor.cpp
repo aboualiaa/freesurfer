@@ -1,11 +1,9 @@
 #include <zlib.h>
-#include <sys/stat.h>
 #include <iostream>
 #include <sstream>
-//#include "mrs/message.h"
 
 #include "ZlibStringCompressor.h"
-//#include "ZlibException.h"
+
 using std::string;
 
 ZlibStringCompressor::ZlibStringCompressor(unsigned long bufferSize)

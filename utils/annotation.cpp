@@ -34,7 +34,6 @@
 #include "colortab.h"
 #include "const.h"
 #include "diag.h"
-#include "error.h"
 #include "label.h"
 #include "mri2.h"
 #include "log.h"

@@ -3,7 +3,6 @@
 
 #include <iostream>
 
-#include <fstream>
 #include "EuclideanMembershipFunction.h"
 
 template <class TVector>

@@ -35,10 +35,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
-#include <unistd.h>
 #include <cstring>
 
-#include "macros.h"
 #include "error.h"
 #include "diag.h"
 #include "proto.h"
@@ -47,7 +45,6 @@
 #include "mri.h"
 #include "mri2.h"
 #include "mri_identify.h"
-#include "MRIio_old.h"
 #include "registerio.h"
 #include "resample.h"
 #include "version.h"

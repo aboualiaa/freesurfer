@@ -35,10 +35,8 @@
 #include "cma.h"
 #include "proto.h"
 #include "mri.h"
-#include "macros.h"
 #include "version.h"
 #include "gca.h"
-#include "flash.h"
 
 static char vcid[] =
     "$Id: mri_gca_ambiguous.c,v 1.4 2011/03/02 00:04:15 nicks Exp $";

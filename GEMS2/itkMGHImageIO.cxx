@@ -3,10 +3,7 @@
 
 #include "itkMGHImageIO.h"
 
-#include <cmath>
-
 #include <cstdio>
-#include <cstdlib>
 
 //-------------------------------
 //

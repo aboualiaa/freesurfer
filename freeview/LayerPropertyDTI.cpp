@@ -27,7 +27,6 @@
  *
  */
 
-#include <assert.h>
 #include "LayerPropertyDTI.h"
 #include "vtkLookupTable.h"
 

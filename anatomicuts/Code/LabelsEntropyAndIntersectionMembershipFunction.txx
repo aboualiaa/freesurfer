@@ -1,6 +1,5 @@
 #include <iostream>
 
-#include <fstream>
 #include "LabelsEntropyAndIntersectionMembershipFunction.h"
 #include <limits>
 

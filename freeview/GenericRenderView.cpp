@@ -41,7 +41,6 @@
 #include <vtkPropPicker.h>
 #include <vtkAssemblyPath.h>
 #include <vtkAssemblyNode.h>
-#include <vtkCellPicker.h>
 #include <vtkGenericOpenGLRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
 #include <QApplication>

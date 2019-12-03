@@ -48,13 +48,9 @@ tkmedit $subject norm.mgz -aux ./asegstats.mgh\
 #include <cstdlib>
 #include <cmath>
 double round(double x);
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/utsname.h>
 #include <unistd.h>
 
-#include "macros.h"
-#include "utils.h"
 #include "mrisurf.h"
 #include "mrisutils.h"
 #include "error.h"
@@ -64,16 +60,8 @@ double round(double x);
 #include "fio.h"
 #include "version.h"
 #include "label.h"
-#include "matrix.h"
-#include "annotation.h"
-#include "fmriutils.h"
 #include "cmdargs.h"
-#include "fsglm.h"
-#include "pdf.h"
 #include "fsgdf.h"
-#include "timer.h"
-#include "matfile.h"
-#include "volcluster.h"
 #include "surfcluster.h"
 #include "fsenv.h"
 

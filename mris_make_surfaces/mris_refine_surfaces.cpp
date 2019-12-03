@@ -41,8 +41,6 @@
 #include "timer.h"
 #include "mrisurf.h"
 #include "mri.h"
-#include "macros.h"
-#include "mrimorph.h"
 #include "mrinorm.h"
 #include "version.h"
 #include "label.h"
@@ -1237,12 +1235,12 @@ static float check_contrast_direction(MRI_SURFACE *mris, MRI *mri_hires) {
 
 #if 0
 static int
-MRIScomputeClassStatistics(MRI_SURFACE *mris, 
-                           MRI *mri, 
-                           float *pwhite_mean, 
-                           float *pwhite_std, 
-                           float *pgray_mean, 
-                           float *pgray_std) 
+MRIScomputeClassStatistics(MRI_SURFACE *mris,
+                           MRI *mri,
+                           float *pwhite_mean,
+                           float *pwhite_std,
+                           float *pgray_mean,
+                           float *pgray_std)
 {
   double  val, x, y, z, xw, yw, zw ;
   int     total_vertices, vno ;
@@ -1287,10 +1285,10 @@ MRIScomputeClassStatistics(MRI_SURFACE *mris,
   }
 
   *pwhite_mean = mean_white /= (float)total_vertices ;
-  *pwhite_std = std_white = 
+  *pwhite_std = std_white =
     sqrt(std_white / (float)total_vertices - mean_white*mean_white) ;
   *pgray_mean = mean_gray /= (float)total_vertices ;
-  *pgray_std = std_gray = 
+  *pgray_std = std_gray =
     sqrt(std_gray / (float)total_vertices - mean_gray*mean_gray) ;
   nsigma = (mean_gray-mean_white) / (std_gray+std_white) ;
   gw_thresh = mean_white + nsigma*std_white ;

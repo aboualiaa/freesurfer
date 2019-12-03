@@ -30,12 +30,8 @@
 
 #include "macros.h"
 #include "const.h"
-#include "MRIio_old.h"
-/*#include "typedefs.h"*/ /* not needed without matrix stuff */
-#include "matrix.h"
 #include "mri.h"
 #include "error.h"
-#include "proto.h"
 #include "version.h"
 
 static char vcid[] =

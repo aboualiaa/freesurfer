@@ -29,10 +29,7 @@
 #include <memory.h>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 
-#include "const.h"
-#include "diag.h"
 #include "error.h"
 #include "macros.h"
 #include "mri.h"

@@ -61,9 +61,7 @@
 #include <cstring>
 
 #include "icosahedron.h"
-#include "fio.h"
 
-#include "MRIio_old.h"
 #include "error.h"
 #include "diag.h"
 #include "mrisurf.h"
@@ -71,7 +69,6 @@
 #include "mri.h"
 #include "label.h"
 #include "registerio.h"
-#include "mri.h"
 #include "mri2.h"
 #include "version.h"
 #include "path.h"

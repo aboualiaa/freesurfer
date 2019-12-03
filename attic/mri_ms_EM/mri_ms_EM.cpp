@@ -41,15 +41,11 @@
 #include "error.h"
 #include "diag.h"
 #include "proto.h"
-#include "mrimorph.h"
 #include "mri_conform.h"
 #include "utils.h"
 #include "timer.h"
-#include "matrix.h"
 #include "transform.h"
 #include "version.h"
-#include "label.h"
-#include "mrinorm.h"
 #include "PoissonSolver.h"
 
 #define SWAP(a, b)                                                             \
@@ -73,10 +69,10 @@ volumed voxels, and increasecovariance */
 static int fix_class_size = 1;
 static int no_INU = 0;
 static double kappa = 1e-8;
-    /* 0.01 is too big */ // this number seems need to be reduced if using 16
-                          // echos, but need be this large for just using
-                          // average; so critical, not good. How to make it
-                          // robust?
+/* 0.01 is too big */ // this number seems need to be reduced if using 16
+                      // echos, but need be this large for just using
+                      // average; so critical, not good. How to make it
+                      // robust?
 
 static int debug_flag = 0;
 

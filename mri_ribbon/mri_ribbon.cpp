@@ -25,17 +25,13 @@
  *
  */
 
-#include <cmath>
 #include <cstdlib>
 #include <cstdio>
 #include <cctype>
-#include <cmath>
 
 #include "mri.h"
 #include "diag.h"
-#include "macros.h"
 #include "mrisurf.h"
-#include "macros.h"
 #include "version.h"
 #include "label.h"
 #include "error.h"

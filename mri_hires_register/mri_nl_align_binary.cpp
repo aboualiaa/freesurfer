@@ -57,9 +57,7 @@
 #include "utils.h"
 #include "gca.h"
 #include "cma.h"
-#include "version.h"
 #include "transform.h"
-#include "fastmarching.h"
 #include "voxlist.h"
 
 #define NONMAX 0

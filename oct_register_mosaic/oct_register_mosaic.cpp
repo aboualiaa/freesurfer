@@ -37,13 +37,11 @@
 #include "diag.h"
 #include "proto.h"
 #include "mrimorph.h"
-#include "mri_conform.h"
 #include "utils.h"
 #include "const.h"
 #include "timer.h"
 #include "version.h"
 #include "numerics.h"
-#include "histo.h"
 #include "fsinit.h"
 
 #define DX_I 1
@@ -431,7 +429,6 @@ int main(int argc, char *argv[]) {
 
            Description:
 ----------------------------------------------------------------------*/
-#include "mrisegment.h"
 #include "label.h"
 static int get_option(int argc, char *argv[]) {
   int nargs = 0;
@@ -448,7 +445,7 @@ static int get_option(int argc, char *argv[]) {
 #if 0
   else if (!stricmp(option, "hough"))
   {
-    MRI *mri_hough ; 
+    MRI *mri_hough ;
     MRI_SEGMENTATION *mseg ;
 
     mri_hough = MRIread(argv[2]) ;
@@ -900,21 +897,21 @@ add_image_to_mosaic(MRI *mri_orig_mosaic, MRI *mri, double x0, double y0, double
   int      width, height, x ;
   double   x1, y1, x2, y2 ;
 
-  x1 = 0 ; y1 = 0 ; 
-  x2 = MAX(mri_orig_mosaic->width-1, x0 + mri->width-1) ; 
+  x1 = 0 ; y1 = 0 ;
+  x2 = MAX(mri_orig_mosaic->width-1, x0 + mri->width-1) ;
   y2 = MAX(mri_orig_mosaic->height-1, y0 + mri->height-1) ;
   xmin = floor(x1) ; ymin = floor(y1) ;
   xmax = ceil(x2) ;  ymax = ceil(y2) ;
-  
+
   width = xmax - xmin + 1 ;
   height = ymax - ymin + 1 ;
   mri_mosaic = MRIallocSequence(width, height, 1, MRI_FLOAT, 2) ;
   MRIcopyHeader(mri_orig_mosaic, mri_mosaic) ;
-  MRIextractInto(mri_orig_mosaic, mri_mosaic, 0, 0, 0, 
+  MRIextractInto(mri_orig_mosaic, mri_mosaic, 0, 0, 0,
 		 mri_orig_mosaic->width,mri_orig_mosaic->height,mri_orig_mosaic->depth,0,0,0) ;
 
 //#ifdef HAVE_OPENMP
-//#pragma omp parallel for if_ROMP(experimental) 
+//#pragma omp parallel for if_ROMP(experimental)
 //#endif
   {
     int x, y, count, xstart, xend, ystart, yend ;
@@ -1109,10 +1106,10 @@ static MRI *undistort_and_mosaic_images(MRI **mri, double *x0, double *y0,
 
 #if 0
 static int
-jacobian_correct(MRI *mri_src, MRI *mri_dst, double ax, double ay, double a, double b, double c, double d) 
+jacobian_correct(MRI *mri_src, MRI *mri_dst, double ax, double ay, double a, double b, double c, double d)
 {
   int x, y ;
-  
+
   for (x = 0 ; x < mri_src->width ; x++)
   {
     double xp1, yp1, jac, xu, yu, val;
@@ -1121,7 +1118,7 @@ jacobian_correct(MRI *mri_src, MRI *mri_dst, double ax, double ay, double a, dou
     {
       if ( x== Gx && y == Gy)
 	DiagBreak() ;
-      
+
       undistorted_coords(mri_src, x, y, ax, ay, a, b, c, d, &xu, &yu) ;
       val = MRIgetVoxVal(mri_src, x, y, 0, 0) ;
       undistorted_coords(mri_src, x+1, y+1, ax, ay, a, b, c, d, &xp1, &yp1) ;

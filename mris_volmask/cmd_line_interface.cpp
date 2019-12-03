@@ -32,7 +32,6 @@
  */
 
 #include <list>
-#include <vector>
 #include <string>
 #include <cstring>
 

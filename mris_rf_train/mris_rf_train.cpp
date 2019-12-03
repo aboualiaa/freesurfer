@@ -26,7 +26,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
 #include <cctype>
 
 #include "macros.h"
@@ -36,10 +35,8 @@
 #include "mrisurf.h"
 #include "utils.h"
 #include "timer.h"
-#include "annotation.h"
 #include "version.h"
 #include "rforest.h"
-#include "rfutils.h"
 #ifdef HAVE_OPENMP
 #include "romp_support.h"
 #endif

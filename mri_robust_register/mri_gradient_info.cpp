@@ -24,21 +24,12 @@
  */
 #include <string>
 #include <iostream>
-#include <fstream>
-#include <sstream>
-#include <vector>
 #include <cassert>
 
-#include "error.h"
 #include "macros.h"
 #include "mri.h"
 #include "histo.h"
-#include "matrix.h"
-#include "timer.h"
-#include "diag.h"
-#include "mrimorph.h"
 #include "version.h"
-#include "transform.h"
 
 using namespace std;
 

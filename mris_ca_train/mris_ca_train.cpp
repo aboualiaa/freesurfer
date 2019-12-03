@@ -39,7 +39,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
 #include <cctype>
 
 #include "macros.h"
@@ -54,7 +53,6 @@
 #include "utils.h"
 #include "timer.h"
 #include "gcsa.h"
-#include "transform.h"
 #include "version.h"
 #include "label.h"
 

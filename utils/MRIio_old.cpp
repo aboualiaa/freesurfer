@@ -26,14 +26,11 @@
 /* MRI I/O - routines for reading and writing large files fast */
 /* 2/1/91 - AD */
 
-#include <math.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 
 #include "proto.h"
-
-#include "MRIio_old.h"
 
 static void MGHprint_error(const char *str);
 
