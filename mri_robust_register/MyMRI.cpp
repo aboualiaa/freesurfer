@@ -22,10 +22,6 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
-#include <cassert>
-#include <iostream>
-#include <algorithm>
-#include <vector>
 
 #ifdef HAVE_OPENMP
 #include <omp.h>
@@ -35,11 +31,6 @@
 #include "MyMatrix.h"
 #include "CostFunctions.h"
 #include "RobustGaussian.h"
-
-#include <climits>
-#include "error.h"
-#include "macros.h"
-#include "histo.h"
 
 using namespace std;
 

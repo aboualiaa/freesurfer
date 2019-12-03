@@ -25,21 +25,8 @@
  *
  */
 
-#include <string>
-#include <iostream>
-#include <vector>
-#include <cassert>
-
-// for rand:
-#include <cstdio>
-#include <cstdlib>
-#include <ctime>
-
 #include "MultiRegistration.h"
 
-#include "error.h"
-#include "macros.h"
-#include "mri.h"
 #include "timer.h"
 #include "version.h"
 

@@ -45,28 +45,16 @@ average \author Bruce Fischl
   ENDUSAGE
 */
 
-#include <cstdio>
-#include <cstdlib>
-#include <unistd.h>
 #include <sys/utsname.h>
 
-#include "macros.h"
-
-#include "mri.h"
 #include "mri2.h"
-#include "mrisurf.h"
 #include "mrisurf_project.h"
-
-#include "utils.h"
-#include "fio.h"
 #include "version.h"
 #include "cmdargs.h"
-#include "error.h"
 #include "diag.h"
 #include "cma.h"
 #include "romp_support.h"
 #include "voxlist.h"
-#include "matrix.h"
 
 #define MAX_SUBJECTS 1000
 #define MAX_RUNS 100
@@ -1264,7 +1252,7 @@ static int compute_surface_correlation_map_at_voxel(MRI *mri_fvol,
 #if 0
 
 static MRI *
-compute_surface_correlations_in_aseg_label(MRI *mri_aseg, int aseg_label, MRI *mri_fvol, MRI *mri_fsurf, MRI *mri_cmat) 
+compute_surface_correlations_in_aseg_label(MRI *mri_aseg, int aseg_label, MRI *mri_fvol, MRI *mri_fsurf, MRI *mri_cmat)
 {
   int  nvox, x, y, z, n ;
 
@@ -1510,7 +1498,7 @@ static int warp_hemi(MRI_SURFACE *mris_mov, MRI_SURFACE *mris_fixed,
   if (write_diags)
   {
     char fname[STRLEN] ;
-    MRI  *mri_fixed ; 
+    MRI  *mri_fixed ;
 
     mri_fixed = sample_fixed(mris_mov, mris_fixed, mht_faces, mri_stats) ;
     sprintf(fname, "lh.label_avg.%3.3d.mgz",  iter) ;
@@ -1628,16 +1616,16 @@ accumulate_subcortical_map(MRI **mri_fvol, MRI **mri_fsurf, LABEL *area, int run
 
 }
 static int
-compute_volume_correlation_at_vertex(MRI *mri_fvol, MRI *mri_fsurf, int vno, int frame, MRI *mri_cmat, MRI *mri_mask) 
+compute_volume_correlation_at_vertex(MRI *mri_fvol, MRI *mri_fsurf, int vno, int frame, MRI *mri_cmat, MRI *mri_mask)
 {
   int   t, x, y, z, xmax, ymax, zmax ;
   float corr, sval, vval, norma, normb, max_corr ;
-  static MRI   *mri_surf = NULL; 
+  static MRI   *mri_surf = NULL;
 
   xmax = ymax = zmax = max_corr = 0.0 ;
   if (vno == Gdiag_no)
     DiagBreak() ;
-  for (x = 0 ; x < mri_fvol->width ; x++)  
+  for (x = 0 ; x < mri_fvol->width ; x++)
     for (y = 0 ; y < mri_fvol->height ; y++)
       for (z = 0 ; z < mri_fvol->depth ; z++)
       {
@@ -1675,7 +1663,7 @@ compute_volume_correlation_at_vertex(MRI *mri_fvol, MRI *mri_fsurf, int vno, int
   return(NO_ERROR) ;
 }
 static MRI *
-compute_volume_correlations_in_surface_label(LABEL *area, MRI *mri_fvol, MRI *mri_fsurf, MRI *mri_cmat, MRI *mri_mask) 
+compute_volume_correlations_in_surface_label(LABEL *area, MRI *mri_fvol, MRI *mri_fsurf, MRI *mri_cmat, MRI *mri_mask)
 {
   int  n ;
 

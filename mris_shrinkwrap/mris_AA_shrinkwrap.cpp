@@ -23,22 +23,10 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-#include <cctype>
-
-#include "macros.h"
-
-#include "mri.h"
 #include "mrisegment.h"
-#include "mrisurf.h"
 #include "mrisurf_project.h"
 
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
 #include "timer.h"
 #include "version.h"
 

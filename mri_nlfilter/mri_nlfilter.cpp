@@ -23,18 +23,8 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cctype>
-
-#include "filter.h"
-#include "macros.h"
 #include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "utils.h"
-#include "mri.h"
 #include "region.h"
 #include "version.h"
 

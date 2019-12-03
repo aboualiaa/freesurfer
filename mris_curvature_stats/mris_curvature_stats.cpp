@@ -27,21 +27,9 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-#include <cctype>
-
-#include <cassert>
-
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
 #include "mrisurf.h"
 #include "version.h"
-#include "label.h"
 
 #define STRBUF 65536
 #define MAX_FILES 1000

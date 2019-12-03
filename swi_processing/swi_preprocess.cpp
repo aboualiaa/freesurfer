@@ -24,6 +24,7 @@
 #include "mri.h"
 #include "DICOMRead.h"
 #include "cmd_line_interface.h"
+
 const char *Progname;
 
 // static function declarations

@@ -1,4 +1,3 @@
-
 /**
  * @file  mri_rf_long_train.c
  * @brief Creates a Random Forest classifier for longitudinal data
@@ -24,26 +23,10 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cctype>
-
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "utils.h"
-#include "timer.h"
-#include "gca.h"
-#include "transform.h"
-#include "cma.h"
 #include "version.h"
-#include "rforest.h"
 #include "rfa.h"
 #include <fcntl.h>
-#include <unistd.h>
 
 #include "romp_support.h"
 

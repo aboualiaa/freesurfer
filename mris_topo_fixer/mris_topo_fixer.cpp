@@ -25,17 +25,7 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cctype>
-
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "mrisurf.h"
-#include "mri.h"
 #include "version.h"
 #include "timer.h"
 #include "topo_parms.h"

@@ -24,16 +24,8 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cctype>
-
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
 #include "mrisurf.h"
-#include "mri.h"
 #include "version.h"
 
 static char vcid[] = "$Id: mris_fill.c,v 1.6 2011/03/02 00:04:32 nicks Exp $";

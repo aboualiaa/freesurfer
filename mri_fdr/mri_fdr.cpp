@@ -23,30 +23,15 @@
  *
  */
 
-/*!
-\file dummy.c
-\brief Example c file that can be used as a template.
-\author Douglas Greve
-*/
-
-#include <cstdio>
-#include <cstdlib>
-#include <unistd.h>
-#include <sys/utsname.h>
-
-#include "fio.h"
 #include "version.h"
 #include "cmdargs.h"
-#include "error.h"
 #include "diag.h"
-#include "mri.h"
 #include "mri2.h"
 #ifdef _OPENMP
 #include "romp_support.h"
 #endif
 #include "timer.h"
 #include "fsenv.h"
-#include "numerics.h"
 #include "randomfields.h"
 
 double round(double x);

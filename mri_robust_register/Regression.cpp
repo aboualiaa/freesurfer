@@ -28,10 +28,6 @@
  */
 
 #include "Regression.h"
-#include <iostream>
-#include <cassert>
-#include <cmath>
-#include <limits>
 #include <vector>
 #include <fstream>
 #include "RobustGaussian.h"
@@ -41,8 +37,6 @@
 #include <vnl/algo/vnl_qr.h>
 #undef export
 
-#include <cstdlib>
-#include "error.h"
 
 using namespace std;
 

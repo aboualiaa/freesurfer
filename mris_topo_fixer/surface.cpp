@@ -25,8 +25,6 @@
 
 #include <fstream>
 
-#include "globals.h"
-#include "surface.h"
 #include "patchdisk.h"
 #include "fastloop.h"
 

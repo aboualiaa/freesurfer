@@ -44,19 +44,9 @@
   ENDUSAGE
 */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-double round(double x);
-#include <sys/utsname.h>
-#include <unistd.h>
-
-#include "error.h"
+// double round(double x);
 #include "diag.h"
-#include "utils.h"
-#include "mrisurf.h"
 #include "mrisutils.h"
-#include "mri.h"
 #include "mri2.h"
 #include "fio.h"
 #include "version.h"

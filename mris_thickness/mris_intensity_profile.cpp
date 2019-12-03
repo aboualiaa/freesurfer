@@ -23,25 +23,14 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-#include <cctype>
-#include "romp_support.h"
-
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "mrisurf.h"
-#include "mri.h"
 #include "version.h"
-#include "transform.h"
 #include "fmriutils.h"
-#include "mrishash.h"
 #include "cma.h"
-#include "fsinit.h"
+
+#ifdef HAVE_OPENMP
+#include "romp_support.h"
+#endif
 
 static char vcid[] =
     "$Id: mris_intensity_profile.c,v 1.23 2013/03/27 01:53:50 fischl Exp $";

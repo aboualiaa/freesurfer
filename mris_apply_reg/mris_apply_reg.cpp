@@ -44,18 +44,12 @@
   ENDUSAGE
 */
 
-#include <cstdio>
-#include <cstdlib>
-#include <unistd.h>
 #include <sys/utsname.h>
 
-#include "utils.h"
 #include "fio.h"
 #include "version.h"
 #include "cmdargs.h"
-#include "error.h"
 #include "diag.h"
-#include "mrisurf.h"
 #include "resample.h"
 #include "pdf.h"
 #include "icosahedron.h"

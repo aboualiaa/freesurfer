@@ -114,17 +114,9 @@ ENDHELP ----------------------------------------------------------------
 
 // $Id: mris_divide_parcellation.c,v 1.12 2012/10/24 19:50:06 maritza Exp $
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-double round(double x);
-#include <cctype>
+// double round(double x);
 
-#include "macros.h"
 #include "version.h"
-#include "utils.h"
-#include "mrisurf.h"
-#include "error.h"
 #include "diag.h"
 #include "annotation.h"
 

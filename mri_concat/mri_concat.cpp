@@ -30,17 +30,8 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cfloat>
-#include <cctype>
-#include <sys/resource.h>
-#include "macros.h"
 #include "mrisutils.h"
-#include "error.h"
 #include "diag.h"
-#include "mri.h"
 #include "mri2.h"
 #include "fio.h"
 #include "fmriutils.h"

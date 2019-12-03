@@ -37,22 +37,16 @@
 #endif
 #endif
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cctype>
 #ifndef Darwin
 #include <malloc.h>
 #endif
 #ifdef HAVE_OPENGL
 #include "glut.h"
 #endif
-#include "error.h"
 #include "diag.h"
 #include "DICOMRead.h"
 #include "mri2.h"
 #include "bfileio.h"
-#include "proto.h"
 #include "version.h"
 #include "cmdargs.h"
 

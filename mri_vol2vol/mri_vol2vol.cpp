@@ -452,28 +452,15 @@ ENDHELP --------------------------------------------------------------
 
 */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cstring>
 #include <sys/stat.h>
-#include <cctype>
-#include <cerrno>
 
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
 
-#include "matrix.h"
-#include "mri.h"
 #include "version.h"
 #include "mri2.h"
 #include "mri_identify.h"
 #include "registerio.h"
 #include "resample.h"
-#include "transform.h"
-#include "gca.h"
 #include "gcamorph.h"
 #include "fio.h"
 #include "pdf.h"

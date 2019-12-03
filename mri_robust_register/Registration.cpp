@@ -24,24 +24,9 @@
  */
 
 #include "Registration.h"
-#include "Quaternion.h"
-#include "MyMatrix.h"
-#include "MyMRI.h"
-#include "Regression.h"
 #include "CostFunctions.h"
-#include "mriBSpline.h"
 
-#include <limits>
-#include <cassert>
-#include <iostream>
-#include <vnl/algo/vnl_matrix_inverse.h>
-#include <vnl/vnl_inverse.h>
-#include <vnl/vnl_vector_fixed.h>
-#include <vnl/vnl_matlab_print.h>
 #include <vnl/algo/vnl_determinant.h>
-
-#include "error.h"
-#include "macros.h"
 
 using namespace std;
 

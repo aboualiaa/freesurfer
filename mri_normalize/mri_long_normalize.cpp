@@ -28,15 +28,7 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cctype>
-
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
 #include "mrinorm.h"
 #include "tags.h"
 #include "version.h"

@@ -22,19 +22,8 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <ctime>
-
 #include "TVector.h"
-
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "mrisurf.h"
-#include "proto.h"
-#include "mrishash.h"
 
 using namespace std;
 

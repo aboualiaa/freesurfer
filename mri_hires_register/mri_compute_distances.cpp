@@ -36,17 +36,8 @@
 //
 ////////////////////////////////////////////////////////////////////
 
-#include <cmath>
-#include <cstdlib>
-#include <cstdio>
-#include "mri.h"
-#include "proto.h"
-#include "macros.h"
-#include "error.h"
 #include "timer.h"
 #include "diag.h"
-#include "utils.h"
-#include "matrix.h"
 #include "mrisegment.h"
 #include "cma.h"
 

@@ -1,5 +1,4 @@
 #include "argparse.h"
-#include "log.h"
 #include "annotation.h"
 
 #include "mris_annot_diff.help.xml.h"

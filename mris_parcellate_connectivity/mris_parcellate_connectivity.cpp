@@ -24,22 +24,9 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cctype>
-
-#include "macros.h"
-
-#include "mri.h"
-#include "mrisurf.h"
 #include "mrisurf_project.h"
-#include "mrishash.h"
 #include "icosahedron.h"
-
-#include "error.h"
 #include "diag.h"
-#include "utils.h"
-#include "const.h"
 #include "timer.h"
 #include "version.h"
 

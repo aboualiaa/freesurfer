@@ -25,20 +25,10 @@
 
 #include "blood.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #include <sys/utsname.h>
-#include <unistd.h>
-
-#include <iomanip>
-#include <iostream>
-#include <string>
-#include <vector>
 
 #include "cmdargs.h"
 #include "diag.h"
-#include "error.h"
 #include "fio.h"
 #include "timer.h"
 #include "version.h"
@@ -66,9 +56,9 @@ vector<vector<int>> nControl;
 vector<char *> outBase, trainTrkList, trainRoi1List, trainRoi2List,
     testMaskList, testFaList, testBaseXfmList;
 char *outDir = nullptr, *outTestDir = nullptr, *trainListFile = nullptr,
-     *trainAsegFile = nullptr, *trainMaskFile = nullptr, *testAffineXfmFile = nullptr,
-     *testNonlinXfmFile = nullptr, *testNonlinRefFile = nullptr,
-     *testBaseMaskFile = nullptr;
+     *trainAsegFile = nullptr, *trainMaskFile = nullptr,
+     *testAffineXfmFile = nullptr, *testNonlinXfmFile = nullptr,
+     *testNonlinRefFile = nullptr, *testBaseMaskFile = nullptr;
 
 struct utsname uts;
 char *cmdline, cwd[2000];
@@ -78,15 +68,15 @@ Timer cputimer;
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
   int nargs;
-int cputime;
+  int cputime;
   char excfile[PATH_MAX];
-char fbase[PATH_MAX];
+  char fbase[PATH_MAX];
 
   /* rkt: check for and handle version tag */
   nargs = handle_version_option(argc, argv, vcid, "$Name:  $");
   if ((nargs != 0) && argc - nargs == 1) {
     exit(0);
-}
+  }
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -100,13 +90,13 @@ char fbase[PATH_MAX];
 
   if (argc == 0) {
     usage_exit();
-}
+  }
 
   parse_commandline(argc, argv);
   check_options();
   if (checkoptsonly != 0) {
     return (0);
-}
+  }
 
   dump_options();
 
@@ -115,17 +105,17 @@ char fbase[PATH_MAX];
       sprintf(excfile, "%s/%s_cpts_all.bad.txt", outDir, outBase[0]);
     } else {
       sprintf(excfile, "%s_cpts_all.bad.txt", outBase[0]);
-}
+    }
   }
 
-  Blood myblood(trainListFile, trainTrkList[0],
-                trainRoi1List.size() != 0u ? trainRoi1List[0] : nullptr,
-                trainRoi2List.size() != 0u ? trainRoi2List[0] : nullptr, trainAsegFile,
-                trainMaskFile, trainMaskLabel.size() != 0u ? trainMaskLabel[0] : 0,
-                excludeStr ? excfile : nullptr, testMaskList, testFaList,
-                testAffineXfmFile, testNonlinXfmFile, testNonlinRefFile,
-                testBaseXfmList, testBaseMaskFile, useTrunc, nControl[0],
-                debug != 0);
+  Blood myblood(
+      trainListFile, trainTrkList[0],
+      trainRoi1List.size() != 0u ? trainRoi1List[0] : nullptr,
+      trainRoi2List.size() != 0u ? trainRoi2List[0] : nullptr, trainAsegFile,
+      trainMaskFile, trainMaskLabel.size() != 0u ? trainMaskLabel[0] : 0,
+      excludeStr ? excfile : nullptr, testMaskList, testFaList,
+      testAffineXfmFile, testNonlinXfmFile, testNonlinRefFile, testBaseXfmList,
+      testBaseMaskFile, useTrunc, nControl[0], debug != 0);
 
   for (unsigned int itrk = 0; itrk < trainTrkList.size(); itrk++) {
     if (itrk > 0) {
@@ -134,18 +124,19 @@ char fbase[PATH_MAX];
           sprintf(excfile, "%s/%s_cpts_all.bad.txt", outDir, outBase[itrk]);
         } else {
           sprintf(excfile, "%s_cpts_all.bad.txt", outBase[itrk]);
-}
+        }
       }
 
       if (nControl.size() > 1) { // Variable number of controls
         myblood.SetNumControls(nControl[itrk]);
-}
+      }
 
-      myblood.ReadStreamlines(trainListFile, trainTrkList[itrk],
-                              trainRoi1List.size() != 0u ? trainRoi1List[itrk] : nullptr,
-                              trainRoi2List.size() != 0u ? trainRoi2List[itrk] : nullptr,
-                              trainMaskLabel.size() != 0u ? trainMaskLabel[itrk] : 0,
-                              excludeStr ? excfile : nullptr);
+      myblood.ReadStreamlines(
+          trainListFile, trainTrkList[itrk],
+          trainRoi1List.size() != 0u ? trainRoi1List[itrk] : nullptr,
+          trainRoi2List.size() != 0u ? trainRoi2List[itrk] : nullptr,
+          trainMaskLabel.size() != 0u ? trainMaskLabel[itrk] : 0,
+          excludeStr ? excfile : nullptr);
     }
 
     cout << "Processing pathway " << itrk + 1 << " of " << trainTrkList.size()
@@ -158,7 +149,7 @@ char fbase[PATH_MAX];
       sprintf(fbase, "%s/%s", outDir, outBase[itrk]);
     } else {
       strcpy(fbase, outBase[itrk]);
-}
+    }
 
     if (outTestDir != nullptr) {
       char ftbase[PATH_MAX];
@@ -168,7 +159,7 @@ char fbase[PATH_MAX];
       myblood.WriteOutputs(fbase, ftbase);
     } else {
       myblood.WriteOutputs(fbase);
-}
+    }
 
     cputime = cputimer.milliseconds();
     cout << "Done in " << cputime / 1000.0 << " sec." << endl;
@@ -182,13 +173,13 @@ char fbase[PATH_MAX];
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
   int nargc;
-int nargsused;
+  int nargsused;
   char **pargv;
-char *option;
+  char *option;
 
   if (argc < 1) {
     usage_exit();
-}
+  }
 
   nargc = argc;
   pargv = argv;
@@ -196,7 +187,7 @@ char *option;
     option = pargv[0];
     if (debug != 0) {
       printf("%d %s\n", nargc, option);
-}
+    }
     nargc -= 1;
     pargv += 1;
 
@@ -215,19 +206,19 @@ char *option;
     } else if (strcmp(option, "--outdir") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       outDir = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--cptdir") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       outTestDir = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--out") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         outBase.push_back(pargv[nargsused]);
         nargsused++;
@@ -235,13 +226,13 @@ char *option;
     } else if (strcmp(option, "--slist") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       trainListFile = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--trk") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         trainTrkList.push_back(pargv[nargsused]);
         nargsused++;
@@ -249,7 +240,7 @@ char *option;
     } else if (strcmp(option, "--rois") == 0) {
       if (nargc < 2) {
         CMDargNErr(option, 1);
-}
+      }
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         trainRoi1List.push_back(pargv[nargsused]);
         nargsused++;
@@ -259,20 +250,20 @@ char *option;
     } else if (strcmp(option, "--seg") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       trainAsegFile = pargv[0];
       nargsused = 1;
     } else if (strcmp(option, "--cmask") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       trainMaskFile = pargv[0];
       nargsused = 1;
     } else if (strcmp(option, "--lmask") == 0) {
       float labid;
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         sscanf(pargv[nargsused], "%f", &labid);
         trainMaskLabel.push_back(labid);
@@ -281,7 +272,7 @@ char *option;
     } else if (strcmp(option, "--bmask") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         testMaskList.push_back(fio_fullpath(pargv[nargsused]));
         nargsused++;
@@ -289,7 +280,7 @@ char *option;
     } else if (strcmp(option, "--fa") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         testFaList.push_back(fio_fullpath(pargv[nargsused]));
         nargsused++;
@@ -297,25 +288,25 @@ char *option;
     } else if (strcmp(option, "--reg") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       testAffineXfmFile = fio_fullpath(pargv[nargsused]);
       nargsused = 1;
     } else if (strcmp(option, "--regnl") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       testNonlinXfmFile = fio_fullpath(pargv[nargsused]);
       nargsused = 1;
     } else if (strcmp(option, "--refnl") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       testNonlinRefFile = fio_fullpath(pargv[nargsused]);
       nargsused = 1;
     } else if (strcmp(option, "--basereg") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         testBaseXfmList.push_back(fio_fullpath(pargv[nargsused]));
         nargsused++;
@@ -323,13 +314,13 @@ char *option;
     } else if (strcmp(option, "--baseref") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       testBaseMaskFile = fio_fullpath(pargv[nargsused]);
       nargsused = 1;
     } else if (strcmp(option, "--ncpts") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         int ncpts;
         vector<int> ncptlist;
@@ -347,7 +338,7 @@ char *option;
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (CMDsingleDash(option) != 0) {
         fprintf(stderr, "       Did you really mean -%s ?\n", option);
-}
+      }
       exit(-1);
     }
     nargc -= nargsused;
@@ -528,7 +519,7 @@ static void check_options() {
          << endl;
     exit(1);
   }
-  }
+}
 
 /* --------------------------------------------- */
 static void dump_options() {
@@ -545,16 +536,16 @@ static void dump_options() {
 
   if (outDir != nullptr) {
     cout << "Output directory: " << outDir << endl;
-}
+  }
 
   if (outTestDir != nullptr) {
     cout << "Output directory in test subject's space: " << outTestDir << endl;
-}
+  }
 
   cout << "Output base:";
   for (istr = outBase.begin(); istr < outBase.end(); istr++) {
     cout << " " << *istr;
-}
+  }
   cout << endl;
 
   cout << "Training subject directory list: " << trainListFile << endl;
@@ -562,20 +553,20 @@ static void dump_options() {
   cout << "Location of streamline files relative to base:";
   for (istr = trainTrkList.begin(); istr < trainTrkList.end(); istr++) {
     cout << " " << *istr;
-}
+  }
   cout << endl;
 
   if (!trainRoi1List.empty()) {
     cout << "Location of start ROI files relative to base:";
     for (istr = trainRoi1List.begin(); istr < trainRoi1List.end(); istr++) {
       cout << " " << *istr;
-}
+    }
     cout << endl;
 
     cout << "Location of end ROI files relative to base:";
     for (istr = trainRoi2List.begin(); istr < trainRoi2List.end(); istr++) {
       cout << " " << *istr;
-}
+    }
     cout << endl;
   }
 
@@ -584,10 +575,10 @@ static void dump_options() {
 
   if (!trainMaskLabel.empty()) {
     cout << "Label ID's from aparc+aseg to add to cortex mask:";
-    for (auto ilab = trainMaskLabel.begin();
-         ilab < trainMaskLabel.end(); ilab++) {
+    for (auto ilab = trainMaskLabel.begin(); ilab < trainMaskLabel.end();
+         ilab++) {
       cout << " " << static_cast<int>(*ilab);
-}
+    }
     cout << endl;
   }
 
@@ -595,57 +586,53 @@ static void dump_options() {
        << endl;
 
   cout << "Brain mask for output subject:";
-  for (auto ifile = testMaskList.begin();
-       ifile < testMaskList.end(); ifile++) {
+  for (auto ifile = testMaskList.begin(); ifile < testMaskList.end(); ifile++) {
     cout << " " << *ifile;
-}
+  }
   cout << endl;
 
   if (!testFaList.empty()) {
     cout << "FA map for output subject:";
-    for (auto ifile = testFaList.begin();
-         ifile < testFaList.end(); ifile++) {
+    for (auto ifile = testFaList.begin(); ifile < testFaList.end(); ifile++) {
       cout << " " << *ifile;
-}
+    }
     cout << endl;
   }
 
   if (testAffineXfmFile != nullptr) {
     cout << "Affine registration from atlas to base for output subject: "
          << testAffineXfmFile << endl;
-}
+  }
 
   if (testNonlinXfmFile != nullptr) {
     cout << "Nonlinear registration from atlas to base for output subject: "
          << testNonlinXfmFile << endl;
-}
+  }
 
   if (testNonlinRefFile != nullptr) {
     cout << "Nonlinear registration source reference for output subject: "
          << testNonlinRefFile << endl;
-}
+  }
 
   if (!testBaseXfmList.empty()) {
     cout << "Affine registration from base to FA map for output subject:";
-    for (auto ifile = testBaseXfmList.begin();
-         ifile < testBaseXfmList.end(); ifile++) {
+    for (auto ifile = testBaseXfmList.begin(); ifile < testBaseXfmList.end();
+         ifile++) {
       cout << " " << *ifile;
-}
+    }
     cout << endl;
   }
 
   if (testBaseMaskFile != nullptr) {
     cout << "Base mask for output subject: " << testBaseMaskFile << endl;
-}
+  }
 
   cout << "Number of control points for initial spline:";
-  for (auto inlist = nControl.begin();
-       inlist < nControl.end(); inlist++) {
-    for (auto inum = inlist->begin();
-         inum < inlist->end(); inum++) {
+  for (auto inlist = nControl.begin(); inlist < nControl.end(); inlist++) {
+    for (auto inum = inlist->begin(); inum < inlist->end(); inum++) {
       cout << " " << *inum;
-}
-}
+    }
+  }
   cout << endl;
 
   cout << "Exclude previously chosen center streamlines: " << excludeStr << endl

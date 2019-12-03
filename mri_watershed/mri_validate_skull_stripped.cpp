@@ -1,7 +1,3 @@
-
-#include <cstdio>
-#include <cstdlib>
-
 #include "mri.h"
 
 static void ErrorValidation(const char *string) {

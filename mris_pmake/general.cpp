@@ -22,12 +22,7 @@
  *
  */
 
-#include <cstdio>
-#include <cstdarg>
-#include <cmath>
-
 #include "general.h"
-#include "pathconvert.h"
 
 extern const char *Progname;
 

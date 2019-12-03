@@ -32,15 +32,7 @@
    $Id: mkxsubjreg.c,v 1.5 2011/03/02 00:04:13 nicks Exp $
 */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cstring>
-
-#include "error.h"
 #include "diag.h"
-#include "matrix.h"
-#include "mri.h"
 #include "registerio.h"
 #include "version.h"
 #include "resample.h"

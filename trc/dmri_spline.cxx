@@ -23,15 +23,7 @@
  *
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #include <sys/utsname.h>
-#include <unistd.h>
-
-#include <iomanip>
-#include <iostream>
-#include <limits.h>
 
 #include "cmdargs.h"
 #include "diag.h"
@@ -60,8 +52,8 @@ static char vcid[] = "";
 const char *Progname = "dmri_spline";
 
 bool showControls = false;
-char *inFile = nullptr, *maskFile = nullptr, *outVolFile = nullptr, *outTextFile = nullptr,
-     *outVecBase = nullptr;
+char *inFile = nullptr, *maskFile = nullptr, *outVolFile = nullptr,
+     *outTextFile = nullptr, *outVecBase = nullptr;
 
 struct utsname uts;
 char *cmdline, cwd[2000];
@@ -71,13 +63,13 @@ Timer cputimer;
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
   int nargs;
-int cputime;
+  int cputime;
 
   /* rkt: check for and handle version tag */
   nargs = handle_version_option(argc, argv, vcid, "$Name:  $");
   if ((nargs != 0) && argc - nargs == 1) {
     exit(0);
-}
+  }
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -91,13 +83,13 @@ int cputime;
 
   if (argc == 0) {
     usage_exit();
-}
+  }
 
   parse_commandline(argc, argv);
   check_options();
   if (checkoptsonly != 0) {
     return (0);
-}
+  }
 
   dump_options();
 
@@ -113,11 +105,11 @@ int cputime;
 
   if (outVolFile != nullptr) {
     myspline.WriteVolume(outVolFile, showControls);
-}
+  }
 
   if (outTextFile != nullptr) {
     myspline.WriteAllPoints(outTextFile);
-}
+  }
 
   if (outVecBase != nullptr) {
     char fname[PATH_MAX];
@@ -167,13 +159,13 @@ int cputime;
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
   int nargc;
-int nargsused;
+  int nargsused;
   char **pargv;
-char *option;
+  char *option;
 
   if (argc < 1) {
     usage_exit();
-}
+  }
 
   nargc = argc;
   pargv = argv;
@@ -181,7 +173,7 @@ char *option;
     option = pargv[0];
     if (debug != 0) {
       printf("%d %s\n", nargc, option);
-}
+    }
     nargc -= 1;
     pargv += 1;
 
@@ -200,31 +192,31 @@ char *option;
     } else if (strcmp(option, "--cpts") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       inFile = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--out") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       outVolFile = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--outpts") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       outTextFile = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--outvec") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       outVecBase = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--mask") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       maskFile = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--show") == 0) {
@@ -233,7 +225,7 @@ char *option;
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (CMDsingleDash(option) != 0) {
         fprintf(stderr, "       Did you really mean -%s ?\n", option);
-}
+      }
       exit(-1);
     }
     nargc -= nargsused;
@@ -309,11 +301,12 @@ static void check_options() {
     cout << "ERROR: Must specify mask volume" << endl;
     exit(1);
   }
-  if ((outVolFile == nullptr) && (outTextFile == nullptr) && (outVecBase == nullptr)) {
+  if ((outVolFile == nullptr) && (outTextFile == nullptr) &&
+      (outVecBase == nullptr)) {
     cout << "ERROR: Must specify at least one type of output file" << endl;
     exit(1);
   }
-  }
+}
 
 /* --------------------------------------------- */
 static void dump_options() {
@@ -334,8 +327,8 @@ static void dump_options() {
   }
   if (outTextFile != nullptr) {
     cout << "Output text file: " << outTextFile << endl;
-}
+  }
   if (outVecBase != nullptr) {
     cout << "Output tangent vector file base name: " << outVecBase << endl;
-}
+  }
 }

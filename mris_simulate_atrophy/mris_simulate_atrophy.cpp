@@ -25,24 +25,10 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cctype>
-
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "mrimorph.h"
-#include "utils.h"
-#include "const.h"
 #include "timer.h"
 #include "version.h"
 #include "cma.h"
-#include "transform.h"
-#include "label.h"
 
 #define WM_VAL 1
 #define GM_VAL 2

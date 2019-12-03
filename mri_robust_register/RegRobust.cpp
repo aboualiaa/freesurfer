@@ -25,7 +25,6 @@
 
 #include "RegRobust.h"
 #include "RegistrationStep.h"
-#include <iostream>
 
 RegRobust::~RegRobust() { // we cleanup our private variables
                           // std::cout << " Destroy Registration" << std::endl;

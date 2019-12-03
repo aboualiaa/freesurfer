@@ -22,20 +22,8 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-#include <cctype>
-
-#include "macros.h"
-#include "error.h"
 #include "cma.h"
 #include "diag.h"
-#include "mri.h"
-#include "proto.h"
-#include "gca.h"
-#include "transform.h"
 #include "version.h"
 
 #define UNIT_VOLUME 128

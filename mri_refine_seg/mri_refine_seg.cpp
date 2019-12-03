@@ -1,14 +1,8 @@
-#include <iostream>
-#include <string>
-#include <vector>
 #include <map>
-#include <algorithm>
-#include <utility>
 
 #include "argparse.h"
 #include "pointset.h"
 
-#include "mri.h"
 #include "mri2.h"
 #include "fio.h"
 #include "volcluster.h"

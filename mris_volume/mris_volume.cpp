@@ -35,17 +35,9 @@
 //
 ////////////////////////////////////////////////////////////////////
 
-#include <cstdio>
-#include <cstdlib>
-#include "mrisurf.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "utils.h"
 #include "timer.h"
-#include "matrix.h"
 #include "version.h"
-#include "label.h"
 #include "mrisutils.h"
 
 #define VERTEX_EDGE(vec, v0, v1)                                               \

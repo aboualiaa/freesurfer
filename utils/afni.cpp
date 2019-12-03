@@ -34,17 +34,8 @@
 // moved out from mriio.c
 //
 
-#include <cctype>
-#include <cerrno>
-#include <cstdio>
-#include <cstdlib>
-
 #include "mri.h"
-
 #include "error.h"
-#include "machine.h"
-#include "utils.h"
-
 #include "AFNI.h"
 
 /* ----- flags for keeping track of what we've gotten from the header ----- */

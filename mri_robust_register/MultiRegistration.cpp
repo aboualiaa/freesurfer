@@ -30,26 +30,10 @@
  */
 
 #include "MultiRegistration.h"
-#include "RegRobust.h"
 #include "Regression.h"
-#include "RobustGaussian.h"
 #include "CostFunctions.h"
-#include "MyMatrix.h"
-#include "MyMRI.h"
-#include "mriBSpline.h"
 
-#include <cassert>
-#include <iostream>
-#include <vnl/vnl_inverse.h>
-#include <vnl/vnl_matrix.h>
-#include <vnl/vnl_matrix_fixed.h>
-#include <vnl/algo/vnl_svd.h>
 #include <vnl/algo/vnl_determinant.h>
-
-#include "error.h"
-#include "macros.h"
-#include "mri.h"
-#include "matrix.h"
 
 using namespace std;
 

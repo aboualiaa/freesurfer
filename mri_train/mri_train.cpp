@@ -23,24 +23,12 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cctype>
-
 #include "diag.h"
-#include "error.h"
 #include "mriclass.h"
-#include "macros.h"
-#include "utils.h"
-#include "proto.h"
-#include "const.h"
-#include "classify.h"
 #include "version.h"
 #include "rforest.h"
 #include "cma.h"
 #include <fcntl.h>
-#include <unistd.h>
 
 static int features = FEATURE_INTENSITY | FEATURE_MEAN3 | FEATURE_DIRECTION |
                       FEATURE_CPOLV_MEDIAN5;

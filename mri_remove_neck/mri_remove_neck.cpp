@@ -22,17 +22,8 @@
  *
  */
 
-#include <cmath>
-#include <cstdlib>
-#include <cstdio>
-
-#include "mri.h"
-#include "proto.h"
-#include "macros.h"
-#include "error.h"
 #include "timer.h"
 #include "diag.h"
-#include "utils.h"
 #include "gca.h"
 #include "cma.h"
 #include "version.h"

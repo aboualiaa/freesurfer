@@ -22,26 +22,13 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <unistd.h>
-#include <cstring>
-#include <sys/utsname.h>
-
-#include "error.h"
 #include "diag.h"
-#include "utils.h"
-#include "matrix.h"
-#include "mri.h"
 #include "mri2.h"
 #include "mri_identify.h"
-#include "mrisurf.h"
 #include "mrisutils.h"
 #include "fio.h"
 #include "volcluster.h"
 #include "surfcluster.h"
-#include "transform.h"
 #include "version.h"
 #include "annotation.h"
 #include "fsenv.h"

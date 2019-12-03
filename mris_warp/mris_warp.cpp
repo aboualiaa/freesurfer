@@ -25,25 +25,11 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-
-// nint
-#include "macros.h"
-
-#include "error.h"
 #include "diag.h"
 #include "timer.h"
-
-#include "mri.h"
-#include "mrisurf.h"
 #include "gcamorph.h"
-
 #include "registerio.h"
-
 #include "resample.h"
-
-// string_to_type
 #include "mri_identify.h"
 
 const char *Progname = nullptr;
@@ -287,8 +273,8 @@ int main(int argc, char *argv[]) {
   gcamn = &gcam->nodes[0][0][0] ;
   printf("g ox oy oz: %2.2f %2.2f %2.2f\ng x y z: %2.2f %2.2f %2.2f\n"
          "g nx ny nz: %2.2f %2.2f %2.2f\n",
-         gcamn->origx, gcamn->origy, gcamn->origz, 
-         gcamn->x, gcamn->y, gcamn->z, 
+         gcamn->origx, gcamn->origy, gcamn->origz,
+         gcamn->x, gcamn->y, gcamn->z,
          gcamn->xn, gcamn->yn, gcamn->zn);
 #endif
 

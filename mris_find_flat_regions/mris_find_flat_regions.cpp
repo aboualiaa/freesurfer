@@ -23,19 +23,9 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cctype>
-
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
 #include "mrisurf.h"
-#include "mri.h"
 #include "version.h"
-#include "label.h"
 #include "mri_identify.h"
 
 static char vcid[] =

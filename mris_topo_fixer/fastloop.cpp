@@ -24,7 +24,6 @@
  */
 
 #include "fastloop.h"
-#include "segment.h"
 
 FastLoop::FastLoop(Surface &s) : surface(&s) {
   defect_faces = nullptr;

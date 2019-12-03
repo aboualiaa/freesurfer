@@ -36,15 +36,8 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include "macros.h"
-#include "mrisurf.h"
 #include "mrisutils.h"
-#include "error.h"
 #include "diag.h"
-#include "mri.h"
 #include "mri2.h"
 #include "fio.h"
 #include "annotation.h"
@@ -461,12 +454,12 @@ int main(int argc, char **argv) {
     MRI    *mri_rh_dist, *mri_lh_dist, *mri_dist;
     if(DoLH){
       mri_lh_dist = MRIcloneDifferentType(mri_norm, MRI_FLOAT) ;
-      MRIScomputeDistanceToSurface(lhwhite, mri_lh_dist, mri_lh_dist->xsize) ; 
+      MRIScomputeDistanceToSurface(lhwhite, mri_lh_dist, mri_lh_dist->xsize) ;
       if(LHOnly) mri_dist = mri_lh_dist;
     }
     if(DoRH){
       mri_rh_dist = MRIcloneDifferentType(mri_norm, MRI_FLOAT) ;
-      MRIScomputeDistanceToSurface(rhwhite, mri_rh_dist, mri_rh_dist->xsize) ; 
+      MRIScomputeDistanceToSurface(rhwhite, mri_rh_dist, mri_rh_dist->xsize) ;
       if(RHOnly) mri_dist = mri_rh_dist;
     }
     if(DoLH && DoRH){

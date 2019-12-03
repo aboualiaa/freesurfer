@@ -22,7 +22,6 @@
  *
  */
 
-#include <cstring> // memcpy
 #include "loop.h"
 
 Loop::Loop() {

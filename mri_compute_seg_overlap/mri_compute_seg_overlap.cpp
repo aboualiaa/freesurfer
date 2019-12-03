@@ -24,14 +24,6 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
-#include "proto.h"
 #include "version.h"
 #include "cma.h"
 

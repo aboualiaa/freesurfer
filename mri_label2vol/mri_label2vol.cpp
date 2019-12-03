@@ -29,26 +29,14 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cstring>
-
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-
-#include "mri.h"
 #include "mrisutils.h"
 #include "mri2.h"
 #include "tags.h"
-#include "matrix.h"
 #include "version.h"
 #include "registerio.h"
 #include "resample.h"
 #include "annotation.h"
-#include "macros.h"
-#include "colortab.h"
 #include "cmdargs.h"
 #include "fsenv.h"
 

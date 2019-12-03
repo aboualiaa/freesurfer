@@ -48,29 +48,20 @@
   ENDUSAGE
 */
 
-#include <cstdio>
-#include <cstdlib>
-#include <unistd.h>
 #include <sys/utsname.h>
 #include <sys/stat.h>
-#include <cerrno>
 
-#include "utils.h"
 #include "fio.h"
 #include "version.h"
 #include "cmdargs.h"
-#include "error.h"
 #include "diag.h"
-#include "mri.h"
 #include "mri2.h"
 #include "timer.h"
 #include "fmriutils.h"
 #include "matfile.h"
 #include "cma.h"
 #include "region.h"
-#include "resample.h"
 #include "numerics.h"
-#include "mrisurf.h"
 #include "mrisutils.h"
 #include "mri_identify.h"
 #include "gtm.h"

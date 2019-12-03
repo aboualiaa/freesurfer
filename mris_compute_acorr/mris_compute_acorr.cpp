@@ -23,19 +23,9 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-#include <cctype>
-
 #include "mrisurf.h"
 #include "mrishash_internals.h"
-
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
 #include "sig.h"
 #include "version.h"
 

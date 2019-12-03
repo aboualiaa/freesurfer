@@ -22,27 +22,15 @@
  *
  */
 
-#include <iostream>
-#include <cstdio>
-#include <vector>
 #if (__GNUC__ < 3)
 #include "/usr/include/g++-3/alloc.h"
 #endif
-#include <string>
 #include <sys/utsname.h>
 
 #include "fio.h"
-#include "mri.h"
-#include "utils.h"
 #include "gcsa.h"
-#include "colortab.h"
-#include "diag.h"
-#include "transform.h"
-#include "mrisurf.h"
 #include "mrisutils.h"
 #include "version.h"
-#include "proto.h"
-#include "error.h"
 #include "gifti.h"
 #include "surfgrad.h"
 #include "mrisurf_metricProperties.h"

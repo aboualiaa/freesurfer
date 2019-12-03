@@ -25,20 +25,10 @@
 
 #include "coffin.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #include <sys/utsname.h>
-#include <unistd.h>
-
-#include <iomanip>
-#include <iostream>
-#include <string>
-#include <vector>
 
 #include "cmdargs.h"
 #include "diag.h"
-#include "error.h"
 #include "fio.h"
 #include "timer.h"
 #include "version.h"
@@ -64,9 +54,10 @@ unsigned int nlab1 = 0, nlab2 = 0;
 unsigned int nTract = 1, nBurnIn = 5000, nSample = 5000, nKeepSample = 10,
              nUpdateProp = 40, localPriorSet = 15, neighPriorSet = 14;
 float fminPath = 0;
-char *dwiFile = nullptr, *gradFile = nullptr, *bvalFile = nullptr, *maskFile = nullptr,
-     *bedpostDir = nullptr, *baseXfmFile = nullptr, *baseMaskFile = nullptr,
-     *affineXfmFile = nullptr, *nonlinXfmFile = nullptr;
+char *dwiFile = nullptr, *gradFile = nullptr, *bvalFile = nullptr,
+     *maskFile = nullptr, *bedpostDir = nullptr, *baseXfmFile = nullptr,
+     *baseMaskFile = nullptr, *affineXfmFile = nullptr,
+     *nonlinXfmFile = nullptr;
 vector<char *> outDir, inDirList, initFile, roiFile1, roiFile2, roiMeshFile1,
     roiMeshFile2, roiRefFile1, roiRefFile2, xyzPriorFile0, xyzPriorFile1,
     tangPriorFile, curvPriorFile, neighPriorFile, neighIdFile, localPriorFile,
@@ -80,21 +71,21 @@ Timer cputimer;
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
   bool doxyzprior = true;
-bool dotangprior = true;
-bool docurvprior = true;
-bool doneighprior = true;
-bool dolocalprior = true;
-bool dopropinit = true;
+  bool dotangprior = true;
+  bool docurvprior = true;
+  bool doneighprior = true;
+  bool dolocalprior = true;
+  bool dopropinit = true;
   int nargs;
-int cputime;
-int ilab1 = 0;
-int ilab2 = 0;
+  int cputime;
+  int ilab1 = 0;
+  int ilab2 = 0;
 
   /* rkt: check for and handle version tag */
   nargs = handle_version_option(argc, argv, vcid, "$Name:  $");
   if ((nargs != 0) && argc - nargs == 1) {
     exit(0);
-}
+  }
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -108,13 +99,13 @@ int ilab2 = 0;
 
   if (argc == 0) {
     usage_exit();
-}
+  }
 
   parse_commandline(argc, argv);
   check_options();
   if (checkoptsonly != 0) {
     return (0);
-}
+  }
 
   dump_options();
 
@@ -123,54 +114,62 @@ int ilab2 = 0;
 
   if (xyzPriorFile0.empty()) {
     doxyzprior = false;
-}
+  }
   if (tangPriorFile.empty()) {
     dotangprior = false;
-}
+  }
   if (curvPriorFile.empty()) {
     docurvprior = false;
-}
+  }
   if (neighPriorFile.empty()) {
     doneighprior = false;
-}
+  }
   if (localPriorFile.empty()) {
     dolocalprior = false;
-}
+  }
   if (stdPropFile.empty()) {
     dopropinit = false;
-}
+  }
 
   Coffin mycoffin(
       outDir[0], inDirList, dwiFile, gradFile, bvalFile, maskFile, bedpostDir,
       nTract, fminPath, baseXfmFile, baseMaskFile, initFile[0], roiFile1[0],
-      roiFile2[0], strstr(roiFile1[0], ".label") != nullptr ? roiMeshFile1[ilab1] : nullptr,
+      roiFile2[0],
+      strstr(roiFile1[0], ".label") != nullptr ? roiMeshFile1[ilab1] : nullptr,
       strstr(roiFile2[0], ".label") != nullptr ? roiMeshFile2[ilab2] : nullptr,
       strstr(roiFile1[0], ".label") != nullptr ? roiRefFile1[ilab1] : nullptr,
       strstr(roiFile2[0], ".label") != nullptr ? roiRefFile2[ilab2] : nullptr,
-      doxyzprior ? xyzPriorFile0[0] : nullptr, doxyzprior ? xyzPriorFile1[0] : nullptr,
-      dotangprior ? tangPriorFile[0] : nullptr, docurvprior ? curvPriorFile[0] : nullptr,
-      doneighprior ? neighPriorFile[0] : nullptr, doneighprior ? neighIdFile[0] : nullptr,
-      doneighprior ? neighPriorSet : 0, dolocalprior ? localPriorFile[0] : nullptr,
+      doxyzprior ? xyzPriorFile0[0] : nullptr,
+      doxyzprior ? xyzPriorFile1[0] : nullptr,
+      dotangprior ? tangPriorFile[0] : nullptr,
+      docurvprior ? curvPriorFile[0] : nullptr,
+      doneighprior ? neighPriorFile[0] : nullptr,
+      doneighprior ? neighIdFile[0] : nullptr, doneighprior ? neighPriorSet : 0,
+      dolocalprior ? localPriorFile[0] : nullptr,
       dolocalprior ? localIdFile[0] : nullptr, dolocalprior ? localPriorSet : 0,
       asegList, affineXfmFile, nonlinXfmFile, nBurnIn, nSample, nKeepSample,
       nUpdateProp, dopropinit ? stdPropFile[0] : nullptr, debug != 0);
 
   if (strstr(roiFile1[0], ".label") != nullptr) {
     ilab1++;
-}
+  }
   if (strstr(roiFile2[0], ".label") != nullptr) {
     ilab2++;
-}
+  }
 
   for (unsigned int iout = 0; iout < outDir.size(); iout++) {
     if (iout > 0) {
       mycoffin.SetOutputDir(outDir[iout]);
       mycoffin.SetPathway(
           initFile[iout], roiFile1[iout], roiFile2[iout],
-          strstr(roiFile1[iout], ".label") != nullptr ? roiMeshFile1[ilab1] : nullptr,
-          strstr(roiFile2[iout], ".label") != nullptr ? roiMeshFile2[ilab2] : nullptr,
-          strstr(roiFile1[iout], ".label") != nullptr ? roiRefFile1[ilab1] : nullptr,
-          strstr(roiFile2[iout], ".label") != nullptr ? roiRefFile2[ilab2] : nullptr,
+          strstr(roiFile1[iout], ".label") != nullptr ? roiMeshFile1[ilab1]
+                                                      : nullptr,
+          strstr(roiFile2[iout], ".label") != nullptr ? roiMeshFile2[ilab2]
+                                                      : nullptr,
+          strstr(roiFile1[iout], ".label") != nullptr ? roiRefFile1[ilab1]
+                                                      : nullptr,
+          strstr(roiFile2[iout], ".label") != nullptr ? roiRefFile2[ilab2]
+                                                      : nullptr,
           doxyzprior ? xyzPriorFile0[iout] : nullptr,
           doxyzprior ? xyzPriorFile1[iout] : nullptr,
           dotangprior ? tangPriorFile[iout] : nullptr,
@@ -184,10 +183,10 @@ int ilab2 = 0;
 
       if (strstr(roiFile1[iout], ".label") != nullptr) {
         ilab1++;
-}
+      }
       if (strstr(roiFile2[iout], ".label") != nullptr) {
         ilab2++;
-}
+      }
     }
 
     cout << "Processing pathway " << iout + 1 << " of " << outDir.size()
@@ -199,7 +198,7 @@ int ilab2 = 0;
       mycoffin.WriteOutputs();
     } else {
       cout << "ERROR: Pathway reconstruction failed" << endl;
-}
+    }
 
     cputime = cputimer.milliseconds();
     printf("Done in %g sec.\n", cputime / 1000.0);
@@ -213,13 +212,13 @@ int ilab2 = 0;
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
   int nargc;
-int nargsused;
+  int nargsused;
   char **pargv;
-char *option;
+  char *option;
 
   if (argc < 1) {
     usage_exit();
-}
+  }
 
   nargc = argc;
   pargv = argv;
@@ -227,7 +226,7 @@ char *option;
     option = pargv[0];
     if (debug != 0) {
       printf("%d %s\n", nargc, option);
-}
+    }
     nargc -= 1;
     pargv += 1;
 
@@ -246,7 +245,7 @@ char *option;
     } else if (strcmp(option, "--outdir") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       nargsused = 0;
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         outDir.push_back(pargv[nargsused]);
@@ -255,7 +254,7 @@ char *option;
     } else if (strcmp(option, "--indir") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       nargsused = 0;
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         inDirList.push_back(fio_fullpath(pargv[nargsused]));
@@ -264,85 +263,85 @@ char *option;
     } else if (strcmp(option, "--dwi") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       dwiFile = pargv[0];
       nargsused = 1;
     } else if (strcmp(option, "--grad") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       gradFile = pargv[0];
       nargsused = 1;
     } else if (strcmp(option, "--bval") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       bvalFile = pargv[0];
       nargsused = 1;
     } else if (strcmp(option, "--mask") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       maskFile = pargv[0];
       nargsused = 1;
     } else if (strcmp(option, "--bpdir") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       bedpostDir = pargv[0];
       nargsused = 1;
     } else if (strcmp(option, "--ntr") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       sscanf(pargv[0], "%u", &nTract);
       nargsused = 1;
     } else if (strcmp(option, "--fmin") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       sscanf(pargv[0], "%f", &fminPath);
       nargsused = 1;
     } else if (strcmp(option, "--basereg") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       baseXfmFile = pargv[0];
       nargsused = 1;
     } else if (strcmp(option, "--basemask") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       baseMaskFile = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--roi1") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       nargsused = 0;
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         roiFile1.push_back(fio_fullpath(pargv[nargsused]));
         if (strstr(*(roiFile1.end() - 1), ".label") != nullptr) {
           nlab1++;
-}
+        }
         nargsused++;
       }
     } else if (strcmp(option, "--roi2") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       nargsused = 0;
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         roiFile2.push_back(fio_fullpath(pargv[nargsused]));
         if (strstr(*(roiFile2.end() - 1), ".label") != nullptr) {
           nlab2++;
-}
+        }
         nargsused++;
       }
     } else if (strcmp(option, "--roimesh1") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       nargsused = 0;
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         roiMeshFile1.push_back(fio_fullpath(pargv[nargsused]));
@@ -351,7 +350,7 @@ char *option;
     } else if (strcmp(option, "--roimesh2") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       nargsused = 0;
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         roiMeshFile2.push_back(fio_fullpath(pargv[nargsused]));
@@ -360,7 +359,7 @@ char *option;
     } else if (strcmp(option, "--roiref1") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       nargsused = 0;
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         roiRefFile1.push_back(fio_fullpath(pargv[nargsused]));
@@ -369,7 +368,7 @@ char *option;
     } else if (strcmp(option, "--roiref2") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       nargsused = 0;
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         roiRefFile2.push_back(fio_fullpath(pargv[nargsused]));
@@ -378,19 +377,19 @@ char *option;
     } else if (strcmp(option, "--reg") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       affineXfmFile = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--regnl") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       nonlinXfmFile = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--init") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       nargsused = 0;
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         initFile.push_back(fio_fullpath(pargv[nargsused]));
@@ -399,7 +398,7 @@ char *option;
     } else if (strcmp(option, "--sdp") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       nargsused = 0;
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         stdPropFile.push_back(fio_fullpath(pargv[nargsused]));
@@ -408,7 +407,7 @@ char *option;
     } else if (strcmp(option, "--prior") == 0) {
       if (nargc < 2) {
         CMDargNErr(option, 2);
-}
+      }
       nargsused = 0;
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         xyzPriorFile0.push_back(fio_fullpath(pargv[nargsused]));
@@ -419,7 +418,7 @@ char *option;
     } else if (strcmp(option, "--nprior") == 0) {
       if (nargc < 2) {
         CMDargNErr(option, 2);
-}
+      }
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         neighPriorFile.push_back(fio_fullpath(pargv[nargsused]));
         nargsused++;
@@ -429,13 +428,13 @@ char *option;
     } else if (strcmp(option, "--nset") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       sscanf(pargv[0], "%u", &neighPriorSet);
       nargsused = 1;
     } else if (strcmp(option, "--lprior") == 0) {
       if (nargc < 2) {
         CMDargNErr(option, 2);
-}
+      }
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         localPriorFile.push_back(fio_fullpath(pargv[nargsused]));
         nargsused++;
@@ -445,13 +444,13 @@ char *option;
     } else if (strcmp(option, "--lset") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       sscanf(pargv[0], "%u", &localPriorSet);
       nargsused = 1;
     } else if (strcmp(option, "--seg") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       nargsused = 0;
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         asegList.push_back(fio_fullpath(pargv[nargsused]));
@@ -460,7 +459,7 @@ char *option;
     } else if (strcmp(option, "--tprior") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         tangPriorFile.push_back(fio_fullpath(pargv[nargsused]));
         nargsused++;
@@ -468,7 +467,7 @@ char *option;
     } else if (strcmp(option, "--cprior") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         curvPriorFile.push_back(fio_fullpath(pargv[nargsused]));
         nargsused++;
@@ -476,32 +475,32 @@ char *option;
     } else if (strcmp(option, "--nb") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       sscanf(pargv[0], "%u", &nBurnIn);
       nargsused = 1;
     } else if (strcmp(option, "--ns") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       sscanf(pargv[0], "%u", &nSample);
       nargsused = 1;
     } else if (strcmp(option, "--nk") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       sscanf(pargv[0], "%u", &nKeepSample);
       nargsused = 1;
     } else if (strcmp(option, "--nu") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       sscanf(pargv[0], "%u", &nUpdateProp);
       nargsused = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (CMDsingleDash(option) != 0) {
         fprintf(stderr, "       Did you really mean -%s ?\n", option);
-}
+      }
       exit(-1);
     }
     nargc -= nargsused;
@@ -728,7 +727,7 @@ static void check_options() {
          << " standard deviation files as outputs" << endl;
     exit(1);
   }
-  }
+}
 
 /* --------------------------------------------- */
 static void dump_options() {
@@ -746,14 +745,14 @@ static void dump_options() {
   cout << "Output directory:";
   for (istr = outDir.begin(); istr < outDir.end(); istr++) {
     cout << " " << *istr;
-}
+  }
   cout << endl;
 
   if (!inDirList.empty()) {
     cout << "Input directory:";
     for (istr = inDirList.begin(); istr < inDirList.end(); istr++) {
       cout << " " << *istr;
-}
+    }
     cout << endl;
   }
 
@@ -768,46 +767,46 @@ static void dump_options() {
   cout << "Initial control point file:";
   for (istr = initFile.begin(); istr < initFile.end(); istr++) {
     cout << " " << *istr;
-}
+  }
   cout << endl;
 
   cout << "End ROI 1:";
   for (istr = roiFile1.begin(); istr < roiFile1.end(); istr++) {
     cout << " " << *istr;
-}
+  }
   cout << endl;
 
   if (nlab1 > 0) {
     cout << "End ROI 1 mesh:";
     for (istr = roiMeshFile1.begin(); istr < roiMeshFile1.end(); istr++) {
       cout << " " << *istr;
-}
+    }
     cout << endl;
 
     cout << "End ROI 1 reference volume:";
     for (istr = roiRefFile1.begin(); istr < roiRefFile1.end(); istr++) {
       cout << " " << *istr;
-}
+    }
     cout << endl;
   }
 
   cout << "End ROI 2:";
   for (istr = roiFile2.begin(); istr < roiFile2.end(); istr++) {
     cout << " " << *istr;
-}
+  }
   cout << endl;
 
   if (nlab2 > 0) {
     cout << "End ROI 2 mesh:";
     for (istr = roiMeshFile2.begin(); istr < roiMeshFile2.end(); istr++) {
       cout << " " << *istr;
-}
+    }
     cout << endl;
 
     cout << "End ROI 2 reference volume:";
     for (istr = roiRefFile2.begin(); istr < roiRefFile2.end(); istr++) {
       cout << " " << *istr;
-}
+    }
     cout << endl;
   }
 
@@ -815,13 +814,13 @@ static void dump_options() {
     cout << "Spatial prior (off path):";
     for (istr = xyzPriorFile0.begin(); istr < xyzPriorFile0.end(); istr++) {
       cout << " " << *istr;
-}
+    }
     cout << endl;
 
     cout << "Spatial prior (on path):";
     for (istr = xyzPriorFile1.begin(); istr < xyzPriorFile1.end(); istr++) {
       cout << " " << *istr;
-}
+    }
     cout << endl;
   }
 
@@ -829,13 +828,13 @@ static void dump_options() {
     cout << "Neighbor aseg prior:";
     for (istr = neighPriorFile.begin(); istr < neighPriorFile.end(); istr++) {
       cout << " " << *istr;
-}
+    }
     cout << endl;
 
     cout << "Neighbor aseg label ID list:";
     for (istr = neighIdFile.begin(); istr < neighIdFile.end(); istr++) {
       cout << " " << *istr;
-}
+    }
     cout << endl;
 
     cout << "Neighbor aseg prior set: " << neighPriorSet << endl;
@@ -845,13 +844,13 @@ static void dump_options() {
     cout << "Local aseg prior:";
     for (istr = localPriorFile.begin(); istr < localPriorFile.end(); istr++) {
       cout << " " << *istr;
-}
+    }
     cout << endl;
 
     cout << "Local aseg label ID list:";
     for (istr = localIdFile.begin(); istr < localIdFile.end(); istr++) {
       cout << " " << *istr;
-}
+    }
     cout << endl;
 
     cout << "Local aseg prior set: " << localPriorSet << endl;
@@ -861,17 +860,17 @@ static void dump_options() {
     cout << "Segmentation map: ";
     for (istr = asegList.begin(); istr < asegList.end(); istr++) {
       cout << " " << *istr;
-}
+    }
     cout << endl;
   }
 
   if (affineXfmFile != nullptr) {
     cout << "DWI-to-atlas affine registration: " << affineXfmFile << endl;
-}
+  }
 
   if (nonlinXfmFile != nullptr) {
     cout << "DWI-to-atlas nonlinear registration: " << nonlinXfmFile << endl;
-}
+  }
 
   cout << "Number of burn-in samples: " << nBurnIn << endl
        << "Number of post-burn-in samples: " << nSample << endl
@@ -882,8 +881,7 @@ static void dump_options() {
     cout << "Initial proposal SD file:";
     for (istr = stdPropFile.begin(); istr < stdPropFile.end(); istr++) {
       cout << " " << *istr;
-}
+    }
     cout << endl;
   }
-
-  }
+}

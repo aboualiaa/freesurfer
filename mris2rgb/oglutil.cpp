@@ -24,22 +24,13 @@
 
 #ifdef HAVE_OPENGL
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
 #ifdef HAVE_APPLE_OPENGL_FRAMEWORK
 #include <OpenGL/glu.h>
 #include <OpenGL/gl.h>
 #else
 #include <GL/glu.h>
-#include <GL/gl.h>
 #endif
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "mrisurf.h"
 #include "TexFont.h"
 #include "oglutil.h"
 

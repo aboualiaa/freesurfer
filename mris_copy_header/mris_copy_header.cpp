@@ -1,8 +1,4 @@
-#include <cstdio>
 #include "diag.h"
-#include "error.h"
-#include "macros.h"
-#include "mri.h"
 #include "mrisurf.h"
 
 const char *Progname;

@@ -24,8 +24,6 @@
  */
 
 #include "diag.h"
-#include "macros.h"
-#include "proto.h"
 
 #ifdef OUTPUT_STAGES
 const std::string stem("TransCPU");

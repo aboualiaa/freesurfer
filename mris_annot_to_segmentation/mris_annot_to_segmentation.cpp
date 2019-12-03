@@ -23,17 +23,8 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cctype>
-
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
 #include "mrisurf.h"
-#include "label.h"
 #include "version.h"
 
 int main(int argc, char *argv[]);

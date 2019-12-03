@@ -27,22 +27,11 @@
  *
  */
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-
-#include "const.h"
-#include "proto.h"
-#include "macros.h"
-#include "error.h"
-#include "MRIio_old.h"
-#include "mri.h"
-#include "mrisurf.h"
 #include "version.h"
 #include "tags.h"
 #include "MC.h"
+#include "MRIio_old.h"
+#include "mrisurf.h"
 
 #define MAXFACES 3000000
 #define MAXVERTICES 1500000

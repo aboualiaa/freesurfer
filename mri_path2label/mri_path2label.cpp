@@ -36,15 +36,10 @@
 
 #include "cmdargs.h"
 #include "diag.h"
-#include "error.h"
 #include "getline.h"
-#include "label.h"
 #include "mrisutils.h"
 #include "path.h"
 #include "version.h"
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
 
 #ifdef Darwin
 #include "getline.h"

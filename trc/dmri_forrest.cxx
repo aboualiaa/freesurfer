@@ -25,16 +25,7 @@
 
 #include "forrest.h"
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-
 #include <sys/utsname.h>
-#include <unistd.h>
-
-#include <iostream>
-#include <string>
-#include <vector>
 
 #include "cmdargs.h"
 #include "diag.h"
@@ -60,8 +51,8 @@ int main(int argc, char *argv[]);
 static char vcid[] = "";
 const char *Progname = "dmri_forrest";
 
-char *testDir = nullptr, *trainListFile = nullptr, *maskFile = nullptr, *asegFile = nullptr,
-     *orientFile = nullptr;
+char *testDir = nullptr, *trainListFile = nullptr, *maskFile = nullptr,
+     *asegFile = nullptr, *orientFile = nullptr;
 vector<char *> tractFileList;
 
 struct utsname uts;
@@ -72,17 +63,17 @@ Timer cputimer;
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
   int nargs;
-int cputime;
-int nx;
-int ny;
-int nz;
-int ntrain;
+  int cputime;
+  int nx;
+  int ny;
+  int nz;
+  int ntrain;
 
   /* rkt: check for and handle version tag */
   nargs = handle_version_option(argc, argv, vcid, "$Name:  $");
   if ((nargs != 0) && argc - nargs == 1) {
     exit(0);
-}
+  }
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -96,13 +87,13 @@ int ntrain;
 
   if (argc == 0) {
     usage_exit();
-}
+  }
 
   parse_commandline(argc, argv);
   check_options();
   if (checkoptsonly != 0) {
     return (0);
-}
+  }
 
   dump_options();
 
@@ -127,18 +118,18 @@ int ntrain;
 
   for (int k = 0; k < 100; k++) {
     const int ix = (int)round(drand48() * (nx - 1));
-const int iy = (int)round(drand48() * (ny - 1));
-const int iz = (int)round(drand48() * (nz - 1));
-const int isamp = (int)round(drand48() * (ntrain - 1));
+    const int iy = (int)round(drand48() * (ny - 1));
+    const int iz = (int)round(drand48() * (nz - 1));
+    const int isamp = (int)round(drand48() * (ntrain - 1));
     vector<int> xyz;
     vector<unsigned int> aseg;
-vector<unsigned int> tracts;
+    vector<unsigned int> tracts;
     vector<float> orient;
 
     // Check if this voxel is inside the brain mask of the test subject
     if (!myforrest.IsInMask(ix, iy, iz)) {
       continue;
-}
+    }
 
     // Get anatomical segmentation neighbors for a voxel in the test subject
     aseg = myforrest.GetTestAseg(ix, iy, iz);
@@ -148,7 +139,7 @@ vector<unsigned int> tracts;
            << " in test subject:";
       for (unsigned int iseg = 0; iseg < aseg.size(); iseg++) {
         cout << " " << aseg[iseg];
-}
+      }
       cout << endl;
     }
 
@@ -173,7 +164,7 @@ vector<unsigned int> tracts;
            << ":";
       for (unsigned int iseg = 0; iseg < aseg.size(); iseg++) {
         cout << " " << aseg[iseg];
-}
+      }
       cout << endl;
     }
 
@@ -192,7 +183,7 @@ vector<unsigned int> tracts;
     } else {
       for (unsigned int itract = 0; itract < tracts.size(); itract++) {
         cout << " " << tracts[itract];
-}
+      }
       cout << endl;
     }
   }
@@ -208,13 +199,13 @@ vector<unsigned int> tracts;
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
   int nargc;
-int nargsused;
+  int nargsused;
   char **pargv;
-char *option;
+  char *option;
 
   if (argc < 1) {
     usage_exit();
-}
+  }
 
   nargc = argc;
   pargv = argv;
@@ -222,7 +213,7 @@ char *option;
     option = pargv[0];
     if (debug != 0) {
       printf("%d %s\n", nargc, option);
-}
+    }
     nargc -= 1;
     pargv += 1;
 
@@ -241,37 +232,37 @@ char *option;
     } else if (strcmp(option, "--test") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       testDir = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--train") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       trainListFile = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--mask") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       maskFile = pargv[0];
       nargsused = 1;
     } else if (strcmp(option, "--seg") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       asegFile = pargv[0];
       nargsused = 1;
     } else if (strcmp(option, "--diff") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       orientFile = pargv[0];
       nargsused = 1;
     } else if (strcmp(option, "--tract") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         tractFileList.push_back(pargv[nargsused]);
         nargsused++;
@@ -280,7 +271,7 @@ char *option;
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (CMDsingleDash(option) != 0) {
         fprintf(stderr, "       Did you really mean -%s ?\n", option);
-}
+      }
       exit(-1);
     }
     nargc -= nargsused;
@@ -361,7 +352,7 @@ static void check_options() {
     cout << "ERROR: Must specify at least one tract label volume" << endl;
     exit(1);
   }
-  }
+}
 
 /* --------------------------------------------- */
 static void dump_options() {
@@ -383,19 +374,18 @@ static void dump_options() {
 
   cout << "Location of streamline files relative to subject directory:";
 
-  for (auto istr = tractFileList.begin();
-       istr < tractFileList.end(); istr++) {
+  for (auto istr = tractFileList.begin(); istr < tractFileList.end(); istr++) {
     cout << " " << *istr;
-}
+  }
   cout << endl;
 
   if (asegFile != nullptr) {
     cout << "Location of aparc+aseg's relative to subject directory: "
          << asegFile << endl;
-}
+  }
 
   if (orientFile != nullptr) {
     cout << "Location of diffusion orientations relative to subject directory: "
          << orientFile << endl;
-}
+  }
 }

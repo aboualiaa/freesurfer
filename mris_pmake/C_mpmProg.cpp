@@ -34,11 +34,6 @@
 #include "c_surface.h"
 #include "c_label.h"
 #include "c_vertex.h"
-#include "fio.h"
-
-#include "unistd.h"
-
-#include <sstream>
 
 extern bool Gb_stdout;
 extern stringstream Gsout;

@@ -37,18 +37,12 @@
  *
  */
 
-// STL includes
-#include <iostream>
-#include <string>
-#include <cstdio>
-
 // utilities
 #include <ANN/ANN.h>
 
 // FS includes
 #include "argparse.h"
 
-#include "error.h"
 #include "mrisurf.h"
 
 #include "mris_resample.help.xml.h"

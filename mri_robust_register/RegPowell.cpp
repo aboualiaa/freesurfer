@@ -24,18 +24,7 @@
  */
 #include "RegPowell.h"
 #include "CostFunctions.h"
-#include "MyMatrix.h"
-#include "MyMRI.h"
-
-#include "numerics.h"
-
-#include <cassert>
-#include <iostream>
-#include <vnl/vnl_inverse.h>
-#include <iomanip>
 #include "fs_vnl/fs_powell.h"
-#include "fs_vnl/fs_cost_function.h"
-#include <vnl/vnl_cost_function.h>
 
 using namespace std;
 

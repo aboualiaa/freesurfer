@@ -91,13 +91,7 @@ mri_cor2label --i lh.thickness.thresh.mgh
 ENDHELP --------------------------------------------------------------
 */
 
-#include <cstdio>
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "label.h"
 #include "version.h"
 #include "mrisurf.h"
 #include "cmdargs.h"

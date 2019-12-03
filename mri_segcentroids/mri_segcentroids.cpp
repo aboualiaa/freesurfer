@@ -1,10 +1,5 @@
-#include <iostream>
-#include <string>
-#include <vector>
 #include <map>
-#include <iomanip>
 
-#include "mri.h"
 #include "mri2.h"
 
 #include "mri_segcentroids.help.xml.h"

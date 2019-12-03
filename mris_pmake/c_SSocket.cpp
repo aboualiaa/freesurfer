@@ -22,21 +22,8 @@
  *
  */
 
-#include <iostream>
 using namespace std;
 
-#include <cstring>
-#include <strings.h>
-#include <cstdio>
-#include <cstdlib>
-#include <unistd.h>
-#include <cerrno>
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <sys/time.h>
-#include <netdb.h>
 #include <fcntl.h>
 
 #if defined __sun__

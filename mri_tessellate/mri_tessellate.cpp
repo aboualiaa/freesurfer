@@ -66,26 +66,12 @@
 //    MRIvoxelToSurfaceRAS()
 //
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cctype>
-#include "mri.h"
 #include "fio.h"
-#include "const.h"
 #include "tags.h"
 #include "diag.h"
-#include "proto.h"
-#include "macros.h"
-#include "error.h"
-#include "MRIio_old.h"
 #include "version.h"
 #include "tags.h"
-#include "matrix.h"
-#include "transform.h"
 #include "cma.h"
-#include "diag.h"
-#include "mrisurf.h"
 
 static char vcid[] =
     "$Id: mri_tessellate.c,v 1.39 2016/07/20 21:05:04 zkaufman Exp $";

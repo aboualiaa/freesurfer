@@ -23,16 +23,9 @@
  *
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include "utils.h"
-#include "mri.h"
 #include "mri2.h"
-#include "error.h"
 #include "diag.h"
 #include "version.h"
-#include "macros.h"
 #include "mri_mi.h"
 
 static void print_usage();

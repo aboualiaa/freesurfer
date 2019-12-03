@@ -55,19 +55,10 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cstring>
-
 #include "icosahedron.h"
 
-#include "error.h"
 #include "diag.h"
-#include "mrisurf.h"
 #include "mrisutils.h"
-#include "mri.h"
-#include "label.h"
 #include "registerio.h"
 #include "mri2.h"
 #include "version.h"

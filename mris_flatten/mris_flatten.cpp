@@ -25,22 +25,9 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-#include <cctype>
-
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "mrisurf.h"
-#include "mri.h"
-#include "utils.h"
 #include "version.h"
 #include "mri2.h"
-#include "mrishash.h"
 
 static char vcid[] =
     "$Id: mris_flatten.c,v 1.42 2016/12/10 22:57:46 fischl Exp $";

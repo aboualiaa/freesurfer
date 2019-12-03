@@ -22,13 +22,8 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
-#include <string>
-#include <iostream>
-#include <cassert>
 
-#include "macros.h"
 #include "mri.h"
-#include "histo.h"
 #include "version.h"
 
 using namespace std;

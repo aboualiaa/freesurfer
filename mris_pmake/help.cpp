@@ -23,7 +23,6 @@
  */
 
 #include "help.h"
-#include "utils.h"
 #include "mris_pmake.help.xml.h"
 
 void synopsis_show() {

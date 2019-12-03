@@ -23,25 +23,11 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-#include <cctype>
-#include <cerrno>
-
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "mrisurf.h"
 #include "mrisutils.h"
 #include "fio.h"
 #include "version.h"
-#include "matrix.h"
-#include "transform.h"
 #include "gifti.h"
-#include "fsenv.h"
 
 #include "compilerdefs.h"
 

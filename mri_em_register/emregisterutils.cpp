@@ -23,10 +23,8 @@
  *
  */
 
-#include "macros.h"
 #include "diag.h"
 #include "cma.h"
-#include "error.h"
 
 #include "emregisterutils.h"
 

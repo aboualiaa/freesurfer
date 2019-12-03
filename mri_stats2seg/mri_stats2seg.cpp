@@ -44,22 +44,12 @@ tkmedit $subject norm.mgz -aux ./asegstats.mgh\
       $FREESURFER_HOME/FreeSurferColorLUT.txt
 --------------------------------------------------------------*/
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-double round(double x);
-#include <sys/utsname.h>
-#include <unistd.h>
+// double round(double x);
 
-#include "mrisurf.h"
 #include "mrisutils.h"
-#include "error.h"
 #include "diag.h"
-#include "mri.h"
 #include "mri2.h"
-#include "fio.h"
 #include "version.h"
-#include "label.h"
 #include "cmdargs.h"
 #include "fsgdf.h"
 #include "surfcluster.h"

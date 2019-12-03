@@ -30,24 +30,12 @@
 // Oct. 12th ,2009
 //
 ////////////////////////////////////////////////////////////////////
-#include <string>
-#include <iostream>
-#include <vector>
-#include <cassert>
-
-#include <ctime>
-#include <cstdlib>
 
 #include "Quaternion.h"
 #include "MyMRI.h"
 
-#include "error.h"
-#include "macros.h"
-#include "mri.h"
-#include "matrix.h"
 #include "mrimorph.h"
 #include "version.h"
-#include <vnl/vnl_matrix.h>
 
 using namespace std;
 

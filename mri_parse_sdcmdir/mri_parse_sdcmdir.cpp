@@ -23,16 +23,11 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <unistd.h>
-#include <cstring>
 #include <sys/utsname.h>
 // MacOSX does not have malloc.h but declaration is in stdlib.h
 #ifndef Darwin
 #include <malloc.h>
 #endif
-#include <cctype>
 #include "diag.h"
 #include "error.h"
 #include "DICOMRead.h"

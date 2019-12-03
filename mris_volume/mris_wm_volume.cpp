@@ -25,18 +25,10 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include "mri.h"
 #include "mrisurf.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "utils.h"
 #include "timer.h"
 #include "version.h"
-#include "label.h"
 
 int main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);

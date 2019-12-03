@@ -25,22 +25,11 @@
 
 #include "vial.h" // Needs to be included first because of CVS libs
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #include <sys/utsname.h>
-#include <unistd.h>
-
-#include <iomanip>
-#include <iostream>
-#include <string>
-#include <vector>
 
 #include "cmdargs.h"
 #include "diag.h"
-#include "error.h"
 #include "fio.h"
-#include "mri.h"
 #include "timer.h"
 #include "version.h"
 
@@ -74,11 +63,11 @@ Timer cputimer;
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
   int nargs;
-int cputime;
+  int cputime;
   char fname[PATH_MAX];
   vector<float> point(3);
   MRI *inref = 0;
-MRI *outref = 0;
+  MRI *outref = 0;
   AffineReg affinereg;
 #ifndef NO_CVS_UP_IN_HERE
   NonlinReg nonlinreg;
@@ -88,7 +77,7 @@ MRI *outref = 0;
   nargs = handle_version_option(argc, argv, vcid, "$Name:  $");
   if ((nargs != 0) && argc - nargs == 1) {
     exit(0);
-}
+  }
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -102,13 +91,13 @@ MRI *outref = 0;
 
   if (argc == 0) {
     usage_exit();
-}
+  }
 
   parse_commandline(argc, argv);
   check_options();
   if (checkoptsonly != 0) {
     return (0);
-}
+  }
 
   dump_options(stdout);
 
@@ -121,13 +110,13 @@ MRI *outref = 0;
   if (nonlinXfmFile != nullptr) {
     if (affineXfmFile != nullptr) {
       affinereg.ReadXfm(affineXfmFile, inref, nullptr);
-}
+    }
     nonlinreg.ReadXfm(nonlinXfmFile, outref);
   } else
 #endif
       if (affineXfmFile != nullptr) {
     affinereg.ReadXfm(affineXfmFile, inref, outref);
-}
+  }
 
   for (int k = 0; k < nout; k++) {
     float coord;
@@ -143,7 +132,7 @@ MRI *outref = 0;
       sprintf(fname, "%s/%s", inDir, inFile[k]);
     } else {
       strcpy(fname, inFile[k]);
-}
+    }
 
     infile.open(fname, ios::in);
     if (!infile) {
@@ -154,7 +143,7 @@ MRI *outref = 0;
     inpts.clear();
     while (infile >> coord) {
       inpts.push_back(coord);
-}
+    }
 
     if (inpts.size() % 3 != 0) {
       cout << "ERROR: File " << fname << " must contain triplets of coordinates"
@@ -164,14 +153,13 @@ MRI *outref = 0;
 
     infile.close();
 
-    for (auto ipt = inpts.begin(); ipt < inpts.end();
-         ipt += 3) {
+    for (auto ipt = inpts.begin(); ipt < inpts.end(); ipt += 3) {
       copy(ipt, ipt + 3, point.begin());
 
       // Apply affine transform
       if (!affinereg.IsEmpty()) {
         affinereg.ApplyXfm(point, point.begin());
-}
+      }
 
 #ifndef NO_CVS_UP_IN_HERE
       // Apply nonlinear transform
@@ -180,7 +168,7 @@ MRI *outref = 0;
           nonlinreg.ApplyXfmInv(point, point.begin());
         } else {
           nonlinreg.ApplyXfm(point, point.begin());
-}
+        }
       }
 #endif
 
@@ -192,7 +180,7 @@ MRI *outref = 0;
       sprintf(fname, "%s/%s", outDir, outFile[k]);
     } else {
       strcpy(fname, outFile[k]);
-}
+    }
 
     outfile.open(fname, ios::out);
     if (!outfile) {
@@ -200,10 +188,9 @@ MRI *outref = 0;
       exit(1);
     }
 
-    for (auto ipt = inpts.begin(); ipt < inpts.end();
-         ipt += 3) {
+    for (auto ipt = inpts.begin(); ipt < inpts.end(); ipt += 3) {
       outfile << ipt[0] << " " << ipt[1] << " " << ipt[2] << endl;
-}
+    }
 
     outfile.close();
 
@@ -222,13 +209,13 @@ MRI *outref = 0;
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
   int nargc;
-int nargsused;
+  int nargsused;
   char **pargv;
-char *option;
+  char *option;
 
   if (argc < 1) {
     usage_exit();
-}
+  }
 
   nargc = argc;
   pargv = argv;
@@ -236,7 +223,7 @@ char *option;
     option = pargv[0];
     if (debug != 0) {
       printf("%d %s\n", nargc, option);
-}
+    }
     nargc -= 1;
     pargv += 1;
 
@@ -255,13 +242,13 @@ char *option;
     } else if (strcmp(option, "--indir") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       inDir = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--in") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       nargsused = 0;
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         inFile[nin] = pargv[nargsused];
@@ -271,13 +258,13 @@ char *option;
     } else if (strcmp(option, "--outdir") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       outDir = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--out") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       nargsused = 0;
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         outFile[nout] = pargv[nargsused];
@@ -287,25 +274,25 @@ char *option;
     } else if (strcmp(option, "--inref") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       inRefFile = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--outref") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       outRefFile = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--reg") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       affineXfmFile = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--regnl") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       nonlinXfmFile = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcasecmp(option, "--invnl") == 0) {
@@ -314,7 +301,7 @@ char *option;
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (CMDsingleDash(option) != 0) {
         fprintf(stderr, "       Did you really mean -%s ?\n", option);
-}
+      }
       exit(-1);
     }
     nargc -= nargsused;
@@ -402,7 +389,7 @@ static void check_options() {
     printf("ERROR: must specify output reference volume\n");
     exit(1);
   }
-  }
+}
 
 /* --------------------------------------------- */
 static void dump_options(FILE *fp) {
@@ -417,30 +404,29 @@ static void dump_options(FILE *fp) {
 
   if (inDir != nullptr) {
     fprintf(fp, "Input directory: %s\n", inDir);
-}
+  }
   fprintf(fp, "Input files:");
   for (int k = 0; k < nin; k++) {
     fprintf(fp, " %s", inFile[k]);
-}
+  }
   fprintf(fp, "\n");
   if (outDir != nullptr) {
     fprintf(fp, "Output directory: %s\n", outDir);
-}
+  }
   if (nout > 0) {
     fprintf(fp, "Output files:");
     for (int k = 0; k < nout; k++) {
       fprintf(fp, " %s", outFile[k]);
-}
+    }
     fprintf(fp, "\n");
   }
   fprintf(fp, "Input reference: %s\n", inRefFile);
   fprintf(fp, "Output reference: %s\n", outRefFile);
   if (affineXfmFile != nullptr) {
     fprintf(fp, "Affine registration: %s\n", affineXfmFile);
-}
+  }
   if (nonlinXfmFile != nullptr) {
     fprintf(fp, "Nonlinear registration: %s\n", nonlinXfmFile);
     fprintf(fp, "Invert nonlinear morph: %d\n", doInvNonlin);
   }
-
-  }
+}

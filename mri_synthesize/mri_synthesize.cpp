@@ -23,16 +23,8 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cctype>
-
-#include "macros.h"
 #include "error.h"
 #include "diag.h"
-#include "mri.h"
-#include "proto.h"
 #include "version.h"
 #include "tags.h"
 #include "flash.h"

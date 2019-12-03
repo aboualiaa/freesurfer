@@ -25,18 +25,8 @@
  *
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-
 #include "diag.h"
-#include "error.h"
-#include "macros.h"
-#include "utils.h"
-#include "proto.h"
 #include "mrisegment.h"
-#include "mri.h"
 #include "tags.h"
 #include "mrinorm.h"
 #include "timer.h"

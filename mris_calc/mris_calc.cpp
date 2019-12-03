@@ -28,28 +28,17 @@
  */
 #define _ISOC99_SOURCE
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-#include <cctype>
 #include <sys/stat.h>
 
-#include <cfloat>
-
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
 #include "mrisurf.h"
-#include "mri.h"
 #include "version.h"
 #include "fio.h"
 #include "mri_identify.h"
-#include "label.h"
 
+#ifdef HAVE_OPENMP
 #include "romp_support.h"
-
+#endif
 #define STRBUF 65536
 #define MAX_FILES 1000
 #define CO(x) fprintf(stdout, (x))

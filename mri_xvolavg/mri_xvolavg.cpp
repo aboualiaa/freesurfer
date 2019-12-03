@@ -30,9 +30,6 @@
   Purpose: averages multiple volumes together into a single
   volume. The volumes can be 4D.
   ----------------------------------------------------------*/
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
 
 #include "error.h"
 #include "diag.h"

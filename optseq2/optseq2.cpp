@@ -25,16 +25,10 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
 #include <sys/time.h>
 
 #include "error.h"
 #include "diag.h"
-#include "proto.h"
-
-#include "matrix.h"
 #include "matfile.h"
 #include "evschutils.h"
 #include "version.h"

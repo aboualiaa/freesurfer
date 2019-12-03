@@ -27,15 +27,6 @@
 
 // Extract the largest connected component of a binary segmentation
 
-#include <cstdio>
-#include <cstdlib>
-#include <cctype>
-#include <cstring>
-
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
-#include "proto.h"
 #include "version.h"
 #include "connectcomp.h"
 #include "mrisurf.h"

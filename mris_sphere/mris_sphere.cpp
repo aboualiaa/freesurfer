@@ -25,27 +25,15 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-#include <cctype>
-#include <sys/resource.h>
-
-#include "macros.h"
-
-#include "mri.h"
-#include "mrisurf.h"
 #include "mrisurf_project.h"
-
-#include "romp_support.h"
-#include "error.h"
 #include "tags.h"
 #include "diag.h"
-#include "proto.h"
-#include "utils.h"
 #include "timer.h"
 #include "version.h"
+
+#ifdef HAVE_OPENMP
+#include "romp_support.h"
+#endif
 
 static char vcid[] =
     "$Id: mris_sphere.c,v 1.62 2017/02/07 19:04:37 fischl Exp $";

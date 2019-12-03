@@ -86,25 +86,13 @@ ENDHELP --------------------------------------------------------------
 
 */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cstring>
-
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
 
-#include "matrix.h"
-#include "mri.h"
 #include "version.h"
 #include "mri2.h"
 #include "registerio.h"
 #include "resample.h"
-#include "gca.h"
 #include "cmdargs.h"
-#include "timer.h"
 #include "romp_support.h"
 
 #ifdef X

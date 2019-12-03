@@ -22,19 +22,11 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
 #include <sys/stat.h>
-#include <cstring>
-#include <cerrno>
 
-#include "error.h"
 #include "diag.h"
-#include "mrisurf.h"
-#include "label.h"
 #include "annotation.h"
 #include "version.h"
-#include "mri.h"
 #include "fio.h"
 #include "cma.h"
 

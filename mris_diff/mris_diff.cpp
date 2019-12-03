@@ -78,26 +78,15 @@
   ENDHELP
 */
 
-#include <cstdio>
-#include <cstdlib>
-#include <algorithm>
-#include <cmath>
-double round(double x);
+// double round(double x);
 #include <sys/utsname.h>
-#include <unistd.h>
 
-#include "utils.h"
-#include "mrisurf.h"
 #include "mrisurf_metricProperties.h"
 #include "mrisutils.h"
-#include "error.h"
 #include "diag.h"
-#include "label.h"
-#include "mri.h"
 #include "mri2.h"
 #include "version.h"
 #include "cmdargs.h"
-#include "timer.h"
 
 static int parse_commandline(int argc, char **argv);
 static void check_options();

@@ -22,29 +22,21 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
-#include <cassert>
-#include <algorithm>
 #include "MyMatrix.h"
 #include "Quaternion.h"
-#include "utils.h" //nint
 
 #define export // obsolete feature 'export template' used in these headers
 #include <vnl/vnl_inverse.h>
 #include <vnl/algo/vnl_matrix_inverse.h>
 #include <vnl/algo/vnl_determinant.h>
-#include <vnl/vnl_vector_fixed.h>
-#include <vnl/vnl_matrix_fixed.h>
 #include <vnl/algo/vnl_complex_eigensystem.h>
 #include <vnl/algo/vnl_symmetric_eigensystem.h>
 #include <vnl/vnl_real.h>
 #include <vnl/vnl_imag.h>
 #include <vnl/algo/vnl_qr.h>
 #include <vnl/vnl_complexify.h>
-#include <iostream>
 #include <vnl/vnl_matlab_print.h>
 #undef export
-
-#include "matrix.h"
 
 #define sign(x) ((x > 0) - (x < 0))
 

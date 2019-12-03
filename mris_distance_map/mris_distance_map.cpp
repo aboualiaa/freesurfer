@@ -24,20 +24,9 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cctype>
-
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "mrisurf.h"
 #include "mrisutils.h"
 #include "version.h"
-#include "matrix.h"
-#include "transform.h"
 
 //------------------------------------------------------------------------
 static char vcid[] =

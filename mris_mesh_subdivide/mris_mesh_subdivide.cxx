@@ -23,29 +23,15 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-
-// nint
-
-#include "macros.h"
 #include "version.h"
-
-#include "error.h"
 #include "diag.h"
 #include "timer.h"
-
 #include "mrisurf.h"
 
-#include <vtkSmartPointer.h>
 #include <vtkCellData.h>
-#include <vtkCellArray.h>
 #include <vtkDoubleArray.h>
-#include <vtkPoints.h>
 #include <vtkTriangle.h>
-#include <vtkPolyData.h>
 #include <vtkPointData.h>
-#include <vtkSphereSource.h>
 #include <vtkButterflySubdivisionFilter.h>
 #include <vtkLoopSubdivisionFilter.h>
 #include <vtkLinearSubdivisionFilter.h>

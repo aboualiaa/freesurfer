@@ -27,17 +27,7 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-#include <cctype>
-#include <sys/resource.h>
-
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
 #include "tags.h"
 #include "timer.h"
 #include "mrisurf.h"

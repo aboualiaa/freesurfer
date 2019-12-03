@@ -25,19 +25,10 @@
  *
  */
 
-#include <string>
-#include <vector>
-#include <iostream>
-
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "utils.h"
 #include "timer.h"
 #include "version.h"
 #include "cma.h"
-#include "transform.h"
 
 struct Parameters {
   std::string prog_name;

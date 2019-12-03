@@ -47,18 +47,8 @@
 
 // $Id: mris_decimate.cpp,v 1.6 2011/03/02 00:04:30 nicks Exp $
 
-#include <cstdio>
-#include <cstdlib>
-#include <unistd.h>
-#include <sstream>
 #include <gts.h>
-#include <iostream>
 #include "mris_decimate.h"
-
-#include "macros.h"
-#include "utils.h"
-#include "fio.h"
-#include "version.h"
 
 ///////////////////////////////////////////////////////////////////////////
 //

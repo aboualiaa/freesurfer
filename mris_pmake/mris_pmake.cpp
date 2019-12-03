@@ -37,18 +37,9 @@
 #include <config.h>
 #endif
 
-#include <string>
-#include <cstdlib>
-
 using namespace std;
 
-#include <cstdio>
-
-
-#include "help.h"
 #include "scanopt.h"
-#include "c_SSocket.h"
-#include "general.h"
 #include "asynch.h"
 
 // Some global vars...

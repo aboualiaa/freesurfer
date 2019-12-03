@@ -23,22 +23,10 @@
  *
  */
 
-#include <cmath>
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
-
-#include "mri.h"
-#include "matrix.h"
-#include "proto.h"
-#include "macros.h"
-#include "error.h"
 #include "timer.h"
 #include "diag.h"
 #include "mrimorph.h"
 #include "mri_conform.h"
-#include "utils.h"
-#include "gca.h"
 #include "cma.h"
 #include "version.h"
 

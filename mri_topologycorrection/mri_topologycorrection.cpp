@@ -26,18 +26,6 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cctype>
-
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
-#include "mrisurf.h"
-#include "matrix.h"
-#include "proto.h"
-#include "const.h"
-#include "mrishash.h"
 #include "diag.h"
 #include "mri_topology.h"
 #include "mri_tess.h"

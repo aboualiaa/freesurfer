@@ -23,17 +23,8 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cctype>
-
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
 #include "mrisurf.h"
-#include "label.h"
 
 static char vcid[] =
     "$Id: mris_sample_label.c,v 1.5 2012/10/01 18:59:32 fischl Exp $";

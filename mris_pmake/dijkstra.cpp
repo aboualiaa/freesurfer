@@ -23,9 +23,6 @@
  *
  */
 
-#include <cstdlib>
-#include <cassert>
-
 #include "dijkstra.h"
 
 struct d_node *d_list = nullptr;

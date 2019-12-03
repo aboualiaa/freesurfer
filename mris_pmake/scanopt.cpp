@@ -77,9 +77,7 @@
  *
  */
 
-#include <iostream>
 #include <fstream>
-#include <iterator>
 using namespace std;
 
 #include <scanopt.h>

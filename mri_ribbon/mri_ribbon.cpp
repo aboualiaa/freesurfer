@@ -25,17 +25,9 @@
  *
  */
 
-#include <cstdlib>
-#include <cstdio>
-#include <cctype>
-
-#include "mri.h"
 #include "diag.h"
 #include "mrisurf.h"
 #include "version.h"
-#include "label.h"
-#include "error.h"
-#include "mrishash.h"
 
 const char *Progname;
 

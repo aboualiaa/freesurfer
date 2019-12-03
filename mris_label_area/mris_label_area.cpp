@@ -23,16 +23,7 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cctype>
-
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "mrisurf.h"
-#include "utils.h"
 #include "timer.h"
 #include "annotation.h"
 #include "version.h"

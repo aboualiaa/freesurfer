@@ -23,13 +23,7 @@
  *
  */
 
-#include <string>
-#include <iostream>
-
-#include "error.h"
 #include "gcamorph.h"
-#include "macros.h"
-#include "mri.h"
 #include "mri_circulars.h"
 #include "version.h"
 

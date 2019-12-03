@@ -55,19 +55,8 @@
 
 */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <sys/utsname.h>
-#include <unistd.h>
-#include <cerrno>
-
-#include "mrisurf.h"
 #include "mrisutils.h"
-#include "utils.h"
-#include "error.h"
 #include "diag.h"
-#include "mri.h"
 #include "mri2.h"
 #include "version.h"
 #include "cma.h"
@@ -78,7 +67,6 @@
 #include "cmdargs.h"
 #include "fio.h"
 #include "ctrpoints.h"
-#include "stats.h"
 #include "gtm.h"
 
 #include "romp_support.h"

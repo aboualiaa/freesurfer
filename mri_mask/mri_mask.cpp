@@ -30,18 +30,8 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cstring>
-
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
 #include "version.h"
-#include "transform.h"
 #include "region.h"
 #include "cma.h"
 

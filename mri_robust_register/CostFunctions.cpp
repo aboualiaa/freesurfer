@@ -26,15 +26,9 @@
 
 #include "CostFunctions.h"
 
-#include <cassert>
-#include <sstream>
 #include "RobustGaussian.h"
 
-#include "error.h"
-#include "macros.h"
-
 #define export // obsolete feature
-#include <vnl/vnl_matrix_fixed.h>
 #include <vnl/algo/vnl_symmetric_eigensystem.h>
 #include <vnl/vnl_det.h>
 #undef export

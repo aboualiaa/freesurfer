@@ -23,19 +23,12 @@
  *
  */
 
-#include <cstdio>
-#include <cstring>
 #include "fio.h"
-#include "utils.h"
-#include "mri.h"
 #include "gcamorph.h"
-#include "minc.h"
 #include "mri_identify.h"
-#include "error.h"
 #include "diag.h"
 #include "version.h"
 #include "cmdargs.h"
-#include "macros.h"
 #include "cma.h"
 
 static void do_file(char *fname);

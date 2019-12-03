@@ -24,28 +24,16 @@
  *
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <ctype.h>
-#include <unistd.h>
-
-#include "macros.h"
-
-#include "mri.h"
-#include "mrisurf.h"
 #include "mrisurf_project.h"
-
-#include "romp_support.h"
-
 #include "timer.h"
-#include "error.h"
 #include "diag.h"
 #include "tags.h"
-#include "proto.h"
 #include "version.h"
 #include "gcsa.h"
+
+#ifdef HAVE_OPENMP
+#include "romp_support.h"
+#endif
 
 #define PARAM_IMAGES (IMAGES_PER_SURFACE * SURFACES)
 

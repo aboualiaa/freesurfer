@@ -29,28 +29,15 @@
 \author Douglas Greve
 */
 
-#include <cstdio>
-#include <cstdlib>
-#include <unistd.h>
-#include <sys/utsname.h>
-#include <cctype>
-
-#include "utils.h"
 #include "fio.h"
 #include "version.h"
 #include "cmdargs.h"
-#include "error.h"
 #include "diag.h"
-#include "mri.h"
 #include "mri2.h"
-#include "mrisurf.h"
-#include <sys/resource.h>
 
 #include "romp_support.h"
 
-#include "timer.h"
 #include "fsenv.h"
-#include "numerics.h"
 #include "randomfields.h"
 #include "mri_conform.h"
 

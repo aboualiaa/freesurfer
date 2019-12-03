@@ -23,23 +23,10 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-#include <cctype>
-
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "mrisurf.h"
-#include "mri.h"
 #include "annotation.h"
 #include "version.h"
 #include "cma.h"
-#include "gca.h"
-#include "mrishash.h"
 
 static char vcid[] =
     "$Id: mris_sample_parc.c,v 1.31 2016/12/11 14:33:38 fischl Exp $";

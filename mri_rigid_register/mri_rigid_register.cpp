@@ -87,26 +87,12 @@ M_reg
 
   *E*/
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cctype>
-
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
 #include "mrimorph.h"
-#include "utils.h"
 #include "timer.h"
-#include "matrix.h"
-#include "transform.h"
 #include "version.h"
 
 //#define LINEAR_CORONAL_RAS_TO_CORONAL_RAS       21
-
-#include "region.h"
 
 static int write_iterations = 0;
 

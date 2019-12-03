@@ -43,21 +43,11 @@
 
 // $Id: main.cpp,v 1.3 2011/03/02 00:04:30 nicks Exp $
 
-#include <cstdio>
-#include <cstdlib>
 #include <sys/utsname.h>
-#include <sstream>
-#include <iostream>
 
 #include "mris_decimate.h"
-
-#include "macros.h"
-#include "utils.h"
-#include "fio.h"
 #include "version.h"
-#include "error.h"
 #include "diag.h"
-#include "mrisurf.h"
 
 ///
 //  Function Prototypes

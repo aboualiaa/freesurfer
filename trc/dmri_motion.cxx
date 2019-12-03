@@ -25,22 +25,11 @@
 
 #include "vial.h" // Needs to be included first because of CVS libs
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-#include <iomanip>
-#include <iostream>
-#include <set>
 #include <sys/utsname.h>
-#include <unistd.h>
-#include <vector>
 
 #include "cmdargs.h"
 #include "diag.h"
-#include "error.h"
 #include "fio.h"
-#include "mri.h"
 #include "timer.h"
 #include "version.h"
 
@@ -63,8 +52,8 @@ const char *Progname = "dmri_motion";
 
 float T = 100, D = .001;
 
-char *inMatFile = nullptr, *inDwiFile = nullptr, *inBvalFile = nullptr, *outFile = nullptr,
-     *outFrameFile = nullptr;
+char *inMatFile = nullptr, *inDwiFile = nullptr, *inBvalFile = nullptr,
+     *outFile = nullptr, *outFrameFile = nullptr;
 
 MRI *dwi;
 
@@ -76,15 +65,15 @@ Timer cputimer;
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
   int nargs;
-int cputime;
+  int cputime;
   float travg = 0;
-float roavg = 0;
-float score = 0;
-float pbad = 0;
+  float roavg = 0;
+  float score = 0;
+  float pbad = 0;
   vector<int> nbadframe;
   vector<float> trframe;
-vector<float> roframe;
-vector<float> scoreframe;
+  vector<float> roframe;
+  vector<float> scoreframe;
   string matline;
   ofstream outfile;
 
@@ -92,7 +81,7 @@ vector<float> scoreframe;
   nargs = handle_version_option(argc, argv, vcid, "$Name:  $");
   if ((nargs != 0) && argc - nargs == 1) {
     exit(0);
-}
+  }
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -106,13 +95,13 @@ vector<float> scoreframe;
 
   if (argc == 0) {
     usage_exit();
-}
+  }
 
   parse_commandline(argc, argv);
   check_options();
   if (checkoptsonly != 0) {
     return (0);
-}
+  }
 
   dump_options();
 
@@ -121,10 +110,10 @@ vector<float> scoreframe;
   if (inMatFile != nullptr) { // Estimate between-volume motion
     int nframe = 0;
     vector<float> xform;
-vector<float> tr0(3, 0);
-vector<float> ro0(3, 0);
-vector<float> trtot(3, 0);
-vector<float> rotot(3, 0);
+    vector<float> tr0(3, 0);
+    vector<float> ro0(3, 0);
+    vector<float> trtot(3, 0);
+    vector<float> rotot(3, 0);
     ifstream infile;
 
     cout << "Loading volume-to-baseline affine transformations" << endl;
@@ -137,17 +126,18 @@ vector<float> rotot(3, 0);
     cout << "Computing between-volume head motion measures" << endl;
 
     while (getline(infile, matline)) {
-      if (((~static_cast<int>(matline.empty()) != 0)) && ((~isalpha(matline[0])) != 0)) {
+      if (((~static_cast<int>(matline.empty()) != 0)) &&
+          ((~isalpha(matline[0])) != 0)) {
         float xval;
         istringstream matstr(matline);
 
         while (matstr >> xval) {
           xform.push_back(xval);
-}
+        }
 
         if (xform.size() == 16) {
           vector<float> tr;
-vector<float> ro;
+          vector<float> ro;
           AffineReg reg(xform);
 
           // Decompose affine registration matrix into its parameters
@@ -159,12 +149,12 @@ vector<float> ro;
           // Frame-to-frame translations
           for (int k = 0; k < 3; k++) {
             trframe.push_back(tr[k] - tr0[k]);
-}
+          }
 
           // Cumulative frame-to-frame translations
           for (int k = 0; k < 3; k++) {
             trtot[k] += fabs(*(trframe.end() - 3 + k));
-}
+          }
 
           copy(tr.begin(), tr.end(), tr0.begin());
 
@@ -174,12 +164,12 @@ vector<float> ro;
           // Frame-to-frame rotations
           for (int k = 0; k < 3; k++) {
             roframe.push_back(ro[k] - ro0[k]);
-}
+          }
 
           // Cumulative frame-to-frame rotations
           for (int k = 0; k < 3; k++) {
             rotot[k] += fabs(*(roframe.end() - 3 + k));
-}
+          }
 
           copy(ro.begin(), ro.end(), ro0.begin());
 
@@ -188,7 +178,7 @@ vector<float> ro;
           nframe++;
         }
       }
-}
+    }
 
     infile.close();
 
@@ -202,16 +192,16 @@ vector<float> ro;
 
   if (inBvalFile != nullptr) { // Estimate within-volume motion
     int nx;
-int ny;
-int nz;
-int nd;
-int nxy;
-int nslice = 0;
-int nbad = 0;
+    int ny;
+    int nz;
+    int nd;
+    int nxy;
+    int nslice = 0;
+    int nbad = 0;
     float minvox;
-float b;
+    float b;
     vector<int> r;
-vector<int> r1;
+    vector<int> r1;
     vector<int>::const_iterator ir1;
     vector<float> bvals;
     vector<float>::const_iterator ibval;
@@ -248,7 +238,7 @@ vector<int> r1;
 
     while (infile >> b) {
       bvals.push_back(b);
-}
+    }
 
     infile.close();
 
@@ -279,16 +269,16 @@ vector<int> r1;
               for (int ix = 0; ix < nx; ix++) {
                 if (MRIgetVoxVal(dwi, ix, iy, iz, id) > thresh) {
                   count++;
-}
-}
-}
+                }
+              }
+            }
 
             r.push_back(count);
           }
 
           if (r1.empty()) { // First frame with this b-value
             r1.insert(r1.begin(), r.begin(), r.end());
-}
+          }
 
           // Motion score (from Benner et al MRM 2011)
           ir1 = r1.begin();
@@ -315,7 +305,7 @@ vector<int> r1;
             *iscore /= *inbad;
           } else {
             *iscore = 1;
-}
+          }
         }
 
         ibval++;
@@ -327,14 +317,14 @@ vector<int> r1;
     // Percentage of bad slices among all non-empty slices
     if (nslice > 0) {
       pbad = nbad / static_cast<float>(nslice) * 100;
-}
+    }
 
     // Average motion score of bad slices
     if (nbad > 0) {
       score /= nbad;
     } else {
       score = 1;
-}
+    }
   }
 
   // Write overall measures to file
@@ -347,8 +337,8 @@ vector<int> r1;
   // Write frame-by-frame measures to file
   if (outFrameFile != nullptr) {
     vector<float>::const_iterator itr = trframe.begin();
-vector<float>::const_iterator iro = roframe.begin();
-vector<float>::const_iterator iscore = scoreframe.begin();
+    vector<float>::const_iterator iro = roframe.begin();
+    vector<float>::const_iterator iscore = scoreframe.begin();
 
     if (trframe.empty()) {
       trframe.resize(nbadframe.size() * 3);
@@ -395,8 +385,7 @@ vector<float>::const_iterator iscore = scoreframe.begin();
             << "RotationX RotationY RotationZ "
             << "PercentBadSlices AvgDropoutScore" << endl;
 
-    for (auto inbad = nbadframe.begin();
-         inbad < nbadframe.end(); inbad++) {
+    for (auto inbad = nbadframe.begin(); inbad < nbadframe.end(); inbad++) {
 
       outfile << itr[0] << " " << itr[1] << " " << itr[2] << " " << iro[0]
               << " " << iro[1] << " " << iro[2] << " " << *inbad << " "
@@ -421,13 +410,13 @@ vector<float>::const_iterator iscore = scoreframe.begin();
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
   int nargc;
-int nargsused;
+  int nargsused;
   char **pargv;
-char *option;
+  char *option;
 
   if (argc < 1) {
     usage_exit();
-}
+  }
 
   nargc = argc;
   pargv = argv;
@@ -435,7 +424,7 @@ char *option;
     option = pargv[0];
     if (debug != 0) {
       printf("%d %s\n", nargc, option);
-}
+    }
     nargc -= 1;
     pargv += 1;
 
@@ -454,50 +443,50 @@ char *option;
     } else if (strcmp(option, "--dwi") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       inDwiFile = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--bval") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       inBvalFile = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--mat") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       inMatFile = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--T") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       sscanf(pargv[0], "%f", &T);
       nargsused = 1;
     } else if (strcmp(option, "--D") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       sscanf(pargv[0], "%f", &D);
       nargsused = 1;
     } else if (strcmp(option, "--out") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       outFile = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--outf") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       outFrameFile = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (CMDsingleDash(option) != 0) {
         fprintf(stderr, "       Did you really mean -%s ?\n", option);
-}
+      }
       exit(-1);
     }
     nargc -= nargsused;
@@ -572,7 +561,8 @@ static void check_options() {
     cout << "ERROR: must specify output file" << endl;
     exit(1);
   }
-  if (((inDwiFile != nullptr) && (inBvalFile == nullptr)) || ((inDwiFile == nullptr) && (inBvalFile != nullptr))) {
+  if (((inDwiFile != nullptr) && (inBvalFile == nullptr)) ||
+      ((inDwiFile == nullptr) && (inBvalFile != nullptr))) {
     cout << "ERROR: must specify both DWI and b-value files" << endl;
     exit(1);
   }
@@ -585,7 +575,7 @@ static void check_options() {
     cout << "ERROR: diffusivity must be positive" << endl;
     exit(1);
   }
-  }
+}
 
 static void dump_options() {
   cout << endl
@@ -602,11 +592,11 @@ static void dump_options() {
   if (outFrameFile != nullptr) {
     cout << "Output frame-by-frame motion measure file: " << outFrameFile
          << endl;
-}
+  }
 
   if (inMatFile != nullptr) {
     cout << "Input transform file: " << inMatFile << endl;
-}
+  }
 
   if (inBvalFile != nullptr) {
     cout << "Input DWI file: " << inDwiFile << endl;
@@ -614,5 +604,4 @@ static void dump_options() {
     cout << "Low-b image intensity threshold: " << T << endl;
     cout << "Nominal diffusivity: " << D << endl;
   }
-
-  }
+}

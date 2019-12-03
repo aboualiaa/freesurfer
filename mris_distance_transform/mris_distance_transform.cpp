@@ -22,21 +22,9 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-#include <cctype>
-
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
 #include "timer.h"
-#include "mrisurf.h"
-#include "mri.h"
 #include "version.h"
-#include "label.h"
 #include "annotation.h"
 
 static char vcid[] =

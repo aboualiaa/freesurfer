@@ -5,7 +5,6 @@
 #include <QtGui/QApplication>
 #endif
 #include "MainWindow.h"
-#include <QDebug>
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {

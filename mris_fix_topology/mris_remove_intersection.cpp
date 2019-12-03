@@ -22,17 +22,9 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cctype>
-
-#include "macros.h"
-#include "error.h"
 #include "tags.h"
 #include "diag.h"
-#include "proto.h"
 #include "mrisurf.h"
-#include "utils.h"
 #include "timer.h"
 #include "version.h"
 

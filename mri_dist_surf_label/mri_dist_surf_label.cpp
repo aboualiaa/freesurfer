@@ -1,14 +1,5 @@
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
 #include "version.h"
-#include "label.h"
 #include "cma.h"
 
 int main(int argc, char *argv[]);

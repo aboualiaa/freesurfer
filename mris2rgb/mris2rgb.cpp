@@ -23,16 +23,7 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-#include <cctype>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-
 #define OPENGL_CODE 1
-#include <glut.h>
 #include <GL/glx.h>
 
 /*#if defined(Linux)|| defined(__sun__)*/
@@ -46,15 +37,9 @@
 #endif
 
 #include "rgb.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "mrisurf.h"
 #include "oglutil.h"
-#include "tiff.h"
 #include "tiffio.h"
-#include "label.h"
 #include "version.h"
 
 static char vcid[] = "$Id: mris2rgb.c,v 1.38 2011/03/02 00:04:26 nicks Exp $";

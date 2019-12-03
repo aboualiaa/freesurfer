@@ -34,19 +34,13 @@
   ENDUSAGE
 */
 
-#include <cstdio>
-#include <cstdlib>
-#include <unistd.h>
 #include <sys/utsname.h>
 
 #undef X
 #include "mri2.h"
-#include "fio.h"
 #include "version.h"
 #include "cmdargs.h"
-#include "error.h"
 #include "diag.h"
-#include "timer.h"
 #include "mri_identify.h"
 
 #include "romp_support.h"

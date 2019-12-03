@@ -29,8 +29,6 @@
 
 #include "mris_topology.h"
 #include "patchdisk.h"
-#include "utils.h"
-
 #include "compilerdefs.h"
 
 #define __PRINT_MODE 0
@@ -524,7 +522,7 @@ MRIS *MRISduplicateOver(MRIS *mris, int mode) {
     n_extra_vertices = __MAX(mris->max_vertices - mris->nvertices, 0);
     n_extra_faces    = __MAX(mris->max_faces    - mris->nfaces,    0);
   }
-  
+
   MRISreallocVerticesAndFaces(mris_dst, mris_dst->nvertices + n_extra_vertices, mris_dst->nfaces + n_extra_faces);
 #endif
 

@@ -2,10 +2,6 @@
 // given subject. The calculated values are cached in a stats file so they can
 // be easily referenced by mri_segstats and mris_anatomical_stats later on.
 
-#include <cstdlib>
-#include <string>
-#include <vector>
-
 #include "argparse.h"
 #include "cma.h"
 

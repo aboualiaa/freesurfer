@@ -146,20 +146,10 @@
 
 */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <unistd.h>
-#include <cstring>
 #include <sys/utsname.h>
 
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
 
-#include "matrix.h"
-#include "mri.h"
 #include "version.h"
 #include "mri2.h"
 #include "registerio.h"
@@ -169,8 +159,6 @@
 #include "timer.h"
 #include "fmriutils.h"
 #include "numerics.h"
-#include "transform.h"
-#include "label.h"
 
 #ifdef X
 #undef X

@@ -23,21 +23,9 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-#include <cctype>
-
 #include "timer.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "const.h"
-#include "proto.h"
-#include "mri.h"
 #include "sig.h"
-#include "label.h"
 #include "version.h"
 #include "cma.h"
 #include "mri_conform.h"
@@ -861,8 +849,6 @@ static MRI *compute_voxel_statistics(VL ***voxel_labels_class1,
   return (mri_stats);
 }
 
-#include "stats.h"
-#include "matrix.h"
 static void write_bfloats(MRI *mri, char *out_name, char *output_subject) {
   STAT_VOLUME *sv;
   fMRI_REG *reg;

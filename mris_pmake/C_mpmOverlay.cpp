@@ -32,9 +32,6 @@
  */
 
 #include "C_mpmOverlay.h"
-#include "general.h"
-
-#include <iostream>
 
 extern bool Gb_stdout;
 extern stringstream Gsout;

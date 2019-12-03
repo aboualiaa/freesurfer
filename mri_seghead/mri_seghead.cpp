@@ -32,18 +32,10 @@
   $Id: mri_seghead.c,v 1.8 2014/03/25 16:06:42 greve Exp $
 */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cstring>
-
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
 #include "mrisurf.h"
 
 #include "fio.h"
-#include "mri.h"
 #include "cmdargs.h"
 
 static int parse_commandline(int argc, char **argv);

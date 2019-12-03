@@ -25,28 +25,16 @@
  *
  */
 
-#include <cmath>
-#include <cstdio>
-#include <cstdlib>
 #include <sys/stat.h>
-#include <cctype>
-#include <cerrno>
 
-#include "mri.h"
-#include "const.h"
 #include "diag.h"
-#include "error.h"
-#include "macros.h"
-#include "proto.h"
 #include "mrimorph.h"
 #include "timer.h"
 #include "mrinorm.h"
 #include "cma.h"
 #include "version.h"
 #include "tags.h"
-#include "transform.h"
 #include "talairachex.h"
-#include "connectcomp.h"
 #include "mrisegment.h"
 
 static char vcid[] = "$Id: mri_fill.c,v 1.119 2011/10/25 14:09:58 fischl Exp $";

@@ -48,13 +48,8 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-
 #include "mrisurf.h"
 #include "version.h"
-#include "error.h"
-#include "utils.h"
 
 #include "compilerdefs.h"
 

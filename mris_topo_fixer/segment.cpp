@@ -22,7 +22,6 @@
  *
  */
 
-#include <cstring> // memcpy
 #include "segment.h"
 
 Segment::Segment() {

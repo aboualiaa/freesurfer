@@ -516,30 +516,17 @@ ENDHELP --------------------------------------------------------------
 // Rewrite MatrixReadTxt to ignore # and % and empty lines
 // Auto-det/read matlab4 matrices
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-double round(double x);
+// double round(double x);
 #include <sys/stat.h>
 #include <sys/utsname.h>
-#include <unistd.h>
-#include <cfloat>
-#include <cerrno>
 
-#include "utils.h"
-#include "mrisurf.h"
 #include "mrisutils.h"
-#include "error.h"
 #include "diag.h"
-#include "mri.h"
 #include "mri2.h"
 #include "fio.h"
 #include "version.h"
-#include "label.h"
-#include "matrix.h"
 #include "fmriutils.h"
 #include "cmdargs.h"
-#include "fsglm.h"
 #include "pdf.h"
 #include "fsgdf.h"
 #include "timer.h"
@@ -548,7 +535,6 @@ double round(double x);
 #include "surfcluster.h"
 #include "randomfields.h"
 #include "dti.h"
-#include "image.h"
 #include "stats.h"
 
 int MRISmaskByLabel(MRI *y, MRIS *surf, LABEL *lb, int invflag);

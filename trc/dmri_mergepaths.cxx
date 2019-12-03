@@ -23,22 +23,12 @@
  *
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #include <sys/utsname.h>
-#include <unistd.h>
-
-#include <iomanip>
-#include <iostream>
-#include <limits.h>
 
 #include "cma.h"
 #include "cmdargs.h"
 #include "diag.h"
-#include "error.h"
 #include "fio.h"
-#include "mri.h"
 #include "timer.h"
 #include "version.h"
 
@@ -71,16 +61,16 @@ Timer cputimer;
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
   int nargs;
-int cputime;
+  int cputime;
   char fname[PATH_MAX];
   MRI *invol = 0;
-MRI *outvol = 0;
+  MRI *outvol = 0;
 
   /* rkt: check for and handle version tag */
   nargs = handle_version_option(argc, argv, vcid, "$Name:  $");
   if ((nargs != 0) && argc - nargs == 1) {
     exit(0);
-}
+  }
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -94,13 +84,13 @@ MRI *outvol = 0;
 
   if (argc == 0) {
     usage_exit();
-}
+  }
 
   parse_commandline(argc, argv);
   check_options();
   if (checkoptsonly != 0) {
     return (0);
-}
+  }
 
   dump_options(stdout);
 
@@ -117,7 +107,7 @@ MRI *outvol = 0;
       sprintf(fname, "%s/%s", inDir, inFile[iframe]);
     } else {
       strcpy(fname, inFile[iframe]);
-}
+    }
 
     invol = MRIread(fname);
 
@@ -133,8 +123,9 @@ MRI *outvol = 0;
       MRIcopyFrame(invol, outvol, 0, iframe);
 
       if (dispThresh > 0) {
-        inmax = static_cast<float>(MRIfindPercentile(invol, .99, 0)); // Robust max
-}
+        inmax =
+            static_cast<float>(MRIfindPercentile(invol, .99, 0)); // Robust max
+      }
     }
 
     outvol->frames[iframe].thresh = dispThresh * inmax;
@@ -175,13 +166,13 @@ MRI *outvol = 0;
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
   int nargc;
-int nargsused;
+  int nargsused;
   char **pargv;
-char *option;
+  char *option;
 
   if (argc < 1) {
     usage_exit();
-}
+  }
 
   nargc = argc;
   pargv = argv;
@@ -189,7 +180,7 @@ char *option;
     option = pargv[0];
     if (debug != 0) {
       printf("%d %s\n", nargc, option);
-}
+    }
     nargc -= 1;
     pargv += 1;
 
@@ -208,13 +199,13 @@ char *option;
     } else if (strcmp(option, "--indir") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       inDir = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--in") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       nargsused = 0;
       while (nargsused < nargc && (strncmp(pargv[nargsused], "--", 2) != 0)) {
         inFile[nframe] = pargv[nargsused];
@@ -224,26 +215,26 @@ char *option;
     } else if (strcmp(option, "--out") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       outFile = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--ctab") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       ctabFile = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--thresh") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       sscanf(pargv[0], "%f", &dispThresh);
       nargsused = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (CMDsingleDash(option) != 0) {
         fprintf(stderr, "       Did you really mean -%s ?\n", option);
-}
+      }
       exit(-1);
     }
     nargc -= nargsused;
@@ -317,7 +308,7 @@ static void check_options() {
     printf("ERROR: display threshold must a number between 0 and 1\n");
     exit(1);
   }
-  }
+}
 
 /* --------------------------------------------- */
 static void dump_options(FILE *fp) {
@@ -332,11 +323,11 @@ static void dump_options(FILE *fp) {
 
   if (inDir != nullptr) {
     fprintf(fp, "Input directory: %s\n", inDir);
-}
+  }
   fprintf(fp, "Input files:");
   for (int k = 0; k < nframe; k++) {
     fprintf(fp, " %s", inFile[k]);
-}
+  }
   fprintf(fp, "\n");
   fprintf(fp, "Output file: %s\n", outFile);
   fprintf(fp, "Color table file: %s\n", ctabFile);

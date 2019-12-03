@@ -23,10 +23,6 @@
  *
  */
 
-#include <cstdio>
-#include <cstring>
-#include "fio.h"
-#include "matrix.h"
 #include "matfile.h"
 #include "version.h"
 

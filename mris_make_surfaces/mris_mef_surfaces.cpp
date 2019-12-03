@@ -27,23 +27,12 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-#include <cctype>
-
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
 #include "timer.h"
 #include "mrisurf.h"
-#include "mri.h"
 #include "tags.h"
 #include "mrinorm.h"
 #include "version.h"
-#include "label.h"
 
 static char vcid[] =
     "$Id: mris_mef_surfaces.c,v 1.7 2015/02/05 23:34:41 zkaufman Exp $";

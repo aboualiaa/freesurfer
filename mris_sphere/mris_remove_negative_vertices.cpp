@@ -23,20 +23,9 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cctype>
-
-#include "macros.h"
-
 #include "mrisurf_project.h"
-
-#include "error.h"
 #include "tags.h"
 #include "diag.h"
-#include "proto.h"
-#include "utils.h"
 #include "timer.h"
 #include "version.h"
 

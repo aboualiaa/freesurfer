@@ -25,24 +25,12 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-#include <cctype>
-
-#include "macros.h"
 #include "timer.h"
-#include "error.h"
 #include "tags.h"
 #include "diag.h"
-#include "proto.h"
 #include "mrisurf.h"
-#include "mri.h"
 #include "version.h"
-#include "mrishash.h"
 #include "fio.h"
-#include "colortab.h"
 
 #define MAX_PARCEL_VERTICES 10000
 static char vcid[] = "$Id: mris_make_face_parcellation.c,v 1.22 2016/05/06 "

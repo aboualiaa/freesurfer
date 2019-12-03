@@ -23,17 +23,12 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
 #ifndef Darwin
 #include <malloc.h>
 #endif
-#include "error.h"
 #include "diag.h"
 #include "mri2.h"
 #include "imautils.h"
-#include "machine.h"
 #include "version.h"
 
 int main(int argc, char *argv[]);

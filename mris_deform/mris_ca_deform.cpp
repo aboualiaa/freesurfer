@@ -24,24 +24,10 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cctype>
-
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "utils.h"
 #include "timer.h"
 #include "version.h"
 #include "cma.h"
-#include "mrisurf.h"
-#include "histo.h"
-#include "transform.h"
-#include "gca.h"
 #include "gcamorph.h"
 #include "tritri.h" // for CROSS3 definition
 #include "gcaboundary.h"
@@ -681,7 +667,7 @@ static MRI *compute_target_intensities(MRI_SURFACE *mris, MRI *mri_labels,
           xw = xi + d * nx;
           yw = yi + d * ny;
           zw = zi + d * nz;
-#if 0          
+#if 0
           MRIsampleVolume(mri_intensities, xw, yw, zw, &val);  // for debugging
           p = GCAcomputeLabelLikelihood(gca, transform, mri_intensities, xw, yw, zw, target_label);
 #else
@@ -879,7 +865,7 @@ static MRI *compute_target_intensities_with_gcab(
           xw = xi + d * nx;
           yw = yi + d * ny;
           zw = zi + d * nz;
-#if 0          
+#if 0
           MRIsampleVolume(mri_intensities, xw, yw, zw, &val);  // for debugging
           p = GCAcomputeLabelLikelihood(gca, transform, mri_intensities, xw, yw, zw, target_label);
 #else

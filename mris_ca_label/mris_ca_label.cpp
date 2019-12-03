@@ -28,20 +28,8 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cctype>
-
-#include "macros.h"
-
-#include "mri.h"
-#include "mrisurf.h"
 #include "mrisurf_project.h"
-
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "utils.h"
 #include "timer.h"
 #include "gcsa.h"
 #include "annotation.h"

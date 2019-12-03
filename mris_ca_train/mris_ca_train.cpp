@@ -37,24 +37,11 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cctype>
-
-#include "macros.h"
-
-#include "mri.h"
-#include "mrisurf.h"
 #include "mrisurf_project.h"
-
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "utils.h"
 #include "timer.h"
 #include "gcsa.h"
 #include "version.h"
-#include "label.h"
 
 static char vcid[] =
     "$Id: mris_ca_train.c,v 1.17 2011/03/02 00:04:27 nicks Exp $";

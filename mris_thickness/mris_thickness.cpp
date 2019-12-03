@@ -24,21 +24,10 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-#include <cctype>
-
-#include "macros.h"
 #include "timer.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
 #include "mrisurf.h"
-#include "mri.h"
 #include "version.h"
-#include "label.h"
 
 static char vcid[] =
     "$Id: mris_thickness.c,v 1.28 2012/11/27 17:41:26 fischl Exp $";

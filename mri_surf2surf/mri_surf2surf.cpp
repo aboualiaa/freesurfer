@@ -305,21 +305,12 @@ ENDHELP
 */
 
 #undef X
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cstring>
-#include <unistd.h>
-#include <cctype>
 
-#include "mri.h"
 #include "icosahedron.h"
 #include "fio.h"
 #include "pdf.h"
 
-#include "error.h"
 #include "diag.h"
-#include "mrisurf.h"
 #include "mrisutils.h"
 #include "mri2.h"
 #include "mri_identify.h"
@@ -330,11 +321,8 @@ ENDHELP
 #include "selxavgio.h"
 #include "prime.h"
 #include "version.h"
-#include "colortab.h"
 #include "fsenv.h"
-#include "utils.h"
 #include "cmdargs.h"
-#include "proto.h"
 #include "mri_circulars.h"
 
 int DumpSurface(MRIS *surf, char *outfile);

@@ -3,7 +3,6 @@
 #include <QMessageBox>
 #include <QSettings>
 #include <QKeyEvent>
-#include <QAction>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {

@@ -22,13 +22,8 @@
  *
  */
 
-#include <string>
-#include <iostream>
-
 #include "error.h"
-#include "macros.h"
 #include "version.h"
-#include "transform.h"
 #include "ctrpoints.h"
 
 using namespace std;

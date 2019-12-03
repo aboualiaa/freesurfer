@@ -23,16 +23,8 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cctype>
-
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
 #include "mrisurf.h"
-#include "transform.h"
 #include "version.h"
 
 static char vcid[] = "$Id: mri_paint.c,v 1.5 2011/03/02 00:04:23 nicks Exp $";

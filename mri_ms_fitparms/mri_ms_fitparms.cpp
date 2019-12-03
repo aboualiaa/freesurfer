@@ -35,26 +35,15 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cctype>
-
-#include "mri.h"
-#include "macros.h"
 #include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "mri_conform.h"
-#include "utils.h"
 #include "timer.h"
 #include "tags.h"
-#include "matrix.h"
-#include "transform.h"
 #include "version.h"
 #include "mrinorm.h"
 #include "tukey.h"
 #include "mrisegment.h"
+#include "mri_conform.h"
 
 static int check_finite(double val) {
   if (!devFinite(val)) {

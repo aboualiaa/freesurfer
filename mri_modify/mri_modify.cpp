@@ -23,10 +23,6 @@
  *
  */
 
-#include <iostream>
-
-#include "macros.h"
-#include "mri.h"
 #include "transform.h"
 #include "version.h"
 

@@ -39,7 +39,9 @@
  *
  */
 
+#ifdef HAVE_OPENMP
 #include "romp_support.h"
+#endif
 
 #include "diag.h"
 #include "mrimorph.h"

@@ -22,26 +22,14 @@
  *
  */
 
-#include <cmath>
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
-
-#include "mri.h"
-#include "matrix.h"
-#include "proto.h"
-#include "macros.h"
-#include "error.h"
 #include "timer.h"
 #include "diag.h"
-#include "utils.h"
 #include "gca.h"
 #include "tags.h"
 #include "cma.h"
 #include "mrinorm.h"
 #include "version.h"
 #include "mri2.h"
-#include "fsinit.h"
 
 #define MM_FROM_EXTERIOR                                                       \
   5 // distance into brain mask to go when erasing super bright CSF voxels
@@ -1548,7 +1536,6 @@ static MRI *normalize_from_segmentation_volume(MRI *mri_src, MRI *mri_dst,
   MRIfree(&mri_tmp);
   return (mri_dst);
 }
-#include "mrinorm.h"
 MRI *normalizeFromLabel(MRI *mri_in, MRI *mri_dst, MRI *mri_seg, double *fas) {
   MRI *mri_ctrl, *mri_bias;
   int x, y, z, width, height, depth, num, total, input, T1_index, i;

@@ -24,15 +24,10 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cctype>
-#include "utils.h"
 #include "mri.h"
 #include "error.h"
 #include "diag.h"
 #include "version.h"
-#include "macros.h"
 
 static void print_usage();
 static void usage_exit();

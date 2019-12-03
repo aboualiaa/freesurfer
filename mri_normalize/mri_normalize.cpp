@@ -28,23 +28,13 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cctype>
-
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
 #include "timer.h"
-#include "proto.h"
 #include "mrinorm.h"
 #include "mri_conform.h"
 #include "tags.h"
 #include "version.h"
 #include "cma.h"
-#include "transform.h"
 #include "gca.h"
 
 #define CONTRAST_UNKNOWN 0

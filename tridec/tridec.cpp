@@ -23,8 +23,6 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
 #include "const.h"
 #include "version.h"
 

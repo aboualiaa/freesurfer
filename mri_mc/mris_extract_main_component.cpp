@@ -22,24 +22,7 @@
  *
  */
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <unistd.h>
-
-#include "fio.h"
-#include "const.h"
-#include "diag.h"
-#include "proto.h"
-#include "macros.h"
-#include "error.h"
-#include "MRIio_old.h"
-#include "mri.h"
 #include "mrisurf.h"
-#include "gca.h"
-#include "MC.h"
 
 const char *Progname;
 

@@ -1,16 +1,8 @@
-#include <iostream>
-#include <string>
-#include <iomanip>
-#include <algorithm>
-#include <map>
-
 #include "mri_seg_overlap.help.xml.h"
 #include "argparse.h"
 #include "lut.h"
 #include "json.h"
-#include "log.h"
 
-#include "mri.h"
 #include "mri2.h"
 
 struct IntermediateMetrics {

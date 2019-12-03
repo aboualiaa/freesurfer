@@ -42,18 +42,11 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cstring>
 #include <sys/time.h>
 
 #include "icosahedron.h"
-#include "error.h"
 #include "diag.h"
-#include "mrisurf.h"
 #include "mrisutils.h"
-#include "mri.h"
 #include "mri_identify.h"
 #include "mri2.h"
 #include "prime.h"
@@ -62,7 +55,6 @@
 #include "selxavgio.h"
 #include "version.h"
 #include "fmriutils.h"
-#include "proto.h" // nint
 #include "cmdargs.h"
 
 #ifndef FZERO

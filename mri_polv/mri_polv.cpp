@@ -23,15 +23,9 @@
  *
  */
 
-#include <cctype>
-#include <cstdio>
-#include <cstdlib>
-
 #include "diag.h"
 #include "error.h"
-#include "macros.h"
 #include "mri.h"
-#include "proto.h"
 #include "version.h"
 
 int main(int argc, char *argv[]);

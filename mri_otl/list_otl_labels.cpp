@@ -1,10 +1,5 @@
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cerrno>
 #include "mri2.h"
 #include "DICOMRead.h"
-#include "macros.h"
 
 extern int errno;
 const char *Progname;

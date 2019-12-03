@@ -23,24 +23,11 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-#include <cctype>
-
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
 #include "timer.h"
-#include "mrisurf.h"
-#include "mri.h"
-#include "mrinorm.h"
-#include "mri_conform.h"
 #include "cvector.h"
-#include "histo.h"
 #include "version.h"
+#include "mri_conform.h"
 
 static char vcid[] =
     "$Id: mris_ms_refine.c,v 1.20 2015/02/05 23:34:41 zkaufman Exp $";

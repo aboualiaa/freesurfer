@@ -24,15 +24,10 @@
  *
  */
 
-#include "c_label.h"
 #include "dijkstra.h"
-
 #include "c_surface.h"
 #include "c_vertex.h"
-
 #include "C_mpmProg.h"
-
-#include <sstream>
 
 void label_ply_do(s_env &ast_env) {
   //

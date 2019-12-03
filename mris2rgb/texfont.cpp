@@ -22,8 +22,6 @@
 
 #include <cassert>
 #include <cctype>
-#include <cstdlib>
-#include <cstdio>
 #include <cstring>
 #include <GL/glu.h>
 #include "TexFont.h"

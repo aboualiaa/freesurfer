@@ -41,23 +41,14 @@
 
 */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cstring>
-#include <unistd.h>
 #include <sys/utsname.h>
 
-#include "error.h"
 #include "diag.h"
-#include "mri.h"
 #include "mri_identify.h"
-#include "matrix.h"
 #include "registerio.h"
 #include "resample.h"
 #include "cmdargs.h"
 #include "fio.h"
-#include "utils.h"
 #include "volcluster.h"
 #include "version.h"
 #include "randomfields.h"

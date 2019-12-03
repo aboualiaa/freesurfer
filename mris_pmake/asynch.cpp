@@ -24,13 +24,8 @@
  *
  */
 
-#include <string>
-#include <sstream>
-
 #include "legacy.h"
-
 #include "asynch.h"
-#include "general.h"
 #include "c_vertex.h"
 #include "c_label.h"
 #include "c_surface.h"

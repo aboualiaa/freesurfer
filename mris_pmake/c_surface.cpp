@@ -24,10 +24,7 @@
  *
  */
 
-#include "c_surface.h"
 #include "c_vertex.h"
-
-#include <sstream>
 
 void surface_vertexFunction_do(
     s_env &st_env,

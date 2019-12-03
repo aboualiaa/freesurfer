@@ -30,14 +30,8 @@
  *
  */
 
-#include <iostream>
 #include <sstream>
 using namespace std;
-
-#include <ctime>
-
-#include <unistd.h>
-#include <cstring>
 
 #include <c_SMessage.h>
 

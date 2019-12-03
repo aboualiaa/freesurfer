@@ -25,32 +25,19 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cctype>
 #include <sys/utsname.h>
-#include <unistd.h>
-#include <sys/resource.h>
-#ifdef HAVE_OPENMP // mrisurf.c has numerous parallelized functions
-#include "romp_support.h"
-#endif
-
 #include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "utils.h"
 #include "timer.h"
-#include "gca.h"
 #include "mri_conform.h"
-#include "transform.h"
 #include "gcamorph.h"
 #include "cma.h"
 #include "tags.h"
 #include "version.h"
-#include "fsinit.h"
+
+#ifdef HAVE_OPENMP // mrisurf.c has numerous parallelized functions
+#include "romp_support.h"
+#endif
 
 static char *write_likelihood = nullptr;
 static double PRIOR_FACTOR = 1.0;

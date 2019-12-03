@@ -22,22 +22,11 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-#include <cctype>
 #include <sys/utsname.h>
 
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "mrisurf.h"
-#include "mri.h"
 #include "fio.h"
 #include "version.h"
-#include "colortab.h"
 #include "cma.h"
 #include "mrisutils.h"
 

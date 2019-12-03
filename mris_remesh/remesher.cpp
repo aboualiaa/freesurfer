@@ -1,4 +1,3 @@
-#include <cassert>
 #include "remesher.h"
 
 using namespace std;

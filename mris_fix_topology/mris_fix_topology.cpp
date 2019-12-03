@@ -29,25 +29,14 @@
  *
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <ctype.h>
-
-#include "mri.h"
-#include "mrisurf.h"
 #include "mrisurf_project.h"
-#include "mrishash.h"
-
-#include "error.h"
 #include "diag.h"
-#include "macros.h"
 
+#ifdef HAVE_OPENMP
 #include "romp_support.h"
+#endif
+
 #include "tags.h"
-#include "proto.h"
-#include "timer.h"
 #include "version.h"
 
 static char vcid[] =

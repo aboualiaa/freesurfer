@@ -23,18 +23,8 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-#include <cctype>
-
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
 #include "cma.h"
-#include "proto.h"
-#include "mri.h"
 #include "version.h"
 #include "gca.h"
 

@@ -25,17 +25,9 @@
  *
  */
 
-#include <cstdio>
-#include <cctype>
-#include "const.h"
 #include "cma.h"
-#include "utils.h"
-#include "mri.h"
-#include "minc.h"
-#include "error.h"
 #include "diag.h"
 #include "version.h"
-#include "macros.h"
 
 static int get_option(int argc, char *argv[]);
 static void print_version();

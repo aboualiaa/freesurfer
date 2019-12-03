@@ -24,17 +24,11 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <unistd.h>
 #include <sys/utsname.h>
 
-#include "fio.h"
 #include "version.h"
 #include "cmdargs.h"
-#include "error.h"
 #include "diag.h"
-#include "mrisurf.h"
 #include "mris_compVolFrac.h"
 
 static int parse_commandline(int argc, char **argv);

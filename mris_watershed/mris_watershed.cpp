@@ -20,20 +20,14 @@ the watershed transformation. In Mathematical Morphology in Image Processing
 (Ed. E. R. Dougherty), pages 433481 (1993).
 
 */
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
-#include <cctype>
-#include "romp_support.h"
 
-#include "macros.h"
-#include "error.h"
+#ifdef HAVE_OPENMP
+#include "romp_support.h"
+#endif
+
 #include "diag.h"
 #include "mrisurf.h"
-#include "mri.h"
 #include "version.h"
-#include "colortab.h"
-#include "fsinit.h"
 
 static char vcid[] =
     "$Id: mris_watershed.c,v 1.23 2013/03/27 01:53:50 fischl Exp $";

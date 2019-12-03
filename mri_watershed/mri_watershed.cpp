@@ -27,13 +27,6 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cctype>
-#include <vector>
-#include <sys/resource.h>
-
 #define INDIVIDUAL_TIMERS 0
 
 #define FAST_GCAsourceVoxelToPrior 1
@@ -42,14 +35,7 @@
 #include "affine.hpp"
 #endif
 
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "tags.h"
-#include "mrisurf.h"
-#include "matrix.h"
-#include "proto.h"
-#include "const.h"
 #include "diag.h"
 #include "version.h"
 #include "mrisegment.h"
@@ -57,7 +43,6 @@
 #include "mri_conform.h"
 #include "gca.h"
 #include "cma.h"
-#include "transform.h"
 #include "mri_circulars.h"
 
 #define WM_CONST 110 /* not used anymore */

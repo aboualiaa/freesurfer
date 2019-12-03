@@ -24,18 +24,9 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cctype>
-
 #include "mri.h"
-#include "macros.h"
 #include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "colortab.h"
-#include "utils.h"
-#include "const.h"
 #include "version.h"
 
 int main(int argc, char *argv[]);

@@ -1,15 +1,7 @@
-#include <string>
-#include <iostream>
-
 #include "mris_defects_pointset.help.xml.h"
+#include "mri.h"
 #include "argparse.h"
 #include "pointset.h"
-#include "log.h"
-
-#include "utils.h"
-#include "mri.h"
-#include "label.h"
-#include "mrisurf.h"
 #include "mri_circulars.h"
 
 static PointSet::Point sras2ras(MRIS *surf, PointSet::Point point);

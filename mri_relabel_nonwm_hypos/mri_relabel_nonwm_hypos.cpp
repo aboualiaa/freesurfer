@@ -23,13 +23,6 @@
  *
  */
 
-/*!
-\file dummy.c
-\brief Example c file that can be used as a template.
-\author Douglas Greve
-
-*/
-
 // $Id: mri_relabel_nonwm_hypos.c,v 1.2 2014/04/17 18:03:22 greve Exp $
 
 /*
@@ -44,20 +37,10 @@
   ENDUSAGE
 */
 
-#include <cstdio>
-#include <cstdlib>
-#include <unistd.h>
-#include <sys/utsname.h>
-
-#include "utils.h"
-#include "fio.h"
 #include "version.h"
 #include "cmdargs.h"
-#include "error.h"
 #include "diag.h"
-#include "mri.h"
 #include "mri2.h"
-#include "colortab.h"
 #include "fsenv.h"
 
 static int parse_commandline(int argc, char **argv);

@@ -91,21 +91,9 @@ BEGINHELP
 ENDHELP
 */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-#include <cctype>
-
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "mri.h"
-#include "mrisurf.h"
 #include "mrisutils.h"
 #include "icosahedron.h"
-#include "transform.h"
 #include "version.h"
 #include "fio.h"
 #include "gcamorph.h"

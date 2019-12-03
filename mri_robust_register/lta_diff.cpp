@@ -22,27 +22,14 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
-#include <string>
-#include <iostream>
-#include <vector>
-#include <cassert>
-#include <limits>
 
 #define export // obsolete feature 'export template' used in these headers
-#include <vnl/vnl_matrix.h>
 #include <vnl/algo/vnl_determinant.h>
-#include <vnl/vnl_matlab_print.h>
 #undef export
 
 #include "Registration.h"
-#include "MyMatrix.h"
 
-#include "error.h"
-#include "macros.h"
-#include "mri.h"
-#include "matrix.h"
 #include "version.h"
-#include "transform.h"
 
 using namespace std;
 

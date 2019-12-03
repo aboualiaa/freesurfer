@@ -32,17 +32,8 @@
   $Id: mri_surf2vol.c,v 1.28 2014/12/08 19:49:02 greve Exp $
 */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cstring>
-
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
 
-#include "matrix.h"
-#include "mri.h"
 #include "mri2.h"
 #include "mri_identify.h"
 #include "registerio.h"

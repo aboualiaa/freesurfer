@@ -25,25 +25,11 @@
 
 #include "vial.h" // Needs to be included first because of CVS libs
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-#include <iomanip>
-#include <iostream>
-#include <limits>
-#include <limits.h>
-#include <set>
-#include <string>
 #include <sys/utsname.h>
-#include <unistd.h>
-#include <vector>
 
 #include "cmdargs.h"
 #include "diag.h"
-#include "error.h"
 #include "fio.h"
-#include "mri.h"
 #include "timer.h"
 #include "version.h"
 
@@ -76,53 +62,53 @@ Timer cputimer;
 /*--------------------------------------------------*/
 int main(int argc, char **argv) {
   int nargs;
-int cputime;
+  int cputime;
   unsigned int nmeas;
-unsigned int npt;
-unsigned int narc;
-unsigned int nsubjmin;
-unsigned int ntot;
+  unsigned int npt;
+  unsigned int narc;
+  unsigned int nsubjmin;
+  unsigned int ntot;
   float distmin;
-float darc;
-float arcmin;
-float arcmax;
-float arc1m;
-float arc2m;
-float arc1s;
-float arc2s;
-float lthresh1;
-float lthresh2;
-float uthresh1;
-float uthresh2;
+  float darc;
+  float arcmin;
+  float arcmax;
+  float arc1m;
+  float arc2m;
+  float arc1s;
+  float arc2s;
+  float lthresh1;
+  float lthresh2;
+  float uthresh1;
+  float uthresh2;
   string listline;
-string filename;
+  string filename;
   vector<bool>::const_iterator iout;
   vector<unsigned int>::const_iterator insubj;
   vector<float>::const_iterator icenter;
-vector<float>::const_iterator iarc1;
-vector<float>::const_iterator iarc2;
+  vector<float>::const_iterator iarc1;
+  vector<float>::const_iterator iarc2;
   vector<vector<unsigned int>>::const_iterator iallk;
   vector<vector<float>>::const_iterator itemplate;
-vector<vector<float>>::const_iterator iallm;
-vector<vector<float>>::const_iterator iallp;
+  vector<vector<float>>::const_iterator iallm;
+  vector<vector<float>>::const_iterator iallp;
   vector<vector<float>>::iterator ialla;
   vector<bool> isout;
   vector<unsigned int> lengths;
-vector<unsigned int> nsubj;
+  vector<unsigned int> nsubj;
   vector<float> meanpath;
-vector<float> arcend1;
-vector<float> arcend2;
+  vector<float> arcend1;
+  vector<float> arcend2;
   vector<string> subjlist;
-vector<string> measlist;
+  vector<string> measlist;
   vector<vector<unsigned int>> allknots;
   vector<vector<float>> allarc;
-vector<vector<float>> allpaths;
-vector<vector<float>> allmeas;
-vector<vector<float>> allmeasint;
-vector<vector<float>> allmeassec;
+  vector<vector<float>> allpaths;
+  vector<vector<float>> allmeas;
+  vector<vector<float>> allmeasint;
+  vector<vector<float>> allmeassec;
   ifstream listfile;
   ofstream pathfile;
-ofstream pathrasfile;
+  ofstream pathrasfile;
   MATRIX *outv2r;
   MRI *outref = nullptr;
 
@@ -130,7 +116,7 @@ ofstream pathrasfile;
   nargs = handle_version_option(argc, argv, vcid, "$Name:  $");
   if ((nargs != 0) && argc - nargs == 1) {
     exit(0);
-}
+  }
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -144,13 +130,13 @@ ofstream pathrasfile;
 
   if (argc == 0) {
     usage_exit();
-}
+  }
 
   parse_commandline(argc, argv);
   check_options();
   if (checkoptsonly != 0) {
     return (0);
-}
+  }
 
   dump_options(stdout);
 
@@ -178,11 +164,11 @@ ofstream pathrasfile;
 
   while (getline(listfile, listline)) {
     string measline;
-string subjid;
+    string subjid;
     vector<unsigned int> knots;
     vector<float> arc;
-vector<float> path;
-vector<float> meas;
+    vector<float> path;
+    vector<float> meas;
     vector<string> inputs;
     ifstream infile;
     istringstream liststr(listline);
@@ -194,11 +180,11 @@ vector<float> meas;
 
     while (liststr >> filename) {
       inputs.push_back(filename);
-}
+    }
 
     if (inputs.empty()) {
       continue;
-}
+    }
 
     // First input on each line is the path directory
     filename = inputs[0] + "/pathstats.byvoxel.txt";
@@ -232,7 +218,7 @@ vector<float> meas;
 #endif
         if (inputs.size() > 2) {
       affinereg.ReadXfm(inputs[2].c_str(), inref, outref);
-}
+    }
 
     // Read measures along the path
     while (getline(infile, measline)) {
@@ -245,7 +231,7 @@ vector<float> meas;
 
         if (word.compare("subjectname") == 0) {
           linestr >> subjid;
-}
+        }
       } else if (measline.substr(0, 1).compare("x") == 0) { // Header line
         string word;
         istringstream linestr(measline);
@@ -259,11 +245,11 @@ vector<float> meas;
         measlist.clear();
         while (linestr >> word) {
           measlist.push_back(word);
-}
+        }
       } else { // Value line
         float val;
         vector<float> point;
-vector<float> valpoint;
+        vector<float> valpoint;
         istringstream linestr(measline);
 
         // The first three columns are the x, y, z coordinates of this point
@@ -277,13 +263,13 @@ vector<float> valpoint;
         // Apply affine transform
         if (!affinereg.IsEmpty()) {
           affinereg.ApplyXfm(point, point.begin());
-}
+        }
 
 #ifndef NO_CVS_UP_IN_HERE
         // Apply nonlinear transform
         if (!nonlinreg.IsEmpty()) {
           nonlinreg.ApplyXfm(point, point.begin());
-}
+        }
 #endif
 
         // Add length of new path segment to arc lengths
@@ -291,9 +277,9 @@ vector<float> valpoint;
           arc.push_back(0.0);
         } else {
           const float dx = *(path.end() - 3) - point[0];
-const float dy = *(path.end() - 2) - point[1];
-const float dz = *(path.end() - 1) - point[2];
-const float seglen = sqrt(dx * dx + dy * dy + dz * dz);
+          const float dy = *(path.end() - 2) - point[1];
+          const float dz = *(path.end() - 1) - point[2];
+          const float seglen = sqrt(dx * dx + dy * dy + dz * dz);
 
           arc.push_back(*(arc.end() - 1) + seglen);
         }
@@ -304,7 +290,7 @@ const float seglen = sqrt(dx * dx + dy * dy + dz * dz);
         // The remaining columns are the values of the measures at this point
         while (linestr >> val) {
           meas.push_back(val);
-}
+        }
       }
     }
 
@@ -312,11 +298,11 @@ const float seglen = sqrt(dx * dx + dy * dy + dz * dz);
 
     if (inref != nullptr) {
       MRIfree(&inref);
-}
+    }
 
     if (arc.empty()) {
       continue;
-}
+    }
 
     subjlist.push_back(subjid);
     lengths.push_back(arc.size());
@@ -333,8 +319,7 @@ const float seglen = sqrt(dx * dx + dy * dy + dz * dz);
       float dmin = numeric_limits<float>::infinity();
       auto imin = arc.begin();
 
-      for (auto iarc = arc.begin(); iarc < arc.end();
-           iarc++) {
+      for (auto iarc = arc.begin(); iarc < arc.end(); iarc++) {
         const float darc = fabs(arcpart - *iarc);
 
         if (darc < dmin) {
@@ -342,7 +327,7 @@ const float seglen = sqrt(dx * dx + dy * dy + dz * dz);
           dmin = darc;
         } else {
           break;
-}
+        }
       }
 
       knots.push_back(imin - arc.begin());
@@ -362,23 +347,20 @@ const float seglen = sqrt(dx * dx + dy * dy + dz * dz);
   icenter = itemplate->begin() + (allknots[0][2] * 3);
   distmin = numeric_limits<float>::infinity();
 
-  for (auto iallp = allpaths.begin();
-       iallp < allpaths.end(); iallp++) {
+  for (auto iallp = allpaths.begin(); iallp < allpaths.end(); iallp++) {
     float dist = 0.0;
     auto jallk = allknots.begin();
 
-    for (auto jallp = allpaths.begin();
-         jallp < allpaths.end(); jallp++) {
+    for (auto jallp = allpaths.begin(); jallp < allpaths.end(); jallp++) {
       if (jallp != iallp) {
         auto iknot = iallk->begin();
 
-        for (auto jknot = jallk->begin();
-             jknot < jallk->end(); jknot++) {
+        for (auto jknot = jallk->begin(); jknot < jallk->end(); jknot++) {
           const unsigned int ioffset = (*iknot) * 3;
-const unsigned int joffset = (*jknot) * 3;
+          const unsigned int joffset = (*jknot) * 3;
           const float dx = iallp->at(ioffset) - jallp->at(joffset);
-const float dy = iallp->at(ioffset + 1) - jallp->at(joffset + 1);
-const float dz = iallp->at(ioffset + 2) - jallp->at(joffset + 2);
+          const float dy = iallp->at(ioffset + 1) - jallp->at(joffset + 1);
+          const float dz = iallp->at(ioffset + 2) - jallp->at(joffset + 2);
 
           dist += sqrt(dx * dx + dy * dy + dz * dz);
 
@@ -407,7 +389,7 @@ const float dz = iallp->at(ioffset + 2) - jallp->at(joffset + 2);
     cout << darc * outref->xsize << " mm" << endl;
   } else {
     cout << darc << " voxels" << endl;
-}
+  }
 
   if (0) {
     // Write points of most representative path to file as RAS coords
@@ -421,8 +403,7 @@ const float dz = iallp->at(ioffset + 2) - jallp->at(joffset + 2);
 
     npt = 1;
 
-    for (auto ipt = itemplate->begin();
-         ipt < itemplate->end(); ipt += 3) {
+    for (auto ipt = itemplate->begin(); ipt < itemplate->end(); ipt += 3) {
       pathrasfile << npt;
 
       for (int k = 1; k < 4; k++) { // Transform from voxel to RAS coords
@@ -430,7 +411,7 @@ const float dz = iallp->at(ioffset + 2) - jallp->at(joffset + 2);
                     << ipt[0] * outv2r->rptr[k][1] +
                            ipt[1] * outv2r->rptr[k][2] +
                            ipt[2] * outv2r->rptr[k][3] + outv2r->rptr[k][4];
-}
+      }
 
       pathrasfile << " 0" << endl;
 
@@ -443,19 +424,17 @@ const float dz = iallp->at(ioffset + 2) - jallp->at(joffset + 2);
   // Reparameterize the arc length on each path
   ialla = allarc.begin();
 
-  for (auto iallp = allpaths.begin();
-       iallp < allpaths.end(); iallp++) {
+  for (auto iallp = allpaths.begin(); iallp < allpaths.end(); iallp++) {
     float dmin = numeric_limits<float>::infinity();
-float arc0 = 0;
+    float arc0 = 0;
     auto iarc = ialla->begin();
 
     // Find the closest point to the mid-point of the most representative path
-    for (auto ipath = iallp->begin();
-         ipath < iallp->end(); ipath += 3) {
+    for (auto ipath = iallp->begin(); ipath < iallp->end(); ipath += 3) {
       const float dx = ipath[0] - icenter[0];
-const float dy = ipath[1] - icenter[1];
-const float dz = ipath[2] - icenter[2];
-const float dist = dx * dx + dy * dy + dz * dz;
+      const float dy = ipath[1] - icenter[1];
+      const float dz = ipath[2] - icenter[2];
+      const float dist = dx * dx + dy * dy + dz * dz;
       //...
 
       if (dist < dmin) {
@@ -467,10 +446,9 @@ const float dist = dx * dx + dy * dy + dz * dz;
     }
 
     // Make this point the origin of the arc length for this path
-    for (auto iarcnew = ialla->begin();
-         iarcnew < ialla->end(); iarcnew++) {
+    for (auto iarcnew = ialla->begin(); iarcnew < ialla->end(); iarcnew++) {
       *iarcnew -= arc0;
-}
+    }
 
     arcend1.push_back(*min_element(ialla->begin(), ialla->end()));
     arcend2.push_back(*max_element(ialla->begin(), ialla->end()));
@@ -503,8 +481,7 @@ const float dist = dx * dx + dy * dy + dz * dz;
   iarc1 = arcend1.begin();
   iarc2 = arcend2.begin();
 
-  for (auto iout = isout.begin(); iout < isout.end();
-       iout++) {
+  for (auto iout = isout.begin(); iout < isout.end(); iout++) {
     if (*iarc1 < lthresh1 || *iarc1 > uthresh1 || *iarc2 < lthresh2 ||
         *iarc2 > uthresh2) {
       *iout = true;
@@ -531,8 +508,7 @@ const float dist = dx * dx + dy * dy + dz * dz;
   iallp = allpaths.begin();
   iout = isout.begin();
 
-  for (auto ialla = allarc.begin();
-       ialla < allarc.end(); ialla++) {
+  for (auto ialla = allarc.begin(); ialla < allarc.end(); ialla++) {
     float larc = arcmin + darc;
     auto insubj = nsubj.begin();
     auto imean = meanpath.begin();
@@ -541,22 +517,22 @@ const float dist = dx * dx + dy * dy + dz * dz;
     for (unsigned int ilen = 0; ilen < narc; ilen++) {
       float slope;
       vector<float>::const_iterator iarc = ialla->begin();
-vector<float>::const_iterator imeas1;
-vector<float>::const_iterator imeas0;
+      vector<float>::const_iterator imeas1;
+      vector<float>::const_iterator imeas0;
 
       if (*iarc > larc) { // No points in this segment, skip ahead
         for (int k = static_cast<int>(nmeas); k > 0; k--) {
           meas.push_back(numeric_limits<float>::infinity());
-}
+        }
       } else {
         while (*iarc < larc && iarc < ialla->end()) {
           iarc++;
-}
+        }
 
         if (iarc == ialla->end()) { // No points in this segment, skip ahead
           for (int k = static_cast<int>(nmeas); k > 0; k--) {
             meas.push_back(numeric_limits<float>::infinity());
-}
+          }
         } else {
           // Linear interpolation
           slope = (larc - *(iarc - 1)) / (*iarc - *(iarc - 1));
@@ -573,8 +549,7 @@ vector<float>::const_iterator imeas0;
           }
 
           if (!*iout) {
-            auto ipt =
-                iallp->begin() + 3 * (iarc - ialla->begin());
+            auto ipt = iallp->begin() + 3 * (iarc - ialla->begin());
 
             // Increment number of samples in this segment
             (*insubj)++;
@@ -582,7 +557,7 @@ vector<float>::const_iterator imeas0;
             // Add point towards mean path
             for (int k = 0; k < 3; k++) {
               imean[k] += ipt[k];
-}
+            }
           }
         }
       }
@@ -600,7 +575,8 @@ vector<float>::const_iterator imeas0;
   }
 
   // Minimum number of subjects that must contribute to a position on the path
-  nsubjmin = static_cast<unsigned int>(ceil(.2 * static_cast<float>(subjlist.size())));
+  nsubjmin =
+      static_cast<unsigned int>(ceil(.2 * static_cast<float>(subjlist.size())));
 
   // Remove positions from start of path that don't have enough samples
   while (*nsubj.begin() < nsubjmin) {
@@ -608,10 +584,9 @@ vector<float>::const_iterator imeas0;
 
     meanpath.erase(meanpath.begin(), meanpath.begin() + 3);
 
-    for (auto iallm = allmeasint.begin();
-         iallm < allmeasint.end(); iallm++) {
+    for (auto iallm = allmeasint.begin(); iallm < allmeasint.end(); iallm++) {
       iallm->erase(iallm->begin(), iallm->begin() + nmeas);
-}
+    }
   }
 
   // Remove positions from end of path that don't have enough samples
@@ -620,20 +595,18 @@ vector<float>::const_iterator imeas0;
 
     meanpath.erase(meanpath.end() - 3, meanpath.end());
 
-    for (auto iallm = allmeasint.begin();
-         iallm < allmeasint.end(); iallm++) {
+    for (auto iallm = allmeasint.begin(); iallm < allmeasint.end(); iallm++) {
       iallm->erase(iallm->end() - nmeas, iallm->end());
-}
+    }
   }
 
   // Divide sums of points by number of samples to get mean path points
   insubj = nsubj.begin();
 
-  for (auto ipt = meanpath.begin(); ipt < meanpath.end();
-       ipt += 3) {
+  for (auto ipt = meanpath.begin(); ipt < meanpath.end(); ipt += 3) {
     for (int k = 0; k < 3; k++) {
       ipt[k] /= *insubj;
-}
+    }
 
     insubj++;
   }
@@ -654,8 +627,7 @@ vector<float>::const_iterator imeas0;
 
   npt = 1;
 
-  for (auto ipt = meanpath.begin(); ipt < meanpath.end();
-       ipt += 3) {
+  for (auto ipt = meanpath.begin(); ipt < meanpath.end(); ipt += 3) {
     // Write voxel coordinates
     pathfile << ipt[0] << " " << ipt[1] << " " << ipt[2] << endl;
 
@@ -666,7 +638,7 @@ vector<float>::const_iterator imeas0;
       pathrasfile << " "
                   << ipt[0] * outv2r->rptr[k][1] + ipt[1] * outv2r->rptr[k][2] +
                          ipt[2] * outv2r->rptr[k][3] + outv2r->rptr[k][4];
-}
+    }
 
     pathrasfile << " 0" << endl;
 
@@ -679,8 +651,7 @@ vector<float>::const_iterator imeas0;
   // Write output files
   ntot = allmeasint[0].size();
 
-  for (auto imeas = measlist.begin();
-       imeas < measlist.end(); imeas++) {
+  for (auto imeas = measlist.begin(); imeas < measlist.end(); imeas++) {
     string outname = string(outBase) + "." + *imeas + ".txt";
     ofstream outfile;
 
@@ -688,10 +659,9 @@ vector<float>::const_iterator imeas0;
     outfile.open(outname.c_str(), ios::out);
 
     // Write subject names
-    for (auto isubj = subjlist.begin();
-         isubj < subjlist.end(); isubj++) {
+    for (auto isubj = subjlist.begin(); isubj < subjlist.end(); isubj++) {
       outfile << *isubj << " ";
-}
+    }
 
     outfile << endl;
 
@@ -704,7 +674,7 @@ vector<float>::const_iterator imeas0;
           outfile << "NaN ";
         } else {
           outfile << *ival << " ";
-}
+        }
       }
 
       outfile << endl;
@@ -723,11 +693,10 @@ vector<float>::const_iterator imeas0;
 
     iallm = allmeas.begin();
 
-    for (auto ialla = allarc.begin();
-         ialla < allarc.end(); ialla++) {
+    for (auto ialla = allarc.begin(); ialla < allarc.end(); ialla++) {
       float larc = arcmin + darc;
       vector<float>::const_iterator iarc = ialla->begin();
-vector<float>::const_iterator imeas = iallm->begin();
+      vector<float>::const_iterator imeas = iallm->begin();
       vector<float> meas;
 
       while (larc <= arcmax) {
@@ -735,8 +704,7 @@ vector<float>::const_iterator imeas = iallm->begin();
         vector<float> avg(nmeas, 0);
 
         while (*iarc < larc && iarc < ialla->end()) {
-          for (auto iavg = avg.begin(); iavg < avg.end();
-               iavg++) {
+          for (auto iavg = avg.begin(); iavg < avg.end(); iavg++) {
             *iavg += *imeas;
 
             imeas++;
@@ -747,16 +715,14 @@ vector<float>::const_iterator imeas = iallm->begin();
         }
 
         if (nsamp > 0) {
-          for (auto iavg = avg.begin(); iavg < avg.end();
-               iavg++) {
+          for (auto iavg = avg.begin(); iavg < avg.end(); iavg++) {
             *iavg /= nsamp;
-}
+          }
         } else { // No points in this section
-          for (auto iavg = avg.begin(); iavg < avg.end();
-               iavg++) {
+          for (auto iavg = avg.begin(); iavg < avg.end(); iavg++) {
             *iavg = numeric_limits<float>::infinity();
-}
-}
+          }
+        }
 
         meas.insert(meas.end(), avg.begin(), avg.end());
 
@@ -771,8 +737,7 @@ vector<float>::const_iterator imeas = iallm->begin();
     // Write output files
     ntot = nSection * nmeas;
 
-    for (auto imeas = measlist.begin();
-         imeas < measlist.end(); imeas++) {
+    for (auto imeas = measlist.begin(); imeas < measlist.end(); imeas++) {
       string outname = string(outBase) + "." + *imeas + "." + nsec + ".txt";
       ofstream outfile;
 
@@ -780,10 +745,9 @@ vector<float>::const_iterator imeas = iallm->begin();
       outfile.open(outname.c_str(), ios::out);
 
       // Write subject names
-      for (auto isubj = subjlist.begin();
-           isubj < subjlist.end(); isubj++) {
+      for (auto isubj = subjlist.begin(); isubj < subjlist.end(); isubj++) {
         outfile << *isubj << " ";
-}
+      }
 
       outfile << endl;
 
@@ -796,7 +760,7 @@ vector<float>::const_iterator imeas = iallm->begin();
             outfile << "NaN ";
           } else {
             outfile << *ival << " ";
-}
+          }
         }
 
         outfile << endl;
@@ -822,13 +786,13 @@ vector<float>::const_iterator imeas = iallm->begin();
 /* --------------------------------------------- */
 static int parse_commandline(int argc, char **argv) {
   int nargc;
-int nargsused;
+  int nargsused;
   char **pargv;
-char *option;
+  char *option;
 
   if (argc < 1) {
     usage_exit();
-}
+  }
 
   nargc = argc;
   pargv = argv;
@@ -836,7 +800,7 @@ char *option;
     option = pargv[0];
     if (debug != 0) {
       printf("%d %s\n", nargc, option);
-}
+    }
     nargc -= 1;
     pargv += 1;
 
@@ -855,32 +819,32 @@ char *option;
     } else if (strcmp(option, "--list") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       inListFile = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--ref") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       outRefFile = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--out") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       outBase = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--sec") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
-}
+      }
       sscanf(pargv[0], "%d", &nSection);
       nargsused = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (CMDsingleDash(option) != 0) {
         fprintf(stderr, "       Did you really mean -%s ?\n", option);
-}
+      }
       exit(-1);
     }
     nargc -= nargsused;
@@ -949,7 +913,7 @@ static void check_options() {
     cout << "ERROR: must specify input list file" << endl;
     exit(1);
   }
-  }
+}
 
 static void dump_options(FILE *fp) {
   cout << endl

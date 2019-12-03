@@ -25,25 +25,13 @@
  *
  */
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include "mri.h"
-#include "const.h"
 #include "diag.h"
-#include "error.h"
-#include "macros.h"
-#include "proto.h"
 #include "timer.h"
 #include "mrinorm.h"
 #include "cma.h"
 #include "version.h"
-#include "transform.h"
 #include "talairachex.h"
-#include "matrix.h"
 #include "voxlist.h"
-#include "mriTransform.h"
 #include "mrisegment.h"
 #include "tritri.h"
 

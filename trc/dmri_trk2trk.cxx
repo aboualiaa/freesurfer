@@ -28,23 +28,11 @@
 #include "TrackIO.h"
 #include "vial.h" // Needs to be included first because of CVS libs
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-
 #include <sys/utsname.h>
-#include <unistd.h>
-
-#include <iomanip>
-#include <iostream>
-#include <string>
-#include <vector>
 
 #include "cmdargs.h"
 #include "diag.h"
-#include "error.h"
 #include "fio.h"
-#include "mri.h"
 #include "timer.h"
 #include "version.h"
 
@@ -62,7 +50,7 @@ int debug = 0, checkoptsonly = 0;
 
 int main(int argc, char *argv[]);
 
-static char vcid[]   = "";
+static char vcid[] = "";
 const char *Progname = "dmri_trk2trk";
 
 int doInvNonlin = 0, doFill = 0, doMean = 0, doNth = 0, strNum = -1,
@@ -88,7 +76,7 @@ int main(int argc, char **argv) {
   vector<float> point(3);
   vector<float> step(3, 0);
   MATRIX *outv2r;
-  MRI *inref  = 0;
+  MRI *inref = 0;
   MRI *outref = 0;
   MRI *outvol = 0;
   AffineReg affinereg;
@@ -125,7 +113,7 @@ int main(int argc, char **argv) {
   dump_options(stdout);
 
   // Read reference volumes
-  inref  = MRIread(inRefFile);
+  inref = MRIread(inRefFile);
   outref = MRIread(outRefFile);
 
   if (!outVolList.empty()) {
@@ -303,7 +291,7 @@ int main(int argc, char **argv) {
             float dist = ipt[k + 3] - ipt[k];
 
             step[k] = dist;
-            dist    = fabs(dist);
+            dist = fabs(dist);
 
             if (dist > dmax) {
               dmax = dist;
@@ -432,7 +420,7 @@ int main(int argc, char **argv) {
       unsigned int kmax;
       unsigned int nstrout;
       unsigned int kstrmean = 0;
-      float dmin            = numeric_limits<float>::infinity();
+      float dmin = numeric_limits<float>::infinity();
       vector<bool> isout(nstr);
       vector<unsigned int> lengths(nstr);
       vector<float> steps(nstr);
@@ -479,11 +467,11 @@ int main(int argc, char **argv) {
 
       for (auto istr = streamlines.begin(); istr < streamlines.end(); istr++) {
         imean = strmean.begin();
-        istd  = strstd.begin();
+        istd = strstd.begin();
 
         for (unsigned int kpt = 0; kpt < kmax; kpt++) {
           const auto idx = static_cast<unsigned int>(round(kpt * (*istep)));
-          auto ipt       = istr->begin() + idx * 3;
+          auto ipt = istr->begin() + idx * 3;
 
           if (ipt > istr->end() - 3) {
             ipt = istr->end() - 3;
@@ -505,7 +493,7 @@ int main(int argc, char **argv) {
       strU.resize(strmean.size());
       strL.resize(strmean.size());
 
-      istd   = strstd.begin();
+      istd = strstd.begin();
       iupper = strU.begin();
       ilower = strL.begin();
 
@@ -537,7 +525,7 @@ int main(int argc, char **argv) {
       // Flag streamlines with at least one outlier point
       fill(isout.begin(), isout.end(), false);
 
-      iout  = isout.begin();
+      iout = isout.begin();
       istep = steps.begin();
 
       for (auto istr = streamlines.begin(); istr < streamlines.end(); istr++) {
@@ -546,7 +534,7 @@ int main(int argc, char **argv) {
 
         for (unsigned int kpt = 0; kpt < kmax; kpt++) {
           const auto idx = static_cast<unsigned int>(round(kpt * (*istep)));
-          auto ipt       = istr->begin() + idx * 3;
+          auto ipt = istr->begin() + idx * 3;
 
           for (int k = 0; k < 3; k++) {
             if (*ipt > *iupper || *ipt < *ilower) {
@@ -580,7 +568,7 @@ int main(int argc, char **argv) {
       }
 
       // Find the non-outlier streamline that is closest to the mean streamline
-      iout  = isout.begin();
+      iout = isout.begin();
       istep = steps.begin();
 
       for (auto istr = streamlines.begin(); istr < streamlines.end(); istr++) {
@@ -588,11 +576,11 @@ int main(int argc, char **argv) {
           float dist = 0;
 
           imean = strmean.begin();
-          istd  = strstd.begin();
+          istd = strstd.begin();
 
           for (unsigned int kpt = 0; kpt < kmax; kpt++) {
             const auto idx = static_cast<unsigned int>(round(kpt * (*istep)));
-            auto ipt       = istr->begin() + idx * 3;
+            auto ipt = istr->begin() + idx * 3;
 
             const float dx = ipt[0] - imean[0];
             const float dy = ipt[1] - imean[1];
@@ -605,7 +593,7 @@ int main(int argc, char **argv) {
           }
 
           if (dist < dmin) {
-            dmin     = dist;
+            dmin = dist;
             kstrmean = istr - streamlines.begin();
           }
         }
@@ -829,7 +817,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
       }
-      inDir     = fio_fullpath(pargv[0]);
+      inDir = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--in") == 0) {
       if (nargc < 1) {
@@ -853,7 +841,7 @@ static int parse_commandline(int argc, char **argv) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
       }
-      outDir    = fio_fullpath(pargv[0]);
+      outDir = fio_fullpath(pargv[0]);
       nargsused = 1;
     } else if (strcmp(option, "--out") == 0) {
       if (nargc < 1) {
@@ -893,19 +881,19 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 1);
       }
       outRefFile = fio_fullpath(pargv[0]);
-      nargsused  = 1;
+      nargsused = 1;
     } else if (strcmp(option, "--reg") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
       }
       affineXfmFile = fio_fullpath(pargv[0]);
-      nargsused     = 1;
+      nargsused = 1;
     } else if (strcmp(option, "--regnl") == 0) {
       if (nargc < 1) {
         CMDargNErr(option, 1);
       }
       nonlinXfmFile = fio_fullpath(pargv[0]);
-      nargsused     = 1;
+      nargsused = 1;
     } else if (strcasecmp(option, "--invnl") == 0) {
       doInvNonlin = 1;
     } else if (strcasecmp(option, "--fill") == 0) {
@@ -948,7 +936,7 @@ static int parse_commandline(int argc, char **argv) {
       }
       sscanf(pargv[0], "%d", &strNum);
       nargsused = 1;
-      doNth     = 1;
+      doNth = 1;
     } else {
       fprintf(stderr, "ERROR: Option %s unknown\n", option);
       if (CMDsingleDash(option) != 0) {

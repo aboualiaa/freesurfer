@@ -24,19 +24,9 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cctype>
-
-#include "mri.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "utils.h"
 #include "timer.h"
 #include "version.h"
-#include "mrisurf.h"
 #include "gcamorph.h"
 #include "mrinorm.h"
 #include "mri_circulars.h"

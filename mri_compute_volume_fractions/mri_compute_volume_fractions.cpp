@@ -25,19 +25,11 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <unistd.h>
 #include <sys/utsname.h>
 
-#include "utils.h"
-#include "fio.h"
 #include "version.h"
 #include "cmdargs.h"
-#include "error.h"
 #include "diag.h"
-#include "colortab.h"
-#include "transform.h"
 #include "mri2.h"
 #include "mrisutils.h"
 #include "cma.h"

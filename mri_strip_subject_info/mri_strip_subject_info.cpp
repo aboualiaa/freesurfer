@@ -23,15 +23,10 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
 #include <sys/stat.h>
-#include <cstring>
-#include <cerrno>
 #include "mri.h"
 #include "error.h"
 #include "mri_identify.h"
-#include "machine.h"
 #include "version.h"
 
 char *get_base_name(char *fullpath);

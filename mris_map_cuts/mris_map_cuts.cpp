@@ -23,19 +23,10 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cctype>
-
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "utils.h"
-#include "const.h"
 #include "timer.h"
 #include "version.h"
 #include "mrisurf.h"
-#include "mrishash.h"
 
 int main(int argc, char *argv[]);
 static int get_option(int argc, char *argv[]);

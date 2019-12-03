@@ -27,15 +27,8 @@
  *
  */
 
-#include "env.h"
-#include "pathconvert.h"
-#include "C_mpmProg.h"
-#include "C_mpmOverlay.h"
 #include "asynch.h"
-
 #include "legacy.h"
-
-#include <cstdlib>
 
 extern string G_SELF;
 

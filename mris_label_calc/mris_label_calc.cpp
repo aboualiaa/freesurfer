@@ -22,14 +22,9 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
-#include <string>
-#include <iostream>
-#include <cassert>
 
-#include "error.h"
 #include "mrimorph.h"
 #include "version.h"
-#include "label.h"
 
 using namespace std;
 

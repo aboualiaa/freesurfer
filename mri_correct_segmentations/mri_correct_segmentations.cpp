@@ -4,16 +4,8 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cctype>
-#include "utils.h"
-#include "mri.h"
 #include "mri2.h"
-#include "error.h"
-#include "diag.h"
 #include "version.h"
-#include "macros.h"
 
 #include "fastmarching.h"
 

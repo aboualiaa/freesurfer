@@ -22,18 +22,10 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include <cstring>
 #include <sys/time.h>
-#include <cctype>
 
-#include "error.h"
 #include "diag.h"
-#include "utils.h"
 #include "mri_identify.h"
-#include "mri.h"
 #include "mri2.h"
 #include "fmriutils.h"
 #include "randomfields.h"

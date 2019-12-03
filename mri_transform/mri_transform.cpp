@@ -23,27 +23,16 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-#include <cctype>
 #ifdef HAVE_OPENMP // mrisurf.c has numerous parallelized functions
 #include "romp_support.h"
 #endif
 
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "mri.h"
-#include "proto.h"
-#include "transform.h"
 #include "version.h"
 #include "gcamorph.h"
 #include "cmat.h"
 #include "cma.h"
 #include "mrinorm.h"
-#include "fsinit.h"
 
 double MRIcomputeLinearTransformLabelDist(MRI *mri_src, MATRIX *mA, int label);
 static char vcid[] =

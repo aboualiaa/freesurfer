@@ -29,23 +29,13 @@ BEGINHELP
 ENDHELP
 */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-double round(double x);
+// double round(double x);
 #include <sys/utsname.h>
-#include <unistd.h>
 
-#include "macros.h"
-#include "utils.h"
-#include "mrisurf.h"
 #include "mrisutils.h"
-#include "error.h"
 #include "diag.h"
-#include "mri.h"
 #include "fmriutils.h"
 #include "mri2.h"
-#include "fio.h"
 #include "version.h"
 #include "cmdargs.h"
 #include "randomfields.h"

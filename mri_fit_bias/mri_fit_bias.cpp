@@ -29,20 +29,12 @@
 \author Douglas Greve
 */
 
-#include <cstdio>
-#include <cstdlib>
-#include <unistd.h>
 #include <sys/utsname.h>
 
-#include "utils.h"
-#include "error.h"
-#include "mri.h"
 #include "mri2.h"
 #include "diag.h"
-#include "fio.h"
 #include "version.h"
 #include "cmdargs.h"
-#include "matrix.h"
 #include "cma.h"
 #include "region.h"
 #ifdef _OPENMP

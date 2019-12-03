@@ -1,5 +1,4 @@
 #include "argparse.h"
-#include "mrisurf.h"
 #include "remesher.h"
 #include "surfgrad.h"
 
@@ -34,7 +33,8 @@ int main(int argc, const char **argv) {
   MRISremoveIntersections(remeshed);
 
   double diff = (double)remeshed->nvertices / (double)surf->nvertices;
-  printf("Remeshed surface quality stats nv0 = %d  nv = %d  %g\n", surf->nvertices, remeshed->nvertices, diff);
+  printf("Remeshed surface quality stats nv0 = %d  nv = %d  %g\n",
+         surf->nvertices, remeshed->nvertices, diff);
   MRISedges(remeshed);
   MRIScorners(remeshed);
   MRISfaceMetric(remeshed, 0);
