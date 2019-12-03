@@ -24,6 +24,7 @@
 
 #include "mri_convert.hpp"
 #include "mri_convert_lib.hpp"
+#include <boost/algorithm/string.hpp>
 
 auto main(int argc, char *argv[]) -> int {
   auto err_logger = spdlog::stderr_color_mt("stderr");
@@ -349,32 +350,8 @@ auto main(int argc, char *argv[]) -> int {
                     in_k_directions[2]);
       }
       in_k_direction_flag = TRUE;
-    } else if (strcmp(argv[i], "--in_orientation") == 0) {
-      get_string(argc, argv, &i, in_orientation_string.data());
-      errmsg = MRIcheckOrientationString(in_orientation_string.data());
-      if (errmsg != nullptr) {
-        fmt::printf("ERROR: with in orientation string %s\n",
-                    in_orientation_string.data());
-        fmt::printf("%s\n", errmsg);
-        exit(1);
-      }
-      in_orientation_flag = TRUE;
-    }
-
-    else if (strcmp(argv[i], "--out_orientation") == 0) {
-      get_string(argc, argv, &i, out_orientation_string.data());
-      errmsg = MRIcheckOrientationString(out_orientation_string.data());
-      if (errmsg != nullptr) {
-        fmt::printf("ERROR: with out_orientation string %s\n",
-                    out_orientation_string.data());
-        fmt::printf("%s\n", errmsg);
-        exit(1);
-      }
-      out_orientation_flag = TRUE;
-    }
-
-    else if (strcmp(argv[i], "-oid") == 0 ||
-             strcmp(argv[i], "--out_i_direction") == 0) {
+    } else if (strcmp(argv[i], "-oid") == 0 ||
+               strcmp(argv[i], "--out_i_direction") == 0) {
       get_doubles(argc, argv, &i, out_i_directions.data(), 3);
       norm = fs::math::frobenius_norm(&out_i_directions);
       if (norm == 0.0) {
@@ -439,100 +416,11 @@ auto main(int argc, char *argv[]) -> int {
                     out_k_directions[2]);
       }
       out_k_direction_flag = TRUE;
-    } else if (strcmp(argv[i], "-ic") == 0 ||
-               strcmp(argv[i], "--in_center") == 0) {
-      get_floats(argc, argv, &i, in_center.data(), 3);
-      in_center_flag = TRUE;
-    } else if (strcmp(argv[i], "-dic") == 0 ||
-               strcmp(argv[i], "--delta_in_center") == 0) {
-      get_floats(argc, argv, &i, delta_in_center.data(), 3);
-      delta_in_center_flag = TRUE;
-    } else if (strcmp(argv[i], "-oc") == 0 ||
-               strcmp(argv[i], "--out_center") == 0) {
-      get_floats(argc, argv, &i, out_center.data(), 3);
-      out_center_flag = TRUE;
-    } else if (strcmp(argv[i], "-vs") == 0 ||
-               strcmp(argv[i], "--voxsize") == 0 ||
-               strcmp(argv[i], "-voxsize") == 0) {
-      get_floats(argc, argv, &i, voxel_size.data(), 3);
-      voxel_size_flag = TRUE;
-    } else if (strcmp(argv[i], "-ds") == 0 ||
-               strcmp(argv[i], "--downsample") == 0 ||
-               strcmp(argv[i], "-downsample") == 0) {
-      get_floats(argc, argv, &i, downsample_factor.data(), 3);
-      downsample_flag = TRUE;
-    } else if (strcmp(argv[i], "--fwhm") == 0) {
-      get_floats(argc, argv, &i, &fwhm, 1);
-      gstd = fwhm / sqrt(log(256.0));
-      fmt::printf("fwhm = %g, gstd = %g\n", fwhm, gstd);
-    } else if (strcmp(argv[i], "--reduce") == 0) {
-      get_ints(argc, argv, &i, &reduce, 1);
-      fmt::printf("reducing input image %d times\n", reduce);
-    } else if (strcmp(argv[i], "-odt") == 0 ||
-               strcmp(argv[i], "--out_data_type") == 0) {
-      get_string(argc, argv, &i, out_data_type_string.data());
-      if (strcmp(StrLower(out_data_type_string.data()), "uchar") == 0) {
-        out_data_type = MRI_UCHAR;
-      } else if (strcmp(StrLower(out_data_type_string.data()), "short") == 0) {
-        out_data_type = MRI_SHORT;
-      } else if (strcmp(StrLower(out_data_type_string.data()), "int") == 0) {
-        out_data_type = MRI_INT;
-      } else if (strcmp(StrLower(out_data_type_string.data()), "float") == 0) {
-        out_data_type = MRI_FLOAT;
-      } else if (strcmp(StrLower(out_data_type_string.data()), "rgb") == 0) {
-        out_data_type = MRI_RGB;
-      } else {
-        fmt::fprintf(stderr, "\n%s: unknown data type \"%s\"\n", Progname,
-                     argv[i]);
-        fs::util::cli::usage_message(stdout);
-        exit(1);
-      }
-    } else if (strcmp(argv[i], "--bfile-little-endian") == 0) {
-      setenv("BFILE_LITTLE_ENDIAN", "1", 1);
-    } else if (strcmp(argv[i], "--rescale") == 0) {
-      // Rescale so that the global mean of input is rescale_factor
-      rescale_factor = atof(argv[i + 1]);
-      i++;
-    } else if (strcmp(argv[i], "-sc") == 0 || strcmp(argv[i], "--scale") == 0) {
-      scale_factor = atof(argv[i + 1]);
-      i++;
-    } else if (strcmp(argv[i], "-osc") == 0 ||
-               strcmp(argv[i], "--out-scale") == 0) {
-      out_scale_factor = atof(argv[i + 1]);
-      i++;
-    } else if (strcmp(argv[i], "-rt") == 0 ||
-               strcmp(argv[i], "--resample_type") == 0) {
-      get_string(argc, argv, &i, resample_type.data());
-      if (strcmp(StrLower(resample_type.data()), "interpolate") == 0) {
-        resample_type_val = SAMPLE_TRILINEAR;
-      } else if (strcmp(StrLower(resample_type.data()), "nearest") == 0) {
-        resample_type_val = SAMPLE_NEAREST;
-      } else if (strcmp(StrLower(resample_type.data()), "vote") == 0) {
-        resample_type_val = SAMPLE_VOTE;
-      } else if (strcmp(StrLower(resample_type.data()), "weighted") == 0) {
-        resample_type_val = SAMPLE_WEIGHTED;
-      }
-      /*       else if(strcmp(StrLower(resample_type), "sinc") == 0)
-            {
-              resample_type_val = SAMPLE_SINC;
-            }*/
-      else if (strcmp(StrLower(resample_type.data()), "cubic") == 0) {
-        resample_type_val = SAMPLE_CUBIC_BSPLINE;
-      } else {
-        fmt::fprintf(stderr, "\n%s: unknown resample type \"%s\"\n", Progname,
-                     argv[i]);
-        fs::util::cli::usage_message(stdout);
-        exit(1);
-      }
     } else if (strcmp(argv[i], "-it") == 0 ||
                strcmp(argv[i], "--in_type") == 0) {
       get_string(argc, argv, &i, in_type_string.data());
       forced_in_type = string_to_type(in_type_string.data());
       force_in_type_flag = TRUE;
-    } else if (strcmp(argv[i], "-dicomread2") == 0) {
-      UseDICOMRead2 = 1;
-    } else if (strcmp(argv[i], "-dicomread0") == 0) {
-      UseDICOMRead2 = 0;
     } else if (strcmp(argv[i], "-ot") == 0 ||
                strcmp(argv[i], "--out_type") == 0) {
       get_string(argc, argv, &i, out_type_string.data());
@@ -544,22 +432,6 @@ auto main(int argc, char *argv[]) -> int {
       get_string(argc, argv, &i, template_type_string.data());
       forced_template_type = string_to_type(template_type_string.data());
       force_template_type_flag = TRUE;
-    } else if (strcmp(argv[i], "-sn") == 0 ||
-               strcmp(argv[i], "--subject_name") == 0) {
-      get_string(argc, argv, &i, subject_name.data());
-    } else if (strcmp(argv[i], "-gis") == 0 ||
-               strcmp(argv[i], "--gdf_image_stem") == 0) {
-      get_string(argc, argv, &i, gdf_image_stem.data());
-      if (gdf_image_stem.empty()) {
-        fmt::fprintf(stderr, "\n%s: zero length GDF image stem given\n",
-                     Progname);
-        fs::util::cli::usage_message(stdout);
-        exit(1);
-      }
-    } else if (strcmp(argv[i], "-rl") == 0 ||
-               strcmp(argv[i], "--reslice_like") == 0) {
-      get_string(argc, argv, &i, reslice_like_name.data());
-      reslice_like_flag = TRUE;
     } else if (strcmp(argv[i], "-f") == 0 || strcmp(argv[i], "--frame") == 0) {
       nframes = 0;
       do {
@@ -574,13 +446,6 @@ auto main(int argc, char *argv[]) -> int {
 
       get_ints(argc, argv, &i, frames.data(), nframes);
       frame_flag = TRUE;
-    } else if (strcmp(argv[i], "--slice-bias") == 0) {
-      get_floats(argc, argv, &i, &SliceBiasAlpha, 1);
-      SliceBias = TRUE;
-    } else if (strcmp(argv[i], "-il") == 0 ||
-               strcmp(argv[i], "--in_like") == 0) {
-      get_string(argc, argv, &i, in_like_name.data());
-      in_like_flag = TRUE;
     } else if (strcmp(argv[i], "-sp") == 0 ||
                strcmp(argv[i], "--smooth_parcellation") == 0) {
       get_ints(argc, argv, &i, &smooth_parcellation_count, 1);
@@ -593,17 +458,6 @@ auto main(int argc, char *argv[]) -> int {
         exit(1);
       }
       smooth_parcellation_flag = TRUE;
-    } else if (strcmp(argv[i], "-cf") == 0 ||
-               strcmp(argv[i], "--color_file") == 0) {
-      get_string(argc, argv, &i, color_file_name.data());
-      color_file_flag = TRUE;
-    } else if (strcmp(argv[i], "-ns") == 0 ||
-               strcmp(argv[i], "--no_scale") == 0) {
-      get_ints(argc, argv, &i, &no_scale_flag, 1);
-      // no_scale_flag = (no_scale_flag == 0 ? FALSE : TRUE);
-    } else if (strcmp(argv[i], "-cg") == 0 ||
-               strcmp(argv[i], "--crop_gdf") == 0) {
-      mriio_set_gdf_crop_flag(TRUE);
     }
   }
   /**** Finished parsing command line ****/
@@ -2692,6 +2546,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     conflicts.insert(std::make_pair("zero_ge_z_offset", "zgez"));
     conflicts.insert(std::make_pair("zero_ge_z_offset", "no_zero_ge_z_offset"));
     conflicts.insert(std::make_pair("zero_ge_z_offset", "nozgez"));
+    conflicts.insert(std::make_pair("in_center", "ic"));
 
     for (auto const &[key, val] : conflicts) {
       po::conflicting_options(vm, key, val);
@@ -3072,6 +2927,152 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
 
   if (cmdargs->mid_frame_flag) {
     cmdargs->frame_flag = true;
+  }
+
+  if (vm.count("in_center") != 0 || vm.count("ic") != 0) {
+    if (!fs::util::cli::check_vector_range(cmdargs->in_center, 3)) {
+      fmt::printf("ERROR:");
+    }
+
+    cmdargs->in_center_flag = true;
+  }
+
+  if (vm.count("delta_in_center") != 0 || vm.count("dic") != 0) {
+    if (!fs::util::cli::check_vector_range(cmdargs->delta_in_center, 3)) {
+      fmt::printf("ERROR:");
+    }
+
+    cmdargs->delta_in_center_flag = true;
+  }
+
+  if (vm.count("out_center") != 0 || vm.count("oc") != 0) {
+    if (!fs::util::cli::check_vector_range(cmdargs->out_center, 3)) {
+      fmt::printf("ERROR:");
+    }
+
+    cmdargs->out_center_flag = true;
+  }
+
+  if (vm.count("voxsize") != 0 || vm.count("vs") != 0) {
+    if (!fs::util::cli::check_vector_range(cmdargs->voxel_size, 3)) {
+      fmt::printf("ERROR:");
+    }
+
+    cmdargs->voxel_size_flag = true;
+  }
+
+  if (vm.count("downsample") != 0 || vm.count("ds") != 0) {
+    if (!fs::util::cli::check_vector_range(cmdargs->downsample_factor, 3)) {
+      fmt::printf("ERROR:");
+    }
+
+    cmdargs->downsample_flag = true;
+  }
+
+  if (vm.count("reduce") != 0) {
+    fmt::printf("reducing input image %d times\n", cmdargs->reduce);
+  }
+
+  if (vm.count("bfile-little-endian") != 0) {
+    setenv("BFILE_LITTLE_ENDIAN", "1", 1);
+  }
+
+  if (vm.count("dicomread2") != 0) {
+    UseDICOMRead2 = 1;
+  }
+
+  if (vm.count("dicomread0") != 0) {
+    UseDICOMRead2 = 0;
+  }
+
+  if (vm.count("reslice_like") != 0) {
+    cmdargs->reslice_like_flag = true;
+  }
+
+  if (vm.count("slice-bias") != 0) {
+    cmdargs->SliceBias = true;
+  }
+
+  if (vm.count("in_like") != 0) {
+    cmdargs->in_like_flag = true;
+  }
+
+  if (vm.count("color_file") != 0) {
+    cmdargs->color_file_flag = true;
+  }
+
+  if (vm.count("crop_gdf") != 0 || vm.count("crop_gdf") != 0) {
+    mriio_set_gdf_crop_flag(TRUE);
+  }
+
+  if (vm.count("in_orientation") != 0) {
+    auto errmsg =
+        MRIcheckOrientationString(cmdargs->in_orientation_string.data());
+    if (errmsg != nullptr) {
+      fmt::printf("ERROR: with in orientation string %s\n",
+                  cmdargs->in_orientation_string.data());
+      fmt::printf("%s\n", errmsg);
+      exit(1);
+    }
+    cmdargs->in_orientation_flag = true;
+  }
+
+  if (vm.count("out_orientation") != 0) {
+    auto errmsg =
+        MRIcheckOrientationString(cmdargs->out_orientation_string.data());
+    if (errmsg != nullptr) {
+      fmt::printf("ERROR: with out orientation string %s\n",
+                  cmdargs->out_orientation_string.data());
+      fmt::printf("%s\n", errmsg);
+      exit(1);
+    }
+    cmdargs->out_orientation_flag = true;
+  }
+
+  if (vm.count("fwhm") != 0) {
+    cmdargs->gstd = cmdargs->fwhm / sqrt(log(256.0));
+    fmt::printf("fwhm = %g, gstd = %g\n", cmdargs->fwhm, cmdargs->gstd);
+  }
+
+  if (vm.count("out_data_type") != 0) {
+    if (boost::iequals(cmdargs->out_data_type_string, "uchar")) {
+      cmdargs->out_data_type = MRI_UCHAR;
+    } else if (boost::iequals(cmdargs->out_data_type_string, "short")) {
+      cmdargs->out_data_type = MRI_SHORT;
+    } else if (boost::iequals(cmdargs->out_data_type_string, "int")) {
+      cmdargs->out_data_type = MRI_INT;
+    } else if (boost::iequals(cmdargs->out_data_type_string, "float")) {
+      cmdargs->out_data_type = MRI_FLOAT;
+    } else if (boost::iequals(cmdargs->out_data_type_string, "rgb")) {
+      cmdargs->out_data_type = MRI_RGB;
+    } else {
+      fmt::fprintf(stderr, "\n%s: unknown data type \"%s\"\n", Progname,
+                   cmdargs->out_data_type_string);
+      fs::util::cli::usage_message(stdout);
+      exit(1);
+    }
+  }
+
+  if (vm.count("resample_type") != 0) {
+    if (boost::iequals(cmdargs->resample_type, "interpolate")) {
+      cmdargs->resample_type_val = SAMPLE_TRILINEAR;
+    } else if (boost::iequals(cmdargs->resample_type, "nearest")) {
+      cmdargs->resample_type_val = SAMPLE_NEAREST;
+    } else if (boost::iequals(cmdargs->resample_type, "vote")) {
+      cmdargs->resample_type_val = SAMPLE_VOTE;
+    } else if (boost::iequals(cmdargs->resample_type, "weighted")) {
+      cmdargs->resample_type_val = SAMPLE_WEIGHTED;
+    } /*else if (boost::iequals(cmdargs->resample_type, "sinc")) {
+      cmdargs->resample_type_val = SAMPLE_SINC;
+    }*/
+    else if (boost::iequals(cmdargs->resample_type, "cubic")) {
+      cmdargs->resample_type_val = SAMPLE_CUBIC_BSPLINE;
+    } else {
+      fmt::fprintf(stderr, "\n%s: unknown resample type \"%s\"\n", Progname,
+                   cmdargs->resample_type);
+      fs::util::cli::usage_message(stdout);
+      exit(1);
+    }
   }
 
   return true;
@@ -3667,6 +3668,169 @@ void initArgDesc(boost::program_options::options_description *desc,
                                                                            /**/
       ("mid-frame",                                                        /**/
        po::bool_switch(&cmdargs->mid_frame_flag),                          /**/
-       "mid-frame");                                                       /**/
+       "mid-frame")                                                        /**/
+                                                                           /**/
+      ("in_center",                                                        /**/
+       po::value<std::vector<int>>(&cmdargs->in_center)->multitoken(),     /**/
+       "in_center")                                                        /**/
+                                                                           /**/
+      ("ic",                                                               /**/
+       po::value<std::vector<int>>(&cmdargs->in_center)->multitoken(),     /**/
+       "in_center")                                                        /**/
+                                                                           /**/
+      ("delta_in_center",                                                  /**/
+       po::value<std::vector<int>>(&cmdargs->delta_in_center)              /**/
+           ->multitoken(),                                                 /**/
+       "delta_in_center")                                                  /**/
+                                                                           /**/
+      ("dic",                                                              /**/
+       po::value<std::vector<int>>(&cmdargs->delta_in_center)              /**/
+           ->multitoken(),                                                 /**/
+       "delta_in_center")                                                  /**/
+                                                                           /**/
+      ("out_center",                                                       /**/
+       po::value<std::vector<int>>(&cmdargs->out_center)->multitoken(),    /**/
+       "out_center")                                                       /**/
+                                                                           /**/
+      ("oc",                                                               /**/
+       po::value<std::vector<int>>(&cmdargs->out_center)->multitoken(),    /**/
+       "out_center")                                                       /**/
+                                                                           /**/
+      ("voxsize",                                                          /**/
+       po::value<std::vector<int>>(&cmdargs->voxel_size)->multitoken(),    /**/
+       "voxel_size")                                                       /**/
+                                                                           /**/
+      ("vs",                                                               /**/
+       po::value<std::vector<int>>(&cmdargs->voxel_size)->multitoken(),    /**/
+       "voxel_size")                                                       /**/
+                                                                           /**/
+      ("downsample",                                                       /**/
+       po::value<std::vector<int>>(&cmdargs->downsample_factor)            /**/
+           ->multitoken(),                                                 /**/
+       "downsample")                                                       /**/
+                                                                           /**/
+      ("ds",                                                               /**/
+       po::value<std::vector<int>>(&cmdargs->downsample_factor)            /**/
+           ->multitoken(),                                                 /**/
+       "downsample")                                                       /**/
+                                                                           /**/
+      ("reduce",                                                           /**/
+       po::value<int>(&cmdargs->reduce),                                   /**/
+       "reduce")                                                           /**/
+                                                                           /**/
+      ("bfile-little-endian",                                              /**/
+       "bfile-little-endian")                                              /**/
+                                                                           /**/
+      ("rescale",                                                          /**/
+       po::value<float>(&cmdargs->rescale_factor),                         /**/
+       "Rescale so that the global mean of input is rescale_factor")       /**/
+                                                                           /**/
+      ("scale",                                                            /**/
+       po::value<float>(&cmdargs->scale_factor),                           /**/
+       "scale")                                                            /**/
+                                                                           /**/
+      ("sc",                                                               /**/
+       po::value<float>(&cmdargs->scale_factor),                           /**/
+       "scale")                                                            /**/
+                                                                           /**/
+      ("out-scale",                                                        /**/
+       po::value<float>(&cmdargs->out_scale_factor),                       /**/
+       "out-scale")                                                        /**/
+                                                                           /**/
+      ("osc",                                                              /**/
+       po::value<float>(&cmdargs->out_scale_factor),                       /**/
+       "out-scale")                                                        /**/
+                                                                           /**/
+      ("dicomread2",                                                       /**/
+       "dicomread2")                                                       /**/
+                                                                           /**/
+      ("dicomread0",                                                       /**/
+       "dicomread0")                                                       /**/
+                                                                           /**/
+      ("subject_name",                                                     /**/
+       po::value<std::string>(&cmdargs->subject_name),                     /**/
+       "subject_name")                                                     /**/
+                                                                           /**/
+      ("sn",                                                               /**/
+       po::value<std::string>(&cmdargs->subject_name),                     /**/
+       "subject_name")                                                     /**/
+                                                                           /**/
+      ("gdf_image_stem",                                                   /**/
+       po::value<std::string>(&cmdargs->gdf_image_stem),                   /**/
+       "gdf_image_stem")                                                   /**/
+                                                                           /**/
+      ("gis",                                                              /**/
+       po::value<std::string>(&cmdargs->gdf_image_stem),                   /**/
+       "gdf_image_stem")                                                   /**/
+                                                                           /**/
+      ("reslice_like",                                                     /**/
+       po::value<std::string>(&cmdargs->reslice_like),                     /**/
+       "reslice_like")                                                     /**/
+                                                                           /**/
+      ("rl",                                                               /**/
+       po::value<std::string>(&cmdargs->reslice_like),                     /**/
+       "reslice_like")                                                     /**/
+                                                                           /**/
+      ("slice-bias",                                                       /**/
+       po::value<float>(&cmdargs->SliceBiasAlpha),                         /**/
+       "slice-bias")                                                       /**/
+                                                                           /**/
+      ("in_like",                                                          /**/
+       po::value<std::string>(&cmdargs->in_like_name),                     /**/
+       "in_like")                                                          /**/
+                                                                           /**/
+      ("il",                                                               /**/
+       po::value<std::string>(&cmdargs->in_like_name),                     /**/
+       "in_like")                                                          /**/
+                                                                           /**/
+      ("color_file",                                                       /**/
+       po::value<std::string>(&cmdargs->color_file_name),                  /**/
+       "color_file")                                                       /**/
+                                                                           /**/
+      ("cf",                                                               /**/
+       po::value<std::string>(&cmdargs->color_file_name),                  /**/
+       "color_file")                                                       /**/
+                                                                           /**/
+      ("no_scale",                                                         /**/
+       po::bool_switch(&cmdargs->no_scale_flag),                           /**/
+       "no_scale")                                                         /**/
+                                                                           /**/
+      ("ns",                                                               /**/
+       po::bool_switch(&cmdargs->no_scale_flag),                           /**/
+       "no_scale")                                                         /**/
+                                                                           /**/
+      ("crop_gdf",                                                         /**/
+       "crop_gdf")                                                         /**/
+                                                                           /**/
+      ("cg",                                                               /**/
+       "crop_gdf")                                                         /**/
+                                                                           /**/
+      ("in_orientation",                                                   /**/
+       po::value<std::string>(&cmdargs->in_orientation_string),            /**/
+       "in_orientation")                                                   /**/
+                                                                           /**/
+      ("out_orientation",                                                  /**/
+       po::value<std::string>(&cmdargs->out_orientation_string),           /**/
+       "out_orientation")                                                  /**/
+                                                                           /**/
+      ("fwhm",                                                             /**/
+       po::value<double>(&cmdargs->fwhm),                                  /**/
+       "fwhm")                                                             /**/
+                                                                           /**/
+      ("out_data_type",                                                    /**/
+       po::value<std::string>(&cmdargs->out_data_type_string),             /**/
+       "out_data_type")                                                    /**/
+                                                                           /**/
+      ("odt",                                                              /**/
+       po::value<std::string>(&cmdargs->out_data_type_string),             /**/
+       "out_data_type")                                                    /**/
+                                                                           /**/
+      ("resample_type",                                                    /**/
+       po::value<std::string>(&cmdargs->resample_type),                    /**/
+       "resample_type")                                                    /**/
+                                                                           /**/
+      ("rt",                                                               /**/
+       po::value<std::string>(&cmdargs->resample_type),                    /**/
+       "resample_type");                                                   /**/
 }
 /* EOF */
