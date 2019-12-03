@@ -15,6 +15,25 @@ jobs:
   include:
     - os: osx
       osx_image: xcode11.2
+      addons:
+        homebrew:
+          packages:
+            - itk
+            - vtk
+            - petsc
+            - cmake
+            - python@3
+            - gcc@9
+            - jemalloc
+            - tcsh
+            - armadillo
+            - qt
+            - hdf5
+            - libomp
+            - szip
+            - fltk
+            - open-mpi
+            - eigen
       cache:
         directories:
           - packages/hpx
@@ -24,9 +43,11 @@ before_cache:
   - brew cleanup
 
 before_install:
-  - brew update && brew install itk vtk petsc cmake python@3 gcc@9 jemalloc tcsh armadillo qt hdf5 libomp szip fltk open-mpi eigen;
   - alias python='python3'
   - export PATH="/usr/local/opt/python/libexec/bin:$PATH"
+  - curl -fsSL https://github.com/Kitware/ninja/releases/download/v1.9.0.g99df1.kitware.dyndep-1.jobserver-1/ninja-1.9.0.g99df1.kitware.dyndep-1.jobserver-1_x86_64-apple-darwin.tar.gz -o ninja.tar.gz
+  - tar -xzvf ninja.tar.gz
+  - sudo cp ./ninja-1.9.0.g99df1.kitware.dyndep-1.jobserver-1_x86_64-apple-darwin/ninja /usr/local/bin/ninja
   - if [ -d ./packages/hpx ]; then
     echo "cached hpx found -- nothing to download, installing";
     cd ./packages/hpx/cmake-build-release;
@@ -44,9 +65,9 @@ before_install:
 script:
   - sudo xcode-select -s /Applications/Xcode.app
   - mkdir -p cmake-build-release && cd ./cmake-build-release
-  - cmake -DGEMS_BUILD_MATLAB=OFF ..
-  - cmake -DGEMS_BUILD_MATLAB=OFF .. # again so that appleclang finds openMP
-  - make -j$(nproc)
+  - cmake -G Ninja -DGEMS_BUILD_MATLAB=OFF ..
+  - cmake -G Ninja -DGEMS_BUILD_MATLAB=OFF .. # again so that appleclang finds openMP
+  - ninja
 
 # os: linux
 #      addons:
