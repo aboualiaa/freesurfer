@@ -1,5 +1,15 @@
 project(mri_convert)
 find_package(Eigen3 REQUIRED)
+
+if("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang"
+   OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
+  message("Building with Llvm Code Coverage Tools")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-instr-generate -fcoverage-mapping")
+elseif(CMAKE_COMPILER_IS_GNUCXX)
+  message("Building with lcov Code Coverage Tools")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
+endif()
+
 include_directories(${FS_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/packages/dicom
                     ${Boost_INCLUDE_DIRS} ${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
@@ -22,5 +32,7 @@ install(TARGETS mri_make_uchar DESTINATION bin)
 add_executable(mri_convert_tests mri_convert_tests.cpp)
 add_help(mri_convert_tests mri_convert.help.xml)
 set_target_properties(mri_convert_tests PROPERTIES EXCLUDE_FROM_ALL TRUE)
-target_link_libraries(mri_convert_tests utils mri_convert ${GTEST_LIBRARIES} benchmark fmt gtest ${ARMADILLO_LIBRARIES} Eigen3::Eigen)
+target_link_libraries(mri_convert_tests utils mri_convert ${GTEST_LIBRARIES}
+                      benchmark fmt gtest ${ARMADILLO_LIBRARIES} Eigen3::Eigen
+                      ${Boost_LIBRARIES})
 add_test(mri_convert_tests mri_convert_tests)
