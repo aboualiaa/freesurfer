@@ -8,12 +8,10 @@
 #include <boost/program_options.hpp>
 #include <gsl/multi_span>
 
-#include "mri_convert_lib.tpp"
-
 #undef GET_PROGRAM_NAME
 #ifdef __GLIBC__
 #define GET_PROGRAM_NAME() program_invocation_short_name
-#else /* *BSD and OS X */
+#else /* BSD and OS X */
 #include <cstdlib>
 #define GET_PROGRAM_NAME() getprogname()
 #endif
@@ -47,5 +45,7 @@ auto frobenius_normalize(std::vector<double> *matrix) -> void;
 namespace fs::dbg {
 void create_gdb_file(gsl::multi_span<char *> args);
 } // namespace fs::dbg
+
+#include "mri_convert_lib.tpp"
 
 #endif // MRI_TOOLS_MRI_CONVERT_LIB_HPP

@@ -1,3 +1,4 @@
+
 //
 // Created by Ahmed Abou-Aliaa on 04.11.19.
 //
@@ -5,57 +6,29 @@
 #ifndef MRI_TOOLS_MRI_WBC_HPP
 #define MRI_TOOLS_MRI_WBC_HPP
 
-#include "absl/strings/str_join.h"
-#include "benchmark/benchmark.h"
 #include "fmt/printf.h"
 #include "gsl/gsl"
 #include "gsl/multi_span"
-#include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
 
 #include <hpx/hpx_start.hpp>
-#include <hpx/include/iostreams.hpp> // hpx headers have to be included before boost headers
 
 #include <boost/program_options/parsers.hpp>
-#include <boost/filesystem.hpp>
 
-#include "diag.h"
-#include "error.h"
-#include "fmriutils.h"
-#include "fsenv.h"
-#include "macros.h"
-#include "matfile.h"
-#include "mri.h"
 #include "mri2.h"
-#include "mrimorph.h"
-#include "mrisurf.h"
-#include "romp_support.h"
-#include "timer.h"
-#include "version.h"
-
-#include <cerrno>
-#include <cstdint>
-#include <cstdio>
-#include <cstdlib>
-#include <filesystem>
-#include <string>
-#include <sys/stat.h>
-#include <sys/utsname.h>
-#include <unistd.h>
-#include <utility>
 
 //#include "banned.h" // always include last, otherwise you'll break the stl :D
 
 namespace po = boost::program_options;
-namespace fsys = boost::filesystem; // sadly fs is already defined: freesurfer
 using podesc = po::options_description;
 using povm = po::variables_map;
 namespace pocl = boost::program_options::command_line_style;
 
-auto cl_style =
-    pocl::allow_short | pocl::short_allow_adjacent | pocl::short_allow_next |
-    pocl::allow_long | pocl::long_allow_adjacent | pocl::long_allow_next |
-    pocl::allow_sticky | pocl::allow_dash_for_short | pocl::allow_long_disguise;
+static auto const cl_style =
+    static_cast<unsigned>(pocl::allow_short) | pocl::short_allow_adjacent |
+    pocl::short_allow_next | pocl::allow_long | pocl::long_allow_adjacent |
+    pocl::long_allow_next | pocl::allow_sticky | pocl::allow_dash_for_short |
+    pocl::allow_long_disguise;
 
 // TODO(aboualiaa): Find out function and rename accordingly
 constexpr float half = 0.5;

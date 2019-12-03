@@ -25,6 +25,20 @@
 
 #include "mri_wbc.hpp"
 
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <boost/filesystem.hpp>
+
+#include "diag.h"
+#include "fmriutils.h"
+#include "fsenv.h"
+#include "matfile.h"
+#include "mri2.h"
+#include "mrimorph.h"
+#include "romp_support.h"
+#include "version.h"
+
+namespace fsys = boost::filesystem; // sadly fs is already defined: freesurfer
+
 int main(int argc, char *argv[]) {
 
   auto err_logger = spdlog::stderr_color_mt("stderr");
@@ -55,7 +69,7 @@ int main(int argc, char *argv[]) {
   }
 
   // TODO(aboualiaa): do you really need this copying?
-  // yes you do, cebause the workers below take a reference to wbc an access
+  // yes you do, cebause the workers below take a reference to wbc and access
   // its contents
   // TODO(aboualiaa): fix this dependency
   wbc.distthresh = cmdargs.distthresh;
