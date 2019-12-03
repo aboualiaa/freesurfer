@@ -11,8 +11,6 @@
 #include <fstream>
 #include <algorithm>
 
-using uint64 = uint64_t;
-
 namespace fs::util::cli {
 
 auto usage_message(FILE *stream, char const *Progname) -> bool {
@@ -52,18 +50,23 @@ auto usage_message() -> std::string {
 
 auto usage_message(FILE *stream) -> bool {
   if (stream != nullptr) {
-    fmt::fprintf(stream, usage_message());
+    if (fmt::fprintf(stream, usage_message()) < 0) {
+      return false;
+    }
     return true;
   }
-
   return false;
 }
 
 void print_parsed_tokens(po::basic_parsed_options<char> const &parsed_opts) {
   for (auto &opt : parsed_opts.options) {
+    std::string tmp{};
     for (auto &token : opt.original_tokens) {
-      fmt::print("{} ", token);
+      tmp += token;
+      tmp += " ";
     }
+    tmp.pop_back();
+    fmt::print("{}", tmp);
     fmt::print("\n");
   }
 }
@@ -91,7 +94,8 @@ void create_gdb_file(gsl::multi_span<char *> args) {
   fmt::fprintf(fptmp, "file %s\n", args[0]);
   fmt::fprintf(fptmp, "run ");
   for (int j = 1; j < args.size(); j++) {
-    if (strcmp(args[j], "--debug") == 0) {
+    std::string tmp{args[j]};
+    if (tmp.find("debug") != std::string::npos) {
       continue;
     }
     fmt::fprintf(fptmp, "%s ", args[j]);
