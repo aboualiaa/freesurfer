@@ -23,21 +23,9 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-#include <cctype>
-
 #include "numerics.h"
-#include "macros.h"
-#include "error.h"
 #include "diag.h"
-#include "mri.h"
-#include "proto.h"
-#include "transform.h"
 #include "version.h"
-#include "matrix.h"
 #include "density.h"
 #include "mrisegment.h"
 #include "mri_circulars.h"

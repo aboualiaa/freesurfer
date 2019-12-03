@@ -23,9 +23,6 @@
  *
  */
 
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
 #include "mri.h"
 #include "error.h"
 

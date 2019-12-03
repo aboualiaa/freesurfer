@@ -24,7 +24,6 @@
  */
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <float.h>
 #include <endianio.h> /* includes <ANALYZE.h>	*/

@@ -1,16 +1,11 @@
-#include <iostream>
-#include "itkImage.h"
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
 #include "GetPot.h"
 #include "itkThresholdMaximumConnectedComponentsImageFilter.h"
-#include "itkLabelImageToShapeLabelMapFilter.h"
 #include "itkBinaryThresholdImageFilter.h"
-#include "itkBinaryImageToLabelMapFilter.h"
 #include "itkBinaryImageToShapeLabelMapFilter.h"
 #include "itkLabelOverlayImageFilter.h"
 
-#include "mri.h"
 #include "cma.h"
 
 int main(int narg, char *arg[]) {

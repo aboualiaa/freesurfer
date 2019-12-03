@@ -25,9 +25,7 @@
  */
 
 #include <getopt.h>
-#include <cstdlib> // exit
 
-#include <string>
 #include <iostream>
 #include <sstream>
 

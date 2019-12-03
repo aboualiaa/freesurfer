@@ -1,4 +1,3 @@
-
 #include "surf_energy.h"
 
 void add_to_container(const MRI_SURFACE *mris_x, const MRI_SURFACE *mris_fx,

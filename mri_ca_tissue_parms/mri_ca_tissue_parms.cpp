@@ -23,19 +23,10 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cctype>
-
-#include "mri.h"
-#include "macros.h"
 #include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "utils.h"
 #include "timer.h"
 #include "gca.h"
-#include "transform.h"
 #include "version.h"
 
 int main(int argc, char *argv[]);

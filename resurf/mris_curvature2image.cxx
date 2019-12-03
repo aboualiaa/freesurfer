@@ -1,12 +1,11 @@
 #include "itkKdTree.h"
 
 #include "vtkPolyData.h"
-#include <iostream>
 #include "GetPot.h"
 
-#include "vtkPoints.h"
 #include "vtkKdTreePointLocator.h"
 #include "mrisurf.h"
+
 int main(int narg, char *arg[]) {
   constexpr unsigned int Dimension = 3;
   using CoordType = float;
@@ -59,9 +58,11 @@ int main(int narg, char *arg[]) {
           // MRIvoxelToWorld( image, i,j,k, &point[0],&point[1],&point[2]);
           MRIvoxelToSurfaceRAS(image, i, j, k, &point[0], &point[1], &point[2]);
           int id = kDTree->FindClosestPoint(point);
-          //					std::cout << point[0] << " " << point[1] << " "
+          //					std::cout << point[0] << " " << point[1] <<
+          //"
+          //"
           //<< point[2] << " " << id <<  " " << surf->vertices[id].curv <<
-          //std::endl;
+          // std::endl;
           MRIsetVoxVal(output, i, j, k, 0, (float)surf->vertices[id].curv);
         } else {
           MRIsetVoxVal(output, i, j, k, 0, (float)0.0);

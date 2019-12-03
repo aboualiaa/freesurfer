@@ -1,4 +1,3 @@
-#include <QApplication>
 #include "configurationfileform.h"
 
 int main(int argc, char **argv) {

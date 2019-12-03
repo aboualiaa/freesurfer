@@ -19,7 +19,6 @@
 */
 
 #include <iostream>
-#include <exception>
 
 #include "labelfusion.h"
 #include "perform_front_propagation_3d.h"

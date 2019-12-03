@@ -39,31 +39,16 @@
  *
  */
 
-#include <cmath>
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
-#include <cctype>
-
 #include "romp_support.h"
 
-#include "mri.h"
-#include "proto.h"
-#include "macros.h"
-#include "error.h"
-#include "timer.h"
 #include "diag.h"
 #include "mrimorph.h"
-#include "utils.h"
-#include "gca.h"
 #include "cma.h"
 #include "gcamorph.h"
-#include "transform.h"
 #include "mrisegment.h"
 #include "version.h"
 #include "mri_ca_register.help.xml.h"
 #include "mri2.h"
-#include "fsinit.h"
 #include "ctrpoints.h"
 
 static int nozero = 0;

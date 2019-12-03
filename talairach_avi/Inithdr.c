@@ -25,7 +25,6 @@
  */
 
 #include <string.h>
-#include <time.h>
 #include <stdio.h>
 #include <ANALYZE.h>
 #include <unistd.h>

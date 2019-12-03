@@ -21,13 +21,8 @@
  *
  */
 
-#include "fsenv.h"
 #include "mri.h"
-#include "diag.h"
 #include "DICOMRead.h"
-#include <stdexcept>
-#include <vector>
-#include <algorithm>
 #include "cmd_line_interface.h"
 const char *Progname;
 
@@ -35,7 +30,7 @@ const char *Progname;
 // forward declaration
 struct IoParams;
 using namespace std;
-#include <limits> // std::numeric_limits
+// std::numeric_limits
 
 /*
   IO structure which store the command line args

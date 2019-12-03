@@ -27,13 +27,9 @@
  *
  */
 
-#include <cstring>
-#include <cerrno>
 #include <sys/stat.h>
 
-#include <iostream>
 #include <sstream>
-#include <stdexcept>
 
 #include "QdecGlmDesign.h"
 #include "mri.h"

@@ -1,20 +1,14 @@
-#include <iostream>
 #include "itkImageFileReader.h"
 #include "GetPot.h"
-#include "vtkPolyData.h"
 #include "vtkPolyDataReader.h"
 #include "vtkPolyDataWriter.h"
 #include "itkMesh.h"
 #include "PolylineMeshToVTKPolyDataFilter.h"
 
-#include <map>
 #include "itkTriangleCell.h"
-#include "colortab.h"
 
 #include "mrisurf.h"
 #include "mris_multimodal_refinement.h"
-#include "vtkSmartPointer.h"
-#include "vtkPoints.h"
 
 #include <vtkPolyLine.h>
 
@@ -220,7 +214,7 @@ int main(int narg, char *arg[]) {
         MRIsampleVolumeDerivativeScale(images[0], xv, yv, zv, -nx, -ny, -nz,
                                        &mag, 1.0); // expensive
         //	std::cout << ((float)t)*step << " " << val << " " <<  mag <<
-        //std::endl;
+        // std::endl;
         pointsValues->InsertPoint(totalPoints, ((float)t) * step_size, val,
                                   mag);
         ids[i] = totalPoints;
@@ -248,8 +242,8 @@ int main(int narg, char *arg[]) {
   pdWriterValues->SetFileName(outValues);
   pdWriterValues->Update();
 
-  /*			itk::SmartPointer<TrkVTKPolPyDataFilter<ImageType>> vtk2trk  =
-     TrkVTKPolyDataFilter<ImageType>::New();
+  /*			itk::SmartPointer<TrkVTKPolPyDataFilter<ImageType>> vtk2trk
+     = TrkVTKPolyDataFilter<ImageType>::New();
                   vtk2trk->SetReferenceImage(reader->GetOutput());
                   vtk2trk->SetInput( polyData);
                   vtk2trk->VTKToTrk(outNormals);

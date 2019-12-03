@@ -14,18 +14,11 @@ As a validation, it will use the gcam to morph again the volumes
 
 */
 
-// STL
-#include <iostream>
-#include <string>
-
 #include "morph.h"
 
 // FS
 #include "argparse.h"
 #include "timer.h"
-
-#include "mri.h"
-#include "gcamorph.h"
 
 #include "exportGcam.help.xml.h"
 

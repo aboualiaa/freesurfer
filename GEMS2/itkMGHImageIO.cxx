@@ -1,9 +1,4 @@
-
-#include <fstream>
-
 #include "itkMGHImageIO.h"
-
-#include <cstdio>
 
 //-------------------------------
 //

@@ -23,8 +23,6 @@
  *
  */
 
-#include <cstring>
-#include <stdexcept>
 #include <sstream>
 
 #include "QdecSubject.h"

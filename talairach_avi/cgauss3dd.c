@@ -24,7 +24,6 @@
  */
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <math.h>
 #include <endianio.h>
 #include <librms.h>
@@ -45,7 +44,8 @@ void gauss3dd(float *image, int *pnx, int *pny, int *pnz, float *cmppix,
   /*	variables modified: image	! input image overwritten
    */
   /*											*/
-  /*	subroutines called:	FFT, REALT in FORTRAN source fftsun.f or fftsol.f
+  /*	subroutines called:	FFT, REALT in FORTRAN source fftsun.f or
+   * fftsol.f
    */
   /* 				FFT algorithm by Richard C. Singleton
    */

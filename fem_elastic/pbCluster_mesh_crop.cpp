@@ -4,15 +4,10 @@ Gheorghe Postelnicu, 2007
 
 */
 
-#include <algorithm>
-#include <iterator>
-#include <numeric>
-
 #include "mesh_bfs.h"
 
 #include "pbCluster_mesh_crop.h"
 
-#include "fem_3d.h"
 #include "solver.h"
 
 //--------------------------------------------------

@@ -24,7 +24,6 @@
  */
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <unistd.h> /* R_OK and W_OK */
 #include <time.h>

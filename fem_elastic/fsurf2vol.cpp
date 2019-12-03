@@ -1,19 +1,8 @@
-
-// STL includes
-#include <math.h>
-#include <iostream>
-#include <vector>
-#include <iterator>
-
-// PETSC include
-#include "petscksp.h"
-
 // FEM includes
 #include "solver.h"
-#include "fem_3d.h"
 
 // OTHER includes
-#include "surf_powell.h" // use Powell to compute the best lin. transform to
+// use Powell to compute the best lin. transform to
 // do rigid registration of the surfaces.
 
 // the isfinite defined in utils conflicts with vnl
@@ -36,10 +25,6 @@
 #define MORPH_WITH_MESH 1
 #define DO_MORPH_REGRESSION 0
 
-#include "error.h"
-#include "mri.h"
-#include "mrinorm.h"
-#include "mrisurf.h"
 ;
 
 const char *Progname;

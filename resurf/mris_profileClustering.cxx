@@ -2,25 +2,14 @@
 #include "itkWeightedCentroidKdTreeGenerator.h"
 #include "itkKdTreeBasedKmeansEstimator.h"
 #include "itkMinimumDecisionRule.h"
-#include "itkEuclideanDistanceMetric.h"
-#include "itkDistanceToCentroidMembershipFunction.h"
 #include "itkSampleClassifierFilter.h"
 
-#include "itkImage.h"
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
-#include "itkVariableLengthVector.h"
 
-#include <iostream>
-#include "itkDefaultStaticMeshTraits.h"
 #include "fsSurface.h"
-#include "itkTriangleCell.h"
 #include "GetPot.h"
-#include "colortab.h"
-#include "itkVTKPolyDataWriter.h"
 #include <vnl/vnl_cross.h>
-
-#include "mrisurf.h"
 
 int main(int narg, char *arg[]) {
   constexpr unsigned int Dimension = 3;

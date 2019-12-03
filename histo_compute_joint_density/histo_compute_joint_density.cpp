@@ -23,17 +23,11 @@
  *
  */
 
-#include <cstdio>
-#include <cctype>
-#include "const.h"
-#include "utils.h"
 #include "error.h"
 #include "diag.h"
 #include "version.h"
 #include "density.h"
 #include "mrisegment.h"
-#include "proto.h"
-#include "macros.h"
 
 static char vcid[] =
     "$Id: histo_compute_joint_density.c,v 1.4 2011/03/02 00:04:09 nicks Exp $";

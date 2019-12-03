@@ -1,6 +1,3 @@
-#include <cstdio>
-#include <cstdlib>
-#include <iostream>
 #define export
 #include <vnl/vnl_matrix.h>
 #include <vnl/algo/vnl_matrix_inverse.h>

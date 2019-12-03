@@ -1,6 +1,5 @@
 #include "kvlAtlasMeshBuilder.h"
 #include "unistd.h"
-#include "kvlAtlasMeshCollectionModelLikelihoodCalculator.h"
 #include "kvlParameterOrderPowellOptimizer.h"
 #include "kvlAtlasMeshCollectionFastReferencePositionCost.h"
 
@@ -646,7 +645,7 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
     std::set<AtlasMesh::CellIdentifier> &edges,
     std::map<AtlasMesh::PointIdentifier, int> &pointOccupancies, int threadId) {
 
-#if 0  
+#if 0
   mutex.Lock();
 #else
   AtlasMeshBuilderHelper helper(mutex, pointOccupancies);
@@ -658,7 +657,7 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
 
   // Check if there is anything left to do
   if (edges.size() == 0) {
-#if 0      
+#if 0
     mutex.Unlock();
     //mutex.DescriptiveUnlock();
 #endif
@@ -740,7 +739,7 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
       // itkExceptionMacro( << "Error: threads never returning" );
     }
 
-#if 0      
+#if 0
     mutex.Unlock();
     //mutex.DescriptiveUnlock();
 #else
@@ -794,7 +793,7 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
     affectedPoints.push_back(refPosIt.Index());
   }
 
-#if 0    
+#if 0
   // Indicate that we are working on them
   for ( std::vector< AtlasMesh::PointIdentifier >::const_iterator  it = affectedPoints.begin();
         it != affectedPoints.end(); ++it )
@@ -882,7 +881,7 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
   // timeProbe.GetMeanTime() << " seconds to evaluate moves" << std::endl;
 
   if (minTotalCostIndex == -1) {
-#if 0      
+#if 0
     mutex.Lock();
 #else
     helper.Lock();
@@ -899,7 +898,7 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
     // m_Current->Write( impossibleStream.str().c_str() );
     // minTotalCostIndex = 0;
 
-#if 0    
+#if 0
     // Now "un-protect" the points we flagged as being worked on
     for ( std::vector< AtlasMesh::PointIdentifier >::const_iterator  it = affectedPoints.begin();
           it != affectedPoints.end(); ++it )
@@ -1125,7 +1124,7 @@ bool AtlasMeshBuilder ::LoadBalancedAnalyzeEdgeFast(
     {
     std::cout << "    [THREAD " << threadId << "] " << "Done with edge " << edgeId << std::endl;
     }
-  
+
   mutex.Unlock();
   //mutex.DescriptiveUnlock();
 #endif

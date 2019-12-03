@@ -1,7 +1,5 @@
 #include "kvlMultiResolutionAtlasMesher.h"
 
-#include <fstream>
-
 #ifdef USE_TETGEN
 #include "tetgen.h"
 #endif
@@ -582,7 +580,7 @@ AtlasMeshCollection::Pointer MultiResolutionAtlasMesher ::GetMeshCollection(
         const double  volume = ( lambda11 * ( lambda22*lambda33 - lambda32*lambda23 )
                                 - lambda12 * ( lambda21*lambda33 - lambda31*lambda23 )
                                 + lambda13 * ( lambda21*lambda32 - lambda31*lambda22 ) ) / 6;
-        if ( volume <= 0 ) 
+        if ( volume <= 0 )
           {
           std::cout << "****************************************" << std::endl;
           std::cout << "****************************************" << std::endl;

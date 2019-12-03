@@ -1,15 +1,11 @@
-#include <iostream>
 #include "itkImageFileReader.h"
 #include "GetPot.h"
 #include "itkMesh.h"
 
-#include <map>
 #include "itkTriangleCell.h"
-#include "colortab.h"
 
 #include "mrisurf.h"
 #include "mris_multimodal_refinement.h"
-
 
 int main(int narg, char *arg[]) {
   //	try{

@@ -23,12 +23,7 @@
  *
  */
 
-#include <string>
-#include <iostream>
-
 #include "error.h"
-#include "macros.h"
-#include "mri.h"
 #include "transform.h"
 #include "version.h"
 

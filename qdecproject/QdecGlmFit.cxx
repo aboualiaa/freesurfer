@@ -24,11 +24,7 @@
  *
  */
 
-#include <cstring>
-#include <cstdio>
-#include <cstdlib>
 #include <sstream>
-#include <stdexcept>
 #include <fstream>
 
 #include "QdecGlmFit.h"

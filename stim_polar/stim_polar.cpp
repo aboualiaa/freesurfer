@@ -23,15 +23,8 @@
  *
  */
 
-#include <cstdlib>
-#include <cstdio>
-#include <cmath>
-#include <cctype>
-
 #include "glut.h"
 #include "error.h"
-#include "const.h"
-#include "macros.h"
 #include "diag.h"
 #include "version.h"
 

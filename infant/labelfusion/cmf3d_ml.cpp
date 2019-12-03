@@ -55,9 +55,6 @@
 
 */
 
-#include <stdlib.h>
-#include <math.h>
-
 #include "labelfusion.h"
 
 #define YES 0

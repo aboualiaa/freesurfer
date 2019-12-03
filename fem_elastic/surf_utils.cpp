@@ -1,5 +1,3 @@
-
-
 #include "surf_utils.h"
 
 void SurfacePointer::GetTypeFromName(const std::string &name) {

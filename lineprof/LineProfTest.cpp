@@ -23,8 +23,6 @@
  *
  */
 
-#include <math.h>
-
 #include "LineProf.h"
 
 /** Creates a line segment between start(xy) and end(xy)

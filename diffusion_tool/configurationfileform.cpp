@@ -1,9 +1,6 @@
-#include <QFileInfo>
-#include <QDir>
 #include <QTextStream>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QRegExp>
 
 #include "configurationfileform.h"
 

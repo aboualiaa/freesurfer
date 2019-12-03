@@ -6,21 +6,12 @@ This binary creates a morph, given transforms
 
 */
 
-// STL includes
-#include <iterator>
-#include <iostream>
-#include <string>
-
 // OWN
 #include "morph.h"
 #include "transformUtils.h"
 
 // FS
 #include "argparse.h"
-
-#include "gcamorph.h"
-#include "mri.h"
-
 #include "createMorph.help.xml.h"
 
 const char *Progname;

@@ -1,7 +1,6 @@
 #include <math.h>
 #include <fstream>
 #include <iostream>
-#include <stdlib.h> // exit
 
 float *read_transform(const char *fname) {
   std::ifstream ifs(fname);

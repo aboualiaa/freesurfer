@@ -24,7 +24,6 @@
  */
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 #include <ifh.h>
@@ -175,8 +174,7 @@ int Writeifh(char *program, char *outfile, IFH *ifhdr, char control) {
   fprintf(ifhfp, "orientation		:= %d\n", ifhdr->orientation);
   fprintf(ifhfp, "number of dimensions	:= %d\n", ifhdr->number_of_dimensions);
   for (i = 0; i < 4; i++) {
-    fprintf(ifhfp, "matrix size [%d]	:= %d\n", i + 1,
-            ifhdr->matrix_size[i]);
+    fprintf(ifhfp, "matrix size [%d]	:= %d\n", i + 1, ifhdr->matrix_size[i]);
   }
   for (i = 0; i < 3; i++) {
     fprintf(ifhfp, "scaling factor (mm/pixel) [%d]	:= %f\n", i + 1,

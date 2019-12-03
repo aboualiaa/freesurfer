@@ -1,13 +1,11 @@
 #include "kvlAtlasMeshViewingConsole.h"
 
-#include "FL/Fl.H"
 #include "FL/fl_ask.H"
 #include "kvlAtlasMeshAlphaDrawer.h"
 #include "kvlAtlasMeshSummaryDrawer.h"
 #include "itkIntensityWindowingImageFilter.h"
 #include "itkImageFileWriter.h"
 #include "itkImageFileReader.h"
-#include "itkMinimumMaximumImageCalculator.h"
 
 namespace kvl {
 

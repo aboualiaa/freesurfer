@@ -1,4 +1,3 @@
-
 #include "morph_utils.h"
 
 struct FunctorInitOctree {

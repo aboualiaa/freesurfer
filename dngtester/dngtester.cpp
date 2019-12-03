@@ -22,19 +22,16 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-#include "mrisurf.h"
 #include "mrisutils.h"
 #include "geodesics.h"
 #include "timer.h"
-#include "dmatrix.h"
 #include "surfgrad.h"
 #include "DICOMRead.h"
-#include "region.h"
 
+#ifdef HAVE_OPENMP
 #include "romp_support.h"
+#endif
+
 #undef private
 
 // int MRISfaceNormalFace_AddDeltaVertex = -1;

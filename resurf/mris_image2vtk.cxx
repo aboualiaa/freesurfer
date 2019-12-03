@@ -1,6 +1,4 @@
 #define COMPILING_MRISURF_TOPOLOGY
-#include "vtkSmartPointer.h"
-
 
 #include "vtkPolyDataConnectivityFilter.h"
 #include "vtkMarchingCubes.h"
@@ -10,24 +8,15 @@
 #include "vtkImageGaussianSmooth.h"
 #include "vtkSmoothPolyDataFilter.h"
 #include "vtkFillHolesFilter.h"
-//#include "vtkNIFTIImageReader.h"
 #include "vtkDecimatePro.h"
 
-#include "vtkCellArray.h"
-#include "vtkDataArray.h"
 #include "vtkPointData.h"
 #include "vtkImageData.h"
-#include "mri.h"
 #include "mrisurf.h"
-#include "vtkIntArray.h"
 #include "vtkShortArray.h"
 #include "vtkLongArray.h"
-#include "vtkUnsignedCharArray.h"
 #include "vtkFloatArray.h"
 
-#include "error.h"
-#include "fio.h"
-#include "mrishash.h"
 #include "version.h"
 #include "vtkImageDilateErode3D.h"
 #include "vtkImageContinuousErode3D.h"
@@ -267,7 +256,7 @@ int main(int argc, char *argv[]) {
   vtkSmartPointer<vtkPolyData> vtkSurface;
 
   //	vtkSmartPointer<vtkContourFilter> contour =
-  //vtkSmartPointer<vtkContourFilter>::New();
+  // vtkSmartPointer<vtkContourFilter>::New();
   vtkSmartPointer<vtkMarchingCubes> contour =
       vtkSmartPointer<vtkMarchingCubes>::New();
 

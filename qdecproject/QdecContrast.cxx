@@ -27,13 +27,10 @@
  *
  */
 
-#include <cstring>
 #include <cerrno>
-#include <cassert>
 #include <sys/stat.h>
 
 #include "QdecContrast.h"
-#include <cstdio> // printf
 
 // Constructors/Destructors
 //

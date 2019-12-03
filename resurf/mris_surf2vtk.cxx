@@ -1,9 +1,4 @@
-#include <iostream>
 #include "itkImage.h"
-#include <map>
-#include "itkDefaultStaticMeshTraits.h"
-#include "itkMesh.h"
-#include "itkTriangleCell.h"
 #include "GetPot.h"
 
 #include "mrisurf.h"

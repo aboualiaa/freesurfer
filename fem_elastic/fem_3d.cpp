@@ -1,7 +1,3 @@
-#include <math.h>
-#include <map>
-#include <sstream>
-
 #include "timer.h"
 
 #include "fem_3d.h"

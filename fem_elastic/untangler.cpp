@@ -1,8 +1,3 @@
-
-// STL
-#include <iostream>
-#include <list>
-
 // OWN
 #include "solver.h"
 #include "pbmesh_crop.h"

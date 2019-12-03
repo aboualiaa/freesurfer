@@ -27,7 +27,6 @@
 #include <math.h>
 #include <string.h>
 #include <ctype.h>
-#include <stdio.h>
 #include <unistd.h> /* R_OK */
 #include <rec.h>
 #include <endianio.h>

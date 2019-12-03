@@ -33,10 +33,6 @@
  *
  */
 
-#include <list>
-#include <string>
-#include <cstring>
-
 #include "cmd_line_interface.h"
 
 using namespace std;

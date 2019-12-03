@@ -1,6 +1,5 @@
 #include "kvlAtlasParameterEstimationConsole.h"
 
-#include "FL/Fl.H"
 #include "FL/fl_ask.H"
 #include "itkCastImageFilter.h"
 #include "itkCommand.h"
@@ -62,7 +61,6 @@ AtlasParameterEstimationConsole ::AtlasParameterEstimationConsole() {
   m_NumberOfUpsamplingSteps->do_callback();
 }
 
-
 //
 //
 //
@@ -71,13 +69,12 @@ void AtlasParameterEstimationConsole ::SetLabelImages(
   // Sanity checking
   if (fileNames.empty()) {
     return;
-}
+  }
 
   // Read the images
   typedef CompressionLookupTable::ImageType InputImageType;
   std::vector<InputImageType::ConstPointer> labelImages;
-  for (auto it = fileNames.begin();
-       it != fileNames.end(); ++it) {
+  for (auto it = fileNames.begin(); it != fileNames.end(); ++it) {
     // Read the input image
     using ReaderType = itk::ImageFileReader<InputImageType>;
     ReaderType::Pointer reader = ReaderType::New();
@@ -132,7 +129,7 @@ void AtlasParameterEstimationConsole ::InitializeMesh() {
   // Don't build a mesh if no label images have been set
   if (m_Estimator->GetNumberOfLabelImages() == 0) {
     return;
-}
+  }
 
   // Construct mesh
   if (m_UseExplicitStartCollection->value() != 0) {
@@ -417,7 +414,7 @@ void AtlasParameterEstimationConsole ::HandleEstimatorEvent(
 
   while (m_Interrupted) {
     Fl::wait();
-}
+  }
 
   if (m_Stepping) {
     this->Interrupt();

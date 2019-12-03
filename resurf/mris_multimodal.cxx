@@ -1,7 +1,5 @@
 #define COMPILING_MRISURF_TOPOLOGY
-#include <iostream>
 #include "itkImage.h"
-#include <map>
 #include "fsSurface.h"
 #include "GetPot.h"
 #include "itkVTKPolyDataWriter.h"
@@ -9,8 +7,6 @@
 #include "vtkPointData.h"
 
 #include "vtkFillHolesFilter.h"
-#include "vtkPolyDataNormals.h"
-#include "vtkCellArray.h"
 #include "vtkTriangle.h"
 #include "vtkDecimatePro.h"
 #include "vtkCleanPolyData.h"
@@ -18,7 +14,6 @@
 #include "vtkTriangleFilter.h"
 
 #include "vtkDelaunay3D.h"
-#include "mrisurf.h"
 #include "vtkKdTreePointLocator.h"
 #if VTK_MAJOR_VERSION > 5
 #include "vtkPCACurvatureEstimation.h"
@@ -89,7 +84,7 @@ int main(int narg, char *arg[]) {
   using CoordType = float;
   typedef fs::Surface<CoordType, Dimension> SurfType;
   //	typedef fs::SurfaceOptimizationFilter< SurfType, SurfType>
-  //SurfFilterType;
+  // SurfFilterType;
 
   GetPot cl(narg, const_cast<char **>(arg));
   if (cl.size() == 1 || cl.search(2, "--help", "-h")) {
@@ -201,7 +196,7 @@ int main(int narg, char *arg[]) {
       double *point2 = surfVTK->GetPoint(iD);
       float distance = vtkMath::Distance2BetweenPoints(point, point2);
       //	std::cout << point [0] << " " << point2[0]<< " " <<distance <<
-      //std::endl; if( distance > 0.01)
+      // std::endl; if( distance > 0.01)
       { points->InsertPoint(i, point[0], point[1], point[2]); }
     }
 
@@ -225,7 +220,7 @@ int main(int narg, char *arg[]) {
       // kDTree->GetDataSet()->GetPoint(iD, closestPoint);
 
       //	std::cout << point[0] <<  " " << point2[0] << distance <<
-      //std::endl; if (distance <2)
+      // std::endl; if (distance <2)
       { surf->vertices[i].curv = distance; }
     }
     fstream fout;
@@ -246,7 +241,7 @@ int main(int narg, char *arg[]) {
       // kDTree->GetDataSet()->GetPoint(iD, closestPoint);
 
       //	std::cout << point[0] <<  " " << point2[0] << distance <<
-      //std::endl; if (distance <2)
+      // std::endl; if (distance <2)
       {
         // CTABannotationAtIndex(surf->ct, int(distance*10),  &annot);
         // surf->vertices[i].annotation=annot;

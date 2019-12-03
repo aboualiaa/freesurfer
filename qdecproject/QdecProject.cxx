@@ -25,13 +25,9 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
 #include <unistd.h>
 #include <cmath>
 
-#include <stdexcept>
 #include <sstream>
 #include <iostream>
 #include <fstream>

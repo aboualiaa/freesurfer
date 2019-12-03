@@ -1,11 +1,4 @@
-#include <math.h>
-
-#include <vtkPolyData.h>
-#include <vtkPoints.h>
-#include <vtkCellArray.h>
-
 #include "LineProf.h"
-#include "Tracer.h"
 #include "Preprocessor.h"
 #include "PetscSolver.h"
 

@@ -1,8 +1,6 @@
 #include "kvlAtlasMeshBuilder.h"
-#include "itkCommand.h"
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
-#include "kvlCompressionLookupTable.h"
 #include "itkMGHImageIOFactory.h"
 
 namespace kvl {

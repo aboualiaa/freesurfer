@@ -33,7 +33,6 @@
 // FLTK
 #include <FL/x.H>
 // vtk
-#include <vtkCommand.h>
 #include <vtkInteractorStyle.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>

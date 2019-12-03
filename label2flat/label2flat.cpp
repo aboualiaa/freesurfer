@@ -23,18 +23,8 @@
  *
  */
 
-#include <cstdio>
-#include <cstdlib>
-#include <cctype>
-
-#include "macros.h"
-#include "minc.h"
-#include "error.h"
 #include "diag.h"
-#include "proto.h"
-#include "utils.h"
 #include "mrisurf.h"
-#include "label.h"
 #include "version.h"
 
 int main(int argc, char *argv[]);

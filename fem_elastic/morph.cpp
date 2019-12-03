@@ -1,10 +1,6 @@
-
-#include <stdexcept>
-
 #include <itkLinearInterpolateImageFunction.h>
 #include <itkVectorLinearInterpolateImageFunction.h>
 
-#include <itkImageRegionConstIterator.h>
 #include <itkImageRegionIterator.h>
 
 #include "morph.h"

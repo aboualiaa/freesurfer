@@ -1,8 +1,3 @@
-
-// STL includes
-#include <math.h>
-#include <iostream>
-
 // MPI
 //#undef SEEK_SET
 //#undef SEEK_END
@@ -10,15 +5,11 @@
 //#include <mpi.h>
 
 // OWN
-#include "morph.h"
-
 #include "surf_utils.h"
 #include "morph_utils.h"
 
 // FreeSurfer
 #include "argparse.h"
-
-#include "mri.h"
 
 #include "applyMorph.help.xml.h"
 

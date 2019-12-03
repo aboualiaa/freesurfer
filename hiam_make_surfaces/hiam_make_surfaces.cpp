@@ -35,25 +35,10 @@
 // Revision       : $Revision: 1.7 $
 ////////////////////////////////////////////
 
-#include <cctype>
-#include <cmath>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-
-#include "macros.h"
-
-#include "mri.h"
-#include "mrinorm.h"
-
 #include "mrishash_internals.h"
-#include "mrisurf.h"
 #include "mrisurf_project.h"
 
 #include "diag.h"
-#include "error.h"
-#include "matrix.h"
-#include "proto.h"
 
 #define MAX_4_NEIGHBORS 100
 #define MAX_3_NEIGHBORS 70
