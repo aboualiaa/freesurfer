@@ -5,31 +5,10 @@
 #ifndef MRI_TOOLS_MRI_CONVERT_HPP
 #define MRI_TOOLS_MRI_CONVERT_HPP
 
-#include "DICOMRead.h"
-#include "cma.h"
-#include "diag.h"
-#include "fio.h"
-#include "fmriutils.h"
-#include "fsgdf.h"
-#include "fsinit.h"
-#include "gcamorph.h"
-#include "macros.h"
-#include "mri.h"
 #include "mri2.h"
-#include "mri_conform.h"
-#include "mri_identify.h"
-#include "stats.h"
-#include "utils.h"
 #include "version.h"
 
 #include <boost/program_options.hpp>
-#include <boost/program_options/parsers.hpp>
-#include <fmt/printf.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/spdlog.h>
-
-#include <cerrno>
-#include <unistd.h>
 
 struct CMDARGS {
   CMDARGS(int argc, char *argv[]) : raw(argv, argc){}; // NOLINT

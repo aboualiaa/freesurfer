@@ -5,6 +5,8 @@
 #ifndef MRI_TOOLS_MRI_CONVERT_LIB_TPP
 #define MRI_TOOLS_MRI_CONVERT_LIB_TPP
 
+#include <fmt/printf.h>
+
 namespace fs::util::cli {
 template <typename T>
 auto check_vector_range(const std::vector<T> &vector, size_t lower,

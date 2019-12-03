@@ -7,6 +7,7 @@
 #include <armadillo>
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
+#include <Eigen/Dense>
 
 using namespace fs::util::cli;
 

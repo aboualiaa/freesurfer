@@ -24,7 +24,20 @@
 
 #include "mri_convert.hpp"
 #include "mri_convert_lib.hpp"
+
+#include "DICOMRead.h"
+#include "cma.h"
+#include "diag.h"
+#include "fio.h"
+#include "fmriutils.h"
+#include "gcamorph.h"
+#include "mri2.h"
+#include "mri_conform.h"
+#include "mri_identify.h"
+
 #include <boost/algorithm/string.hpp>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
 
 auto main(int argc, char *argv[]) -> int {
   auto err_logger = spdlog::stderr_color_mt("stderr");

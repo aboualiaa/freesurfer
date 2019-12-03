@@ -37,10 +37,6 @@ jobs:
       cache:
         directories:
           - packages/hpx
-          - $HOME/Library/Caches/Homebrew
-
-before_cache:
-  - brew cleanup
 
 before_install:
   - alias python='python3'

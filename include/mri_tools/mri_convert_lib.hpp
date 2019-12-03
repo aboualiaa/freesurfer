@@ -6,7 +6,6 @@
 #define MRI_TOOLS_MRI_CONVERT_LIB_HPP
 
 #include <boost/program_options.hpp>
-#include <fmt/printf.h>
 #include <gsl/multi_span>
 
 #include "mri_convert_lib.tpp"
