@@ -512,6 +512,7 @@ auto main(int argc, char *argv[]) -> int {
   }
 
   if (sizes_good_flag) {
+    spdlog::get("stderr")->critical("sizes_good_flag is not set");
     fs::util::cli::usage_message(stdout);
     exit(1);
   }
