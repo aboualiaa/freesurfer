@@ -2357,10 +2357,10 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     opt_deps conflicts;
     opt_deps dependants;
 
-    conflicts.insert(std::make_pair("no_zero_ge_z_offset", "zero_ge_z_offset"));
-    conflicts.insert(std::make_pair("force_ras_good", "in_i_direction"));
-    conflicts.insert(std::make_pair("force_ras_good", "in_j_direction"));
-    conflicts.insert(std::make_pair("force_ras_good", "in_k_direction"));
+    conflicts.insert(std::pair("no_zero_ge_z_offset", "zero_ge_z_offset"));
+    conflicts.insert(std::pair("force_ras_good", "in_i_direction"));
+    conflicts.insert(std::pair("force_ras_good", "in_j_direction"));
+    conflicts.insert(std::pair("force_ras_good", "in_k_direction"));
 
     for (auto const &[key, val] : conflicts) {
       po::conflicting_options(vm, key, val);
@@ -3648,6 +3648,7 @@ void initArgDesc(boost::program_options::options_description *desc,
        "ascii+crsf")                                                       /**/
                                                                            /**/
       ("ascii-fcol",                                                       /**/
-       "ascii-fcol");                                                      /**/
+       "ascii-fcol")                                                       /**/
+      ;
 }
 /* EOF */
