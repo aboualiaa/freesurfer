@@ -607,17 +607,18 @@ auto main(int argc, char *argv[]) -> int {
     }
 
 #if 0
-    if (out_volume_type == MGH_MORPH)
-    {
-      GCA_MORPH *gcam ;
+    if (out_volume_type == MGH_MORPH) {
+      GCA_MORPH *gcam;
 
       if (mri->nframes != 3)
-	ErrorExit(ERROR_UNSUPPORTED, "%s: input volume must have 3 frames not %d to write to warp", Progname, mri->nframes) ;
-      gcam = GCAMalloc(mri->width, mri->height, mri->depth) ;
-      GCAMinit(gcam, mri, NULL, NULL, 0) ;
-      GCAMreadWarpFromMRI( gcam, mri );
-      GCAMwrite(gcam, out_name) ;
-      exit(0) ;
+        ErrorExit(ERROR_UNSUPPORTED,
+                  "%s: input volume must have 3 frames not %d to write to warp",
+                  Progname, mri->nframes);
+      gcam = GCAMalloc(mri->width, mri->height, mri->depth);
+      GCAMinit(gcam, mri, NULL, NULL, 0);
+      GCAMreadWarpFromMRI(gcam, mri);
+      GCAMwrite(gcam, out_name);
+      exit(0);
     }
 #endif
 
@@ -1659,18 +1660,21 @@ auto main(int argc, char *argv[]) -> int {
         // dimensions
 #if 0
         if ((gcam->image.width == mri->width) &&
-	    (gcam->image.height == mri->height) &&
-	    (gcam->image.depth == mri->depth))
-	  mri_transformed = MRIclone(mri, NULL);
-	else  // when morphing atlas to subject using -ait <3d morph> must resample atlas to 256 before applying morph
-	{
-	  MRI *mri_tmp ;
-	  mri_transformed = MRIalloc(gcam->image.width,  gcam->image.height, gcam->image.depth, mri->type) ;
-	  useVolGeomToMRI(&gcam->image, mri_transformed) ;
-	  mri_tmp = MRIresample(mri, mri_transformed, resample_type_val);
-	  MRIfree(&mri) ; MRIfree(&mri_template) ;
-	  mri = mri_tmp ;
-	}
+            (gcam->image.height == mri->height) &&
+            (gcam->image.depth == mri->depth))
+          mri_transformed = MRIclone(mri, NULL);
+        else // when morphing atlas to subject using -ait <3d morph> must
+             // resample atlas to 256 before applying morph
+        {
+          MRI *mri_tmp;
+          mri_transformed = MRIalloc(gcam->image.width, gcam->image.height,
+                                     gcam->image.depth, mri->type);
+          useVolGeomToMRI(&gcam->image, mri_transformed);
+          mri_tmp = MRIresample(mri, mri_transformed, resample_type_val);
+          MRIfree(&mri);
+          MRIfree(&mri_template);
+          mri = mri_tmp;
+        }
 #endif
         fmt::printf("morphing from atlas with resample type %d\n",
                     resample_type_val);
@@ -1767,20 +1771,27 @@ auto main(int argc, char *argv[]) -> int {
     mri = mri2;
   }
 
-  /*printf("mri  vs.  mri_template\n");
-  fmt::printf(" dim  ( %i , %i , %i ) vs ( %i , %i , %i
-  )\n",mri->width,mri->height,mri->depth,mri_template->width,mri_template->height,mri_template->depth);
-  fmt::printf(" size ( %.9g , %.9g , %.9g ) vs ( %.9g , %.9g , %.9g
-  )\n",mri->xsize,mri->ysize,mri->zsize,mri_template->xsize,mri_template->ysize,mri_template->zsize);
-  fmt::printf(" xras ( %.9g , %.9g , %.9g ) vs ( %.9g , %.9g , %.9g
-  )\n",mri->x_r,mri->x_a,mri->x_s,mri_template->x_r,mri_template->x_a,mri_template->x_s);
-  fmt::printf(" yras ( %.9g , %.9g , %.9g ) vs ( %.9g , %.9g , %.9g
-  )\n",mri->y_r,mri->x_a,mri->y_s,mri_template->y_r,mri_template->y_a,mri_template->y_s);
-  fmt::printf(" zras ( %.9g , %.9g , %.9g ) vs ( %.9g , %.9g , %.9g
-  )\n",mri->z_r,mri->x_a,mri->z_s,mri_template->z_r,mri_template->z_a,mri_template->z_s);
-  fmt::printf(" cras ( %.9g , %.9g , %.9g ) vs ( %.9g , %.9g , %.9g
-  )\n",mri->c_r,mri->c_a,mri->c_s,mri_template->c_r,mri_template->c_a,mri_template->c_s);
-  */
+#if 0
+  printf("mri  vs.  mri_template\n");
+  fmt::printf(" dim  ( %i , %i , %i ) vs ( %i , %i , %i)\n", mri->width,
+              mri->height, mri->depth, mri_template->width,
+              mri_template->height, mri_template->depth);
+  fmt::printf(" size ( %.9g , %.9g , %.9g ) vs ( %.9g , %.9g , %.9g)\n",
+              mri->xsize, mri->ysize, mri->zsize, mri_template->xsize,
+              mri_template->ysize, mri_template->zsize);
+  fmt::printf(" xras ( %.9g , %.9g , %.9g ) vs ( %.9g , %.9g , %.9g)\n",
+              mri->x_r, mri->x_a, mri->x_s, mri_template->x_r,
+              mri_template->x_a, mri_template->x_s);
+  fmt::printf(" yras ( %.9g , %.9g , %.9g ) vs ( %.9g , %.9g , %.9g)\n",
+              mri->y_r, mri->x_a, mri->y_s, mri_template->y_r,
+              mri_template->y_a, mri_template->y_s);
+  fmt::printf(" zras ( %.9g , %.9g , %.9g ) vs ( %.9g , %.9g , %.9g)\n",
+              mri->z_r, mri->x_a, mri->z_s, mri_template->z_r,
+              mri_template->z_a, mri_template->z_s);
+  fmt::printf(" cras ( %.9g , %.9g , %.9g ) vs ( %.9g , %.9g , %.9g)\n",
+              mri->c_r, mri->c_a, mri->c_s, mri_template->c_r,
+              mri_template->c_a, mri_template->c_s);
+#endif
 
   /* ----- reslice if necessary and not performed during transform ----- */
   float eps = 1e-05; /* (mr) do eps testing to avoid reslicing due to tiny
