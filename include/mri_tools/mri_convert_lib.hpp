@@ -22,7 +22,7 @@ namespace pocl = boost::program_options::command_line_style;
 namespace po = boost::program_options;
 
 // program option style
-static auto const po_style =
+constexpr auto po_style =
     static_cast<unsigned>(pocl::allow_short) | pocl::short_allow_adjacent |
     pocl::short_allow_next | pocl::allow_long | pocl::long_allow_adjacent |
     pocl::long_allow_next | pocl::allow_sticky | pocl::allow_dash_for_short |
