@@ -48,6 +48,19 @@ before_install:
   - git clone https://github.com/MestreLion/git-tools.git
   - export PATH="./git-tools:$PATH"
   - git-restore-mtime
+  - cd ./packages/GSL
+  - ../../git-tools/git-restore-mtime
+  - cd ../abseil-cpp
+  - ../../git-tools/git-restore-mtime
+  - cd ../benchmark
+  - ../../git-tools/git-restore-mtime
+  - cd ../googletest
+  - ../../git-tools/git-restore-mtime
+  - cd ../fmt
+  - ../../git-tools/git-restore-mtime
+  - cd ../spdlog
+  - ../../git-tools/git-restore-mtime
+  - cd ../../
   - if [ -d ./packages/hpx ]; then
     echo "cached hpx found -- nothing to download, installing";
     cd ./packages/hpx/cmake-build-release;
