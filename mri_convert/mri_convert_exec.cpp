@@ -278,8 +278,6 @@ auto main(int argc, char *argv[]) -> int {
   STAT_TABLE *StatTable{};
   STAT_TABLE *OutStatTable{};
 
-  FSinit();
-  ErrorInit(NULL, NULL, NULL);
   DiagInit(nullptr, nullptr, nullptr);
 
   make_cmd_version_string(
