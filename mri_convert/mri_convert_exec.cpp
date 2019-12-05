@@ -111,7 +111,7 @@ auto main(int argc, char *argv[]) -> int {
 
   /* ----- catch zero or negative voxel dimensions ----- */
 
-  sizes_good_flag = TRUE;
+  sizes_good_flag = true;
 
   if (((cmdargs.in_i_size_flag) && cmdargs.in_i_size <= 0.0) ||
       ((cmdargs.in_j_size_flag) && cmdargs.in_j_size <= 0.0) ||
