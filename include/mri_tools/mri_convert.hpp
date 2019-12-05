@@ -11,6 +11,9 @@
 
 #include <boost/program_options.hpp>
 
+constexpr int default_cropsize = 256;
+constexpr int default_crop_center = 128;
+
 struct CMDARGS {
   CMDARGS(int argc, char *argv[]) : raw(argv, argc){}; // NOLINT
 
@@ -28,9 +31,11 @@ public:
   std::string autoalign_file{};
   std::string transform_fname{};
   std::string out_like_name{};
-  std::vector<int> crop_center{128, 128, 128};
+  std::vector<int> crop_center{default_crop_center, default_crop_center,
+                               default_crop_center};
   std::vector<int> slice_crop{}; //?
-  std::vector<int> cropsize{256, 256, 256};
+  std::vector<int> cropsize{default_cropsize, default_cropsize,
+                            default_cropsize};
   std::string devolvexfm_subject{};
   std::string colortablefile{};
   std::string dil_seg_mask{};
@@ -271,24 +276,7 @@ print_help(boost::program_options::options_description const &desc, ENV *env) {
 /* ----- determines tolerance of non-orthogonal basis vectors ----- */
 constexpr auto CLOSE_ENOUGH{5e-3};
 
-[[deprecated("use boost::program_options")]] void
-get_ints(int argc, char *argv[], int *pos, int *vals, int nvals);
-
-[[deprecated("use boost::program_options")]] void
-get_floats(int argc, char *argv[], int *pos, float *vals, int nvals);
-
-[[deprecated("use boost::program_options")]] void
-get_doubles(int argc, char *argv[], int *pos, double *vals, int nvals);
-
-[[deprecated("use boost::program_options")]] void
-get_string(int argc, char *argv[], int *pos, char *val);
-
-[[deprecated("use fs::usage_message and pass Progname instead")]] void
-usage_message(FILE *stream);
-
 void usage(FILE *stream);
-
-static int debug{};
 
 extern int errno;
 
