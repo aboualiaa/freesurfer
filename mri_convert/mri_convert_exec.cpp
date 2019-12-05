@@ -540,7 +540,7 @@ auto main(int argc, char *argv[]) -> int {
   if (cmdargs.outside_val > 0) {
     mri->outside_val = cmdargs.outside_val;
   }
-  if (cmdargs.upsample_flag != 0) {
+  if (cmdargs.upsample_flag) {
     fmt::printf("UpsampleFactor = %d\n", cmdargs.upsample_factor);
     mritmp = MRIupsampleN(mri, nullptr, cmdargs.upsample_factor);
     MRIfree(&mri);
@@ -964,10 +964,10 @@ auto main(int argc, char *argv[]) -> int {
     mri->z_s = cmdargs.in_k_directions[2];
     mri->ras_good_flag = 1;
   }
-  if (cmdargs.delete_cmds != 0) {
+  if (cmdargs.delete_cmds) {
     mri->ncmds = 0;
   }
-  if (cmdargs.DoNewTransformFname != 0) {
+  if (cmdargs.DoNewTransformFname) {
     fmt::printf("Changing xform name to %s\n",
                 cmdargs.new_transform_fname.data());
     strcpy(mri->transform_fname, cmdargs.new_transform_fname.data());
@@ -2263,7 +2263,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     cmdargs->reorder_flag = true;
   }
 
-  if (vm.count("reorder4_vals") != 0U || vm.count("r4") != 0U) {
+  if (vm.count("reorder4_vals") != 0U) {
 
     if (!fs::util::cli::check_vector_range(cmdargs->reorder4_vals, 4)) {
       spdlog::get("stderr")->critical(
@@ -2274,7 +2274,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     cmdargs->reorder4_flag = true;
   }
 
-  if ((vm.count("outside_val") != 0U) || (vm.count("oval") != 0U)) {
+  if (vm.count("outside_val") != 0U) {
     fmt::printf("setting outside val to %d\n", cmdargs->outside_val);
   }
 
@@ -2350,11 +2350,11 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     cmdargs->conform_flag = true;
   }
 
-  if ((vm.count("conform_size") != 0U) || (vm.count("cs") != 0U)) {
+  if (vm.count("conform_size") != 0U) {
     cmdargs->conform_flag = true;
   }
 
-  if ((vm.count("apply_transform") != 0U) || (vm.count("at") != 0U)) {
+  if (vm.count("apply_transform") != 0U) {
     cmdargs->transform_flag = true;
     cmdargs->invert_transform_flag = false;
   }
@@ -2401,7 +2401,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     cmdargs->DevXFM = 0;
   }
 
-  if ((vm.count("apply_inverse_transform") != 0U) || (vm.count("ait") != 0U)) {
+  if (vm.count("apply_inverse_transform") != 0U) {
     if (FileExists(cmdargs->transform_fname.data()) == 0) {
       fmt::fprintf(stderr, "ERROR: cannot find transform file %s\n",
                    cmdargs->transform_fname.data());
@@ -2415,27 +2415,27 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     cmdargs->upsample_flag = true;
   }
 
-  if ((vm.count("in_i_size") != 0U) || (vm.count("iis") != 0U)) {
+  if (vm.count("in_i_size") != 0U) {
     cmdargs->in_i_size_flag = true;
   }
 
-  if ((vm.count("in_j_size") != 0U) || (vm.count("ijs") != 0U)) {
+  if (vm.count("in_j_size") != 0U) {
     cmdargs->in_j_size_flag = true;
   }
 
-  if ((vm.count("in_k_size") != 0U) || (vm.count("iks") != 0U)) {
+  if (vm.count("in_k_size") != 0U) {
     cmdargs->in_k_size_flag = true;
   }
 
-  if ((vm.count("out_i_size") != 0U) || (vm.count("ois") != 0U)) {
+  if (vm.count("out_i_size") != 0U) {
     cmdargs->out_i_size_flag = true;
   }
 
-  if ((vm.count("out_j_size") != 0U) || (vm.count("ojs") != 0U)) {
+  if (vm.count("out_j_size") != 0U) {
     cmdargs->out_j_size_flag = true;
   }
 
-  if ((vm.count("out_k_size") != 0U) || (vm.count("oks") != 0U)) {
+  if (vm.count("out_k_size") != 0U) {
     cmdargs->out_k_size_flag = true;
   }
 
@@ -2451,33 +2451,27 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     cmdargs->cutends_flag = true;
   }
 
-  if ((vm.count("out_i_count") != 0U) || (vm.count("oni") != 0U) ||
-      (vm.count("oic") != 0U)) {
+  if (vm.count("out_i_count") != 0U) {
     cmdargs->out_n_i_flag = true;
   }
 
-  if ((vm.count("out_j_count") != 0U) || (vm.count("onj") != 0U) ||
-      (vm.count("ojc") != 0U)) {
+  if (vm.count("out_j_count") != 0U) {
     cmdargs->out_n_j_flag = true;
   }
 
-  if ((vm.count("out_k_count") != 0U) || (vm.count("onk") != 0U) ||
-      (vm.count("okc") != 0U)) {
+  if (vm.count("out_k_count") != 0U) {
     cmdargs->out_n_k_flag = true;
   }
 
-  if ((vm.count("in_i_count") != 0U) || (vm.count("ini") != 0U) ||
-      (vm.count("iic") != 0U)) {
+  if (vm.count("in_i_count") != 0U) {
     cmdargs->in_n_i_flag = true;
   }
 
-  if ((vm.count("in_j_count") != 0U) || (vm.count("inj") != 0U) ||
-      (vm.count("ijc") != 0U)) {
+  if (vm.count("in_j_count") != 0U) {
     cmdargs->in_n_j_flag = true;
   }
 
-  if ((vm.count("in_k_count") != 0U) || (vm.count("ink") != 0U) ||
-      (vm.count("ikc") != 0U)) {
+  if (vm.count("in_k_count") != 0U) {
     cmdargs->in_n_k_flag = true;
   }
 
@@ -2546,7 +2540,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     setenv("NROWS_OVERRIDE", tmpstr.data(), 1);
   }
 
-  if (vm.count("statusfile") != 0 || vm.count("status") != 0) {
+  if (vm.count("statusfile") != 0) {
     SDCMStatusFile = cmdargs->statusfile.data();
     std::ofstream ofs(SDCMStatusFile);
     if (!ofs.is_open()) {
@@ -2592,7 +2586,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     cmdargs->frame_flag = true;
   }
 
-  if (vm.count("in_center") != 0 || vm.count("ic") != 0) {
+  if (vm.count("in_center") != 0) {
     if (!fs::util::cli::check_vector_range(cmdargs->in_center, 3)) {
       fmt::printf("ERROR:");
     }
@@ -2600,7 +2594,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     cmdargs->in_center_flag = true;
   }
 
-  if (vm.count("delta_in_center") != 0 || vm.count("dic") != 0) {
+  if (vm.count("delta_in_center") != 0) {
     if (!fs::util::cli::check_vector_range(cmdargs->delta_in_center, 3)) {
       fmt::printf("ERROR:");
     }
@@ -2608,7 +2602,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     cmdargs->delta_in_center_flag = true;
   }
 
-  if (vm.count("out_center") != 0 || vm.count("oc") != 0) {
+  if (vm.count("out_center") != 0) {
     if (!fs::util::cli::check_vector_range(cmdargs->out_center, 3)) {
       fmt::printf("ERROR:");
     }
@@ -2616,7 +2610,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     cmdargs->out_center_flag = true;
   }
 
-  if (vm.count("voxsize") != 0 || vm.count("vs") != 0) {
+  if (vm.count("voxsize") != 0) {
     if (!fs::util::cli::check_vector_range(cmdargs->voxel_size, 3)) {
       fmt::printf("ERROR:");
     }
@@ -2624,7 +2618,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     cmdargs->voxel_size_flag = true;
   }
 
-  if (vm.count("downsample") != 0 || vm.count("ds") != 0) {
+  if (vm.count("downsample") != 0) {
     if (!fs::util::cli::check_vector_range(cmdargs->downsample_factor, 3)) {
       fmt::printf("ERROR:");
     }
@@ -2664,7 +2658,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     cmdargs->color_file_flag = true;
   }
 
-  if (vm.count("crop_gdf") != 0 || vm.count("crop_gdf") != 0) {
+  if (vm.count("crop_gdf") != 0) {
     mriio_set_gdf_crop_flag(TRUE);
   }
 
@@ -2738,7 +2732,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     }
   }
 
-  if (vm.count("in_i_direction") != 0 || vm.count("iid") != 0) {
+  if (vm.count("in_i_direction") != 0) {
     auto norm = fs::math::frobenius_norm(&cmdargs->in_i_directions);
     auto directions = cmdargs->in_i_directions;
     if (norm == 0.0) {
@@ -2760,7 +2754,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     cmdargs->in_i_direction_flag = true;
   }
 
-  if (vm.count("in_j_direction") != 0 || vm.count("ikd") != 0) {
+  if (vm.count("in_j_direction") != 0) {
     auto norm = fs::math::frobenius_norm(&cmdargs->in_j_directions);
     auto directions = cmdargs->in_j_directions;
     if (norm == 0.0) {
@@ -2782,7 +2776,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     cmdargs->in_j_direction_flag = true;
   }
 
-  if (vm.count("in_k_direction") != 0 || vm.count("ikd") != 0) {
+  if (vm.count("in_k_direction") != 0) {
     auto norm = fs::math::frobenius_norm(&cmdargs->in_k_directions);
     auto directions = cmdargs->in_k_directions;
     if (norm == 0.0) {
@@ -2804,7 +2798,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     cmdargs->in_k_direction_flag = true;
   }
 
-  if (vm.count("out_i_direction") != 0 || vm.count("oid") != 0) {
+  if (vm.count("out_i_direction") != 0) {
     auto norm = fs::math::frobenius_norm(&cmdargs->out_i_directions);
     auto directions = cmdargs->out_i_directions;
     if (norm == 0.0) {
@@ -2826,7 +2820,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     cmdargs->out_i_direction_flag = true;
   }
 
-  if (vm.count("out_j_direction") != 0 || vm.count("ojd") != 0) {
+  if (vm.count("out_j_direction") != 0) {
     auto norm = fs::math::frobenius_norm(&cmdargs->out_j_directions);
     auto directions = cmdargs->out_j_directions;
     if (norm == 0.0) {
@@ -2848,7 +2842,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     cmdargs->out_j_direction_flag = true;
   }
 
-  if (vm.count("out_k_direction") != 0 || vm.count("okd") != 0) {
+  if (vm.count("out_k_direction") != 0) {
     auto norm = fs::math::frobenius_norm(&cmdargs->out_k_directions);
     auto directions = cmdargs->out_k_directions;
     if (norm == 0.0) {
