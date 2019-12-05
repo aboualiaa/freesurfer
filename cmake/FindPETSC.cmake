@@ -22,6 +22,4 @@ library_paths(
   petsccontrib
   mpich
   pmpich
-  petsc.3.12.1
-  petsc.3.12
 )
