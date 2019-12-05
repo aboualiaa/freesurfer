@@ -23,18 +23,13 @@
  */
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
-#include <QtCore>
-#include <QFileInfo>
-#include "LayerMRI.h"
 #include "LayerPropertyMRI.h"
 #include "LayerSurface.h"
 #include "LayerROI.h"
 #include "LayerTrack.h"
 #include "LayerDTI.h"
 #include "LayerVolumeTrack.h"
-#include "LayerCollection.h"
 #include "BrushProperty.h"
-#include <QMessageBox>
 #include "LUTDataHolder.h"
 #include "DialogLoadVolume.h"
 #include "ThreadIOWorker.h"
@@ -57,7 +52,6 @@
 #include "LayerPropertySurface.h"
 #include "LayerPropertyPointSet.h"
 #include "LayerPropertyROI.h"
-#include "FSPointSet.h"
 #include "DialogLoadPointSet.h"
 #include "DialogTransformVolume.h"
 #include "DialogCropVolume.h"
@@ -85,7 +79,6 @@
 #include "DialogWriteMovieFrames.h"
 #include "LayerLandmarks.h"
 #include "Interactor2DNavigate.h"
-#include "MainApplication.h"
 #include "DialogRepositionSurface.h"
 #include "WindowTimeCourse.h"
 #include "DialogLabelStats.h"
@@ -104,8 +97,6 @@
 #include "DialogSetCamera.h"
 #include "DialogThresholdVolume.h"
 #include "DialogVolumeSegmentation.h"
-#include <QProcessEnvironment>
-#include <QJsonDocument>
 #include "DialogLoadTransform.h"
 #include "LayerPropertyTrack.h"
 #include "BinaryTreeView.h"
@@ -113,7 +104,6 @@
 #include "Annotation2D.h"
 #include "PanelLayer.h"
 #include "WindowLayerInfo.h"
-#include <QDebug>
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 #include <QtWidgets>
@@ -791,13 +781,11 @@ void MainWindow::ReassureGeometry() {
   }
 }
 
-void MainWindow::showEvent(QShowEvent *event)
-{
+void MainWindow::showEvent(QShowEvent *event) {
   static bool bFirstTime = true;
   QMainWindow::showEvent(event);
 #ifdef Q_OS_LINUX
-  if (bFirstTime)
-  {
+  if (bFirstTime) {
     m_dlgPreferences->hide();
     bFirstTime = false;
   }
@@ -1802,30 +1790,32 @@ void MainWindow::CommandLoadSubject(const QStringList &sa) {
     return;
   }
   subject_path += "/" + sa[1];
-  QString args = QString("freeview -v "
-                         "%1/mri/norm.mgz "
-                         "%1/mri/T1.mgz "
-                         "%1/mri/brainmask.mgz "
-                         "%1/mri/wm.mgz:colormap=heat:visible=0:opacity=0.4 "
-                         "%1/mri/aseg.mgz:colormap=lut:opacity=0.22 "
-                         "-f %1/surf/lh.white "
-                         "%1/surf/rh.white "
-                         "%1/surf/lh.pial:edgecolor=red "
-                         "%1/surf/rh.pial:edgecolor=red "
-                         //                         "%1/surf/lh.orig:edgecolor=green:visible=0
-                         //                         "
-                         //                         "%1/surf/rh.orig:edgecolor=green:visible=0
-                         //                         "
-                         "%1/surf/lh.inflated:annot=aparc:visible=0 "
-                         "%1/surf/rh.inflated:annot=aparc:visible=0 "
-                         "%1/surf/lh.orig.nofix:overlay=%1/surf/"
-                         "lh.defect_labels:edgecolor=overlay:overlay_threshold="
-                         "0.01,100,percentile:visible=0 "
-                         "%1/surf/rh.orig.nofix:overlay=%1/surf/"
-                         "rh.defect_labels:edgecolor=overlay:overlay_threshold="
-                         "0.01,100,percentile:visible=0 "
-                         "-viewport coronal ")
-                     .arg(subject_path);
+  QString args =
+      QString(
+          "freeview -v "
+          "%1/mri/norm.mgz "
+          "%1/mri/T1.mgz "
+          "%1/mri/brainmask.mgz "
+          "%1/mri/wm.mgz:colormap=heat:visible=0:opacity=0.4 "
+          "%1/mri/aseg.mgz:colormap=lut:opacity=0.22 "
+          "-f %1/surf/lh.white "
+          "%1/surf/rh.white "
+          "%1/surf/lh.pial:edgecolor=red "
+          "%1/surf/rh.pial:edgecolor=red "
+          //                         "%1/surf/lh.orig:edgecolor=green:visible=0
+          //                         "
+          //                         "%1/surf/rh.orig:edgecolor=green:visible=0
+          //                         "
+          "%1/surf/lh.inflated:annot=aparc:visible=0 "
+          "%1/surf/rh.inflated:annot=aparc:visible=0 "
+          "%1/surf/lh.orig.nofix:overlay=%1/surf/"
+          "lh.defect_labels:edgecolor=overlay:overlay_threshold="
+          "0.01,100,percentile:visible=0 "
+          "%1/surf/rh.orig.nofix:overlay=%1/surf/"
+          "rh.defect_labels:edgecolor=overlay:overlay_threshold="
+          "0.01,100,percentile:visible=0 "
+          "-viewport coronal ")
+          .arg(subject_path);
   QString control_pt_file = QString("%1/tmp/control.dat").arg(subject_path);
   if (QFile::exists(control_pt_file))
     args += "-c " + control_pt_file;
