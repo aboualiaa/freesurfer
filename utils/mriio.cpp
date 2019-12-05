@@ -509,6 +509,24 @@ int MRIgetVolumeName(const char *string, char *name_only) {
 
 } /* end MRIgetVolumeName() */
 
+namespace fs::mri::io {
+auto getVolumeName(std::string const string) -> std::string const {
+
+  auto name_only = string;
+  if (auto atSign = name_only.find('@'); atSign != std::string::npos) {
+    name_only = name_only.substr(atSign);
+  }
+
+  if (MRIIO_Strip_Pound == 1) {
+    if (auto poundSign = name_only.find('#'); poundSign != std::string::npos) {
+      name_only = name_only.substr(poundSign);
+    }
+  }
+
+  return name_only;
+}
+} // namespace fs::mri::io
+
 MRI *mri_read(const char *fname, int type, int volume_flag, int start_frame,
               int end_frame) {
   MRI *mri, *mri2;

@@ -75,8 +75,11 @@ int handle_version_option(int argc, char **argv, const char *id_string,
 int handle_version_option(bool all_info, gsl::multi_span<char *>,
                           const std::string id_string,
                           const std::string version_string);
-int make_cmd_version_string(int argc, char **argv, const char *id_string,
-                            const char *version_string, char *return_string);
+
+[[deprecated("this function is unsafe, do not use")]] int
+make_cmd_version_string(int argc, char **argv, const char *id_string,
+                        const char *version_string, char *return_string);
+
 char *argv2cmdline(int argc, char *argv[]);
 std::string argv2cmdline(gsl::multi_span<char *>, bool progname = true);
 char *VERuser();

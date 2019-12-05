@@ -34,10 +34,13 @@
 #include "mri2.h"
 #include "mri_conform.h"
 #include "mri_identify.h"
+#include "mriio.hpp"
 
 #include <boost/algorithm/string.hpp>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
+
+//#include <aboualiaa/banned.h>
 
 auto main(int argc, char *argv[]) -> int {
   auto err_logger = spdlog::stderr_color_mt("stderr");
@@ -70,7 +73,7 @@ auto main(int argc, char *argv[]) -> int {
   float fov_y{};
   float fov_z{};
   int nframes{};
-  std::string in_name_only{};
+  std::string in_name_only;
   LTA *lta_transform{};
   MRI *mri_transformed{};
   MRI *mritmp{};
@@ -103,9 +106,12 @@ auto main(int argc, char *argv[]) -> int {
 
   DiagInit(nullptr, nullptr, nullptr);
 
-  make_cmd_version_string(
-      argc, argv, "$Id: mri_convert.c,v 1.227 2017/02/16 19:15:42 greve Exp $",
-      "$Name:  $", cmdline.data());
+  // TODO(aboualiaa): Implement a safe version if make_cmd_version_string (in
+  // utils/version.cpp) then delete this loop
+  for (auto arg : cmdargs.raw) {
+    cmdline.append(arg);
+    cmdline.append(" ");
+  }
 
   Progname = GET_PROGRAM_NAME();
 
@@ -145,7 +151,7 @@ auto main(int argc, char *argv[]) -> int {
     fmt::fprintf(stderr, "out k size = %g\n", cmdargs.out_k_size);
   }
 
-  if (sizes_good_flag) {
+  if (!sizes_good_flag) {
     spdlog::get("stderr")->critical("sizes_good_flag is not set");
     fs::util::cli::usage_message(stdout);
     exit(1);
@@ -170,7 +176,9 @@ auto main(int argc, char *argv[]) -> int {
   }
 
   /* ----- copy file name (only -- strip '@' and '#') ----- */
-  MRIgetVolumeName(cmdargs.in_name.data(), in_name_only.data());
+  in_name_only = fs::mri::io::getVolumeName(cmdargs.in_name);
+
+  //  MRIgetVolumeName(cmdargs.in_name.data(), in_name_only.data());
 
   /* If input type is spm and N_Zero_Pad_Input < 0, set to 3*/
   if (cmdargs.in_type_string == "spm" && N_Zero_Pad_Input < 0) {
@@ -2008,7 +2016,7 @@ auto main(int argc, char *argv[]) -> int {
       mri2 = nullptr;
       for (i = 0; i < mri->nframes; i++) {
         mri2 = MRIcopyFrame(mri, mri2, i, 0);
-        fmt::sprintf(tmpstr.data(), "%s%04d.%s", stem, i, ext);
+        tmpstr = fmt::sprintf("%s%04d.%s", stem, i, ext);
         fmt::printf("%2d %s\n", i, tmpstr.data());
         err = MRIwrite(mri2, tmpstr.data());
         if (err != NO_ERROR) {
