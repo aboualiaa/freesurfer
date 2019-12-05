@@ -48,7 +48,6 @@ auto main(int argc, char *argv[]) -> int {
     return 1;
   }
 
-  int nargs{};
   MRI *mri{};
   MRI *mri2{};
   MRI *mri_template{};
@@ -64,8 +63,6 @@ auto main(int argc, char *argv[]) -> int {
   char *stem{};
   char *ext{};
   std::array<char, 4> ostr{};
-  char *errmsg{};
-  double norm;
   float i_dot_j{};
   float i_dot_k{};
   float j_dot_k{};
@@ -73,7 +70,6 @@ auto main(int argc, char *argv[]) -> int {
   float fov_y{};
   float fov_z{};
   int nframes{};
-  char *errormsg{};
   std::string in_name_only{};
   LTA *lta_transform{};
   MRI *mri_transformed{};
@@ -1638,8 +1634,9 @@ auto main(int argc, char *argv[]) -> int {
 #endif
 
   /* ----- reslice if necessary and not performed during transform ----- */
-  float eps = 1e-05; /* (mr) do eps testing to avoid reslicing due to tiny
-                        differences, e.g. from IO */
+  constexpr auto eps =
+      static_cast<const float>(1e-05); /* (mr) do eps testing to avoid reslicing
+                        due to tiny differences, e.g. from IO */
   if ((!cmdargs.out_like_flag) && (transform_type != MORPH_3D_TYPE) &&
       (fabs(mri->xsize - mri_template->xsize) > eps ||
        fabs(mri->ysize - mri_template->ysize) > eps ||
