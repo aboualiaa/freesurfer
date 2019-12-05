@@ -5,8 +5,8 @@
 #ifndef MRI_TOOLS_MRI_CONVERT_HPP
 #define MRI_TOOLS_MRI_CONVERT_HPP
 
-#include "mri2.h"
 #include "mri.h"
+#include "mri2.h"
 #include "version.h"
 
 #include <boost/program_options.hpp>
@@ -15,40 +15,122 @@ struct CMDARGS {
   CMDARGS(int argc, char *argv[]) : raw(argv, argc){}; // NOLINT
 
 public:
+  MATRIX *AutoAlign{};
+  double fwhm{-1};
+  double gstd{-1};
   gsl::multi_span<char *> raw;
   std::vector<int> reorder_vals{};
-  bool reorder_flag{};
   std::vector<int> reorder4_vals{};
+  std::string left_right_mirror_hemi{}; // which half to mirror (lh, rh)
+  std::string input_volume{};           //?
+  std::string output_volume{};          //?
+  std::string new_transform_fname{};
+  std::string autoalign_file{};
+  std::string transform_fname{};
+  std::string out_like_name{};
+  std::vector<int> crop_center{128, 128, 128};
+  std::vector<int> slice_crop{}; //?
+  std::vector<int> cropsize{256, 256, 256};
+  std::string devolvexfm_subject{};
+  std::string colortablefile{};
+  std::string dil_seg_mask{};
+  std::string in_name{};
+  std::string out_name{};
+  std::string statusfile{}; //?
+  std::string sdcmlist{};   //?
+  std::vector<int> fsubsample{};
+  std::vector<int> in_center;
+  std::vector<int> delta_in_center;
+  std::vector<int> out_center;
+  std::vector<int> voxel_size;
+  std::vector<int> downsample_factor;
+  std::string subject_name;
+  std::string gdf_image_stem;
+  std::string reslice_like_name;
+  std::string in_like_name;
+  std::string color_file_name;
+  std::string in_orientation_string;
+  std::string out_orientation_string;
+  std::string out_data_type_string;
+  std::string resample_type;
+  std::vector<double> in_i_directions;
+  std::vector<double> in_j_directions;
+  std::vector<double> in_k_directions;
+  std::vector<double> out_i_directions;
+  std::vector<double> out_j_directions;
+  std::vector<double> out_k_directions;
+  std::string in_type_string;
+  std::string out_type_string;
+  std::string template_type_string;
+  std::vector<int> frames;
+  int outside_val{};
+  float invert_contrast{}; //?
+  int conf_keep_dc{};
+  float conform_size{1.0};
+  int slice_crop_start{};
+  int slice_crop_stop{};
+  int DevXFM{};
+  int upsample_factor{};
+  float in_i_size{};
+  float in_j_size{};
+  float in_k_size{};
+  float out_i_size{};
+  float out_j_size{};
+  float out_k_size{};
+  int nthframe{-1};
+  int n_erode_seg;
+  int n_dil_seg{};
+  int ncutends{};
+  int out_n_i{};
+  int in_n_i{};
+  int in_n_j{};
+  int in_n_k{};
+  float in_tr{};
+  float in_ti{};
+  float in_te{};
+  float in_flip_angle{};
+  int out_n_j{};
+  int out_n_k{};
+  int nskip{};            // number of frames to skip from start
+  int ndrop{};            // number of frames to skip from end
+  int nslices_override{}; //?
+  int ncols_override{};   //?
+  int nrows_override{};   //?
+  int SubSampStart{};
+  int SubSampDelta{};
+  int SubSampEnd{};
+  int reduce;
+  float rescale_factor{1};
+  float scale_factor{1};
+  float out_scale_factor{1};
+  float SliceBiasAlpha{1.0};
+  int out_data_type;
+  int resample_type_val{SAMPLE_TRILINEAR};
+  int forced_out_type{MRI_VOLUME_TYPE_UNKNOWN};
+  int forced_in_type{MRI_VOLUME_TYPE_UNKNOWN};
+  int forced_template_type{MRI_VOLUME_TYPE_UNKNOWN};
+  int smooth_parcellation_count;
+  int ascii_flag;
+  bool smooth_parcellation_flag;
+  bool reorder_flag{};
   bool reorder4_flag{};
   bool debug{};
-  int outside_val{};
-
-  // where does this come from
-  bool left_right_reverse{};
+  bool conform_width_256_flag{};
+  bool left_right_reverse{}; // where does this come from
   bool left_right_reverse_pix{};
-  bool left_right_mirror_flag{};        // mirror half of the image
-  std::string left_right_mirror_hemi{}; // which half to mirror (lh, rh)
-  bool left_right_keep_flag{};          // keep half of the image
+  bool left_right_mirror_flag{}; // mirror half of the image
+  bool left_right_keep_flag{};   // keep half of the image
   bool left_right_swap_label{};
   bool flip_cols{};
   bool slice_reverse{};
   bool in_stats_table_flag{};
   bool out_stats_table_flag{};
-  float invert_contrast{};     //?
-  std::string input_volume{};  //?
-  std::string output_volume{}; //?
   bool conform_flag{};
-  int conf_keep_dc{};
-  bool conform_width_256_flag{};
   bool delete_cmds{};
-  std::string new_transform_fname{};
   bool DoNewTransformFname{};
   bool sphinx_flag{};
-  std::string autoalign_file{};
-  MATRIX *AutoAlign{};
   bool nochange_flag{};
   bool conform_min_flag{}; // conform to the smallest dimension
-  float conform_size{1.0};
   bool parse_only_flag{};
   bool in_info_flag{};
   bool out_info_flag{};
@@ -61,21 +143,11 @@ public:
   bool out_matrix_flag{};
   bool force_ras_good{};
   bool split_frames_flag{};
-  std::string transform_fname{};
   bool transform_flag{};
   bool invert_transform_flag{};
-  std::string out_like_name{};
   bool out_like_flag{};
   bool crop_flag{};
-  std::vector<int> crop_center{128, 128, 128};
   bool slice_crop_flag{};
-  int slice_crop_start{};
-  int slice_crop_stop{};
-  std::vector<int> slice_crop{}; //?
-  std::vector<int> cropsize{256, 256, 256};
-  std::string devolvexfm_subject{};
-  int DevXFM{};
-  int upsample_factor{};
   bool upsample_flag{};
   bool in_i_size_flag{};
   bool in_j_size_flag{};
@@ -83,24 +155,12 @@ public:
   bool out_i_size_flag{};
   bool out_j_size_flag{};
   bool out_k_size_flag{};
-  float in_i_size{};
-  float in_j_size{};
-  float in_k_size{};
-  float out_i_size{};
-  float out_j_size{};
-  float out_k_size{};
-  std::string colortablefile{};
-  int nthframe{-1};
   bool translate_labels_flag{};
   bool zero_outlines_flag{};
   bool fill_parcellation_flag{};
   bool roi_flag{};
-  std::string dil_seg_mask{};
   bool erode_seg_flag{};
-  int n_erode_seg;
-  int n_dil_seg{};
   bool dil_seg_flag{};
-  int ncutends{};
   bool cutends_flag{};
   bool out_n_i_flag{};
   bool out_n_j_flag{};
@@ -112,95 +172,33 @@ public:
   bool in_ti_flag{};
   bool in_te_flag{};
   bool in_flip_angle_flag{};
-  int out_n_i{};
-  int in_n_i{};
   bool downsample2_flag{};
-  int in_n_j{};
-  int in_n_k{};
-  float in_tr{};
-  float in_ti{};
-  float in_te{};
-  float in_flip_angle{};
-  int out_n_j{};
-  int out_n_k{};
-  std::string in_name{};
-  std::string out_name{};
   bool zero_ge_z_offset_flag{}; // E/
   bool no_zero_ge_z_offset_flag{};
-  int nskip{};              // number of frames to skip from start
-  int ndrop{};              // number of frames to skip from end
-  int nslices_override{};   //?
-  int ncols_override{};     //?
-  int nrows_override{};     //?
-  std::string statusfile{}; //?
-  std::string sdcmlist{};   //?
-  std::vector<int> fsubsample{};
-  int SubSampStart{};
-  int SubSampDelta{};
-  int SubSampEnd{};
   bool subsample_flag{};
   bool frame_flag{};
   bool mid_frame_flag{};
   bool in_center_flag;
-  std::vector<int> in_center;
-  std::vector<int> delta_in_center;
   bool delta_in_center_flag;
-  std::vector<int> out_center;
   bool out_center_flag;
-  std::vector<int> voxel_size;
   bool voxel_size_flag;
-  std::vector<int> downsample_factor;
   bool downsample_flag;
-  int reduce;
-  float rescale_factor{1};
-  float scale_factor{1};
-  float out_scale_factor{1};
-  std::string subject_name;
-  std::string gdf_image_stem;
-  std::string reslice_like_name;
   bool reslice_like_flag;
   bool SliceBias;
-  float SliceBiasAlpha{1.0};
-  std::string in_like_name;
-  std::string color_file_name;
   bool in_like_flag;
   bool color_file_flag;
   bool no_scale_flag;
-  std::string in_orientation_string;
   bool in_orientation_flag;
-  std::string out_orientation_string;
   bool out_orientation_flag;
-  double fwhm{-1};
-  double gstd{-1};
-  std::string out_data_type_string;
-  int out_data_type;
-  std::string resample_type;
-  int resample_type_val{SAMPLE_TRILINEAR};
-  std::vector<double> in_i_directions;
   bool in_i_direction_flag;
-  std::vector<double> in_j_directions;
   bool in_j_direction_flag;
-  std::vector<double> in_k_directions;
-  std::vector<double> out_i_directions;
-  std::vector<double> out_j_directions;
-  std::vector<double> out_k_directions;
   bool out_j_direction_flag;
   bool out_i_direction_flag;
   bool out_k_direction_flag;
   bool in_k_direction_flag;
-  std::string in_type_string;
   bool force_in_type_flag{};
   bool force_out_type_flag{};
-  std::string out_type_string;
-  int forced_out_type{MRI_VOLUME_TYPE_UNKNOWN};
-  int forced_in_type{MRI_VOLUME_TYPE_UNKNOWN};
   bool force_template_type_flag;
-  int forced_template_type{MRI_VOLUME_TYPE_UNKNOWN};
-  std::string template_type_string;
-  std::vector<int> frames;
-  int smooth_parcellation_count;
-  bool smooth_parcellation_flag;
-  int ascii_flag;
 };
 
 struct ENV {
