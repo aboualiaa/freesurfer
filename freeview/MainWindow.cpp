@@ -791,9 +791,16 @@ void MainWindow::ReassureGeometry() {
   }
 }
 
-void MainWindow::showEvent(QShowEvent *event) {
+void MainWindow::showEvent(QShowEvent *event)
+{
+  static bool bFirstTime = true;
   QMainWindow::showEvent(event);
 #ifdef Q_OS_LINUX
+  if (bFirstTime)
+  {
+    m_dlgPreferences->hide();
+    bFirstTime = false;
+  }
   m_ptBackUpPos = this->pos();
   QTimer::singleShot(500, this, SLOT(ReassureGeometry()));
 #endif
