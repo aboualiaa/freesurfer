@@ -117,8 +117,6 @@ public:
   int smooth_parcellation_count{};
   int ascii_flag{};
   bool smooth_parcellation_flag{};
-  bool reorder_flag{};
-  bool reorder4_flag{};
   bool debug{};
   bool conform_width_256_flag{};
   bool left_right_reverse{}; // where does this come from
@@ -183,11 +181,6 @@ public:
   bool subsample_flag{};
   bool frame_flag{};
   bool mid_frame_flag{};
-  bool in_center_flag{};
-  bool delta_in_center_flag{};
-  bool out_center_flag{};
-  bool voxel_size_flag{};
-  bool downsample_flag{};
   bool reslice_like_flag{};
   bool SliceBias{};
   bool in_like_flag{};
