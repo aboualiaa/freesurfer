@@ -2889,38 +2889,38 @@ void initArgDesc(boost::program_options::options_description *desc,
                                                                          /**/
       ("in_i_size,iis",                                                  /**/
        po::value(&cmdargs->in_i_size)                                    /**/
-           ->notifier(cli::checkValue(0.0f, "in_i_size",                 /**/
-                                      std::greater<float>())),           /**/
+           ->notifier(cli::checkValue(0.0F, "in_i_size",                 /**/
+                                      std::greater<>())),                /**/
        "in_i_size")                                                      /**/
                                                                          /**/
       ("in_j_size,ijs",                                                  /**/
        po::value(&cmdargs->in_j_size)                                    /**/
-           ->notifier(cli::checkValue(0.0f, "in_j_size",                 /**/
-                                      std::greater<float>())),           /**/
+           ->notifier(cli::checkValue(0.0F, "in_j_size",                 /**/
+                                      std::greater<>())),                /**/
        "in_j_size")                                                      /**/
                                                                          /**/
       ("in_k_size,iks",                                                  /**/
        po::value(&cmdargs->in_k_size)                                    /**/
-           ->notifier(cli::checkValue(0.0f, "in_k_size",                 /**/
-                                      std::greater<float>())),           /**/
+           ->notifier(cli::checkValue(0.0F, "in_k_size",                 /**/
+                                      std::greater<>())),                /**/
        "in_k_size")                                                      /**/
                                                                          /**/
       ("out_i_size,ois",                                                 /**/
        po::value(&cmdargs->out_i_size)                                   /**/
-           ->notifier(cli::checkValue(0.0f, "out_i_size",                /**/
-                                      std::greater<float>())),           /**/
+           ->notifier(cli::checkValue(0.0F, "out_i_size",                /**/
+                                      std::greater<>())),                /**/
        "out_i_size")                                                     /**/
                                                                          /**/
       ("out_j_size,ojs",                                                 /**/
        po::value(&cmdargs->out_j_size)                                   /**/
-           ->notifier(cli::checkValue(0.0f, "out_j_size",                /**/
-                                      std::greater<float>())),           /**/
+           ->notifier(cli::checkValue(0.0F, "out_j_size",                /**/
+                                      std::greater<>())),                /**/
        "out_j_size")                                                     /**/
                                                                          /**/
       ("out_k_size,oks",                                                 /**/
        po::value(&cmdargs->out_k_size)                                   /**/
-           ->notifier(cli::checkValue(0.0f, "out_k_size",                /**/
-                                      std::greater<float>())),           /**/
+           ->notifier(cli::checkValue(0.0F, "out_k_size",                /**/
+                                      std::greater<>())),                /**/
        "out_k_size")                                                     /**/
                                                                          /**/
       ("ctab",                                                           /**/
