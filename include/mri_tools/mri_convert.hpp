@@ -40,8 +40,9 @@ public:
   std::vector<int> reorder_vals{};
   std::vector<int> reorder4_vals{};
   std::string left_right_mirror_hemi{}; // which half to mirror (lh, rh)
-  std::string input_volume{};           //?
-  std::string output_volume{};          //?
+  std::string left_right_keep_hemi{};
+  std::string input_volume{};  //?
+  std::string output_volume{}; //?
   std::string new_transform_fname{};
   std::string autoalign_file{};
   std::string transform_fname{};
@@ -131,7 +132,6 @@ public:
   int forced_template_type{MRI_VOLUME_TYPE_UNKNOWN};
   int smooth_parcellation_count{};
   int ascii_flag{};
-  bool smooth_parcellation_flag{};
   bool debug{};
   bool conform_width_256_flag{};
   bool left_right_reverse{}; // where does this come from

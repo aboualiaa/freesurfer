@@ -66,6 +66,19 @@ auto check_value(T const value, T comp, std::string opt,
   }
   return true;
 }
+
+auto check_string_values(std::vector<std::string> allowed, std::string value,
+                         std::string opt) {
+
+  if (std::find(allowed.begin(), allowed.end(), value) != allowed.end()) {
+    return;
+  }
+
+  auto message = fmt::format("value '{}' disallowed for option \"{}\". try "
+                             "--help for more detail\n",
+                             value, opt);
+  throw std::logic_error(message);
+}
 } // namespace
 
 auto checkSize = [](auto opt, size_t min, size_t max = 0) {
@@ -75,6 +88,16 @@ auto checkSize = [](auto opt, size_t min, size_t max = 0) {
 auto checkValue = [](auto min, auto opt,
                      std::function<bool(typeof(min), typeof(min))> fn) {
   return [min, opt, fn](auto value) { check_value(value, min, opt, fn); };
+};
+
+auto checkRange = [](auto min, auto max, auto opt) {
+  return
+      [min, opt, max](auto value) { check_value_range(value, opt, min, max); };
+};
+
+auto checkString = [](std::vector<std::string> allowed, std::string opt) {
+  return
+      [allowed, opt](auto value) { check_string_values(allowed, value, opt); };
 };
 
 auto allocateExternalString = [](char **var) mutable {
