@@ -7,6 +7,7 @@
 
 #include <boost/program_options.hpp>
 #include <gsl/multi_span>
+#include <fmt/format.h>
 
 #undef GET_PROGRAM_NAME
 #ifdef __GLIBC__
@@ -45,6 +46,39 @@ auto frobenius_normalize(std::vector<double> *matrix) -> void;
 namespace fs::dbg {
 void create_gdb_file(gsl::multi_span<char *> args);
 } // namespace fs::dbg
+
+namespace boost::program_options {
+
+///
+/// \param vm variables map
+/// \param for_what requiring option
+/// \param required_option required option
+inline void dependant_options(boost::program_options::variables_map const &vm,
+                              std::string const &for_what,
+                              std::string const &required_option) {
+  if ((vm.count(for_what) != 0U) && !vm[for_what].defaulted()) {
+    if (vm.count(required_option) == 0 || vm[required_option].defaulted()) {
+      auto msg = fmt::format("Option '{}' requires option '{}'.", for_what,
+                             required_option);
+      throw std::logic_error(msg);
+    }
+  }
+}
+
+///
+/// \param vm variables map
+/// \param opt1 conflicting option 1
+/// \param opt2 conflicting option 2
+inline void conflicting_options(boost::program_options::variables_map const &vm,
+                                std::string const &opt1,
+                                std::string const &opt2) {
+  if ((vm.count(opt1) != 0U) && !vm[opt1].defaulted() &&
+      (vm.count(opt2) != 0U) && !vm[opt2].defaulted()) {
+    auto msg = fmt::format("Conflicting options '{}' and '{}'.", opt1, opt2);
+    throw std::logic_error(msg);
+  }
+}
+} // namespace boost::program_options
 
 #include "mri_convert_lib.tpp"
 

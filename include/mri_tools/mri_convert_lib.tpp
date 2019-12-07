@@ -6,8 +6,13 @@
 #define MRI_TOOLS_MRI_CONVERT_LIB_TPP
 
 #include <fmt/printf.h>
+#include <fstream>
+
+#include "mri.h"
 
 namespace fs::util::cli {
+
+namespace {
 template <typename T>
 auto check_vector_range(const std::vector<T> &vector, std::string opt,
                         size_t lower, size_t upper = 0) -> bool {
@@ -61,6 +66,7 @@ auto check_value(T const value, T comp, std::string opt,
   }
   return true;
 }
+} // namespace
 
 auto checkRange = [](auto opt, size_t min, size_t max = 0) {
   return [opt, min, max](auto v) { check_vector_range(v, opt, min, max); };
@@ -71,5 +77,65 @@ auto checkValue = [](auto min, auto opt,
   return [min, opt, fn](auto value) { check_value(value, min, opt, fn); };
 };
 
+auto allocateExternalString = [](char **var) mutable {
+  return [var](std::string value) mutable {
+    *var = static_cast<char *>(calloc(value.length() + 1, sizeof(char)));
+    memmove(*var, value.data(), value.length());
+  };
+};
+
+auto addConflicts = [](std::vector<std::string> conflicts, std::string name,
+                       auto *args) {
+  return [name, conflicts, args](auto value) {
+    for (auto &conflict : conflicts) {
+      args->conflict_map.insert(std::make_pair(name, conflict));
+    }
+  };
+};
+
+auto addDependencies = [](std::vector<std::string> dependencies,
+                          std::string name, auto *args) {
+  return [name, dependencies, args](auto value) {
+    for (auto &dependency : dependencies) {
+      args->dependency_map.insert(std::make_pair(name, dependency));
+    }
+  };
+};
 } // namespace fs::util::cli
+
+namespace fs::util::mri {
+
+auto checkOrientationString = [](std::string ostr) {
+  auto errmsg = MRIcheckOrientationString(ostr.data());
+  if (errmsg != nullptr) {
+    auto err = fmt::format("ERROR: with orientation string %s\n", ostr.data());
+    err += errmsg;
+    throw std::logic_error(err);
+  }
+};
+
+} // namespace fs::util::mri
+
+namespace fs::util::io {
+auto checkFileReadable = [](std::string file_name) {
+  std::ifstream fptmp(file_name);
+  if (!fptmp.is_open()) {
+    auto message =
+        fmt::format("ERROR: could not open {} for reading\n", file_name);
+    throw std::logic_error(message);
+  }
+  fptmp.close();
+};
+
+auto checkFileWriteable = [](std::string file_name) {
+  std::ofstream fptmp(file_name);
+  if (!fptmp.is_open()) {
+    auto message =
+        fmt::format("ERROR: could not open {} for writing\n", file_name);
+    throw std::logic_error(message);
+  }
+  fptmp << "0\n";
+  fptmp.close();
+};
+} // namespace fs::util::io
 #endif

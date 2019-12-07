@@ -23,7 +23,6 @@
  */
 
 #include "mri_convert.hpp"
-#include "mri_convert_lib.hpp"
 
 #include "DICOMRead.h"
 #include "cma.h"
@@ -125,8 +124,6 @@ auto main(int argc, char *argv[]) -> int {
 
   /* ----- copy file name (only -- strip '@' and '#') ----- */
   in_name_only = fs::mri::io::getVolumeName(cmdargs.in_name);
-
-  //  MRIgetVolumeName(cmdargs.in_name.data(), in_name_only.data());
 
   /* If input type is spm and N_Zero_Pad_Input < 0, set to 3*/
   if (cmdargs.in_type_string == "spm" && N_Zero_Pad_Input < 0) {
@@ -924,7 +921,7 @@ auto main(int argc, char *argv[]) -> int {
                 cmdargs.new_transform_fname.data());
     strcpy(mri->transform_fname, cmdargs.new_transform_fname.data());
   }
-  if (cmdargs.in_orientation_flag) {
+  if (!cmdargs.in_orientation_string.empty()) {
     fmt::printf("Setting input orientation to %s\n",
                 cmdargs.in_orientation_string.data());
     MRIorientationStringToDircos(mri, cmdargs.in_orientation_string.data());
@@ -1273,7 +1270,7 @@ auto main(int argc, char *argv[]) -> int {
     mri_template->z_a = cmdargs.out_k_directions[1];
     mri_template->z_s = cmdargs.out_k_directions[2];
   }
-  if (cmdargs.out_orientation_flag) {
+  if (!cmdargs.out_orientation_string.empty()) {
     fmt::printf("Setting output orientation to %s\n",
                 cmdargs.out_orientation_string.data());
     MRIorientationStringToDircos(mri_template,
@@ -1990,7 +1987,6 @@ void usage(FILE *stream) {
 static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
 
   namespace po = boost::program_options;
-  using opt_deps = std::multimap<std::string, std::string>;
 
   po::options_description desc(
       "\nUSAGE: mri_convert_exec [options] <in volume> <out volume>\n"
@@ -2015,28 +2011,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
                            .style(fs::util::cli::po_style)
                            .run();
     po::store(parsed_opts, vm);
-
     fs::util::cli::print_parsed_tokens(parsed_opts);
-
-    opt_deps conflicts;
-    opt_deps dependants;
-
-    conflicts.insert(std::pair("no_zero_ge_z_offset", "zero_ge_z_offset"));
-    conflicts.insert(std::pair("force_ras_good", "in_i_direction"));
-    conflicts.insert(std::pair("force_ras_good", "in_j_direction"));
-    conflicts.insert(std::pair("force_ras_good", "in_k_direction"));
-    conflicts.insert(std::pair("out_name", "read_only"));
-    conflicts.insert(std::pair("out_name", "no_write"));
-
-    dependants.insert(std::pair("out_stats_table", "like"));
-
-    for (auto const &[key, val] : conflicts) {
-      po::conflicting_options(vm, key, val);
-    }
-
-    for (auto const &[key, val] : dependants) {
-      po::dependant_options(vm, key, val);
-    }
 
   } catch (std::exception const &e) {
     spdlog::get("stderr")->critical(e.what());
@@ -2061,6 +2036,9 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
 
   try {
     po::notify(vm);
+
+    cmdargs->check_conflicts(vm);
+    cmdargs->check_dependencies(vm);
   } catch (std::exception const &e) {
     spdlog::get("stderr")->critical(e.what());
     return false;
@@ -2327,29 +2305,6 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     setenv("NROWS_OVERRIDE", tmpstr.data(), 1);
   }
 
-  if (vm.count("statusfile") != 0) {
-    SDCMStatusFile = cmdargs->statusfile.data();
-    std::ofstream ofs(SDCMStatusFile);
-    if (!ofs.is_open()) {
-      fmt::fprintf(stderr, "ERROR: could not open %s for writing\n",
-                   SDCMStatusFile);
-      exit(1);
-    }
-    ofs << "0\n";
-    ofs.close();
-  }
-
-  if (vm.count("sdcmlist") != 0) {
-    SDCMListFile = cmdargs->sdcmlist.data();
-    std::ifstream fptmp(SDCMListFile);
-    if (!fptmp.is_open()) {
-      fmt::fprintf(stderr, "ERROR: could not open %s for reading\n",
-                   SDCMListFile);
-      exit(1);
-    }
-    fptmp.close();
-  }
-
   if (vm.count("fsubsample") != 0) {
     cmdargs->SubSampStart = cmdargs->fsubsample[0];
     cmdargs->SubSampDelta = cmdargs->fsubsample[1];
@@ -2399,30 +2354,6 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
 
   if (vm.count("crop_gdf") != 0) {
     mriio_set_gdf_crop_flag(TRUE);
-  }
-
-  if (vm.count("in_orientation") != 0) {
-    auto errmsg =
-        MRIcheckOrientationString(cmdargs->in_orientation_string.data());
-    if (errmsg != nullptr) {
-      fmt::printf("ERROR: with in orientation string %s\n",
-                  cmdargs->in_orientation_string.data());
-      fmt::printf("%s\n", errmsg);
-      exit(1);
-    }
-    cmdargs->in_orientation_flag = true;
-  }
-
-  if (vm.count("out_orientation") != 0) {
-    auto errmsg =
-        MRIcheckOrientationString(cmdargs->out_orientation_string.data());
-    if (errmsg != nullptr) {
-      fmt::printf("ERROR: with out orientation string %s\n",
-                  cmdargs->out_orientation_string.data());
-      fmt::printf("%s\n", errmsg);
-      exit(1);
-    }
-    cmdargs->out_orientation_flag = true;
   }
 
   if (vm.count("fwhm") != 0) {
@@ -2659,607 +2590,630 @@ void initArgDesc(boost::program_options::options_description *desc,
 
   namespace po = boost::program_options;
   namespace cli = fs::util::cli;
+  namespace io = fs::util::io;
+  namespace mri = fs::util::mri;
 
-  desc->add_options()                                                    /**/
-                                                                         /**/
-      ("help,h",                                                         /**/
-       "print out information on how to use this program and exit")      /**/
-                                                                         /**/
-      ("version,v",                                                      /**/
-       "print out version and exit")                                     /**/
-                                                                         /**/
-      ("usage,u",                                                        /**/
-       "print usage and exit")                                           /**/
-                                                                         /**/
-      ("version2",                                                       /**/
-       "just exits")                                                     /**/
-                                                                         /**/
-      ("debug",                                                          /**/
-       po::bool_switch(&cmdargs->debug),                                 /**/
-       "turn on debugging")                                              /**/
-                                                                         /**/
-      ("reorder,r",                                                      /**/
-       po::value(&cmdargs->reorder_vals)                                 /**/
-           ->multitoken()                                                /**/
-           ->notifier(cli::checkRange("reorder", 3)),                    /**/
-       "todo")                                                           /**/
-                                                                         /**/
-      ("reorder4,r4",                                                    /**/
-       po::value(&cmdargs->reorder4_vals)                                /**/
-           ->multitoken()                                                /**/
-           ->notifier(cli::checkRange("reorder4", 4)),                   /**/
-       "todo")                                                           /**/
-                                                                         /**/
-      ("outside_val,oval",                                               /**/
-       po::value(&cmdargs->outside_val),                                 /**/
-       "Set the values outside of the image that may rotate in if a"     /**/
-       " transform is applied to val")                                   /**/
-                                                                         /**/
-      ("no-dwi",                                                         /**/
-       "set FS_LOAD_DWI to 0")                                           /**/
-                                                                         /**/
-      ("left-right-reverse",                                             /**/
-       po::bool_switch(&cmdargs->left_right_reverse),                    /**/
-       "left right reverse")                                             /**/
-                                                                         /**/
-      ("left-right-reverse-pix",                                         /**/
-       po::bool_switch(&cmdargs->left_right_reverse_pix),                /**/
-       "left-right-reverse-pix")                                         /**/
-                                                                         /**/
-      ("left-right-keep",                                                /**/
-       po::value(&cmdargs->left_right_mirror_hemi),                      /**/
-       "left-right-keep")                                                /**/
-                                                                         /**/
-      ("left-right-swap-label",                                          /**/
-       po::bool_switch(&cmdargs->left_right_swap_label),                 /**/
-       "left-right-swap-label")                                          /**/
-                                                                         /**/
-      ("flip-cols",                                                      /**/
-       po::bool_switch(&cmdargs->flip_cols),                             /**/
-       "flip-cols")                                                      /**/
-                                                                         /**/
-      ("slice-reverse",                                                  /**/
-       po::bool_switch(&cmdargs->slice_reverse),                         /**/
-       "slice-reverse")                                                  /**/
-                                                                         /**/
-      ("in_stats_table",                                                 /**/
-       po::bool_switch(&cmdargs->in_stats_table_flag),                   /**/
-       "Input data is a stats table as produced by asegstats2table or "  /**/
-       "aparcstats2table")                                               /**/
-                                                                         /**/
-      ("out_stats_table",                                                /**/
-       po::value(&cmdargs->out_stats_table_flag)->implicit_value(false), /**/
-       "Output data is a stats table (use --like to pass template"       /**/
-       " table for measure, columns, and rows heads)")                   /**/
-                                                                         /**/
-      ("invert_contrast",                                                /**/
-       po::value(&cmdargs->invert_contrast),                             /**/
-       "invert_contrast")                                                /**/
-                                                                         /**/
-      ("input_volume,i",                                                 /**/
-       po::value(&cmdargs->input_volume),                                /**/
-       "input_volume")                                                   /**/
-                                                                         /**/
-      ("output_volume,o",                                                /**/
-       po::value(&cmdargs->output_volume),                               /**/
-       "output_volume")                                                  /**/
-                                                                         /**/
-      ("conform,c",                                                      /**/
-       po::bool_switch(&cmdargs->conform_flag),                          /**/
-       "conform")                                                        /**/
-                                                                         /**/
-      ("conform-dc",                                                     /**/
-       po::value(&cmdargs->conf_keep_dc),                                /**/
-       "conform-dc")                                                     /**/
-                                                                         /**/
-      ("cw256",                                                          /**/
-       po::bool_switch(&cmdargs->conform_width_256_flag),                /**/
-       "cw256")                                                          /**/
-                                                                         /**/
-      ("delete-cmds",                                                    /**/
-       po::bool_switch(&cmdargs->delete_cmds),                           /**/
-       "delete-cmds")                                                    /**/
-                                                                         /**/
-      ("new-transform-fname",                                            /**/
-       po::value(&cmdargs->new_transform_fname),                         /**/
-       "new-transform-fname")                                            /**/
-                                                                         /**/
-      ("sphinx",                                                         /**/
-       po::bool_switch(&cmdargs->sphinx_flag),                           /**/
-       "Change orientation info to sphinx")                              /**/
-                                                                         /**/
-      ("rescale-dicom",                                                  /**/
-       "rescale-dicom")                                                  /**/
-                                                                         /**/
-      ("no-rescale-dicom",                                               /**/
-       "no-rescale-dicom")                                               /**/
-                                                                         /**/
-      ("bvec-scanner",                                                   /**/
-       "bvec-scanner")                                                   /**/
-                                                                         /**/
-      ("bvec-voxel",                                                     /**/
-       "bvec-voxel")                                                     /**/
-                                                                         /**/
-      ("no-analyze-rescale",                                             /**/
-       "no-analyze-rescale")                                             /**/
-                                                                         /**/
-      ("autoalign",                                                      /**/
-       po::value(&cmdargs->autoalign_file),                              /**/
-       "autoalign")                                                      /**/
-                                                                         /**/
-      ("nochange,nc",                                                    /**/
-       po::bool_switch(&cmdargs->nochange_flag),                         /**/
-       "Don't change type of input to that of template")                 /**/
-                                                                         /**/
-      ("conform_min,cm",                                                 /**/
-       po::bool_switch(&cmdargs->conform_min_flag),                      /**/
-       "conform_min")                                                    /**/
-                                                                         /**/
-      ("conform_size,cs",                                                /**/
-       po::value(&cmdargs->conform_size),                                /**/
-       "conform_size")                                                   /**/
-                                                                         /**/
-      ("parse_only,po",                                                  /**/
-       po::bool_switch(&cmdargs->parse_only_flag),                       /**/
-       "parse_only")                                                     /**/
-                                                                         /**/
-      ("in_info,ii",                                                     /**/
-       po::bool_switch(&cmdargs->in_info_flag),                          /**/
-       "in_info")                                                        /**/
-                                                                         /**/
-      ("out_info,oi",                                                    /**/
-       po::bool_switch(&cmdargs->out_info_flag),                         /**/
-       "out_info")                                                       /**/
-                                                                         /**/
-      ("template_info,ti",                                               /**/
-       po::bool_switch(&cmdargs->template_info_flag),                    /**/
-       "template_info")                                                  /**/
-                                                                         /**/
-      ("in_stats,is",                                                    /**/
-       po::bool_switch(&cmdargs->in_stats_flag),                         /**/
-       "Print statistics on input volume")                               /**/
-                                                                         /**/
-      ("out_stats,os",                                                   /**/
-       po::bool_switch(&cmdargs->out_stats_flag),                        /**/
-       "Print statistics on output volume")                              /**/
-                                                                         /**/
-      ("read_only,ro",                                                   /**/
-       po::value(&cmdargs->read_only_flag)->implicit_value(false),       /**/
-       "read_only")                                                      /**/
-                                                                         /**/
-      ("no_write,nw",                                                    /**/
-       po::value(&cmdargs->no_write_flag)->implicit_value(false),        /**/
-       "no_write")                                                       /**/
-                                                                         /**/
-      ("in_matrix,im",                                                   /**/
-       po::bool_switch(&cmdargs->in_matrix_flag),                        /**/
-       "in_matrix")                                                      /**/
-                                                                         /**/
-      ("out_matrix,om",                                                  /**/
-       po::bool_switch(&cmdargs->out_matrix_flag),                       /**/
-       "out_matrix")                                                     /**/
-                                                                         /**/
-      ("force_ras_good",                                                 /**/
-       po::bool_switch(&cmdargs->force_ras_good),                        /**/
-       "force_ras_good")                                                 /**/
-                                                                         /**/
-      ("split",                                                          /**/
-       po::bool_switch(&cmdargs->split_frames_flag),                     /**/
-       "split")                                                          /**/
-                                                                         /**/
-      /* transform related things here */                                /**/
-                                                                         /**/
-      ("apply_transform,T,at",                                           /**/
-       po::value(&cmdargs->transform_fname),                             /**/
-       "apply_transform")                                                /**/
-                                                                         /**/
-      ("like",                                                           /**/
-       po::value(&cmdargs->out_like_name),                               /**/
-       "like")                                                           /**/
-                                                                         /**/
-      ("crop",                                                           /**/
-       po::value(&cmdargs->crop_center)                                  /**/
-           ->multitoken()                                                /**/
-           ->notifier(cli::checkRange("crop", 3)),                       /**/
-       "crop")                                                           /**/
-                                                                         /**/
-      ("slice-crop",                                                     /**/
-       po::value(&cmdargs->slice_crop)                                   /**/
-           ->multitoken()                                                /**/
-           ->notifier(cli::checkRange("slice-crop", 2)),                 /**/
-       "slice-crop")                                                     /**/
-                                                                         /**/
-      ("cropsize",                                                       /**/
-       po::value(&cmdargs->cropsize)                                     /**/
-           ->multitoken()                                                /**/
-           ->notifier(cli::checkRange("cropsize", 3)),                   /**/
-       "cropsize")                                                       /**/
-                                                                         /**/
-      ("devolvexfm",                                                     /**/
-       po::value(&cmdargs->devolvexfm_subject),                          /**/
-       "devolvexfm")                                                     /**/
-                                                                         /**/
-      ("apply_inverse_transform,ait",                                    /**/
-       po::value(&cmdargs->transform_fname),                             /**/
-       "apply_inverse_transform")                                        /**/
-                                                                         /**/
-      ("upsample",                                                       /**/
-       po::value(&cmdargs->upsample_factor),                             /**/
-       "Reduce voxel size by a factor of N in all dimensions")           /**/
-                                                                         /**/
-      ("in_i_size,iis",                                                  /**/
-       po::value(&cmdargs->in_i_size)                                    /**/
-           ->notifier(cli::checkValue(0.0F, "in_i_size",                 /**/
-                                      std::greater<>())),                /**/
-       "in_i_size")                                                      /**/
-                                                                         /**/
-      ("in_j_size,ijs",                                                  /**/
-       po::value(&cmdargs->in_j_size)                                    /**/
-           ->notifier(cli::checkValue(0.0F, "in_j_size",                 /**/
-                                      std::greater<>())),                /**/
-       "in_j_size")                                                      /**/
-                                                                         /**/
-      ("in_k_size,iks",                                                  /**/
-       po::value(&cmdargs->in_k_size)                                    /**/
-           ->notifier(cli::checkValue(0.0F, "in_k_size",                 /**/
-                                      std::greater<>())),                /**/
-       "in_k_size")                                                      /**/
-                                                                         /**/
-      ("out_i_size,ois",                                                 /**/
-       po::value(&cmdargs->out_i_size)                                   /**/
-           ->notifier(cli::checkValue(0.0F, "out_i_size",                /**/
-                                      std::greater<>())),                /**/
-       "out_i_size")                                                     /**/
-                                                                         /**/
-      ("out_j_size,ojs",                                                 /**/
-       po::value(&cmdargs->out_j_size)                                   /**/
-           ->notifier(cli::checkValue(0.0F, "out_j_size",                /**/
-                                      std::greater<>())),                /**/
-       "out_j_size")                                                     /**/
-                                                                         /**/
-      ("out_k_size,oks",                                                 /**/
-       po::value(&cmdargs->out_k_size)                                   /**/
-           ->notifier(cli::checkValue(0.0F, "out_k_size",                /**/
-                                      std::greater<>())),                /**/
-       "out_k_size")                                                     /**/
-                                                                         /**/
-      ("ctab",                                                           /**/
-       po::value(&cmdargs->colortablefile),                              /**/
-       "ctab")                                                           /**/
-                                                                         /**/
-      ("nth_frame,nth",                                                  /**/
-       po::value(&cmdargs->nthframe),                                    /**/
-       "nth_frame")                                                      /**/
-                                                                         /**/
-      ("no_translate,nt",                                                /**/
-       po::bool_switch(&cmdargs->translate_labels_flag),                 /**/
-       "no_translate")                                                   /**/
-                                                                         /**/
-      ("zero_outlines,zo",                                               /**/
-       po::bool_switch(&cmdargs->zero_outlines_flag),                    /**/
-       "zero_outlines")                                                  /**/
-                                                                         /**/
-      ("fill_parcellation,fp",                                           /**/
-       po::bool_switch(&cmdargs->fill_parcellation_flag),                /**/
-       "fill_parcellation")                                              /**/
-                                                                         /**/
-      ("roi",                                                            /**/
-       po::bool_switch(&cmdargs->roi_flag),                              /**/
-       "roi flag")                                                       /**/
-                                                                         /**/
-      ("dil-seg-mask",                                                   /**/
-       po::value(&cmdargs->dil_seg_mask),                                /**/
-       "dil-seg-mask")                                                   /**/
-                                                                         /**/
-      ("erode-seg",                                                      /**/
-       po::value(&cmdargs->n_erode_seg),                                 /**/
-       "erode-seg")                                                      /**/
-                                                                         /**/
-      ("dil-seg",                                                        /**/
-       po::value(&cmdargs->n_dil_seg),                                   /**/
-       "dil-seg")                                                        /**/
-                                                                         /**/
-      ("cutends",                                                        /**/
-       po::value(&cmdargs->ncutends),                                    /**/
-       "cutends")                                                        /**/
-                                                                         /**/
-      ("out_i_count,oni,oic",                                            /**/
-       po::value(&cmdargs->out_n_i),                                     /**/
-       "out_i_count")                                                    /**/
-                                                                         /**/
-      ("out_j_count,onj,ojc",                                            /**/
-       po::value(&cmdargs->out_n_j),                                     /**/
-       "out_i_count")                                                    /**/
-                                                                         /**/
-      ("out_k_count,onk,okc",                                            /**/
-       po::value(&cmdargs->out_n_k),                                     /**/
-       "out_i_count")                                                    /**/
-                                                                         /**/
-      ("downsample2,ds2",                                                /**/
-       po::bool_switch(&cmdargs->downsample2_flag),                      /**/
-       "downsample2")                                                    /**/
-                                                                         /**/
-      ("in_i_count,ini,iic",                                             /**/
-       po::value(&cmdargs->in_n_i),                                      /**/
-       "in_i_count")                                                     /**/
-                                                                         /**/
-      ("in_j_count,inj,ijc",                                             /**/
-       po::value(&cmdargs->in_n_j),                                      /**/
-       "in_j_count")                                                     /**/
-                                                                         /**/
-      ("in_k_count,ink,ikc",                                             /**/
-       po::value(&cmdargs->in_n_k),                                      /**/
-       "in_k_count")                                                     /**/
-                                                                         /**/
-      ("tr",                                                             /**/
-       po::value(&cmdargs->in_tr),                                       /**/
-       "tr")                                                             /**/
-                                                                         /**/
-      ("TI",                                                             /**/
-       po::value(&cmdargs->in_ti),                                       /**/
-       "ti")                                                             /**/
-                                                                         /**/
-      ("te",                                                             /**/
-       po::value(&cmdargs->in_te),                                       /**/
-       "te")                                                             /**/
-                                                                         /**/
-      ("flip_angle",                                                     /**/
-       po::value(&cmdargs->in_flip_angle),                               /**/
-       "flip_angle")                                                     /**/
-                                                                         /**/
-      ("in_name",                                                        /**/
-       po::value(&cmdargs->in_name)->required(),                         /**/
-       "in_name")                                                        /**/
-                                                                         /**/
-      ("out_name",                                                       /**/
-       po::value(&cmdargs->out_name),                                    /**/
-       "out_name")                                                       /**/
-                                                                         /**/
-      ("zero_ge_z_offset,zgez",                                          /**/
-       po::bool_switch(&cmdargs->zero_ge_z_offset_flag),                 /**/
-       "zero_ge_z_offset")                                               /**/
-                                                                         /**/
-      ("no_zero_ge_z_offset,nozgez",                                     /**/
-       po::bool_switch(&cmdargs->no_zero_ge_z_offset_flag),              /**/
-       "no_zero_ge_z_offset")                                            /**/
-                                                                         /**/
-      ("nskip",                                                          /**/
-       po::value(&cmdargs->nskip),                                       /**/
-       "nskip")                                                          /**/
-                                                                         /**/
-      ("ndrop",                                                          /**/
-       po::value(&cmdargs->ndrop),                                       /**/
-       "ndrop")                                                          /**/
-                                                                         /**/
-      ("diag",                                                           /**/
-       po::value(&Gdiag_no),                                             /**/
-       "diag")                                                           /**/
-                                                                         /**/
-      ("mra",                                                            /**/
-       "This flag forces DICOMread to first use 18,50 to get the slice"  /**/
-       " thickness instead of 18,88. This is needed with siemens mag "   /**/
-       "res angiogram (MRAs)")                                           /**/
-                                                                         /**/
-      ("auto-slice-res",                                                 /**/
-       "Automatically determine whether to get slice thickness "         /**/
-       "from 18,50 or 18,88 depending upon  the value of 18,23")         /**/
-                                                                         /**/
-      ("no-strip-pound",                                                 /**/
-       "no-strip-pound")                                                 /**/
-                                                                         /**/
-      ("in_nspmzeropad",                                                 /**/
-       po::value(&N_Zero_Pad_Input),                                     /**/
-       "in_nspmzeropad")                                                 /**/
-                                                                         /**/
-      ("nspmzeropad",                                                    /**/
-       po::value(&N_Zero_Pad_Output),                                    /**/
-       "out_nspmzeropad")                                                /**/
-                                                                         /**/
-      ("out_nspmzeropad",                                                /**/
-       po::value(&N_Zero_Pad_Output),                                    /**/
-       "out_nspmzeropad")                                                /**/
-                                                                         /**/
-      ("mosaic-fix-noascii",                                             /**/
-       "mosaic-fix-noascii")                                             /**/
-                                                                         /**/
-      ("nslices-override",                                               /**/
-       po::value(&cmdargs->nslices_override),                            /**/
-       "nslices-override")                                               /**/
-                                                                         /**/
-      ("ncols-override",                                                 /**/
-       po::value(&cmdargs->ncols_override),                              /**/
-       "ncols-override")                                                 /**/
-                                                                         /**/
-      ("nrows-override",                                                 /**/
-       po::value(&cmdargs->nrows_override),                              /**/
-       "nrows-override")                                                 /**/
-                                                                         /**/
-      ("statusfile,status",                                              /**/
-       po::value(&cmdargs->statusfile),                                  /**/
-       "File name to write percent complete for Siemens DICOM")          /**/
-                                                                         /**/
-      ("sdcmlist",                                                       /**/
-       po::value(&cmdargs->sdcmlist),                                    /**/
-       "File name that contains a list of Siemens DICOM files that "     /**/
-       "are in the same run as the one listed on the command-line. "     /**/
-       "If not present, the directory will be scanned, but this can "    /**/
-       "take a while.")                                                  /**/
-                                                                         /**/
-      ("fsubsample",                                                     /**/
-       po::value(&cmdargs->fsubsample)                                   /**/
-           ->multitoken()                                                /**/
-           ->notifier(cli::checkRange("fsubsample", 3)),                 /**/
-       "fsubsample")                                                     /**/
-                                                                         /**/
-      ("mid-frame",                                                      /**/
-       po::bool_switch(&cmdargs->mid_frame_flag),                        /**/
-       "mid-frame")                                                      /**/
-                                                                         /**/
-      ("in_center,ic",                                                   /**/
-       po::value(&cmdargs->in_center)                                    /**/
-           ->multitoken()                                                /**/
-           ->notifier(cli::checkRange("in_center", 3)),                  /**/
-       "in_center")                                                      /**/
-                                                                         /**/
-      ("delta_in_center,dic",                                            /**/
-       po::value(&cmdargs->delta_in_center)                              /**/
-           ->multitoken()                                                /**/
-           ->notifier(cli::checkRange("delta_in_center", 3)),            /**/
-       "delta_in_center")                                                /**/
-                                                                         /**/
-      ("out_center,oc",                                                  /**/
-       po::value(&cmdargs->out_center)                                   /**/
-           ->multitoken()                                                /**/
-           ->notifier(cli::checkRange("out_center", 3)),                 /**/
-       "out_center")                                                     /**/
-                                                                         /**/
-      ("voxsize,vs",                                                     /**/
-       po::value(&cmdargs->voxel_size)                                   /**/
-           ->multitoken()                                                /**/
-           ->notifier(cli::checkRange("voxsize", 3)),                    /**/
-       "voxel_size")                                                     /**/
-                                                                         /**/
-      ("downsample,ds",                                                  /**/
-       po::value(&cmdargs->downsample_factor)                            /**/
-           ->multitoken()                                                /**/
-           ->notifier(cli::checkRange("downsample", 3)),                 /**/
-       "downsample")                                                     /**/
-                                                                         /**/
-      ("reduce",                                                         /**/
-       po::value(&cmdargs->reduce),                                      /**/
-       "reduce")                                                         /**/
-                                                                         /**/
-      ("bfile-little-endian",                                            /**/
-       "bfile-little-endian")                                            /**/
-                                                                         /**/
-      ("rescale",                                                        /**/
-       po::value(&cmdargs->rescale_factor),                              /**/
-       "Rescale so that the global mean of input is rescale_factor")     /**/
-                                                                         /**/
-      ("scale,sc",                                                       /**/
-       po::value(&cmdargs->scale_factor),                                /**/
-       "scale")                                                          /**/
-                                                                         /**/
-      ("out-scale,osc",                                                  /**/
-       po::value(&cmdargs->out_scale_factor),                            /**/
-       "out-scale")                                                      /**/
-                                                                         /**/
-      ("dicomread2",                                                     /**/
-       "dicomread2")                                                     /**/
-                                                                         /**/
-      ("dicomread0",                                                     /**/
-       "dicomread0")                                                     /**/
-                                                                         /**/
-      ("subject_name,sn",                                                /**/
-       po::value(&cmdargs->subject_name),                                /**/
-       "subject_name")                                                   /**/
-                                                                         /**/
-      ("gdf_image_stem,gis",                                             /**/
-       po::value(&cmdargs->gdf_image_stem),                              /**/
-       "gdf_image_stem")                                                 /**/
-                                                                         /**/
-      ("reslice_like,rl",                                                /**/
-       po::value(&cmdargs->reslice_like_name),                           /**/
-       "reslice_like")                                                   /**/
-                                                                         /**/
-      ("slice-bias",                                                     /**/
-       po::value(&cmdargs->SliceBiasAlpha),                              /**/
-       "slice-bias")                                                     /**/
-                                                                         /**/
-      ("in_like,il",                                                     /**/
-       po::value(&cmdargs->in_like_name),                                /**/
-       "in_like")                                                        /**/
-                                                                         /**/
-      ("color_file,cf",                                                  /**/
-       po::value(&cmdargs->color_file_name),                             /**/
-       "color_file")                                                     /**/
-                                                                         /**/
-      ("no_scale,ns",                                                    /**/
-       po::bool_switch(&cmdargs->no_scale_flag),                         /**/
-       "no_scale")                                                       /**/
-                                                                         /**/
-      ("crop_gdf,cg",                                                    /**/
-       "crop_gdf")                                                       /**/
-                                                                         /**/
-      ("in_orientation",                                                 /**/
-       po::value(&cmdargs->in_orientation_string),                       /**/
-       "in_orientation")                                                 /**/
-                                                                         /**/
-      ("out_orientation",                                                /**/
-       po::value(&cmdargs->out_orientation_string),                      /**/
-       "out_orientation")                                                /**/
-                                                                         /**/
-      ("fwhm",                                                           /**/
-       po::value(&cmdargs->fwhm),                                        /**/
-       "fwhm")                                                           /**/
-                                                                         /**/
-      ("out_data_type,odt",                                              /**/
-       po::value(&cmdargs->out_data_type_string),                        /**/
-       "out_data_type")                                                  /**/
-                                                                         /**/
-      ("resample_type,rt",                                               /**/
-       po::value(&cmdargs->resample_type),                               /**/
-       "resample_type")                                                  /**/
-                                                                         /**/
-      ("in_i_direction,iid",                                             /**/
-       po::value(&cmdargs->in_i_directions)                              /**/
-           ->multitoken(),                                               /**/
-       "in_i_direction")                                                 /**/
-                                                                         /**/
-      ("in_j_direction,ijd",                                             /**/
-       po::value(&cmdargs->in_j_directions)                              /**/
-           ->multitoken(),                                               /**/
-       "in_j_direction")                                                 /**/
-                                                                         /**/
-      ("in_k_direction,ikd",                                             /**/
-       po::value(&cmdargs->in_k_directions)                              /**/
-           ->multitoken(),                                               /**/
-       "in_k_direction")                                                 /**/
-                                                                         /**/
-      ("out_i_direction,oid",                                            /**/
-       po::value(&cmdargs->out_i_directions)                             /**/
-           ->multitoken(),                                               /**/
-       "out_i_direction")                                                /**/
-                                                                         /**/
-                                                                         /**/
-      ("out_j_direction,ojd",                                            /**/
-       po::value(&cmdargs->out_j_directions)                             /**/
-           ->multitoken(),                                               /**/
-       "out_j_direction")                                                /**/
-                                                                         /**/
-      ("out_k_direction,okd",                                            /**/
-       po::value(&cmdargs->out_k_directions)                             /**/
-           ->multitoken(),                                               /**/
-       "out_k_direction")                                                /**/
-                                                                         /**/
-      ("in_type,it",                                                     /**/
-       po::value(&cmdargs->in_type_string),                              /**/
-       "in_type")                                                        /**/
-                                                                         /**/
-      ("out_type,ot",                                                    /**/
-       po::value(&cmdargs->out_type_string),                             /**/
-       "out_type")                                                       /**/
-                                                                         /**/
-      ("template_type,tt",                                               /**/
-       po::value(&cmdargs->template_type_string),                        /**/
-       "template_type")                                                  /**/
-                                                                         /**/
-      ("frame,f",                                                        /**/
-       po::value(&cmdargs->frames)->multitoken(),                        /**/
-       "frame")                                                          /**/
-                                                                         /**/
-      ("smooth_parcellation,sp",                                         /**/
-       po::value(&cmdargs->smooth_parcellation_count),                   /**/
-       "smooth_parcellation")                                            /**/
-                                                                         /**/
-      ("ascii",                                                          /**/
-       "ascii")                                                          /**/
-                                                                         /**/
-      ("ascii+crsf",                                                     /**/
-       "ascii+crsf")                                                     /**/
-                                                                         /**/
-      ("ascii-fcol",                                                     /**/
-       "ascii-fcol")                                                     /**/
+  desc->add_options()                                                   /**/
+                                                                        /**/
+      ("help,h",                                                        /**/
+       "print out information on how to use this program and exit")     /**/
+                                                                        /**/
+      ("version,v",                                                     /**/
+       "print out version and exit")                                    /**/
+                                                                        /**/
+      ("usage,u",                                                       /**/
+       "print usage and exit")                                          /**/
+                                                                        /**/
+      ("version2",                                                      /**/
+       "just exits")                                                    /**/
+                                                                        /**/
+      ("debug",                                                         /**/
+       po::bool_switch(&cmdargs->debug),                                /**/
+       "turn on debugging")                                             /**/
+                                                                        /**/
+      ("reorder,r",                                                     /**/
+       po::value(&cmdargs->reorder_vals)                                /**/
+           ->multitoken()                                               /**/
+           ->notifier(cli::checkRange("reorder", 3)),                   /**/
+       "todo")                                                          /**/
+                                                                        /**/
+      ("reorder4,r4",                                                   /**/
+       po::value(&cmdargs->reorder4_vals)                               /**/
+           ->multitoken()                                               /**/
+           ->notifier(cli::checkRange("reorder4", 4)),                  /**/
+       "todo")                                                          /**/
+                                                                        /**/
+      ("outside_val,oval",                                              /**/
+       po::value(&cmdargs->outside_val),                                /**/
+       "Set the values outside of the image that may rotate in if a"    /**/
+       " transform is applied to val")                                  /**/
+                                                                        /**/
+      ("no-dwi",                                                        /**/
+       "set FS_LOAD_DWI to 0")                                          /**/
+                                                                        /**/
+      ("left-right-reverse",                                            /**/
+       po::bool_switch(&cmdargs->left_right_reverse),                   /**/
+       "left right reverse")                                            /**/
+                                                                        /**/
+      ("left-right-reverse-pix",                                        /**/
+       po::bool_switch(&cmdargs->left_right_reverse_pix),               /**/
+       "left-right-reverse-pix")                                        /**/
+                                                                        /**/
+      ("left-right-keep",                                               /**/
+       po::value(&cmdargs->left_right_mirror_hemi),                     /**/
+       "left-right-keep")                                               /**/
+                                                                        /**/
+      ("left-right-swap-label",                                         /**/
+       po::bool_switch(&cmdargs->left_right_swap_label),                /**/
+       "left-right-swap-label")                                         /**/
+                                                                        /**/
+      ("flip-cols",                                                     /**/
+       po::bool_switch(&cmdargs->flip_cols),                            /**/
+       "flip-cols")                                                     /**/
+                                                                        /**/
+      ("slice-reverse",                                                 /**/
+       po::bool_switch(&cmdargs->slice_reverse),                        /**/
+       "slice-reverse")                                                 /**/
+                                                                        /**/
+      ("in_stats_table",                                                /**/
+       po::bool_switch(&cmdargs->in_stats_table_flag),                  /**/
+       "Input data is a stats table as produced by asegstats2table or " /**/
+       "aparcstats2table")                                              /**/
+                                                                        /**/
+      ("out_stats_table",                                               /**/
+       po::bool_switch(&cmdargs->out_stats_table_flag)                  /**/
+           ->notifier(                                                  /**/
+                      cli::addDependencies({"like"}, "out_stats_table", /**/
+                                           cmdargs)),                   /**/
+       "Output data is a stats table (use --like to pass template"      /**/
+       " table for measure, columns, and rows heads)")                  /**/
+                                                                        /**/
+      ("invert_contrast",                                               /**/
+       po::value(&cmdargs->invert_contrast),                            /**/
+       "invert_contrast")                                               /**/
+                                                                        /**/
+      ("input_volume,i",                                                /**/
+       po::value(&cmdargs->input_volume),                               /**/
+       "input_volume")                                                  /**/
+                                                                        /**/
+      ("output_volume,o",                                               /**/
+       po::value(&cmdargs->output_volume),                              /**/
+       "output_volume")                                                 /**/
+                                                                        /**/
+      ("conform,c",                                                     /**/
+       po::bool_switch(&cmdargs->conform_flag),                         /**/
+       "conform")                                                       /**/
+                                                                        /**/
+      ("conform-dc",                                                    /**/
+       po::value(&cmdargs->conf_keep_dc),                               /**/
+       "conform-dc")                                                    /**/
+                                                                        /**/
+      ("cw256",                                                         /**/
+       po::bool_switch(&cmdargs->conform_width_256_flag),               /**/
+       "cw256")                                                         /**/
+                                                                        /**/
+      ("delete-cmds",                                                   /**/
+       po::bool_switch(&cmdargs->delete_cmds),                          /**/
+       "delete-cmds")                                                   /**/
+                                                                        /**/
+      ("new-transform-fname",                                           /**/
+       po::value(&cmdargs->new_transform_fname),                        /**/
+       "new-transform-fname")                                           /**/
+                                                                        /**/
+      ("sphinx",                                                        /**/
+       po::bool_switch(&cmdargs->sphinx_flag),                          /**/
+       "Change orientation info to sphinx")                             /**/
+                                                                        /**/
+      ("rescale-dicom",                                                 /**/
+       "rescale-dicom")                                                 /**/
+                                                                        /**/
+      ("no-rescale-dicom",                                              /**/
+       "no-rescale-dicom")                                              /**/
+                                                                        /**/
+      ("bvec-scanner",                                                  /**/
+       "bvec-scanner")                                                  /**/
+                                                                        /**/
+      ("bvec-voxel",                                                    /**/
+       "bvec-voxel")                                                    /**/
+                                                                        /**/
+      ("no-analyze-rescale",                                            /**/
+       "no-analyze-rescale")                                            /**/
+                                                                        /**/
+      ("autoalign",                                                     /**/
+       po::value(&cmdargs->autoalign_file),                             /**/
+       "autoalign")                                                     /**/
+                                                                        /**/
+      ("nochange,nc",                                                   /**/
+       po::bool_switch(&cmdargs->nochange_flag),                        /**/
+       "Don't change type of input to that of template")                /**/
+                                                                        /**/
+      ("conform_min,cm",                                                /**/
+       po::bool_switch(&cmdargs->conform_min_flag),                     /**/
+       "conform_min")                                                   /**/
+                                                                        /**/
+      ("conform_size,cs",                                               /**/
+       po::value(&cmdargs->conform_size),                               /**/
+       "conform_size")                                                  /**/
+                                                                        /**/
+      ("parse_only,po",                                                 /**/
+       po::bool_switch(&cmdargs->parse_only_flag),                      /**/
+       "parse_only")                                                    /**/
+                                                                        /**/
+      ("in_info,ii",                                                    /**/
+       po::bool_switch(&cmdargs->in_info_flag),                         /**/
+       "in_info")                                                       /**/
+                                                                        /**/
+      ("out_info,oi",                                                   /**/
+       po::bool_switch(&cmdargs->out_info_flag),                        /**/
+       "out_info")                                                      /**/
+                                                                        /**/
+      ("template_info,ti",                                              /**/
+       po::bool_switch(&cmdargs->template_info_flag),                   /**/
+       "template_info")                                                 /**/
+                                                                        /**/
+      ("in_stats,is",                                                   /**/
+       po::bool_switch(&cmdargs->in_stats_flag),                        /**/
+       "Print statistics on input volume")                              /**/
+                                                                        /**/
+      ("out_stats,os",                                                  /**/
+       po::bool_switch(&cmdargs->out_stats_flag),                       /**/
+       "Print statistics on output volume")                             /**/
+                                                                        /**/
+      ("read_only,ro",                                                  /**/
+       po::bool_switch(&cmdargs->read_only_flag),                       /**/
+       "read_only")                                                     /**/
+                                                                        /**/
+      ("no_write,nw",                                                   /**/
+       po::bool_switch(&cmdargs->no_write_flag),                        /**/
+       "no_write")                                                      /**/
+                                                                        /**/
+      ("in_matrix,im",                                                  /**/
+       po::bool_switch(&cmdargs->in_matrix_flag),                       /**/
+       "in_matrix")                                                     /**/
+                                                                        /**/
+      ("out_matrix,om",                                                 /**/
+       po::bool_switch(&cmdargs->out_matrix_flag),                      /**/
+       "out_matrix")                                                    /**/
+                                                                        /**/
+      ("force_ras_good",                                                /**/
+       po::bool_switch(&cmdargs->force_ras_good)                        /**/
+           ->notifier(                                                  /**/
+                      cli::addConflicts(                                /**/
+                                        {"in_i_direction",              /**/
+                                         "in_j_direction",              /**/
+                                         "in_k_direction"},             /**/
+                                        "force_ras_good", cmdargs)),    /**/
+       "force_ras_good")                                                /**/
+                                                                        /**/
+      ("split",                                                         /**/
+       po::bool_switch(&cmdargs->split_frames_flag),                    /**/
+       "split")                                                         /**/
+                                                                        /**/
+      /* transform related things here */                               /**/
+                                                                        /**/
+      ("apply_transform,T,at",                                          /**/
+       po::value(&cmdargs->transform_fname),                            /**/
+       "apply_transform")                                               /**/
+                                                                        /**/
+      ("like",                                                          /**/
+       po::value(&cmdargs->out_like_name),                              /**/
+       "like")                                                          /**/
+                                                                        /**/
+      ("crop",                                                          /**/
+       po::value(&cmdargs->crop_center)                                 /**/
+           ->multitoken()                                               /**/
+           ->notifier(cli::checkRange("crop", 3)),                      /**/
+       "crop")                                                          /**/
+                                                                        /**/
+      ("slice-crop",                                                    /**/
+       po::value(&cmdargs->slice_crop)                                  /**/
+           ->multitoken()                                               /**/
+           ->notifier(cli::checkRange("slice-crop", 2)),                /**/
+       "slice-crop")                                                    /**/
+                                                                        /**/
+      ("cropsize",                                                      /**/
+       po::value(&cmdargs->cropsize)                                    /**/
+           ->multitoken()                                               /**/
+           ->notifier(cli::checkRange("cropsize", 3)),                  /**/
+       "cropsize")                                                      /**/
+                                                                        /**/
+      ("devolvexfm",                                                    /**/
+       po::value(&cmdargs->devolvexfm_subject),                         /**/
+       "devolvexfm")                                                    /**/
+                                                                        /**/
+      ("apply_inverse_transform,ait",                                   /**/
+       po::value(&cmdargs->transform_fname),                            /**/
+       "apply_inverse_transform")                                       /**/
+                                                                        /**/
+      ("upsample",                                                      /**/
+       po::value(&cmdargs->upsample_factor),                            /**/
+       "Reduce voxel size by a factor of N in all dimensions")          /**/
+                                                                        /**/
+      ("in_i_size,iis",                                                 /**/
+       po::value(&cmdargs->in_i_size)                                   /**/
+           ->notifier(cli::checkValue(0.0F, "in_i_size",                /**/
+                                      std::greater<>())),               /**/
+       "in_i_size")                                                     /**/
+                                                                        /**/
+      ("in_j_size,ijs",                                                 /**/
+       po::value(&cmdargs->in_j_size)                                   /**/
+           ->notifier(cli::checkValue(0.0F, "in_j_size",                /**/
+                                      std::greater<>())),               /**/
+       "in_j_size")                                                     /**/
+                                                                        /**/
+      ("in_k_size,iks",                                                 /**/
+       po::value(&cmdargs->in_k_size)                                   /**/
+           ->notifier(cli::checkValue(0.0F, "in_k_size",                /**/
+                                      std::greater<>())),               /**/
+       "in_k_size")                                                     /**/
+                                                                        /**/
+      ("out_i_size,ois",                                                /**/
+       po::value(&cmdargs->out_i_size)                                  /**/
+           ->notifier(cli::checkValue(0.0F, "out_i_size",               /**/
+                                      std::greater<>())),               /**/
+       "out_i_size")                                                    /**/
+                                                                        /**/
+      ("out_j_size,ojs",                                                /**/
+       po::value(&cmdargs->out_j_size)                                  /**/
+           ->notifier(cli::checkValue(0.0F, "out_j_size",               /**/
+                                      std::greater<>())),               /**/
+       "out_j_size")                                                    /**/
+                                                                        /**/
+      ("out_k_size,oks",                                                /**/
+       po::value(&cmdargs->out_k_size)                                  /**/
+           ->notifier(cli::checkValue(0.0F, "out_k_size",               /**/
+                                      std::greater<>())),               /**/
+       "out_k_size")                                                    /**/
+                                                                        /**/
+      ("ctab",                                                          /**/
+       po::value(&cmdargs->colortablefile),                             /**/
+       "ctab")                                                          /**/
+                                                                        /**/
+      ("nth_frame,nth",                                                 /**/
+       po::value(&cmdargs->nthframe),                                   /**/
+       "nth_frame")                                                     /**/
+                                                                        /**/
+      ("no_translate,nt",                                               /**/
+       po::bool_switch(&cmdargs->translate_labels_flag),                /**/
+       "no_translate")                                                  /**/
+                                                                        /**/
+      ("zero_outlines,zo",                                              /**/
+       po::bool_switch(&cmdargs->zero_outlines_flag),                   /**/
+       "zero_outlines")                                                 /**/
+                                                                        /**/
+      ("fill_parcellation,fp",                                          /**/
+       po::bool_switch(&cmdargs->fill_parcellation_flag),               /**/
+       "fill_parcellation")                                             /**/
+                                                                        /**/
+      ("roi",                                                           /**/
+       po::bool_switch(&cmdargs->roi_flag),                             /**/
+       "roi flag")                                                      /**/
+                                                                        /**/
+      ("dil-seg-mask",                                                  /**/
+       po::value(&cmdargs->dil_seg_mask),                               /**/
+       "dil-seg-mask")                                                  /**/
+                                                                        /**/
+      ("erode-seg",                                                     /**/
+       po::value(&cmdargs->n_erode_seg),                                /**/
+       "erode-seg")                                                     /**/
+                                                                        /**/
+      ("dil-seg",                                                       /**/
+       po::value(&cmdargs->n_dil_seg),                                  /**/
+       "dil-seg")                                                       /**/
+                                                                        /**/
+      ("cutends",                                                       /**/
+       po::value(&cmdargs->ncutends),                                   /**/
+       "cutends")                                                       /**/
+                                                                        /**/
+      ("out_i_count,oni,oic",                                           /**/
+       po::value(&cmdargs->out_n_i),                                    /**/
+       "out_i_count")                                                   /**/
+                                                                        /**/
+      ("out_j_count,onj,ojc",                                           /**/
+       po::value(&cmdargs->out_n_j),                                    /**/
+       "out_i_count")                                                   /**/
+                                                                        /**/
+      ("out_k_count,onk,okc",                                           /**/
+       po::value(&cmdargs->out_n_k),                                    /**/
+       "out_i_count")                                                   /**/
+                                                                        /**/
+      ("downsample2,ds2",                                               /**/
+       po::bool_switch(&cmdargs->downsample2_flag),                     /**/
+       "downsample2")                                                   /**/
+                                                                        /**/
+      ("in_i_count,ini,iic",                                            /**/
+       po::value(&cmdargs->in_n_i),                                     /**/
+       "in_i_count")                                                    /**/
+                                                                        /**/
+      ("in_j_count,inj,ijc",                                            /**/
+       po::value(&cmdargs->in_n_j),                                     /**/
+       "in_j_count")                                                    /**/
+                                                                        /**/
+      ("in_k_count,ink,ikc",                                            /**/
+       po::value(&cmdargs->in_n_k),                                     /**/
+       "in_k_count")                                                    /**/
+                                                                        /**/
+      ("tr",                                                            /**/
+       po::value(&cmdargs->in_tr),                                      /**/
+       "tr")                                                            /**/
+                                                                        /**/
+      ("TI",                                                            /**/
+       po::value(&cmdargs->in_ti),                                      /**/
+       "ti")                                                            /**/
+                                                                        /**/
+      ("te",                                                            /**/
+       po::value(&cmdargs->in_te),                                      /**/
+       "te")                                                            /**/
+                                                                        /**/
+      ("flip_angle",                                                    /**/
+       po::value(&cmdargs->in_flip_angle),                              /**/
+       "flip_angle")                                                    /**/
+                                                                        /**/
+      ("in_name",                                                       /**/
+       po::value(&cmdargs->in_name)->required(),                        /**/
+       "in_name")                                                       /**/
+                                                                        /**/
+      ("out_name",                                                      /**/
+       po::value(&cmdargs->out_name)                                    /**/
+           ->notifier(cli::addConflicts({"read_only", "no_write"},      /**/
+                                        "out_name", cmdargs)),          /**/
+       "out_name")                                                      /**/
+                                                                        /**/
+      ("zero_ge_z_offset,zgez",                                         /**/
+       po::bool_switch(&cmdargs->zero_ge_z_offset_flag)                 /**/
+           ->notifier(                                                  /**/
+                      cli::addConflicts({"no_zero_ge_z_offset"},        /**/
+                                        "zero_ge_z_offset",             /**/
+                                        cmdargs)),                      /**/
+       "zero_ge_z_offset")                                              /**/
+                                                                        /**/
+      ("no_zero_ge_z_offset,nozgez",                                    /**/
+       po::bool_switch(&cmdargs->no_zero_ge_z_offset_flag),             /**/
+       "no_zero_ge_z_offset")                                           /**/
+                                                                        /**/
+      ("nskip",                                                         /**/
+       po::value(&cmdargs->nskip),                                      /**/
+       "nskip")                                                         /**/
+                                                                        /**/
+      ("ndrop",                                                         /**/
+       po::value(&cmdargs->ndrop),                                      /**/
+       "ndrop")                                                         /**/
+                                                                        /**/
+      ("diag",                                                          /**/
+       po::value(&Gdiag_no),                                            /**/
+       "diag")                                                          /**/
+                                                                        /**/
+      ("mra",                                                           /**/
+       "This flag forces DICOMread to first use 18,50 to get the slice" /**/
+       " thickness instead of 18,88. This is needed with siemens mag "  /**/
+       "res angiogram (MRAs)")                                          /**/
+                                                                        /**/
+      ("auto-slice-res",                                                /**/
+       "Automatically determine whether to get slice thickness "        /**/
+       "from 18,50 or 18,88 depending upon  the value of 18,23")        /**/
+                                                                        /**/
+      ("no-strip-pound",                                                /**/
+       "no-strip-pound")                                                /**/
+                                                                        /**/
+      ("in_nspmzeropad",                                                /**/
+       po::value(&N_Zero_Pad_Input),                                    /**/
+       "in_nspmzeropad")                                                /**/
+                                                                        /**/
+      ("nspmzeropad",                                                   /**/
+       po::value(&N_Zero_Pad_Output),                                   /**/
+       "out_nspmzeropad")                                               /**/
+                                                                        /**/
+      ("out_nspmzeropad",                                               /**/
+       po::value(&N_Zero_Pad_Output),                                   /**/
+       "out_nspmzeropad")                                               /**/
+                                                                        /**/
+      ("mosaic-fix-noascii",                                            /**/
+       "mosaic-fix-noascii")                                            /**/
+                                                                        /**/
+      ("nslices-override",                                              /**/
+       po::value(&cmdargs->nslices_override),                           /**/
+       "nslices-override")                                              /**/
+                                                                        /**/
+      ("ncols-override",                                                /**/
+       po::value(&cmdargs->ncols_override),                             /**/
+       "ncols-override")                                                /**/
+                                                                        /**/
+      ("nrows-override",                                                /**/
+       po::value(&cmdargs->nrows_override),                             /**/
+       "nrows-override")                                                /**/
+                                                                        /**/
+      ("statusfile,status",                                             /**/
+       po::value(&cmdargs->statusfile)                                  /**/
+           ->notifier(io::checkFileWriteable)                           /**/
+           ->notifier(cli::allocateExternalString(&SDCMStatusFile)),    /**/
+       "File name to write percent complete for Siemens DICOM")         /**/
+                                                                        /**/
+      ("sdcmlist",                                                      /**/
+       po::value(&cmdargs->sdcmlist)                                    /**/
+           ->notifier(io::checkFileReadable)                            /**/
+           ->notifier(cli::allocateExternalString(&SDCMListFile)),      /**/
+       "File name that contains a list of Siemens DICOM files that "    /**/
+       "are in the same run as the one listed on the command-line. "    /**/
+       "If not present, the directory will be scanned, but this can "   /**/
+       "take a while.")                                                 /**/
+                                                                        /**/
+      ("fsubsample",                                                    /**/
+       po::value(&cmdargs->fsubsample)                                  /**/
+           ->multitoken()                                               /**/
+           ->notifier(cli::checkRange("fsubsample", 3)),                /**/
+       "fsubsample")                                                    /**/
+                                                                        /**/
+      ("mid-frame",                                                     /**/
+       po::bool_switch(&cmdargs->mid_frame_flag),                       /**/
+       "mid-frame")                                                     /**/
+                                                                        /**/
+      ("in_center,ic",                                                  /**/
+       po::value(&cmdargs->in_center)                                   /**/
+           ->multitoken()                                               /**/
+           ->notifier(cli::checkRange("in_center", 3)),                 /**/
+       "in_center")                                                     /**/
+                                                                        /**/
+      ("delta_in_center,dic",                                           /**/
+       po::value(&cmdargs->delta_in_center)                             /**/
+           ->multitoken()                                               /**/
+           ->notifier(cli::checkRange("delta_in_center", 3)),           /**/
+       "delta_in_center")                                               /**/
+                                                                        /**/
+      ("out_center,oc",                                                 /**/
+       po::value(&cmdargs->out_center)                                  /**/
+           ->multitoken()                                               /**/
+           ->notifier(cli::checkRange("out_center", 3)),                /**/
+       "out_center")                                                    /**/
+                                                                        /**/
+      ("voxsize,vs",                                                    /**/
+       po::value(&cmdargs->voxel_size)                                  /**/
+           ->multitoken()                                               /**/
+           ->notifier(cli::checkRange("voxsize", 3)),                   /**/
+       "voxel_size")                                                    /**/
+                                                                        /**/
+      ("downsample,ds",                                                 /**/
+       po::value(&cmdargs->downsample_factor)                           /**/
+           ->multitoken()                                               /**/
+           ->notifier(cli::checkRange("downsample", 3)),                /**/
+       "downsample")                                                    /**/
+                                                                        /**/
+      ("reduce",                                                        /**/
+       po::value(&cmdargs->reduce),                                     /**/
+       "reduce")                                                        /**/
+                                                                        /**/
+      ("bfile-little-endian",                                           /**/
+       "bfile-little-endian")                                           /**/
+                                                                        /**/
+      ("rescale",                                                       /**/
+       po::value(&cmdargs->rescale_factor),                             /**/
+       "Rescale so that the global mean of input is rescale_factor")    /**/
+                                                                        /**/
+      ("scale,sc",                                                      /**/
+       po::value(&cmdargs->scale_factor),                               /**/
+       "scale")                                                         /**/
+                                                                        /**/
+      ("out-scale,osc",                                                 /**/
+       po::value(&cmdargs->out_scale_factor),                           /**/
+       "out-scale")                                                     /**/
+                                                                        /**/
+      ("dicomread2",                                                    /**/
+       "dicomread2")                                                    /**/
+                                                                        /**/
+      ("dicomread0",                                                    /**/
+       "dicomread0")                                                    /**/
+                                                                        /**/
+      ("subject_name,sn",                                               /**/
+       po::value(&cmdargs->subject_name),                               /**/
+       "subject_name")                                                  /**/
+                                                                        /**/
+      ("gdf_image_stem,gis",                                            /**/
+       po::value(&cmdargs->gdf_image_stem),                             /**/
+       "gdf_image_stem")                                                /**/
+                                                                        /**/
+      ("reslice_like,rl",                                               /**/
+       po::value(&cmdargs->reslice_like_name),                          /**/
+       "reslice_like")                                                  /**/
+                                                                        /**/
+      ("slice-bias",                                                    /**/
+       po::value(&cmdargs->SliceBiasAlpha),                             /**/
+       "slice-bias")                                                    /**/
+                                                                        /**/
+      ("in_like,il",                                                    /**/
+       po::value(&cmdargs->in_like_name),                               /**/
+       "in_like")                                                       /**/
+                                                                        /**/
+      ("color_file,cf",                                                 /**/
+       po::value(&cmdargs->color_file_name),                            /**/
+       "color_file")                                                    /**/
+                                                                        /**/
+      ("no_scale,ns",                                                   /**/
+       po::bool_switch(&cmdargs->no_scale_flag),                        /**/
+       "no_scale")                                                      /**/
+                                                                        /**/
+      ("crop_gdf,cg",                                                   /**/
+       "crop_gdf")                                                      /**/
+                                                                        /**/
+      ("in_orientation",                                                /**/
+       po::value(&cmdargs->in_orientation_string)                       /**/
+           ->notifier(mri::checkOrientationString),                     /**/
+       "in_orientation")                                                /**/
+                                                                        /**/
+      ("out_orientation",                                               /**/
+       po::value(&cmdargs->out_orientation_string)                      /**/
+           ->notifier(mri::checkOrientationString),                     /**/
+       "out_orientation")                                               /**/
+                                                                        /**/
+      ("fwhm",                                                          /**/
+       po::value(&cmdargs->fwhm),                                       /**/
+       "fwhm")                                                          /**/
+                                                                        /**/
+      ("out_data_type,odt",                                             /**/
+       po::value(&cmdargs->out_data_type_string),                       /**/
+       "out_data_type")                                                 /**/
+                                                                        /**/
+      ("resample_type,rt",                                              /**/
+       po::value(&cmdargs->resample_type),                              /**/
+       "resample_type")                                                 /**/
+                                                                        /**/
+      ("in_i_direction,iid",                                            /**/
+       po::value(&cmdargs->in_i_directions)                             /**/
+           ->multitoken(),                                              /**/
+       "in_i_direction")                                                /**/
+                                                                        /**/
+      ("in_j_direction,ijd",                                            /**/
+       po::value(&cmdargs->in_j_directions)                             /**/
+           ->multitoken(),                                              /**/
+       "in_j_direction")                                                /**/
+                                                                        /**/
+      ("in_k_direction,ikd",                                            /**/
+       po::value(&cmdargs->in_k_directions)                             /**/
+           ->multitoken(),                                              /**/
+       "in_k_direction")                                                /**/
+                                                                        /**/
+      ("out_i_direction,oid",                                           /**/
+       po::value(&cmdargs->out_i_directions)                            /**/
+           ->multitoken(),                                              /**/
+       "out_i_direction")                                               /**/
+                                                                        /**/
+                                                                        /**/
+      ("out_j_direction,ojd",                                           /**/
+       po::value(&cmdargs->out_j_directions)                            /**/
+           ->multitoken(),                                              /**/
+       "out_j_direction")                                               /**/
+                                                                        /**/
+      ("out_k_direction,okd",                                           /**/
+       po::value(&cmdargs->out_k_directions)                            /**/
+           ->multitoken(),                                              /**/
+       "out_k_direction")                                               /**/
+                                                                        /**/
+      ("in_type,it",                                                    /**/
+       po::value(&cmdargs->in_type_string),                             /**/
+       "in_type")                                                       /**/
+                                                                        /**/
+      ("out_type,ot",                                                   /**/
+       po::value(&cmdargs->out_type_string),                            /**/
+       "out_type")                                                      /**/
+                                                                        /**/
+      ("template_type,tt",                                              /**/
+       po::value(&cmdargs->template_type_string),                       /**/
+       "template_type")                                                 /**/
+                                                                        /**/
+      ("frame,f",                                                       /**/
+       po::value(&cmdargs->frames)->multitoken(),                       /**/
+       "frame")                                                         /**/
+                                                                        /**/
+      ("smooth_parcellation,sp",                                        /**/
+       po::value(&cmdargs->smooth_parcellation_count),                  /**/
+       "smooth_parcellation")                                           /**/
+                                                                        /**/
+      ("ascii",                                                         /**/
+       "ascii")                                                         /**/
+                                                                        /**/
+      ("ascii+crsf",                                                    /**/
+       "ascii+crsf")                                                    /**/
+                                                                        /**/
+      ("ascii-fcol",                                                    /**/
+       "ascii-fcol")                                                    /**/
       ;
 }
 /* EOF */

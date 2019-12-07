@@ -8,16 +8,31 @@
 #include "mri.h"
 #include "mri2.h"
 #include "version.h"
+#include "mri_convert_lib.hpp"
 
 #include <boost/program_options.hpp>
 
 constexpr int default_cropsize = 256;
 constexpr int default_crop_center = 128;
-
+namespace po = boost::program_options;
 struct CMDARGS {
   CMDARGS(int argc, char *argv[]) : raw(argv, argc){}; // NOLINT
 
+  void check_conflicts(po::variables_map vm) {
+    for (auto const &[key, val] : conflict_map) {
+      po::conflicting_options(vm, key, val);
+    }
+  }
+
+  void check_dependencies(po::variables_map vm) {
+    for (auto const &[key, val] : dependency_map) {
+      po::dependant_options(vm, key, val);
+    }
+  }
+
 public:
+  std::multimap<std::string, std::string> conflict_map;
+  std::multimap<std::string, std::string> dependency_map;
   MATRIX *AutoAlign{};
   double fwhm{-1.0};
   double gstd{-1.0};
@@ -186,8 +201,6 @@ public:
   bool in_like_flag{};
   bool color_file_flag{};
   bool no_scale_flag{};
-  bool in_orientation_flag{};
-  bool out_orientation_flag{};
   bool in_i_direction_flag{};
   bool in_j_direction_flag{};
   bool out_j_direction_flag{};
@@ -203,38 +216,6 @@ struct ENV {
   std::string vcid =
       "$Id: mri_convert.c,v 1.227 2017/02/16 19:15:42 greve Exp $";
 };
-
-namespace boost::program_options {
-
-///
-/// \param vm variables map
-/// \param for_what requiring option
-/// \param required_option required option
-inline void dependant_options(boost::program_options::variables_map const &vm,
-                              std::string const &for_what,
-                              std::string const &required_option) {
-  if ((vm.count(for_what) != 0U) && !vm[for_what].defaulted()) {
-    if (vm.count(required_option) == 0 || vm[required_option].defaulted()) {
-      throw std::logic_error(std::string("Option '") + for_what +
-                             "' requires option '" + required_option + "'.");
-    }
-  }
-}
-
-///
-/// \param vm variables map
-/// \param opt1 conflicting option 1
-/// \param opt2 conflicting option 2
-inline void conflicting_options(boost::program_options::variables_map const &vm,
-                                std::string const &opt1,
-                                std::string const &opt2) {
-  if ((vm.count(opt1) != 0U) && !vm[opt1].defaulted() &&
-      (vm.count(opt2) != 0U) && !vm[opt2].defaulted()) {
-    throw std::logic_error(std::string("Conflicting options '") + opt1 +
-                           "' and '" + opt2 + "'.");
-  }
-}
-} // namespace boost::program_options
 
 /// \brief does the housekeeping, use this to parse command lines,
 ///  do sanity and inconsistency checks, read files etc. After that
