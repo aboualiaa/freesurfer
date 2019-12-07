@@ -2614,13 +2614,13 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("reorder,r",                                                     /**/
        po::value(&cmdargs->reorder_vals)                                /**/
            ->multitoken()                                               /**/
-           ->notifier(cli::checkRange("reorder", 3)),                   /**/
+           ->notifier(cli::checkSize("reorder", 3)),                    /**/
        "todo")                                                          /**/
                                                                         /**/
       ("reorder4,r4",                                                   /**/
        po::value(&cmdargs->reorder4_vals)                               /**/
            ->multitoken()                                               /**/
-           ->notifier(cli::checkRange("reorder4", 4)),                  /**/
+           ->notifier(cli::checkSize("reorder4", 4)),                   /**/
        "todo")                                                          /**/
                                                                         /**/
       ("outside_val,oval",                                              /**/
@@ -2802,19 +2802,19 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("crop",                                                          /**/
        po::value(&cmdargs->crop_center)                                 /**/
            ->multitoken()                                               /**/
-           ->notifier(cli::checkRange("crop", 3)),                      /**/
+           ->notifier(cli::checkSize("crop", 3)),                       /**/
        "crop")                                                          /**/
                                                                         /**/
       ("slice-crop",                                                    /**/
        po::value(&cmdargs->slice_crop)                                  /**/
            ->multitoken()                                               /**/
-           ->notifier(cli::checkRange("slice-crop", 2)),                /**/
+           ->notifier(cli::checkSize("slice-crop", 2)),                 /**/
        "slice-crop")                                                    /**/
                                                                         /**/
       ("cropsize",                                                      /**/
        po::value(&cmdargs->cropsize)                                    /**/
            ->multitoken()                                               /**/
-           ->notifier(cli::checkRange("cropsize", 3)),                  /**/
+           ->notifier(cli::checkSize("cropsize", 3)),                   /**/
        "cropsize")                                                      /**/
                                                                         /**/
       ("devolvexfm",                                                    /**/
@@ -3040,7 +3040,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("fsubsample",                                                    /**/
        po::value(&cmdargs->fsubsample)                                  /**/
            ->multitoken()                                               /**/
-           ->notifier(cli::checkRange("fsubsample", 3)),                /**/
+           ->notifier(cli::checkSize("fsubsample", 3)),                 /**/
        "fsubsample")                                                    /**/
                                                                         /**/
       ("mid-frame",                                                     /**/
@@ -3050,31 +3050,31 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("in_center,ic",                                                  /**/
        po::value(&cmdargs->in_center)                                   /**/
            ->multitoken()                                               /**/
-           ->notifier(cli::checkRange("in_center", 3)),                 /**/
+           ->notifier(cli::checkSize("in_center", 3)),                  /**/
        "in_center")                                                     /**/
                                                                         /**/
       ("delta_in_center,dic",                                           /**/
        po::value(&cmdargs->delta_in_center)                             /**/
            ->multitoken()                                               /**/
-           ->notifier(cli::checkRange("delta_in_center", 3)),           /**/
+           ->notifier(cli::checkSize("delta_in_center", 3)),            /**/
        "delta_in_center")                                               /**/
                                                                         /**/
       ("out_center,oc",                                                 /**/
        po::value(&cmdargs->out_center)                                  /**/
            ->multitoken()                                               /**/
-           ->notifier(cli::checkRange("out_center", 3)),                /**/
+           ->notifier(cli::checkSize("out_center", 3)),                 /**/
        "out_center")                                                    /**/
                                                                         /**/
       ("voxsize,vs",                                                    /**/
        po::value(&cmdargs->voxel_size)                                  /**/
            ->multitoken()                                               /**/
-           ->notifier(cli::checkRange("voxsize", 3)),                   /**/
+           ->notifier(cli::checkSize("voxsize", 3)),                    /**/
        "voxel_size")                                                    /**/
                                                                         /**/
       ("downsample,ds",                                                 /**/
        po::value(&cmdargs->downsample_factor)                           /**/
            ->multitoken()                                               /**/
-           ->notifier(cli::checkRange("downsample", 3)),                /**/
+           ->notifier(cli::checkSize("downsample", 3)),                 /**/
        "downsample")                                                    /**/
                                                                         /**/
       ("reduce",                                                        /**/

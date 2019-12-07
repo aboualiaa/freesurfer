@@ -68,7 +68,7 @@ auto check_value(T const value, T comp, std::string opt,
 }
 } // namespace
 
-auto checkRange = [](auto opt, size_t min, size_t max = 0) {
+auto checkSize = [](auto opt, size_t min, size_t max = 0) {
   return [opt, min, max](auto v) { check_vector_range(v, opt, min, max); };
 };
 
