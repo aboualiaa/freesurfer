@@ -207,6 +207,11 @@ public:
 
   vtkTransform *GetSurfaceToRasTransform();
 
+  void SetIgnoreVolumeGeometry(bool bIgnore)
+  {
+    m_bIgnoreVG = bIgnore;
+  }
+
 protected:
   bool InitializeData(const QString &vector_filename = QString(),
                       const QString &patch_filename = QString(),
@@ -301,7 +306,9 @@ protected:
 
   double m_dMaxSegmentLength;
 
-  QVector<int> m_originalRipflags;
+  QVector<int>  m_originalRipflags;
+
+  bool    m_bIgnoreVG;
 };
 
 #endif

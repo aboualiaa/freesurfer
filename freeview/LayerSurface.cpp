@@ -193,16 +193,23 @@ void LayerSurface::SetRefVolume(LayerMRI *ref) {
             Qt::UniqueConnection);
 }
 
-bool LayerSurface::LoadSurfaceFromFile() {
-  if (m_surfaceSource) {
+bool LayerSurface::LoadSurfaceFromFile(bool bIgnoreVG)
+{
+  if ( m_surfaceSource )
+  {
     delete m_surfaceSource;
   }
 
-  m_surfaceSource =
-      new FSSurface(m_volumeRef ? m_volumeRef->GetSourceVolume() : NULL);
-  if (!m_surfaceSource->MRISRead(m_sFilename, m_sVectorFilename,
-                                 m_sPatchFilename, m_sTargetFilename,
-                                 m_sSphereFilename, m_listSupFiles)) {
+  m_surfaceSource = new FSSurface( m_volumeRef ? m_volumeRef->GetSourceVolume() : NULL );
+  m_surfaceSource->SetIgnoreVolumeGeometry(bIgnoreVG);
+  if ( !m_surfaceSource->MRISRead( m_sFilename,
+                                   m_sVectorFilename,
+                                   m_sPatchFilename,
+                                   m_sTargetFilename,
+                                   m_sSphereFilename,
+                                   m_listSupFiles)
+       )
+  {
     return false;
   }
 
@@ -2696,9 +2703,9 @@ bool LayerSurface::LoadParameterization(const QString &filename) {
     SetActiveOverlay(m_overlays.size() - 1);
 
     emit Modified();
-    emit SurfaceOverlayAdded(overlay);
-    connect(overlay, SIGNAL(DataUpdated()), this,
-            SIGNAL(SurfaceOverlyDataUpdated()), Qt::UniqueConnection);
+    emit SurfaceOverlayAdded( overlay );
+    connect(overlay, SIGNAL(DataUpdated()), this, SIGNAL(SurfaceOverlyDataUpdated()), Qt::UniqueConnection);
+    MRIfree(&mri);
     return true;
   } else
     return false;

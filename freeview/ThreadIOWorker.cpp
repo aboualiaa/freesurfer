@@ -173,9 +173,12 @@ void ThreadIOWorker::run() {
     if (!surf) {
       return;
     }
-    if (!surf->LoadSurfaceFromFile()) {
-      emit Error(m_layer, m_nJobType);
-    } else {
+    if ( !surf->LoadSurfaceFromFile(m_args["ignore_vg"].toBool()) )
+    {
+      emit Error( m_layer, m_nJobType );
+    }
+    else
+    {
       if (m_args.value("hidden").toBool())
         m_layer->setProperty("hidden", true);
 
