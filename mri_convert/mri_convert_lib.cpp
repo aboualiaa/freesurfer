@@ -6,8 +6,6 @@
 
 #include <eigen3/Eigen/Dense>
 
-#include <fstream>
-
 namespace fs::util::cli {
 
 auto usage_message(FILE *stream, char const *Progname) -> bool {

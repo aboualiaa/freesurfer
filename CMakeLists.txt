@@ -135,7 +135,7 @@ find_package(PETSC)
 # --- boost ---
 set(Boost_NO_BOOST_CMAKE ON) # TODO: remove after updating boost from 1.71
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost COMPONENTS program_options unit_test_framework filesystem log)
+find_package(Boost REQUIRED COMPONENTS program_options unit_test_framework filesystem log)
 
 # -------- itk --------
 find_package(ITK)
@@ -149,8 +149,8 @@ find_package(ANN)
 find_package(GTS)
 
 # -------- matlab --------
-set(Matlab_ROOT_DIR /Applications/Polyspace/R2019b.app)
-find_package(MATLAB)
+#set(Matlab_ROOT_DIR /Applications/Polyspace/R2019b.app)
+#find_package(MATLAB)
 
 # -------- hpx --------
 set(HPX_IGNORE_COMPILER_COMPATIBILITY ON)
@@ -249,7 +249,7 @@ if(APPLE)
     set(OpenMP_libgomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
     set(OpenMP_libiomp5_LIBRARY ${OpenMP_CXX_LIB_NAMES})
   endif()
-  set(CMAKE_EXE_LINKER_FLAGS "-Xpreprocessor -fopenmp -lomp -L/usr/local/opt/libomp/lib -I/usr/local/opt/libomp/include")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Xpreprocessor -fopenmp -lomp -L/usr/local/opt/libomp/lib -I/usr/local/opt/libomp/include")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
 

@@ -1957,7 +1957,7 @@ auto main(int argc, char *argv[]) -> int {
       stem = IDstemFromName(cmdargs.out_name.data());
       ext = IDextensionFromName(cmdargs.out_name.data());
 
-      fmt::printf("Splitting frames, stem = %s, ext = %s\n", stem, ext);
+      fmt::printf("splitting frames, stem = %s, ext = %s\n", stem, ext);
       mri2 = nullptr;
       for (i = 0; i < mri->nframes; i++) {
         mri2 = MRIcopyFrame(mri, mri2, i, 0);
@@ -2304,138 +2304,6 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
       fs::util::cli::usage_message(stdout);
       exit(1);
     }
-  }
-
-  if (vm.count("in_i_direction") != 0) {
-    auto norm = fs::math::frobenius_norm(&cmdargs->in_i_directions);
-    auto directions = cmdargs->in_i_directions;
-    if (norm == 0.0) {
-      fmt::fprintf(stderr,
-                   "\n%s: directions must have non-zero magnitude; "
-                   "in_i_direction = (%g, %g, %g)\n",
-                   Progname, directions[0], directions[1], directions[2]);
-      fs::util::cli::usage_message(stdout);
-      exit(1);
-    }
-    if (norm != 1.0) {
-      fmt::printf("normalizing in_i_direction: (%g, %g, %g) -> ", directions[0],
-                  directions[1], directions[2]);
-      fs::math::frobenius_normalize(&cmdargs->in_i_directions);
-      directions = cmdargs->in_i_directions;
-      fmt::printf("(%g, %g, %g)\n", directions[0], directions[1],
-                  directions[2]);
-    }
-    cmdargs->in_i_direction_flag = true;
-  }
-
-  if (vm.count("in_j_direction") != 0) {
-    auto norm = fs::math::frobenius_norm(&cmdargs->in_j_directions);
-    auto directions = cmdargs->in_j_directions;
-    if (norm == 0.0) {
-      fmt::fprintf(stderr,
-                   "\n%s: directions must have non-zero magnitude; "
-                   "in_j_direction = (%g, %g, %g)\n",
-                   Progname, directions[0], directions[1], directions[2]);
-      fs::util::cli::usage_message(stdout);
-      exit(1);
-    }
-    if (norm != 1.0) {
-      fmt::printf("normalizing in_j_direction: (%g, %g, %g) -> ", directions[0],
-                  directions[1], directions[2]);
-      fs::math::frobenius_normalize(&cmdargs->in_j_directions);
-      directions = cmdargs->in_j_directions;
-      fmt::printf("(%g, %g, %g)\n", directions[0], directions[1],
-                  directions[2]);
-    }
-    cmdargs->in_j_direction_flag = true;
-  }
-
-  if (vm.count("in_k_direction") != 0) {
-    auto norm = fs::math::frobenius_norm(&cmdargs->in_k_directions);
-    auto directions = cmdargs->in_k_directions;
-    if (norm == 0.0) {
-      fmt::fprintf(stderr,
-                   "\n%s: directions must have non-zero magnitude; "
-                   "in_k_direction = (%g, %g, %g)\n",
-                   Progname, directions[0], directions[1], directions[2]);
-      fs::util::cli::usage_message(stdout);
-      exit(1);
-    }
-    if (norm != 1.0) {
-      fmt::printf("normalizing in_k_direction: (%g, %g, %g) -> ", directions[0],
-                  directions[1], directions[2]);
-      fs::math::frobenius_normalize(&cmdargs->in_k_directions);
-      directions = cmdargs->in_k_directions;
-      fmt::printf("(%g, %g, %g)\n", directions[0], directions[1],
-                  directions[2]);
-    }
-    cmdargs->in_k_direction_flag = true;
-  }
-
-  if (vm.count("out_i_direction") != 0) {
-    auto norm = fs::math::frobenius_norm(&cmdargs->out_i_directions);
-    auto directions = cmdargs->out_i_directions;
-    if (norm == 0.0) {
-      fmt::fprintf(stderr,
-                   "\n%s: directions must have non-zero magnitude; "
-                   "out_i_direction = (%g, %g, %g)\n",
-                   Progname, directions[0], directions[1], directions[2]);
-      fs::util::cli::usage_message(stdout);
-      exit(1);
-    }
-    if (norm != 1.0) {
-      fmt::printf("normalizing out_i_direction: (%g, %g, %g) -> ",
-                  directions[0], directions[1], directions[2]);
-      fs::math::frobenius_normalize(&cmdargs->out_i_directions);
-      directions = cmdargs->out_i_directions;
-      fmt::printf("(%g, %g, %g)\n", directions[0], directions[1],
-                  directions[2]);
-    }
-    cmdargs->out_i_direction_flag = true;
-  }
-
-  if (vm.count("out_j_direction") != 0) {
-    auto norm = fs::math::frobenius_norm(&cmdargs->out_j_directions);
-    auto directions = cmdargs->out_j_directions;
-    if (norm == 0.0) {
-      fmt::fprintf(stderr,
-                   "\n%s: directions must have non-zero magnitude; "
-                   "out_j_direction = (%g, %g, %g)\n",
-                   Progname, directions[0], directions[1], directions[2]);
-      fs::util::cli::usage_message(stdout);
-      exit(1);
-    }
-    if (norm != 1.0) {
-      fmt::printf("normalizing out_j_direction: (%g, %g, %g) -> ",
-                  directions[0], directions[1], directions[2]);
-      fs::math::frobenius_normalize(&cmdargs->out_j_directions);
-      directions = cmdargs->out_j_directions;
-      fmt::printf("(%g, %g, %g)\n", directions[0], directions[1],
-                  directions[2]);
-    }
-    cmdargs->out_j_direction_flag = true;
-  }
-
-  if (vm.count("out_k_direction") != 0) {
-    auto norm = fs::math::frobenius_norm(&cmdargs->out_k_directions);
-    auto directions = cmdargs->out_k_directions;
-    if (norm == 0.0) {
-      fmt::fprintf(stderr,
-                   "\n%s: directions must have non-zero magnitude; "
-                   "out_k_direction = (%g, %g, %g)\n",
-                   Progname, directions[0], directions[1], directions[2]);
-      fs::util::cli::usage_message(stdout);
-      exit(1);
-    }
-    if (norm != 1.0) {
-      fmt::printf("normalizing out_k_direction: (%g, %g, %g) -> ",
-                  directions[0], directions[1], directions[2]);
-      fs::math::frobenius_normalize(&cmdargs->out_k_directions);
-      directions = cmdargs->out_k_directions;
-      fmt::printf("(%g, %g, %g)\n", directions[0], directions[1],
-                  directions[2]);
-    }
-    cmdargs->out_k_direction_flag = true;
   }
 
   if (vm.count("in_type") != 0) {
@@ -2901,7 +2769,7 @@ void initArgDesc(boost::program_options::options_description *desc,
        po::value(&cmdargs->nskip)                                           /**/
            ->notifier(cli::checkValue(0, "nskip", std::greater_equal<>())), /**/
        "nskip")                                                             /**/
-                                                                            /**/
+      /**/
       ("ndrop",                                                             /**/
        po::value(&cmdargs->ndrop)                                           /**/
            ->notifier(cli::checkValue(0, "ndrop", std::greater_equal<>())), /**/
@@ -3172,4 +3040,3 @@ void initArgDesc(boost::program_options::options_description *desc,
        "ascii-fcol")                                                        /**/
       ;
 }
-/* EOF */

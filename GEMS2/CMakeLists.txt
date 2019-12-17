@@ -22,7 +22,7 @@ option(GEMS_BUILD_SHARED_LIBS "Build GEMS with shared libraries" ON) # doesn't d
 option(GEMS_BUILD_EXECUTABLES "Build command line executables" ON)
 option(GEMS_BUILD_TESTING "Build tests" ON)
 option(GEMS_BUILD_GUI "Build GUI components (requires FLTK and VTK)" ON)
-option(GEMS_BUILD_MATLAB "Build Matlab wrappers" ON)
+option(GEMS_BUILD_MATLAB "Build Matlab wrappers" OFF)
 option(GEMS_BUILD_PYTHON "Build Python wrappers" OFF) # if you're building the whole freesurfer project, this gets turned on below
 option(GEMS_BUILD_CUDA "Build CUDA stuff" OFF)
 

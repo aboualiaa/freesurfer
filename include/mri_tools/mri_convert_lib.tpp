@@ -137,6 +137,30 @@ auto checkOrientationString = [](std::string ostr) {
   }
 };
 
+auto checkNorm = [](std::string opt, bool &flag) {
+  return [opt, &flag](auto value) {
+    auto norm = fs::math::frobenius_norm(&value);
+    auto directions = value;
+    if (norm == 0.0) {
+      fmt::fprintf(stderr,
+                   "\n%s: directions must have non-zero magnitude; "
+                   "%s = (%g, %g, %g)\n",
+                   Progname, opt, directions[0], directions[1], directions[2]);
+      fs::util::cli::usage_message(stdout);
+      throw std::logic_error("");
+    }
+    if (norm != 1.0) {
+      fmt::printf("normalizing %s: (%g, %g, %g) -> ", opt, directions[0],
+                  directions[1], directions[2]);
+      fs::math::frobenius_normalize(&value);
+      directions = value;
+      fmt::printf("(%g, %g, %g)\n", directions[0], directions[1],
+                  directions[2]);
+    }
+    flag = true;
+  };
+};
+
 } // namespace fs::util::mri
 
 namespace fs::util::io {
