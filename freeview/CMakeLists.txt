@@ -193,6 +193,7 @@ if(BUILD_GUIS AND VTK_FOUND AND PETSC_FOUND AND TARGET vtkutils)
     WindowLayerInfo.cpp
     WindowEditAnnotation.cpp
     DialogNewAnnotation.cpp
+    DialogScreenshotOverlay.cpp
     freeview.qrc
     )
 

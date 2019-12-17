@@ -37,6 +37,7 @@ class LayerSurface;
 class SurfaceLabel;
 class SurfaceOverlayProperty;
 class QAbstractButton;
+class DialogScreenshotOverlay;
 
 class WindowConfigureOverlay : public QWidget, public UIUpdateHelper {
   Q_OBJECT
@@ -46,7 +47,8 @@ public:
   ~WindowConfigureOverlay();
 
   void showEvent(QShowEvent *);
-  void resizeEvent(QResizeEvent *e);
+  void hideEvent(QHideEvent *);
+  void resizeEvent(QResizeEvent* e);
 
 signals:
   void ActiveFrameChanged(int nframe);
@@ -62,10 +64,10 @@ public slots:
   void LoadLabelMask(const QString &fn);
 
 protected slots:
-  void OnActiveSurfaceChanged(Layer *layer);
-  void OnClicked(QAbstractButton *btn);
-  void OnSliderOpacity(int nVal);
-  void OnSpinBoxOpacity(double dVal);
+  void OnActiveSurfaceChanged(Layer* layer);
+  void OnButtonClicked();
+  void OnSliderOpacity( int nVal );
+  void OnSpinBoxOpacity( double dVal );
   void OnButtonAdd();
   bool UpdateOverlayProperty(SurfaceOverlayProperty *p);
   void UpdateThresholdChanges();
@@ -87,14 +89,18 @@ protected slots:
   void OnComboOverlayChanged(int n);
   void OnCycleOverlay();
   void UpdateGeometry();
+  void OnCheckFixedAxes(bool bChecked, bool bUpdateGraph = true);
+  void OnActiveOverlayChanged();
 
 private:
   Ui::WindowConfigureOverlay *ui;
 
-  LineMarkers m_markers; // custom gradient markers
-  LayerSurface *m_layerSurface;
-  float *m_fDataCache;
-  double m_dSavedOffset;
+  LineMarkers   m_markers;    // custom gradient markers
+  LayerSurface* m_layerSurface;
+  float*        m_fDataCache;
+  double        m_dSavedOffset;
+  double        m_rangeOverall[2];
+  DialogScreenshotOverlay*  m_dlgScreenshot;
 };
 
 #endif // WINDOWCONFIGUREOVERLAY_H
