@@ -118,7 +118,7 @@ auto addConflicts = [](std::vector<std::string> conflicts, std::string name,
 
 auto addDependencies = [](std::vector<std::string> dependencies,
                           std::string name, auto *args) {
-  return [name, dependencies, args](auto value) {
+  return [name, dependencies, args]([[maybe_unused]] auto value) {
     for (auto &dependency : dependencies) {
       args->dependency_map.insert(std::make_pair(name, dependency));
     }
