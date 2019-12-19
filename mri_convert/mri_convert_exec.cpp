@@ -1436,7 +1436,7 @@ auto main(int argc, char *argv[]) -> int {
         ErrorExit(ERROR_NOFILE, "%s: could not read xform from %s\n", Progname,
                   cmdargs.transform_fname.c_str());
       }
-      if (static_cast<int>(cmdargs.invert_transform_flag) == 0) {
+      if (!cmdargs.invert_transform_flag) {
         fmt::printf("morphing to atlas with resample type %d\n",
                     cmdargs.resample_type_val);
         mri_transformed =
@@ -1531,8 +1531,7 @@ auto main(int argc, char *argv[]) -> int {
   }
 
   /* ----- change type if necessary ----- */
-  if (mri->type != mri_template->type &&
-      static_cast<int>(cmdargs.nochange_flag) == FALSE) {
+  if (mri->type != mri_template->type && !cmdargs.nochange_flag) {
     fmt::printf("changing data type from %s to %s (noscale = %d)...\n",
                 MRItype2str(mri->type), MRItype2str(mri_template->type),
                 cmdargs.no_scale_flag);
@@ -1936,7 +1935,7 @@ auto main(int argc, char *argv[]) -> int {
     fmt::printf("done\n");
     exit(0);
   }
-  if (static_cast<int>(cmdargs.no_write_flag) == 0) {
+  if (!cmdargs.no_write_flag) {
     if (cmdargs.split_frames_flag) {
       fmt::printf("writing to %s...\n", cmdargs.out_name.data());
       if (cmdargs.force_out_type_flag) {
