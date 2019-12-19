@@ -2044,301 +2044,6 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     return false;
   }
 
-  if (cmdargs->debug) {
-    spdlog::set_level(spdlog::level::debug); // Set global log level to debug
-    fs::dbg::create_gdb_file(args);
-  }
-
-  if (vm.count("outside_val") != 0U) {
-    fmt::printf("setting outside val to %d\n", cmdargs->outside_val);
-  }
-
-  if (vm.count("conform-dc") != 0U) {
-    cmdargs->conform_flag = true;
-  }
-
-  if (cmdargs->conform_width_256_flag) {
-    cmdargs->conform_flag = true;
-  }
-
-  if (vm.count("autoalign") != 0U) {
-    cmdargs->AutoAlign =
-        MatrixReadTxt(cmdargs->autoalign_file.c_str(), nullptr);
-    fmt::printf("Auto Align Matrix\n");
-    MatrixPrint(stdout, cmdargs->AutoAlign);
-  }
-
-  if (cmdargs->conform_min_flag) {
-    cmdargs->conform_flag = true;
-  }
-
-  if (vm.count("conform_size") != 0U) {
-    cmdargs->conform_flag = true;
-  }
-
-  if (vm.count("apply_transform") != 0U) {
-    cmdargs->transform_flag = true;
-    cmdargs->invert_transform_flag = false;
-  }
-
-  if (vm.count("like") != 0U) {
-    cmdargs->out_like_flag = true;
-    // creates confusion when this is printed:
-    // fmt::printf("WARNING: --like does not work on multi-frame data\n");
-    // but we'll leave it here for the interested coder
-  }
-
-  if (vm.count("crop") != 0U) {
-    cmdargs->crop_flag = true;
-  }
-
-  if (vm.count("slice-crop") != 0U) {
-    cmdargs->slice_crop_flag = true;
-    cmdargs->slice_crop_start = cmdargs->slice_crop[0];
-    cmdargs->slice_crop_stop = cmdargs->slice_crop[1];
-    if (cmdargs->slice_crop_start > cmdargs->slice_crop_stop) {
-      fmt::fprintf(stderr, "ERROR: s_start > s_end\n");
-      exit(1);
-    }
-  }
-
-  if (vm.count("cropsize") != 0U) {
-    cmdargs->crop_flag = true;
-  }
-
-  if (vm.count("devolvexfm") != 0U) {
-    /* devolve xfm to account for cras != 0 */
-    cmdargs->DevXFM = 0;
-  }
-
-  if (vm.count("apply_inverse_transform") != 0U) {
-    if (FileExists(cmdargs->transform_fname.data()) == 0) {
-      fmt::fprintf(stderr, "ERROR: cannot find transform file %s\n",
-                   cmdargs->transform_fname.data());
-      exit(1);
-    }
-    cmdargs->transform_flag = true;
-    cmdargs->invert_transform_flag = true;
-  }
-
-  if (vm.count("upsample") != 0U) {
-    cmdargs->upsample_flag = true;
-  }
-
-  if (vm.count("in_i_size") != 0U) {
-    cmdargs->in_i_size_flag = true;
-  }
-
-  if (vm.count("in_j_size") != 0U) {
-    cmdargs->in_j_size_flag = true;
-  }
-
-  if (vm.count("in_k_size") != 0U) {
-    cmdargs->in_k_size_flag = true;
-  }
-
-  if (vm.count("out_i_size") != 0U) {
-    cmdargs->out_i_size_flag = true;
-  }
-
-  if (vm.count("out_j_size") != 0U) {
-    cmdargs->out_j_size_flag = true;
-  }
-
-  if (vm.count("out_k_size") != 0U) {
-    cmdargs->out_k_size_flag = true;
-  }
-
-  if (vm.count("erode-seg") != 0U) {
-    cmdargs->erode_seg_flag = true;
-  }
-
-  if (vm.count("dil-seg") != 0U) {
-    cmdargs->dil_seg_flag = true;
-  }
-
-  if (vm.count("cutends") != 0U) {
-    cmdargs->cutends_flag = true;
-  }
-
-  if (vm.count("out_i_count") != 0U) {
-    cmdargs->out_n_i_flag = true;
-  }
-
-  if (vm.count("out_j_count") != 0U) {
-    cmdargs->out_n_j_flag = true;
-  }
-
-  if (vm.count("out_k_count") != 0U) {
-    cmdargs->out_n_k_flag = true;
-  }
-
-  if (vm.count("in_i_count") != 0U) {
-    cmdargs->in_n_i_flag = true;
-  }
-
-  if (vm.count("in_j_count") != 0U) {
-    cmdargs->in_n_j_flag = true;
-  }
-
-  if (vm.count("in_k_count") != 0U) {
-    cmdargs->in_n_k_flag = true;
-  }
-
-  if (vm.count("tr") != 0U) {
-    cmdargs->in_tr_flag = true;
-  }
-
-  if (vm.count("TI") != 0U) {
-    cmdargs->in_ti_flag = true;
-  }
-
-  if (vm.count("te") != 0U) {
-    cmdargs->in_te_flag = true;
-  }
-
-  if (vm.count("flip_angle") != 0U) {
-    cmdargs->in_flip_angle_flag = true;
-  }
-
-  if (vm.count("nslices-override") != 0) {
-    fmt::printf("NSlicesOverride %d\n", cmdargs->nslices_override);
-    std::string tmpstr = std::to_string(cmdargs->nslices_override);
-    setenv("NSLICES_OVERRIDE", tmpstr.data(), 1);
-  }
-
-  if (vm.count("ncols-override") != 0) {
-    fmt::printf("NColsOverride %d\n", cmdargs->ncols_override);
-    std::string tmpstr = std::to_string(cmdargs->ncols_override);
-    setenv("NCOLS_OVERRIDE", tmpstr.data(), 1);
-  }
-
-  if (vm.count("nrows-override") != 0) {
-    fmt::printf("NRowsOverride %d\n", cmdargs->nrows_override);
-    std::string tmpstr = std::to_string(cmdargs->nrows_override);
-    setenv("NROWS_OVERRIDE", tmpstr.data(), 1);
-  }
-
-  if (vm.count("fsubsample") != 0) {
-    std::tie(cmdargs->SubSampStart, cmdargs->SubSampDelta,
-             cmdargs->SubSampEnd) = std::array<int, 3>{
-        cmdargs->fsubsample[0], cmdargs->fsubsample[1], cmdargs->fsubsample[2]};
-    if (cmdargs->SubSampDelta == 0) {
-      fmt::printf("ERROR: don't use subsample delta = 0\n");
-      exit(1);
-    }
-    cmdargs->subsample_flag = true;
-  }
-
-  if (cmdargs->mid_frame_flag) {
-    cmdargs->frame_flag = true;
-  }
-
-  if (vm.count("reduce") != 0) {
-    fmt::printf("reducing input image %d times\n", cmdargs->reduce);
-  }
-
-  if (vm.count("reslice_like") != 0) {
-    cmdargs->reslice_like_flag = true;
-  }
-
-  if (vm.count("slice-bias") != 0) {
-    cmdargs->SliceBias = true;
-  }
-
-  if (vm.count("in_like") != 0) {
-    cmdargs->in_like_flag = true;
-  }
-
-  if (vm.count("color_file") != 0) {
-    cmdargs->color_file_flag = true;
-  }
-
-  if (vm.count("crop_gdf") != 0) {
-    mriio_set_gdf_crop_flag(TRUE);
-  }
-
-  if (vm.count("fwhm") != 0) {
-    cmdargs->gstd = cmdargs->fwhm / sqrt(log(256.0));
-    fmt::printf("fwhm = %g, gstd = %g\n", cmdargs->fwhm, cmdargs->gstd);
-  }
-
-  if (vm.count("out_data_type") != 0) {
-    if (boost::iequals(cmdargs->out_data_type_string, "uchar")) {
-      cmdargs->out_data_type = MRI_UCHAR;
-    } else if (boost::iequals(cmdargs->out_data_type_string, "short")) {
-      cmdargs->out_data_type = MRI_SHORT;
-    } else if (boost::iequals(cmdargs->out_data_type_string, "int")) {
-      cmdargs->out_data_type = MRI_INT;
-    } else if (boost::iequals(cmdargs->out_data_type_string, "float")) {
-      cmdargs->out_data_type = MRI_FLOAT;
-    } else if (boost::iequals(cmdargs->out_data_type_string, "rgb")) {
-      cmdargs->out_data_type = MRI_RGB;
-    } else {
-      fmt::fprintf(stderr, "\n%s: unknown data type \"%s\"\n", Progname,
-                   cmdargs->out_data_type_string);
-      fs::util::cli::usage_message(stdout);
-      exit(1);
-    }
-  }
-
-  if (vm.count("resample_type") != 0) {
-    if (boost::iequals(cmdargs->resample_type, "interpolate")) {
-      cmdargs->resample_type_val = SAMPLE_TRILINEAR;
-    } else if (boost::iequals(cmdargs->resample_type, "nearest")) {
-      cmdargs->resample_type_val = SAMPLE_NEAREST;
-    } else if (boost::iequals(cmdargs->resample_type, "vote")) {
-      cmdargs->resample_type_val = SAMPLE_VOTE;
-    } else if (boost::iequals(cmdargs->resample_type, "weighted")) {
-      cmdargs->resample_type_val = SAMPLE_WEIGHTED;
-    } /*else if (boost::iequals(cmdargs->resample_type, "sinc")) {
-      cmdargs->resample_type_val = SAMPLE_SINC;
-    }*/
-    else if (boost::iequals(cmdargs->resample_type, "cubic")) {
-      cmdargs->resample_type_val = SAMPLE_CUBIC_BSPLINE;
-    } else {
-      fmt::fprintf(stderr, "\n%s: unknown resample type \"%s\"\n", Progname,
-                   cmdargs->resample_type);
-      fs::util::cli::usage_message(stdout);
-      exit(1);
-    }
-  }
-
-  if (vm.count("in_type") != 0) {
-    cmdargs->force_in_type_flag = true;
-    cmdargs->forced_in_type = string_to_type(cmdargs->in_type_string.data());
-  }
-
-  if (vm.count("out_type") != 0) {
-    cmdargs->force_out_type_flag = true;
-    cmdargs->forced_out_type = string_to_type(cmdargs->out_type_string.data());
-  }
-
-  if (vm.count("template_type") != 0) {
-    cmdargs->force_template_type_flag = true;
-    cmdargs->forced_template_type =
-        string_to_type(cmdargs->template_type_string.data());
-  }
-
-  if (vm.count("frame") != 0) {
-    cmdargs->frame_flag = true;
-  }
-
-  if (vm.count("ascii") != 0) {
-    cmdargs->ascii_flag = 1;
-    cmdargs->force_in_type_flag = true;
-  }
-
-  if (vm.count("ascii+crsf") != 0) {
-    cmdargs->ascii_flag = 2;
-    cmdargs->force_in_type_flag = true;
-  }
-
-  if (vm.count("ascii+crsf") != 0) {
-    cmdargs->ascii_flag = 3;
-    cmdargs->force_in_type_flag = true;
-  }
-
   return true;
 }
 
@@ -2378,7 +2083,12 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("debug",
 
-       po::bool_switch(&cmdargs->debug),
+       po::bool_switch(&cmdargs->debug) //
+           ->notifier([cmdargs]() {
+             spdlog::set_level(
+                 spdlog::level::debug); // Set global log level to debug
+             fs::dbg::create_gdb_file(cmdargs->raw);
+           }),
 
        "turn on debugging")
 
@@ -2411,7 +2121,10 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("outside_val,oval",
 
-       po::value(&cmdargs->outside_val),
+       po::value(&cmdargs->outside_val) //
+           ->notifier([cmdargs]() {
+             fmt::printf("setting outside val to %d\n", cmdargs->outside_val);
+           }),
 
        "Set the values outside of the image that may rotate in if a transform "
        "is applied to val")
@@ -2544,7 +2257,10 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("conform-dc",
 
-       po::value(&cmdargs->conf_keep_dc),
+       po::value(&cmdargs->conf_keep_dc) //
+           ->notifier([cmdargs]() {
+             cmdargs->conform_flag = true;
+           }),
 
        "conform-dc")
 
@@ -2552,7 +2268,10 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("cw256",
 
-       po::bool_switch(&cmdargs->conform_width_256_flag),
+       po::bool_switch(&cmdargs->conform_width_256_flag) //
+           ->notifier([cmdargs]() {
+             cmdargs->conform_flag = true;
+           }),
 
        "cw256")
 
@@ -2649,7 +2368,13 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("autoalign",
 
-       po::value(&cmdargs->autoalign_file),
+       po::value(&cmdargs->autoalign_file) //
+           ->notifier([cmdargs](auto v) {
+             io::checkFileReadable(v);
+             cmdargs->AutoAlign = MatrixReadTxt(v.c_str(), nullptr);
+             fmt::printf("Auto Align Matrix\n");
+             MatrixPrint(stdout, cmdargs->AutoAlign);
+           }),
 
        "Text file with autoalign matrix")
 
@@ -2665,7 +2390,10 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("conform_min,cm",
 
-       po::bool_switch(&cmdargs->conform_min_flag),
+       po::bool_switch(&cmdargs->conform_min_flag) //
+           ->notifier([cmdargs]() {
+             cmdargs->conform_flag = true;
+           }),
 
        "Conform to the src min direction size")
 
@@ -2673,7 +2401,10 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("conform_size,cs",
 
-       po::value(&cmdargs->conform_size),
+       po::value(&cmdargs->conform_size) //
+           ->notifier([cmdargs]() {
+             cmdargs->conform_flag = true;
+           }),
 
        "conform to the size given in mm")
 
@@ -2783,7 +2514,11 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("apply_transform,T,at",
 
-       po::value(&cmdargs->transform_fname),
+       po::value(&cmdargs->transform_fname) //
+           ->notifier([cmdargs]() {
+             cmdargs->transform_flag = true;
+             cmdargs->invert_transform_flag = false;
+           }),
 
        "Apply transform given by xfm or m3z files. The volume can be resampled "
        "into another space by supplying a transform using the -apply_transform "
@@ -2804,7 +2539,13 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("like",
 
-       po::value(&cmdargs->out_like_name),
+       po::value(&cmdargs->out_like_name) //
+           ->notifier([cmdargs]() {
+             cmdargs->out_like_flag = true;
+             // creates confusion when this is printed:
+             // fmt::printf("WARNING: --like does not work on multi-frame
+             // data\n"); but we'll leave it here for the interested coder
+           }),
 
        "Output is embedded in a volume like name, or in stats-table like name "
        "(measure, columns, rows)")
@@ -2815,7 +2556,11 @@ void initArgDesc(boost::program_options::options_description *desc,
 
        po::value(&cmdargs->crop_center) //
            ->multitoken()
-           ->notifier(cli::checkSize("crop", 3)),
+           ->notifier([cmdargs](auto v) {
+             auto checker = cli::checkSize("crop", 3);
+             checker(v);
+             cmdargs->crop_flag = true;
+           }),
 
        "Crop to 256 around center (x,y,z)")
 
@@ -2825,7 +2570,17 @@ void initArgDesc(boost::program_options::options_description *desc,
 
        po::value(&cmdargs->slice_crop) //
            ->multitoken()
-           ->notifier(cli::checkSize("slice-crop", 2)),
+           ->notifier([cmdargs](auto v) {
+             auto checker = cli::checkSize("slice-crop", 2);
+             checker(v);
+             cmdargs->slice_crop_flag = true;
+             cmdargs->slice_crop_start = cmdargs->slice_crop[0];
+             cmdargs->slice_crop_stop = cmdargs->slice_crop[1];
+             if (cmdargs->slice_crop_start > cmdargs->slice_crop_stop) {
+               fmt::fprintf(stderr, "ERROR: s_start > s_end\n");
+               exit(1);
+             }
+           }),
 
        "Keep slices s_start to s_end")
 
@@ -2835,7 +2590,11 @@ void initArgDesc(boost::program_options::options_description *desc,
 
        po::value(&cmdargs->cropsize) //
            ->multitoken()
-           ->notifier(cli::checkSize("cropsize", 3)),
+           ->notifier([cmdargs](auto v) {
+             auto checker = cli::checkSize("cropsize", 3);
+             checker(v);
+             cmdargs->crop_flag = true;
+           }),
 
        "Crop to size <dx, dy, dz>")
 
@@ -2843,7 +2602,11 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("devolvexfm",
 
-       po::value(&cmdargs->devolvexfm_subject),
+       po::value(&cmdargs->devolvexfm_subject) //
+           ->notifier([cmdargs]() {
+             /* devolve xfm to account for cras != 0 */
+             cmdargs->DevXFM = 0;
+           }),
 
        "devolvexfm")
 
@@ -2851,7 +2614,12 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("apply_inverse_transform,ait",
 
-       po::value(&cmdargs->transform_fname),
+       po::value(&cmdargs->transform_fname) //
+           ->notifier([cmdargs](auto v) {
+             io::checkFileReadable(v.data());
+             cmdargs->transform_flag = true;
+             cmdargs->invert_transform_flag = true;
+           }),
 
        "Apply inverse transform given by xfm or m3z files.")
 
@@ -2859,7 +2627,10 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("upsample",
 
-       po::value(&cmdargs->upsample_factor),
+       po::value(&cmdargs->upsample_factor) //
+           ->notifier([cmdargs]() {
+             cmdargs->upsample_flag = true;
+           }),
 
        "Reduce voxel size by a factor of N in all dimensions")
 
@@ -2868,7 +2639,12 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("in_i_size,iis",
 
        po::value(&cmdargs->in_i_size) //
-           ->notifier(cli::checkValue(0.0F, "in_i_size", std::greater<>())),
+           ->notifier([cmdargs](auto v) {
+             auto checker =
+                 cli::checkValue(0.0F, "in_i_size", std::greater<>());
+             checker(v);
+             cmdargs->in_i_size_flag = true;
+           }),
 
        "in_i_size")
 
@@ -2877,7 +2653,12 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("in_j_size,ijs",
 
        po::value(&cmdargs->in_j_size) //
-           ->notifier(cli::checkValue(0.0F, "in_j_size", std::greater<>())),
+           ->notifier([cmdargs](auto v) {
+             auto checker =
+                 cli::checkValue(0.0F, "in_j_size", std::greater<>());
+             checker(v);
+             cmdargs->in_j_size_flag = true;
+           }),
 
        "in_j_size")
 
@@ -2886,7 +2667,12 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("in_k_size,iks",
 
        po::value(&cmdargs->in_k_size) //
-           ->notifier(cli::checkValue(0.0F, "in_k_size", std::greater<>())),
+           ->notifier([cmdargs](auto v) {
+             auto checker =
+                 cli::checkValue(0.0F, "in_k_size", std::greater<>());
+             checker(v);
+             cmdargs->in_k_size_flag = true;
+           }),
 
        "in_k_size")
 
@@ -2895,7 +2681,12 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("out_i_size,ois",
 
        po::value(&cmdargs->out_i_size) //
-           ->notifier(cli::checkValue(0.0F, "out_i_size", std::greater<>())),
+           ->notifier([cmdargs](auto v) {
+             auto checker =
+                 cli::checkValue(0.0F, "out_i_size", std::greater<>());
+             checker(v);
+             cmdargs->out_i_size_flag = true;
+           }),
 
        "out_i_size")
 
@@ -2903,8 +2694,13 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("out_j_size,ojs",
 
-       po::value(&cmdargs->out_j_size)
-           ->notifier(cli::checkValue(0.0F, "out_j_size", std::greater<>())),
+       po::value(&cmdargs->out_j_size) //
+           ->notifier([cmdargs](auto v) {
+             auto checker =
+                 cli::checkValue(0.0F, "out_j_size", std::greater<>());
+             checker(v);
+             cmdargs->out_j_size_flag = true;
+           }),
 
        "out_j_size")
 
@@ -2913,7 +2709,12 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("out_k_size,oks",
 
        po::value(&cmdargs->out_k_size) //
-           ->notifier(cli::checkValue(0.0F, "out_k_size", std::greater<>())),
+           ->notifier([cmdargs](auto v) {
+             auto checker =
+                 cli::checkValue(0.0F, "out_k_size", std::greater<>());
+             checker(v);
+             cmdargs->out_k_size_flag = true;
+           }),
 
        "out_k_size")
 
@@ -2976,7 +2777,10 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("erode-seg",
 
-       po::value(&cmdargs->n_erode_seg),
+       po::value(&cmdargs->n_erode_seg) //
+           ->notifier([cmdargs]() {
+             cmdargs->erode_seg_flag = true;
+           }),
 
        "Erode segmentation boundaries Nerode times (based on 6 nearest "
        "neighbors)")
@@ -2985,7 +2789,10 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("dil-seg",
 
-       po::value(&cmdargs->n_dil_seg),
+       po::value(&cmdargs->n_dil_seg) //
+           ->notifier([cmdargs]() {
+             cmdargs->dil_seg_flag = true;
+           }),
 
        "Dilate segmentation boundaries Ndilate times (based on 6 nearest "
        "neighbors) to fill seg=0 voxels")
@@ -2994,7 +2801,10 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("cutends",
 
-       po::value(&cmdargs->ncutends),
+       po::value(&cmdargs->ncutends) //
+           ->notifier([cmdargs]() {
+             cmdargs->cutends_flag = true;
+           }),
 
        "Remove ncut slices from the ends")
 
@@ -3002,67 +2812,119 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("out_i_count,oni,oic",
 
-       po::value(&cmdargs->out_n_i), "out_i_count")
+       po::value(&cmdargs->out_n_i) //
+           ->notifier([cmdargs]() {
+             cmdargs->out_n_i_flag = true;
+           }),
+
+       "out_i_count")
 
       //
 
       ("out_j_count,onj,ojc",
 
-       po::value(&cmdargs->out_n_j), "out_i_count")
+       po::value(&cmdargs->out_n_j) //
+           ->notifier([cmdargs]() {
+             cmdargs->out_n_j_flag = true;
+           }),
+
+       "out_i_count")
 
       //
 
       ("out_k_count,onk,okc",
 
-       po::value(&cmdargs->out_n_k), "out_i_count")
+       po::value(&cmdargs->out_n_k) //
+           ->notifier([cmdargs]() {
+             cmdargs->out_n_k_flag = true;
+           }),
+
+       "out_i_count")
 
       //
 
       ("downsample2,ds2",
 
-       po::bool_switch(&cmdargs->downsample2_flag), "downsample2")
+       po::bool_switch(&cmdargs->downsample2_flag),
+
+       "downsample2")
 
       //
 
       ("in_i_count,ini,iic",
 
-       po::value(&cmdargs->in_n_i), "in_i_count")
+       po::value(&cmdargs->in_n_i) //
+           ->notifier([cmdargs]() {
+             cmdargs->in_n_i_flag = true;
+           }),
+
+       "in_i_count")
 
       //
 
       ("in_j_count,inj,ijc",
 
-       po::value(&cmdargs->in_n_j), "in_j_count")
+       po::value(&cmdargs->in_n_j) //
+           ->notifier([cmdargs]() {
+             cmdargs->in_n_j_flag = true;
+           }),
+
+       "in_j_count")
 
       //
 
       ("in_k_count,ink,ikc",
 
-       po::value(&cmdargs->in_n_k), "in_k_count")
+       po::value(&cmdargs->in_n_k) //
+           ->notifier([cmdargs]() {
+             cmdargs->in_n_k_flag = true;
+           }),
+
+       "in_k_count")
 
       //
 
       ("tr",
 
-       po::value(&cmdargs->in_tr), "TR in msec")
+       po::value(&cmdargs->in_tr) //
+           ->notifier([cmdargs]() {
+             cmdargs->in_tr_flag = true;
+           }),
+
+       "TR in msec")
 
       //
 
       ("TI",
 
-       po::value(&cmdargs->in_ti), "TI in msec (note uppercase flag)")
+       po::value(&cmdargs->in_ti) //
+           ->notifier([cmdargs]() {
+             cmdargs->in_ti_flag = true;
+           }),
+
+       "TI in msec (note uppercase flag)")
 
       //
 
       ("te",
 
-       po::value(&cmdargs->in_te), "TE in msec")
+       po::value(&cmdargs->in_te) //
+           ->notifier([cmdargs]() {
+             cmdargs->in_te_flag = true;
+           }),
+
+       "TE in msec")
 
       //
 
       ("flip_angle",
 
-       po::value(&cmdargs->in_flip_angle), "Angle in radians")
+       po::value(&cmdargs->in_flip_angle) //
+           ->notifier([cmdargs]() {
+             cmdargs->in_flip_angle_flag = true;
+           }),
+
+       "Angle in radians")
 
       //
 
@@ -3200,7 +3062,12 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("nslices-override",
 
-       po::value(&cmdargs->nslices_override),
+       po::value(&cmdargs->nslices_override) //
+           ->notifier([cmdargs]() {
+             fmt::printf("NSlicesOverride %d\n", cmdargs->nslices_override);
+             std::string tmpstr = std::to_string(cmdargs->nslices_override);
+             setenv("NSLICES_OVERRIDE", tmpstr.data(), 1);
+           }),
 
        "Use this number of slices when converting DICOM mosaics")
 
@@ -3208,7 +3075,12 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("ncols-override",
 
-       po::value(&cmdargs->ncols_override),
+       po::value(&cmdargs->ncols_override) //
+           ->notifier([cmdargs]() {
+             fmt::printf("NColsOverride %d\n", cmdargs->ncols_override);
+             std::string tmpstr = std::to_string(cmdargs->ncols_override);
+             setenv("NCOLS_OVERRIDE", tmpstr.data(), 1);
+           }),
 
        "ncols-override")
 
@@ -3216,7 +3088,12 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("nrows-override",
 
-       po::value(&cmdargs->nrows_override),
+       po::value(&cmdargs->nrows_override) //
+           ->notifier([cmdargs]() {
+             fmt::printf("NRowsOverride %d\n", cmdargs->nrows_override);
+             std::string tmpstr = std::to_string(cmdargs->nrows_override);
+             setenv("NROWS_OVERRIDE", tmpstr.data(), 1);
+           }),
 
        "nrows-override")
 
@@ -3258,7 +3135,19 @@ void initArgDesc(boost::program_options::options_description *desc,
 
        po::value(&cmdargs->fsubsample) //
            ->multitoken()
-           ->notifier(cli::checkSize("fsubsample", 3)),
+           ->notifier([cmdargs](auto v) {
+             auto checker = cli::checkSize("fsubsample", 3);
+             checker(v);
+             std::tie(cmdargs->SubSampStart, cmdargs->SubSampDelta,
+                      cmdargs->SubSampEnd) = std::array<int, 3>{
+                 cmdargs->fsubsample[0], cmdargs->fsubsample[1],
+                 cmdargs->fsubsample[2]};
+             if (cmdargs->SubSampDelta == 0) {
+               fmt::printf("ERROR: don't use subsample delta = 0\n");
+               exit(1);
+             }
+             cmdargs->subsample_flag = true;
+           }),
 
        "Frame subsampling (end = -1 for end)")
 
@@ -3266,7 +3155,10 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("mid-frame",
 
-       po::bool_switch(&cmdargs->mid_frame_flag),
+       po::bool_switch(&cmdargs->mid_frame_flag) //
+           ->notifier([cmdargs]() {
+             cmdargs->frame_flag = true;
+           }),
 
        "Keep only the middle frame")
 
@@ -3324,7 +3216,10 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("reduce",
 
-       po::value(&cmdargs->reduce),
+       po::value(&cmdargs->reduce) //
+           ->notifier([cmdargs]() {
+             fmt::printf("reducing input image %d times\n", cmdargs->reduce);
+           }),
 
        "reduce")
 
@@ -3408,7 +3303,10 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("reslice_like,rl",
 
-       po::value(&cmdargs->reslice_like_name),
+       po::value(&cmdargs->reslice_like_name) //
+           ->notifier([cmdargs]() {
+             cmdargs->reslice_like_flag = true;
+           }),
 
        "reslice_like")
 
@@ -3416,7 +3314,10 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("slice-bias",
 
-       po::value(&cmdargs->SliceBiasAlpha),
+       po::value(&cmdargs->SliceBiasAlpha) //
+           ->notifier([cmdargs]() {
+             cmdargs->SliceBias = true;
+           }),
 
        "Apply half-cosine bias field")
 
@@ -3424,7 +3325,10 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("in_like,il",
 
-       po::value(&cmdargs->in_like_name),
+       po::value(&cmdargs->in_like_name) //
+           ->notifier([cmdargs]() {
+             cmdargs->in_like_flag = true;
+           }),
 
        "in_like")
 
@@ -3432,7 +3336,10 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("color_file,cf",
 
-       po::value(&cmdargs->color_file_name),
+       po::value(&cmdargs->color_file_name) //
+           ->notifier([cmdargs]() {
+             cmdargs->color_file_flag = true;
+           }),
 
        "color_file")
 
@@ -3447,6 +3354,11 @@ void initArgDesc(boost::program_options::options_description *desc,
       //
 
       ("crop_gdf,cg",
+
+       po::bool_switch() //
+           ->notifier([]() {
+             mriio_set_gdf_crop_flag(TRUE);
+           }),
 
        "Apply GDF cropping")
 
@@ -3472,7 +3384,12 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("fwhm",
 
-       po::value(&cmdargs->fwhm),
+       po::value(&cmdargs->fwhm) //
+           ->notifier([cmdargs]() {
+             cmdargs->gstd = cmdargs->fwhm / sqrt(log(256.0));
+             fmt::printf("fwhm = %g, gstd = %g\n", cmdargs->fwhm,
+                         cmdargs->gstd);
+           }),
 
        "Smooth input volume by fwhm mm")
 
@@ -3480,7 +3397,27 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("out_data_type,odt",
 
-       po::value(&cmdargs->out_data_type_string),
+       po::value(&cmdargs->out_data_type_string) //
+           ->notifier([cmdargs]() {
+             if (boost::iequals(cmdargs->out_data_type_string, "uchar")) {
+               cmdargs->out_data_type = MRI_UCHAR;
+             } else if (boost::iequals(cmdargs->out_data_type_string,
+                                       "short")) {
+               cmdargs->out_data_type = MRI_SHORT;
+             } else if (boost::iequals(cmdargs->out_data_type_string, "int")) {
+               cmdargs->out_data_type = MRI_INT;
+             } else if (boost::iequals(cmdargs->out_data_type_string,
+                                       "float")) {
+               cmdargs->out_data_type = MRI_FLOAT;
+             } else if (boost::iequals(cmdargs->out_data_type_string, "rgb")) {
+               cmdargs->out_data_type = MRI_RGB;
+             } else {
+               fmt::fprintf(stderr, "\n%s: unknown data type \"%s\"\n",
+                            Progname, cmdargs->out_data_type_string);
+               fs::util::cli::usage_message(stdout);
+               exit(1);
+             }
+           }),
 
        "out_data_type")
 
@@ -3488,7 +3425,28 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("resample_type,rt",
 
-       po::value(&cmdargs->resample_type),
+       po::value(&cmdargs->resample_type) //
+           ->notifier([cmdargs]() {
+             if (boost::iequals(cmdargs->resample_type, "interpolate")) {
+               cmdargs->resample_type_val = SAMPLE_TRILINEAR;
+             } else if (boost::iequals(cmdargs->resample_type, "nearest")) {
+               cmdargs->resample_type_val = SAMPLE_NEAREST;
+             } else if (boost::iequals(cmdargs->resample_type, "vote")) {
+               cmdargs->resample_type_val = SAMPLE_VOTE;
+             } else if (boost::iequals(cmdargs->resample_type, "weighted")) {
+               cmdargs->resample_type_val = SAMPLE_WEIGHTED;
+             } /*else if (boost::iequals(cmdargs->resample_type, "sinc")) {
+          cmdargs->resample_type_val = SAMPLE_SINC;
+        }*/
+             else if (boost::iequals(cmdargs->resample_type, "cubic")) {
+               cmdargs->resample_type_val = SAMPLE_CUBIC_BSPLINE;
+             } else {
+               fmt::fprintf(stderr, "\n%s: unknown resample type \"%s\"\n",
+                            Progname, cmdargs->resample_type);
+               fs::util::cli::usage_message(stdout);
+               exit(1);
+             }
+           }),
 
        "Default is interpolate")
 
@@ -3592,7 +3550,12 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("in_type,it",
 
-       po::value(&cmdargs->in_type_string),
+       po::value(&cmdargs->in_type_string) //
+           ->notifier([cmdargs]() {
+             cmdargs->force_in_type_flag = true;
+             cmdargs->forced_in_type =
+                 string_to_type(cmdargs->in_type_string.data());
+           }),
 
        "in_type")
 
@@ -3600,7 +3563,12 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("out_type,ot",
 
-       po::value(&cmdargs->out_type_string),
+       po::value(&cmdargs->out_type_string) //
+           ->notifier([cmdargs]() {
+             cmdargs->force_out_type_flag = true;
+             cmdargs->forced_out_type =
+                 string_to_type(cmdargs->out_type_string.data());
+           }),
 
        "out_type")
 
@@ -3608,7 +3576,12 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("template_type,tt",
 
-       po::value(&cmdargs->template_type_string),
+       po::value(&cmdargs->template_type_string) //
+           ->notifier([cmdargs]() {
+             cmdargs->force_template_type_flag = true;
+             cmdargs->forced_template_type =
+                 string_to_type(cmdargs->template_type_string.data());
+           }),
 
        "template_type")
 
@@ -3616,7 +3589,11 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("frame,f",
 
-       po::value(&cmdargs->frames)->multitoken(),
+       po::value(&cmdargs->frames) //
+           ->multitoken()
+           ->notifier([cmdargs]() {
+             cmdargs->frame_flag = true;
+           }),
 
        "Keep only 0-based frame number(s)")
 
@@ -3633,6 +3610,12 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("ascii",
 
+       po::bool_switch() //
+           ->notifier([cmdargs]() {
+             cmdargs->ascii_flag = 1;
+             cmdargs->force_in_type_flag = true;
+           }),
+
        "Save output as ascii. This will be a data file with a single column of "
        "data. The fastest dimension will be col, then row, then slice, then "
        "frame")
@@ -3641,11 +3624,23 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("ascii+crsf",
 
+       po::bool_switch() //
+           ->notifier([cmdargs]() {
+             cmdargs->ascii_flag = 2;
+             cmdargs->force_in_type_flag = true;
+           }),
+
        "Same as --ascii but includes col, row, slice, and frame")
 
       //
 
       ("ascii-fcol",
+
+       po::bool_switch() //
+           ->notifier([cmdargs]() {
+             cmdargs->ascii_flag = 3;
+             cmdargs->force_in_type_flag = true;
+           }),
 
        "ascii-fcol");
 }
