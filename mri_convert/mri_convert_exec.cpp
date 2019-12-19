@@ -1980,7 +1980,7 @@ auto main(int argc, char *argv[]) -> int {
 } /* end main() */
 
 #include "mri_convert.help.xml.h"
-void usage(FILE *stream) {
+void usage(FILE * /*stream*/) {
   outputHelpXml(mri_convert_help_xml, mri_convert_help_xml_len);
 } /* end usage() */
 
@@ -2423,7 +2423,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("no-dwi",
 
        po::bool_switch() //
-           ->notifier([]([[maybe_unused]] auto v) {
+           ->notifier([](auto /*unused*/) {
              setenv("FS_LOAD_DWI", "0", 1);
            }),
 
@@ -2605,7 +2605,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("no-rescale-dicom",
 
        po::bool_switch() //
-           ->notifier([](auto) {
+           ->notifier([](auto /*unused*/) {
              setenv("FS_RESCALE_DICOM", "0", 1);
            }),
 
@@ -2617,7 +2617,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("bvec-scanner",
 
        po::bool_switch() //
-           ->notifier([](auto) {
+           ->notifier([](auto /*unused*/) {
              setenv("FS_DESIRED_BVEC_SPACE", "1", 1);
            }),
 
@@ -2629,7 +2629,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("bvec-voxel",
 
        po::bool_switch() //
-           ->notifier([](auto) {
+           ->notifier([](auto /*unused*/) {
              setenv("FS_DESIRED_BVEC_SPACE", "2", 1);
            }),
 
@@ -2641,7 +2641,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("no-analyze-rescale",
 
        po::bool_switch() //
-           ->notifier([](auto) {
+           ->notifier([](auto /*unused*/) {
              setenv("FS_ANALYZE_NO_RESCALE", "1", 1);
            }),
 
@@ -3131,7 +3131,7 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("mra",
 
-       po::bool_switch()->notifier([]([[maybe_unused]] auto v) {
+       po::bool_switch()->notifier([](auto /*unused*/) {
          SliceResElTag1 = 0x50;
          SliceResElTag2 = 0x88;
        }),
@@ -3145,7 +3145,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("auto-slice-res",
 
        po::bool_switch() //
-           ->notifier([]([[maybe_unused]] auto v) {
+           ->notifier([](auto /*unused*/) {
              AutoSliceResElTag = 1;
            }),
 
@@ -3157,7 +3157,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("no-strip-pound",
 
        po::bool_switch() //
-           ->notifier([]([[maybe_unused]] auto v) {
+           ->notifier([](auto /*unused*/) {
              MRIIO_Strip_Pound = 0;
            }),
 
@@ -3192,7 +3192,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("mosaic-fix-noascii",
 
        po::bool_switch() //
-           ->notifier([](auto) {
+           ->notifier([](auto /*unused*/) {
              setenv("FS_MOSAIC_FIX_NOASCII", "1", 1);
            }),
 
@@ -3335,7 +3335,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("bfile-little-endian",
 
        po::bool_switch() //
-           ->notifier([](auto) {
+           ->notifier([](auto /*unused*/) {
              setenv("BFILE_LITTLE_ENDIAN", "1", 1);
            }),
 
@@ -3384,7 +3384,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("dicomread0",
 
        po::bool_switch() //
-           ->notifier([]([[maybe_unused]] auto v) {
+           ->notifier([](auto /*unused*/) {
              UseDICOMRead2 = 0;
            }),
 
