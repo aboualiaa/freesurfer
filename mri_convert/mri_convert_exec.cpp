@@ -2354,162 +2354,260 @@ void initArgDesc(boost::program_options::options_description *desc,
 
   desc->add_options()
 
-      ("help,h", "print out information on how to use this program and exit")
+      ("help,h",
+
+       "print out information on how to use this program and exit")
 
       //
 
-      ("version,v", "print out version and exit")
+      ("version,v",
+
+       "print out version and exit")
 
       //
 
-      ("usage,u", "print usage and exit")
+      ("usage,u",
+
+       "print usage and exit")
 
       //
 
-      ("version2", "just exits")
+      ("version2",
+
+       "just exits")
 
       //
 
-      ("debug", po::bool_switch(&cmdargs->debug), "turn on debugging")
+      ("debug",
+
+       po::bool_switch(&cmdargs->debug),
+
+       "turn on debugging")
 
       //
 
       ("reorder,r",
-       po::value(&cmdargs->reorder_vals)
+
+       po::value(&cmdargs->reorder_vals) //
            ->multitoken()
            ->notifier(cli::checkSize("reorder", 3)),
+
        "todo")
 
       //
 
       ("reorder4,r4",
-       po::value(&cmdargs->reorder4_vals)
+
+       po::value(&cmdargs->reorder4_vals) //
            ->multitoken()
            ->notifier(cli::checkSize("reorder4", 4)),
-       "todo")
+
+       "Reorder axes such that olddim1 is the new column dimensions, olddim2 "
+       "is the new row dimension, olddim3 is the new slice, and olddim4 is the "
+       "new frame dimension. Example: 2 1 3 will swap row and colms. If using "
+       "-r4, the output geometry will likely be wrong. It is best to re-run "
+       "mri_convert and specify a correctly orientated volume through the "
+       "--in_like option")
 
       //
 
-      ("outside_val,oval", po::value(&cmdargs->outside_val),
-       "Set the values outside of the image that may rotate in if a"
-       " transform is applied to val")
+      ("outside_val,oval",
+
+       po::value(&cmdargs->outside_val),
+
+       "Set the values outside of the image that may rotate in if a transform "
+       "is applied to val")
 
       //
 
-      ("no-dwi", po::bool_switch()->notifier([](auto v) {
-        setenv("FS_LOAD_DWI", "0", 1);
-      }),
+      ("no-dwi",
+
+       po::bool_switch() //
+           ->notifier([]([[maybe_unused]] auto v) {
+             setenv("FS_LOAD_DWI", "0", 1);
+           }),
+
        "set FS_LOAD_DWI to 0")
 
       //
 
-      ("left-right-reverse", po::bool_switch(&cmdargs->left_right_reverse),
+      ("left-right-reverse",
+
+       po::bool_switch(&cmdargs->left_right_reverse),
+
        "left right reverse")
 
       //
 
       ("left-right-reverse-pix",
+
        po::bool_switch(&cmdargs->left_right_reverse_pix),
+
        "left-right-reverse-pix")
 
       //
 
       ("left-right-keep",
-       po::value(&cmdargs->left_right_keep_hemi)
+
+       po::value(&cmdargs->left_right_keep_hemi) //
            ->notifier(cli::checkString({"lh", "rh"}, "left-right-keep")),
+
        "left-right-keep")
 
       //
 
       ("left-right-mirror",
-       po::value(&cmdargs->left_right_mirror_hemi)
+
+       po::value(&cmdargs->left_right_mirror_hemi) //
            ->notifier(cli::checkString({"lh", "rh"}, "left-right-mirror")),
+
        "left-right-mirror")
 
       //
 
       ("left-right-swap-label",
+
        po::bool_switch(&cmdargs->left_right_swap_label),
+
        "left-right-swap-label")
 
       //
 
-      ("flip-cols", po::bool_switch(&cmdargs->flip_cols), "flip-cols")
+      ("flip-cols",
+
+       po::bool_switch(&cmdargs->flip_cols),
+
+       "flip-cols")
 
       //
 
-      ("slice-reverse", po::bool_switch(&cmdargs->slice_reverse),
-       "slice-reverse")
+      ("slice-reverse",
+
+       po::bool_switch(&cmdargs->slice_reverse),
+
+       "Reverse order of slices, update vox2ras")
 
       //
 
-      ("in_stats_table", po::bool_switch(&cmdargs->in_stats_table_flag),
+      ("in_stats_table",
+
+       po::bool_switch(&cmdargs->in_stats_table_flag),
+
        "Input data is a stats table as produced by asegstats2table or "
        "aparcstats2table")
 
       //
 
       ("out_stats_table",
-       po::bool_switch(&cmdargs->out_stats_table_flag)
+
+       po::bool_switch(&cmdargs->out_stats_table_flag) //
            ->notifier(
                cli::addDependencies({"like"}, "out_stats_table", cmdargs)),
+
        "Output data is a stats table (use --like to pass template table for "
        "measure, columns, and rows heads)")
 
       //
 
-      ("invert_contrast", po::value(&cmdargs->invert_contrast),
-       "invert_contrast")
+      ("invert_contrast",
+
+       po::value(&cmdargs->invert_contrast),
+
+       "All voxels in volume greater than threshold are replaced with "
+       "255-value. Only makes sense for 8 bit images. Only operates on first "
+       "frame.")
 
       //
 
-      ("input_volume,i", po::value(&cmdargs->input_volume), "input_volume")
+      ("input_volume,i",
+
+       po::value(&cmdargs->input_volume),
+
+       "input_volume")
 
       //
 
-      ("output_volume,o", po::value(&cmdargs->output_volume), "output_volume")
+      ("output_volume,o",
+
+       po::value(&cmdargs->output_volume),
+
+       "output_volume")
 
       //
 
-      ("conform,c", po::bool_switch(&cmdargs->conform_flag), "conform")
+      ("conform,c",
+
+       po::bool_switch(&cmdargs->conform_flag),
+
+       "Conform to 1mm voxel size in coronal slice direction with 256^3 or "
+       "more.")
 
       //
 
-      ("conform-dc", po::value(&cmdargs->conf_keep_dc), "conform-dc")
+      ("conform-dc",
+
+       po::value(&cmdargs->conf_keep_dc),
+
+       "conform-dc")
 
       //
 
-      ("cw256", po::bool_switch(&cmdargs->conform_width_256_flag), "cw256")
+      ("cw256",
+
+       po::bool_switch(&cmdargs->conform_width_256_flag),
+
+       "cw256")
 
       //
 
-      ("delete-cmds", po::bool_switch(&cmdargs->delete_cmds), "delete-cmds")
+      ("delete-cmds",
+
+       po::bool_switch(&cmdargs->delete_cmds),
+
+       "delete-cmds")
 
       //
 
-      ("new-transform-fname", po::value(&cmdargs->new_transform_fname),
+      ("new-transform-fname",
+
+       po::value(&cmdargs->new_transform_fname),
+
        "new-transform-fname")
       //
 
-      ("sphinx", po::bool_switch(&cmdargs->sphinx_flag),
-       "Change orientation info to sphinx")
+      ("sphinx",
+
+       po::bool_switch(&cmdargs->sphinx_flag),
+
+       "Change orientation info to sphinx. Reorient to sphinx the position. "
+       "This function is applicable when the input geometry information is "
+       "correct but the subject was in the scanner in the 'sphinx' position "
+       "(ie AP in line with the bore) instead of head-first-supine (HFS). This "
+       "is often the case with monkeys. Note that the assumption is that the "
+       "geometry information in the input file is otherwise accurate.")
 
       //
 
-      ("rescale-dicom", po::bool_switch()->notifier([cmdargs](auto v) {
-        setenv("FS_RESCALE_DICOM", "1", 1);
-        auto tmp =
-            cli::addConflicts({"no-rescale-dicom"}, "rescale-dicom", cmdargs);
-        tmp(v);
-      }),
+      ("rescale-dicom",
+
+       po::bool_switch() //
+           ->notifier([cmdargs](auto v) {
+             setenv("FS_RESCALE_DICOM", "1", 1);
+             auto tmp = cli::addConflicts({"no-rescale-dicom"}, "rescale-dicom",
+                                          cmdargs);
+             tmp(v);
+           }),
+
        "DO  apply rescale intercept and slope based on (0028,1052) "
        "(0028,1053).")
 
       //
       ("no-rescale-dicom",
 
-       po::bool_switch()->notifier(
-           [](auto v) { setenv("FS_RESCALE_DICOM", "0", 1); }),
+       po::bool_switch() //
+           ->notifier([](auto) {
+             setenv("FS_RESCALE_DICOM", "0", 1);
+           }),
 
        "Do NOT apply rescale intercept and slope based on (0028,1052) "
        "(0028,1053).")
@@ -2518,336 +2616,525 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("bvec-scanner",
 
-       po::bool_switch()->notifier(
-           [](auto v) { setenv("FS_DESIRED_BVEC_SPACE", "1", 1); }),
+       po::bool_switch() //
+           ->notifier([](auto) {
+             setenv("FS_DESIRED_BVEC_SPACE", "1", 1);
+           }),
 
        "force bvecs to be in scanner space. only applies when reading "
        "dicoms")
 
       //
 
-      ("bvec-voxel", po::bool_switch()->notifier([](auto v) {
-        setenv("FS_DESIRED_BVEC_SPACE", "2", 1);
-      }),
+      ("bvec-voxel",
+
+       po::bool_switch() //
+           ->notifier([](auto) {
+             setenv("FS_DESIRED_BVEC_SPACE", "2", 1);
+           }),
+
        "force bvecs to be in voxel space. only applies when reading"
        " dicoms.")
 
       //
 
-      ("no-analyze-rescale", po::bool_switch()->notifier([](auto v) {
-        setenv("FS_ANALYZE_NO_RESCALE", "1", 1);
-      }),
+      ("no-analyze-rescale",
+
+       po::bool_switch() //
+           ->notifier([](auto) {
+             setenv("FS_ANALYZE_NO_RESCALE", "1", 1);
+           }),
 
        "Turns off rescaling of analyze files")
 
       //
 
-      ("autoalign", po::value(&cmdargs->autoalign_file), "autoalign")
+      ("autoalign",
+
+       po::value(&cmdargs->autoalign_file),
+
+       "Text file with autoalign matrix")
 
       //
 
-      ("nochange,nc", po::bool_switch(&cmdargs->nochange_flag),
+      ("nochange,nc",
+
+       po::bool_switch(&cmdargs->nochange_flag),
+
        "Don't change type of input to that of template")
 
       //
 
-      ("conform_min,cm", po::bool_switch(&cmdargs->conform_min_flag),
-       "conform_min")
+      ("conform_min,cm",
+
+       po::bool_switch(&cmdargs->conform_min_flag),
+
+       "Conform to the src min direction size")
 
       //
 
-      ("conform_size,cs", po::value(&cmdargs->conform_size), "conform_size")
+      ("conform_size,cs",
+
+       po::value(&cmdargs->conform_size),
+
+       "conform to the size given in mm")
 
       //
 
-      ("parse_only,po", po::bool_switch(&cmdargs->parse_only_flag),
+      ("parse_only,po",
+
+       po::bool_switch(&cmdargs->parse_only_flag),
+
        "parse_only")
 
       //
 
-      ("in_info,ii", po::bool_switch(&cmdargs->in_info_flag), "in_info")
+      ("in_info,ii",
+
+       po::bool_switch(&cmdargs->in_info_flag),
+
+       "in_info")
 
       //
 
-      ("out_info,oi", po::bool_switch(&cmdargs->out_info_flag), "out_info")
+      ("out_info,oi",
+
+       po::bool_switch(&cmdargs->out_info_flag),
+
+       "out_info")
 
       //
 
-      ("template_info,ti", po::bool_switch(&cmdargs->template_info_flag),
-       "template_info")
+      ("template_info,ti",
+
+       po::bool_switch(&cmdargs->template_info_flag),
+
+       "Dump info about template")
 
       //
 
-      ("in_stats,is", po::bool_switch(&cmdargs->in_stats_flag),
-       "Print statistics on "
-       "input volume")
+      ("in_stats,is",
+
+       po::bool_switch(&cmdargs->in_stats_flag),
+
+       "Print statistics on input volume")
 
       //
 
-      ("out_stats,os", po::bool_switch(&cmdargs->out_stats_flag),
+      ("out_stats,os",
+
+       po::bool_switch(&cmdargs->out_stats_flag),
+
        "Print statistics on output volume")
 
       //
 
-      ("read_only,ro", po::bool_switch(&cmdargs->read_only_flag), "read_only")
+      ("read_only,ro",
+
+       po::bool_switch(&cmdargs->read_only_flag),
+
+       "read_only")
 
       //
 
-      ("no_write,nw", po::bool_switch(&cmdargs->no_write_flag), "no_write")
+      ("no_write,nw",
+
+       po::bool_switch(&cmdargs->no_write_flag),
+
+       "no_write")
 
       //
 
-      ("in_matrix,im", po::bool_switch(&cmdargs->in_matrix_flag), "in_matrix")
+      ("in_matrix,im",
+
+       po::bool_switch(&cmdargs->in_matrix_flag),
+
+       "in_matrix")
 
       //
 
-      ("out_matrix,om", po::bool_switch(&cmdargs->out_matrix_flag),
+      ("out_matrix,om",
+
+       po::bool_switch(&cmdargs->out_matrix_flag),
+
        "out_matrix")
 
       //
 
       ("force_ras_good",
-       po::bool_switch(&cmdargs->force_ras_good)
+
+       po::bool_switch(&cmdargs->force_ras_good) //
            ->notifier(cli::addConflicts(
                {"in_i_direction", "in_j_direction", "in_k_direction"},
                "force_ras_good", cmdargs)),
+
        "force_ras_good")
 
       //
 
-      ("split", po::bool_switch(&cmdargs->split_frames_flag), "split")
+      ("split",
+
+       po::bool_switch(&cmdargs->split_frames_flag),
+
+       "Split output frames into separate output files. Example: mri_convert "
+       "a.nii b.nii --split will create b0000.nii b0001.nii b0002.nii ...")
 
       //
 
       /* transform related things here */
 
-      ("apply_transform,T,at", po::value(&cmdargs->transform_fname),
-       "apply_transform")
+      ("apply_transform,T,at",
+
+       po::value(&cmdargs->transform_fname),
+
+       "Apply transform given by xfm or m3z files. The volume can be resampled "
+       "into another space by supplying a transform using the -apply_transform "
+       "flag. This reads the transform file and applies the transform (when "
+       "--apply_inverse_transform is used, the transform is inverted an then "
+       "applied). An example of a transform file is talairach.xfm as found in "
+       "subjectid/mri/transforms. To convert a subject's orig volume to "
+       "talairach space, execute the following lines: cd subjectid/mri , mkdir "
+       "talairach, mri_convert orig.mgz --apply_transform "
+       "transforms/talairach.xfm -oc 0 0 0 orig.talairach.mgz. This properly "
+       "accounts for the case where the input volume does not have it's "
+       "coordinate center at 0. To evaluate the result, run: tkmedit -f "
+       "$SUBJECTS_DIR/talairach/mri/orig.mgz -aux orig.talairach.mgz . The "
+       "main and aux volumes should overlap very closely. If they do not, use "
+       "tkregister2 to fix it.")
 
       //
 
-      ("like", po::value(&cmdargs->out_like_name), "like")
+      ("like",
+
+       po::value(&cmdargs->out_like_name),
+
+       "Output is embedded in a volume like name, or in stats-table like name "
+       "(measure, columns, rows)")
 
       //
 
       ("crop",
-       po::value(&cmdargs->crop_center)
+
+       po::value(&cmdargs->crop_center) //
            ->multitoken()
            ->notifier(cli::checkSize("crop", 3)),
-       "crop")
+
+       "Crop to 256 around center (x,y,z)")
 
       //
 
       ("slice-crop",
-       po::value(&cmdargs->slice_crop)
+
+       po::value(&cmdargs->slice_crop) //
            ->multitoken()
            ->notifier(cli::checkSize("slice-crop", 2)),
-       "slice-crop")
+
+       "Keep slices s_start to s_end")
 
       //
 
       ("cropsize",
-       po::value(&cmdargs->cropsize)
+
+       po::value(&cmdargs->cropsize) //
            ->multitoken()
            ->notifier(cli::checkSize("cropsize", 3)),
-       "cropsize")
+
+       "Crop to size <dx, dy, dz>")
 
       //
 
-      ("devolvexfm", po::value(&cmdargs->devolvexfm_subject), "devolvexfm")
+      ("devolvexfm",
+
+       po::value(&cmdargs->devolvexfm_subject),
+
+       "devolvexfm")
 
       //
 
-      ("apply_inverse_transform,ait", po::value(&cmdargs->transform_fname),
-       "apply_inverse_transform")
+      ("apply_inverse_transform,ait",
+
+       po::value(&cmdargs->transform_fname),
+
+       "Apply inverse transform given by xfm or m3z files.")
 
       //
 
-      ("upsample", po::value(&cmdargs->upsample_factor),
+      ("upsample",
+
+       po::value(&cmdargs->upsample_factor),
+
        "Reduce voxel size by a factor of N in all dimensions")
 
       //
 
       ("in_i_size,iis",
-       po::value(&cmdargs->in_i_size)
+
+       po::value(&cmdargs->in_i_size) //
            ->notifier(cli::checkValue(0.0F, "in_i_size", std::greater<>())),
+
        "in_i_size")
 
       //
 
       ("in_j_size,ijs",
-       po::value(&cmdargs->in_j_size)
+
+       po::value(&cmdargs->in_j_size) //
            ->notifier(cli::checkValue(0.0F, "in_j_size", std::greater<>())),
+
        "in_j_size")
 
       //
 
       ("in_k_size,iks",
-       po::value(&cmdargs->in_k_size)
+
+       po::value(&cmdargs->in_k_size) //
            ->notifier(cli::checkValue(0.0F, "in_k_size", std::greater<>())),
+
        "in_k_size")
 
       //
 
       ("out_i_size,ois",
-       po::value(&cmdargs->out_i_size)
+
+       po::value(&cmdargs->out_i_size) //
            ->notifier(cli::checkValue(0.0F, "out_i_size", std::greater<>())),
+
        "out_i_size")
 
       //
 
       ("out_j_size,ojs",
+
        po::value(&cmdargs->out_j_size)
            ->notifier(cli::checkValue(0.0F, "out_j_size", std::greater<>())),
+
        "out_j_size")
 
       //
 
       ("out_k_size,oks",
-       po::value(&cmdargs->out_k_size)
+
+       po::value(&cmdargs->out_k_size) //
            ->notifier(cli::checkValue(0.0F, "out_k_size", std::greater<>())),
+
        "out_k_size")
 
       //
 
-      ("ctab", po::value(&cmdargs->colortablefile), "ctab")
+      ("ctab",
+
+       po::value(&cmdargs->colortablefile),
+
+       "ctab")
 
       //
 
-      ("nth_frame,"
-       "nth",
-       po::value(&cmdargs->nthframe), "nth_frame")
+      ("nth_frame,nth",
+
+       po::value(&cmdargs->nthframe),
+
+       "Specify frame number")
 
       //
 
-      ("no_translate,nt", po::bool_switch(&cmdargs->translate_labels_flag),
+      ("no_translate,nt",
+
+       po::bool_switch(&cmdargs->translate_labels_flag),
+
        "no_translate")
 
       //
 
-      ("zero_outlines,zo", po::bool_switch(&cmdargs->zero_outlines_flag),
+      ("zero_outlines,zo",
+
+       po::bool_switch(&cmdargs->zero_outlines_flag),
+
        "zero_outlines")
 
       //
 
       ("fill_parcellation,fp",
-       po::bool_switch(&cmdargs->fill_parcellation_flag), "fill_parcellation")
+
+       po::bool_switch(&cmdargs->fill_parcellation_flag),
+
+       "fill_parcellation")
       //
 
-      ("roi", po::bool_switch(&cmdargs->roi_flag), "roi flag")
+      ("roi",
 
-      //
+       po::bool_switch(&cmdargs->roi_flag),
 
-      ("dil-seg-mask", po::value(&cmdargs->dil_seg_mask), "dil-seg-mask")
-
-      //
-
-      ("erode-seg", po::value(&cmdargs->n_erode_seg), "erode-seg")
-
-      //
-
-      ("dil-seg", po::value(&cmdargs->n_dil_seg), "dil-seg")
+       "roi flag")
 
       //
 
-      ("cutends", po::value(&cmdargs->ncutends), "cutends")
+      ("dil-seg-mask",
+
+       po::value(&cmdargs->dil_seg_mask),
+
+       "Dilate segmentation boundaries to fill mask")
 
       //
 
-      ("out_i_count,oni,oic", po::value(&cmdargs->out_n_i), "out_i_count")
+      ("erode-seg",
+
+       po::value(&cmdargs->n_erode_seg),
+
+       "Erode segmentation boundaries Nerode times (based on 6 nearest "
+       "neighbors)")
 
       //
 
-      ("out_j_count,onj,ojc", po::value(&cmdargs->out_n_j), "out_i_count")
+      ("dil-seg",
+
+       po::value(&cmdargs->n_dil_seg),
+
+       "Dilate segmentation boundaries Ndilate times (based on 6 nearest "
+       "neighbors) to fill seg=0 voxels")
 
       //
 
-      ("out_k_count,onk,okc", po::value(&cmdargs->out_n_k), "out_i_count")
+      ("cutends",
+
+       po::value(&cmdargs->ncutends),
+
+       "Remove ncut slices from the ends")
 
       //
 
-      ("downsample2,ds2", po::bool_switch(&cmdargs->downsample2_flag),
-       "downsample2")
+      ("out_i_count,oni,oic",
+
+       po::value(&cmdargs->out_n_i), "out_i_count")
 
       //
 
-      ("in_i_count,ini,iic", po::value(&cmdargs->in_n_i), "in_i_count")
+      ("out_j_count,onj,ojc",
+
+       po::value(&cmdargs->out_n_j), "out_i_count")
 
       //
 
-      ("in_j_count,inj,ijc", po::value(&cmdargs->in_n_j), "in_j_count")
+      ("out_k_count,onk,okc",
+
+       po::value(&cmdargs->out_n_k), "out_i_count")
 
       //
 
-      ("in_k_count,ink,ikc", po::value(&cmdargs->in_n_k), "in_k_count")
+      ("downsample2,ds2",
+
+       po::bool_switch(&cmdargs->downsample2_flag), "downsample2")
 
       //
 
-      ("tr", po::value(&cmdargs->in_tr), "tr")
+      ("in_i_count,ini,iic",
+
+       po::value(&cmdargs->in_n_i), "in_i_count")
 
       //
 
-      ("TI", po::value(&cmdargs->in_ti), "ti")
+      ("in_j_count,inj,ijc",
+
+       po::value(&cmdargs->in_n_j), "in_j_count")
 
       //
 
-      ("te", po::value(&cmdargs->in_te), "te")
+      ("in_k_count,ink,ikc",
+
+       po::value(&cmdargs->in_n_k), "in_k_count")
 
       //
 
-      ("flip_angle", po::value(&cmdargs->in_flip_angle), "flip_angle")
+      ("tr",
+
+       po::value(&cmdargs->in_tr), "TR in msec")
 
       //
 
-      ("in_name", po::value(&cmdargs->in_name)->required(), "in_name")
+      ("TI",
+
+       po::value(&cmdargs->in_ti), "TI in msec (note uppercase flag)")
+
+      //
+
+      ("te",
+
+       po::value(&cmdargs->in_te), "TE in msec")
+
+      //
+
+      ("flip_angle",
+
+       po::value(&cmdargs->in_flip_angle), "Angle in radians")
+
+      //
+
+      ("in_name",
+
+       po::value(&cmdargs->in_name)->required(), "in_name")
 
       //
 
       ("out_name",
-       po::value(&cmdargs->out_name)
+
+       po::value(&cmdargs->out_name) //
            ->notifier(cli::addConflicts({"read_only", "no_write"}, "out_name",
                                         cmdargs)),
+
        "out_name")
 
       //
 
       ("zero_ge_z_offset,zgez",
-       po::bool_switch(&cmdargs->zero_ge_z_offset_flag)
+
+       po::bool_switch(&cmdargs->zero_ge_z_offset_flag) //
            ->notifier(cli::addConflicts({"no_zero_ge_z_offset"},
                                         "zero_ge_z_offset", cmdargs)),
-       "zero_ge_z_offset")
+
+       "Set c_s=0 (appropriate for dicom files from GE machines with isocenter "
+       "scanning)")
 
       //
 
-      ("no_zero_ge_z_offset,"
-       "nozgez",
+      ("no_zero_ge_z_offset,nozgez",
+
        po::bool_switch(&cmdargs->no_zero_ge_z_offset_flag),
+
        "no_zero_ge_z_offset")
 
       //
 
       ("nskip",
-       po::value(&cmdargs->nskip)
+
+       po::value(&cmdargs->nskip) //
            ->notifier(cli::checkValue(0, "nskip", std::greater_equal<>())),
-       "nskip")
+
+       "Skip the first n frames")
 
       //
 
       ("ndrop",
-       po::value(&cmdargs->ndrop)
+
+       po::value(&cmdargs->ndrop) //
            ->notifier(cli::checkValue(0, "ndrop", std::greater_equal<>())),
-       "ndrop")
+
+       "Drop the last n frames")
 
       //
 
-      ("diag", po::value(&Gdiag_no), "diag")
+      ("diag",
+
+       po::value(&Gdiag_no),
+
+       "diag")
 
       //
 
-      ("mra", po::bool_switch()->notifier([](auto v) {
-        SliceResElTag1 = 0x50;
-        SliceResElTag2 = 0x88;
-      }),
+      ("mra",
+
+       po::bool_switch()->notifier([]([[maybe_unused]] auto v) {
+         SliceResElTag1 = 0x50;
+         SliceResElTag2 = 0x88;
+       }),
 
        "This flag forces DICOMread to first use 18,50 to get the slice "
        "thickness instead of 18,88. This is needed with siemens mag res "
@@ -2856,232 +3143,362 @@ void initArgDesc(boost::program_options::options_description *desc,
       //
 
       ("auto-slice-res",
-       po::bool_switch()->notifier([](auto v) { AutoSliceResElTag = 1; }),
+
+       po::bool_switch() //
+           ->notifier([]([[maybe_unused]] auto v) {
+             AutoSliceResElTag = 1;
+           }),
+
        "Automatically determine whether to get slice thickness from 18,50 or "
        "18,88 depending upon the value of 18,23")
 
       //
 
       ("no-strip-pound",
-       po::bool_switch()->notifier([](auto v) { MRIIO_Strip_Pound = 0; }),
+
+       po::bool_switch() //
+           ->notifier([]([[maybe_unused]] auto v) {
+             MRIIO_Strip_Pound = 0;
+           }),
+
        "no-strip-pound")
 
       //
 
-      ("in_nspmzeropad", po::value(&N_Zero_Pad_Input), "in_nspmzeropad")
+      ("in_nspmzeropad",
+
+       po::value(&N_Zero_Pad_Input),
+
+       "in_nspmzeropad")
 
       //
 
-      ("nspmzeropad", po::value(&N_Zero_Pad_Output), "out_nspmzeropad")
+      ("nspmzeropad",
+
+       po::value(&N_Zero_Pad_Output),
+
+       "out_nspmzeropad")
 
       //
 
-      ("out_nspmzeropad", po::value(&N_Zero_Pad_Output), "out_nspmzeropad")
+      ("out_nspmzeropad",
+
+       po::value(&N_Zero_Pad_Output),
+
+       "out_nspmzeropad")
 
       //
 
-      ("mosaic-fix-noascii", po::bool_switch()->notifier([](auto v) {
-        setenv("FS_MOSAIC_FIX_NOASCII", "1", 1);
-      }),
+      ("mosaic-fix-noascii",
+
+       po::bool_switch() //
+           ->notifier([](auto) {
+             setenv("FS_MOSAIC_FIX_NOASCII", "1", 1);
+           }),
+
        "mosaic-fix-noascii")
 
       //
 
-      ("nslices-override", po::value(&cmdargs->nslices_override),
-       "nslices-override")
+      ("nslices-override",
+
+       po::value(&cmdargs->nslices_override),
+
+       "Use this number of slices when converting DICOM mosaics")
 
       //
 
-      ("ncols-override", po::value(&cmdargs->ncols_override), "ncols-override")
+      ("ncols-override",
+
+       po::value(&cmdargs->ncols_override),
+
+       "ncols-override")
 
       //
 
-      ("nrows-override", po::value(&cmdargs->nrows_override), "nrows-override")
+      ("nrows-override",
+
+       po::value(&cmdargs->nrows_override),
+
+       "nrows-override")
 
       //
 
       ("statusfile,status",
-       po::value(&cmdargs->statusfile)->notifier([](auto v) {
-         auto checker = io::checkFileWriteable;
-         checker(v);
-         auto allocator = cli::allocateExternalString(&SDCMStatusFile);
-         allocator(v);
-       }),
-       "File name to write percent complete for Siemens DICOM")
+
+       po::value(&cmdargs->statusfile) //
+           ->notifier([](auto v) {
+             auto checker = io::checkFileWriteable;
+             checker(v);
+             auto allocator = cli::allocateExternalString(&SDCMStatusFile);
+             allocator(v);
+           }),
+
+       "File name to write percent complete for Siemens DICOM. Status file for "
+       "DICOM conversion")
 
       //
 
-      ("sdcmlist", po::value(&cmdargs->sdcmlist)->notifier([](auto v) {
-        auto checker = io::checkFileWriteable;
-        checker(v);
-        auto allocator = cli::allocateExternalString(&SDCMListFile);
-        allocator(v);
-      }),
+      ("sdcmlist",
+
+       po::value(&cmdargs->sdcmlist) //
+           ->notifier([](auto v) {
+             auto checker = io::checkFileWriteable;
+             checker(v);
+             auto allocator = cli::allocateExternalString(&SDCMListFile);
+             allocator(v);
+           }),
+
        "File name that contains a list of Siemens DICOM files that are in the "
        "same run as the one listed on the command-line. If not present, the "
-       "directory will be scanned, but this can take a while.")
+       "directory will be scanned, but this can take a while. List of DICOM "
+       "files for conversion")
 
       //
 
       ("fsubsample",
-       po::value(&cmdargs->fsubsample)
+
+       po::value(&cmdargs->fsubsample) //
            ->multitoken()
            ->notifier(cli::checkSize("fsubsample", 3)),
-       "fsubsample")
+
+       "Frame subsampling (end = -1 for end)")
 
       //
 
-      ("mid-frame", po::bool_switch(&cmdargs->mid_frame_flag), "mid-frame")
+      ("mid-frame",
+
+       po::bool_switch(&cmdargs->mid_frame_flag),
+
+       "Keep only the middle frame")
 
       //
 
       ("in_center,ic",
-       po::value(&cmdargs->in_center)
+
+       po::value(&cmdargs->in_center) //
            ->multitoken()
            ->notifier(cli::checkSize("in_center", 3)),
+
        "in_center")
 
       //
 
       ("delta_in_center,dic",
-       po::value(&cmdargs->delta_in_center)
+
+       po::value(&cmdargs->delta_in_center) //
            ->multitoken()
            ->notifier(cli::checkSize("delta_in_center", 3)),
+
        "delta_in_center")
 
       //
 
       ("out_center,oc",
+
        po::value(&cmdargs->out_center)
            ->multitoken()
            ->notifier(cli::checkSize("out_center", 3)),
+
        "out_center")
 
       //
 
       ("voxsize,vs",
-       po::value(&cmdargs->voxel_size)
+
+       po::value(&cmdargs->voxel_size) //
            ->multitoken()
            ->notifier(cli::checkSize("voxsize", 3)),
+
        "voxel_size")
 
       //
 
       ("downsample,ds",
-       po::value(&cmdargs->downsample_factor)
+
+       po::value(&cmdargs->downsample_factor) //
            ->multitoken()
            ->notifier(cli::checkSize("downsample", 3)),
+
        "downsample")
 
       //
 
-      ("reduce", po::value(&cmdargs->reduce), "reduce")
+      ("reduce",
+
+       po::value(&cmdargs->reduce),
+
+       "reduce")
 
       //
 
-      ("bfile-little-endian", po::bool_switch()->notifier([](auto v) {
-        setenv("BFILE_LITTLE_ENDIAN", "1", 1);
-      }),
-       "bfile-little-endian")
+      ("bfile-little-endian",
+
+       po::bool_switch() //
+           ->notifier([](auto) {
+             setenv("BFILE_LITTLE_ENDIAN", "1", 1);
+           }),
+
+       "Write out bshort/bfloat files in little endian")
 
       //
 
-      ("rescale", po::value(&cmdargs->rescale_factor),
+      ("rescale",
+
+       po::value(&cmdargs->rescale_factor),
+
        "Rescale so that the global mean of input is rescale_factor")
 
       //
 
-      ("scale,sc", po::value(&cmdargs->scale_factor), "scale")
+      ("scale,sc",
+
+       po::value(&cmdargs->scale_factor),
+
+       "Input intensity scale factor")
 
       //
 
-      ("out-scale,osc", po::value(&cmdargs->out_scale_factor), "out-scale")
+      ("out-scale,osc",
+
+       po::value(&cmdargs->out_scale_factor),
+
+       "Output intensity scale factor")
 
       //
 
-      ("dicomread2", po::bool_switch()->notifier([cmdargs](auto v) {
-        UseDICOMRead2 = 1;
-        auto checker = cli::addConflicts({"dicomread0"}, "dicomread2", cmdargs);
-        checker(v);
-      }),
+      ("dicomread2",
+
+       po::bool_switch() //
+           ->notifier([cmdargs](auto v) {
+             UseDICOMRead2 = 1;
+             auto checker =
+                 cli::addConflicts({"dicomread0"}, "dicomread2", cmdargs);
+             checker(v);
+           }),
+
        "dicomread2")
 
       //
 
       ("dicomread0",
-       po::bool_switch()->notifier([](auto v) { UseDICOMRead2 = 0; }),
+
+       po::bool_switch() //
+           ->notifier([]([[maybe_unused]] auto v) {
+             UseDICOMRead2 = 0;
+           }),
+
        "dicomread0")
 
       //
 
-      ("subject_name,sn", po::value(&cmdargs->subject_name), "subject_name")
+      ("subject_name,sn",
+
+       po::value(&cmdargs->subject_name),
+
+       "subject_name")
 
       //
 
-      ("gdf_image_stem,gis", po::value(&cmdargs->gdf_image_stem),
+      ("gdf_image_stem,gis",
+
+       po::value(&cmdargs->gdf_image_stem),
+
        "gdf_image_stem")
 
       //
 
-      ("reslice_like,rl", po::value(&cmdargs->reslice_like_name),
+      ("reslice_like,rl",
+
+       po::value(&cmdargs->reslice_like_name),
+
        "reslice_like")
 
       //
 
-      ("slice-bias", po::value(&cmdargs->SliceBiasAlpha), "slice-bias")
+      ("slice-bias",
+
+       po::value(&cmdargs->SliceBiasAlpha),
+
+       "Apply half-cosine bias field")
 
       //
 
-      ("in_like,il", po::value(&cmdargs->in_like_name), "in_like")
+      ("in_like,il",
+
+       po::value(&cmdargs->in_like_name),
+
+       "in_like")
 
       //
 
       ("color_file,cf",
 
-       po::value(&cmdargs->color_file_name), "color_file")
+       po::value(&cmdargs->color_file_name),
+
+       "color_file")
 
       //
 
-      ("no_scale,ns", po::bool_switch(&cmdargs->no_scale_flag), "no_scale")
+      ("no_scale,ns",
+
+       po::bool_switch(&cmdargs->no_scale_flag),
+
+       "1 means don't rescale values for COR")
 
       //
 
-      ("crop_gdf,cg", "crop_gdf")
+      ("crop_gdf,cg",
+
+       "Apply GDF cropping")
 
       //
 
       ("in_orientation",
-       po::value(&cmdargs->in_orientation_string)
+
+       po::value(&cmdargs->in_orientation_string) //
            ->notifier(mri::checkOrientationString),
-       "in_orientation")
+
+       "see SPECIFYING THE ORIENTATION")
 
       //
 
       ("out_orientation",
-       po::value(&cmdargs->out_orientation_string)
+
+       po::value(&cmdargs->out_orientation_string) //
            ->notifier(mri::checkOrientationString),
-       "out_orientation")
+
+       "See SETTING ORIENTATION")
 
       //
 
-      ("fwhm", po::value(&cmdargs->fwhm), "fwhm")
+      ("fwhm",
+
+       po::value(&cmdargs->fwhm),
+
+       "Smooth input volume by fwhm mm")
 
       //
 
-      ("out_data_type,odt", po::value(&cmdargs->out_data_type_string),
+      ("out_data_type,odt",
+
+       po::value(&cmdargs->out_data_type_string),
+
        "out_data_type")
 
       //
 
-      ("resample_type,"
-       "rt",
-       po::value(&cmdargs->resample_type), "resample_type")
+      ("resample_type,rt",
+
+       po::value(&cmdargs->resample_type),
+
+       "Default is interpolate")
 
       //
 
-      ("in_i_direction,"
-       "iid",
-       po::value(&cmdargs->in_i_directions)
+      ("in_i_direction,iid",
+
+       po::value(&cmdargs->in_i_directions) //
            ->multitoken()
            ->notifier([cmdargs](auto v) {
              auto normChecker =
@@ -3090,12 +3507,14 @@ void initArgDesc(boost::program_options::options_description *desc,
              sizeChecker(v);
              normChecker(v);
            }),
+
        "in_i_direction")
 
       //
 
       ("in_j_direction,ijd",
-       po::value(&cmdargs->in_j_directions)
+
+       po::value(&cmdargs->in_j_directions) //
            ->multitoken()
            ->notifier([cmdargs](auto v) {
              auto normChecker =
@@ -3104,12 +3523,14 @@ void initArgDesc(boost::program_options::options_description *desc,
              sizeChecker(v);
              normChecker(v);
            }),
+
        "in_j_direction")
 
       //
 
       ("in_k_direction,ikd",
-       po::value(&cmdargs->in_k_directions)
+
+       po::value(&cmdargs->in_k_directions) //
            ->multitoken()
            ->notifier([cmdargs](auto v) {
              auto normChecker =
@@ -3118,12 +3539,14 @@ void initArgDesc(boost::program_options::options_description *desc,
              sizeChecker(v);
              normChecker(v);
            }),
+
        "in_k_direction")
 
       //
 
       ("out_i_direction,oid",
-       po::value(&cmdargs->out_i_directions)
+
+       po::value(&cmdargs->out_i_directions) //
            ->multitoken()
            ->notifier([cmdargs](auto v) {
              auto normChecker = mri::checkNorm("out_i_direction",
@@ -3132,12 +3555,14 @@ void initArgDesc(boost::program_options::options_description *desc,
              sizeChecker(v);
              normChecker(v);
            }),
+
        "out_i_direction")
 
       //
 
       ("out_j_direction,ojd",
-       po::value(&cmdargs->out_j_directions)
+
+       po::value(&cmdargs->out_j_directions) //
            ->multitoken()
            ->notifier([cmdargs](auto v) {
              auto normChecker = mri::checkNorm("out_j_direction",
@@ -3146,12 +3571,14 @@ void initArgDesc(boost::program_options::options_description *desc,
              sizeChecker(v);
              normChecker(v);
            }),
+
        "out_j_direction")
 
       //
 
       ("out_k_direction,okd",
-       po::value(&cmdargs->out_k_directions)
+
+       po::value(&cmdargs->out_k_directions) //
            ->multitoken()
            ->notifier([cmdargs](auto v) {
              auto normChecker = mri::checkNorm("out_k_direction",
@@ -3160,41 +3587,67 @@ void initArgDesc(boost::program_options::options_description *desc,
              sizeChecker(v);
              normChecker(v);
            }),
+
        "out_k_direction")
 
       //
 
-      ("in_type,it", po::value(&cmdargs->in_type_string), "in_type")
+      ("in_type,it",
+
+       po::value(&cmdargs->in_type_string),
+
+       "in_type")
 
       //
 
-      ("out_type,ot", po::value(&cmdargs->out_type_string), "out_type")
+      ("out_type,ot",
+
+       po::value(&cmdargs->out_type_string),
+
+       "out_type")
 
       //
 
-      ("template_type,tt", po::value(&cmdargs->template_type_string),
+      ("template_type,tt",
+
+       po::value(&cmdargs->template_type_string),
+
        "template_type")
 
       //
 
-      ("frame,f", po::value(&cmdargs->frames)->multitoken(), "frame")
+      ("frame,f",
+
+       po::value(&cmdargs->frames)->multitoken(),
+
+       "Keep only 0-based frame number(s)")
 
       //
 
       ("smooth_parcellation,sp",
-       po::value(&cmdargs->smooth_parcellation_count)
+
+       po::value(&cmdargs->smooth_parcellation_count) //
            ->notifier(cli::checkRange(14, 26, "smooth_parcellation")),
+
        "smooth_parcellation")
 
       //
 
-      ("ascii", "ascii")
+      ("ascii",
+
+       "Save output as ascii. This will be a data file with a single column of "
+       "data. The fastest dimension will be col, then row, then slice, then "
+       "frame")
 
       //
 
-      ("ascii+crsf", "ascii+crsf")
+      ("ascii+crsf",
+
+       "Same as --ascii but includes col, row, slice, and frame")
 
       //
 
-      ("ascii-fcol", "ascii-fcol");
+      ("ascii-fcol",
+
+       "ascii-fcol");
 }

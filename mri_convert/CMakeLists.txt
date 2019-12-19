@@ -18,10 +18,7 @@ include_directories(${FS_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/packages/dicom
 add_library(mri_convert STATIC EXCLUDE_FROM_ALL mri_convert_lib.cpp)
 
 add_executable(mri_convert_exec mri_convert_exec.cpp)
-hpx_setup_target(mri_convert_exec
-                 DEPENDENCIES utils mri_convert ${Boost_LIBRARIES} benchmark
-                 fmt ${ARMADILLO_LIBRARIES} Eigen3::Eigen
-                 COMPONENT_DEPENDENCIES iostreams)
+target_link_libraries(mri_convert_exec utils mri_convert ${Boost_LIBRARIES} benchmark fmt Eigen3::Eigen)
 add_help(mri_convert_exec mri_convert.help.xml)
 install(TARGETS mri_convert_exec DESTINATION bin)
 add_test_script(NAME mri_convert_test SCRIPT test.sh DEPENDS mri_convert)
