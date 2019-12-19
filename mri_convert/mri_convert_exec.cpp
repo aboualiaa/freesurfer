@@ -1537,7 +1537,7 @@ auto main(int argc, char *argv[]) -> int {
                 MRItype2str(mri->type), MRItype2str(mri_template->type),
                 cmdargs.no_scale_flag);
     mri2 = MRISeqchangeType(mri, mri_template->type, 0.0, 0.999,
-                            cmdargs.no_scale_flag);
+                            static_cast<int>(cmdargs.no_scale_flag));
     if (mri2 == nullptr) {
       fmt::printf("ERROR: MRISeqchangeType\n");
       exit(1);
@@ -2084,7 +2084,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("debug",
 
        po::bool_switch(&cmdargs->debug) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              spdlog::set_level(
                  spdlog::level::debug); // Set global log level to debug
              fs::dbg::create_gdb_file(cmdargs->raw);
@@ -2122,7 +2122,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("outside_val,oval",
 
        po::value(&cmdargs->outside_val) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              fmt::printf("setting outside val to %d\n", cmdargs->outside_val);
            }),
 
@@ -2258,7 +2258,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("conform-dc",
 
        po::value(&cmdargs->conf_keep_dc) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->conform_flag = true;
            }),
 
@@ -2269,7 +2269,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("cw256",
 
        po::bool_switch(&cmdargs->conform_width_256_flag) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->conform_flag = true;
            }),
 
@@ -2391,7 +2391,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("conform_min,cm",
 
        po::bool_switch(&cmdargs->conform_min_flag) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->conform_flag = true;
            }),
 
@@ -2402,7 +2402,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("conform_size,cs",
 
        po::value(&cmdargs->conform_size) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->conform_flag = true;
            }),
 
@@ -2515,7 +2515,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("apply_transform,T,at",
 
        po::value(&cmdargs->transform_fname) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->transform_flag = true;
              cmdargs->invert_transform_flag = false;
            }),
@@ -2540,7 +2540,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("like",
 
        po::value(&cmdargs->out_like_name) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->out_like_flag = true;
              // creates confusion when this is printed:
              // fmt::printf("WARNING: --like does not work on multi-frame
@@ -2603,7 +2603,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("devolvexfm",
 
        po::value(&cmdargs->devolvexfm_subject) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              /* devolve xfm to account for cras != 0 */
              cmdargs->DevXFM = 0;
            }),
@@ -2616,7 +2616,7 @@ void initArgDesc(boost::program_options::options_description *desc,
 
        po::value(&cmdargs->transform_fname) //
            ->notifier([cmdargs](auto v) {
-             io::checkFileReadable(v.data());
+             io::checkFileReadable(v);
              cmdargs->transform_flag = true;
              cmdargs->invert_transform_flag = true;
            }),
@@ -2628,7 +2628,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("upsample",
 
        po::value(&cmdargs->upsample_factor) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->upsample_flag = true;
            }),
 
@@ -2778,7 +2778,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("erode-seg",
 
        po::value(&cmdargs->n_erode_seg) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->erode_seg_flag = true;
            }),
 
@@ -2790,7 +2790,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("dil-seg",
 
        po::value(&cmdargs->n_dil_seg) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->dil_seg_flag = true;
            }),
 
@@ -2802,7 +2802,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("cutends",
 
        po::value(&cmdargs->ncutends) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->cutends_flag = true;
            }),
 
@@ -2813,7 +2813,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("out_i_count,oni,oic",
 
        po::value(&cmdargs->out_n_i) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->out_n_i_flag = true;
            }),
 
@@ -2824,7 +2824,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("out_j_count,onj,ojc",
 
        po::value(&cmdargs->out_n_j) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->out_n_j_flag = true;
            }),
 
@@ -2835,7 +2835,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("out_k_count,onk,okc",
 
        po::value(&cmdargs->out_n_k) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->out_n_k_flag = true;
            }),
 
@@ -2854,7 +2854,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("in_i_count,ini,iic",
 
        po::value(&cmdargs->in_n_i) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->in_n_i_flag = true;
            }),
 
@@ -2865,7 +2865,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("in_j_count,inj,ijc",
 
        po::value(&cmdargs->in_n_j) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->in_n_j_flag = true;
            }),
 
@@ -2876,7 +2876,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("in_k_count,ink,ikc",
 
        po::value(&cmdargs->in_n_k) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->in_n_k_flag = true;
            }),
 
@@ -2887,7 +2887,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("tr",
 
        po::value(&cmdargs->in_tr) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->in_tr_flag = true;
            }),
 
@@ -2898,7 +2898,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("TI",
 
        po::value(&cmdargs->in_ti) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->in_ti_flag = true;
            }),
 
@@ -2909,7 +2909,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("te",
 
        po::value(&cmdargs->in_te) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->in_te_flag = true;
            }),
 
@@ -2920,7 +2920,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("flip_angle",
 
        po::value(&cmdargs->in_flip_angle) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->in_flip_angle_flag = true;
            }),
 
@@ -3063,7 +3063,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("nslices-override",
 
        po::value(&cmdargs->nslices_override) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              fmt::printf("NSlicesOverride %d\n", cmdargs->nslices_override);
              std::string tmpstr = std::to_string(cmdargs->nslices_override);
              setenv("NSLICES_OVERRIDE", tmpstr.data(), 1);
@@ -3076,7 +3076,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("ncols-override",
 
        po::value(&cmdargs->ncols_override) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              fmt::printf("NColsOverride %d\n", cmdargs->ncols_override);
              std::string tmpstr = std::to_string(cmdargs->ncols_override);
              setenv("NCOLS_OVERRIDE", tmpstr.data(), 1);
@@ -3089,7 +3089,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("nrows-override",
 
        po::value(&cmdargs->nrows_override) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              fmt::printf("NRowsOverride %d\n", cmdargs->nrows_override);
              std::string tmpstr = std::to_string(cmdargs->nrows_override);
              setenv("NROWS_OVERRIDE", tmpstr.data(), 1);
@@ -3156,7 +3156,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("mid-frame",
 
        po::bool_switch(&cmdargs->mid_frame_flag) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->frame_flag = true;
            }),
 
@@ -3217,7 +3217,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("reduce",
 
        po::value(&cmdargs->reduce) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              fmt::printf("reducing input image %d times\n", cmdargs->reduce);
            }),
 
@@ -3304,7 +3304,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("reslice_like,rl",
 
        po::value(&cmdargs->reslice_like_name) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->reslice_like_flag = true;
            }),
 
@@ -3315,7 +3315,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("slice-bias",
 
        po::value(&cmdargs->SliceBiasAlpha) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->SliceBias = true;
            }),
 
@@ -3326,7 +3326,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("in_like,il",
 
        po::value(&cmdargs->in_like_name) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->in_like_flag = true;
            }),
 
@@ -3337,7 +3337,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("color_file,cf",
 
        po::value(&cmdargs->color_file_name) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->color_file_flag = true;
            }),
 
@@ -3356,7 +3356,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("crop_gdf,cg",
 
        po::bool_switch() //
-           ->notifier([]() {
+           ->notifier([](auto /*unused*/) {
              mriio_set_gdf_crop_flag(TRUE);
            }),
 
@@ -3385,7 +3385,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("fwhm",
 
        po::value(&cmdargs->fwhm) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->gstd = cmdargs->fwhm / sqrt(log(256.0));
              fmt::printf("fwhm = %g, gstd = %g\n", cmdargs->fwhm,
                          cmdargs->gstd);
@@ -3398,7 +3398,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("out_data_type,odt",
 
        po::value(&cmdargs->out_data_type_string) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              if (boost::iequals(cmdargs->out_data_type_string, "uchar")) {
                cmdargs->out_data_type = MRI_UCHAR;
              } else if (boost::iequals(cmdargs->out_data_type_string,
@@ -3426,7 +3426,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("resample_type,rt",
 
        po::value(&cmdargs->resample_type) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              if (boost::iequals(cmdargs->resample_type, "interpolate")) {
                cmdargs->resample_type_val = SAMPLE_TRILINEAR;
              } else if (boost::iequals(cmdargs->resample_type, "nearest")) {
@@ -3551,7 +3551,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("in_type,it",
 
        po::value(&cmdargs->in_type_string) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->force_in_type_flag = true;
              cmdargs->forced_in_type =
                  string_to_type(cmdargs->in_type_string.data());
@@ -3564,7 +3564,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("out_type,ot",
 
        po::value(&cmdargs->out_type_string) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->force_out_type_flag = true;
              cmdargs->forced_out_type =
                  string_to_type(cmdargs->out_type_string.data());
@@ -3577,7 +3577,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("template_type,tt",
 
        po::value(&cmdargs->template_type_string) //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->force_template_type_flag = true;
              cmdargs->forced_template_type =
                  string_to_type(cmdargs->template_type_string.data());
@@ -3591,7 +3591,7 @@ void initArgDesc(boost::program_options::options_description *desc,
 
        po::value(&cmdargs->frames) //
            ->multitoken()
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->frame_flag = true;
            }),
 
@@ -3611,7 +3611,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("ascii",
 
        po::bool_switch() //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->ascii_flag = 1;
              cmdargs->force_in_type_flag = true;
            }),
@@ -3625,7 +3625,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("ascii+crsf",
 
        po::bool_switch() //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->ascii_flag = 2;
              cmdargs->force_in_type_flag = true;
            }),
@@ -3637,7 +3637,7 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("ascii-fcol",
 
        po::bool_switch() //
-           ->notifier([cmdargs]() {
+           ->notifier([cmdargs](auto /*unused*/) {
              cmdargs->ascii_flag = 3;
              cmdargs->force_in_type_flag = true;
            }),

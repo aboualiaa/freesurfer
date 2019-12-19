@@ -82,22 +82,28 @@ auto check_string_values(std::vector<std::string> allowed, std::string value,
 } // namespace
 
 auto checkSize = [](auto opt, size_t min, size_t max = 0) {
-  return [opt, min, max](auto v) { check_vector_range(v, opt, min, max); };
+  return [opt, min, max](auto v) {
+    check_vector_range(v, opt, min, max);
+  };
 };
 
 auto checkValue = [](auto min, auto opt,
                      std::function<bool(typeof(min), typeof(min))> fn) {
-  return [min, opt, fn](auto value) { check_value(value, min, opt, fn); };
+  return [min, opt, fn](auto value) {
+    check_value(value, min, opt, fn);
+  };
 };
 
 auto checkRange = [](auto min, auto max, auto opt) {
-  return
-      [min, opt, max](auto value) { check_value_range(value, opt, min, max); };
+  return [min, opt, max](auto value) {
+    check_value_range(value, opt, min, max);
+  };
 };
 
 auto checkString = [](std::vector<std::string> allowed, std::string opt) {
-  return
-      [allowed, opt](auto value) { check_string_values(allowed, value, opt); };
+  return [allowed, opt](auto value) {
+    check_string_values(allowed, value, opt);
+  };
 };
 
 auto allocateExternalString = [](char **var) mutable {
@@ -164,7 +170,7 @@ auto checkNorm = [](std::string opt, bool &flag) {
 } // namespace fs::util::mri
 
 namespace fs::util::io {
-auto checkFileReadable = [](std::string file_name) {
+auto checkFileReadable = [](std::string &file_name) {
   std::ifstream fptmp(file_name);
   if (!fptmp.is_open()) {
     auto message =
