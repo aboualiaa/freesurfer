@@ -43,6 +43,7 @@
 
 auto main(int argc, char *argv[]) -> int {
   auto err_logger = spdlog::stderr_color_mt("stderr");
+  spdlog::set_level(spdlog::level::warn);
   auto env = ENV();
   auto cmdargs = CMDARGS(argc, argv);
   if (!good_cmdline_args(&cmdargs, &env)) {
@@ -2046,8 +2047,6 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
   if (cmdargs->debug) {
     spdlog::set_level(spdlog::level::debug); // Set global log level to debug
     fs::dbg::create_gdb_file(args);
-  } else {
-    spdlog::set_level(spdlog::level::warn);
   }
 
   if (vm.count("outside_val") != 0U) {
