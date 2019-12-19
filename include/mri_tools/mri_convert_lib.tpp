@@ -170,7 +170,7 @@ auto checkNorm = [](std::string opt, bool &flag) {
 } // namespace fs::util::mri
 
 namespace fs::util::io {
-auto checkFileReadable = [](std::string &file_name) {
+auto checkFileReadable = [](std::string file_name) {
   std::ifstream fptmp(file_name);
   if (!fptmp.is_open()) {
     auto message =

@@ -1995,7 +1995,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
   pos.add("in_name", 1).add("out_name", 1);
   po::variables_map vm;
 
-  initArgDesc(&desc, cmdargs);
+  initArgDesc(&desc, cmdargs, env);
   auto args = cmdargs->raw;
   auto ac = static_cast<int>(args.size());
   auto av = args.data();
@@ -2010,31 +2010,10 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
                            .positional(pos)
                            .style(fs::util::cli::po_style)
                            .run();
+
     po::store(parsed_opts, vm);
     fs::util::cli::print_parsed_tokens(parsed_opts);
 
-  } catch (std::exception const &e) {
-    spdlog::get("stderr")->critical(e.what());
-    return false;
-  }
-
-  if (vm.count("version2") != 0U) {
-    exit(97);
-  }
-
-  if (vm.count("help") != 0U || vm.count("usage") != 0U) {
-    usage(nullptr);
-    print_help(desc, env);
-    return false;
-  }
-
-  if ((vm.count("version") != 0U) || (vm.count("all-info") != 0U)) {
-    handle_version_option(vm.count("all-info") != 0U, args, env->vcid,
-                          "$Name:  $");
-    return false;
-  }
-
-  try {
     po::notify(vm);
 
     cmdargs->check_conflicts(vm);
@@ -2048,7 +2027,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
 }
 
 void initArgDesc(boost::program_options::options_description *desc,
-                 CMDARGS *cmdargs) {
+                 CMDARGS *cmdargs, ENV *env) {
 
   namespace po = boost::program_options;
   namespace cli = fs::util::cli;
@@ -2059,17 +2038,59 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("help,h",
 
+       po::bool_switch() //
+           ->notifier([env, desc](auto v) {
+             if (v) {
+               usage(nullptr);
+               print_help(*desc, env);
+               exit(0);
+             }
+           }),
+
        "print out information on how to use this program and exit")
 
       //
 
       ("version,v",
 
+       po::bool_switch() //
+           ->notifier([cmdargs, env](auto v) {
+             if (v) {
+               handle_version_option(false, cmdargs->raw, env->vcid,
+                                     "$Name:  $");
+               exit(0);
+             }
+           }),
+
        "print out version and exit")
 
       //
 
+      ("all-info",
+
+       po::bool_switch() //
+           ->notifier([cmdargs, env](auto v) {
+             if (v) {
+               handle_version_option(true, cmdargs->raw, env->vcid,
+                                     "$Name:  $");
+               exit(0);
+             }
+           }),
+
+       "print out all info and exit")
+
+      //
+
       ("usage,u",
+
+       po::bool_switch() //
+           ->notifier([env, desc](auto v) {
+             if (v) {
+               usage(nullptr);
+               print_help(*desc, env);
+               exit(0);
+             }
+           }),
 
        "print usage and exit")
 
@@ -2077,17 +2098,26 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("version2",
 
+       po::bool_switch() //
+           ->notifier([](auto v) {
+             if (v) {
+               exit(97);
+             }
+           }),
+
        "just exits")
 
       //
 
       ("debug",
 
-       po::bool_switch(&cmdargs->debug) //
-           ->notifier([cmdargs](auto /*unused*/) {
-             spdlog::set_level(
-                 spdlog::level::debug); // Set global log level to debug
-             fs::dbg::create_gdb_file(cmdargs->raw);
+       po::bool_switch() //
+           ->notifier([cmdargs](auto v) {
+             if (v) {
+               spdlog::set_level(
+                   spdlog::level::debug); // Set global log level to debug
+               fs::dbg::create_gdb_file(cmdargs->raw);
+             }
            }),
 
        "turn on debugging")
@@ -2134,8 +2164,10 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("no-dwi",
 
        po::bool_switch() //
-           ->notifier([](auto /*unused*/) {
-             setenv("FS_LOAD_DWI", "0", 1);
+           ->notifier([](auto v) {
+             if (v) {
+               setenv("FS_LOAD_DWI", "0", 1);
+             }
            }),
 
        "set FS_LOAD_DWI to 0")
@@ -2210,10 +2242,14 @@ void initArgDesc(boost::program_options::options_description *desc,
       //
 
       ("out_stats_table",
-
        po::bool_switch(&cmdargs->out_stats_table_flag) //
-           ->notifier(
-               cli::addDependencies({"like"}, "out_stats_table", cmdargs)),
+           ->notifier([cmdargs](auto v) {
+             if (v) {
+               auto adder =
+                   cli::addDependencies({"like"}, "out_stats_table", cmdargs);
+               adder(v);
+             }
+           }),
 
        "Output data is a stats table (use --like to pass template table for "
        "measure, columns, and rows heads)")
@@ -2269,8 +2305,10 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("cw256",
 
        po::bool_switch(&cmdargs->conform_width_256_flag) //
-           ->notifier([cmdargs](auto /*unused*/) {
-             cmdargs->conform_flag = true;
+           ->notifier([cmdargs](auto v) {
+             if (v) {
+               cmdargs->conform_flag = true;
+             }
            }),
 
        "cw256")
@@ -2309,10 +2347,12 @@ void initArgDesc(boost::program_options::options_description *desc,
 
        po::bool_switch() //
            ->notifier([cmdargs](auto v) {
-             setenv("FS_RESCALE_DICOM", "1", 1);
-             auto tmp = cli::addConflicts({"no-rescale-dicom"}, "rescale-dicom",
-                                          cmdargs);
-             tmp(v);
+             if (v) {
+               setenv("FS_RESCALE_DICOM", "1", 1);
+               auto tmp = cli::addConflicts({"no-rescale-dicom"},
+                                            "rescale-dicom", cmdargs);
+               tmp(v);
+             }
            }),
 
        "DO  apply rescale intercept and slope based on (0028,1052) "
@@ -2322,8 +2362,10 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("no-rescale-dicom",
 
        po::bool_switch() //
-           ->notifier([](auto /*unused*/) {
-             setenv("FS_RESCALE_DICOM", "0", 1);
+           ->notifier([](auto v) {
+             if (v) {
+               setenv("FS_RESCALE_DICOM", "0", 1);
+             }
            }),
 
        "Do NOT apply rescale intercept and slope based on (0028,1052) "
@@ -2334,8 +2376,10 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("bvec-scanner",
 
        po::bool_switch() //
-           ->notifier([](auto /*unused*/) {
-             setenv("FS_DESIRED_BVEC_SPACE", "1", 1);
+           ->notifier([](auto v) {
+             if (v) {
+               setenv("FS_DESIRED_BVEC_SPACE", "1", 1);
+             }
            }),
 
        "force bvecs to be in scanner space. only applies when reading "
@@ -2346,8 +2390,10 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("bvec-voxel",
 
        po::bool_switch() //
-           ->notifier([](auto /*unused*/) {
-             setenv("FS_DESIRED_BVEC_SPACE", "2", 1);
+           ->notifier([](auto v) {
+             if (v) {
+               setenv("FS_DESIRED_BVEC_SPACE", "2", 1);
+             }
            }),
 
        "force bvecs to be in voxel space. only applies when reading"
@@ -2358,8 +2404,10 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("no-analyze-rescale",
 
        po::bool_switch() //
-           ->notifier([](auto /*unused*/) {
-             setenv("FS_ANALYZE_NO_RESCALE", "1", 1);
+           ->notifier([](auto v) {
+             if (v) {
+               setenv("FS_ANALYZE_NO_RESCALE", "1", 1);
+             }
            }),
 
        "Turns off rescaling of analyze files")
@@ -2391,8 +2439,10 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("conform_min,cm",
 
        po::bool_switch(&cmdargs->conform_min_flag) //
-           ->notifier([cmdargs](auto /*unused*/) {
-             cmdargs->conform_flag = true;
+           ->notifier([cmdargs](auto v) {
+             if (v) {
+               cmdargs->conform_flag = true;
+             }
            }),
 
        "Conform to the src min direction size")
@@ -2493,9 +2543,14 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("force_ras_good",
 
        po::bool_switch(&cmdargs->force_ras_good) //
-           ->notifier(cli::addConflicts(
-               {"in_i_direction", "in_j_direction", "in_k_direction"},
-               "force_ras_good", cmdargs)),
+           ->notifier([cmdargs](auto v) {
+             if (v) {
+               auto adder = cli::addConflicts(
+                   {"in_i_direction", "in_j_direction", "in_k_direction"},
+                   "force_ras_good", cmdargs);
+               adder(v);
+             }
+           }),
 
        "force_ras_good")
 
@@ -2947,8 +3002,13 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("zero_ge_z_offset,zgez",
 
        po::bool_switch(&cmdargs->zero_ge_z_offset_flag) //
-           ->notifier(cli::addConflicts({"no_zero_ge_z_offset"},
-                                        "zero_ge_z_offset", cmdargs)),
+           ->notifier([cmdargs](auto v) {
+             if (v) {
+               auto adder = cli::addConflicts({"no_zero_ge_z_offset"},
+                                              "zero_ge_z_offset", cmdargs);
+               adder(v);
+             }
+           }),
 
        "Set c_s=0 (appropriate for dicom files from GE machines with isocenter "
        "scanning)")
@@ -2991,10 +3051,13 @@ void initArgDesc(boost::program_options::options_description *desc,
 
       ("mra",
 
-       po::bool_switch()->notifier([](auto /*unused*/) {
-         SliceResElTag1 = 0x50;
-         SliceResElTag2 = 0x88;
-       }),
+       po::bool_switch() //
+           ->notifier([](auto v) {
+             if (v) {
+               SliceResElTag1 = 0x50;
+               SliceResElTag2 = 0x88;
+             }
+           }),
 
        "This flag forces DICOMread to first use 18,50 to get the slice "
        "thickness instead of 18,88. This is needed with siemens mag res "
@@ -3005,8 +3068,10 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("auto-slice-res",
 
        po::bool_switch() //
-           ->notifier([](auto /*unused*/) {
-             AutoSliceResElTag = 1;
+           ->notifier([](auto v) {
+             if (v) {
+               AutoSliceResElTag = 1;
+             }
            }),
 
        "Automatically determine whether to get slice thickness from 18,50 or "
@@ -3017,8 +3082,10 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("no-strip-pound",
 
        po::bool_switch() //
-           ->notifier([](auto /*unused*/) {
-             MRIIO_Strip_Pound = 0;
+           ->notifier([](auto v) {
+             if (v) {
+               MRIIO_Strip_Pound = 0;
+             }
            }),
 
        "no-strip-pound")
@@ -3156,8 +3223,10 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("mid-frame",
 
        po::bool_switch(&cmdargs->mid_frame_flag) //
-           ->notifier([cmdargs](auto /*unused*/) {
-             cmdargs->frame_flag = true;
+           ->notifier([cmdargs](auto v) {
+             if (v) {
+               cmdargs->frame_flag = true;
+             }
            }),
 
        "Keep only the middle frame")
@@ -3228,8 +3297,10 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("bfile-little-endian",
 
        po::bool_switch() //
-           ->notifier([](auto /*unused*/) {
-             setenv("BFILE_LITTLE_ENDIAN", "1", 1);
+           ->notifier([](auto v) {
+             if (v) {
+               setenv("BFILE_LITTLE_ENDIAN", "1", 1);
+             }
            }),
 
        "Write out bshort/bfloat files in little endian")
@@ -3264,10 +3335,12 @@ void initArgDesc(boost::program_options::options_description *desc,
 
        po::bool_switch() //
            ->notifier([cmdargs](auto v) {
-             UseDICOMRead2 = 1;
-             auto checker =
-                 cli::addConflicts({"dicomread0"}, "dicomread2", cmdargs);
-             checker(v);
+             if (v) {
+               UseDICOMRead2 = 1;
+               auto checker =
+                   cli::addConflicts({"dicomread0"}, "dicomread2", cmdargs);
+               checker(v);
+             }
            }),
 
        "dicomread2")
@@ -3277,8 +3350,10 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("dicomread0",
 
        po::bool_switch() //
-           ->notifier([](auto /*unused*/) {
-             UseDICOMRead2 = 0;
+           ->notifier([](auto v) {
+             if (v) {
+               UseDICOMRead2 = 0;
+             }
            }),
 
        "dicomread0")
@@ -3356,8 +3431,10 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("crop_gdf,cg",
 
        po::bool_switch() //
-           ->notifier([](auto /*unused*/) {
-             mriio_set_gdf_crop_flag(TRUE);
+           ->notifier([](auto v) {
+             if (v) {
+               mriio_set_gdf_crop_flag(TRUE);
+             }
            }),
 
        "Apply GDF cropping")
@@ -3611,9 +3688,11 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("ascii",
 
        po::bool_switch() //
-           ->notifier([cmdargs](auto /*unused*/) {
-             cmdargs->ascii_flag = 1;
-             cmdargs->force_in_type_flag = true;
+           ->notifier([cmdargs](auto v) {
+             if (v) {
+               cmdargs->ascii_flag = 1;
+               cmdargs->force_in_type_flag = true;
+             }
            }),
 
        "Save output as ascii. This will be a data file with a single column of "
@@ -3625,9 +3704,11 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("ascii+crsf",
 
        po::bool_switch() //
-           ->notifier([cmdargs](auto /*unused*/) {
-             cmdargs->ascii_flag = 2;
-             cmdargs->force_in_type_flag = true;
+           ->notifier([cmdargs](auto v) {
+             if (v) {
+               cmdargs->ascii_flag = 2;
+               cmdargs->force_in_type_flag = true;
+             }
            }),
 
        "Same as --ascii but includes col, row, slice, and frame")
@@ -3637,9 +3718,12 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("ascii-fcol",
 
        po::bool_switch() //
-           ->notifier([cmdargs](auto /*unused*/) {
-             cmdargs->ascii_flag = 3;
-             cmdargs->force_in_type_flag = true;
+           ->notifier([cmdargs](auto v) {
+             if (v) {
+               cmdargs->ascii_flag = 3;
+               cmdargs->force_in_type_flag = true;
+               fmt::printf("blowme please");
+             }
            }),
 
        "ascii-fcol");

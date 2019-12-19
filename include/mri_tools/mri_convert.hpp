@@ -229,7 +229,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool;
 /// \param desc holds description of supported args
 /// \param cmdargs holds the actual args
 static void initArgDesc(boost::program_options::options_description *desc,
-                        CMDARGS *cmdargs);
+                        CMDARGS *cmdargs, ENV *env);
 
 ///
 /// \param desc holds description of supported args
