@@ -492,7 +492,8 @@ void mriio_set_gdf_crop_flag(int new_gdf_crop_flag) {
 
 } /* end mriio_set_gdf_crop_flag() */
 
-int MRIgetVolumeName(const char *string, char *name_only) {
+[[deprecated("use fs::mri::io::getVolumeName instead")]] int
+MRIgetVolumeName(const char *string, char *name_only) {
   char *at, *pound;
 
   strcpy(name_only, string);
@@ -508,24 +509,6 @@ int MRIgetVolumeName(const char *string, char *name_only) {
   return (NO_ERROR);
 
 } /* end MRIgetVolumeName() */
-
-namespace fs::mri::io {
-auto getVolumeName(std::string const string) -> std::string const {
-
-  auto name_only = string;
-  if (auto atSign = name_only.find('@'); atSign != std::string::npos) {
-    name_only = name_only.substr(atSign);
-  }
-
-  if (MRIIO_Strip_Pound == 1) {
-    if (auto poundSign = name_only.find('#'); poundSign != std::string::npos) {
-      name_only = name_only.substr(poundSign);
-    }
-  }
-
-  return name_only;
-}
-} // namespace fs::mri::io
 
 MRI *mri_read(const char *fname, int type, int volume_flag, int start_frame,
               int end_frame) {
@@ -14403,3 +14386,22 @@ static int niiPrintHdr(FILE *fp, struct nifti_1_header *hdr) {
   // fprintf(fp,"          %d \n",hdr->);
   return (0);
 }
+
+// MARK: - fs namespace
+namespace fs::mri::io {
+auto getVolumeName(std::string const string) -> std::string const {
+
+  auto name_only = string;
+  if (auto atSign = name_only.find('@'); atSign != std::string::npos) {
+    name_only = name_only.substr(atSign);
+  }
+
+  if (MRIIO_Strip_Pound == 1) {
+    if (auto poundSign = name_only.find('#'); poundSign != std::string::npos) {
+      name_only = name_only.substr(poundSign);
+    }
+  }
+
+  return name_only;
+}
+} // namespace fs::mri::io

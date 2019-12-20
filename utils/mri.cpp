@@ -18243,3 +18243,28 @@ int MRIclipBrightWM(MRI *mri_T1, const MRI *mri_wm) {
 
   return (NO_ERROR);
 }
+
+namespace fs::mri::util {
+
+/*!
+  \fn float getVoxValChunkChar(MRI *mri, int c, int r, int s, int f)
+  \brief Returns voxel value as a float regardless of the underlying data type.
+  \param MRI *mri - input MRI
+  \param int c - column
+  \param int r - row
+  \param int s - slice
+  \param int f - frame
+  \return float value at the given col, row, slice, frame
+  This function is general but slow. See also MRIptr2dbl().
+*/
+float getVoxValChunkChar(const MRI *mri, int c, int r, int s, int f) {
+  // since this always gets used in a hot loop, we refrain here from sanity
+  // checks, these should be done outside the loop
+  // the switch on type should also occur outside
+  // this is also only for chunked mris, the check should happen outside
+
+  return (float)*((unsigned char *)mri->chunk + c + r * mri->vox_per_row +
+                  s * mri->vox_per_slice + f * mri->vox_per_vol);
+}
+
+} // namespace fs::mri::util

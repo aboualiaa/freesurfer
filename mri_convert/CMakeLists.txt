@@ -10,7 +10,8 @@ elseif(CMAKE_COMPILER_IS_GNUCXX)
   message("Building with lcov Code Coverage Tools")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
 endif()
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fsanitize=address -fsanitize-recover=address -fsanitize-memory-track-origins -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-common -O1")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fsanitize=address -fsanitize-recover=address -fsanitize-memory-track-origins -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-common -O0")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0")
 
 include_directories(${FS_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/packages/dicom
                     ${Boost_INCLUDE_DIRS} ${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
