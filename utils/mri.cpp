@@ -181,8 +181,6 @@ MRI::MRI(Shape volshape, int dtype, bool alloc) : shape(volshape), type(dtype) {
   if (!alloc)
     return;
 
-  initIndices();
-
   // should this be defaulted in the header instead?
   ras_good_flag = 1;
 
@@ -190,8 +188,19 @@ MRI::MRI(Shape volshape, int dtype, bool alloc) : shape(volshape), type(dtype) {
   chunk = calloc(bytes_total, 1);
   ischunked = bool(chunk);
 
-  // allocate an array of slice pointers - this is done regardless of chunking
-  // so that we can still support 3d-indexing and not produce any weird issues
+  // initialize slices and indices
+  initSlices();
+  initIndices();
+}
+
+
+/**
+  Allocates array of slice pointers - this is done regardless of chunking so that we
+  can still support 3D-indexing and not produce any weird issues. This function should
+  only be called once for a single volume.
+*/
+void MRI::initSlices()
+{
   int nslices = depth * nframes;
   slices = (BUFTYPE ***)calloc(nslices, sizeof(BUFTYPE **));
   if (!slices)
@@ -314,7 +323,7 @@ MRI::~MRI() {
       free(slices);
     }
   } else {
-    free(chunk);
+    if (owndata) free(chunk);
     if (slices) {
       for (int slice = 0; slice < depth * nframes; slice++)
         if (slices[slice])

@@ -421,7 +421,7 @@ source $FREESURFER_HOME/sources.csh
 # tmp_unknown_args, which will be parsed in this script
 set tmp_config = `mktemp`
 set tmp_unknown_args = `mktemp`
-rca-config $FREESURFER_HOME/recon-config.yaml $tmp_config $tmp_unknown_args $argv:q
+rca-config $FREESURFER_HOME/etc/recon-config.yaml $tmp_config $tmp_unknown_args $argv:q
 if($status) then
   echo "ERROR: could not configure recon-all parameters"
   exit 1;
@@ -3283,7 +3283,7 @@ if($DoAutoDetGWStats) then
     set ads  = ../surf/autodet.gw.stats.$hemi.dat
     set orig = ../surf/$hemi.orig
     # Using the premesh makes a difference
-    if($DoRemesh) set orig = ../surf/$hemi.orig.premesh
+    if($DoRemesh && ! $longitudinal) set orig = ../surf/$hemi.orig.premesh
     # set cmd = ($cmd $WMSeg_wlo $WMSeg_ghi $xopts $subjid $hemi) # might need these
     set cmd = (mris_autodet_gwstats --o $ads  --i $bfs --wm $wm --surf $orig)
     set xopts = `fsr-getxopts mris_autodet_gwstats $XOptsFile $GlobXOptsFile`;

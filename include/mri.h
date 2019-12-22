@@ -182,7 +182,8 @@ public:
   ~MRI();
 
   void initIndices();
-  void write(const std::string &filename);
+  void initSlices();
+  void write(const std::string& filename);
   FnvHash hash();
 
   // ---- image geometry ----
@@ -234,8 +235,8 @@ public:
   double outside_val = 0;
   double mean;
   int brightness = 1;
-  int yinvert = 1; // for converting between MNC and coronal slices
-  int dof;
+  int yinvert = 1;              // for converting between MNC and coronal slices
+  int dof = 1;
   MRI_FRAME *frames = nullptr;
   COLOR_TABLE *ct = nullptr;
   MRI_REGION roi;
@@ -266,18 +267,18 @@ public:
   int tag_data_size = 0;    // size of tag data
 
   // ---- image buffer ----
-  int type;                 // image data type
-  int ptype = 2;            // NOT USED
-  size_t bytes_per_vox = 0; // bytes per voxel
-  size_t bytes_total = 0;   // total bytes in buffer
-  size_t vox_per_row = 0;   // number of voxels per volume row
-  size_t vox_per_slice = 0; // number of voxels per volume slice
-  size_t vox_per_vol = 0;   // number of voxels per volume frame
-  size_t vox_total = 0;     // total number of voxels in the volume
-  int ischunked; // indicates whether the buffer is chunked (contiguous)
-  BUFTYPE ***slices =
-      nullptr; // fallback non-contiguous storage for 3D-indexed image data
-  void *chunk = nullptr; // default contiguous storage for image data
+  int type;                     // image data type
+  int ptype = 2;                // NOT USED
+  size_t bytes_per_vox = 0;     // bytes per voxel
+  size_t bytes_total = 0;       // total bytes in buffer
+  size_t vox_per_row = 0;       // number of voxels per volume row
+  size_t vox_per_slice = 0;     // number of voxels per volume slice
+  size_t vox_per_vol = 0;       // number of voxels per volume frame
+  size_t vox_total = 0;         // total number of voxels in the volume
+  int ischunked;                // indicates whether the buffer is chunked (contiguous)
+  bool owndata = true;          // indicates ownership of the chunked buffer data
+  BUFTYPE ***slices = nullptr;  // fallback non-contiguous storage for 3D-indexed image data
+  void *chunk = nullptr;        // default contiguous storage for image data
 };
 
 struct MOTIONBLUR2D {

@@ -18,6 +18,7 @@
  *
  */
 #include "mrisurf_base.h"
+#include "mrisurf_metricProperties.h"
 
 int mris_sort_compare_float(const void *pc1, const void *pc2) {
   float c1, c2;
@@ -649,10 +650,9 @@ void MRISreallocVerticesAndFaces(MRIS *mris, int nvertices, int nfaces) {
   MRISoverAllocVerticesAndFaces(mris, nvertices, nfaces, nvertices, nfaces);
 }
 
-
-MRIS* MRIScopyMetadata(MRIS const * source, MRIS * target)
-{
-  if (!target) target = MRISalloc(source->nvertices, source->nfaces);
+MRIS *MRIScopyMetadata(MRIS const *source, MRIS *target) {
+  if (!target)
+    target = MRISalloc(source->nvertices, source->nfaces);
 
   target->type = source->type;
   target->status = source->status;
@@ -666,7 +666,6 @@ MRIS* MRIScopyMetadata(MRIS const * source, MRIS * target)
 
   return target;
 }
-
 
 void MRISctr(MRIS *mris, int max_vertices, int max_faces, int nvertices,
              int nfaces) {
@@ -862,8 +861,65 @@ int MRISunrip(MRIS *mris) {
   return (NO_ERROR);
 }
 
+/*
+  Returns an (nvertices x 3) array of the surface's vertex positions.
+*/
+float *MRISgetVertexArray(MRIS *mris) {
+  float *const buffer = new float[mris->nvertices * 3];
+  float *ptr = buffer;
+  for (int n = 0; n < mris->nvertices; n++) {
+    *ptr++ = mris->vertices[n].x;
+    *ptr++ = mris->vertices[n].y;
+    *ptr++ = mris->vertices[n].z;
+  }
+  return buffer;
+}
+
+/*
+  Returns an (nvertices x 3) array of the surface's vertex normals.
+*/
+float *MRISgetVertexNormalArray(MRIS *mris) {
+  float *const buffer = new float[mris->nvertices * 3];
+  float *ptr = buffer;
+  for (int n = 0; n < mris->nvertices; n++) {
+    *ptr++ = mris->vertices[n].nx;
+    *ptr++ = mris->vertices[n].ny;
+    *ptr++ = mris->vertices[n].nz;
+  }
+  return buffer;
+}
+
+/*
+  Returns an (nfaces x 3) array of the surface's face indices.
+*/
+int *MRISgetFaceArray(MRIS *mris) {
+  int *const buffer = new int[mris->nfaces * 3];
+  int *ptr = buffer;
+  for (int n = 0; n < mris->nfaces; n++) {
+    *ptr++ = mris->faces[n].v[0];
+    *ptr++ = mris->faces[n].v[1];
+    *ptr++ = mris->faces[n].v[2];
+  }
+  return buffer;
+}
+
+/*
+  Returns an (nfaces x 3) array of the surface's face normals.
+*/
+float *MRISgetFaceNormalArray(MRIS *mris) {
+  float *const buffer = new float[mris->nfaces * 3];
+  float *ptr = buffer;
+  for (int n = 0; n < mris->nfaces; n++) {
+    FaceNormCacheEntry const *norm = getFaceNorm(mris, n);
+    *ptr++ = norm->nx;
+    *ptr++ = norm->ny;
+    *ptr++ = norm->nz;
+  }
+  return buffer;
+}
+
 char const *mrisurf_surface_names[3] = {"inflated", "smoothwm", "smoothwm"};
-char const *curvature_names[3] = {"inflated.H", "sulc", nullptr};
+char const *curvature_names[3] = {"inflated.H", "sulc", NULL};
 
 int MRISsetCurvatureName(int nth, char const *name) {
   if (nth > 2) {
