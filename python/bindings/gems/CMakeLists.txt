@@ -1,17 +1,17 @@
 include_directories(${CMAKE_SOURCE_DIR}/gems ${CMAKE_CURRENT_SOURCE_DIR})
 
-set(CMAKE_CXX_FLAGS "-fPIC -fpermissive -msse2 -mfpmath=sse")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fpermissive -msse2 -mfpmath=sse")
 
 add_compile_options(-Wno-inconsistent-missing-override -Wno-self-assign-field)
 
 pybind11_add_module(gemsbindings
-  python.cxx
-  pyKvlCalculator.cxx
-  pyKvlImage.cxx
-  pyKvlMesh.cxx
-  pyKvlOptimizer.cxx
-  pyKvlTransform.cxx
-)
+                    python.cxx
+                    pyKvlCalculator.cxx
+                    pyKvlImage.cxx
+                    pyKvlMesh.cxx
+                    pyKvlOptimizer.cxx
+                    pyKvlTransform.cxx
+                    )
 
 # link utilities
 target_link_libraries(gemsbindings PRIVATE kvlGEMSCommon)
