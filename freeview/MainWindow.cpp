@@ -65,6 +65,8 @@
 #include "VolumeFilterDilate.h"
 #include "VolumeFilterOpen.h"
 #include "VolumeFilterClose.h"
+#include "VolumeFilterThreshold.h"
+#include "VolumeFilterBoundary.h"
 #include "DialogVolumeFilter.h"
 #include "DialogGradientFilter.h"
 #include "Cursor2D.h"
@@ -5834,10 +5836,23 @@ void MainWindow::OnVolumeFilterThreshold() {
   //  }
 }
 
-void MainWindow::OnVolumeFilterSobel() {
-  LayerMRI *mri = (LayerMRI *)GetActiveLayer("MRI");
-  if (mri) {
-    VolumeFilterSobel *filter = new VolumeFilterSobel(mri, mri);
+void MainWindow::OnVolumeFilterBoundary()
+{
+  LayerMRI* mri = (LayerMRI*)GetActiveLayer( "MRI" );
+  if ( mri )
+  {
+    VolumeFilterBoundary* filter = new VolumeFilterBoundary( mri, mri );
+    m_threadVolumeFilter->ExecuteFilter(filter);
+    mri->ResetWindowLevel();
+  }
+}
+
+void MainWindow::OnVolumeFilterSobel()
+{
+  LayerMRI* mri = (LayerMRI*)GetActiveLayer( "MRI" );
+  if ( mri )
+  {
+    VolumeFilterSobel* filter = new VolumeFilterSobel( mri, mri );
     m_threadVolumeFilter->ExecuteFilter(filter);
     mri->ResetWindowLevel();
   }
