@@ -1409,24 +1409,16 @@ void MainWindow::OnIdle() {
   ui->actionTransformVolume->setEnabled(layerVolume);
   ui->actionThresholdVolume->setEnabled(layerVolume);
   ui->actionVolumeSegmentation->setEnabled(layerVolume);
-  ui->actionVolumeFilterConvolve->setEnabled(!bBusy && layerVolume &&
-                                             layerVolume->IsEditable());
-  ui->actionVolumeFilterMean->setEnabled(!bBusy && layerVolume &&
-                                         layerVolume->IsEditable());
-  ui->actionVolumeFilterMedian->setEnabled(!bBusy && layerVolume &&
-                                           layerVolume->IsEditable());
-  ui->actionVolumeFilterGradient->setEnabled(!bBusy && layerVolume &&
-                                             layerVolume->IsEditable());
-  ui->actionVolumeFilterSobel->setEnabled(!bBusy && layerVolume &&
-                                          layerVolume->IsEditable());
-  ui->actionVolumeFilterErode->setEnabled(!bBusy && layerVolume &&
-                                          layerVolume->IsEditable());
-  ui->actionVolumeFilterDilate->setEnabled(!bBusy && layerVolume &&
-                                           layerVolume->IsEditable());
-  ui->actionVolumeFilterOpen->setEnabled(!bBusy && layerVolume &&
-                                         layerVolume->IsEditable());
-  ui->actionVolumeFilterClose->setEnabled(!bBusy && layerVolume &&
-                                          layerVolume->IsEditable());
+  ui->actionVolumeFilterConvolve->setEnabled( !bBusy && layerVolume && layerVolume->IsEditable() );
+  ui->actionVolumeFilterMean    ->setEnabled( !bBusy && layerVolume && layerVolume->IsEditable() );
+  ui->actionVolumeFilterMedian  ->setEnabled( !bBusy && layerVolume && layerVolume->IsEditable() );
+  ui->actionVolumeFilterGradient->setEnabled( !bBusy && layerVolume && layerVolume->IsEditable() );
+  ui->actionVolumeFilterSobel->setEnabled( !bBusy && layerVolume && layerVolume->IsEditable() );
+  ui->actionVolumeFilterErode->setEnabled( !bBusy && layerVolume && layerVolume->IsEditable() );
+  ui->actionVolumeFilterDilate->setEnabled( !bBusy && layerVolume && layerVolume->IsEditable() );
+  ui->actionVolumeFilterOpen->setEnabled( !bBusy && layerVolume && layerVolume->IsEditable() );
+  ui->actionVolumeFilterClose->setEnabled( !bBusy && layerVolume && layerVolume->IsEditable() );
+  ui->actionVolumeFilterBoundary->setEnabled( !bBusy && layerVolume && layerVolume->IsEditable() );
   ui->actionSetCamera->setEnabled(bHasLayer);
   ui->actionSaveCamera->setEnabled(bHasLayer && GetMainView() == ui->view3D);
   ui->actionLoadCamera->setEnabled(bHasLayer && GetMainView() == ui->view3D);
@@ -1624,59 +1616,117 @@ void MainWindow::RunScript() {
     CommandSetDisplayIsoSurface(sa);
   } else if (cmd == "saveisosurface") {
     OnSaveIsoSurface(sa.last());
-  } else if (cmd == "setisosurfacecolor") {
-    CommandSetIsoSurfaceColor(sa);
-  } else if (cmd == "setisosurfaceupsample") {
-    CommandSetIsoSurfaceUpsample(sa);
-  } else if (cmd == "setextractallregions") {
-    CommandSetExtractAllRegions(sa);
-  } else if (cmd == "loadisosurfaceregion") {
-    CommandLoadIsoSurfaceRegion(sa);
-  } else if (cmd == "setsurfaceoverlaymethod") {
-    CommandSetSurfaceOverlayMethod(sa);
-  } else if (cmd == "setsurfaceoverlaycustom") {
-    CommandSetSurfaceOverlayCustom(sa);
-  } else if (cmd == "setsurfaceoverlaycolormap") {
-    CommandSetSurfaceOverlayColormap(sa);
-  } else if (cmd == "setsurfaceoverlayopacity") {
-    CommandSetSurfaceOverlayOpacity(sa);
-  } else if (cmd == "setsurfaceoverlayframe") {
-    CommandSetSurfaceOverlayFrame(sa);
-  } else if (cmd == "setsurfaceoverlaysmooth") {
-    CommandSetSurfaceOverlaySmooth(sa);
-  } else if (cmd == "setsurfaceoverlaymask") {
-    CommandSetSurfaceOverlayMask(sa);
-  } else if (cmd == "setsurfaceoffset") {
-    CommandSetSurfaceOffset(sa);
-  } else if (cmd == "gotosurfacevertex") {
-    CommandGoToSurfaceVertex(sa);
-  } else if (cmd == "setpointsetcolor") {
-    CommandSetPointSetColor(sa);
-  } else if (cmd == "setpointsetradius") {
-    CommandSetPointSetRadius(sa);
-  } else if (cmd == "setpointsetheatmap") {
-    CommandSetPointSetHeatmap(sa);
-  } else if (cmd == "setdisplayvector") {
-    CommandSetDisplayVector(sa);
-  } else if (cmd == "setdisplaytensor") {
-    CommandSetDisplayTensor(sa);
-  } else if (cmd == "setsurfacecolor") {
-    CommandSetSurfaceColor(sa);
-  } else if (cmd == "setsurfaceedgecolor") {
-    CommandSetSurfaceEdgeColor(sa);
-  } else if (cmd == "setsurfaceedgethickness") {
-    CommandSetSurfaceEdgeThickness(sa);
-  } else if (cmd == "displaysurfacevertex") {
-    CommandSetDisplaySurfaceVertex(sa);
-  } else if (cmd == "hidesurfacein3d") {
-    CommandHideSurfaceIn3D(sa);
-  } else if (cmd == "setsurfacevertexcolor") {
-    CommandSetSurfaceVertexColor(sa);
-  } else if (cmd == "setsurfacelabeloutline") {
-    CommandSetSurfaceLabelOutline(sa);
-  } else if (cmd == "setsurfacelabelcolor") {
-    CommandSetSurfaceLabelColor(sa);
-  } else if (cmd == "gotosurfacelabel") {
+  }
+  else if ( cmd == "setisosurfacecolor" )
+  {
+    CommandSetIsoSurfaceColor( sa );
+  }
+  else if (cmd == "setisosurfaceupsample")
+  {
+    CommandSetIsoSurfaceUpsample( sa );
+  }
+  else if (cmd == "setextractallregions")
+  {
+    CommandSetExtractAllRegions( sa );
+  }
+  else if ( cmd == "loadisosurfaceregion" )
+  {
+    CommandLoadIsoSurfaceRegion( sa );
+  }
+  else if ( cmd == "setsurfaceoverlaymethod" )
+  {
+    CommandSetSurfaceOverlayMethod( sa );
+  }
+  else if ( cmd == "setsurfaceoverlaycustom" )
+  {
+    CommandSetSurfaceOverlayCustom( sa );
+  }
+  else if (cmd == "setsurfaceoverlaycolormap")
+  {
+    CommandSetSurfaceOverlayColormap( sa );
+  }
+  else if ( cmd == "setsurfaceoverlayopacity" )
+  {
+    CommandSetSurfaceOverlayOpacity( sa );
+  }
+  else if ( cmd == "setsurfaceoverlayframe")
+  {
+    CommandSetSurfaceOverlayFrame( sa );
+  }
+  else if (cmd == "setsurfaceoverlaysmooth")
+  {
+    CommandSetSurfaceOverlaySmooth( sa );
+  }
+  else if (cmd == "setsurfaceoverlaymask")
+  {
+    CommandSetSurfaceOverlayMask( sa );
+  }
+  else if ( cmd == "setsurfaceoffset" )
+  {
+    CommandSetSurfaceOffset( sa );
+  }
+  else if ( cmd == "gotosurfacevertex")
+  {
+    CommandGoToSurfaceVertex( sa );
+  }
+  else if ( cmd == "setpointsetcolor" )
+  {
+    CommandSetPointSetColor( sa );
+  }
+  else if ( cmd == "setpointsetradius" )
+  {
+    CommandSetPointSetRadius( sa );
+  }
+  else if (cmd == "setpointsetheatmap")
+  {
+    CommandSetPointSetHeatmap( sa );
+  }
+  else if ( cmd == "setdisplayvector" )
+  {
+    CommandSetDisplayVector( sa );
+  }
+  else if ( cmd == "setdisplaytensor" )
+  {
+    CommandSetDisplayTensor( sa );
+  }
+  else if ( cmd == "setsurfacecolor" )
+  {
+    CommandSetSurfaceColor( sa );
+  }
+  else if ( cmd == "setsurfaceedgecolor" )
+  {
+    CommandSetSurfaceEdgeColor( sa );
+  }
+  else if ( cmd == "setsurfaceedgethickness" )
+  {
+    CommandSetSurfaceEdgeThickness( sa );
+  }
+  else if ( cmd == "displaysurfacevertex" )
+  {
+    CommandSetDisplaySurfaceVertex( sa );
+  }
+  else if ( cmd == "hidesurfacein3d")
+  {
+    CommandHideSurfaceIn3D( sa );
+  }
+  else if ( cmd == "setsurfacevertexcolor" )
+  {
+    CommandSetSurfaceVertexColor( sa );
+  }
+  else if ( cmd == "setsurfacelabeloutline" )
+  {
+    CommandSetSurfaceLabelOutline( sa );
+  }
+  else if ( cmd == "setsurfacelabelopacity" )
+  {
+    CommandSetSurfaceLabelOpacity( sa );
+  }
+  else if (cmd == "setsurfacelabelcolor")
+  {
+    CommandSetSurfaceLabelColor( sa );
+  }
+  else if (cmd == "gotosurfacelabel")
+  {
     OnGoToSurfaceLabel(true);
   } else if (cmd == "hidesurfacelabel") {
     CommandHideSurfaceLabel(sa);
@@ -2860,12 +2910,30 @@ void MainWindow::CommandLoadSurface(const QStringList &cmd) {
               }
             }
           }
-        } else if (subOption == "label_color" || subOption == "labelcolor") {
-          if (!subArgu.isEmpty()) {
-            for (int i = 0; i < m_scripts.size(); i++) {
-              if (m_scripts[i][0] == "loadsurfacelabel") {
-                m_scripts.insert(i + 1, QStringList("setsurfacelabelcolor")
-                                            << subArgu);
+        }
+        else if ( subOption == "label_opacity" || subOption == "labelopacity")
+        {
+          if (!subArgu.isEmpty())
+          {
+            for (int i = 0; i < m_scripts.size(); i++)
+            {
+              if (m_scripts[i][0] == "loadsurfacelabel")
+              {
+                m_scripts.insert(i+1, QStringList("setsurfacelabelopacity") << subArgu);
+                break;
+              }
+            }
+          }
+        }
+        else if (subOption == "label_color" || subOption == "labelcolor")
+        {
+          if (!subArgu.isEmpty())
+          {
+            for (int i = 0; i < m_scripts.size(); i++)
+            {
+              if (m_scripts[i][0] == "loadsurfacelabel")
+              {
+                m_scripts.insert(i+1, QStringList("setsurfacelabelcolor") << subArgu);
                 break;
               }
             }
@@ -2973,7 +3041,22 @@ void MainWindow::CommandSetSurfaceLabelOutline(const QStringList &cmd) {
   }
 }
 
-void MainWindow::CommandHideSurfaceLabel(const QStringList &cmd) {
+void MainWindow::CommandSetSurfaceLabelOpacity(const QStringList &cmd)
+{
+  LayerSurface* surf = (LayerSurface*)GetLayerCollection( "Surface" )->GetActiveLayer();
+  if ( surf )
+  {
+    bool ok;
+    cmd[1].toDouble(&ok);
+    if (ok && surf->GetActiveLabel())
+    {
+      surf->GetActiveLabel()->SetOpacity(cmd[1].toDouble());
+    }
+  }
+}
+
+void MainWindow::CommandHideSurfaceLabel(const QStringList &cmd)
+{
   Q_UNUSED(cmd);
   LayerSurface *surf =
       (LayerSurface *)GetLayerCollection("Surface")->GetActiveLayer();
@@ -6630,12 +6713,10 @@ void MainWindow::OnReloadSurface() {
               AddScript(QStringList("setsurfacelabeloutline") << "1");
             if (!label->IsVisible())
               AddScript(QStringList("hidesurfacelabel"));
-            double *c = label->GetColor();
-            AddScript(QStringList("setsurfacelabelcolor")
-                      << QString("%1,%2,%3")
-                             .arg((int)(c[0] * 255))
-                             .arg((int)(c[1] * 255))
-                             .arg((int)(c[2] * 255)));
+            if (label->GetOpacity() != 1)
+              AddScript(QStringList("setsurfacelabelopacity") << QString::number(label->GetOpacity()));
+            double* c = label->GetColor();
+            AddScript(QStringList("setsurfacelabelcolor") << QString("%1,%2,%3").arg((int)(c[0]*255)).arg((int)(c[1]*255)).arg((int)(c[2]*255)));
           }
         }
         for (int j = surf->GetNumberOfAnnotations() - 1; j >= 0; j--) {

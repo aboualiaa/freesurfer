@@ -36,52 +36,56 @@
 #include "romp_support.h"
 #endif
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
-static int replaceLabels(MRI *mri_seg);
-static void modify_transform(TRANSFORM *transform, MRI *mri, GCA *gca);
-static int lateralize_hypointensities(MRI *mri_seg);
-static int check(MRI *mri_seg, char *subjects_dir, char *subject_name);
 
-static int conform = 1;
-static int flash = 0;
-static int binarize = 0;
-static int binarize_in = 0;
-static int binarize_out = 0;
-static char *wmsa_fname = nullptr;
+int main(int argc, char *argv[]) ;
+static int get_option(int argc, char *argv[]) ;
+static int replaceLabels(MRI *mri_seg) ;
+static void configure_transform(TRANSFORM *transform, MRI *mri, GCA *gca) ;
+static int lateralize_hypointensities(MRI *mri_seg) ;
+static int check(MRI *mri_seg, char *subjects_dir, char *subject_name) ;
 
-static int gca_flags = GCA_NO_FLAGS;
+static int conform = 1 ;
+static int flash = 0 ;
+static int binarize = 0 ;
+static int binarize_in = 0 ;
+static int binarize_out = 0 ;
+static char *wmsa_fname = NULL ;
 
-static COLOR_TABLE *ctab = nullptr;
-const char *Progname;
-static void usage_exit(int code);
-static char *mask_fname = nullptr;
-static char *insert_fname = nullptr;
-static int insert_label = 0;
-static char *histo_fname = nullptr;
+static int gca_flags = GCA_NO_FLAGS ;
 
-static float scale = 0;
-static int force_inputs = 1;
+static COLOR_TABLE *ctab = NULL ;
+const char *Progname ;
+static void usage_exit(int code) ;
+static char *mask_fname = NULL ;
+static char *insert_fname = NULL ;
+static int  insert_label = 0 ;
+static char *histo_fname = NULL ;
 
-static GCA_PARMS parms;
-static char *seg_dir = "seg_edited.mgz"; // default name of manual edit file
-static char T1_name[STRLEN] = "orig";
-static char *xform_name = nullptr;
-static int prune = 0;
-static float smooth = -1;
-static int gca_inputs = 0;
-static double TRs[MAX_GCA_INPUTS];
-static double TEs[MAX_GCA_INPUTS];
-static double FAs[MAX_GCA_INPUTS];
-static int map_to_flash = 0;
+static float scale = 0 ;
+static int force_inputs = 1 ;
 
-static int ninputs = 1; /* T1 intensity */
-static int navgs = 0;
+static GCA_PARMS parms ;
+static char *seg_dir = "seg_edited.mgz" ; // default name of manual edit file
+static char T1_name[STRLEN] = "orig" ;
+static char *xform_name = NULL;
+static int prune = 0 ;
+static float smooth = -1 ;
+static int gca_inputs = 0 ;
+static double TRs[MAX_GCA_INPUTS] ;
+static double TEs[MAX_GCA_INPUTS] ;
+static double FAs[MAX_GCA_INPUTS] ;
+static int map_to_flash = 0 ;
 
-static char subjects_dir[STRLEN];
-static char *heq_fname = nullptr;
+static int ninputs = 1 ;  /* T1 intensity */
+static int navgs = 0 ;
 
-static char *input_names[MAX_GCA_INPUTS] = {T1_name};
+static char subjects_dir[STRLEN] ;
+static char *heq_fname = NULL ;
+
+static char *input_names[MAX_GCA_INPUTS] =
+  {
+    T1_name
+  } ;
 
 static int do_sanity_check = 0;
 static int do_fix_badsubjs = 0;
@@ -289,16 +293,29 @@ int main(int argc, char *argv[]) {
               MRIreplaceValues(mri_seg, mri_seg, j, 0);
           }
         }
-        if (insert_fname) {
-          MRI *mri_insert;
+        transform = TransformRead(fname);
+        if (!transform)
+          ErrorExit(ERROR_NOFILE, "%s: could not read transform from file %s", Progname, fname);
 
-          sprintf(fname, "%s/%s/mri/%s", subjects_dir, subject_name,
-                  insert_fname);
-          mri_insert = MRIread(fname);
-          if (mri_insert == nullptr)
-            ErrorExit(ERROR_NOFILE,
-                      "%s: could not read volume from %s for insertion",
-                      Progname, insert_fname);
+        configure_transform(transform, mri_inputs, gca);
+        // Here we do 2 things
+        // 1. modify gca direction cosines to
+        // that of the transform destination (both linear and non-linear)
+        // 2. if ras-to-ras transform,
+        // then change it to vox-to-vox transform (linear case)
+
+        // modify transform to store inverse also
+	printf("Inverting transform\n");fflush(stdout);
+        TransformInvert(transform, mri_inputs) ;
+        // verify inverse
+        lta = (LTA *) transform->xform;
+      }
+      else
+      {
+        GCAreinit(mri_inputs, gca);
+        // just use the input value, since dst = src volume
+        transform = TransformAlloc(LINEAR_VOXEL_TO_VOXEL, NULL) ;
+      }
 
           MRIbinarize(mri_insert, mri_insert, 1, 0, insert_label);
           MRIcopyLabel(mri_insert, mri_seg, insert_label);
@@ -698,55 +715,38 @@ int main(int argc, char *argv[]) {
           MRIcopyLabel(mri_insert, mri_seg, insert_label);
           MRIfree(&mri_insert);
         }
-
-        replaceLabels(mri_seg);
-        MRIeraseBorderPlanes(mri_seg, 1);
-
-        // input volume
-        /////////////////////////////////
-        // inputs are T1, PD, .... per subject
-        for (input = 0; input < ninputs; input++) {
-          sprintf(fname, "%s/%s/mri/%s", subjects_dir, subject_name,
-                  input_names[ordering[input]]);
-          if (DIAG_VERBOSE_ON)
-            printf("reading co-registered input from %s...\n", fname);
-          mri_tmp = MRIread(fname);
-          if (!mri_tmp)
-            ErrorExit(ERROR_NOFILE, "%s: could not read T1 data from file %s",
-                      Progname, fname);
-
-          // input check 1
-          if (getSliceDirection(mri_tmp) != MRI_CORONAL) {
-            ErrorExit(ERROR_BADPARM,
-                      "%s: must be in coronal direction, but it is not\n",
-                      fname);
-          }
-          // input check 2
-          if (conform && (mri_tmp->xsize != 1 || mri_tmp->ysize != 1 ||
-                          mri_tmp->zsize != 1)) {
-            ErrorExit(ERROR_BADPARM,
-                      "%s: must have 1mm voxel size, but have (%f, %f, %f)\n",
-                      fname, mri_tmp->xsize, mri_tmp->ysize, mri_tmp->ysize);
-          }
-          // input check 3 is removed c_(ras) != 0 can be handled
-          if (input == 0) {
-            int nframes = ninputs;
-
-            if (gca_flags & GCA_XGRAD)
-              nframes += ninputs;
-            if (gca_flags & GCA_YGRAD)
-              nframes += ninputs;
-            if (gca_flags & GCA_ZGRAD)
-              nframes += ninputs;
-            mri_inputs =
-                MRIallocSequence(mri_tmp->width, mri_tmp->height,
-                                 mri_tmp->depth, mri_tmp->type, nframes);
-            if (!mri_inputs)
-              ErrorExit(ERROR_NOMEMORY,
-                        "%s: could not allocate input volume %dx%dx%dx%d",
-                        mri_tmp->width, mri_tmp->height, mri_tmp->depth,
-                        ninputs);
-            MRIcopyHeader(mri_tmp, mri_inputs);
+        mri_inputs=MRIcopyFrame(mri_tmp, mri_inputs, 0, input) ;
+	if(mri_inputs == NULL) exit(1);
+        MRIfree(&mri_tmp) ;
+      } // end of building inputs
+      ///////////////////////////////////////////////////////////
+      if (xform_name)
+      {
+        sprintf(fname, "%s/%s/mri/transforms/%s",
+                subjects_dir, subject_name, xform_name) ;
+        if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
+          printf("reading transform from %s...\n", fname) ;
+        transform = TransformRead(fname) ;
+        if (!transform)
+          ErrorExit(ERROR_NOFILE, "%s: could not read transform from file %s",
+                    Progname, fname) ;
+        // change the transform to vox-to-vox
+        configure_transform(transform, mri_inputs, gca);
+	printf("Inverting transform\n");fflush(stdout);
+        TransformInvert(transform, mri_inputs) ;
+        if ((transform->type != MORPH_3D_TYPE) &&
+            ((Gdiag & DIAG_SHOW) && DIAG_VERBOSE_ON))
+        {
+          // verify inverse
+          lta = (LTA *) transform->xform;
+          {
+            MATRIX *go = lta->xforms[0].m_L;
+            MATRIX *back = lta->inv_xforms[0].m_L;
+            MATRIX *seki = MatrixMultiply(back, go, NULL);
+            fprintf(stderr,
+                    "You should see the unit matrix to verify the inverse.\n");
+            MatrixPrint(stderr, seki);
+            MatrixFree(&seki);
           }
 
           if (mask_fname) {
@@ -1257,128 +1257,56 @@ static int replaceLabels(MRI *mri_seg) {
   return (NO_ERROR);
 }
 
-// modify transform to vox-to-vox
-static void modify_transform(TRANSFORM *transform, MRI *mri_inputs, GCA *gca) {
-  LTA *lta = nullptr;
-  MATRIX *i_to_r = nullptr, *r_to_i = nullptr, *tmpmat = nullptr, *vox2vox;
-  MRI *mri_buf = nullptr;
-  GCA_MORPH *gcam = nullptr;
-  static int warned = 0;
 
-  // temp buf to get the transform
-  mri_buf = MRIallocHeader(mri_inputs->width, mri_inputs->height,
-                           mri_inputs->depth, mri_inputs->type, 1);
-  MRIcopyHeader(mri_inputs, mri_buf);
+/*
+  Reinitializes the GCA geometry with the transform's target geometry. If the transform
+  has no destination information, the geometry of the source image is used and CRAS is set to
+  the origin. If the transform is a linear RAS->RAS matrix, it is converted to VOX->VOX.
+*/
+static void configure_transform(TRANSFORM *transform, MRI *src, GCA *gca)
+{
+  static bool warned = false;
 
-  //////////////////////////////////////////////////////////////////////////
-  // non-linear transform case
-  //////////////////////////////////////////////////////////////////////////
+  // get transform target geometry
+  VOL_GEOM *geom = nullptr;
   if (transform->type == MORPH_3D_TYPE) {
-    gcam = (GCA_MORPH *)transform->xform;
-    if (gcam->atlas.valid) // means it contains the dst volume information
-    {
-      mri_buf->c_r = gcam->atlas.c_r;
-      mri_buf->c_a = gcam->atlas.c_a;
-      mri_buf->c_s = gcam->atlas.c_s;
-      if (warned == 0) {
-        if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
-          fprintf(stderr, "INFO: modified c_(r,a,s) using the non-linear "
-                          "transform dst value.\n");
-        warned = 1;
-      }
-    } else // this is an old 3d, I should use c_(ras) = 0
-    {
-      mri_buf->c_r = 0;
-      mri_buf->c_a = 0;
-      mri_buf->c_s = 0;
-      if (warned == 0) {
-        if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
-          fprintf(stderr, "INFO: modified c_(r,a,s) = 0.\n");
-        warned = 1;
-      }
-    }
+    geom = &((GCA_MORPH *)transform->xform)->atlas;
+  } else {
+    geom = &((LTA *)transform->xform)->xforms[0].dst;
   }
-  ////////////////////////////////////////////////////////////////////////////
-  /// linear transform case
-  ////////////////////////////////////////////////////////////////////////////
-  else if (transform->type == LINEAR_VOX_TO_VOX) {
-    lta = (LTA *)(transform->xform);
-    // modify using the xform dst
-    if (lta->xforms[0].dst.valid) {
-      mri_buf->c_r = lta->xforms[0].dst.c_r;
-      mri_buf->c_a = lta->xforms[0].dst.c_a;
-      mri_buf->c_s = lta->xforms[0].dst.c_s;
-      if (warned == 0) {
-        if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
-          fprintf(stderr, "INFO: modified c_(r,a,s) using the xform dst.\n");
-        warned = 1;
-      }
-    } else // keep the old behavior
-    {
-      mri_buf->c_r = 0;
-      mri_buf->c_a = 0;
-      mri_buf->c_s = 0;
-      if (warned == 0) {
-        if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
-          fprintf(stderr, "INFO: modified c_(r,a,s) = 0.\n");
-        warned = 1;
-      }
+
+  MRI *target = nullptr;
+  if (geom->valid) {
+    // create target volume with transform target geometry
+    target = MRIallocFromVolGeom(geom, src->type, 1, 1);
+  } else {
+    // if target does not exist, just use source geometry with cras set to origin
+    target = MRIallocHeader(src->width, src->height, src->depth, src->type, 1);
+    MRIcopyHeader(src, target);
+    bool in305space = ((transform->type == LINEAR_RAS_TO_RAS) && (getenv("USE_AVERAGE305")));
+    if (in305space && (!warned)) {
+      fprintf(stdout, "INFO: Using average_305 CRAS. Disable by unsetting USE_AVERAGE305 env variable.\n");
+      warned = true;
     }
-  } else if (transform->type == LINEAR_RAS_TO_RAS) {
-    lta = (LTA *)(transform->xform);
-    // modify using the xform dst
-    if (lta->xforms[0].dst.valid) {
-      mri_buf->c_r = lta->xforms[0].dst.c_r;
-      mri_buf->c_a = lta->xforms[0].dst.c_a;
-      mri_buf->c_s = lta->xforms[0].dst.c_s;
-      if (warned == 0) {
-        if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
-          fprintf(stderr, "INFO: modified c_(r,a,s) using the xform dst\n");
-        warned = 1;
-      }
-    }
-    // dst invalid
-    else if (getenv("USE_AVERAGE305")) // use average_305 value
-                                       // (usually ras-to-ras comes from MNI
-                                       // transform)
-    {
-      mri_buf->c_r = -0.095;
-      mri_buf->c_a = -16.51;
-      mri_buf->c_s = 9.75;
-      if (warned == 0) {
-        if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON) {
-          fprintf(stderr, "INFO: modified c_(r,a,s) using average_305 value\n");
-          fprintf(stderr, "INFO: if this is not preferred, set environment "
-                          "variable NO_AVERAGE305\n");
-        }
-        warned = 1;
-      }
-    } else // keep old behavior
-    {
-      mri_buf->c_r = 0;
-      mri_buf->c_a = 0;
-      mri_buf->c_s = 0;
-      if (warned == 0) {
-        if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
-          fprintf(stderr,
-                  "INFO: xform.dst invalid thus modified c_(r,a,s) = 0.\n");
-        warned = 1;
-      }
-    }
-    /////////////////////////////////////////////////////////////////
-    printf("INFO: original RAS-to-RAS transform\n");
-    MatrixPrint(stdout, lta->xforms[0].m_L);
-    // going from vox->RAS->TalRAS
-    i_to_r = extract_i_to_r(mri_inputs);
-    tmpmat = MatrixMultiply(lta->xforms[0].m_L, i_to_r, NULL);
-    r_to_i = extract_r_to_i(mri_buf);
-    // going from TalRAS -> voxel
-    vox2vox = MatrixMultiply(r_to_i, tmpmat, NULL);
-    printf("INFO: modified VOX-to-VOX transform\n");
-    MatrixPrint(stdout, vox2vox);
-    // store it
+    target->c_r = in305space ? -0.095 : 0.0;
+    target->c_a = in305space ? -16.51 : 0.0;
+    target->c_s = in305space ?   9.75 : 0.0;
+  }
+
+  // reinit the GCA with new geometry
+  GCAreinit(target, gca);
+
+  // if transform is ras->ras, convert to vox->vox
+  if (transform->type == LINEAR_RAS_TO_RAS) {
+    LTA *lta = (LTA *)transform->xform;
+    // vox -> RAS -> TalRAS
+    MATRIX *i_to_r = extract_i_to_r(src);
+    MATRIX *tmpmat = MatrixMultiply(lta->xforms[0].m_L, i_to_r, NULL);
+    MATRIX *r_to_i = extract_r_to_i(target);
+    // TalRAS -> vox
+    MATRIX *vox2vox = MatrixMultiply(r_to_i, tmpmat,NULL );
     MatrixCopy(vox2vox, lta->xforms[0].m_L);
-    // now mark it as vox-to-vox
+    // mark it as vox-to-vox
     transform->type = LINEAR_VOX_TO_VOX;
     // free up memory
     MatrixFree(&r_to_i);
@@ -1386,13 +1314,11 @@ static void modify_transform(TRANSFORM *transform, MRI *mri_inputs, GCA *gca) {
     MatrixFree(&tmpmat);
     MatrixFree(&vox2vox);
   }
-  /////////////////////////////////////////////////////////////////
-  // OK now we know what the target c_(ras) should be
-  // we reset c_(ras) value for GCA node and priors
-  GCAreinit(mri_buf, gca);
 
-  MRIfree(&mri_buf);
+  MRIfree(&target);
 }
+
+
 #define WSIZE 9
 #define WHALF ((WSIZE - 1) / 2)
 static int lateralize_hypointensities(MRI *mri_seg) {
