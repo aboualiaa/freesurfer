@@ -60,11 +60,11 @@ before_install:
   - ../../git-tools/git-restore-mtime && popd
   - pushd ./packages/spdlog
   - ../../git-tools/git-restore-mtime && popd
-  - if [ -d ./packages/hpx ]; then
+  - if [ -d ./packages/hpx/cmake-build-release ]; then
     echo "cached hpx found -- nothing to download, installing";
-    pushd ./packages/hpx/cmake-build-release;
+    cd ./packages/hpx/cmake-build-release;
     make -j$(nproc) install;
-    popd;
+    cd ../../../;
     else
     git clone https://github.com/STEllAR-GROUP/hpx.git packages/hpx;
     cd ./packages/hpx;
