@@ -48,24 +48,23 @@ before_install:
   - git clone https://github.com/MestreLion/git-tools.git
   - export PATH="./git-tools:$PATH"
   - git-restore-mtime
-  - cd ./packages/GSL
-  - ../../git-tools/git-restore-mtime
-  - cd ../abseil-cpp
-  - ../../git-tools/git-restore-mtime
-  - cd ../benchmark
-  - ../../git-tools/git-restore-mtime
-  - cd ../googletest
-  - ../../git-tools/git-restore-mtime
-  - cd ../fmt
-  - ../../git-tools/git-restore-mtime
-  - cd ../spdlog
-  - ../../git-tools/git-restore-mtime
-  - cd ../../
+  - pushd ./packages/GSL
+  - ../../git-tools/git-restore-mtime && popd
+  - push ./packages/abseil-cpp
+  - ../../git-tools/git-restore-mtime && popd
+  - push ./packages/benchmark
+  - ../../git-tools/git-restore-mtime && popd
+  - push ./packages/googletest
+  - ../../git-tools/git-restore-mtime && popd
+  - push ./packages/fmt
+  - ../../git-tools/git-restore-mtime && popd
+  - push ./packages/spdlog
+  - ../../git-tools/git-restore-mtime && popd
   - if [ -d ./packages/hpx ]; then
     echo "cached hpx found -- nothing to download, installing";
-    cd ./packages/hpx/cmake-build-release;
+    pushd ./packages/hpx/cmake-build-release;
     make -j$(nproc) install;
-    cd ../../../;
+    popd;
     else
     git clone https://github.com/STEllAR-GROUP/hpx.git packages/hpx;
     cd ./packages/hpx;

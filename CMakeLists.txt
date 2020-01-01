@@ -123,7 +123,7 @@ find_package(Armadillo)
 find_package(PETSC)
 
 # --- boost ---
-set(Boost_NO_BOOST_CMAKE ON) # TODO: remove after updating boost from 1.71
+#set(Boost_NO_BOOST_CMAKE ON) # TODO: remove after updating boost from 1.71
 set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost REQUIRED COMPONENTS program_options unit_test_framework filesystem log)
 
