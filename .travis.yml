@@ -79,7 +79,7 @@ script:
   - mkdir -p cmake-build-release && cd ./cmake-build-release
   - cmake -G Ninja -DGEMS_BUILD_MATLAB=OFF ..
   - cmake -G Ninja -DGEMS_BUILD_MATLAB=OFF .. # again so that appleclang finds openMP
-  - ninja
+  - timeout 2m ninja
 
 # os: linux
 #      addons:
