@@ -50,15 +50,15 @@ before_install:
   - git-restore-mtime
   - pushd ./packages/GSL
   - ../../git-tools/git-restore-mtime && popd
-  - push ./packages/abseil-cpp
+  - pushd ./packages/abseil-cpp
   - ../../git-tools/git-restore-mtime && popd
-  - push ./packages/benchmark
+  - pushd ./packages/benchmark
   - ../../git-tools/git-restore-mtime && popd
-  - push ./packages/googletest
+  - pushd ./packages/googletest
   - ../../git-tools/git-restore-mtime && popd
-  - push ./packages/fmt
+  - pushd ./packages/fmt
   - ../../git-tools/git-restore-mtime && popd
-  - push ./packages/spdlog
+  - pushd ./packages/spdlog
   - ../../git-tools/git-restore-mtime && popd
   - if [ -d ./packages/hpx ]; then
     echo "cached hpx found -- nothing to download, installing";
