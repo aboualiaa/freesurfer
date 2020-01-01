@@ -36,35 +36,36 @@
 //#define BRIGHT_LABEL         130
 //#define BRIGHT_BORDER_LABEL  100
 
-static int extract = 0;
-static int verbose = 0;
-static int wsize = 11;
-static float pct = 0.8;
-static float pslope = 1.0f;
-static float nslope = 1.0f;
-static float wm_low = 90;
-static float wm_hi = 125;
-static float gray_hi = 100;
-static float gray_low = 30;
-static int gray_low_set = 0;
-static int niter = 1;
-static int gray_hi_set = 0;
-static int wm_hi_set = 0;
-static int wm_low_set = 0;
+static int extract = 0 ;
+static int  verbose = 0 ;
+static int wsize = 11 ;
+double wsizemm = 0;
+static float pct = 0.8 ;
+static float pslope = 1.0f ;
+static float nslope = 1.0f ;
+static float wm_low = 90 ;
+static float wm_hi = 125 ;
+static float gray_hi = 100 ;
+static float gray_low = 30 ;
+static int gray_low_set = 0 ;
+static int niter = 1 ;
+static int gray_hi_set = 0 ;
+static int wm_hi_set = 0 ;
+static int wm_low_set = 0 ;
 
-static int scan_type = MRI_UNKNOWN;
-static int thickness = 4;
-static int thicken = 1;
-static int nsegments = 20;
-static int fill_bg = 0;
-static int fill_ventricles = 0;
+static int scan_type = MRI_UNKNOWN ;
+static int thickness = 4 ;
+static int thicken = 1 ;
+static int nsegments = 20 ;
+static int fill_bg = 0 ;
+static int fill_ventricles = 0 ;
 
-static int keep_edits = 0;
+static int keep_edits = 0 ;
 
-static int auto_detect_stats = 1;
-static int no1d_remove = 0;
-static int log_stats = 1;
-static void usage_exit(int code);
+static int auto_detect_stats =  1 ;
+static int no1d_remove = 0 ;
+static int log_stats = 1 ;
+static void  usage_exit(int code) ;
 char *segmentdatfile = "segment.dat";
 
 #define BLUR_SIGMA 0.25f
@@ -145,18 +146,25 @@ int main(int argc, char *argv[]) {
   mri_src = MRIread(input_file_name);
   if (!mri_src)
     ErrorExit(ERROR_NOFILE, "%s: could not read source volume from %s",
-              Progname, input_file_name);
-  MRIaddCommandLine(mri_src, cmdline);
-  if (mri_src->type != MRI_UCHAR) {
-    MRI *mri_tmp;
-    printf("changing input type from %d to UCHAR\n", mri_src->type);
-    mri_tmp = MRIchangeType(mri_src, MRI_UCHAR, 0, 1000, 1);
-    MRIfree(&mri_src);
-    mri_src = mri_tmp;
+              Progname, input_file_name) ;
+  MRIaddCommandLine(mri_src, cmdline) ;
+  if (mri_src->type != MRI_UCHAR)
+  {
+    MRI *mri_tmp ;
+    printf("changing input type from %d to UCHAR\n", mri_src->type) ;
+    mri_tmp = MRIchangeType(mri_src, MRI_UCHAR, 0, 1000, 1) ;
+    MRIfree(&mri_src) ;
+    mri_src = mri_tmp ;
   }
 
-  if (thicken > 1) {
-    mri_dst = MRIcopy(mri_src, NULL);
+  if(wsizemm > 0){
+    double voxres = (mri_src->xsize + mri_src->ysize + mri_src->zsize)/3.0;
+    wsize = round(wsizemm/voxres);
+    printf("wsizemm = %g, voxres = %g, wsize = %d\n",wsizemm,voxres,wsize);
+  }
+
+  if (thicken > 1)  {
+    mri_dst = MRIcopy(mri_src, NULL) ;
     /*    MRIfilterMorphology(mri_dst, mri_dst) ;*/
     if (no1d_remove == 0) {
       printf("removing 1-dimensional structures...\n");
@@ -561,23 +569,31 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "seg")) {
     segfilename = argv[2];
     // See docs for MRIclassifyAmbiguousNonPar() for meaning of Qwm, etc
-    sscanf(argv[3], "%lf", &Qwm);
-    sscanf(argv[4], "%lf", &Qctx);
-    sscanf(argv[5], "%d", &NdilWM);
-    sscanf(argv[6], "%d", &NdilCtx);
-    printf("Using aseg %s\n", segfilename);
-    printf("  params %lf %lf %d %d\n", Qwm, Qctx, NdilWM, NdilCtx);
-    nargs = 5;
-  } else if (strcmp(option, "polvwsize") == 0) {
-    sscanf(argv[2], "%d", &polvwsize);
-    nargs = 1;
-  } else if (strcmp(option, "polvlen") == 0) {
-    sscanf(argv[2], "%f", &polvlen);
-    nargs = 1;
-  } else if (strcmp(option, "diagno") == 0 || strcmp(option, "diag_no") == 0) {
-    Gdiag_no = atoi(argv[2]);
-    nargs = 1;
-  } else if (strcmp(option, "diag-write") == 0) {
+    sscanf(argv[3],"%lf",&Qwm);
+    sscanf(argv[4],"%lf",&Qctx);
+    sscanf(argv[5],"%d",&NdilWM);
+    sscanf(argv[6],"%d",&NdilCtx);
+    printf("Using aseg %s\n",segfilename);
+    printf("  params %lf %lf %d %d\n",Qwm,Qctx,NdilWM,NdilCtx);
+    nargs = 5 ;
+  }
+  else if (strcmp(option, "polvwsize")==0){
+    sscanf(argv[2],"%d",&polvwsize);
+    nargs = 1 ;
+  }
+  else if (strcmp(option, "polvlen")==0){
+    sscanf(argv[2],"%f",&polvlen);
+    nargs = 1 ;
+  }
+  else if (strcmp(option, "wsizemm")==0){
+    sscanf(argv[2],"%lf",&wsizemm);
+    nargs = 1 ;
+  }
+  else if (strcmp(option, "diagno")==0 || strcmp(option, "diag_no")==0){
+    Gdiag_no = atoi(argv[2]) ;
+    nargs = 1 ;
+  }
+  else if (strcmp(option, "diag-write") == 0 ){
     Gdiag |= DIAG_WRITE;
   } else if (strcmp(option, "diag-verbose") == 0) {
     Gdiag |= DIAG_VERBOSE;
