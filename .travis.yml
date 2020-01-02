@@ -75,7 +75,7 @@ before_install:
     fi
 
 script:
-  - sudo xcode-select -s /Applications/Xcode.app
+  - sudo xcode-select -r # s /Applications/Xcode.app
   - mkdir -p cmake-build-release && cd ./cmake-build-release
   - cmake -G Ninja -DGEMS_BUILD_MATLAB=OFF ..
   - cmake -G Ninja -DGEMS_BUILD_MATLAB=OFF .. # again so that appleclang finds openMP
