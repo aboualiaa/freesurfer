@@ -46,20 +46,11 @@ before_install:
   - tar -xzvf ninja.tar.gz
   - sudo cp ./ninja-1.9.0.g99df1.kitware.dyndep-1.jobserver-1_x86_64-apple-darwin/ninja /usr/local/bin/ninja
   - git clone https://github.com/MestreLion/git-tools.git
-  - export PATH="./git-tools:$PATH"
+  - export PATH="$(pwd)/git-tools:$PATH"
   - git-restore-mtime
-  - pushd ./packages/GSL
-  - ../../git-tools/git-restore-mtime && popd
-  - pushd ./packages/abseil-cpp
-  - ../../git-tools/git-restore-mtime && popd
-  - pushd ./packages/benchmark
-  - ../../git-tools/git-restore-mtime && popd
-  - pushd ./packages/googletest
-  - ../../git-tools/git-restore-mtime && popd
-  - pushd ./packages/fmt
-  - ../../git-tools/git-restore-mtime && popd
-  - pushd ./packages/spdlog
-  - ../../git-tools/git-restore-mtime && popd
+  - LAST_PATH=$(pwd)
+  - for d in ./packages/* ; do (cd "$d" && git-restore-mtime); done
+  - cd $LAST_PATH
   - if [ -d ./packages/hpx/cmake-build-release ]; then
     echo "cached hpx found -- nothing to download, installing";
     cd ./packages/hpx/cmake-build-release;
