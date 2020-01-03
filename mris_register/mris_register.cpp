@@ -765,49 +765,73 @@ static int get_option(int argc, char *argv[]) {
     curvature_names[2] = argv[2];
     MRISsetCurvatureName(2, curvature_names[2]);
     fprintf(stderr, "using %s as curvature function for surface 2.\n",
-            curvature_names[2]);
-    nargs = 1;
+            curvature_names[2]) ;
+    nargs = 1 ;
   }
-
-  else if (!stricmp(option, "lm")) {
-    parms.integration_type = INTEGRATE_LINE_MINIMIZE;
-    fprintf(stderr, "integrating with line minimization\n");
-  } else if (!stricmp(option, "search")) {
-    parms.integration_type = INTEGRATE_LM_SEARCH;
-    fprintf(stderr, "integrating with binary search line minimization\n");
-  } else if (!stricmp(option, "dt")) {
-    parms.dt = atof(argv[2]);
-    parms.base_dt = .2 * parms.dt;
+  else if (!stricmp(option, "threads")){
+    int nthreads;
+    sscanf(argv[2],"%d",&nthreads);
+    #ifdef _OPENMP
+    omp_set_num_threads(nthreads);
+    #endif
     nargs = 1;
-    fprintf(stderr, "momentum with dt = %2.2f\n", parms.dt);
-  } else if (!stricmp(option, "area")) {
-    use_defaults = 0;
-    sscanf(argv[2], "%f", &parms.l_area);
-    nargs = 1;
-    fprintf(stderr, "using l_area = %2.3f\n", parms.l_area);
-  } else if (!stricmp(option, "parea")) {
-    use_defaults = 0;
-    sscanf(argv[2], "%f", &parms.l_parea);
-    nargs = 1;
-    fprintf(stderr, "using l_parea = %2.3f\n", parms.l_parea);
-  } else if (!stricmp(option, "nlarea")) {
-    use_defaults = 0;
-    sscanf(argv[2], "%f", &parms.l_nlarea);
-    nargs = 1;
-    fprintf(stderr, "using l_nlarea = %2.3f\n", parms.l_nlarea);
-  } else if (!stricmp(option, "spring")) {
-    use_defaults = 0;
-    sscanf(argv[2], "%f", &parms.l_spring);
-    nargs = 1;
-    fprintf(stderr, "using l_spring = %2.3f\n", parms.l_spring);
-  } else if (!stricmp(option, "corr")) {
-    use_defaults = 0;
-    sscanf(argv[2], "%f", &parms.l_corr);
-    nargs = 1;
-    fprintf(stderr, "using l_corr = %2.3f\n", parms.l_corr);
-  } else if (!stricmp(option, "remove_negative")) {
-    remove_negative = atoi(argv[2]);
-    nargs = 1;
+  } 
+  else if (!stricmp(option, "lm"))
+  {
+    parms.integration_type = INTEGRATE_LINE_MINIMIZE ;
+    fprintf(stderr, "integrating with line minimization\n") ;
+  }
+  else if (!stricmp(option, "search"))
+  {
+    parms.integration_type = INTEGRATE_LM_SEARCH ;
+    fprintf(stderr, "integrating with binary search line minimization\n") ;
+  }
+  else if (!stricmp(option, "dt"))
+  {
+    parms.dt = atof(argv[2]) ;
+    parms.base_dt = .2*parms.dt ;
+    nargs = 1 ;
+    fprintf(stderr, "momentum with dt = %2.2f\n", parms.dt) ;
+  }
+  else if (!stricmp(option, "area"))
+  {
+    use_defaults = 0 ;
+    sscanf(argv[2], "%f", &parms.l_area) ;
+    nargs = 1 ;
+    fprintf(stderr, "using l_area = %2.3f\n", parms.l_area) ;
+  }
+  else if (!stricmp(option, "parea"))
+  {
+    use_defaults = 0 ;
+    sscanf(argv[2], "%f", &parms.l_parea) ;
+    nargs = 1 ;
+    fprintf(stderr, "using l_parea = %2.3f\n", parms.l_parea) ;
+  }
+  else if (!stricmp(option, "nlarea"))
+  {
+    use_defaults = 0 ;
+    sscanf(argv[2], "%f", &parms.l_nlarea) ;
+    nargs = 1 ;
+    fprintf(stderr, "using l_nlarea = %2.3f\n", parms.l_nlarea) ;
+  }
+  else if (!stricmp(option, "spring"))
+  {
+    use_defaults = 0 ;
+    sscanf(argv[2], "%f", &parms.l_spring) ;
+    nargs = 1 ;
+    fprintf(stderr, "using l_spring = %2.3f\n", parms.l_spring) ;
+  }
+  else if (!stricmp(option, "corr"))
+  {
+    use_defaults = 0 ;
+    sscanf(argv[2], "%f", &parms.l_corr) ;
+    nargs = 1 ;
+    fprintf(stderr, "using l_corr = %2.3f\n", parms.l_corr) ;
+  }
+  else if (!stricmp(option, "remove_negative"))
+  {
+    remove_negative = atoi(argv[2]) ;
+    nargs = 1 ;
     fprintf(stderr, "%sremoving negative triangles with iterative smoothing\n",
             remove_negative ? "" : "not ");
   } else if (!stricmp(option, "curv")) {

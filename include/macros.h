@@ -32,10 +32,13 @@
 #include "proto.h"
 #include <math.h>
 
+#define DEFINE_LOG2 static double log2(double x) { return log(x) / log(2.0); }
+	// defining log2 as a macro has problems with other header files that also define it as a function taking an integer arg 
+	
 #ifdef _MSDOS
 #include <math.h>
-#define exp2(f) pow(2.0, (f))
-#define log2(f) (log(f) / log(2.0))
+#define exp2(f)     pow(2.0,(f))
+DEFINE_LOG2
 #ifndef M_E
 #define M_E 2.718282 /* exp(1) */
 #endif
@@ -109,20 +112,19 @@
 #define STRCPALLOC(str) strcpy(STRALLOC(str), str)
 
 #ifdef Linux
-#define exp2(f) pow(2.0, (f))
-#define log2(f) (log(f) / log(2.0))
+#define exp2(f)     pow(2.0,(f))
 #endif
 
 #ifdef IRIX
-#define exp2(f) pow(2.0, (f))
-#define log2(f) (log(f) / log(2.0))
+#define exp2(f)     pow(2.0,(f))
+DEFINE_LOG2
 #endif
 
 #ifdef SunOS
-#define exp2(f) pow(2.0, (f))
-#define log2(f) (log(f) / log(2.0))
-#define ceilf(f) (int)ceil((double)f)
-#define floorf(f) (int)floor((double)f)
+#define exp2(f)     pow(2.0,(f))
+DEFINE_LOG2
+#define ceilf(f)    (int)ceil((double)f)
+#define floorf(f)   (int)floor((double)f)
 #endif
 
 #define ISPOW2(n) (exp2((float)nint(log2((float)n))) == (float)n)
