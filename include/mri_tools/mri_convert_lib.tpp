@@ -171,7 +171,7 @@ auto checkNorm = [](std::string_view opt, bool &flag) {
 
 namespace fs::util::io {
 auto checkFileReadable = [](std::string_view file_name) {
-  std::ifstream fptmp(file_name);
+  std::ifstream fptmp(file_name.data());
   if (!fptmp.is_open()) {
     auto message =
         fmt::format("ERROR: could not open {} for reading\n", file_name);
@@ -181,7 +181,7 @@ auto checkFileReadable = [](std::string_view file_name) {
 };
 
 auto checkFileWriteable = [](std::string_view file_name) {
-  std::ofstream fptmp(file_name);
+  std::ofstream fptmp(file_name.data());
   if (!fptmp.is_open()) {
     auto message =
         fmt::format("ERROR: could not open {} for writing\n", file_name);
