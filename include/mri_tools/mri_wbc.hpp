@@ -12,6 +12,7 @@
 
 //#include <hpx/hpx_start.hpp>
 
+#include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
 
 #include "mri2.h"
