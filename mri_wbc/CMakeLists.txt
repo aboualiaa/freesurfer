@@ -2,10 +2,8 @@ project(mri_wbc)
 
 include_directories(${FS_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
-add_hpx_executable(mri_wbc
-                   SOURCES mri_wbc.cpp
-                   DEPENDENCIES utils Boost::program_options benchmark fmt
-                   COMPONENT_DEPENDENCIES iostreams)
+add_executable(mri_wbc mri_wbc.cpp)
+target_link_libraries(mri_wbc utils Boost::program_options Boost::filesystem benchmark fmt)
 #target_link_libraries(mri_wbc utils ${Boost_LIBRARIES} benchmark fmt)
 install(TARGETS mri_wbc DESTINATION bin)
 
