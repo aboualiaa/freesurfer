@@ -42,15 +42,8 @@ jobs:
 before_install:
   - alias python='python3'
   - export PATH="/usr/local/opt/python/libexec/bin:$PATH"
-  - curl -fsSL https://github.com/Kitware/ninja/releases/download/v1.9.0.g99df1.kitware.dyndep-1.jobserver-1/ninja-1.9.0.g99df1.kitware.dyndep-1.jobserver-1_x86_64-apple-darwin.tar.gz -o ninja.tar.gz
-  - tar -xzvf ninja.tar.gz
-  - sudo cp ./ninja-1.9.0.g99df1.kitware.dyndep-1.jobserver-1_x86_64-apple-darwin/ninja /usr/local/bin/ninja
-  - git clone https://github.com/MestreLion/git-tools.git
-  - export PATH="$(pwd)/git-tools:$PATH"
-  - git-restore-mtime
-  - LAST_PATH=$(pwd)
-  - for d in ./packages/* ; do (cd "$d" && git-restore-mtime); done
-  - cd $LAST_PATH
+  - ./ci-scripts/install-ninja.sh
+  - ./ci-scripts/restore-mtime.sh
 #  - ./ci-scripts/install-hpx.sh
 
 script:
