@@ -51,7 +51,7 @@ before_install:
   - LAST_PATH=$(pwd)
   - for d in ./packages/* ; do (cd "$d" && git-restore-mtime); done
   - cd $LAST_PATH
-  - ./ci-scripts/install-hpx.sh
+#  - ./ci-scripts/install-hpx.sh
 
 script:
   - sudo xcode-select -r # s /Applications/Xcode.app
