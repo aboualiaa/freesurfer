@@ -1175,9 +1175,14 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%ld", &seed);
       nargsused = 1;
-    } else if (!strcasecmp(option, "--min-dist")) {
-      if (nargc < 4)
-        CMDargNErr(option, 4);
+    } 
+    else if (!strcasecmp(option, "--gdiag_no")) {
+      if (nargc < 1) CMDargNErr(option,1);
+      sscanf(pargv[0],"%d",&Gdiag_no);
+      nargsused = 1;
+    } 
+    else if (!strcasecmp(option, "--min-dist")) {
+      if(nargc < 4) CMDargNErr(option,4);
       surf1 = MRISread(pargv[0]);
       if (surf1 == nullptr)
         exit(1);
@@ -1272,12 +1277,11 @@ static void print_usage() {
   printf("   --xyz-rms xyzrmsfile : compute and save rms diff between xyz\n");
   printf("   --angle-rms anglermsfile : compute angle on sphere between xyz\n");
   printf("   --seed seed : set random seed for degenerate normals\n");
-  printf("   --min-dist surf1 surf2 mindist : compute vertex-by-vert RMS "
-         "distance between surfs\n");
-  printf("     surfs do not need to have the same number of vertices. Output "
-         "on surf2\n");
+  printf("   --min-dist surf1 surf2 exactflag mindist : compute vertex-by-vert RMS distance between surfs\n");
+  printf("     surfs do not need to have the same number of vertices. Output on surf2\n");
   printf("\n");
   printf("   --debug       turn on debugging\n");
+  printf("   --gdiag_no Gdiag_no\n");
   printf("   --checkopts   don't run anything, just check options and exit\n");
   printf("   --help        print out information on how to use program\n");
   printf("   --version     print out version and exit\n");

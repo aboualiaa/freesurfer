@@ -661,13 +661,12 @@ static void check_options() {
     }
     ctab2 = CTABalloc(ctab->nentries);
     nlabels = 0;
-    for (n = 0; n < ctab->nentries; n++) {
-      if (strlen(ctab->entries[n]->name) == 0)
-        continue;
-      sprintf(tmpstr, "%s/%s.%s.label", labeldir, hemi, ctab->entries[n]->name);
-      if (!fio_FileExistsReadable(tmpstr))
-        continue;
-      printf("%2d %s\n", n, tmpstr);
+    for (n=0; n<ctab->nentries; n++) {
+      if(ctab->entries[n] == NULL) continue;
+      if (strlen(ctab->entries[n]->name) == 0) continue;
+      sprintf(tmpstr,"%s/%s.%s.label",labeldir,hemi,ctab->entries[n]->name);
+      if(!fio_FileExistsReadable(tmpstr)) continue;
+      printf("%2d %s\n",n,tmpstr);
       LabelFiles[nlabels] = strcpyalloc(tmpstr);
       strcpy(ctab2->entries[nlabels]->name, ctab->entries[n]->name);
       ctab2->entries[nlabels]->ri = ctab->entries[n]->ri;

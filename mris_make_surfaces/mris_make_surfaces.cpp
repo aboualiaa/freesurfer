@@ -2327,60 +2327,74 @@ static int get_option(int argc, char *argv[]) {
     nargs = 1;
   } else if (!stricmp(option, "T2_max_inside")) {
     T2_max_inside_set = 1;
-    T2_max_inside = atof(argv[2]);
-    T2_max_set = 1;
-    fprintf(
-        stderr,
-        "using max T2 gray matter (interior and exterior) threshold %2.1f\n",
-        T2_max_inside);
-    nargs = 1;
-  } else if (!stricmp(option, "T2_max_outside")) {
-    T2_max_outside = atof(argv[2]);
-    T2_max_set = 1;
-    fprintf(stderr, "using max T2 gray matter exterior threshold %2.1f\n",
-            T2_max_outside);
-    nargs = 1;
-  } else if (!stricmp(option, "T2_min_outside")) {
-    T2_min_outside = atof(argv[2]);
-    fprintf(stderr, "using min T2 exterior gray matter threshold %2.1f\n",
-            T2_min_outside);
-    nargs = 1;
-  } else if (!stricmp(option, "T2_max_outside")) {
-    T2_max_outside = atof(argv[2]);
-    fprintf(stderr, "using max T2 exterior gray matter threshold %2.1f\n",
-            T2_max_outside);
-    nargs = 1;
-  } else if (!stricmp(option, "grad_dir")) {
-    int i = atoi(argv[2]);
-    parms.grad_dir = i < 0 ? -1 : i > 0 ? 1 : 0;
-    fprintf(stderr, "setting grad dir to %d\n", parms.grad_dir);
-    nargs = 1;
-  } else if (!stricmp(option, "ct")) {
-    printf("reading color table from %s\n", argv[2]);
-    ctab = CTABreadASCII(argv[2]);
-    nargs = 1;
-  } else if (!stricmp(option, "soap")) {
-    parms.smooth_intersections = 1;
-    printf("using soap bubble smoothing to remove vertex intersections\n");
-  } else if (!stricmp(option, "read_pinch")) {
-    read_pinch_fname = argv[2];
-    printf("reading pinch initialization from %s\n", read_pinch_fname);
-    nargs = 1;
-  } else if (!stricmp(option, "pial_offset")) {
-    pial_target_offset = atof(argv[2]);
-    fprintf(stderr, "offseting pial target vals by %2.2f\n",
-            pial_target_offset);
-    nargs = 1;
-  } else if (!stricmp(option, "white_offset")) {
-    white_target_offset = atof(argv[2]);
-    fprintf(stderr, "offseting white target vals by %2.0f\n",
-            white_target_offset);
-    nargs = 1;
-  } else if (!stricmp(option, "both")) {
-    remove_contra = 0;
-    fprintf(stderr, "not removing contralateral hemi\n");
-  } else if (!stricmp(option, "nsigma") || !stricmp(option, "nsigmas")) {
-    nsigma = atof(argv[2]);
+    T2_max_inside = atof(argv[2]) ; T2_max_set = 1 ;
+    fprintf(stderr,  "using max T2 gray matter (interior and exterior) threshold %2.1f\n", T2_max_inside) ;
+    nargs = 1 ;
+  }
+  else if (!stricmp(option, "T2_max_outside"))
+  {
+    T2_max_outside = atof(argv[2]) ; T2_max_set = 1 ;
+    fprintf(stderr,  "using max T2 gray matter exterior threshold %2.1f\n", T2_max_outside) ;
+    nargs = 1 ;
+  }
+  else if (!stricmp(option, "T2_min_outside"))
+  {
+    T2_min_outside = atof(argv[2]) ;
+    fprintf(stderr,  "using min T2 exterior gray matter threshold %2.1f\n", T2_min_outside) ;
+    nargs = 1 ;
+  }
+  else if (!stricmp(option, "T2_min_outside"))
+  {
+    T2_min_outside = atof(argv[2]) ;
+    fprintf(stderr,  "using max T2 exterior gray matter threshold %2.1f\n", T2_min_outside) ;
+    nargs = 1 ;
+  }
+  else if (!stricmp(option, "grad_dir"))
+  {
+    int i = atoi(argv[2]) ;
+    parms.grad_dir =  i < 0 ? -1 : i > 0 ? 1 : 0 ;
+    fprintf(stderr,  "setting grad dir to %d\n", parms.grad_dir) ;
+    nargs = 1 ;
+  }
+  else if (!stricmp(option, "ct"))
+  {
+    printf("reading color table from %s\n", argv[2]) ;
+    ctab = CTABreadASCII(argv[2]) ;
+    nargs = 1 ;
+  }
+  else if (!stricmp(option, "soap"))
+  {
+    parms.smooth_intersections = 1 ;
+    printf("using soap bubble smoothing to remove vertex intersections\n") ;
+  }
+  else if (!stricmp(option, "read_pinch"))
+  {
+    read_pinch_fname = argv[2] ;
+    printf("reading pinch initialization from %s\n", read_pinch_fname) ;
+    nargs = 1 ;
+  }
+  else if (!stricmp(option, "pial_offset"))
+  {
+    pial_target_offset = atof(argv[2]) ;
+    fprintf(stderr,  "offseting pial target vals by %2.2f\n",
+            pial_target_offset) ;
+    nargs = 1 ;
+  }
+  else if (!stricmp(option, "white_offset"))
+  {
+    white_target_offset = atof(argv[2]) ;
+    fprintf(stderr,  "offseting white target vals by %2.0f\n",
+            white_target_offset) ;
+    nargs = 1 ;
+  }
+  else if (!stricmp(option, "both"))
+  {
+    remove_contra = 0 ;
+    fprintf(stderr,  "not removing contralateral hemi\n") ;
+  }
+  else if (!stricmp(option, "nsigma") || !stricmp(option, "nsigmas"))
+  {
+    nsigma = atof(argv[2]) ;
     fprintf(stderr,
             "using dura threshold of %2.2f sigmas from mean (default=2)\n",
             nsigma);

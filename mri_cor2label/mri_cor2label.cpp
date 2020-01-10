@@ -112,7 +112,8 @@ int main(int argc, char *argv[]);
 char *infile;
 char *labelfile;
 char *volfile;
-int labelid;
+int  labelid;
+int DoStat;
 char *hemi, *SUBJECTS_DIR;
 char *surfname = "white";
 MRI *mri;
@@ -128,11 +129,13 @@ float xsum, ysum, zsum;
 char tmpstr[2000];
 MRIS *surf = nullptr;
 
+
 /*----------------------------------------------------*/
 int main(int argc, char **argv) {
   FILE *fp;
-  int nargs, nv, nth;
-  MATRIX *vox2rastkr = nullptr, *crs = nullptr, *xyz = nullptr;
+  int nargs,nv,nth;
+  MATRIX *vox2rastkr=NULL, *crs=NULL, *xyz=NULL;
+  double voxval;
 
   /* rkt: check for and handle version tag */
   nargs = handle_version_option(
@@ -197,42 +200,51 @@ int main(int argc, char **argv) {
   ysum = 0.0;
   zsum = 0.0;
   nth = -1;
-  for (zi = 0; zi < mri->depth; zi++) {
-    for (yi = 0; yi < mri->height; yi++) {
-      for (xi = 0; xi < mri->width; xi++) {
-        nth++;
+  for (zi=0; zi < mri->depth; zi++) {
+    for (yi=0; yi < mri->height; yi++) {
+      for (xi=0; xi < mri->width; xi++) {
+	nth++;
 
-        c = (int)MRIgetVoxVal(mri, xi, yi, zi, 0);
-        if (c != labelid)
-          continue;
+        voxval = MRIgetVoxVal(mri,xi,yi,zi,0);
 
-        if (surf == nullptr) {
-          crs->rptr[1][1] = xi;
-          crs->rptr[2][1] = yi;
-          crs->rptr[3][1] = zi;
-          crs->rptr[4][1] = 1;
-          xyz = MatrixMultiply(vox2rastkr, crs, xyz);
-          x = xyz->rptr[1][1];
-          y = xyz->rptr[2][1];
-          z = xyz->rptr[3][1];
-          lb->lv[nlabel].vno = -1;
-        } else {
-          x = surf->vertices[nth].x;
-          y = surf->vertices[nth].y;
-          z = surf->vertices[nth].z;
-          lb->lv[nlabel].vno = nth;
-        }
-        if (verbose)
-          printf("%5d   %3d %3d %3d   %6.2f %6.2f %6.2f \n", nlabel, xi, yi, zi,
-                 x, y, z);
+	if(DoStat == 0){
+	  c = (int)voxval;
+	  if(c != labelid) continue;
+	}
+	else {
+	  if(voxval == 0) continue;
+	  lb->lv[nlabel].stat = voxval;
+	}
 
-        lb->lv[nlabel].x = x;
-        lb->lv[nlabel].y = y;
-        lb->lv[nlabel].z = z;
-        nlabel++;
-        xsum += x;
-        ysum += y;
-        zsum += z;
+	if(surf == NULL){
+	  crs->rptr[1][1] = xi;
+	  crs->rptr[2][1] = yi;
+	  crs->rptr[3][1] = zi;
+	  crs->rptr[4][1] = 1;
+	  xyz = MatrixMultiply(vox2rastkr,crs,xyz);
+	  x = xyz->rptr[1][1];
+	  y = xyz->rptr[2][1];
+	  z = xyz->rptr[3][1];
+	  lb->lv[nlabel].vno = -1;
+	}
+	else {
+	  x = surf->vertices[nth].x;
+	  y = surf->vertices[nth].y;
+	  z = surf->vertices[nth].z;
+	  lb->lv[nlabel].vno = nth;
+	}
+	if (verbose)
+	  printf("%5d   %3d %3d %3d   %6.2f %6.2f %6.2f \n",
+		 nlabel,xi,yi,zi,x,y,z);
+
+	lb->lv[nlabel].x = x;
+	lb->lv[nlabel].y = y;
+	lb->lv[nlabel].z = z;
+	nlabel ++;
+	xsum += x;
+	ysum += y;
+	zsum += z;
+
       }
     }
   }
@@ -315,6 +327,11 @@ static int parse_commandline(int argc, char **argv) {
       sscanf(pargv[1], "%d", &labelid);
       nargs = 2;
     }
+    /* ---- copy voxel value to stat field ---------- */
+    else if (!strcmp(option, "--stat")) {
+      DoStat = 1;
+      nargs = 1;
+    }
 
     /* ---- label id ---------- */
     else if (!strcmp(option, "--surf")) {
@@ -362,18 +379,18 @@ static void usage_exit() {
   exit(1);
 }
 /* --------------------------------------------- */
-static void print_usage() {
-  printf("\n");
-  printf("mri_cor2label \n");
-  printf("   --i  input     : vol or surface overlay\n");
-  printf("   --id labelid   : value to match in the input\n");
-  printf("   --l  labelfile : name of output file\n");
-  printf("   --v  volfile   : write label volume in file\n");
-  printf(
-      "   --surf subject hemi <surf> : interpret input as surface overlay\n");
-  printf("   --sd subjectsdir : override $SUBJECTS_DIR\n");
-  printf("   --help         :print out help information\n");
-  printf("\n");
+static void print_usage(void) {
+printf("\n");
+printf("mri_cor2label \n");
+printf("   --i  input     : vol or surface overlay\n");
+printf("   --id labelid   : value to match in the input\n");
+printf("   --stat   : use all non-zero valued voxels and copy value to stat field\n");
+printf("   --l  labelfile : name of output file\n");
+printf("   --v  volfile   : write label volume in file\n");
+printf("   --surf subject hemi <surf> : interpret input as surface overlay\n");
+printf("   --sd subjectsdir : override $SUBJECTS_DIR\n");
+printf("   --help         :print out help information\n");
+printf("\n");
 }
 /* --------------------------------------------- */
 static void print_help() {
@@ -458,8 +475,12 @@ static void check_options() {
     fprintf(stderr, "ERROR: must be supply a label or volume file\n");
     exit(1);
   }
-  if (labelid == -1) {
-    fprintf(stderr, "ERROR: must supply a label id\n");
+  if(labelid == -1 && DoStat == 0) {
+    fprintf(stderr,"ERROR: must supply a label id or --stat\n");
+    exit(1);
+  }
+  if(labelid != -1 && DoStat != 0) {
+    fprintf(stderr,"ERROR: cannot supply both label id and --stat\n");
     exit(1);
   }
 

@@ -264,7 +264,7 @@ static void mhtVoxelList_SampleTriangle(float mhtres, Ptdbl_t const *vptin0,
   ans.x = abs(a);                                                              \
   ans.y = abs(a.y);                                                            \
   ans.z = abs(a.z)
-#define W2VOL(ares, x) (((x) + FIELD_OF_VIEW / 2) / (ares))
+#define W2VOL(ares, x) ((x / ares) + TABLE_CENTER)
 #define W2VOX(ares, x) ((int)(W2VOL(ares, x)))
 #define PTWORLD2VOXEL(ans, ares, pt)                                           \
   ans.xv = W2VOX(ares, pt.x);                                                  \
@@ -389,6 +389,7 @@ static void mhtVoxelList_SampleTriangle(float mhtres, Ptdbl_t const *vptin0,
     for (rungstep = 1; rungstep <= rungsteps_reqd; rungstep++) {
       PTINC(posn_b2c, delta_b2c);
       PTWORLD2VOXEL(voxco_b2c, mhtres, posn_b2c);
+
       //---------------------------------------------
       // If we crossed a boundary, add voxels in that
       // "path" to voxlist
@@ -517,7 +518,34 @@ struct MRIS_HASH_TABLE_NoSurface : public MRIS_HASH_TABLE {
       face->cy = yt;
       face->cz = zt;
     }
-  }
+      
+    virtual void computeFaceCentroid(int which, int fno, float *x, float *y, float *z) = 0;
+
+    double WORLD_TO_VOLUME(double x) const { return (x / vres()) + TABLE_CENTER; }
+    int    WORLD_TO_VOXEL (double x) const { return int(WORLD_TO_VOLUME(x));  }
+    float  WORLD_TO_VOLUME(float  x) const { return (x / vres()) + TABLE_CENTER; }
+    int    WORLD_TO_VOXEL (float  x) const { return int(WORLD_TO_VOLUME(x));  }
+
+    void checkConstructedWithFaces   () const;
+    void checkConstructedWithVertices() const;
+
+    void  lockBuckets() const;
+    void  unlockBuckets() const;
+    
+    MHBT* acqBucket       (float x, float y, float z) const;
+    MHBT* acqBucket       (int xv, int yv, int zv) const;
+    MHBT* acqBucketAtVoxIx(int xv, int yv, int zv) const;
+    MHBT* makeAndAcqBucket(int xv, int yv, int zv);
+    bool  existsBuckets2  (int xv, int yv) const;
+
+    int mhtAddFaceOrVertexAtCoords   (float x, float y, float z, int forvnum);
+    int mhtAddFaceOrVertexAtVoxIx    (int xv, int yv, int zv, int forvnum);
+    int mhtRemoveFaceOrVertexAtVoxIx (int xv, int yv, int zv, int forvnum);
+
+    void mhtFaceCentroid2xyz_float   (int fno, float *x, float *y, float *z);
+        // Centroids are computed once and stored in the MHT_FACE
+        // They *should* be updated when the face is moved - but I suspect that they are not!
+};
 
   virtual void computeFaceCentroid(int which, int fno, float *x, float *y,
                                    float *z) = 0;
@@ -1144,28 +1172,26 @@ int MRIS_HASH_TABLE_IMPL<Surface, Face, Vertex>::removeAllFaces(int vno) {
 //  which to list fno.
 //
 template <class Surface, class Face, class Vertex>
-int MRIS_HASH_TABLE_IMPL<Surface, Face, Vertex>::mhtFaceToMHT(Face const face,
-                                                              bool const on) {
-  if (face.ripflag())
-    return (NO_ERROR);
-  auto const fno = face.fno();
+int MRIS_HASH_TABLE_IMPL<Surface,Face,Vertex>::mhtFaceToMHT(Face const face, bool const on)
+{
+    if (face.ripflag()) return (NO_ERROR);
+    auto const fno = face.fno();
 
-  Vertex const v0 = face.v(0);
-  Vertex const v1 = face.v(1);
-  Vertex const v2 = face.v(2);
+    Vertex const v0 = face.v(0);
+    Vertex const v1 = face.v(1);
+    Vertex const v2 = face.v(2);
 
-  Ptdbl_t vpt0, vpt1, vpt2;
-  mhtVertex2xyz(v0, which(), &vpt0);
-  mhtVertex2xyz(v1, which(), &vpt1);
-  mhtVertex2xyz(v2, which(), &vpt2);
+    Ptdbl_t vpt0, vpt1, vpt2;
+    mhtVertex2xyz(v0, which(), &vpt0);
+    mhtVertex2xyz(v1, which(), &vpt1);
+    mhtVertex2xyz(v2, which(), &vpt2);
 
-  if (Gx >= 0) {
-    double dist0 = sqrt(SQR(vpt0.x - Gx) + SQR(vpt0.y - Gy) + SQR(vpt0.z - Gz));
-    double dist1 = sqrt(SQR(vpt1.x - Gx) + SQR(vpt1.y - Gy) + SQR(vpt1.z - Gz));
-    double dist2 = sqrt(SQR(vpt2.x - Gx) + SQR(vpt2.y - Gy) + SQR(vpt2.z - Gz));
-    if (dist0 < vres() || dist1 < vres() || dist2 < vres())
-      DiagBreak();
-  }
+    if (Gx >= 0) {
+        double dist0 = sqrt(SQR(vpt0.x - Gx) + SQR(vpt0.y - Gy) + SQR(vpt0.z - Gz));
+        double dist1 = sqrt(SQR(vpt1.x - Gx) + SQR(vpt1.y - Gy) + SQR(vpt1.z - Gz));
+        double dist2 = sqrt(SQR(vpt2.x - Gx) + SQR(vpt2.y - Gy) + SQR(vpt2.z - Gz));
+        if (dist0 < vres() || dist1 < vres() || dist2 < vres()) DiagBreak();
+    }
 
   VOXEL_LISTgw voxlist;
   mhtVoxelList_Init(&voxlist);
@@ -1177,11 +1203,12 @@ int MRIS_HASH_TABLE_IMPL<Surface, Face, Vertex>::mhtFaceToMHT(Face const face,
     int j = voxlist.voxels[vlix][1];
     int k = voxlist.voxels[vlix][2];
 
-    if (on)
-      mhtAddFaceOrVertexAtVoxIx(i, j, k, fno);
-    else
-      mhtRemoveFaceOrVertexAtVoxIx(i, j, k, fno);
-  }
+        if (on) mhtAddFaceOrVertexAtVoxIx   (i, j, k, fno);
+        else    mhtRemoveFaceOrVertexAtVoxIx(i, j, k, fno);
+    }
+
+    return (NO_ERROR);
+}
 
   return (NO_ERROR);
 }
@@ -1737,7 +1764,7 @@ int MRIS_HASH_TABLE_IMPL<Surface, Face, Vertex>::findClosestVertexGeneric(
   probez_vol = WORLD_TO_VOLUME(probez);
 
   // (Note: In following (int) truncs toward zero, but that's OK because
-  // range of probex_vol is all positive, centered at FIELD_OF_VIEW/2)
+  // range of probex_vol is all positive, centered at TABLE_CENTER)
   probex_vox = (int)probex_vol;
   probey_vox = (int)probey_vol;
   probez_vox = (int)probez_vol;
@@ -2019,7 +2046,7 @@ void MRIS_HASH_TABLE_IMPL<Surface, Face, Vertex>::findClosestFaceNoGeneric(
   probez_vol = WORLD_TO_VOLUME(probez);
 
   // (Note: In following (int) truncs toward zero, but that's OK because
-  // range of probex_vol is all positive, centered at FIELD_OF_VIEW/2)
+  // range of probex_vol is all positive, centered at TABLE_CENTER)
   probex_vox = (int)probex_vol;
   probey_vox = (int)probey_vol;
   probez_vox = (int)probez_vol;

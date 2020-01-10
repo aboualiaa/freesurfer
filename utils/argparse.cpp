@@ -196,15 +196,12 @@ void ArgumentParser::parse(const ArgumentParser::StringVector &argv) {
   for (StringVector::const_iterator in = argv.begin() + 1; in < argv.end();
        ++in) {
     String element = *in;
-    if (element[0] == '-') {
-      if (index.count(element) == 0)
-        logFatal(2) << "unknown flag '" << element << "'";
+    if (index.count(element) != 0) {
       // count the number of input args following this option
       unsigned int args_following = 0;
       for (StringVector::const_iterator fin = in + 1; fin < argv.end(); fin++) {
         String future = *fin;
-        if (future[0] != '-')
-          args_following++;
+        if (index.count(future) == 0) args_following++;
       }
       if (arguments[index[element]].min_args > args_following) {
         logFatal(2) << "not enough inputs supplied to '" << element << "'";
@@ -220,11 +217,10 @@ void ArgumentParser::parse(const ArgumentParser::StringVector &argv) {
   for (StringVector::const_iterator in = argv.begin() + 1; in < argv.end();
        ++in) {
     String element = *in;
-    // check if the element is flagged
-    if (element[0] != '-') {
-      // it's not, it's a positional argument
-      if (!active.valid && !positionals.empty())
-        active = positionals[++posidx];
+    // check if the element is a known flag
+    if (index.count(element) == 0) {
+      // it's not, it must be a positional argument
+      if (!active.valid && !positionals.empty()) active = positionals[++posidx];
 
       // has the current active argument reached its required number of inputs?
       if (active.fixed && (active.fixed_nargs == active.consumed)) {

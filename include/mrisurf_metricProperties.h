@@ -179,4 +179,5 @@ constructComputeDefectContext(ComputeDefectContext *computeDefectContext) {
 #define VERTEX_CANONICAL_EDGE(vec, v0, v1)                                     \
   VECTOR_LOAD(vec, v1->cx - v0->cx, v1->cy - v0->cy, v1->cz - v0->cz)
 
-void MRIScomputeMetricProperties(MRIS_MP *mris);
+void MRIScomputeMetricProperties(MRIS_MP* mris);
+void MRIScomputeMetricPropertiesFaster(MRIS *mris);
