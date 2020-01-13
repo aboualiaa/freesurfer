@@ -18276,4 +18276,71 @@ float getVoxValChunkChar(const MRI *mri, int c, int r, int s, int f) {
                   s * mri->vox_per_slice + f * mri->vox_per_vol);
 }
 
-} // namespace fs::mri::util
+
+/*
+  Creates an 3D ITK float image from a given frame.
+*/
+ITKImageType::Pointer MRI::toITKImage(int frame)
+{
+  // configure image region
+  ITKImageType::RegionType region;
+
+  ITKImageType::IndexType start;
+  start.Fill(0);
+  region.SetIndex(start);
+
+  ITKImageType::SizeType size;
+  size[0] = this->width;
+  size[1] = this->height;
+  size[2] = this->depth;
+  region.SetSize(size);
+
+  // construct image
+  ITKImageType::Pointer image = ITKImageType::New();
+  image->SetRegions(region);
+  image->Allocate();
+
+  // copy pixel data from MRI
+  ITKImageType::IndexType pixelIndex;
+  for (int x = 0 ; x < this->width ; x++) {
+    for (int y = 0 ; y < this->height ; y++) {
+      for (int z = 0 ; z < this->depth ; z++) {
+        pixelIndex[0] = x;
+        pixelIndex[1] = y;
+        pixelIndex[2] = z;
+        float val = MRIgetVoxVal(this, x, y, z, frame);
+        image->SetPixel(pixelIndex, val);
+      }
+    }
+  }
+
+  return image;
+}
+
+
+/*
+  Loads pixel data from a 3D ITK image into the MRI buffer
+  for a given frame.
+*/
+void MRI::loadITKImage(ITKImageType::Pointer image, int frame)
+{
+  // make sure sizes match
+  const ITKImageType::SizeType size = image->GetLargestPossibleRegion().GetSize();
+  if (size[0] != this->width || size[1] != this->height || size[2] != this->depth) {
+    fs::fatal() << "ITK image size does not match MRI size";
+  }
+
+  // copy pixel data into MRI
+  ITKImageType::IndexType pixelIndex;
+  for (int x = 0 ; x < this->width ; x++) {
+    for (int y = 0 ; y < this->height ; y++) {
+      for (int z = 0 ; z < this->depth ; z++) {
+        pixelIndex[0] = x;
+        pixelIndex[1] = y;
+        pixelIndex[2] = z;
+        float val = image->GetPixel(pixelIndex);
+        MRIsetVoxVal(this, x, y, z, frame, val);
+      }
+    }
+  }
+}

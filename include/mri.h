@@ -38,9 +38,11 @@
 #include "const.h"
 #include "dmatrix.h"
 #include "fnvhash.h"
-#include "machine.h"
-#include "matrix.h"
-#include "minc.h"
+#include "itkImage.h"
+
+#ifndef isfinite
+#define isfinite std::isfinite
+#endif
 
 using BUFTYPE = unsigned char;
 using int64 = int64_t;
@@ -71,41 +73,44 @@ constexpr auto NEAREST_NEIGHBOR_CORNER = 3;
 
 #define MAX_CMDS 1000
 
-constexpr auto SEQUENCE_MPRAGE = 1;
-constexpr auto SEQUENCE_EPI = 2;
+#define SEQUENCE_MPRAGE      1
+#define SEQUENCE_EPI         2
 
-constexpr auto FRAME_TYPE_ORIGINAL = 0;
-constexpr auto FRAME_TYPE_DIFFUSION_AUGMENTED = 1;
+#define FRAME_TYPE_ORIGINAL             0
+#define FRAME_TYPE_DIFFUSION_AUGMENTED  1
 
-#define MRInvox(mri)                                                           \
-  ((mri)->width * (mri)->height * (mri)->depth * (mri)->nframes)
+#define MRInvox(mri)  ((mri)->width * (mri)->height * (mri)->depth * (mri)->nframes)
 
-constexpr auto BVEC_SPACE_UNKNOWN = 0;
-constexpr auto BVEC_SPACE_SCANNER = 1;
-constexpr auto BVEC_SPACE_VOXEL = 2;
+#define BVEC_SPACE_UNKNOWN 0
+#define BVEC_SPACE_SCANNER 1
+#define BVEC_SPACE_VOXEL   2
 
-constexpr auto MB_RADIAL = 0;
-constexpr auto MB_TANGENTIAL = 1;
+#define MB_RADIAL 0
+#define MB_TANGENTIAL 1
 
-struct MRI_FRAME {
-  int type;          // code for what is stored in this frame
-  float TE;          // echo time
-  float TR;          // recovery time
-  float flip;        // flip angle
-  float TI;          // time-to-inversion
-  float TD;          // delay time
-  int sequence_type; // see SEQUENCE* constants
-  float echo_spacing;
-  float echo_train_len; // length of the echo train
-  float read_dir[3];    // read-out direction in RAS coords
-  float pe_dir[3];      // phase-encode direction in RAS coords
-  float slice_dir[3];   // slice direction in RAS coords
-  int label;            // index into CLUT
-  char name[STRLEN];    // human-readable description of frame contents
-  int dof;              // for stat maps (e.g. # of subjects)
-  MATRIX *m_ras2vox;
-  float thresh;
-  int units; // e.g. UNITS_PPM,  UNITS_RAD_PER_SEC, ...
+// standard itk image type
+typedef itk::Image<float, 3> ITKImageType;
+
+typedef struct
+{
+  int     type ;           // code for what is stored in this frame
+  float   TE ;             // echo time
+  float   TR ;             // recovery time
+  float   flip ;           // flip angle
+  float   TI ;             // time-to-inversion
+  float   TD ;             // delay time
+  int     sequence_type ;  // see SEQUENCE* constants
+  float   echo_spacing ;
+  float   echo_train_len ; // length of the echo train
+  float   read_dir[3] ;    // read-out direction in RAS coords
+  float   pe_dir[3] ;      // phase-encode direction in RAS coords
+  float   slice_dir[3] ;   // slice direction in RAS coords
+  int     label ;          // index into CLUT
+  char    name[STRLEN] ;   // human-readable description of frame contents
+  int     dof ;            // for stat maps (e.g. # of subjects)
+  MATRIX  *m_ras2vox ;
+  float   thresh ;
+  int     units ;          // e.g. UNITS_PPM,  UNITS_RAD_PER_SEC, ...
 
   // for Herr Dr. Prof. Dr. Dr. Witzel
   // directions: maybe best in both reference frames
@@ -185,6 +190,10 @@ public:
   void initSlices();
   void write(const std::string& filename);
   FnvHash hash();
+
+  // ITK image conversions
+  ITKImageType::Pointer toITKImage(int frame = 0);
+  void loadITKImage(ITKImageType::Pointer image, int frame = 0);
 
   // ---- image geometry ----
   int width;       // number of columns
