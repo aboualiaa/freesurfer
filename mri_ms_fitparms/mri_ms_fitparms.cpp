@@ -2758,9 +2758,11 @@ static MRI *compute_T2star_map(MRI **mri_flash, int nvolumes, int *scan_types,
           if (InterpMethod == SAMPLE_SINC)
             MRIsincSampleVolume(mri_flash[e], xf, yf, zf, sinchalfwindow, &val);
           else
-            MRIsampleVolumeType(mri_flash[e], xf, yf, zf, &val, InterpMethod);
-          if (val <= 0 || !isfinite(val)) {
-            val = 1E-6;
+            MRIsampleVolumeType(mri_flash[e], xf, yf, zf,
+                                &val, InterpMethod) ;
+          if (val <= 0 || !std::isfinite(val))
+          {
+            val = 1E-6 ;
           }
 
           VECTOR_ELT(vY, e + 1) = log(val);
@@ -2775,8 +2777,9 @@ static MRI *compute_T2star_map(MRI **mri_flash, int nvolumes, int *scan_types,
         if (T2star > 10000 || T2star < -1000) {
           DiagBreak();
         }
-        if (!isfinite(T2star)) {
-          T2star = 0;
+        if (!std::isfinite(T2star))
+        {
+          T2star = 0 ;
         }
         if (T2star > max_T2star) {
           T2star = max_T2star;

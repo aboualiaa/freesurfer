@@ -1497,10 +1497,8 @@ static double mriIntensityRMS(MRI *mri_in, MRI *mri_ref, LTA *lta,
           DiagBreak();
         delta *= dot;
         sse += delta * delta * mri_in->thick;
-        if (sse > 2000)
-          DiagBreak();
-        if (!isfinite(sse))
-          DiagBreak();
+        if (sse > 2000) DiagBreak();
+        if (!std::isfinite(sse)) DiagBreak();
       }
     }
   }
@@ -3605,8 +3603,7 @@ static int m3dAreaTerm(MORPH_3D *m3d, double l_area, int i, int j, int k,
     fprintf(stdout, "node (%d,%d,%d) has no areal term!\n", i, j, k);
     /*    return(m3dDistanceTerm(m3d, 10*l_area, i, j, k, pdx, pdy, pdz)) ;*/
   }
-  if (!isfinite(*pdx) || !isfinite(*pdy) || !isfinite(*pdz))
-    DiagBreak();
+  if (!std::isfinite(*pdx) || !std::isfinite(*pdy) || !std::isfinite(*pdz)) DiagBreak();
   return (NO_ERROR);
 }
 static int m3dNonlinearAreaTerm(MORPH_3D *m3d, double l_nlarea, int i, int j,
@@ -4551,10 +4548,8 @@ static int m3dapplyGradient(MORPH_3D *m3d, double dt) {
 ------------------------------------------------------*/
 static int finitep(float f) {
   return (1);
-  if (!isfinite(f))
-    return (0);
-  if (fabs(f) > 1e5)
-    return (0);
+  if (!std::isfinite(f)) return (0);
+  if (fabs(f) > 1e5) return (0);
   return (1);
 }
 /*-----------------------------------------------------
@@ -7287,10 +7282,8 @@ static float computeRigidAlignmentErrorFunctional(float *p) {
         if (fabs(delta) > 20)
           DiagBreak();
         sse += delta * delta;
-        if (sse > 2000)
-          DiagBreak();
-        if (!isfinite(sse))
-          DiagBreak();
+        if (sse > 2000) DiagBreak();
+        if (!std::isfinite(sse)) DiagBreak();
       }
     }
   }

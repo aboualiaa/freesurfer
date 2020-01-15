@@ -1272,9 +1272,9 @@ int MRIScomputeBorderValues_MEF_WHITE(MRI_SURFACE *mris, MRI *mri_em_combined,
         if (val30 < low30 || val5 > high5)
           break;
       }
-      outward_dist = dist - step_size / 2;
-      if (!isfinite(outward_dist))
-        DiagBreak();
+      outward_dist = dist-step_size/2 ;
+      if (!std::isfinite(outward_dist))
+        DiagBreak() ;
       if (inward_dist <= 0 || outward_dist >= 0)
         break;
     }
@@ -1664,9 +1664,9 @@ int MRIScomputeBorderValues_PD_WHITE(MRI_SURFACE *mris, MRI *mri_PD,
         if (val > high)
           break;
       }
-      outward_dist = dist - step_size / 2;
-      if (!isfinite(outward_dist))
-        DiagBreak();
+      outward_dist = dist-step_size/2 ;
+      if (!std::isfinite(outward_dist))
+        DiagBreak() ;
       if (inward_dist <= 0 || outward_dist >= 0)
         break;
     }
@@ -2018,10 +2018,10 @@ int MRIScomputeBorderValues_MEF_PIAL(MRI_SURFACE *mris, MRI *mri_em_combined,
           break;
       }
       outward_dist = dist;
-      if (!isfinite(outward_dist))
-        DiagBreak();
-      if (outward_dist >= (0.5 * step_size))
-        break;
+      if (!std::isfinite(outward_dist))
+        DiagBreak() ;
+      if (outward_dist >= (0.5*step_size))
+        break ;
     }
 
     if (inward_dist > 0 && outward_dist <= 0)
@@ -2635,10 +2635,10 @@ int MRIScomputeBorderValues_PD_PIAL(MRI_SURFACE *mris, MRI *mri_PD,
           break;
       }
       outward_dist = dist;
-      if (!isfinite(outward_dist))
-        DiagBreak();
-      if (outward_dist >= (0.5 * step_size))
-        break;
+      if (!std::isfinite(outward_dist))
+        DiagBreak() ;
+      if (outward_dist >= (0.5*step_size))
+        break ;
     }
 
     if (inward_dist > 0 && outward_dist <= 0)
@@ -3010,10 +3010,10 @@ int MRIScomputeBorderValues_T1_PIAL(MRI_SURFACE *mris, MRI *mri_T1,
           break;
       }
       outward_dist = dist;
-      if (!isfinite(outward_dist))
-        DiagBreak();
-      if (outward_dist >= (0.5 * step_size))
-        break;
+      if (!std::isfinite(outward_dist))
+        DiagBreak() ;
+      if (outward_dist >= (0.5*step_size))
+        break ;
     }
 
     if (inward_dist > 0 && outward_dist <= 0)

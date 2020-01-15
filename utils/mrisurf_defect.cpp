@@ -14335,7 +14335,7 @@ static NOINLINE int mrisComputeOptimalRetessellation_wkr(
     } else {
       fitness_sigma = sqrt(fitness_sigma);
     }
-    if (!isfinite(fitness_sigma)) {
+    if (!std::isfinite(fitness_sigma)) {
       DiagBreak();
     }
 

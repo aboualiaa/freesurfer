@@ -188,9 +188,10 @@ double VectorLogLikelihood(VECTOR *v, VECTOR *v_mean, VECTOR *v_var) {
     if (DZERO(var)) {
       var = 1.0;
     }
-    ll = SQR(val - mean) / (2 * var);
-    if (!isfinite(ll) || !isfinite(total_ll)) {
-      DiagBreak();
+    ll = SQR(val-mean) / (2*var) ;
+    if (!std::isfinite(ll) || !std::isfinite(total_ll))
+    {
+      DiagBreak() ;
     }
     total_ll += ll;
   }

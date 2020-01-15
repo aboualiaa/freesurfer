@@ -929,19 +929,19 @@ static void estimate_rigid_regmatrix(MRI *mri_source, MRI *mri_target,
           M_tmp->rptr[2][1] = y;
           M_tmp->rptr[3][1] = z;
           M_tmp->rptr[4][1] = 1;
-          MatrixMultiply(vox_s2vox_t, M_tmp, M_tmp2);
-          xf = M_tmp2->rptr[1][1];
-          yf = M_tmp2->rptr[2][1];
-          zf = M_tmp2->rptr[3][1];
+          MatrixMultiply(vox_s2vox_t,M_tmp,M_tmp2);
+          xf = M_tmp2->rptr[1][1] ;
+          yf = M_tmp2->rptr[2][1] ;
+          zf = M_tmp2->rptr[3][1] ;
 
-          MRIsampleVolume(mri_source, x, y, z, &val1);
-          MRIsampleVolume(mri_target, xf, yf, zf, &val2);
-          if (FZERO(val1) || FZERO(val2))
-            continue;
-          num++;
-          new_scale += val1 / val2;
-          if (!isfinite(new_scale))
-            DiagBreak();
+          MRIsampleVolume(mri_source, x, y, z, &val1) ;
+          MRIsampleVolume(mri_target, xf, yf, zf, &val2) ;
+          if (FZERO(val1)|| FZERO(val2))
+            continue ;
+          num++ ;
+          new_scale += val1 / val2 ;
+          if (!std::isfinite(new_scale))
+            DiagBreak()  ;
         }
       }
     }

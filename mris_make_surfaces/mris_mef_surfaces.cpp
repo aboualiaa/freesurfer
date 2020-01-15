@@ -1264,9 +1264,9 @@ int MRIScomputeBorderValues_MEF_WHITE(MRI_SURFACE *mris, MRI *mri_em_combined,
         if (val30 < gm_mean[0] || val5 > (gm_mean[1] + gm_std[1]))
           break;
       }
-      outward_dist = dist - step_size / 2;
-      if (!isfinite(outward_dist))
-        DiagBreak();
+      outward_dist = dist-step_size/2 ;
+      if (!std::isfinite(outward_dist))
+        DiagBreak() ;
       if (inward_dist <= 0 || outward_dist >= 0)
         break;
     }
@@ -1630,10 +1630,10 @@ int MRIScomputeBorderValues_MEF_PIAL(MRI_SURFACE *mris, MRI *mri_em_combined,
           break;
       }
       outward_dist = dist;
-      if (!isfinite(outward_dist))
-        DiagBreak();
-      if (outward_dist >= (0.5 * step_size))
-        break;
+      if (!std::isfinite(outward_dist))
+        DiagBreak() ;
+      if (outward_dist >= (0.5*step_size))
+        break ;
     }
 
     if (inward_dist > 0 && outward_dist <= 0)

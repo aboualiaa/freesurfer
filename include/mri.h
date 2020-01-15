@@ -40,9 +40,6 @@
 #include "fnvhash.h"
 #include "itkImage.h"
 
-#ifndef isfinite
-#define isfinite std::isfinite
-#endif
 
 using BUFTYPE = unsigned char;
 using int64 = int64_t;

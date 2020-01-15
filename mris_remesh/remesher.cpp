@@ -1522,8 +1522,9 @@ int Remesher::createVertexOnEdge(const Vector &pos) {
     v2 = ti;
     w = 1.0 - w;
   }
-  Vector nv = points3d[v1] * w + points3d[v2] * (1.0 - w);
-  if (isnan(nv[0])) {
+  Vector nv = points3d[v1]*w + points3d[v2]*(1.0-w);
+  if (std::isnan(nv[0]))
+  {
     cerr << " createVertexOnEdge ERROR point nan? " << nv << endl;
     exit(1);
   }

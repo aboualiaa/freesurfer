@@ -1281,9 +1281,9 @@ static double ms_errfunc_sse(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) {
     wm_total += fabs(white_delta);
     pial_total += fabs(pial_delta);
 #endif
-    if (!isfinite(sse))
-      DiagBreak();
-    total_sse += sse;
+    if (!std::isfinite(sse))
+      DiagBreak() ;
+    total_sse += sse ;
     if (Gdiag_no == vno)
       printf("flash intensity term v %d: sse = %2.2f (%2.2f, %2.2f)\n", vno,
              sse, white_delta, pial_delta);
@@ -1326,9 +1326,9 @@ static double ms_errfunc_rms(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) {
                                      plot_stuff);
     rms = sqrt((white_delta * white_delta) + (pial_delta * pial_delta));
 #endif
-    rms_total += rms;
-    if (!isfinite(rms))
-      DiagBreak();
+    rms_total += rms ;
+    if (!std::isfinite(rms))
+      DiagBreak() ;
     if (Gdiag_no == vno)
       printf("v %d: rms = %2.3f\n", vno, rms);
   }
@@ -2631,9 +2631,9 @@ static double compute_optimal_parameters(MRI_SURFACE *mris, int vno,
 #else
       MRIsampleVolumeType(mri, x, y, z, &image_vals[i][j], sample_type);
       if (j > orig_pial_index)
-        DiagBreak();
-      if (!isfinite(image_vals[i][j]))
-        DiagBreak();
+        DiagBreak() ;
+      if (!std::isfinite(image_vals[i][j]))
+        DiagBreak() ;
 #endif
     }
     MRIsampleVolumeType(mri_T1, x, y, z, &T1_vals[j], sample_type);
@@ -2810,8 +2810,8 @@ static double compute_optimal_parameters(MRI_SURFACE *mris, int vno,
           T1_gm < ep->cv_min_gm_T1[vno] || T1_gm > ep->cv_max_gm_T1[vno])
         continue;
 
-      if (!isfinite(sse))
-        ErrorPrintf(ERROR_BADPARM, "sse not finite at v %d", vno);
+      if (!std::isfinite(sse))
+        ErrorPrintf(ERROR_BADPARM, "sse not finite at v %d", vno) ;
 
       if (sse < best_sse || best_sse < 0) {
         best_csf_len = csf_len;
@@ -2902,11 +2902,12 @@ static double compute_optimal_parameters(MRI_SURFACE *mris, int vno,
            inward_dist, outward_dist, orig_cortical_dist);
     cortical_dist = best_pial_dist - best_white_dist;
     sse = compute_vertex_sse(ep, image_vals, max_j, best_white_dist,
-                             cortical_dist, best_T1_wm, best_PD_wm, best_T1_gm,
-                             best_PD_gm, best_T1_csf, best_PD_csf, plot_stuff,
-                             T1_vals, PD_vals, vno);
-    if (!isfinite(sse))
-      ErrorPrintf(ERROR_BADPARM, "sse not finite at v %d", vno);
+                             cortical_dist, best_T1_wm, best_PD_wm,
+                             best_T1_gm, best_PD_gm, best_T1_csf,
+                             best_PD_csf, plot_stuff, T1_vals, PD_vals, vno) ;
+    if (!std::isfinite(sse))
+      ErrorPrintf(ERROR_BADPARM, "sse not finite at v %d", vno) ;
+
   }
   if (best_T1_wm < ep->cv_min_wm_T1[vno])
     best_T1_wm = ep->cv_min_wm_T1[vno];
@@ -2972,11 +2973,11 @@ static double compute_vertex_sse(
       else
         scale = 1;
       predicted_val =
-          image_forward_model(mri->tr, mri->flip_angle, dist, cortical_dist,
-                              T1_wm, PD_wm, T1_gm, PD_gm, T1_csf, PD_csf);
-      error = scale * (image_vals[i][j] - predicted_val);
-      sse += (error * error);
-      if (!isfinite(sse)) {
+        image_forward_model(mri->tr, mri->flip_angle, dist, cortical_dist,
+                            T1_wm, PD_wm, T1_gm, PD_gm, T1_csf, PD_csf) ;
+      error = scale*(image_vals[i][j] - predicted_val) ;
+      sse += (error*error) ;
+      if (!std::isfinite(sse)) {
         printf("sse not finite predicted_val=%2.1f, "
                "tissue parms=(%2.0f,%2.0f,%2.0f|%2.0f, %2.0f, %2.0f)\n",
                predicted_val, T1_wm, PD_wm, T1_gm, PD_gm, T1_csf, PD_csf);
@@ -3175,7 +3176,7 @@ sample_parameter_map(MRI_SURFACE *mris, MRI *mri, MRI *mri_res,
       HISTOplot(histo, "histo.plt") ;
       HISTOplot(hsmooth, "hsmooth.plt") ;
     }
-    if (!isfinite(parm))
+    if (!std::isfinite(parm))
       ErrorPrintf(ERROR_BADPARM, "sample_parameter_map(%s): vno %d, parm = %2.2f, total_wt = %2.2f\n",
                   name, vno, parm, total_wt) ;
   }
@@ -3792,10 +3793,10 @@ static int compute_T1_PD(double *image_vals, MRI **mri_flash, int nvolumes,
       best_PD = norm_im / upper_norm;
       best_sse = upper_sse;
     }
-    if (!isfinite(best_PD)) {
-      printf("best_PD is not finite at %d (%2.1f)\n", mid_j, mid_T1);
-      DiagBreak();
-      exit(0);
+    if (!std::isfinite(best_PD)) {
+      printf("best_PD is not finite at %d (%2.1f)\n", mid_j, mid_T1) ;
+      DiagBreak() ;
+      exit(0) ;
     }
     range /= 2;
     niter++;
@@ -3844,21 +3845,20 @@ static double scale_all_images(MRI **mri_flash, int nvolumes, MRI_SURFACE *mris,
                            v->z - v->nz, &xw, &yw, &zw);
       MRIsampleVolumeType(mri_flash[i], xw, yw, zw, &mean_wm[i], sample_type);
     }
-    compute_T1_PD(mean_wm, mri_flash, nvolumes, &T1, &PD);
-    T1_wm_total += T1;
-    PD_wm_total += PD;
-    if (!isfinite(T1) || !isfinite(PD) || !isfinite(T1_wm_total) ||
-        !isfinite(PD_wm_total))
-      DiagBreak();
-    ep->cv_wm_T1[vno] = T1;
-    ep->cv_wm_PD[vno] = PD;
+    compute_T1_PD(mean_wm, mri_flash, nvolumes, &T1, &PD) ;
+    T1_wm_total += T1 ;
+    PD_wm_total += PD ;
+    if (!std::isfinite(T1) || !std::isfinite(PD) ||
+        !std::isfinite(T1_wm_total) || !std::isfinite(PD_wm_total))
+      DiagBreak() ;
+    ep->cv_wm_T1[vno] = T1 ;
+    ep->cv_wm_PD[vno] = PD ;
 
-    for (i = 0; i < nvolumes; i++) {
-      // MRIworldToVoxel(mri_flash[i], v->x+v->nx, v->y+v->ny, v->z+v->nz, &xw,
-      // &yw, &zw) ; converting surface vertex to volume voxel
-      MRIsurfaceRASToVoxel(mri_flash[i], v->x + v->nx, v->y + v->ny,
-                           v->z + v->nz, &xw, &yw, &zw);
-      MRIsampleVolumeType(mri_flash[i], xw, yw, zw, &mean_wm[i], sample_type);
+    for (i = 0 ; i < nvolumes ; i++) {
+      // MRIworldToVoxel(mri_flash[i], v->x+v->nx, v->y+v->ny, v->z+v->nz, &xw, &yw, &zw) ;
+      // converting surface vertex to volume voxel
+      MRIsurfaceRASToVoxel(mri_flash[i],v->x+v->nx, v->y+v->ny, v->z+v->nz, &xw, &yw, &zw);
+      MRIsampleVolumeType(mri_flash[i], xw, yw, zw, &mean_wm[i], sample_type) ;
     }
     compute_T1_PD(mean_wm, mri_flash, nvolumes, &T1, &PD);
     T1_gm_total += T1;

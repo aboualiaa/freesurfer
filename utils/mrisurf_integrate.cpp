@@ -1748,10 +1748,8 @@ static double mrisLineMinimize(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) {
       double c = RVECTOR_ELT(mP, 3);
 
       if (Gdiag & DIAG_SHOW && DIAG_VERBOSE_ON)
-        fprintf(stdout,
-                "(a,b,c) = (%2.3f, %2.3f, %2.3f), predicted min at %2.3f\n", a,
-                b, c, -b / a);
-      if (!isfinite(a)) {
+        fprintf(stdout, "(a,b,c) = (%2.3f, %2.3f, %2.3f), predicted min at %2.3f\n", a, b, c, -b / a);
+      if (!std::isfinite(a)) {
         DiagBreak();
       }
 
@@ -1763,7 +1761,7 @@ static double mrisLineMinimize(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) {
       N++;
       cheapAssert(N <= MAX_ENTRIES);
 
-      if (isfinite(a) && !FZERO(a)) {
+      if (std::isfinite(a) && !FZERO(a)) {
         float new_min_delta = -b / a;
 
         if (new_min_delta < 10.0f * min_delta &&

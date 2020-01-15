@@ -466,10 +466,10 @@ MRI *MRIcomputeChangeMap(MRI *mri1, MRI *mri2, TRANSFORM *transform,
           p = (1.0 / (sqrt(2 * M_PI) * sigma)) *
               exp(-0.5 * (dif * dif) / (2 * sigma * sigma));
           p = HISTOgetCount(hg, fabs(dif));
-          p = 1.0 - 1.0 * p;
-          logp = -log10(p);
-          if (isfinite(logp) == 0 || (DZERO(logp) && p < .1))
-            MRIsetVoxVal(mri_big, x1, y1, z1, 0, 1);
+          p = 1.0 - 1.0*p ;
+          logp = -log10(p) ;
+          if (std::isfinite(logp) == 0 || (DZERO(logp) && p < .1))
+            MRIsetVoxVal(mri_big, x1, y1, z1, 0, 1) ;
           else
             MRIsetVoxVal(mri_change, x1, y1, z1, 0, logp);
         }

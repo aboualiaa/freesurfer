@@ -285,14 +285,16 @@ void QdecGlmDesign::ClearContinuousFactors() {
 
       vector<QdecSubject *> subjs = this->mDataTable->GetSubjects();
       unsigned int nInputs = subjs.size();
-      for (unsigned int m = 0; m < nInputs; m++) {
-        if (isnan(subjs[m]->GetContinuousFactorValue(
-                this->mContinuousFactors[f]->GetFactorName().c_str()))) {
-          fprintf(stdout,
-                  "\nINFO: re-including subject %s into analysis "
-                  "excluded previously due to NaN data point\n",
-                  subjs[m]->GetId().c_str());
-          this->SetExcludeSubjectID(subjs[m]->GetId().c_str(), false);
+      for (unsigned int m=0; m < nInputs; m++)
+      {
+        if (std::isnan(subjs[m]->GetContinuousFactorValue( 
+                    this->mContinuousFactors[f]->GetFactorName().c_str() )))
+        {
+          fprintf( stdout,
+                   "\nINFO: re-including subject %s into analysis "
+                   "excluded previously due to NaN data point\n",
+                   subjs[m]->GetId().c_str() );
+          this->SetExcludeSubjectID( subjs[m]->GetId().c_str(), false );
         }
       }
     }
@@ -318,13 +320,15 @@ void QdecGlmDesign::AddContinuousFactor(const char *isFactorName) {
   // exclude any subjects whose data is NaN for this factor
   vector<QdecSubject *> subjs = this->mDataTable->GetSubjects();
   unsigned int nInputs = subjs.size();
-  for (unsigned int m = 0; m < nInputs; m++) {
-    if (isnan(subjs[m]->GetContinuousFactorValue(isFactorName))) {
-      fprintf(stderr,
-              "\nWARNING: will exclude subject %s from analysis "
-              "due to NaN data point!\n",
-              subjs[m]->GetId().c_str());
-      this->SetExcludeSubjectID(subjs[m]->GetId().c_str(), true);
+  for (unsigned int m=0; m < nInputs; m++)
+  {
+    if (std::isnan(subjs[m]->GetContinuousFactorValue( isFactorName )))
+    {
+      fprintf( stderr,
+               "\nWARNING: will exclude subject %s from analysis "
+               "due to NaN data point!\n",
+               subjs[m]->GetId().c_str() );
+      this->SetExcludeSubjectID( subjs[m]->GetId().c_str(), true );
     }
   }
 }
@@ -341,14 +345,16 @@ void QdecGlmDesign::ClearNuisanceFactors() {
 
       vector<QdecSubject *> subjs = this->mDataTable->GetSubjects();
       unsigned int nInputs = subjs.size();
-      for (unsigned int m = 0; m < nInputs; m++) {
-        if (isnan(subjs[m]->GetContinuousFactorValue(
-                this->mNuisanceFactors[f]->GetFactorName().c_str()))) {
-          fprintf(stdout,
-                  "\nINFO: re-including subject %s into analysis "
-                  "excluded previously due to NaN data point\n",
-                  subjs[m]->GetId().c_str());
-          this->SetExcludeSubjectID(subjs[m]->GetId().c_str(), false);
+      for (unsigned int m=0; m < nInputs; m++)
+      {
+        if (std::isnan(subjs[m]->GetContinuousFactorValue( 
+                    this->mNuisanceFactors[f]->GetFactorName().c_str() )))
+        {
+          fprintf( stdout,
+                   "\nINFO: re-including subject %s into analysis "
+                   "excluded previously due to NaN data point\n",
+                   subjs[m]->GetId().c_str() );
+          this->SetExcludeSubjectID( subjs[m]->GetId().c_str(), false );
         }
       }
     }
@@ -374,13 +380,15 @@ void QdecGlmDesign::AddNuisanceFactor(const char *isFactorName) {
   // exclude any subjects whose data is NaN for this factor
   vector<QdecSubject *> subjs = this->mDataTable->GetSubjects();
   unsigned int nInputs = subjs.size();
-  for (unsigned int m = 0; m < nInputs; m++) {
-    if (isnan(subjs[m]->GetContinuousFactorValue(isFactorName))) {
-      fprintf(stderr,
-              "\nWARNING: will exclude subject %s from analysis "
-              "due to NaN data point!\n",
-              subjs[m]->GetId().c_str());
-      this->SetExcludeSubjectID(subjs[m]->GetId().c_str(), true);
+  for (unsigned int m=0; m < nInputs; m++)
+  {
+    if (std::isnan(subjs[m]->GetContinuousFactorValue( isFactorName )))
+    {
+      fprintf( stderr,
+               "\nWARNING: will exclude subject %s from analysis "
+               "due to NaN data point!\n",
+               subjs[m]->GetId().c_str() );
+      this->SetExcludeSubjectID( subjs[m]->GetId().c_str(), true );
     }
   }
 }

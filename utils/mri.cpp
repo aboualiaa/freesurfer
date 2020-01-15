@@ -14114,7 +14114,7 @@ MRI *MRIrandexp(MRI *mrimean, MRI *binmask, unsigned long int seed, int nreps,
               q = RFdrawVal(rfs);
             v = (log(L) - log(L * q)) / L;
             MRIsetVoxVal(mrirandexp, c, r, s, f2, v);
-            if (!isfinite(v)) {
+            if (!std::isfinite(v)) {
               printf("WARNING: MRIrandexp(): voxel not finite\n");
               printf("%3d %3d %3d %2d mu = %lf; L = %lf; q=%30.30lf; v=%lf;\n",
                      c, r, s, f2, mu, L, q, v);
@@ -18299,6 +18299,13 @@ ITKImageType::Pointer MRI::toITKImage(int frame)
   ITKImageType::Pointer image = ITKImageType::New();
   image->SetRegions(region);
   image->Allocate();
+
+  // copy vox size metadata
+  ITKImageType::SpacingType spacing;
+  spacing[0] = this->xsize;
+  spacing[1] = this->ysize;
+  spacing[2] = this->zsize;
+  image->SetSpacing(spacing);
 
   // copy pixel data from MRI
   ITKImageType::IndexType pixelIndex;

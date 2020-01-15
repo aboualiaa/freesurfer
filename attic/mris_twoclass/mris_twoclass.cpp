@@ -1760,10 +1760,10 @@ static double cvector_average_in_label(float *v, LABEL *area, int num) {
   int i;
   double avg;
 
-  for (avg = 0.0, i = 0; i < area->n_points; i++) {
-    if (!isfinite(v[area->lv[i].vno]))
-      DiagBreak();
-    avg += v[area->lv[i].vno];
+  for (avg = 0.0, i = 0 ; i < area->n_points ; i++) {
+    if (!std::isfinite(v[area->lv[i].vno]))
+      DiagBreak() ;
+    avg += v[area->lv[i].vno] ;
   }
   avg /= (double)area->n_points;
   return (avg);

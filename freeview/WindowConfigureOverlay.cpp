@@ -141,15 +141,15 @@ void WindowConfigureOverlay::OnActiveSurfaceChanged(Layer *layer) {
             this, SLOT(UpdateUI()), Qt::UniqueConnection);
   }
 
-  if (m_fDataCache)
-    delete[] m_fDataCache;
-  m_fDataCache = 0;
-
   OnActiveOverlayChanged();
 }
 
 void WindowConfigureOverlay::OnActiveOverlayChanged()
 {
+  if (m_fDataCache)
+    delete[] m_fDataCache;
+  m_fDataCache = 0;
+
   UpdateUI();
   OnCheckFixedAxes(ui->checkBoxFixedAxes->isChecked(), false);
   UpdateGraph();
@@ -329,10 +329,15 @@ void WindowConfigureOverlay::OnApply() {
       m_layerSurface->GetActiveOverlay()->UpdateSmooth();
     else
       p->EmitColorMapChanged();
-    if (ui->checkBoxApplyToAll->isChecked()) {
-      for (int i = 0; i < m_layerSurface->GetNumberOfOverlays(); i++) {
-        SurfaceOverlay *so = m_layerSurface->GetOverlay(i);
-        if (so != m_layerSurface->GetActiveOverlay()) {
+    if (ui->checkBoxApplyToAll->isChecked())
+    {
+      for (int i = 0; i < m_layerSurface->GetNumberOfOverlays(); i++)
+      {
+        SurfaceOverlay* so = m_layerSurface->GetOverlay(i);
+        if (so != m_layerSurface->GetActiveOverlay())
+        {
+          smooth_changed = (so->GetProperty()->GetSmooth() != ui->checkBoxEnableSmooth->isChecked() ||
+                so->GetProperty()->GetSmoothSteps() != ui->spinBoxSmoothSteps->value() );
           so->GetProperty()->Copy(p);
           if (smooth_changed)
             so->UpdateSmooth();

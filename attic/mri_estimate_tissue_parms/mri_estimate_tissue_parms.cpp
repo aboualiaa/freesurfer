@@ -329,19 +329,19 @@ int main(int argc, char *argv[]) {
             continue ;
           }
 #endif
-          sse = estimateVoxelParameters(mri_flash, nvolumes, x, y, z, mri_T1,
-                                        mri_PD, nsteps);
-          nvox++;
-          last_T1 = MRISvox(mri_T1, x, y, z);
-          last_PD = MRISvox(mri_PD, x, y, z);
-          total_rms += sqrt(sse / nvolumes);
-          if (!isfinite(total_rms))
-            DiagBreak();
+          sse = estimateVoxelParameters(mri_flash, nvolumes, x, y, z,
+                                        mri_T1, mri_PD, nsteps) ;
+          nvox++ ;
+          last_T1 = MRISvox(mri_T1, x, y, z) ;
+          last_PD = MRISvox(mri_PD, x, y, z) ;
+          total_rms += sqrt(sse/nvolumes) ;
+          if (!std::isfinite(total_rms))
+            DiagBreak() ;
         }
       }
-      avg_rms = total_rms / nvox;
-      if (!isfinite(avg_rms))
-        DiagBreak();
+      avg_rms = total_rms / nvox ;
+      if (!std::isfinite(avg_rms))
+        DiagBreak() ;
     }
   }
 
@@ -744,9 +744,9 @@ static double computeVoxelSSE(MRI **mri_flash, int nflash, int x, int y, int z,
     err = (MRISvox(mri, x, y, z) - estimate);
     sse += err * err;
   }
-  if (!isfinite(sse))
-    DiagBreak();
-  return (sse);
+  if (!std::isfinite(sse))
+    DiagBreak() ;
+  return(sse) ;
 }
 
 static double findInitialParameters(MRI **mri_flash, int nflash, int x, int y,

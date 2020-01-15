@@ -295,11 +295,9 @@ endif()
 # warnings
 # clang complains about -Wno-unused-but-set-variable and says to use -Wno-unused-const-variable
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-everything -arch x86_64 -Wl,-w")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-everything -arch x86_64 -Wl,-w")
-else() # TODO: this only works for gcc, check for other compilers as well
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-const-variable -Wno-inconsistent-missing-override -Wno-self-assign-field")
+else()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-but-set-variable")
 endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
@@ -364,6 +362,7 @@ add_subdirectory(gems)
 # used in the standard stream should be added further down
 add_subdirectories(
   AntsDenoiseImageFs
+  AntsN4BiasFieldCorrectionFs
   lta_convert
   mri_and
   mri_add_xform_to_header

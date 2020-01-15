@@ -755,10 +755,10 @@ static int cvector_compute_t_test(float *c1_mean, float *c1_var, float *c2_mean,
     if (numer > 0)
       pvals[i] = -log10(sig);
     else
-      pvals[i] = log10(sig);
-    if (!isfinite(numer) || !isfinite(denom) || !isfinite(pvals[i]) ||
-        i == Gdiag_no)
-      DiagBreak();
+      pvals[i] = log10(sig) ;
+    if (!std::isfinite(numer) || !std::isfinite(denom) || !std::isfinite(pvals[i])
+        || i == Gdiag_no)
+      DiagBreak() ;
   }
   return (NO_ERROR);
 }

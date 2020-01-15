@@ -225,27 +225,25 @@ int main(int argc, char *argv[]) {
       //  have an intensity greather than (gray_low+gray_hi)/2 (~70) and NOT WM
       //  voxels needing to be between gray_low (30) and gray_high (110).
       MRIcomputeClassStatistics(mri_src, mri_tmp, gray_low, WHITE_MATTER_MEAN,
-                                &white_mean, &white_sigma, &gray_mean,
-                                &gray_sigma);
-      if (!isfinite(white_mean) || !isfinite(white_sigma) ||
-          !isfinite(gray_mean) || !isfinite(gray_sigma))
-        ErrorExit(ERROR_BADPARM,
-                  "%s: class statistics not finite - check input volume!",
-                  Progname);
-
-      printf(" white_mean %g\n", white_mean);
-      printf(" white_sigma %g\n", white_sigma);
-      printf(" gray_mean %g\n", gray_mean);
-      printf(" gray_sigma %g\n", gray_sigma);
-      fflush(stdout);
-
-      if (!wm_low_set) {
-        if (FZERO(gray_sigma)) {
-          wm_low = (white_mean + gray_mean) / 2;
-        } else {
-          // Set wm_low to one stddev above GM mean
-          wm_low = gray_mean + gray_sigma;
-        }
+				&white_mean, &white_sigma, &gray_mean,
+				&gray_sigma) ;
+      if (!std::isfinite(white_mean) || !std::isfinite(white_sigma) ||
+	  !std::isfinite(gray_mean) || !std::isfinite(gray_sigma))
+	ErrorExit(ERROR_BADPARM,"%s: class statistics not finite - check input volume!", Progname);
+      
+      printf(" white_mean %g\n",white_mean);
+      printf(" white_sigma %g\n",white_sigma);
+      printf(" gray_mean %g\n",gray_mean);
+      printf(" gray_sigma %g\n",gray_sigma);fflush(stdout);
+      
+      if (!wm_low_set)    {
+	if (FZERO(gray_sigma))      {
+	  wm_low = (white_mean+gray_mean) / 2 ;
+	}
+	else {
+	  // Set wm_low to one stddev above GM mean
+	  wm_low = gray_mean + gray_sigma ;
+	}
       }
 
       if (!gray_hi_set) {

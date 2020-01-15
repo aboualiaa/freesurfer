@@ -465,10 +465,10 @@ static MRI *MRIsynthesize(MRI *mri_T1, MRI *mri_PD, MRI *mri_T2star,
           MRIsampleVolume(mri_T2star, x, y, z, &T2star);
           flash = FLASHforwardModelT2star(T1, PD, T2star, TR, alpha, TE);
         } else
-          flash = FLASHforwardModel(T1, PD, TR, alpha, TE);
-        MRIsetVoxVal(mri_dst, x, y, z, 0, flash);
-        if (!isfinite(flash))
-          DiagBreak();
+          flash = FLASHforwardModel(T1, PD, TR, alpha, TE) ;
+        MRIsetVoxVal(mri_dst, x, y, z, 0, flash) ;
+        if (!std::isfinite(flash))
+          DiagBreak() ;
       }
     }
   }

@@ -332,9 +332,9 @@ static double compute_MT_log_likelihood(MRI_SURFACE *mris, MRI *mri_profiles,
       val = MRIgetVoxVal(mri_profiles, vno, 0, 0, i);
       ll_vno += -SQR(u_interior[i] - val) / (2 * v_interior[i]);
     }
-    ll += ll_vno;
-    if (!isfinite(ll))
-      DiagBreak();
+    ll += ll_vno ;
+    if (!std::isfinite(ll))
+      DiagBreak() ;
   }
   if (num == 0)
     return (-1e10);

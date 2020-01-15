@@ -2538,7 +2538,8 @@ void analyseWM(double *tab, MRI_variables *MRI_var) {
     a = (n * Sxy - Sy * Sx) / (n * Sxx - Sx * Sx);
     b = -(a * Sx - Sy) / n;
 
-    if (DZERO(a) || !isfinite(a)) {
+    if (DZERO(a) || !std::isfinite(a))
+    {
       Error("\n Interpolation problem in the white matter curve analysis\n");
     }
 
@@ -2586,7 +2587,8 @@ void analyseWM(double *tab, MRI_variables *MRI_var) {
     a = (n * Sxy - Sy * Sx) / (n * Sxx - Sx * Sx);
     b = -(a * Sx - Sy) / n;
 
-    if (DZERO(a) || !isfinite(a)) {
+    if (DZERO(a) || !std::isfinite(a))
+    {
       Error("\n Interpolation problem in the white matter analysis");
     }
 
@@ -4668,7 +4670,8 @@ void local_params(STRIP_PARMS *parms, MRI_variables *MRI_var) {
     // assuming the height of GM_intensity and CSF_intensity are the same
     int denom = (MRI_var->CSF_MAX[j] + MRI_var->GM_intensity[j] -
                  MRI_var->GM_MIN[j] - MRI_var->CSF_intens[j]);
-    if (DZERO(denom) || !isfinite((float)denom)) {
+    if (DZERO(denom) || !std::isfinite((float)denom))
+    {
       fprintf(stdout, "\n Problem with MRI_var->TRANSITION_intensity\n");
       MRI_var->TRANSITION_intensity[j] = 0;
     } else {
@@ -4934,7 +4937,8 @@ void analyseCSF(unsigned long CSF_percent[6][256], MRI_variables *MRI_var,
   a = (n * Sxy - Sy * Sx) / (n * Sxx - Sx * Sx);
   b = -(a * Sx - Sy) / n;
 
-  if (DZERO(a) || !isfinite(a)) {
+  if (DZERO(a) || !std::isfinite(a))
+  {
     fprintf(stdout, "\n Problem with the least square "
                     "interpolation for CSF_MAX");
     // don't change the value
@@ -4986,7 +4990,7 @@ void analyseCSF(unsigned long CSF_percent[6][256], MRI_variables *MRI_var,
   a = (n * Sxy - Sy * Sx) / (n * Sxx - Sx * Sx);
   b = -(a * Sx - Sy) / n;
 
-  if (DZERO(a) || !isfinite(a))
+  if (DZERO(a) || !std::isfinite(a))
     fprintf(stdout, "\n Problem with the least square "
                     "interpolation for CSF_MIN");
   else {
@@ -5110,11 +5114,13 @@ void analyseGM(unsigned long CSF_percent[6][256],
   a = (n * Sxy - Sy * Sx) / (n * Sxx - Sx * Sx);
   b = -(a * Sx - Sy) / n;
 
-  if (DZERO(a) || !isfinite(a))
-    fprintf(stdout, "\n Problem with the least square interpolation "
-                    "in GM_MIN calculation.");
-  else {
-    MRI_var->GM_MIN[i] = int(MAX(0, -b / a));
+  if (DZERO(a) || !std::isfinite(a))
+    fprintf(stdout,
+            "\n Problem with the least square interpolation "
+            "in GM_MIN calculation.");
+  else
+  {
+    MRI_var->GM_MIN[i]=int(MAX(0,-b/a));
   }
 #ifndef __OPTIMIZE__
 //  int j;
@@ -5175,9 +5181,9 @@ void analyseGM(unsigned long CSF_percent[6][256],
     Sxx += k * k;
   }
 
-  a = (n * Sxy - Sy * Sx) / (n * Sxx - Sx * Sx);
-  b = -(a * Sx - Sy) / n;
-  if (DZERO(a) || !isfinite(a))
+  a=(n*Sxy-Sy*Sx)/(n*Sxx-Sx*Sx);
+  b=-(a*Sx-Sy)/n;
+  if (DZERO(a) || !std::isfinite(a))
     fprintf(stdout, "\n (2) Problem with the least square "
                     "interpolation in GM_MIN calculation.");
   else {
@@ -6694,8 +6700,9 @@ double mrisComputeCorrelationErrorLocal(MRI_SURFACE *mris,
       std = 1.0f;
     }
 
-    delta = (src - target) / std;
-    if (!isfinite(delta)) {
+    delta = (src - target) / std ;
+    if (!std::isfinite(delta))
+    {
       continue;
     }
 

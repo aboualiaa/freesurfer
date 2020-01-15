@@ -184,7 +184,7 @@ int mrisComputeRepulsiveTerm(MRI_SURFACE *mris, double l_repulse, MHT *mht,
         dy /= norm;
         dz /= norm;
 
-        if (!isfinite(dx) || !isfinite(dy) || !isfinite(dz))
+        if (!std::isfinite(dx) || !std::isfinite(dy) || !std::isfinite(dz)) 
           DiagBreak();
 
         sx += scale * dx;
@@ -2986,7 +2986,7 @@ int mrisComputeCorrelationTerm(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) {
     if (mag > max_mag) {
       max_mag = mag;
     }
-    if (!isfinite(v->dx) || !isfinite(v->dy) || !isfinite(v->dz)) {
+    if (!std::isfinite(v->dx) || !std::isfinite(v->dy) || !std::isfinite(v->dz)) {
       DiagBreak();
       ErrorExit(ERROR_BADPARM,
                 "mrisComputeCorrelationTerm: delta is not finite at vno %d",
@@ -3130,7 +3130,7 @@ int mrisComputeVectorCorrelationTerm(MRI_SURFACE *mris,
     if (mag > max_mag) {
       max_mag = mag;
     }
-    if (!isfinite(v->dx) || !isfinite(v->dy) || !isfinite(v->dz)) {
+    if (!std::isfinite(v->dx) || !std::isfinite(v->dy) || !std::isfinite(v->dz)) {
       DiagBreak();
       ErrorExit(
           ERROR_BADPARM,
@@ -3363,7 +3363,7 @@ int mrisComputePolarCorrelationTerm(MRI_SURFACE *mris,
     if (mag > max_mag) {
       max_mag = mag;
     }
-    if (!isfinite(v->dx) || !isfinite(v->dy) || !isfinite(v->dz)) {
+    if (!std::isfinite(v->dx) || !std::isfinite(v->dy) || !std::isfinite(v->dz)) {
       DiagBreak();
       ErrorExit(
           ERROR_BADPARM,

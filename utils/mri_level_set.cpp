@@ -227,8 +227,7 @@ MRI *MRIregionGrow(MRI *mri_src, MRI *mri_distance, float x0, float y0,
                   (dxx + dyy) * SQR(dz) -
                   2.0 * (dx * dy * dxy + dx * dz * dxz + dy * dz * dyz)) /
                  denom;
-          if (!isfinite(km))
-            km = 0.0;
+          if (!std::isfinite(km)) km = 0.0;
 
           /* speed function F based on normal and curvature */
           F = 1.0 - km * e_curv;
