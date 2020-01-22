@@ -7087,7 +7087,11 @@ MRI *ImageToMRI(IMAGE *I) {
   mri->c_s = 0;
 
   // hips coordinate system is inverted
+  int pix_per_frame = I->rows * I->cols;
   for (frames = 0; frames < nframes; ++frames) {
+
+    int frame_offset = pix_per_frame * frames;
+
     for (y = 0; y < height; y++) {
       yp = height - (y + 1);
 
@@ -7098,7 +7102,7 @@ MRI *ImageToMRI(IMAGE *I) {
             int rgb;
             // int r, g, b;
 
-            rgb = *(int *)IMAGERGBpix(I, x, yp) & 0x00ffffff;
+            rgb = *(int *)(IMAGERGBpix(I, x, yp) + frame_offset) & 0x00ffffff;
             // r = rgb & 0x00ff;
             // g = (rgb >> 8) & 0x00ff;
             // b = (rgb >> 16) & 0x00ff;
@@ -7113,9 +7117,8 @@ MRI *ImageToMRI(IMAGE *I) {
             int rgb;
             // int r, g, b;
 
-            rgb = *(int *)IMAGERGBpix(I, x, yp) & 0x00ffffff;
-            if (rgb > 0)
-              DiagBreak();
+            rgb = *(int *)(IMAGERGBpix(I, x, yp) + frame_offset) & 0x00ffffff;
+            if (rgb > 0) DiagBreak();
             // r = rgb & 0x00ff;
             // g = (rgb >> 8) & 0x00ff;
             // b = (rgb >> 16) & 0x00ff;
@@ -7123,11 +7126,12 @@ MRI *ImageToMRI(IMAGE *I) {
             //	    MRIseq_vox(mri, x, y, 0, frames) = (0.299*r + 0.587*g +
             // 0.114*b); ; // standard tv
             // conversion
-          } else
-            MRIseq_vox(mri, x, y, 0, frames) = *IMAGEpix(I, x, yp);
+          }
+          else
+            MRIseq_vox(mri, x, y, 0, frames) = *(IMAGEpix(I, x, yp) + frame_offset);
           break;
         case MRI_SHORT:
-          MRISseq_vox(mri, x, y, 0, frames) = *IMAGESpix(I, x, yp);
+          MRISseq_vox(mri, x, y, 0, frames) = *(IMAGESpix(I, x, yp) + frame_offset);
           break;
         case MRI_INT: {
           // int val;
@@ -7136,9 +7140,8 @@ MRI *ImageToMRI(IMAGE *I) {
             int rgb;
             // int r, g, b;
 
-            rgb = *(int *)IMAGERGBpix(I, x, yp);
-            if (rgb > 0)
-              DiagBreak();
+            rgb = *(int *)(IMAGERGBpix(I, x, yp) + frame_offset);
+            if (rgb > 0) DiagBreak();
             // r = rgb & 0x00ff;
             // g = (rgb >> 8) & 0x00ff;
             // b = (rgb >> 16) & 0x00ff;
@@ -7146,20 +7149,18 @@ MRI *ImageToMRI(IMAGE *I) {
             //	      MRIseq_vox(mri, x, y, 0, frames) = (0.299*r + 0.587*g +
             // 0.114*b); ; // standard tv
             // conversion
-          } else {
-            if (*IMAGESpix(I, x, yp) < 0)
-              DiagBreak();
+          }
+          else {
             if (I->pixel_format == PFSHORT)
-              MRIIseq_vox(mri, x, y, 0, frames) =
-                  (int)((unsigned short)(*IMAGESpix(I, x, yp)));
+              MRIIseq_vox(mri, x, y, 0, frames) = (int)((unsigned short)(*(IMAGESpix(I, x, yp) + frame_offset)));
             else
-              MRIIseq_vox(mri, x, y, 0, frames) = *IMAGEIpix(I, x, yp);
+              MRIIseq_vox(mri, x, y, 0, frames) = *(IMAGEIpix(I, x, yp) + frame_offset);
             // val = MRIIseq_vox(mri, x, y, 0, frames);
           }
           break;
         }
         case MRI_FLOAT:
-          MRIFseq_vox(mri, x, y, 0, frames) = *IMAGEFpix(I, x, yp);
+          MRIFseq_vox(mri, x, y, 0, frames) = *(IMAGEFpix(I, x, yp) + frame_offset);
           break;
         default:
           ErrorReturn(NULL, (ERROR_UNSUPPORTED,
