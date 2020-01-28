@@ -1282,6 +1282,7 @@ MRI *MRIreadInfo(const char *fname);
 MRI *MRIreadHeader(const char *fname, int type);
 int GetSPMStartFrame(void);
 int MRIwrite(MRI *mri, const char *fname);
+int MRIwrite(MRI *mri, const std::string cppfname);
 int MRIwriteFrame(MRI *mri, const char *fname, int frame);
 int MRIwriteType(MRI *mri, const char *fname, int type);
 MRI *MRIreadRaw(FILE *fp, int width, int height, int depth, int type);
@@ -1462,68 +1463,63 @@ int MRIlabeledVoxels(MRI *mri_src, int label);
 int MRIlabelInVolume(MRI *mri_src, int label);
 #define MRI_MEAN_MIN_DISTANCE 0
 double MRIcomputeLabelAccuracy(MRI *mri_src, MRI *mri_ref, int which, FILE *fp);
-double MRIcomputeMeanMinLabelDistance(MRI *mri_src, MRI *mri_ref, int label) ;
-int MRIcomputeLabelCentroid(MRI *mri_aseg, int label,
-														double *pxc, double *pyc, double *pzc) ;
-  int MRIkarcherMean(MRI *mri, float low_val, float hi_val, int *px, int *py, int *pz) ;
-int MRIcomputeCentroid(MRI *mri, double *pxc, double *pyc, double *pzc) ;
+double MRIcomputeMeanMinLabelDistance(MRI *mri_src, MRI *mri_ref, int label);
+int MRIcomputeLabelCentroid(MRI *mri_aseg, int label, double *pxc, double *pyc,
+                            double *pzc);
+int MRIkarcherMean(MRI *mri, float low_val, float hi_val, int *px, int *py,
+                   int *pz);
+int MRIcomputeCentroid(MRI *mri, double *pxc, double *pyc, double *pzc);
 MRI *MRIdivideAseg(MRI *mri_src, MRI *mri_dst, int label, int nunits);
-int MRIgeometryMatched(MRI *mri1, MRI *mri2) ;
+int MRIgeometryMatched(MRI *mri1, MRI *mri2);
 
-MRI *MRIsegmentationSurfaceNormals(MRI *mri_seg,
-                                   MRI *mri_normals,
-                                   int target_label,
-                                   MRI **pmri_ctrl) ;
+MRI *MRIsegmentationSurfaceNormals(MRI *mri_seg, MRI *mri_normals,
+                                   int target_label, MRI **pmri_ctrl);
 MRI *MRIbinMaskToCol(MRI *binmask, MRI *bincol);
-MRI *MRIfillHoles(MRI *mri_src, MRI *mri_fill, int thresh)  ;
-int  MRIfillRegion(MRI *mri, int x,int y,int z,float fill_val,int whalf) ;
-MRI *MRIfloodFillRegion(MRI *mri_src, MRI *mri_dst,
-                        int threshold, int fill_val, int max_count) ;
-int  MRIcomputeBorderNormalAtVoxel(MRI *mri_seg, int x0, int y0, int z0,
-                                   float *pnx, float *pny, float *pnz,
-                                   int label) ;
-MRI  *MRImatchIntensityRatio(MRI *mri_source, MRI *_target, MRI *mri_matched,
-                             double min_scale, double max_scale,
-                             double low_thresh, double high_thresh);
+MRI *MRIfillHoles(MRI *mri_src, MRI *mri_fill, int thresh);
+int MRIfillRegion(MRI *mri, int x, int y, int z, float fill_val, int whalf);
+MRI *MRIfloodFillRegion(MRI *mri_src, MRI *mri_dst, int threshold, int fill_val,
+                        int max_count);
+int MRIcomputeBorderNormalAtVoxel(MRI *mri_seg, int x0, int y0, int z0,
+                                  float *pnx, float *pny, float *pnz,
+                                  int label);
+MRI *MRImatchIntensityRatio(MRI *mri_source, MRI *_target, MRI *mri_matched,
+                            double min_scale, double max_scale,
+                            double low_thresh, double high_thresh);
 
 // types of MRI sequences
-#define MRI_UNKNOWN          0
-#define MRI_MGH_MPRAGE       1
-#define MRI_ADNI_MPRAGE      2
-#define MRI_WASHU_MPRAGE     3
-#define MRI_MIND_MPRAGE      4
+#define MRI_UNKNOWN 0
+#define MRI_MGH_MPRAGE 1
+#define MRI_ADNI_MPRAGE 2
+#define MRI_WASHU_MPRAGE 3
+#define MRI_MIND_MPRAGE 4
 
-
-MRI *MRIcreateDistanceTransforms(MRI *mri, MRI *mri_all_dtrans,
-                                 float max_dist,
+MRI *MRIcreateDistanceTransforms(MRI *mri, MRI *mri_all_dtrans, float max_dist,
                                  int *labels, int nlabels);
-MRI *MRIapplyMorph(MRI *mri_source,
-                   MRI *mri_morph,
-                   MRI *mri_dst,
+MRI *MRIapplyMorph(MRI *mri_source, MRI *mri_morph, MRI *mri_dst,
                    int sample_type);
-int MRIorderIndices(MRI *mri,
-                    short *x_indices,
-                    short *y_indices,
-                    short *z_indices) ;
-int MRIcomputeVoxelPermutation(MRI *mri,
-                               short *x_indices,
-                               short *y_indices,
+int MRIorderIndices(MRI *mri, short *x_indices, short *y_indices,
+                    short *z_indices);
+int MRIcomputeVoxelPermutation(MRI *mri, short *x_indices, short *y_indices,
                                short *z_indices);
-MRI *MRInormalizeInteriorDistanceTransform(MRI *mri_src_dist,
-                                           MRI *mri_ref_dist,
+MRI *MRInormalizeInteriorDistanceTransform(MRI *mri_src_dist, MRI *mri_ref_dist,
                                            MRI *mri_dst_dist);
 
-const char* MRItype2str(int type);
+const char *MRItype2str(int type);
 MRI *MRIaddNoise(MRI *mri_in, MRI *mri_out, float amp);
-int MRIfindSliceWithMostStructure(MRI *mri_aseg, int slice_direction, int label) ;
-int MRIcomputeVolumeFractions(MRI *mri_src, MATRIX *m_vox2vox,
-			      MRI *mri_seg, MRI *mri_fractions) ;
+int MRIfindSliceWithMostStructure(MRI *mri_aseg, int slice_direction,
+                                  int label);
+int MRIcomputeVolumeFractions(MRI *mri_src, MATRIX *m_vox2vox, MRI *mri_seg,
+                              MRI *mri_fractions);
 
-MRI *MRInbrThresholdLabel(MRI *mri_src, MRI *mri_dst,  int label, int out_label, int whalf,  float thresh) ;
-MRI *MRIsolveLaplaceEquation(MRI *mri_interior, MRI *mri_seg, int source_label, int target_label,
-			       float source_val,float target_val, float outside_val);
+MRI *MRInbrThresholdLabel(MRI *mri_src, MRI *mri_dst, int label, int out_label,
+                          int whalf, float thresh);
+MRI *MRIsolveLaplaceEquation(MRI *mri_interior, MRI *mri_seg, int source_label,
+                             int target_label, float source_val,
+                             float target_val, float outside_val);
 
-int MRIsampleVolumeFrameMasked(const MRI *mri, const MRI *mri_mask, double x, double y, double z, const int frame, double *pval);
+int MRIsampleVolumeFrameMasked(const MRI *mri, const MRI *mri_mask, double x,
+                               double y, double z, const int frame,
+                               double *pval);
 
 int MRIclipBrightWM(MRI *mri_T1, const MRI *mri_wm);
 

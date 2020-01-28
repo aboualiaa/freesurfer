@@ -1259,21 +1259,8 @@ int MRIwrite(MRI *mri, const char *fname) {
 } /* end MRIwrite() */
 
 int MRIwrite(MRI *mri, const std::string cppfname) {
-  const char *fname = cppfname.c_str();
-  int int_type = -1;
-  int error;
-
-  chklc();
-  if ((int_type = mri_identify(fname)) < 0) {
-    errno = 0;
-    ErrorReturn(ERROR_BADPARM,
-                (ERROR_BADPARM, "unknown file type for file (%s)", fname));
-  }
-
-  error = MRIwriteType(mri, fname, int_type);
-  return (error);
-
-} /* end MRIwrite() */
+  return MRIwrite(mri, cppfname.c_str());
+}
 
 /* ----- required header fields ----- */
 
