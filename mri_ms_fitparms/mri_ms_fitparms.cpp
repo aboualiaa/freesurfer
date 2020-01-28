@@ -2640,8 +2640,9 @@ static MRI *estimate_T2star(MRI **mri_flash, int nvolumes, MRI *mri_PD,
           if (devIsnan(PD)) {
             DiagBreak();
           }
-          if (isnan(PD)) {
-            DiagBreak();
+          if (std::isnan(PD))
+          {
+            DiagBreak() ;
           }
           if (mri_PD) {
             MRIsetVoxVal(mri_PD, x, y, z, 0, PD);

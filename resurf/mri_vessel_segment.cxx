@@ -5,151 +5,143 @@
 #include "itkBinaryThresholdImageFilter.h"
 #include "itkBinaryImageToShapeLabelMapFilter.h"
 #include "itkLabelOverlayImageFilter.h"
+#include "mris_multimodal_refinement.h"
 
 #include "cma.h"
 
-int main(int narg, char *arg[]) {
-  GetPot cl(narg, const_cast<char **>(arg));
-  if (cl.size() == 1 || cl.search(2, "--help", "-h")) {
-    std::cout << "Usage: " << std::endl;
-    std::cout << arg[0]
-              << " -t1 t1.mgz -t2 t2.mgz -aseg aseg.mgz -o output.mgz --shape "
-              << std::endl;
-    return -1;
-  }
 
-  const char *imageNameT1 = cl.follow("", "-t1");
-  const char *imageNameT2 = cl.follow("", "-t2");
-  const char *outputName = cl.follow("", "-o");
+int main(int narg, char * arg[])
+{
+	GetPot cl(narg, const_cast<char**>(arg));
+	if(cl.size()==1 || cl.search(2,"--help","-h"))
+	{
+		std::cout<<"Usage: " << std::endl;
+		std::cout<< arg[0] << " -t1 t1.mgz -t2 t2.mgz -aseg aseg.mgz -o output.mgz --shape "  << std::endl;   
+		return -1;
+	}
 
-  if (!cl.search("--shape")) {
-    MRI *imageAseg = nullptr;
-    if (cl.search("-aseg")) {
-      const char *imageNameAseg = cl.follow("", "-aseg");
-      imageAseg = MRIread(imageNameAseg);
-    }
 
-    MRI *imageT1 = MRIread(imageNameT1);
-    MRI *imageT2 = MRIread(imageNameT2);
-    MRI *output = MRIcopy(imageT1, nullptr);
 
-    for (int x = 0; x < imageT1->width; x++) {
-      for (int y = 0; y < imageT1->height; y++) {
-        for (int z = 0; z < imageT1->depth; z++) {
-          int label = (imageAseg) ? MRIgetVoxVal(imageAseg, x, y, z, 0) : 0;
-          float T1 = MRIgetVoxVal(imageT1, x, y, z, 0);
-          float T2 = MRIgetVoxVal(imageT2, x, y, z, 0);
-          if (IS_CORTEX(label) && 1.1 * T1 > T2) {
-            MRIsetVoxVal(output, x, y, z, 0, 1);
-          } else {
-            MRIsetVoxVal(output, x, y, z, 0, 0);
-          }
-        }
-      }
-    }
+	const char *imageNameT1= cl.follow ("", "-t1");
+	const char *imageNameT2 = cl.follow ("", "-t2");
+	const char *outputName = cl.follow ("", "-o");
 
-    MRIwrite(output, outputName);
-    MRIfree(&imageT1);
-    MRIfree(&imageT2);
-    if (imageAseg)
-      MRIfree(&imageAseg);
-    MRIfree(&output);
-  } else {
-    using LabelType = unsigned short;
-    typedef itk::ShapeLabelObject<long unsigned int, 3> ShapeLabelObjectType;
-    using LabelMapType = itk::LabelMap<ShapeLabelObjectType>;
+	if(!cl.search("--shape"))
+	{
+		MRI* imageAseg = NULL;
+		if(cl.search("-aseg"))
+		{
+			const char *imageNameAseg = cl.follow ("", "-aseg");
+			imageAseg =  MRIread(imageNameAseg) ;
+		}
 
-    typedef itk::Image<unsigned char, 3> ImageType;
-    typedef itk::Image<float, 3> FloatImageType;
 
-    typedef itk::CastImageFilter<FloatImageType, ImageType> CastToCharType;
+		MRI *imageT1 =  MRIread(imageNameT1) ;
+		MRI *imageT2 =  MRIread(imageNameT2) ;
+		MRI *vesselMR =  MRIcopy(imageT1, NULL) ;
+		//MRI *whiteMR=  MRIcopy(imageT1, NULL) ;
+		MRIS_MultimodalRefinement refinement;
+		refinement.SegmentVessel(imageT1, imageT2, vesselMR);
 
-    itk::ImageFileReader<FloatImageType>::Pointer reader =
-        itk::ImageFileReader<FloatImageType>::New();
-    reader->SetFileName(imageNameT1);
-    reader->Update();
-    using BinaryFilterType =
-        itk::BinaryThresholdImageFilter<FloatImageType, FloatImageType>;
-    BinaryFilterType::Pointer binarize = BinaryFilterType::New();
-    binarize->SetLowerThreshold(0);
-    binarize->SetUpperThreshold(1);
-    binarize->SetInput(reader->GetOutput());
-    binarize->SetInsideValue(255);
-    binarize->SetOutsideValue(0);
-    binarize->Update();
+		MRIwrite(vesselMR,outputName) ;
+		MRIfree(&imageT1);	
+		MRIfree(&imageT2);	
+		MRIfree(&vesselMR);	
+	}
+	else
+	{
+		typedef unsigned short LabelType;
+		typedef itk::ShapeLabelObject< long unsigned int, 3> ShapeLabelObjectType;
+		typedef itk::LabelMap< ShapeLabelObjectType > LabelMapType;
 
-    CastToCharType::Pointer castFilter2 = CastToCharType::New();
-    castFilter2->SetInput(binarize->GetOutput());
-    castFilter2->Update();
+		typedef itk::Image<unsigned char, 3> ImageType;
+		typedef itk::Image<float, 3> FloatImageType;
+	
+		typedef itk::CastImageFilter<FloatImageType, ImageType > CastToCharType;
 
-    using BinaryImageToLabelMapFilterType =
-        itk::BinaryImageToShapeLabelMapFilter<ImageType>;
-    BinaryImageToLabelMapFilterType::Pointer binaryImageToLabelMapFilter =
-        BinaryImageToLabelMapFilterType::New();
-    binaryImageToLabelMapFilter->SetInput(castFilter2->GetOutput());
-    binaryImageToLabelMapFilter->Update();
-    // The output of this filter is an itk::LabelMap, which contains
-    // itk::LabelObject's
-    std::cout
-        << "There are "
-        << binaryImageToLabelMapFilter->GetOutput()->GetNumberOfLabelObjects()
-        << " objects." << std::endl;
+		itk::ImageFileReader<FloatImageType>::Pointer reader = itk::ImageFileReader<FloatImageType>::New();
+		reader->SetFileName(imageNameT1);
+		reader->Update();
+		using BinaryFilterType = itk::BinaryThresholdImageFilter<FloatImageType, FloatImageType >;	
+		BinaryFilterType::Pointer binarize = BinaryFilterType::New();  
+		binarize->SetLowerThreshold( 0 );
+		binarize->SetUpperThreshold(1);
+		binarize->SetInput(reader->GetOutput());
+		binarize->SetInsideValue(255);
+		binarize->SetOutsideValue(0);
+		binarize->Update();
 
-    LabelMapType *labelMap = binaryImageToLabelMapFilter->GetOutput();
-    std::cout << labelMap->GetNumberOfLabelObjects() << " labels." << std::endl;
+		CastToCharType::Pointer castFilter2 = CastToCharType::New();
+		castFilter2->SetInput(binarize->GetOutput());
+		castFilter2->Update();	
 
-    std::vector<unsigned long> labelsToRemove;
 
-    // Retrieve all attributes
-    for (unsigned int n = 0; n < labelMap->GetNumberOfLabelObjects(); ++n) {
-      ShapeLabelObjectType *labelObject = labelMap->GetNthLabelObject(n);
-      if (labelObject->GetPhysicalSize() > 1000) {
-        labelsToRemove.push_back(labelObject->GetLabel());
-      } else if (labelObject->GetRoundness() > .80) {
-        if (labelObject->GetPhysicalSize() > 10) {
-          labelObject->SetLabel(1);
-        } else {
-          labelObject->SetLabel(2);
-        }
-      } else if (labelObject->GetElongation() > .99) {
+		using BinaryImageToLabelMapFilterType = itk::BinaryImageToShapeLabelMapFilter<ImageType>;
+		BinaryImageToLabelMapFilterType::Pointer binaryImageToLabelMapFilter = BinaryImageToLabelMapFilterType::New();
+		binaryImageToLabelMapFilter->SetInput(castFilter2->GetOutput());
+		binaryImageToLabelMapFilter->Update();
+		// The output of this filter is an itk::LabelMap, which contains itk::LabelObject's
+		std::cout << "There are " << binaryImageToLabelMapFilter->GetOutput()->GetNumberOfLabelObjects() << " objects." << std::endl;
 
-        labelObject->SetLabel(3);
-      }
-    }
+		LabelMapType *labelMap = binaryImageToLabelMapFilter->GetOutput();
+		std::cout  <<  labelMap->GetNumberOfLabelObjects() << " labels." << std::endl;
 
-    // Remove all regions that were marked for removal.
-    for (unsigned int i = 0; i < labelsToRemove.size(); ++i) {
-      binaryImageToLabelMapFilter->GetOutput()->RemoveLabel(labelsToRemove[i]);
-    }
+		std::vector<unsigned long> labelsToRemove;
 
-    typedef itk::LabelMapToLabelImageFilter<
-        BinaryImageToLabelMapFilterType::OutputImageType, ImageType>
-        LabelMapToLabelImageFilterType;
-    LabelMapToLabelImageFilterType::Pointer labelMapToLabelImageFilter =
-        LabelMapToLabelImageFilterType::New();
-    labelMapToLabelImageFilter->SetInput(
-        binaryImageToLabelMapFilter->GetOutput());
-    labelMapToLabelImageFilter->Update();
+		// Retrieve all attributes
+		for (unsigned int n = 0; n < labelMap->GetNumberOfLabelObjects(); ++n)
+		{
+			ShapeLabelObjectType *labelObject = labelMap->GetNthLabelObject(n);
+			if (labelObject->GetPhysicalSize() >1000)
+			{
+				labelsToRemove.push_back(labelObject->GetLabel());
+			}
+			else if (labelObject->GetRoundness() > .80)
+			{
+				if( labelObject->GetPhysicalSize() > 10)
+				{
+					labelObject->SetLabel(1);
+				}
+				else
+				{
+					labelObject->SetLabel(2);
+				}
+			}
+			else if (labelObject->GetElongation() > .99)
+			{
 
-    using RGBPixelType = itk::RGBPixel<unsigned char>;
-    typedef itk::Image<RGBPixelType, 3> RGBImageType;
+				labelObject->SetLabel(3);
+			}
+		}
 
-    typedef itk::LabelOverlayImageFilter<FloatImageType, ImageType,
-                                         RGBImageType>
-        LabelOverlayImageFilterType;
-    LabelOverlayImageFilterType::Pointer labelOverlayImageFilter =
-        LabelOverlayImageFilterType::New();
-    labelOverlayImageFilter->SetInput(reader->GetOutput());
-    labelOverlayImageFilter->SetLabelImage(
-        labelMapToLabelImageFilter->GetOutput());
-    labelOverlayImageFilter->SetOpacity(.5);
-    labelOverlayImageFilter->Update();
+		// Remove all regions that were marked for removal.
+		for(unsigned int i = 0; i < labelsToRemove.size(); ++i)
+		{
+			binaryImageToLabelMapFilter->GetOutput()->RemoveLabel(labelsToRemove[i]);
+		}
 
-    using WriterTypeS = itk::ImageFileWriter<RGBImageType>;
-    WriterTypeS::Pointer writers = WriterTypeS::New();
-    writers->SetFileName(outputName);
-    writers->SetInput(labelOverlayImageFilter->GetOutput());
-    writers->Update();
-  }
-  return 0;
+		typedef itk::LabelMapToLabelImageFilter<BinaryImageToLabelMapFilterType::OutputImageType, ImageType> LabelMapToLabelImageFilterType;
+		LabelMapToLabelImageFilterType::Pointer labelMapToLabelImageFilter = LabelMapToLabelImageFilterType::New();
+		labelMapToLabelImageFilter->SetInput(binaryImageToLabelMapFilter->GetOutput());
+		labelMapToLabelImageFilter->Update();
+
+		typedef itk::RGBPixel<unsigned char> RGBPixelType;
+		typedef itk::Image<RGBPixelType, 3> RGBImageType;
+
+		typedef itk::LabelOverlayImageFilter<FloatImageType, ImageType, RGBImageType> LabelOverlayImageFilterType;
+		LabelOverlayImageFilterType::Pointer labelOverlayImageFilter = LabelOverlayImageFilterType::New();
+		labelOverlayImageFilter->SetInput(reader->GetOutput());
+		labelOverlayImageFilter->SetLabelImage(labelMapToLabelImageFilter->GetOutput());
+		labelOverlayImageFilter->SetOpacity(.5);
+		labelOverlayImageFilter->Update();
+
+		typedef  itk::ImageFileWriter< RGBImageType  > WriterTypeS;
+		WriterTypeS::Pointer writers = WriterTypeS::New();
+		writers->SetFileName(outputName);
+		writers->SetInput(labelOverlayImageFilter->GetOutput());
+		writers->Update();
+
+
+	}
+	return 0;
 }

@@ -96,89 +96,96 @@ int SymmetricLabelId(int id) {
     }*/
   return symId;
 }
-std::vector<MeshType::Pointer>
-BasicMeshToMesh(std::vector<BasicMeshType::Pointer> basicMeshes,
-                ImageType::Pointer segmentation, bool removeInterHemispheric) {
-  if (ct == nullptr) {
-    FSENV *fsenv = FSENVgetenv();
-    char tmpstr[2000];
-    sprintf(tmpstr, "%s/FreeSurferColorLUT.txt", fsenv->FREESURFER_HOME);
-    ct = CTABreadASCII(tmpstr);
-  }
+std::vector<MeshType::Pointer> BasicMeshToMesh(std::vector<BasicMeshType::Pointer> basicMeshes, ImageType::Pointer segmentation, float  interHemiThreshold )
+{
+	if( ct == NULL)
+	{
+		FSENV *fsenv = FSENVgetenv();
+		char tmpstr[2000];	
+		sprintf(tmpstr, "%s/FreeSurferColorLUT.txt", fsenv->FREESURFER_HOME);
+		ct = CTABreadASCII(tmpstr);
+	}
 
-  std::vector<MeshType::Pointer> meshes;
-  for (unsigned int i = 0; i < basicMeshes.size(); i++) {
-    using CellIterator = BasicMeshType::CellsContainer::ConstIterator;
-    int globalIndex = 0;
-    int indexCell = 0;
-    // typedef MeshType::PointIdentifier PointIdentifier;
-    using PointDataContainerType = MeshType::PointDataContainer;
-    BasicMeshType::Pointer basicMesh = basicMeshes[i];
-    MeshType::Pointer mesh = MeshType::New();
-    int out = 0;
-    for (CellIterator cellIt = basicMesh->GetCells()->Begin();
-         cellIt != basicMesh->GetCells()->End(); cellIt++) {
-      PointDataContainerType::Pointer dataContainer =
-          PointDataContainerType::New();
-      int withinIndex = 0;
-      MeshType::CellAutoPointer line;
-      BasicMeshType::CellTraits::PointIdIterator pointIdIt =
-          cellIt.Value()->PointIdsBegin();
+	std::vector<MeshType::Pointer> meshes;
+	for(unsigned int i=0;i<basicMeshes.size();i++)
+	{
+		typedef BasicMeshType::CellsContainer::ConstIterator CellIterator;
+		int globalIndex=0;
+		int indexCell =0;
+		// typedef MeshType::PointIdentifier PointIdentifier;
+		typedef MeshType::PointDataContainer PointDataContainerType;
+		BasicMeshType::Pointer basicMesh = basicMeshes[i];
+		MeshType::Pointer mesh = MeshType::New();
+		int out =0;
+		for(CellIterator cellIt = basicMesh->GetCells()->Begin(); cellIt!= basicMesh->GetCells()->End(); cellIt++)
+		{
+			PointDataContainerType::Pointer dataContainer = PointDataContainerType::New();
+			int withinIndex=0;
+			MeshType::CellAutoPointer line;
+			BasicMeshType::CellTraits::PointIdIterator  pointIdIt  = cellIt.Value()->PointIdsBegin();
 
-      BasicMeshType::PointType pt = 0;
-      int left = 0, right = 0;
+			BasicMeshType::PointType pt=0; 
+			int left=0, right=0;
 
-      if (removeInterHemispheric) {
-        for (pointIdIt = cellIt.Value()->PointIdsBegin();
-             pointIdIt != cellIt.Value()->PointIdsEnd(); pointIdIt++) {
-          basicMesh->GetPoint(*pointIdIt, &pt);
-          ImageType::IndexType index;
-          if (segmentation->TransformPhysicalPointToIndex(pt, index)) {
-            ImageType::PixelType label = segmentation->GetPixel(index);
+			if(interHemiThreshold>0)
+			{ 
+				for(pointIdIt  = cellIt.Value()->PointIdsBegin();pointIdIt != cellIt.Value()->PointIdsEnd();pointIdIt++)
+				{
+					basicMesh->GetPoint(*pointIdIt, &pt);
+					ImageType::IndexType index;
+					if (segmentation->TransformPhysicalPointToIndex(pt,index))
+					{
+						ImageType::PixelType label = segmentation->GetPixel(index);
 
-            std::string str = std::string(ct->entries[(int)label]->name);
-            if (str.find(LEFT) != std::string::npos ||
-                str.find(LEFT2) != std::string::npos) {
-              left++;
+						std::string str = std::string(ct->entries[(int)label]->name);
+						if( str.find(LEFT) != std::string::npos ||  str.find(LEFT2) != std::string::npos)
+						{
+							left++;						
 
-            } else if (str.find(RIGHT) != std::string::npos ||
-                       str.find(RIGHT2) != std::string::npos) {
-              right++;
-            }
-          }
-        }
-      }
-      if (right == 0 || left == 0 || !removeInterHemispheric) {
-        for (pointIdIt = cellIt.Value()->PointIdsBegin();
-             pointIdIt != cellIt.Value()->PointIdsEnd(); pointIdIt++) {
-          basicMesh->GetPoint(*pointIdIt, &pt);
+						} else	if( str.find(RIGHT) != std::string::npos ||  str.find(RIGHT2) != std::string::npos)
+						{
+							right++;
+						}				
+					}
 
-          line.TakeOwnership(new itk::PolylineCell<MeshType::CellType>);
-          mesh->SetPoint(globalIndex, pt);
-          line->SetPointId(withinIndex, globalIndex);
+				}
+			}
+			if (right == 0 || left ==0 || interHemiThreshold<=0 )
+			{
+				for(pointIdIt  = cellIt.Value()->PointIdsBegin();pointIdIt != cellIt.Value()->PointIdsEnd();pointIdIt++)
+				{
+					basicMesh->GetPoint(*pointIdIt, &pt);
 
-          withinIndex++;
-          globalIndex++;
-          // std::cout << globalIndex << " "<< std::endl;
-        }
+					line.TakeOwnership ( new itk::PolylineCell<MeshType::CellType> );
+					mesh->SetPoint (globalIndex, pt);
+					line->SetPointId (withinIndex, globalIndex);
 
-        mesh->SetCell(indexCell, line);
-        indexCell++;
-      } else {
-        out++;
-        //	std::cout << "right " << right << " left " << left << " remove
-        //"<< removeInterHemispheric << std::endl;
-      }
-    }
-    float val = (float)out / ((float)indexCell + out);
-    // std::cout << " val " << val << std::endl;
-    if (val > 0.20) {
-      meshes.push_back(MeshType::New());
-    } else {
-      meshes.push_back(mesh);
-    }
-  }
-  return meshes;
+					withinIndex++;
+					globalIndex++;
+					//std::cout << globalIndex << " "<< std::endl;
+				}
+
+				mesh->SetCell (indexCell, line);
+				indexCell++;
+			}
+			else
+			{
+				out++;
+				//	std::cout << "right " << right << " left " << left << " remove "<< removeInterHemispheric << std::endl;
+			}
+		}
+		float val =(float)out / ((float)indexCell+out);
+		//std::cout << " val " << val << std::endl;
+		if( val> interHemiThreshold)
+		{
+			meshes.push_back(MeshType::New());
+		}
+		else
+		{
+			meshes.push_back(mesh);
+		}
+	}
+	return meshes;
 }
 
 std::vector<MeasurementVectorType> SetDirectionalNeighbors(
@@ -386,271 +393,264 @@ FixSampleClusters(std::vector<vtkSmartPointer<vtkPolyData>> polydatas) {
   }
   return meshes;
 }
-int main(int narg, char *arg[]) {
-  try {
-    enum { Dimension = 3 };
-    using PixelType = double;
-    using ImageType = itk::Image<PixelType, Dimension>;
+int main(int narg, char*  arg[])
+{
+	try 
+	{
+		enum {Dimension =3};
+		typedef double                                                        PixelType;
+		typedef itk::Image< PixelType,  Dimension >  ImageType;
 
-    GetPot cl(narg, const_cast<char **>(arg));
-    GetPot cl2(narg, const_cast<char **>(arg));
-    if (cl.size() == 1 || cl.search(2, "--help", "-h")) {
-      std::cout << "Usage: " << std::endl;
-      std::cout << arg[0]
-                << " -s1 parcellation1 -s2 parcellation2 -c numClusters -h1 "
-                   "clusteringPath1  -h2 clusterinPath2 -labels (-euclid for "
-                   "Eucildean) -bb -sym -o output"
-                << std::endl;
-      return -1;
-    }
-    int numClusters = cl.follow(0, "-c");
-    const char *segFile = cl.follow("", "-s1");
-    using ImageReaderType = itk::ImageFileReader<ImageType>;
-    ImageReaderType::Pointer readerS = ImageReaderType::New();
-    readerS->SetFileName(segFile);
-    readerS->Update();
-    ImageType::Pointer segmentation1 = readerS->GetOutput();
 
-    segFile = cl.follow("", "-s2");
-    bool symm = cl.search("-sym");
-    std::cout << "Symmetry " << symm << std::endl;
-    bool bb = cl.search("-bb");
-    std::cout << "Baby Mode " << bb << std::endl;
-    readerS = ImageReaderType::New();
-    readerS->SetFileName(segFile);
-    readerS->Update();
-    ImageType::Pointer segmentation2 = readerS->GetOutput();
+		GetPot cl(narg, const_cast<char**>(arg));
+		GetPot cl2(narg, const_cast<char**>(arg));
+		if(cl.size()==1 || cl.search(2,"--help","-h"))
+		{
+			std::cout<<"Usage: " << std::endl;
+			std::cout<< arg[0] << " -s1 parcellation1 -s2 parcellation2 -c numClusters -h1 clusteringPath1  -h2 clusterinPath2 -labels (-euclid for Eucildean) -bb -sym interHemiRatioClusterRemoval -o output"  << std::endl;   
+			return -1;
+		}
+		int numClusters = cl.follow(0,"-c");
+		const char *segFile = cl.follow ("", "-s1");
+		typedef itk::ImageFileReader<ImageType> ImageReaderType;
+		ImageReaderType::Pointer readerS = ImageReaderType::New();
+		readerS->SetFileName ( segFile);
+		readerS->Update();
+		ImageType::Pointer segmentation1  = readerS->GetOutput();
 
-    std::string hierarchyFilename = std::string(cl.follow("", "-h1"));
 
-    HierarchicalClusteringPruner<BasicMeshType, ImageType>::Pointer
-        hierarchyPruner =
-            HierarchicalClusteringPruner<BasicMeshType, ImageType>::New();
-    hierarchyPruner->SetNumberOfClusters(numClusters);
-    hierarchyPruner->SetHierarchyFilename(hierarchyFilename +
-                                          "/HierarchicalHistory.csv");
-    hierarchyPruner->SetClustersPath(hierarchyFilename);
-    hierarchyPruner->SetExtension(FiberFormat::TRK);
-    hierarchyPruner->SetReferenceImage(segmentation1);
-    hierarchyPruner->Update();
-    std::vector<long long> meshes1Files = hierarchyPruner->GetClustersIds();
-    std::vector<BasicMeshType::Pointer> basicMeshes1 =
-        FixSampleClusters(hierarchyPruner->GetOutputBundles());
-    std::vector<MeshType::Pointer> meshes1 =
-        BasicMeshToMesh(basicMeshes1, segmentation1, symm);
 
-    hierarchyFilename = std::string(cl.follow("", "-h2"));
+		segFile = cl.follow ("", "-s2");
+		float symm =  cl.follow(0.0,"-sym");
+		std::cout << "Symmetry " << symm << std::endl;
+		bool bb =  cl.search("-bb");
+		std::cout << "Baby Mode " << bb << std::endl;
+		readerS = ImageReaderType::New();
+		readerS->SetFileName ( segFile);
+		readerS->Update();
+		ImageType::Pointer segmentation2  = readerS->GetOutput();
 
-    hierarchyPruner->SetHierarchyFilename(hierarchyFilename +
-                                          "/HierarchicalHistory.csv");
-    hierarchyPruner->SetReferenceImage(segmentation2);
-    hierarchyPruner->SetClustersPath(hierarchyFilename);
-    hierarchyPruner->Update();
-    std::vector<BasicMeshType::Pointer> basicMeshes2 =
-        FixSampleClusters(hierarchyPruner->GetOutputBundles());
-    std::vector<MeshType::Pointer> meshes2 =
-        BasicMeshToMesh(basicMeshes2, segmentation2, symm);
+		std::string hierarchyFilename  = std::string(cl.follow("","-h1"));
 
-    std::vector<long long> meshes2Files = hierarchyPruner->GetClustersIds();
-    /*GetMeshes(cl, "-f1" , "-F1", &meshes1,&meshes1Files);
-      std::cout << " meshses 1  size " << meshes1.size() << std::endl;
-      GetMeshes(cl, "-f2" , "-F2", &meshes2, &meshes2Files);
-      std::cout << " meshses 2  size " << meshes2.size() << std::endl;
-      */
+		HierarchicalClusteringPruner<BasicMeshType, ImageType>::Pointer hierarchyPruner =  HierarchicalClusteringPruner<BasicMeshType,ImageType>::New();
+		hierarchyPruner->SetNumberOfClusters(numClusters);
+		hierarchyPruner->SetHierarchyFilename(hierarchyFilename+"/HierarchicalHistory.csv"); 
+		hierarchyPruner->SetClustersPath(hierarchyFilename);
+		hierarchyPruner->SetExtension(FiberFormat::TRK);
+		hierarchyPruner->SetReferenceImage(segmentation1);
+		hierarchyPruner->Update();
+		std::vector<long long> meshes1Files = hierarchyPruner->GetClustersIds(); 
+		std::vector<BasicMeshType::Pointer> basicMeshes1= FixSampleClusters(hierarchyPruner->GetOutputBundles());	
+		std::vector<MeshType::Pointer> meshes1= BasicMeshToMesh(basicMeshes1, segmentation1, symm);
 
-    std::vector<int> clusterCentroidsIndex1 =
-        std::vector<int>(meshes1.size(), -1);
-    std::vector<int> clusterCentroidsIndex2 =
-        std::vector<int>(meshes2.size(), -1);
+		hierarchyFilename  = std::string(cl.follow("","-h2"));
 
-    std::map<long long, long long> correspondances;
-    vnl_matrix<double> distances(meshes1.size(), meshes2.size());
-    if (cl.search(1, "-euclid")) {
-      std::vector<int> clusterCentroidsIndex1 = GetCentroidIndices(meshes1);
-      std::vector<int> clusterCentroidsIndex2 = GetCentroidIndices(meshes2);
+		hierarchyPruner->SetHierarchyFilename(hierarchyFilename+"/HierarchicalHistory.csv"); 
+		hierarchyPruner->SetReferenceImage(segmentation2);
+		hierarchyPruner->SetClustersPath(hierarchyFilename);
+		hierarchyPruner->Update();
+		std::vector<BasicMeshType::Pointer> basicMeshes2 = FixSampleClusters(hierarchyPruner->GetOutputBundles());	
+		std::vector<MeshType::Pointer> meshes2 = BasicMeshToMesh(basicMeshes2, segmentation2, symm);
 
-      for (unsigned int i = 0; i < meshes1.size(); i++) {
-        float dist_min = std::numeric_limits<float>::max();
 
-        CellAutoPointer cell1;
-        meshes1[i]->GetCell(clusterCentroidsIndex1[i], cell1);
-        for (unsigned int j = 0; j < meshes2.size(); j++) {
-          CellAutoPointer cell2;
-          meshes2[j]->GetCell(clusterCentroidsIndex2[j], cell2);
+		std::vector<long long> meshes2Files = hierarchyPruner->GetClustersIds();
+		/*GetMeshes(cl, "-f1" , "-F1", &meshes1,&meshes1Files);
+		  std::cout << " meshses 1  size " << meshes1.size() << std::endl;
+		  GetMeshes(cl, "-f2" , "-F2", &meshes2, &meshes2Files);
+		  std::cout << " meshses 2  size " << meshes2.size() << std::endl;
+		  */
 
-          double dist = 0.0;
-          double dist_inv = 0.0;
-          MeshType::CellTraits::PointIdIterator pointIdIt1 =
-              cell1->PointIdsBegin();
-          MeshType::CellTraits::PointIdIterator pointIdIt2 =
-              cell2->PointIdsBegin();
-          MeshType::CellTraits::PointIdIterator pointIdIt2_inv =
-              cell2->PointIdsEnd();
-          pointIdIt2_inv--;
-          for (; pointIdIt1 != cell1->PointIdsEnd();
-               pointIdIt1++, pointIdIt2++, pointIdIt2_inv--) {
-            MeshType::PointType pt1 = 0;
-            meshes1[i]->GetPoint(*pointIdIt1, &pt1);
-            MeshType::PointType pt2 = 0;
-            meshes2[j]->GetPoint(*pointIdIt2, &pt2);
-            MeshType::PointType pt2_inv = 0;
-            meshes2[j]->GetPoint(*pointIdIt2_inv, &pt2_inv);
+		std::vector<int> clusterCentroidsIndex1 = std::vector<int>(meshes1.size(),-1);
+		std::vector<int> clusterCentroidsIndex2 =std::vector<int>(meshes2.size(),-1);
 
-            dist += pt1.EuclideanDistanceTo(pt2);
-            dist_inv += pt1.EuclideanDistanceTo(pt2_inv);
-          }
-          if (dist < dist_min || dist_inv < dist_min) {
-            dist_min = std::min(dist, dist_inv);
-            correspondances[i] = j;
-          }
-          distances(i, j) = std::min(dist, dist_inv);
-        }
-      }
-    } else // if (cl.search(1,"-labels"))
-    {
-      OrientationPlanesFromParcellationFilter<
-          ImageType, ImageType>::Pointer orientationFilter1 =
-          OrientationPlanesFromParcellationFilter<ImageType, ImageType>::New();
-      orientationFilter1->SetInput(segmentation1);
-      orientationFilter1->SetBabyMode(bb);
-      orientationFilter1->Update();
-      std::vector<itk::Vector<float>> orientations1;
-      orientations1.push_back(orientationFilter1->GetUpDown());
-      orientations1.push_back(orientationFilter1->GetFrontBack());
-      orientations1.push_back(orientationFilter1->GetLeftRight());
 
-      OrientationPlanesFromParcellationFilter<
-          ImageType, ImageType>::Pointer orientationFilter2 =
-          OrientationPlanesFromParcellationFilter<ImageType, ImageType>::New();
-      orientationFilter2->SetInput(segmentation2);
-      orientationFilter2->SetBabyMode(bb);
-      orientationFilter2->Update();
-      std::vector<itk::Vector<float>> orientations2;
-      orientations2.push_back(orientationFilter2->GetUpDown());
-      orientations2.push_back(orientationFilter2->GetFrontBack());
-      orientations2.push_back(orientationFilter2->GetLeftRight());
+		std::map<long long,long long> correspondances;
+		vnl_matrix<double> distances(meshes1.size(),meshes2.size());
+		if (cl.search(1,"-euclid"))
+		{
+			std::vector<int> clusterCentroidsIndex1 = GetCentroidIndices(meshes1);
+			std::vector<int> clusterCentroidsIndex2 = GetCentroidIndices(meshes2);
 
-      // std::cout << orientationFilter1->GetUpDown() << " " <<
-      // orientationFilter1->GetFrontBack() << " " <<
-      // orientationFilter1->GetLeftRight() << std::endl; std::cout <<
-      // orientationFilter2->GetUpDown() << " " <<
-      // orientationFilter2->GetFrontBack() << " " <<
-      // orientationFilter2->GetLeftRight() << std::endl;
+			for(unsigned int i=0;i<meshes1.size();i++)
+			{	
+				float dist_min = std::numeric_limits<float>::max();
 
-      // typedef ImageType::IndexType IndexType;
-      std::vector<itk::Vector<float>> direcciones1;
-      std::vector<itk::Vector<float>> direcciones2;
-      int possibles[3] = {0, 1, -1};
-      for (unsigned int i = 0; i < 3; i++) {
-        for (unsigned int k = 0; k < 3; k++) {
-          for (unsigned int j = 0; j < 3; j++) {
-            /*IndexType index1;
-              index1[0] = possibles[i] * orientations1[0];
-              index1[1] = possibles[j] * orientations1[1];
-              index1[2] = possibles[k] * orientations1[2];
-              */
-            /*IndexType index2;
-              index2[0] = possibles[i] * orientations2[0];
-              index2[1] = possibles[j] * orientations2[1];
-              index2[2] = possibles[k] * orientations2[2];
-              */
-            itk::Vector<float> dir1;
-            itk::Vector<float> dir2;
-            for (int w = 0; w < 3; w++) {
+				CellAutoPointer cell1;
+				meshes1[i]->GetCell(clusterCentroidsIndex1[i], cell1);
+				for(unsigned int j=0;j<meshes2.size();j++)
+				{
+					CellAutoPointer cell2;
+					meshes2[j]->GetCell(clusterCentroidsIndex2[j], cell2);
 
-              dir1[w] = possibles[i] * orientations1[0][w] +
-                        possibles[j] * orientations1[1][w] +
-                        possibles[k] * orientations1[2][w];
-              if (symm) {
-                dir2[w] = possibles[i] * orientations2[0][w] +
-                          possibles[j] * orientations2[1][w] -
-                          possibles[k] * orientations2[2][w];
-              } else {
-                dir2[w] = possibles[i] * orientations2[0][w] +
-                          possibles[j] * orientations2[1][w] +
-                          possibles[k] * orientations2[2][w];
-              }
-            }
-            dir1.Normalize();
-            dir2.Normalize();
-            int howManyZeros = 0;
-            if (i == 0)
-              howManyZeros++;
-            if (j == 0)
-              howManyZeros++;
-            if (k == 0)
-              howManyZeros++;
-            if (howManyZeros != 3) {
-              direcciones1.push_back(dir1);
-              direcciones2.push_back(dir2);
-              //	std::cout << dir1 << " "<< dir2 << std::endl;
-            }
-          }
-        }
-      }
-      std::vector<MeasurementVectorType> measurements1 =
-          SetDirectionalNeighbors(meshes1, clusterCentroidsIndex1,
-                                  segmentation1, direcciones1, false);
-      std::vector<MeasurementVectorType> measurements2 =
-          SetDirectionalNeighbors(meshes2, clusterCentroidsIndex2,
-                                  segmentation2, direcciones2, symm);
-      MembershipFunctionType::Pointer function = MembershipFunctionType::New();
-      function->SetLabels(true);
-      //		std::cout << measurements1[100] << std::endl;
-      //		std::cout << measurements2[50] << std::endl;
+					double dist=0.0;
+					double dist_inv=0.0;
+					MeshType::CellTraits::PointIdIterator  pointIdIt1  =cell1->PointIdsBegin();
+					MeshType::CellTraits::PointIdIterator  pointIdIt2  =cell2->PointIdsBegin();
+					MeshType::CellTraits::PointIdIterator  pointIdIt2_inv  =cell2->PointIdsEnd();
+					pointIdIt2_inv--;
+					for(;pointIdIt1 != cell1->PointIdsEnd(); pointIdIt1++, pointIdIt2++, pointIdIt2_inv--)
+					{
+						MeshType::PointType pt1=0;
+						meshes1[i]->GetPoint (*pointIdIt1, &pt1);
+						MeshType::PointType pt2=0;
+						meshes2[j]->GetPoint (*pointIdIt2, &pt2);
+						MeshType::PointType pt2_inv=0;
+						meshes2[j]->GetPoint (*pointIdIt2_inv, &pt2_inv);
 
-      for (unsigned int i = 0; i < measurements1.size(); i++) {
-        float aff_max = std::numeric_limits<float>::min();
-        for (unsigned int j = 0; j < measurements2.size(); j++) {
-          float aff = function->Evaluate(&measurements1[i], &measurements2[j]);
-          //				std::cout << aff << std::endl;
-          if (aff > aff_max) {
-            aff_max = aff;
-            correspondances[i] = j;
-          }
-          // distances(i,j)= (1-aff)*100;
-          distances(i, j) = (1 / (aff + 0.01));
+						dist +=	pt1.EuclideanDistanceTo(pt2);
+						dist_inv += pt1.EuclideanDistanceTo(pt2_inv);
+					}
+					if(dist<dist_min || dist_inv < dist_min)
+					{
+						dist_min = std::min(dist, dist_inv);
+						correspondances[i]=j;
+					}
+					distances(i,j)=std::min(dist,dist_inv);
 
-          // distances(i,j)= aff;
-        }
-      }
-    }
-    // if(cl.search(1,"-hungarian"))
-    {
-      // std::cout << " distances " << distances << std::endl;
-      std::vector<unsigned int> assign =
-          vnl_hungarian_algorithm<double>(distances); //.GetAssignmentVector();
-      // std::cout << " assign size" << assign.size() << std::endl;
-      // std::cout << assign[0] << " " << assign[199] << std::endl;
-      for (unsigned int i = 0; i < assign.size(); i++)
-        correspondances[i] = assign[i];
-    }
+				}
+			}	
+		}
+		else// if (cl.search(1,"-labels"))
+		{
+			OrientationPlanesFromParcellationFilter<ImageType,ImageType>::Pointer orientationFilter1 = OrientationPlanesFromParcellationFilter<ImageType, ImageType>::New();
+			orientationFilter1->SetInput(segmentation1);
+			orientationFilter1->SetBabyMode(bb);
+			orientationFilter1->Update();
+			std::vector<itk::Vector<float>> orientations1;
+			orientations1.push_back(orientationFilter1->GetUpDown());
+			orientations1.push_back(orientationFilter1->GetFrontBack());
+			orientations1.push_back(orientationFilter1->GetLeftRight());
 
-    const char *output = cl.follow("", "-o");
+			OrientationPlanesFromParcellationFilter<ImageType,ImageType>::Pointer orientationFilter2 = OrientationPlanesFromParcellationFilter<ImageType, ImageType>::New();
+			orientationFilter2->SetInput(segmentation2);
+			orientationFilter2->SetBabyMode(bb);
+			orientationFilter2->Update();
+			std::vector<itk::Vector<float>> orientations2;
+			orientations2.push_back(orientationFilter2->GetUpDown());
+			orientations2.push_back(orientationFilter2->GetFrontBack());
+			orientations2.push_back(orientationFilter2->GetLeftRight());
 
-    std::cout << "Correspondances file " << output << std::endl;
-    std::ofstream csv_file;
-    csv_file.open(output);
+			//std::cout << orientationFilter1->GetUpDown() << " " << orientationFilter1->GetFrontBack() << " " << orientationFilter1->GetLeftRight() << std::endl;	
+			//std::cout << orientationFilter2->GetUpDown() << " " << orientationFilter2->GetFrontBack() << " " << orientationFilter2->GetLeftRight() << std::endl;	
 
-    csv_file << "Subject A,Subject B , " << std::endl;
 
-    // for (std::map<int,std::vector<int>>::iterator it=correspondances.begin();
-    // it!=correspondances.end(); ++it)
-    for (std::map<long long, long long>::iterator it = correspondances.begin();
-         it != correspondances.end(); ++it) {
-      csv_file << meshes1Files[it->first] << "," << meshes2Files[it->second]
-               << "," << distances[it->first][it->second] << std::endl;
-    }
-    csv_file.close();
+			//typedef ImageType::IndexType IndexType;
+			std::vector<itk::Vector<float>> direcciones1;
+			std::vector<itk::Vector<float>> direcciones2;
+			int possibles[3] = {0,1,-1};
+			for(unsigned int i=0;i<3;i++)
+			{
+				for(unsigned int k=0;k<3;k++)
+				{
+					for(unsigned int j=0;j<3;j++)
+					{
+						/*IndexType index1;
+						  index1[0] = possibles[i] * orientations1[0];
+						  index1[1] = possibles[j] * orientations1[1];
+						  index1[2] = possibles[k] * orientations1[2];
+						  */
+						/*IndexType index2;
+						  index2[0] = possibles[i] * orientations2[0];
+						  index2[1] = possibles[j] * orientations2[1];
+						  index2[2] = possibles[k] * orientations2[2];
+						  */	
+						itk::Vector<float> dir1;
+						itk::Vector<float> dir2;
+						for(int w=0;w<3;w++)
+						{
 
-  } catch (...) {
-    std::cout << "Error --> ";
-    for (int i = 0; i < narg; i++) {
-      std::cout << arg[i];
-    }
-    std::cout << std::endl;
-  }
-  return 0;
+							dir1[w] = possibles[i] * orientations1[0][w]+possibles[j] * orientations1[1][w]+possibles[k] * orientations1[2][w];
+							if( symm)
+							{
+								dir2[w] = possibles[i] * orientations2[0][w]+possibles[j] * orientations2[1][w]-possibles[k] * orientations2[2][w];
+							}
+							else
+							{
+								dir2[w] = possibles[i] * orientations2[0][w]+possibles[j] * orientations2[1][w]+possibles[k] * orientations2[2][w];
+							}
+						}
+						dir1.Normalize();
+						dir2.Normalize();
+						int howManyZeros=0;
+						if(i==0)
+							howManyZeros++;
+						if(j==0)
+							howManyZeros++;
+						if(k==0)
+							howManyZeros++;
+						if(howManyZeros!=3)
+						{
+							direcciones1.push_back(dir1);
+							direcciones2.push_back(dir2);
+							//	std::cout << dir1 << " "<< dir2 << std::endl;
+						}
+					}
+				}
+			}
+			std::vector<MeasurementVectorType> measurements1 =  SetDirectionalNeighbors(meshes1, clusterCentroidsIndex1,segmentation1, direcciones1, false);
+			std::vector<MeasurementVectorType> measurements2 = SetDirectionalNeighbors(meshes2, clusterCentroidsIndex2,segmentation2, direcciones2, symm);
+			MembershipFunctionType::Pointer function = MembershipFunctionType::New();		
+			function->SetLabels(true);
+			//		std::cout << measurements1[100] << std::endl;
+			//		std::cout << measurements2[50] << std::endl;
+
+			for(unsigned int i=0;i<measurements1.size();i++)
+			{
+				float aff_max = std::numeric_limits<float>::min();
+				for(unsigned int j=0;j<measurements2.size();j++)
+				{
+					float aff = function->Evaluate(&measurements1[i], &measurements2[j]);
+					//				std::cout << aff << std::endl;
+					if(aff > aff_max)
+					{
+						aff_max = aff;
+						correspondances[i]=j;
+					}
+					//distances(i,j)= (1-aff)*100;
+					distances(i,j)= (1/(aff+0.01));
+
+					//distances(i,j)= aff;
+				}
+
+			}
+		}
+		//if(cl.search(1,"-hungarian"))
+		{
+			//std::cout << " distances " << distances << std::endl;
+			vcl_vector<unsigned int> assign = vnl_hungarian_algorithm< double>( distances ); //.GetAssignmentVector();
+			//std::cout << " assign size" << assign.size() << std::endl;
+			//std::cout << assign[0] << " " << assign[199] << std::endl;
+			for( unsigned int i=0;i<assign.size();i++)
+				correspondances[i]=assign[i];
+		}
+
+
+		const char *output= cl.follow ("", "-o");
+
+		std::cout << "Correspondances file " << output << std::endl;
+		std::ofstream csv_file;
+		csv_file.open (output);
+
+		csv_file << "Subject A,Subject B , "<< std::endl;
+
+		//for (std::map<int,std::vector<int>>::iterator it=correspondances.begin(); it!=correspondances.end(); ++it)
+		for (std::map<long long,long long>::iterator it=correspondances.begin(); it!=correspondances.end(); ++it)
+		{
+			csv_file << meshes1Files[it->first] << "," << meshes2Files[it->second] << ","<< distances[it->first][it->second] << std::endl;
+		}
+		csv_file.close();
+
+	}catch(...)
+	{
+		std::cout << "Error --> ";
+		for(int i=0;i<narg;i++)
+		{
+			std::cout << arg[i];
+		}
+		std::cout << std::endl;
+
+	}
+	return 0;
 }
 /*std::cout << "starting hungarian algorithm"<< std::endl;
 

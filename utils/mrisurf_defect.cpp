@@ -11714,11 +11714,20 @@ void MRIScomputeDistanceVolume(TOPOFIX_PARMS *parms,
         computeVertexPseudoNormal(mris, vn, n_v2, 0);
       }
     }
-    if (isnan(n_v0[0]) || isnan(n_v1[0]) || isnan(n_v2[0])) {
-      fprintf(stderr, ".%d & %d[%d(%d) %d(%d) %d(%d)][%f %f %f]\n", wsurf, fno,
-              face->v[0], mris->vertices[face->v[0]].marked, face->v[1],
-              mris->vertices[face->v[1]].marked, face->v[2],
-              mris->vertices[face->v[2]].marked, n_v0[0], n_v1[0], n_v2[0]);
+    if (std::isnan(n_v0[0]) || std::isnan(n_v1[0]) || std::isnan(n_v2[0])) {
+      fprintf(stderr,
+              ".%d & %d[%d(%d) %d(%d) %d(%d)][%f %f %f]\n",
+              wsurf,
+              fno,
+              face->v[0],
+              mris->vertices[face->v[0]].marked,
+              face->v[1],
+              mris->vertices[face->v[1]].marked,
+              face->v[2],
+              mris->vertices[face->v[2]].marked,
+              n_v0[0],
+              n_v1[0],
+              n_v2[0]);
       exit(-1);
     }
     //////////////////////////////////////////////////////////////

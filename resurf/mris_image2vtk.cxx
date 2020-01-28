@@ -331,74 +331,130 @@ int main(int argc, char *argv[]) {
 #else
     stripper->SetInputData(vtkSurface);
 #endif
-    //	stripper->PassVertsOff();
-    //	stripper->PassLinesOff();
+	contour->SetValue(0, 1);	
+	contour->SetNumberOfContours(1);
+	contour->Update();
 
-    vtkSmartPointer<vtkCleanPolyData> cleaner =
-        vtkSmartPointer<vtkCleanPolyData>::New();
-    cleaner->SetAbsoluteTolerance(0.1);
-    cleaner->SetInputConnection(stripper->GetOutputPort());
-    cleaner->Update();
+	vtkSmartPointer<vtkPolyDataConnectivityFilter> conn =	vtkSmartPointer<vtkPolyDataConnectivityFilter>::New();
+	conn->SetInputConnection( contour->GetOutputPort() );
+	//conn->SetExtractionModeToLargestRegion();
+	conn->SetExtractionModeToAllRegions();
 
-    vtkSmartPointer<vtkSmoothPolyDataFilter> smoother =
-        vtkSmartPointer<vtkSmoothPolyDataFilter>::New();
-    // smoother->SetInputConnection( contour->GetOutputPort() );
-    smoother->SetInputConnection(cleaner->GetOutputPort());
-    smoother->SetNumberOfIterations(vtkSmoothingIterations);
-    smoother->SetRelaxationFactor(0.3);
-    smoother->FeatureEdgeSmoothingOff();
-    smoother->BoundarySmoothingOn();
-    smoother->Update();
-    vtkSurface = smoother->GetOutput();
-  }
+	vtkSurface = conn->GetOutput();
 
-  MRIS *surf = MRISalloc(vtkSurface->GetNumberOfPoints(),
-                         vtkSurface->GetNumberOfPolys());
-  surf->type = MRIS_TRIANGULAR_SURFACE;
-  for (int i = 0; i < vtkSurface->GetNumberOfPoints(); i++) {
-    double *point = vtkSurface->GetPoint(i);
-    double *point2 = vtkSurface->GetPoint(i);
-    //::MRIvoxelToWorld( imageFS, point[0]/0.013, point[1]/0.1, point[2]/0.013,
-    //&point2[0], &point2[1], &point2[2] );
-    //::MRIworldToVoxel( m_volumeRef->m_MRITarget, ras[0], ras[1], ras[2],
-    //&cindex[0], &cindex[1], &cindex[2] );
+	std::cout << " num points " << vtkSurface->GetNumberOfPoints()<< std::endl;
 
-    //	MRISsurfaceRASToVoxel(surf, imageFS,point[0], point[1], point[2],
-    //&point2[0], &point2[1], &point2[2] );
+//	for(int i =0;i<vtkSmoothingIterations;i++)
+	{
+		vtkSmartPointer<vtkFillHolesFilter> fillHoles =	vtkSmartPointer<vtkFillHolesFilter>::New();
+	#if VTK_MAJOR_VERSION <= 5	
+		fillHoles->SetInput(vtkSurface);
+	#else
+		fillHoles->SetInputData(vtkSurface);
+	#endif
+		fillHoles->SetHoleSize(10000000000.0);
+		fillHoles->Update();
+		vtkSurface = fillHoles->GetOutput();
 
-    // MRIvoxelToSurfaceRAS( imageFS,point[0], point[1], point[2], &point2[0],
-    // &point2[1], &point2[2] );
+		vtkSmartPointer<vtkTriangleFilter> stripper2 =  vtkSmartPointer<vtkTriangleFilter>::New();
+	#if VTK_MAJOR_VERSION <= 5	
+		stripper2->SetInput( vtkSurface );
+	#else
+		stripper2->SetInputData( vtkSurface );
+	#endif
+		stripper2->Update();   	
+		vtkSurface = stripper2->GetOutput();
 
-    surf->vertices[i].x = -point2[0];
-    surf->vertices[i].z = -point2[1];
-    surf->vertices[i].y = point2[2];
-  }
+		float reduction = 1.0 - redPercentage /vtkSurface->GetNumberOfPoints();
+		std::cout << " reduction " << reduction << " num points " << vtkSurface->GetNumberOfPoints()<< std::endl;
+		vtkSmartPointer<vtkQuadricDecimation> decimate = vtkSmartPointer<vtkQuadricDecimation>::New();
+		//vtkSmartPointer<vtkDecimatePro> decimate = vtkSmartPointer<vtkDecimatePro>::New();
+	#if VTK_MAJOR_VERSION <= 5	
+		decimate->SetInput(vtkSurface);
+	#else
+		decimate->SetInputData(vtkSurface);
+	#endif
+	//	decimate->SetVolumePreservation(true);
+	//	decimate->SetPreserveTopology(true);
+	//	decimate->SplittingOff();
+	//	decimate->BoundaryVertexDeletionOn();
+		decimate->SetTargetReduction(reduction); //99% reduction (if there was 100 triangles, now there will be 1)
+		decimate->Update();
+		vtkSurface = decimate->GetOutput();
 
-  // Copy in the faces.
-  vtkIdType cPointIDs = 0;
-  vtkIdType *pPointIDs = nullptr;
-  vtkCellArray *polys = vtkSurface->GetPolys();
-  assert(polys);
-  vtkIdType nFace = 0;
-  for (polys->InitTraversal(); polys->GetNextCell(cPointIDs, pPointIDs);
-       nFace++) {
-    if (cPointIDs == 3) {
-      // surf->faces[nFace].v = pPointIDs;
-      for (int nPointID = 0; nPointID < 3; nPointID++) {
-        surf->faces[nFace].v[nPointID] = pPointIDs[nPointID];
-        /// MRIS::faces face = surf->faces[1];
-        // face.v[1] = pPointIDs[1];
-      }
-    }
-  }
-  // surf->SetMatrix(MRIvoxelXformToRasXform(imageFS));
+		std::cout << "num points " << vtkSurface->GetNumberOfPoints()<< std::endl;
+		vtkSmartPointer<vtkTriangleFilter> stripper =		vtkSmartPointer<vtkTriangleFilter>::New();
+	#if VTK_MAJOR_VERSION <= 5	
+		stripper->SetInput( vtkSurface );
+	#else
+		stripper->SetInputData( vtkSurface );
+	#endif
+	//	stripper->PassVertsOff();
+	//	stripper->PassLinesOff();
 
-  // surf->vg= imageFS->vg; //=  MRIgetVoxelToRasXform(imageFS) ;
-  // //MRIvoxelXformToRasXform(imageFS); //)imageFS->GetMatrix();
-  // Write the data.
-  MRISwrite(surf, outputFileName);
+		vtkSmartPointer<vtkCleanPolyData> cleaner = vtkSmartPointer<vtkCleanPolyData>::New();
+		cleaner->SetAbsoluteTolerance(0.1);
+		cleaner->SetInputConnection(stripper->GetOutputPort());
+		cleaner->Update();
 
-  return EXIT_SUCCESS;
+		vtkSmartPointer<vtkSmoothPolyDataFilter> smoother =     vtkSmartPointer<vtkSmoothPolyDataFilter>::New();
+		//smoother->SetInputConnection( contour->GetOutputPort() );
+		smoother->SetInputConnection( cleaner->GetOutputPort() );
+		smoother->SetNumberOfIterations(vtkSmoothingIterations);
+		smoother->SetRelaxationFactor(0.3);
+		smoother->FeatureEdgeSmoothingOff();
+		smoother->BoundarySmoothingOn();
+		smoother->Update();
+		vtkSurface = smoother->GetOutput();
+
+	}
+
+
+	
+	MRIS* surf = MRISalloc( vtkSurface->GetNumberOfPoints(), vtkSurface->GetNumberOfPolys());
+	surf->type = MRIS_TRIANGULAR_SURFACE;
+	for(int i=0; i<vtkSurface->GetNumberOfPoints();i++)
+	{	
+		double* point = vtkSurface->GetPoint( i);
+		double* point2 = vtkSurface->GetPoint( i);
+		//::MRIvoxelToWorld( imageFS, point[0]/0.013, point[1]/0.1, point[2]/0.013, &point2[0], &point2[1], &point2[2] );
+		//::MRIworldToVoxel( m_volumeRef->m_MRITarget, ras[0], ras[1], ras[2], &cindex[0], &cindex[1], &cindex[2] );
+
+		//	MRISsurfaceRASToVoxel(surf, imageFS,point[0], point[1], point[2], &point2[0], &point2[1], &point2[2] );
+		
+		// MRIvoxelToSurfaceRAS( imageFS,point[0], point[1], point[2], &point2[0], &point2[1], &point2[2] );
+
+		surf->vertices[i].x = -  point2[0];
+		surf->vertices[i].z = -  point2[1];
+		surf->vertices[i].y =  point2[2];
+	}
+
+	// Copy in the faces.
+	vtkIdType cPointIDs = 0;
+	vtkIdType* pPointIDs = NULL;
+	vtkCellArray* polys = vtkSurface->GetPolys();
+	assert( polys );
+	vtkIdType nFace = 0;
+	for( polys->InitTraversal();polys->GetNextCell( cPointIDs, pPointIDs ); nFace++ ) 
+	{
+		if( cPointIDs == 3 ) 
+		{
+			//surf->faces[nFace].v = pPointIDs;
+			for( int nPointID = 0; nPointID < 3; nPointID++ )
+			{	
+				surf->faces[nFace].v[nPointID] = pPointIDs[nPointID];
+				///MRIS::faces face = surf->faces[1];
+				//face.v[1] = pPointIDs[1];
+			}
+		}
+	}
+	//surf->SetMatrix(MRIvoxelXformToRasXform(imageFS));
+	
+	//surf->vg= imageFS->vg; //=  MRIgetVoxelToRasXform(imageFS) ; //MRIvoxelXformToRasXform(imageFS); //)imageFS->GetMatrix();
+	// Write the data.
+	MRISwrite( surf, outputFileName);
+
+return EXIT_SUCCESS;
 }
 
 /*	vtkSmartPointer<vtkImageResample> resampler =

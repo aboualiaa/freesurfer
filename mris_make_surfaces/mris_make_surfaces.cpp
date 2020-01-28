@@ -203,8 +203,9 @@ static int nowhite = 0;
 
 // orig_white, if specified, will be used as the initial surface
 // to place the white surface. Whatever surface is specified, it
-// will not be smoothed prior to placing the white surface.
-static char *orig_white = NULL;
+// will not be smoothed prior to placing the white surface. 
+static char *orig_white = NULL ;
+static char *orig_sphere = NULL ;
 
 // orig_pial, if specified, will be used as the initial surface
 // to place the white surface
@@ -238,31 +239,37 @@ static float max_thickness = 5.0;
 
 static float variablesigma = 3.0;
 
-#define MAX_WHITE 120
-#define MAX_BORDER_WHITE 105
-#define MIN_BORDER_WHITE 85
-#define MIN_GRAY_AT_WHITE_BORDER 70
+#define MAX_WHITE             120
+#define MAX_BORDER_WHITE      105
+#define MIN_BORDER_WHITE       85
+#define MIN_GRAY_AT_WHITE_BORDER  70
 
-#define MAX_GRAY 95
-#define MIN_GRAY_AT_CSF_BORDER 40
-#define MID_GRAY ((max_gray + min_gray_at_csf_border) / 2)
-#define MAX_GRAY_AT_CSF_BORDER 75
-#define MIN_CSF 10
-#define MAX_CSF 40
+#define MAX_GRAY               95
+#define MIN_GRAY_AT_CSF_BORDER    40
+#define MID_GRAY               ((max_gray + min_gray_at_csf_border) / 2)
+#define MAX_GRAY_AT_CSF_BORDER    75
+#define MIN_CSF                10
+#undef MAX_CSF
+#define MAX_CSF                40
 
-static int max_border_white_set = 0, min_border_white_set = 0,
-           min_gray_at_white_border_set = 0, max_gray_set = 0,
-           max_gray_at_csf_border_set = 0, min_gray_at_csf_border_set = 0,
-           min_csf_set = 0, max_csf_set = 0;
+static  int   max_border_white_set = 0,
+              min_border_white_set = 0,
+              min_gray_at_white_border_set = 0,
+              max_gray_set = 0,
+              max_gray_at_csf_border_set = 0,
+              min_gray_at_csf_border_set = 0,
+              min_csf_set = 0,
+              max_csf_set = 0 ;
 
-static float max_border_white = MAX_BORDER_WHITE,
-             min_border_white = MIN_BORDER_WHITE,
-             min_gray_at_white_border = MIN_GRAY_AT_WHITE_BORDER,
-             max_gray = MAX_GRAY,
-             max_gray_at_csf_border = MAX_GRAY_AT_CSF_BORDER,
-             min_gray_at_csf_border = MIN_GRAY_AT_CSF_BORDER, min_csf = MIN_CSF,
-             max_csf = MAX_CSF;
-static char sdir[STRLEN] = "";
+static  float   max_border_white = MAX_BORDER_WHITE,
+                min_border_white = MIN_BORDER_WHITE,
+                min_gray_at_white_border = MIN_GRAY_AT_WHITE_BORDER,
+                max_gray = MAX_GRAY,
+                max_gray_at_csf_border = MAX_GRAY_AT_CSF_BORDER,
+                min_gray_at_csf_border = MIN_GRAY_AT_CSF_BORDER,
+                min_csf = MIN_CSF,
+                max_csf = MAX_CSF ;
+static char sdir[STRLEN] = "" ;
 
 static int MGZ = 1; // for use with MGZ format
 
@@ -1614,16 +1621,32 @@ int main(int argc, char *argv[]) {
 	if ( followGradients)
 	{
 		std::cout << "T2/FLAIR compute target based on gradients "<< std::endl;
+		sprintf(fname, "%s/%s/surf/%s.%s%s", sdir, sname, hemi, orig_sphere, suffix) ;
+		printf("reading sphere position from %s...\n", fname) ;
+		//MRIS* sph = MRISread(fname);
+		//MRIStoParameterization(sph,NULL, 1,0);
+
 		MRIS_MultimodalRefinement* refine = new MRIS_MultimodalRefinement();
-		refine->SetStep(.25);
-		refine->SetNumberOfSteps(15);
+		MRI* whiteMR= MRIcopy(mri_T1_pial,NULL);
+		MRI* vesselMR= MRIcopy(mri_T1_pial,NULL);
+		refine->SegmentWM(mri_T1_pial,mri_flair, whiteMR);
+		refine->SegmentVessel(mri_T1_pial,mri_flair, vesselMR);
+
+		refine->SetStep(.4);
+		refine->SetNumberOfSteps(8);
 		refine->SetGradientSigma(.3);
 		refine->SetSegmentation(mri_aseg);
 		refine->FindMaximumGradient(contrast_type== CONTRAST_T2);
+		refine->addImage(mri_T1_pial);
 		refine->addImage(mri_flair);
+		refine->SetWhiteMR(whiteMR);
+		refine->SetVesselMR(vesselMR);
+		//refine->SetSphere(sph);
 		refine->getTarget(mris); //, debugVertex);
 		
-			//refine->addImage(mri_T1_pial);
+		MRIfree(&whiteMR);
+		MRIfree(&vesselMR);
+		delete refine;
 	}
 	else
 	{
@@ -2613,28 +2636,51 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "long")) {
     longitudinal = 1;
     printf("Using longitudinal scheme\n");
-  } else if (!stricmp(option, "SDIR")) {
-    strcpy(sdir, argv[2]);
-    printf("using %s as SUBJECTS_DIR...\n", sdir);
-    setenv("SUBJECTS_DIR", sdir, 1);
-    nargs = 1;
-  } else if (!stricmp(option, "orig_white")) {
-    orig_white = argv[2];
-    printf("using %s starting white location...\n", orig_white);
-    nargs = 1;
-  } else if (!stricmp(option, "orig_pial")) {
-    orig_pial = argv[2];
-    printf("using %s starting pial locations...\n", orig_pial);
-    nargs = 1;
-  } else if (!stricmp(option, "max_border_white")) {
-    max_border_white_set = 1;
-    max_border_white = atof(argv[2]);
-    nargs = 1;
-  } else if (!stricmp(option, "min_border_white")) {
-    min_border_white_set = 1;
-    min_border_white = atof(argv[2]);
-    nargs = 1;
-  } else if (!stricmp(option, "wlo")) // same flag name as mri_segment
+  }
+  else if (!stricmp(option, "SDIR"))
+  {
+    strcpy(sdir, argv[2]) ;
+    printf("using %s as SUBJECTS_DIR...\n", sdir) ;
+    setenv("SUBJECTS_DIR",sdir,1);
+    nargs = 1 ;
+  }
+  else if (!stricmp(option, "orig_white"))
+  {
+    orig_white = argv[2] ;
+    printf("using %s starting white location...\n", orig_white) ;
+    nargs = 1 ;
+  }
+  else if (!stricmp(option, "orig_pial"))
+  {
+    orig_pial = argv[2] ;
+    printf("using %s starting pial locations...\n", orig_pial) ;
+    nargs = 1 ;
+  }
+  else if (!stricmp(option, "orig_sphere"))
+  {
+    orig_sphere = argv[2] ;
+    printf("using %s sphere locations...\n", orig_sphere) ;
+    nargs = 1 ;
+  }
+  else if (!stricmp(option, "max_border_white"))
+  {
+    max_border_white_set = 1 ;
+    max_border_white = atof(argv[2]) ;
+    nargs = 1 ;
+  }
+  else if (!stricmp(option, "min_border_white"))
+  {
+    min_border_white_set = 1 ;
+    min_border_white = atof(argv[2]) ;
+    nargs = 1 ;
+  }
+  else if (!stricmp(option, "wlo"))     // same flag name as mri_segment
+  {
+    min_border_white_set = 1 ;
+    min_border_white = atof(argv[2]) ;
+    nargs = 1 ;
+  }
+  else if (!stricmp(option, "scale_std"))
   {
     min_border_white_set = 1;
     min_border_white = atof(argv[2]);
@@ -3892,7 +3938,7 @@ static double compute_brain_thresh(MRI_SURFACE *mris, MRI *mri_ratio,
   MRIfree(&mri_filled);
   return (thresh);
 }
-
+#undef SAMPLE_DIST
 #define SAMPLE_DIST .1
 #define PERCENTILE 0.9
 

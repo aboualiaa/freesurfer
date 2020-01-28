@@ -2749,11 +2749,11 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 1);
       sscanf(pargv[0], "%lf", &FWHM);
       csd->nullfwhm = FWHM;
-      printf("FWHM = %f\n", FWHM);
-      if (isnan(FWHM)) {
-        printf("ERROR: input FWHM is NaN (not a number).\n");
-        printf("  Check the mask in the glm directory.\n");
-        exit(1);
+      printf("FWHM = %f\n",FWHM);
+      if(std::isnan(FWHM)){
+	printf("ERROR: input FWHM is NaN (not a number).\n");
+	printf("  Check the mask in the glm directory.\n");
+	exit(1);
       }
       if (FWHM < 0) {
         printf("ERROR: input FWHM = %f < 0.\n", FWHM);
