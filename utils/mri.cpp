@@ -18275,13 +18275,12 @@ float getVoxValChunkChar(const MRI *mri, int c, int r, int s, int f) {
   return (float)*((unsigned char *)mri->chunk + c + r * mri->vox_per_row +
                   s * mri->vox_per_slice + f * mri->vox_per_vol);
 }
-
+} // namespace fs::mri::util
 
 /*
   Creates an 3D ITK float image from a given frame.
 */
-ITKImageType::Pointer MRI::toITKImage(int frame)
-{
+ITKImageType::Pointer MRI::toITKImage(int frame) {
   // configure image region
   ITKImageType::RegionType region;
 
