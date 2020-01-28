@@ -38,6 +38,7 @@
 #include <boost/algorithm/string.hpp>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
+#include <absl/strings/str_join.h>
 
 //#include <aboualiaa/banned.h>
 
@@ -108,10 +109,7 @@ auto main(int argc, char *argv[]) -> int {
 
   // TODO(aboualiaa): Implement a safe version of make_cmd_version_string (in
   // utils/version.cpp) then delete this loop
-  for (auto arg : cmdargs.raw) {
-    cmdline.append(arg);
-    cmdline.append(" ");
-  }
+  cmdline = absl::StrJoin(cmdargs.raw, " ");
 
   Progname = GET_PROGRAM_NAME();
 
