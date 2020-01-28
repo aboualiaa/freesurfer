@@ -24,6 +24,7 @@
 #include "streamIoMisc.h"
 
 #include "stl_utils.hpp"
+#define throw(...)
 
 #if 0
 

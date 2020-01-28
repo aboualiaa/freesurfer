@@ -57,7 +57,9 @@
 #include "diag.h"
 #include "macros.h"
 #include "gca.h"
-;
+
+#define throw(...)
+
 const char *Progname;
 
 // static function declarations
