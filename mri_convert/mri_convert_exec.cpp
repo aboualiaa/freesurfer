@@ -35,10 +35,10 @@
 #include "mri_identify.h"
 #include "mriio.hpp"
 
+#include <absl/strings/str_join.h>
 #include <boost/algorithm/string.hpp>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
-#include <absl/strings/str_join.h>
 
 //#include <aboualiaa/banned.h>
 
@@ -1897,7 +1897,7 @@ auto main(int argc, char *argv[]) -> int {
 
   if (cmdargs.ascii_flag != 0) {
     fmt::printf("Writing as ASCII to %s\n", cmdargs.out_name.data());
-    fptmp = fopen(cmdargs.out_name.data(), "w");
+    fptmp = fopen(cmdargs.out_name.data(), "we");
     if (cmdargs.ascii_flag == 1 || cmdargs.ascii_flag == 2) {
       for (f = 0; f < mri->nframes; f++) {
         for (s = 0; s < mri->depth; s++) {
