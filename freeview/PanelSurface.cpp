@@ -869,6 +869,7 @@ void PanelSurface::OnComboAnnotation(int nSel_in) {
                               QFileInfo(surf->GetFileName()).dir().path());
       if (dlg.exec() == QDialog::Accepted)
         surf->CreateNewAnnotation(dlg.GetColorTableFile(), dlg.GetName());
+      QTimer::singleShot(100, this, SLOT(OnButtonEditAnnotation()));
     }
     UpdateWidgets();
   }
@@ -978,7 +979,12 @@ void PanelSurface::OnComboSpline(int nSel) {
 
 void PanelSurface::OnButtonConfigureOverlay() { m_wndConfigureOverlay->show(); }
 
-void PanelSurface::OnButtonEditAnnotation() { m_wndEditAnnotation->show(); }
+void PanelSurface::OnButtonEditAnnotation()
+{
+  m_wndEditAnnotation->show();
+  ui->actionPath->setChecked(true);
+  ui->actionPathFill->trigger();
+}
 
 void PanelSurface::OnButtonRemoveOverlay() {
   LayerSurface *surf = GetCurrentLayer<LayerSurface *>();
@@ -1367,7 +1373,7 @@ void PanelSurface::OnButtonDeletePath() {
 
 void PanelSurface::OnButtonCustomFillPath() {
   m_dlgCustomFill->show();
-  m_dlgCustomFill->raise();
+//  m_dlgCustomFill->raise();
 }
 
 void PanelSurface::OnCustomFillTriggered(const QVariantMap &options_in) {

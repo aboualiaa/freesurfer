@@ -5,7 +5,8 @@
 DialogCustomFill::DialogCustomFill(QWidget *parent)
     : QDialog(parent), ui(new Ui::DialogCustomFill) {
   ui->setupUi(this);
-
+  this->setWindowFlags( Qt::Tool | Qt::WindowTitleHint |
+                        Qt::WindowCloseButtonHint| Qt::CustomizeWindowHint );
   QSettings s;
   ui->checkBoxFillToPaths->setChecked(
       s.value("CustomFill/FillToPaths", true).toBool());
