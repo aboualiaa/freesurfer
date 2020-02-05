@@ -30,6 +30,8 @@
 #include <QMessageBox>
 #include <QFileInfo>
 #include <QDebug>
+#include <QTimer>
+#include "Layer.h"
 
 DialogSaveScreenshot::DialogSaveScreenshot(QWidget *parent)
     : QDialog(parent), ui(new Ui::DialogSaveScreenshot) {
@@ -49,7 +51,8 @@ DialogSaveScreenshot::~DialogSaveScreenshot() {
   delete ui;
 }
 
-QString DialogSaveScreenshot::GetFileName() {
+QString DialogSaveScreenshot::GetFileName()
+{
   QString filename = ui->lineEditFileName->text().trimmed();
   if (!filename.isEmpty())
     return QFileInfo(QDir::current(), filename).absoluteFilePath();
@@ -92,21 +95,45 @@ void DialogSaveScreenshot::OnOpen() {
   }
 }
 
-void DialogSaveScreenshot::OnSave() {
-  if (GetFileName().isEmpty()) {
+void DialogSaveScreenshot::OnSave()
+{
+  ui->labelProgress->clear();
+  if ( GetFileName().isEmpty() )
+  {
     QMessageBox::warning(this, "Error", "Please enter file name to be saved.");
     return;
   }
 
   MainWindow *mainwnd = MainWindow::GetMainWindow();
   mainwnd->SetScreenShotSettings(GetSettings());
-  if (!mainwnd->GetMainView()->SaveScreenShot(
-          GetFileName(), ui->checkBoxAntiAliasing,
-          ui->spinBoxMagnification->value(),
-          ui->checkBoxAutoTrim->isChecked())) {
-    QMessageBox::warning(this, "Error",
-                         "Failed to save screenshot. Please make sure the "
-                         "directory exists and writable.");
+  if (ui->checkBoxCycle->isChecked())
+  {
+    QString type = mainwnd->GetCurrentLayerType();
+    if (type != "Surface" && type != "MRI")
+    {
+      QMessageBox::warning(this, "Error", "Select a volume or surface as current layer");
+      return;
+    }
+    m_listLayers = mainwnd->GetLayers(type);
+    if (m_listLayers.isEmpty())
+      return;
+
+    m_listFilenames.clear();
+    for (int i = 0; i < m_listLayers.size(); i++)
+    {
+      m_listFilenames << GetFileName().replace("%name", m_listLayers[i]->GetName());
+    }
+
+    m_nLayerIndex = 0;
+    OnSaveLayer();
+    return;
+  }
+
+  if (!mainwnd->GetMainView()->
+      SaveScreenShot(GetFileName(), ui->checkBoxAntiAliasing,
+                     ui->spinBoxMagnification->value(), ui->checkBoxAutoTrim->isChecked()))
+  {
+    QMessageBox::warning(this, "Error", "Failed to save screenshot. Please make sure the directory exists and writable.");
     return;
   }
   m_strLastDir = QFileInfo(GetFileName()).absolutePath();
@@ -114,4 +141,24 @@ void DialogSaveScreenshot::OnSave() {
   if (!ui->checkBoxKeepWindow->isChecked()) {
     hide();
   }
+}
+
+void DialogSaveScreenshot::OnSaveLayer()
+{
+   if (m_nLayerIndex < m_listLayers.size())
+   {
+     for (int i = 0; i < m_listLayers.size(); i++)
+     {
+        m_listLayers[i]->SetVisible(i == m_nLayerIndex);
+     }
+     MainWindow::GetMainWindow()->GetMainView()->
+         SaveScreenShot(m_listFilenames[m_nLayerIndex],
+                        ui->checkBoxAntiAliasing,
+                        ui->spinBoxMagnification->value(),
+                        ui->checkBoxAutoTrim->isChecked());
+     m_nLayerIndex++;
+     if (m_nLayerIndex < m_listLayers.size())
+       QTimer::singleShot(250, this, SLOT(OnSaveLayer()));
+   }
+   ui->labelProgress->setText(QString("%1 / %2").arg(m_nLayerIndex).arg(m_listLayers.size()));
 }

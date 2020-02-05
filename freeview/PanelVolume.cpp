@@ -89,17 +89,13 @@ PanelVolume::PanelVolume(QWidget *parent)
   }
 
   connect(mainwnd, SIGNAL(NewVolumeCreated()), SLOT(ShowAllLabels()));
-  connect(ui->pushButtonContourSave, SIGNAL(clicked(bool)), mainwnd,
-          SLOT(OnSaveIsoSurface()));
+  connect(mainwnd, SIGNAL(RefreshLookUpTableRequested()), SLOT(RefreshColorTable()), Qt::QueuedConnection);
+  connect(ui->pushButtonContourSave, SIGNAL(clicked(bool)), mainwnd, SLOT(OnSaveIsoSurface()));
 
-  ui->toolbar->insertAction(ui->actionMoveLayerUp,
-                            mainwnd->ui->actionNewVolume);
-  ui->toolbar->insertAction(ui->actionMoveLayerUp,
-                            mainwnd->ui->actionLoadVolume);
-  ui->toolbar->insertAction(ui->actionMoveLayerUp,
-                            mainwnd->ui->actionCloseVolume);
-  ui->toolbar->insertAction(ui->actionMoveLayerUp,
-                            mainwnd->ui->actionSaveVolume);
+  ui->toolbar->insertAction(ui->actionMoveLayerUp, mainwnd->ui->actionNewVolume);
+  ui->toolbar->insertAction(ui->actionMoveLayerUp, mainwnd->ui->actionLoadVolume);
+  ui->toolbar->insertAction(ui->actionMoveLayerUp, mainwnd->ui->actionCloseVolume);
+  ui->toolbar->insertAction(ui->actionMoveLayerUp, mainwnd->ui->actionSaveVolume);
   ui->toolbar->insertSeparator(ui->actionMoveLayerUp);
 
   m_luts = mainwnd->GetLUTData();
@@ -181,9 +177,8 @@ PanelVolume::PanelVolume(QWidget *parent)
                             << ui->labelColorMap << ui->comboBoxColorMap;
 
   m_widgetlistVolumeTrack << ui->treeWidgetColorTable << m_widgetlistFrame
-                          << ui->labelSmoothIteration
-                          << ui->sliderContourSmoothIteration
-                          << ui->lineEditContourSmoothIteration;
+                          << ui->labelSmoothIteration << ui->sliderContourSmoothIteration
+                          << ui->lineEditContourSmoothIteration << ui->checkBoxSelectAllLabels;
   m_widgetlistVolumeTrack.removeOne(ui->checkBoxAutoAdjustFrameLevel);
 
   m_widgetlistVolumeTrackSpecs << ui->labelTrackVolumeThreshold
@@ -904,8 +899,17 @@ void PanelVolume::UpdateTrackVolumeThreshold() {
   EnableWidgets(this->m_widgetlistVolumeTrackSpecs, item);
 }
 
-void PanelVolume::PopulateColorTable(COLOR_TABLE *ct, bool bForce) {
-  if (ct && (bForce || ct != m_curCTAB)) {
+void PanelVolume::RefreshColorTable()
+{
+  BlockAllSignals(true);
+  PopulateColorTable(m_curCTAB, true);
+  BlockAllSignals(false);
+}
+
+void PanelVolume::PopulateColorTable( COLOR_TABLE* ct, bool bForce )
+{
+  if ( ct && (bForce || ct != m_curCTAB) )
+  {
     m_curCTAB = ct;
     ui->treeWidgetColorTable->clear();
     int nTotalCount = 0;
@@ -924,15 +928,24 @@ void PanelVolume::PopulateColorTable(COLOR_TABLE *ct, bool bForce) {
     QList<int> selectedLabels;
     if (layer) {
       labels = layer->GetAvailableLabels();
-      selectedLabels = layer->GetProperty()->GetSelectedLabels();
+      if (layer->IsTypeOf("VolumeTrack"))
+      {
+        selectedLabels = ((LayerVolumeTrack*)layer)->GetVisibleLabels();
+      }
+      else
+      {
+        selectedLabels = layer->GetProperty()->GetSelectedLabels();
+      }
     }
     int nValidCount = 0;
     bool bHasSelected = false, bHasUnselected = false;
-    for (int i = 0; i < nTotalCount; i++) {
-      CTABisEntryValid(ct, i, &nValid);
-      if (nValid) {
-        CTABcopyName(ct, i, name, 1000);
-        ColorTableItem *item = new ColorTableItem(ui->treeWidgetColorTable);
+    for ( int i = 0; i < nTotalCount; i++ )
+    {
+      CTABisEntryValid( ct, i, &nValid );
+      if ( nValid )
+      {
+        CTABcopyName( ct, i, name, 1000 );
+        ColorTableItem* item = new ColorTableItem();
         if (ColorTableItem::SortType == ColorTableItem::ST_VALUE)
           item->setText(0, QString("%1 %2").arg(i).arg(name));
         else
@@ -958,6 +971,7 @@ void PanelVolume::PopulateColorTable(COLOR_TABLE *ct, bool bForce) {
           nSel = nValidCount;
         }
         nValidCount++;
+        ui->treeWidgetColorTable->addTopLevelItem(item);
       }
     }
     if (nSel >= 0) {
@@ -1652,35 +1666,51 @@ void PanelVolume::OnCheckBoxSelectAllLabels(int nState) {
   }
   ui->treeWidgetColorTable->blockSignals(false);
 
-  LayerMRI *layer = GetCurrentLayer<LayerMRI *>();
-  if (layer) {
-    if (nState == Qt::Unchecked)
-      layer->GetProperty()->SetUnselectAllLabels();
+  LayerMRI* layer = GetCurrentLayer<LayerMRI*>();
+  if ( layer )
+  {
+    if (layer->IsTypeOf("VolumeTrack"))
+    {
+      LayerVolumeTrack* tv = qobject_cast<LayerVolumeTrack*>(layer);
+      if (tv)
+      {
+        tv->ShowAllLabels(ui->checkBoxSelectAllLabels->checkState() == Qt::Checked);
+      }
+    }
     else
-      layer->GetProperty()->SetSelectAllLabels();
+    {
+      if (nState == Qt::Unchecked)
+        layer->GetProperty()->SetUnselectAllLabels();
+      else
+        layer->GetProperty()->SetSelectAllLabels();
+    }
   }
 }
 
 void PanelVolume::OnColorTableItemChanged(QTreeWidgetItem *item) {
   ui->checkBoxSelectAllLabels->blockSignals(true);
   ui->checkBoxSelectAllLabels->setCheckState(Qt::PartiallyChecked);
-  LayerMRI *layer = GetCurrentLayer<LayerMRI *>();
-  if (layer) {
-    int nVal = item->data(0, Qt::UserRole + 1).toInt();
+  LayerMRI* layer = GetCurrentLayer<LayerMRI*>();
+  if ( layer )
+  {
+    int nVal = item->data(0, Qt::UserRole+1).toInt();
+    QList<int> selected;
     if (!layer->IsTypeOf("VolumeTrack"))
-      layer->GetProperty()->SetSelectLabel(nVal,
-                                           item->checkState(0) == Qt::Checked);
-    else {
-      LayerVolumeTrack *tv = qobject_cast<LayerVolumeTrack *>(layer);
-      if (tv) {
-        int nLabel = item->data(0, Qt::UserRole + 1).toInt();
+    {
+      layer->GetProperty()->SetSelectLabel(nVal, item->checkState(0) == Qt::Checked);
+      selected = layer->GetProperty()->GetSelectedLabels();
+    }
+    else
+    {
+      LayerVolumeTrack* tv = qobject_cast<LayerVolumeTrack*>(layer);
+      if (tv)
+      {
+        int nLabel = item->data(0, Qt::UserRole+1).toInt();
         tv->SetLabelVisible(nLabel, item->checkState(0) == Qt::Checked);
+        selected = tv->GetVisibleLabels();
       }
     }
-    ui->checkBoxSelectAllLabels->setCheckState(
-        layer->GetProperty()->GetSelectedLabels().isEmpty()
-            ? Qt::Unchecked
-            : Qt::PartiallyChecked);
+    ui->checkBoxSelectAllLabels->setCheckState(selected.isEmpty()?Qt::Unchecked:Qt::PartiallyChecked);
   }
 
   ui->checkBoxSelectAllLabels->blockSignals(false);

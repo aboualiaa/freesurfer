@@ -31,7 +31,10 @@ namespace Ui {
 class DialogSaveScreenshot;
 }
 
-class DialogSaveScreenshot : public QDialog {
+class Layer;
+
+class DialogSaveScreenshot : public QDialog
+{
   Q_OBJECT
 
 public:
@@ -49,10 +52,14 @@ public:
 protected slots:
   void OnSave();
   void OnOpen();
+  void OnSaveLayer();
 
 private:
   Ui::DialogSaveScreenshot *ui;
   QString m_strLastDir;
+  QStringList m_listFilenames;
+  QList<Layer*> m_listLayers;
+  int m_nLayerIndex;
 };
 
 #endif // DIALOGSAVESCREENSHOT_H

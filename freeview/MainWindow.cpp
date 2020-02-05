@@ -1637,7 +1637,11 @@ void MainWindow::RunScript() {
   {
     CommandSetExtractAllRegions( sa );
   }
-  else if ( cmd == "loadisosurfaceregion" )
+  else if ( cmd == "settrackvolumeframe" )
+  {
+    CommandSetVolumeTrackFrame(sa);
+  }
+  else if ( cmd == "loadsurface" )
   {
     CommandLoadIsoSurfaceRegion( sa );
   }
@@ -2558,7 +2562,33 @@ void MainWindow::CommandLoadVolumeTrack(const QStringList &sa) {
   if (sa.last() == "r") {
     bResample = true;
   }
-  this->LoadVolumeTrackFile(sa[1], bResample);
+
+  QStringList list = sa[1].split(":");
+  if (list.size() > 1)
+  {
+    QStringList sublist = list[1].split("=");
+    if (sublist.size() > 1 && sublist[0] == "frame")
+      m_scripts.insert(0, QStringList("settrackvolumeframe") << sublist[1]);
+  }
+  this->LoadVolumeTrackFile(list[0], bResample);
+}
+
+void MainWindow::CommandSetVolumeTrackFrame(const QStringList &cmd)
+{
+  Layer* layer = GetActiveLayer("MRI");
+  if (layer && layer->IsTypeOf("VolumeTrack"))
+  {
+     LayerVolumeTrack* vt = (LayerVolumeTrack*)layer;
+     QStringList frames = cmd[1].split(",");
+     vt->ShowAllLabels(false);
+     for (int i = 0; i < frames.size(); i++)
+     {
+       int nFrame = frames[i].toInt();
+       if (nFrame >= 0)
+        vt->SetFrameVisible(nFrame, true);
+     }
+     emit RefreshLookUpTableRequested();
+  }
 }
 
 void MainWindow::CommandLoadPVolumes(const QStringList &cmd) {
