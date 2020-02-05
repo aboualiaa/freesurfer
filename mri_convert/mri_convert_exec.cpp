@@ -107,8 +107,6 @@ auto main(int argc, char *argv[]) -> int {
 
   DiagInit(nullptr, nullptr, nullptr);
 
-  // TODO(aboualiaa): Implement a safe version of make_cmd_version_string (in
-  // utils/version.cpp) then delete this loop
   cmdline = absl::StrJoin(cmdargs.raw, " ");
 
   Progname = GET_PROGRAM_NAME();
