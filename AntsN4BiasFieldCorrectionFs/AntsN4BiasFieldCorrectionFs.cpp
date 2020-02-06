@@ -19,6 +19,7 @@
 #include "itkImageRegionIterator.h"
 #include "itkN4BiasFieldCorrectionImageFilter.h"
 #include "itkShrinkImageFilter.h"
+#include "itkPlatformMultiThreader.h"
 
 #include "argparse.h"
 #include "mri.h"
@@ -46,7 +47,7 @@ int main(int argc, char const *argv[])
   ITKImageType::Pointer inputImage = mri->toITKImage();
 
   // set itk threads to 1
-  itk::MultiThreader::SetGlobalDefaultNumberOfThreads(1);
+  itk::PlatformMultiThreader::SetGlobalDefaultNumberOfThreads(1);
 
   // create a "mask" that just covers the whole image
   ITKImageType::Pointer maskImage = ITKImageType::New();

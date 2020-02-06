@@ -6,9 +6,9 @@
   The itkAdaptiveNonLocalMeansDenoisingImageFilter class (from ANTs) implements an
   ITK-based spatially-adaptive filter described in the following paper.
 
-        J. V. Manjon, P. Coupe, Luis Marti-Bonmati, D. L. Collins, and M. Robles. Adaptive 
-        Non-Local Means Denoising of MR Images With Spatially Varying Noise Levels, 
-        Journal of Magnetic Resonance Imaging, 31:192-203, June 2010. 
+        J. V. Manjon, P. Coupe, Luis Marti-Bonmati, D. L. Collins, and M. Robles. Adaptive
+        Non-Local Means Denoising of MR Images With Spatially Varying Noise Levels,
+        Journal of Magnetic Resonance Imaging, 31:192-203, June 2010.
 
   A technical description of the code is available at the following link.
 
@@ -19,6 +19,7 @@
 
 
 #include "itkAdaptiveNonLocalMeansDenoisingImageFilter.h"
+#include "itkPlatformMultiThreader.h"
 #include "argparse.h"
 #include "mri.h"
 #include "AntsDenoiseImageFs.help.xml.h"
@@ -40,7 +41,7 @@ int main(int argc, char const *argv[])
   MRI* mri = MRIread(inputname.c_str());
 
   // set itk threads to 1
-  itk::MultiThreader::SetGlobalDefaultNumberOfThreads(1);
+  itk::PlatformMultiThreader::SetGlobalDefaultNumberOfThreads(1);
 
   for (int frame = 0 ; frame < mri->nframes ; frame++) {
     // convert frame to ITK image
