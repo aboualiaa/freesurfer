@@ -137,8 +137,10 @@ find_package(ITK)
 find_package(ANN)
 
 # -------- gts --------
-# only used by mris_decimate
-find_package(GTS)
+# only used by mris_decimate (not available on mac)
+if(NOT APPLE)
+  find_package(GTS)
+endif()
 
 # -------- matlab --------
 #set(Matlab_ROOT_DIR /Applications/Polyspace/R2019b.app)
@@ -651,6 +653,7 @@ endif()
 
 if(INFANT_MODULE)
   add_subdirectory(infant)
+  add_subdirectory(sscnn_skullstripping)
 endif()
 
 if(TKTOOLS_MODULE)
