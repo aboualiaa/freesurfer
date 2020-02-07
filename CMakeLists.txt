@@ -148,6 +148,7 @@ endif()
 
 # -------- hpx --------
 set(HPX_IGNORE_COMPILER_COMPATIBILITY ON)
+set(HPX_IGNORE_CMAKE_BUILD_TYPE_COMPATIBILITY OFF FORCE)
 find_package(HPX)
 
 # -------- openCV --------
