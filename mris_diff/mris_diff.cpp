@@ -1261,8 +1261,8 @@ static void print_usage() {
   printf("   --aparc2 aparc2   optional different name to compare to aparc\n");
   printf("\n");
   printf("other options:\n");
-  printf("   --thresh N    threshold (default=0) [note: not currently "
-         "implemented!] \n");
+  printf("   --simple : just report whether the surfaces are different\n");
+  printf("   --thresh N    threshold (default=0) [note: not currently implemented!] \n");
   printf("   --maxerrs N   stop looping after N errors (default=%d)\n",
          MAX_NUM_ERRORS);
   printf("   --renumbered  the vertices or faces may have been renumbered and "
