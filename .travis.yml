@@ -44,7 +44,7 @@ before_install:
   - export PATH="/usr/local/opt/python/libexec/bin:$PATH"
   - ./ci-scripts/install-ninja.sh
   - ./ci-scripts/restore-mtime.sh
-#  - ./ci-scripts/install-hpx.sh
+  - ./ci-scripts/install-hpx.sh
 
 script:
   - sudo xcode-select -r # s /Applications/Xcode.app
