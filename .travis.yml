@@ -10,6 +10,7 @@ jobs:
       env:
         - ON_OSX=true
         - PATH="/usr/local/opt/python/libexec/bin:$PATH"
+        - PATH="/usr/local/opt/llvm/bin:$PATH"
       osx_image: xcode11.3
       addons:
         homebrew:
