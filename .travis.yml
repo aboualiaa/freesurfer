@@ -7,7 +7,9 @@ language: cpp
 jobs:
   include:
     - os: osx
-      env: ON_OSX=true
+      env:
+        - ON_OSX=true
+        - PATH="/usr/local/opt/python/libexec/bin:$PATH"
       osx_image: xcode11.3
       addons:
         homebrew:
