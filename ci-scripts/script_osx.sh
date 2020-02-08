@@ -1,7 +1,5 @@
 #!/bin/bash
 
-alias python='python3'
-export PATH="/usr/local/opt/python/libexec/bin:$PATH"
 sudo xcode-select -r # s /Applications/Xcode.app
 mkdir -p cmake-build-release && cd ./cmake-build-release
 sed -i '' '/CMAKE_CXX_COMPILER:FILEPATH/d' ./cmake-build-release/CMakeCache.txt # remove compiler cache entry just in case travis updated xcode
