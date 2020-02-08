@@ -49,6 +49,7 @@ before_install:
 script:
   - sudo xcode-select -r # s /Applications/Xcode.app
   - mkdir -p cmake-build-release && cd ./cmake-build-release
+  - rm ./CMakeCache.txt # remove cache in case travis updated xcode
   - cmake -G Ninja -DGEMS_BUILD_MATLAB=OFF ..
   - cmake -G Ninja -DGEMS_BUILD_MATLAB=OFF .. # again so that appleclang finds openMP
   - timeout 30m ninja
