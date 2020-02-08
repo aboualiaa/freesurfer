@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 project(gems)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-everything -arch x86_64 -fPIC -fpermissive -msse2 -mfpmath=sse -Wl,-w ")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-everything -arch x86_64 -fPIC -fpermissive -msse2 -mfpmath=sse -Wl,-w ")
+add_compile_options(-arch x86_64 -fPIC -fpermissive -msse2 -mfpmath=sse -Wl,-w)
+add_compile_options(-arch x86_64 -fPIC -fpermissive -msse2 -mfpmath=sse -Wl,-w)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(interfaces)

@@ -2,7 +2,8 @@
 project(packages)
 
 # turn off all warnings and make sure libraries are position-independent
-add_compile_options(-Wno-everything -fPIC)
+add_compile_options(-fPIC)
+
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_subdirectories(

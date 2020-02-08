@@ -32,6 +32,19 @@ if(NOT APPLE)
   option(TKTOOLS_MODULE "Install old Linux TK GUIs" OFF)
 endif()
 
+# warnings
+# clang complains about -Wno-unused-but-set-variable and says to use -Wno-unused-const-variable
+if(SUPPRESS_WARNINGS)
+  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    add_compile_options(-Wno-everything)
+  elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    add_compile_options(-w)
+  endif()
+  add_link_options(-w)
+endif()
+
+add_compile_options(-fPIC)
+
 # enable ctest
 enable_testing()
 
@@ -112,7 +125,7 @@ add_definitions(-DHAVE_ZLIB)
 # -------- gfortran/blas/lapack --------
 if(NOT APPLE)
   find_library(GFORTRAN_LIBRARIES
-               HINTS /usr/lib/gcc/x86_64-linux-gnu/4.8 /usr/lib/gcc/x86_64-redhat-linux/4.8.2/
+               HINTS /usr/lib/gcc/*/*/ /usr/lib/gcc/*/*/
                NAMES libgfortran.a gfortran)
   find_library(BLAS_LIBRARIES NAMES libblas.a)
   find_library(LAPACK_LIBRARIES NAMES liblapack.a)
@@ -244,8 +257,7 @@ if(APPLE)
     set(OpenMP_libgomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
     set(OpenMP_libiomp5_LIBRARY ${OpenMP_CXX_LIB_NAMES})
   endif()
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Xpreprocessor -fopenmp -lomp -L/usr/local/opt/libomp/lib -I/usr/local/opt/libomp/include")
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+  add_link_options(-Xpreprocessor -fopenmp -lomp -L/usr/local/opt/libomp/lib -I/usr/local/opt/libomp/include -L/usr/local/opt/hdf5/lib -L/usr/local/opt/szip/lib)
 endif()
 
 find_package(OpenMP)
@@ -296,16 +308,6 @@ endif()
 # --------------------------------------------------
 #             freesurfer build settings
 # --------------------------------------------------
-
-# warnings
-# clang complains about -Wno-unused-but-set-variable and says to use -Wno-unused-const-variable
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-everything -Wno-unused-const-variable -Wno-inconsistent-missing-override -Wno-self-assign-field")
-else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-everything -Wno-unused-but-set-variable")
-endif()
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 # linker options
 if(APPLE)

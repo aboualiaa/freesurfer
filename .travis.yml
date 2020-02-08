@@ -45,6 +45,7 @@ jobs:
             - tcsh
             - curl
             - git
+            - cmake
       cache:
         - apt
         - ccache
