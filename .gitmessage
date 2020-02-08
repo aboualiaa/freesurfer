@@ -1,0 +1,13 @@
+[scope:scale] What
+# 
+# Why:
+#
+# 'scope' can be one of:
+# ci, tool name, cmake, repo
+#
+# 'scale' can be one of:
+# mod 'Modification', major change
+# bug 'Bug Fix', major change
+# feat 'New feature', minor change
+# ref 'Refactoring', minor change
+# triv 'Trivial change', minor change 
