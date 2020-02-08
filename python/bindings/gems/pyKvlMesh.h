@@ -23,19 +23,20 @@ using SCALE_3D = std::vector<double>;
 class KvlMesh {
 
 public:
-  // Python accessible
-  KvlMesh();
-  [[nodiscard]] int PointCount() const;
-  [[nodiscard]] py::array_t<double> GetPointSet() const;
-  void SetPointSet(const py::array_t<double> &source);
-  [[nodiscard]] py::array_t<double> GetAlphas() const;
-  void SetAlphas(const py::array_t<double> &source);
-  void Scale(const SCALE_3D &scaling);
-  py::array_t<uint16_t> RasterizeMesh(std::vector<size_t> size,
-                                      int classNumber = -1);
-  py::array RasterizeValues(
-      std::vector<size_t> size,
-      py::array_t<double, py::array::c_style | py::array::forcecast> values);
+    // Python accessible
+    KvlMesh();
+    int PointCount() const;
+    py::array_t<double> GetPointSet() const;
+    void SetPointSet(const py::array_t<double> &source);
+    py::array_t<double> GetAlphas() const;
+    void SetAlphas(const py::array_t<double> &source);
+    void Scale(const SCALE_3D &scaling);
+    py::array_t<uint16_t> RasterizeMesh(std::vector<size_t> size, int classNumber=-1);
+    py::array RasterizeValues(std::vector<size_t> size, py::array_t<double, py::array::c_style | py::array::forcecast> values);
+    py::array_t<double> FitAlphas( const py::array_t< uint16_t, 
+                                                      py::array::f_style | py::array::forcecast >& 
+                                   probabilityImageBuffer ) const;
+
 
   // C++ Only
   KvlMesh(MeshPointer &aMesh);
