@@ -6,9 +6,10 @@
 ![Follow](https://img.shields.io/github/followers/aboualiaa?style=social)
 ![Forks](https://img.shields.io/github/forks/aboualiaa/freesurfer?style=social)
 
+Overall Build Status: [![Build Status](https://travis-ci.com/aboualiaa/freesurfer.svg?branch=fs-modernize)](https://travis-ci.com/aboualiaa/freesurfer)
+
 |Builds|AppleClang 11| GCC 9|
 |:--:|:--:|:--:|
-|Summary|[![Build Status](https://travis-ci.com/aboualiaa/freesurfer.svg?branch=fs-modernize)](https://travis-ci.com/aboualiaa/freesurfer)||
 |macOS 10.14|![](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/1?use_travis_com=true)| |
 |Ubuntu 14.04| |![](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/2?use_travis_com=true)|
 
