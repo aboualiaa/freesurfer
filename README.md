@@ -15,6 +15,10 @@
 ![Follow](https://img.shields.io/github/followers/aboualiaa?style=social)
 ![Forks](https://img.shields.io/github/forks/aboualiaa/freesurfer?style=social)
 
+|macOS|Linux|
+|:--:|:--:|
+|![](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/1?use_travis_com=true)|![](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/2?use_travis_com=true)|
+
 ## Introduction
 
 FreeSurfer is a software package for the analysis and visualization of neuroimaging data from cross-sectional and longitudinal studies. It is developed by the [Laboratory for Computational Neuroimaging](https://www.martinos.org/lab/lcn) at the [Martinos Center for Biomedical Imaging](https://www.nmr.mgh.harvard.edu).
