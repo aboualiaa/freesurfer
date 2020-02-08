@@ -1,5 +1,5 @@
 git:
-  depth: false
+  depth: 1
   quiet: true
 
 language: cpp
