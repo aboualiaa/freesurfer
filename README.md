@@ -3,21 +3,31 @@
   <p align="center">An open-source software suite for processing human brain MRI</p>
 </div>
 
-[![Build Status](https://travis-ci.com/aboualiaa/freesurfer.svg?branch=fs-modernize)](https://travis-ci.com/aboualiaa/freesurfer) 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/152dd9ab1aff497999ffb1872b9718f5)](https://www.codacy.com/manual/aboualiaa/freesurfer?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=aboualiaa/freesurfer&amp;utm_campaign=Badge_Grade)
-![Issues](https://img.shields.io/github/issues/aboualiaa/freesurfer)
-![Pull Requests](https://img.shields.io/github/issues-pr/aboualiaa/freesurfer)
-![Contributers](https://img.shields.io/github/contributors/aboualiaa/freesurfer)
-![Last Commit](https://img.shields.io/github/last-commit/aboualiaa/freesurfer)
-![Version](https://img.shields.io/github/v/tag/aboualiaa/freesurfer)
-![Code Size](https://img.shields.io/github/repo-size/aboualiaa/freesurfer)
-
 ![Follow](https://img.shields.io/github/followers/aboualiaa?style=social)
 ![Forks](https://img.shields.io/github/forks/aboualiaa/freesurfer?style=social)
 
-|macOS|Linux|
-|:--:|:--:|
-|![](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/1?use_travis_com=true)|![](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/2?use_travis_com=true)|
+|Builds|AppleClang 11| GCC 9|
+|:--:|:--:|:--:|
+|Summary|[![Build Status](https://travis-ci.com/aboualiaa/freesurfer.svg?branch=fs-modernize)](https://travis-ci.com/aboualiaa/freesurfer)||
+|macOS 10.14|![](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/1?use_travis_com=true)| |
+|Ubuntu 14.04| |![](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/2?use_travis_com=true)|
+
+|Tests|
+|:--:|
+||
+
+|Code Quality|
+|:--:|
+|![Code Size](https://img.shields.io/github/repo-size/aboualiaa/freesurfer)|
+|![Issues](https://img.shields.io/github/issues/aboualiaa/freesurfer)|
+|[![Codacy Badge](https://api.codacy.com/project/badge/Grade/152dd9ab1aff497999ffb1872b9718f5)](https://www.codacy.com/manual/aboualiaa/freesurfer?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=aboualiaa/freesurfer&amp;utm_campaign=Badge_Grade)|
+
+|Activity|
+|:--:|
+|![Contributers](https://img.shields.io/github/contributors/aboualiaa/freesurfer)|
+|![Pull Requests](https://img.shields.io/github/issues-pr/aboualiaa/freesurfer)|
+|![Last Commit](https://img.shields.io/github/last-commit/aboualiaa/freesurfer)|
+|![Version](https://img.shields.io/github/v/tag/aboualiaa/freesurfer)|
 
 ## Introduction
 
