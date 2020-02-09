@@ -8,10 +8,12 @@
 
 Overall Build Status: [![Build Status](https://travis-ci.com/aboualiaa/freesurfer.svg?branch=fs-modernize)](https://travis-ci.com/aboualiaa/freesurfer)
 
-|Builds|AppleClang 11| GCC 9|
+|Builds|AppleClang 11| Clang 9 | GCC 9|
 |:--:|:--:|:--:|
-|macOS 10.14|![](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/1?use_travis_com=true)| |
-|Ubuntu 14.04| |![](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/2?use_travis_com=true)|
+|macOS 10.14|![](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/1?use_travis_com=true) | Soon | Soon |
+|Ubuntu 14.04| N/A | Soon | ![](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/2?use_travis_com=true)|
+|Ubuntu 16.04| N/A | Soon | ![](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/2?use_travis_com=true)|
+|Ubuntu 18.04| N/A | Soon | ![](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/2?use_travis_com=true)|
 
 |Tests|
 |:--:|
@@ -62,11 +64,11 @@ Terms and conditions for use, reproduction, distribution and contribution are fo
 - [x] Catalina: Apple Clang 11
 - [ ] ContiniousIntegration
     - [x] macOS
-    - [ ] Ubuntu
+    - [ ] Ubuntu 14.04
+    - [ ] Ubuntu 16.04
+    - [ ] Ubuntu 18.04
     - [ ] Catalina: LLVM Clang 9
     - [ ] Catalina: GCC 9
-    - [ ] Centos: GCC 9
-    - [ ] Centos: Clang 9
 - [ ] no banned functions
 - [ ] Unify Interface using Boost Program Options
 - [ ] TDD (Boost/Google/Catch2?)
