@@ -23,6 +23,7 @@
  *
  */
 
+#include <stdlib.h>
 #include <math.h>
 
 double tukey_biweight(double residual, double C) {

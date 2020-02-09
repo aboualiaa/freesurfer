@@ -35,6 +35,7 @@
 #include <sys/stat.h>
 
 #include "diag.h"
+#include "chklc.h"
 
 extern char *crypt(const char *, const char *);
 

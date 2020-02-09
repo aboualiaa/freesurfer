@@ -12,8 +12,8 @@ Overall Build Status: [![Build Status](https://travis-ci.com/aboualiaa/freesurfe
 |:--:|:--:|:--:|
 |macOS 10.14|![](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/1?use_travis_com=true) | Soon | Soon |
 |Ubuntu 14.04| N/A | Soon | ![](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/2?use_travis_com=true)|
-|Ubuntu 16.04| N/A | Soon | ![](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/2?use_travis_com=true)|
-|Ubuntu 18.04| N/A | Soon | ![](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/2?use_travis_com=true)|
+|Ubuntu 16.04| N/A | Soon | ![](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/3?use_travis_com=true)|
+|Ubuntu 18.04| N/A | Soon | ![](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/4?use_travis_com=true)|
 
 |Tests|
 |:--:|

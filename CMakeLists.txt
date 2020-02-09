@@ -18,7 +18,13 @@ set(CMAKE_CXX_STANDARD 20)
 
 if(APPLE)
   set(FS_PACKAGES_DIR "/Users/aboualiaa/Downloads/packages")
+else()
+  set(FS_PACKAGES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake-build-debug-trusty/prebuilt_packages")
+  message(STATUS "${CMAKE_CURRENT_SOURCE_DIR}")
+  set(VTK_DIR ${FS_PACKAGES_DIR}/vtk/7.1 CACHE PATH "VTK install directory")
+  set(ITK_DIR ${FS_PACKAGES_DIR}/itk/4.13.0 CACHE PATH "ITK install directory")
 endif()
+
 # a few build options
 option(MINIMAL "Only build core components" OFF)
 option(BUILD_GUIS "Build GUI tools" ON)
@@ -47,10 +53,12 @@ if(SUPPRESS_WARNINGS)
   add_link_options(-w)
 endif()
 
-set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
-set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
-set(CMAKE_C_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
-set(CMAKE_CXX_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
+if(APPLE)
+  set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
+  set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
+  set(CMAKE_C_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
+  set(CMAKE_CXX_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
+endif()
 
 add_compile_options(-fPIC)
 
@@ -125,7 +133,7 @@ endif()
 # all custom find-modules are stored in the cmake subdir
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-add_subdirectory(packages/abseil-cpp)
+#add_subdirectory(packages/abseil-cpp)
 
 # -------- zlib --------
 find_package(ZLIB REQUIRED)
@@ -152,7 +160,7 @@ set(Boost_USE_MULTITHREADED TRUE)
 find_package(Boost REQUIRED COMPONENTS program_options unit_test_framework filesystem log atomic)
 
 # -------- itk --------
-find_package(ITK)
+find_package(ITK HINTS ${ITK_DIR})
 
 # -------- ann --------
 # ANN is only used by mris_resample
@@ -202,7 +210,7 @@ endif()
 
 # -------- vtk --------
 #set(VTK_DIR ${FS_PACKAGES_DIR}/vtk/7.1 CACHE PATH "VTK install directory")
-find_package(VTK)# HINTS ${VTK_DIR})
+find_package(VTK HINTS ${VTK_DIR})
 if(VTK_FOUND AND VTK_BUILD_SHARED_LIBS)
   # locate all shared vtk libraries
   if(${VTK_VERSION} LESS 7)

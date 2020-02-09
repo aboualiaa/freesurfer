@@ -3,6 +3,9 @@
 #undef export
 
 #include "Tracer.h"
+#ifndef ITK_LEGACY_REMOVE
+#define IsInsideInObjectSpace(x) IsInside((x))
+#endif
 
 bool Tracer::DoNotExitOnError = false;
 

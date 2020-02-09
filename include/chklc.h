@@ -27,6 +27,9 @@
 
 void chklc();
 int chklc2(char *msg);
+
+#ifndef Darwin
 void cmp_glib_version();
+#endif
 
 #endif
