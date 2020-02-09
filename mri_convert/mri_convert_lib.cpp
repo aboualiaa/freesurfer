@@ -66,13 +66,13 @@ void print_parsed_tokens(po::basic_parsed_options<char> const &parsed_opts) {
 namespace fs::math {
 
 auto frobenius_norm(const std::vector<double> *matrix) -> double {
-  auto size = static_cast<Eigen::Index>((*matrix).size());
+  auto size = static_cast<Eigen::VectorXd::Index>((*matrix).size());
   auto data = (*matrix).data();
   return Eigen::VectorXd::Map(data, size).norm();
 }
 
 auto frobenius_normalize(std::vector<double> *matrix) -> void {
-  auto size = static_cast<Eigen::Index>((*matrix).size());
+  auto size = static_cast<Eigen::VectorXd::Index>((*matrix).size());
   auto data = (*matrix).data();
   Eigen::VectorXd::Map(data, size).normalize();
 }
