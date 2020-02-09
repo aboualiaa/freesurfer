@@ -6,7 +6,11 @@ endif()
 # project info
 cmake_policy(SET CMP0048 NEW)
 project(freesurfer VERSION 7.0.0)
-cmake_minimum_required(VERSION 3.10.2) # preparing for itk5
+if(NOT APPLE)
+  cmake_minimum_required(VERSION 3.9)
+else()
+  cmake_minimum_required(VERSION 3.10.2) # preparing for itk5
+endif()
 enable_language(C CXX Fortran)
 
 # enable std c++20
@@ -43,9 +47,9 @@ if(SUPPRESS_WARNINGS)
   add_link_options(-w)
 endif()
 
-set(CMAKE_C_ARCHIVE_CREATE   "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
+set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
 set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
-set(CMAKE_C_ARCHIVE_FINISH   "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
+set(CMAKE_C_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
 set(CMAKE_CXX_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
 
 add_compile_options(-fPIC)
