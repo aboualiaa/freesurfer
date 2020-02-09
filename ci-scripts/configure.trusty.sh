@@ -32,6 +32,8 @@ curl --connect-timeout 8 --retry 5 -O http://surfer.nmr.mgh.harvard.edu/pub/data
 tar -xzf centos7-packages.tar.gz
 mv ./packages ./prebuilt_packages
 
+sed -i -- 's/#  error \"Dunno about this gcc\"/\/\//g' ./prebuilt_packages/itk/4.13.0/include/ITK-4.13/vcl_compiler.h
+
 cmake -DCMAKE_CROSSCOMPILING=1 -DRUN_HAVE_STD_REGEX=0 -DRUN_HAVE_POSIX_REGEX=0 ..
 make mri_* mris_* hiam_*
 
