@@ -7,7 +7,7 @@
 #include <armadillo>
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 
 using namespace fs::util::cli;
 
@@ -118,16 +118,16 @@ TEST(test_frobenius_normalize, vector_version) {
 
 TEST(test_check_vector_range, test_vectors) {
   std::vector<std::string> strvec{20};
-  ASSERT_TRUE(fs::util::cli::check_vector_range(strvec, 20));
-  ASSERT_TRUE(fs::util::cli::check_vector_range(strvec, 20, 30));
-  ASSERT_FALSE(fs::util::cli::check_vector_range(strvec, 19));
-  ASSERT_FALSE(fs::util::cli::check_vector_range(strvec, 0));
-  ASSERT_FALSE(fs::util::cli::check_vector_range(strvec, 30));
-  ASSERT_TRUE(fs::util::cli::check_vector_range(strvec, 15, 25));
-  ASSERT_TRUE(fs::util::cli::check_vector_range(strvec, 15, 20));
-  ASSERT_TRUE(fs::util::cli::check_vector_range(strvec, 19, 20));
-  ASSERT_TRUE(fs::util::cli::check_vector_range(strvec, 20, 21));
-  ASSERT_DEATH(fs::util::cli::check_vector_range(strvec, 30, 20), "");
+  ASSERT_TRUE(fs::util::cli::check_vector_range(strvec, "1", 20));
+  ASSERT_TRUE(fs::util::cli::check_vector_range(strvec, "2", 20, 30));
+  ASSERT_ANY_THROW(fs::util::cli::check_vector_range(strvec, "3", 19));
+  ASSERT_ANY_THROW(fs::util::cli::check_vector_range(strvec, "4", 0));
+  ASSERT_ANY_THROW(fs::util::cli::check_vector_range(strvec, "5", 30));
+  ASSERT_TRUE(fs::util::cli::check_vector_range(strvec, "6", 15, 25));
+  ASSERT_TRUE(fs::util::cli::check_vector_range(strvec, "7", 15, 20));
+  ASSERT_TRUE(fs::util::cli::check_vector_range(strvec, "8", 19, 20));
+  ASSERT_TRUE(fs::util::cli::check_vector_range(strvec, "9", 20, 21));
+  ASSERT_ANY_THROW(fs::util::cli::check_vector_range(strvec, "10", 30, 20));
 }
 
 TEST(test_create_gdb_file, test_input) {
