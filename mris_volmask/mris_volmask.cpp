@@ -48,7 +48,7 @@
 #include "timer.h"
 #include "gca.h"
 #include "version.h"
-
+#define throw(...)
 const char *Progname;
 
 using Pointd = Math::Point<int>;
