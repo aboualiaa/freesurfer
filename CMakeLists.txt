@@ -133,7 +133,9 @@ endif()
 # all custom find-modules are stored in the cmake subdir
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-#add_subdirectory(packages/abseil-cpp)
+add_subdirectory(packages/abseil-cpp)
+
+find_package(ArrayFire)
 
 # -------- zlib --------
 find_package(ZLIB REQUIRED)
