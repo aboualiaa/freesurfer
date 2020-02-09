@@ -54,12 +54,12 @@ jobs:
         - ccache
 
 before_install:
-  - if [[ $ON_OSX ]]; then ./ci-scripts/before_install_osx.sh; fi
-  - if [[ $ON_LINUX ]]; then ./ci-scripts/before_install_linux.sh; fi
+  - if [[ $ON_OSX ]]; then ./ci-scripts/travis.before_install.osx.sh; fi
+  - if [[ $ON_LINUX ]]; then ./ci-scripts/travis.before_install.linux.sh; fi
 
 script:
-  - if [[ $ON_OSX ]]; then ./ci-scripts/script_osx.sh; fi
-  - if [[ $ON_LINUX ]]; then ./ci-scripts/script_linux.sh; fi
+  - if [[ $ON_OSX ]]; then ./ci-scripts/travis.script.osx.sh; fi
+  - if [[ $ON_LINUX ]]; then ./ci-scripts/travis.script.linux.sh; fi
 
 #before_install:
 #  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
