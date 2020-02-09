@@ -1,5 +1,7 @@
 #!/bin/bash
 
+mkdir cmake-build-debug-trusty && cd ./cmake-build-debug-trusty
+
 sudo apt-get install -y --no-install-suggests --no-install-recommends git wget tcsh build-essential \
   gfortran libblas-dev liblapack-dev zlib1g-dev libxmu-dev \
   libxmu-headers libxi-dev libxt-dev libx11-dev libglu1-mesa-dev \
@@ -35,7 +37,6 @@ mv ./packages ./prebuilt_packages
 sed -i -- 's/#  error \"Dunno about this gcc\"/\/\//g' ./prebuilt_packages/itk/4.13.0/include/ITK-4.13/vcl_compiler.h
 
 cmake -DCMAKE_CROSSCOMPILING=1 -DRUN_HAVE_STD_REGEX=0 -DRUN_HAVE_POSIX_REGEX=0 ..
-make mri_* mris_* hiam_*
 
 #cd ./packages
 #wget http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-lite-3.12.4.tar.gz
