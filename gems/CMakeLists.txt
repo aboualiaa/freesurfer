@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.5)
 project(gems)
 
-add_compile_options(-arch x86_64 -fPIC -fpermissive -msse2 -mfpmath=sse -Wl,-w)
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  add_compile_options(-fPIC -fpermissive -msse2 -mfpmath=sse -Wl,-w)
+else()
+  add_compile_options(-arch x86_64 -fPIC -fpermissive -msse2 -mfpmath=sse -Wl,-w)
+endif()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(interfaces)

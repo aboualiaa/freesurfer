@@ -1,7 +1,11 @@
 # PETSC Find Module
 
 if(NOT PETSC_DIR)
-  set(PETSC_DIR "/usr/local/opt/petsc")
+  if(APPLE)
+    set(PETSC_DIR "/usr/local/opt/petsc")
+  else()
+    set(PETSC_DIR ${FS_PACKAGES_DIR}/petsc/2.3.3)
+  endif()
 endif()
 
 set(PETSC_INCLUDE_DIR ${PETSC_DIR}/include)
