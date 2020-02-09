@@ -25,7 +25,7 @@
 #ifndef _DICOMRead_H
 #define _DICOMRead_H
 
-#include "MRI.h"
+#include "mri.h"
 #include "dicom.h"
 #include "lst.h"
 #include "dicom_objects.h"
