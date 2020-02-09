@@ -9,9 +9,9 @@ sudo apt-get install -y git wget tcsh build-essential \
 sudo mv /usr/bin/python /usr/bin/python.bak
 sudo mv /usr/bin/python3.5 /usr/bin/python
 
-sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 sudo apt-get update
-sudo apt-get install gcc-5 g++-9
+sudo apt-get install gcc-9 g++-9
 
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9
 

@@ -8,12 +8,12 @@
 
 Overall Build Status: [![Build Status](https://travis-ci.com/aboualiaa/freesurfer.svg?branch=fs-modernize)](https://travis-ci.com/aboualiaa/freesurfer)
 
-|Builds|AppleClang 11| Clang 9 | GCC 9|
-|:--:|:--:|:--:|
-|macOS 10.14|![](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/1?use_travis_com=true) | Soon | Soon |
-|Ubuntu 14.04| N/A | Soon | ![](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/2?use_travis_com=true) |
-|Ubuntu 16.04| N/A | Soon | ![](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/3?use_travis_com=true) |
-|Ubuntu 18.04| N/A | Soon | ![](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/4?use_travis_com=true) |
+| Builds | AppleClang 11 | Clang 9 | GCC 9 |
+|:--:|:--:|:--:|:--:|
+| macOS 10.14| ![Mojave](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/1?use_travis_com=true) | Soon | Soon |
+| Ubuntu 14.04 | N/A | Soon | ![Trusty](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/2?use_travis_com=true) |
+| Ubuntu 16.04 | N/A | Soon | ![Xenial](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/3?use_travis_com=true) |
+| Ubuntu 18.04 | N/A | Soon | ![Bionic](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/4?use_travis_com=true) |
 
 |Tests|
 |:--:|
