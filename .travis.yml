@@ -53,39 +53,39 @@ jobs:
         - apt
         - ccache
     - os: linux
-        env: ON_LINUX=true
-        dist: xenial
-        addons:
-          apt:
-            packages:
-              - gfortran
-              - libxi-dev
-              - liblapack-dev
-              - python3.5-dev
-              - tcsh
-              - curl
-              - git
-              - cmake
-        cache:
-          - apt
-          - ccache
+      env: ON_LINUX=true
+      dist: xenial
+      addons:
+        apt:
+          packages:
+            - gfortran
+            - libxi-dev
+            - liblapack-dev
+            - python3.5-dev
+            - tcsh
+            - curl
+            - git
+            - cmake
+      cache:
+        - apt
+        - ccache
     - os: linux
-        env: ON_LINUX=true
-        dist: bionic
-        addons:
-          apt:
-            packages:
-              - gfortran
-              - libxi-dev
-              - liblapack-dev
-              - python3.5-dev
-              - tcsh
-              - curl
-              - git
-              - cmake
-        cache:
-          - apt
-          - ccache
+      env: ON_LINUX=true
+      dist: bionic
+      addons:
+        apt:
+          packages:
+            - gfortran
+            - libxi-dev
+            - liblapack-dev
+            - python3.5-dev
+            - tcsh
+            - curl
+            - git
+            - cmake
+      cache:
+        - apt
+        - ccache
 
 before_install:
   - if [[ $ON_OSX ]]; then ./ci-scripts/travis.before_install.osx.sh; fi
