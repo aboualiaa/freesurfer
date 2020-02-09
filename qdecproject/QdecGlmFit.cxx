@@ -26,6 +26,7 @@
 
 #include <sstream>
 #include <fstream>
+#include <cstring>
 
 #include "QdecGlmFit.h"
 

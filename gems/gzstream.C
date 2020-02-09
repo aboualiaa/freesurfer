@@ -27,7 +27,7 @@
 // ============================================================================
 
 #include <gzstream.h>
-
+#include <string.h>
 #ifdef GZSTREAM_NAMESPACE
 namespace GZSTREAM_NAMESPACE {
 #endif

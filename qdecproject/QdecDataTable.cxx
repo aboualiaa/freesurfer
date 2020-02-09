@@ -30,6 +30,7 @@
 #include <sstream>
 
 #include "QdecDataTable.h"
+#include <cstring>
 
 // Constructors/Destructors
 //

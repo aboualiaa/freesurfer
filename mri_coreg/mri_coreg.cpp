@@ -29,6 +29,8 @@
 \author Douglas Greve
 */
 
+#include <sys/resource.h>
+
 #include "fio.h"
 #include "version.h"
 #include "cmdargs.h"

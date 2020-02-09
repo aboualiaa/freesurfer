@@ -1,3 +1,5 @@
+#include <iomanip>
+
 #include "mri_seg_overlap.help.xml.h"
 #include "argparse.h"
 #include "lut.h"

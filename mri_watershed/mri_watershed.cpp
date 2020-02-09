@@ -35,6 +35,8 @@
 #include "affine.hpp"
 #endif
 
+#include <sys/resource.h>
+
 #include "tags.h"
 #include "diag.h"
 #include "version.h"

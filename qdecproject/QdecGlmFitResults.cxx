@@ -25,6 +25,7 @@
  */
 
 #include "QdecGlmFitResults.h"
+#include <cstring>
 
 // Constructors/Destructors
 //

@@ -22,6 +22,8 @@
  *
  */
 
+#include <cstring>
+
 #include "segment.h"
 
 Segment::Segment() {

@@ -6,6 +6,8 @@ This binary creates a morph, given transforms
 
 */
 
+#include <iterator>
+
 // OWN
 #include "morph.h"
 #include "transformUtils.h"

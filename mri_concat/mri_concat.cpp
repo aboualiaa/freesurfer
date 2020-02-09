@@ -30,6 +30,8 @@
  *
  */
 
+#include <sys/resource.h>
+
 #include "mrisutils.h"
 #include "diag.h"
 #include "mri2.h"

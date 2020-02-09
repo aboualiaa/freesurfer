@@ -31,6 +31,7 @@
  */
 
 #include <sstream>
+#include <cstring>
 using namespace std;
 
 #include <c_SMessage.h>

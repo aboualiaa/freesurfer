@@ -30,6 +30,7 @@
 #include <sys/stat.h>
 
 #include <sstream>
+#include <cstring>
 
 #include "QdecGlmDesign.h"
 #include "mri.h"
@@ -287,7 +288,7 @@ void QdecGlmDesign::ClearContinuousFactors() {
       unsigned int nInputs = subjs.size();
       for (unsigned int m=0; m < nInputs; m++)
       {
-        if (std::isnan(subjs[m]->GetContinuousFactorValue( 
+        if (std::isnan(subjs[m]->GetContinuousFactorValue(
                     this->mContinuousFactors[f]->GetFactorName().c_str() )))
         {
           fprintf( stdout,
@@ -347,7 +348,7 @@ void QdecGlmDesign::ClearNuisanceFactors() {
       unsigned int nInputs = subjs.size();
       for (unsigned int m=0; m < nInputs; m++)
       {
-        if (std::isnan(subjs[m]->GetContinuousFactorValue( 
+        if (std::isnan(subjs[m]->GetContinuousFactorValue(
                     this->mNuisanceFactors[f]->GetFactorName().c_str() )))
         {
           fprintf( stdout,

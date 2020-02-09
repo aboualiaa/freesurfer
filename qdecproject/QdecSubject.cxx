@@ -24,6 +24,7 @@
  */
 
 #include <sstream>
+#include <cstring>
 
 #include "QdecSubject.h"
 

@@ -25,7 +25,7 @@
 using namespace std;
 
 #include <fcntl.h>
-
+#include <cstring>
 #if defined __sun__
 #include <sys/file.h>
 #endif

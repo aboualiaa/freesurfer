@@ -27,6 +27,8 @@
  *
  */
 
+#include <sys/resource.h>
+
 #include "diag.h"
 #include "tags.h"
 #include "timer.h"

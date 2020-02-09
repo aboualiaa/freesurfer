@@ -25,6 +25,8 @@
  *
  */
 
+#include <sys/resource.h>
+
 #include "mrisurf_project.h"
 #include "tags.h"
 #include "diag.h"

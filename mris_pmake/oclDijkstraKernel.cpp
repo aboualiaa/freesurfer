@@ -16,6 +16,7 @@
 //
 #include <cfloat>
 #include <iostream>
+#include <cstring>
 #include "oclDijkstraKernel.h"
 
 ///

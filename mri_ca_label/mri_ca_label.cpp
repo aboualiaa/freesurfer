@@ -26,6 +26,8 @@
  */
 
 #include <sys/utsname.h>
+#include <sys/resource.h>
+
 #include "mri.h"
 #include "diag.h"
 #include "timer.h"

@@ -22,6 +22,8 @@
  *
  */
 
+#include <cstring>
+
 #include "loop.h"
 
 Loop::Loop() {

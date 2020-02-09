@@ -27,7 +27,8 @@
  */
 
 #include "QdecFactor.h"
-
+#include <cstring>
+#include <stdexcept>
 // Constructors/Destructors
 //
 

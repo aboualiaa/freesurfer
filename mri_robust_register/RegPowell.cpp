@@ -22,6 +22,9 @@
  * Reporting: freesurfer@nmr.mgh.harvard.edu
  *
  */
+
+#include <iomanip>
+
 #include "RegPowell.h"
 #include "CostFunctions.h"
 #include "fs_vnl/fs_powell.h"

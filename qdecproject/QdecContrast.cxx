@@ -31,6 +31,9 @@
 #include <sys/stat.h>
 
 #include "QdecContrast.h"
+#include <cassert>
+
+#include <cstring>
 
 // Constructors/Destructors
 //
