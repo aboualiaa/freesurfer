@@ -3,10 +3,14 @@
   <p align="center">An open-source software suite for processing human brain MRI</p>
 </div>
 
-![Follow](https://img.shields.io/github/followers/aboualiaa?style=social)
-![Forks](https://img.shields.io/github/forks/aboualiaa/freesurfer?style=social)
-
-Overall Build Status: [![Build Status](https://travis-ci.com/aboualiaa/freesurfer.svg?branch=fs-modernize)](https://travis-ci.com/aboualiaa/freesurfer)
+<table>
+<tr>
+    <td><img src="https://img.shields.io/github/followers/aboualiaa?style=social" /></td>
+    <td><img src="https://img.shields.io/github/forks/aboualiaa/freesurfer?style=social" /></td>
+    <td><a href="https://travis-ci.com/aboualiaa/freesurfer">
+    <img src="https://travis-ci.com/aboualiaa/freesurfer.svg?branch=fs-modernize" /></a></td>
+</tr>
+</table>
 
 | Builds | AppleClang 11 | Clang 9 | GCC 9 |
 |:--:|:--:|:--:|:--:|
@@ -17,7 +21,7 @@ Overall Build Status: [![Build Status](https://travis-ci.com/aboualiaa/freesurfe
 
 |Tests|
 |:--:|
-||
+|[![codecov](https://codecov.io/gh/aboualiaa/freesurfer/branch/fs-modernize/graph/badge.svg)](https://codecov.io/gh/aboualiaa/freesurfer)|
 
 |Code Quality|
 |:--:|
