@@ -17,14 +17,10 @@
 
   sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9
 
-  if [[ $TRAVIS ]]; then
-    echo "On Travis; Python should be set correctly."
-  else
-    sudo update-alternatives --install /usr/local/bin/python python /usr/bin/python3.5 1 --force
-    sudo add-apt-repository --yes ppa:fkrull/deadsnakes
-    sudo apt-get update
-    sudo apt-get install --yes python3.5 python3.5-dev
-  fi
+  sudo update-alternatives --install /usr/local/bin/python python /usr/bin/python3.5 1 --force
+  sudo add-apt-repository --yes ppa:fkrull/deadsnakes
+  sudo apt-get update
+  sudo apt-get install --yes python3.5 python3.5-dev
 
   wget https://cmake.org/files/v3.16/cmake-3.16.4-Linux-x86_64.tar.gz
   tar -xzf cmake-3.16.4-Linux-x86_64.tar.gz
