@@ -34,6 +34,7 @@
  */
 
 #include "cmd_line_interface.h"
+#include <cstring>
 
 using namespace std;
 // this sucks a little - cannot make generic code here

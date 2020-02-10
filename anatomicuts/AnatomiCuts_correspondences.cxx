@@ -22,7 +22,7 @@
 #include "LabelsEntropyAndIntersectionMembershipFunction.h"
 #include "GetPot.h"
 #include <string>
-#include <ITK-5.0/vcl_compiler.h>
+//#include <ITK-5.0/vcl_compiler.h>
 #include "vtkSplineFilter.h"
 #include "OrientationPlanesFromParcellationFilter.h"
 

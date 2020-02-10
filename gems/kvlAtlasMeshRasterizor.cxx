@@ -43,7 +43,7 @@ void AtlasMeshRasterizor ::Rasterize(const AtlasMesh *mesh) {
 //
 //
 //
-itk::ITK_THREAD_RETURN_TYPE AtlasMeshRasterizor ::ThreaderCallback(void *arg) {
+ITK_THREAD_RETURN_TYPE AtlasMeshRasterizor ::ThreaderCallback(void *arg) {
 
   // Retrieve the input arguments
   const int threadNumber =
@@ -61,8 +61,8 @@ itk::ITK_THREAD_RETURN_TYPE AtlasMeshRasterizor ::ThreaderCallback(void *arg) {
   // contributions) every single time we repeat the same computation on the same
   // computer with the same number of threads.
   const int numberOfTetrahedra = str->m_TetrahedronIds.size();
-#if 0  
-  const int  numberOfTetrahedraPerThread = 
+#if 0
+  const int  numberOfTetrahedraPerThread =
           itk::Math::Ceil< int >( static_cast< double >( numberOfTetrahedra ) / numberOfThreads );
   const int  thisThreadStartNumber =  threadNumber * numberOfTetrahedraPerThread;
   int  thisThreadEndNumber =  thisThreadStartNumber + numberOfTetrahedraPerThread - 1;
@@ -70,10 +70,10 @@ itk::ITK_THREAD_RETURN_TYPE AtlasMeshRasterizor ::ThreaderCallback(void *arg) {
     {
     thisThreadEndNumber = (numberOfTetrahedra-1);
     }
-    
-  // Rasterize all tetrahedra assigned to this thread  
-  for ( int tetrahedronNumber = thisThreadStartNumber; 
-        tetrahedronNumber <= thisThreadEndNumber; 
+
+  // Rasterize all tetrahedra assigned to this thread
+  for ( int tetrahedronNumber = thisThreadStartNumber;
+        tetrahedronNumber <= thisThreadEndNumber;
         tetrahedronNumber++ )
 #else
   // Rasterize all tetrahedra assigned to this thread
@@ -136,7 +136,7 @@ itk::ITK_THREAD_RETURN_TYPE AtlasMeshRasterizor ::ThreaderCallback(void *arg) {
 
 #endif
 
-  return itk::ITK_THREAD_RETURN_DEFAULT_VALUE;
+  return ITK_THREAD_RETURN_DEFAULT_VALUE;
 }
 
 } // end namespace kvl

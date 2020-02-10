@@ -8,6 +8,10 @@ cmake_policy(SET CMP0048 NEW)
 project(freesurfer VERSION 7.0.0)
 if(NOT APPLE)
   cmake_minimum_required(VERSION 3.9)
+  add_definitions(-DFS_ITK_LEGACY_REMOVE)
+  add_definitions(-DVCL_GCC_80) # trick itk 4 into believing the compiler is gcc 8
+  add_definitions(-DVXL_FULLCXX11SUPPORT)
+  set(BUILD_GUIS OFF)
 else()
   cmake_minimum_required(VERSION 3.10.2) # preparing for itk5
 endif()
@@ -16,7 +20,7 @@ enable_language(C CXX Fortran)
 # enable std c++20
 set(CMAKE_CXX_STANDARD 20)
 
-if(APPLE)
+if(APPLE AND NOT TRAVIS)
   set(FS_PACKAGES_DIR "/Users/aboualiaa/Downloads/packages")
 else()
   set(FS_PACKAGES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake-build-debug-trusty/prebuilt_packages")
@@ -373,8 +377,11 @@ add_subdirectory(utils)
 # the following utility libraries are required for freeview
 add_subdirectories(vtkutils lineprof)
 
+# TODO: solve build issues on linux/gcc: looser throw spec...
 # the fem elastic subdir also builds a library, so it should be added first
-add_subdirectory(fem_elastic)
+if(APPLE)
+  add_subdirectory(fem_elastic)
+endif()
 
 # build the gems library
 add_subdirectory(gems)

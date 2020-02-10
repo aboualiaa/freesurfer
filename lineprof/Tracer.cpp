@@ -3,7 +3,7 @@
 #undef export
 
 #include "Tracer.h"
-#ifndef ITK_LEGACY_REMOVE
+#ifdef FS_ITK_LEGACY_REMOVE
 #define IsInsideInObjectSpace(x) IsInside((x))
 #endif
 

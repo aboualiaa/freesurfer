@@ -33,6 +33,7 @@
 
 #include "cmd_line_interface.h"
 #include "utils.h"
+#include <cstring>
 
 using namespace std;
 

@@ -3,7 +3,6 @@
 
 #include "itkImage.h"
 #include "itkRGBAPixel.h"
-#include "itkVTKImageExport.h"
 #include "kvlAtlasMesh.h"
 #include "vtkActor.h"
 #include "vtkCamera.h"
@@ -19,6 +18,12 @@
 #include "vtkPlane.h"
 #include "vtkSmartPointer.h"
 #include "vtkUnstructuredGrid.h"
+
+#ifndef FS_ITK_LEGACY_REMOVE
+#include "itkVTKImageExport.h"
+#else
+#include "vtkImageExport.h"
+#endif
 
 class vtkImageImport;
 

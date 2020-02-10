@@ -10,6 +10,8 @@ Gheorghe Postelnicu, 2007
 
 #include "solver.h"
 
+#define throw(...)
+
 //--------------------------------------------------
 //
 // MeshCrop class

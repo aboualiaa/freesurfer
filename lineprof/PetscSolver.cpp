@@ -5,6 +5,15 @@
 
 #include "PetscSolver.h"
 
+#ifndef PETSC_LEGACY
+#define MatDestroy(x) MatDestroy(&x)
+#define VecDestroy(x) VecDestroy(&x)
+#define KSPDestroy(x) KSPDestroy(&x)
+#endif
+#ifdef PETSC_LEGACY
+#define KSPSetOperators(x, y, z) KSPSetOperators(x, y, z, DIFFERENT_NONZERO_PATTERN)
+#endif
+
 PetscSolver::PetscSolver() {
   data = NULL;
   mask = NULL;
@@ -17,11 +26,11 @@ PetscSolver::PetscSolver() {
 
 PetscSolver::~PetscSolver() {
   if (A)
-    MatDestroy(&A);
+    MatDestroy(A);
   if (rhs)
-    VecDestroy(&rhs);
+    VecDestroy(rhs);
   if (sol)
-    VecDestroy(&sol);
+    VecDestroy(sol);
 }
 
 void PetscSolver::SetInputMask(MaskImagePointer inputMask,
@@ -59,9 +68,8 @@ int PetscSolver::Update(double convergence) {
   KSP ksp;
   ierr = KSPCreate(PETSC_COMM_WORLD, &ksp);
   CHKERRQ(ierr);
-  ierr =
-      KSPSetOperators(ksp, A,
-                      A); // not needed any more:, DIFFERENT_NONZERO_PATTERN);
+  ierr = KSPSetOperators(ksp, A, A);
+
   CHKERRQ(ierr);
   PC pc;
   ierr = KSPGetPC(ksp, &pc);
@@ -100,10 +108,10 @@ int PetscSolver::Update(double convergence) {
   CHKERRQ(ierr);
   ierr = VecNorm(vcheck, NORM_2, &norm);
   CHKERRQ(ierr);
-  ierr = VecDestroy(&vcheck);
+  ierr = VecDestroy(vcheck);
   CHKERRQ(ierr);
 
-  ierr = KSPDestroy(&ksp);
+  ierr = KSPDestroy(ksp);
   CHKERRQ(ierr);
 
   return 0;

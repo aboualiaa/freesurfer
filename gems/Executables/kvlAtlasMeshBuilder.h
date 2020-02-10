@@ -7,6 +7,8 @@
 #include "kvlCompressionLookupTable.h"
 #include <mutex>
 
+#include "itk_5_4_map.h"
+
 namespace kvl {
 
 class AtlasMeshBuilderMutexLock : public std::mutex {
@@ -274,7 +276,7 @@ protected:
   /** Static function used as a "callback" by the MultiThreader.  The threading
    * library will call this routine for each thread, which will delegate the
    * control to ThreadedGenerateData(). */
-  static itk::ITK_THREAD_RETURN_TYPE LoadBalancedThreaderCallback(void *arg);
+  static ITK_THREAD_RETURN_TYPE LoadBalancedThreaderCallback(void *arg);
 
   /** Internal structure used for passing image data into the threading library
    */

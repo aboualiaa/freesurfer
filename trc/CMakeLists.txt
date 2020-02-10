@@ -1,6 +1,7 @@
 project(trc)
 
-if(PETSC_FOUND)
+# TODO: remove APPLE condition after solving fem_elastic build issues on linux
+if(PETSC_FOUND AND APPLE)
 
   include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}

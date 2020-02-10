@@ -9,6 +9,9 @@ endif()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(interfaces)
+include_directories(${VTK_INCLUDE_DIRS})
+include_directories(${ITK_INCLUDE_DIRS})
+include_directories(${FS_INCLUDE_DIRS})
 
 # find ITK if we're building independently of freesurfer
 if(NOT ITK_FOUND)

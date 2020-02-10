@@ -3,6 +3,8 @@
 #include "kvlParameterOrderPowellOptimizer.h"
 #include "kvlAtlasMeshCollectionFastReferencePositionCost.h"
 
+#include "itk_5_4_map.h"
+
 namespace kvl {
 
 // itk::SimpleFastMutexLock  mutex;
@@ -1176,7 +1178,7 @@ AtlasMeshBuilder ::GetRandomizedEdgesAsSet() const {
 //
 //
 //
-itk::ITK_THREAD_RETURN_TYPE
+ITK_THREAD_RETURN_TYPE
 AtlasMeshBuilder ::LoadBalancedThreaderCallback(void *arg) {
 
   // Retrieve the input arguments
@@ -1232,7 +1234,7 @@ AtlasMeshBuilder ::LoadBalancedThreaderCallback(void *arg) {
     }
   }
 
-  return itk::ITK_THREAD_RETURN_DEFAULT_VALUE;
+  return ITK_THREAD_RETURN_DEFAULT_VALUE;
 }
 
 } // end namespace kvl

@@ -19,12 +19,11 @@
 #include "itkImageRegionIterator.h"
 #include "itkN4BiasFieldCorrectionImageFilter.h"
 #include "itkShrinkImageFilter.h"
-#include "itkPlatformMultiThreader.h"
 
 #include "argparse.h"
 #include "mri.h"
 #include "AntsN4BiasFieldCorrectionFs.help.xml.h"
-
+#include "itk_5_4_map.h"
 
 int main(int argc, char const *argv[])
 {

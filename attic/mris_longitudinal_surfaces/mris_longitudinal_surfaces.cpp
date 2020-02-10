@@ -45,6 +45,7 @@
 #include "mrinorm.h"
 #include "version.h"
 #include "label.h"
+#include "mri2.h"
 
 static char vcid[] = "$Id: mris_longitudinal_surfaces.c,v 1.8 2015/11/09 "
                      "04:18:29 zkaufman Exp $";
@@ -64,9 +65,12 @@ static MRI *MRIsmoothMasking(MRI *mri_src, MRI *mri_mask, MRI *mri_dst,
 MRI *MRIfillVentricle(MRI *mri_inv_lv, MRI *mri_T1, float thresh, int out_label,
                       MRI *mri_dst);
 
-int MRISfindExpansionRegions(MRI_SURFACE *mris);
+
 int MRIsmoothBrightWM(MRI *mri_T1, MRI *mri_wm);
+#if 0
+int MRISfindExpansionRegions(MRI_SURFACE *mris);
 MRI *MRIfindBrightNonWM(MRI *mri_T1, MRI *mri_wm);
+#endif
 
 static LABEL *highres_label = NULL;
 static char T1_name[STRLEN] = "brain";
@@ -1378,7 +1382,7 @@ static MRI *MRIsmoothMasking(MRI *mri_src, MRI *mri_mask, MRI *mri_dst,
   }
   return (mri_dst);
 }
-
+#if 0
 int MRISfindExpansionRegions(MRI_SURFACE *mris) {
   int vno, num, n, num_long, total;
   float d, dsq, mean, std, dist;
@@ -1436,6 +1440,7 @@ int MRISfindExpansionRegions(MRI_SURFACE *mris) {
   }
   return (NO_ERROR);
 }
+#endif
 
 int MRIsmoothBrightWM(MRI *mri_T1, MRI *mri_wm) {
   int width, height, depth, x, y, z, nthresholded;
@@ -1469,6 +1474,8 @@ int MRIsmoothBrightWM(MRI *mri_T1, MRI *mri_wm) {
 
   return (NO_ERROR);
 }
+
+#if 0
 MRI *MRIfindBrightNonWM(MRI *mri_T1, MRI *mri_wm) {
   int width, height, depth, x, y, z, nlabeled, nwhite, xk, yk, zk, xi, yi, zi;
   BUFTYPE *pT1, *pwm, val, wm;
@@ -1544,6 +1551,8 @@ MRI *MRIfindBrightNonWM(MRI *mri_T1, MRI *mri_wm) {
   MRIfree(&mri_tmp);
   return (mri_labeled);
 }
+#endif
+
 static float check_contrast_direction(MRI_SURFACE *mris, MRI *mri_T1) {
   int vno, n;
   VERTEX *v;

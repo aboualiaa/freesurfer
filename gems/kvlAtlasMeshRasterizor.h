@@ -3,6 +3,8 @@
 
 #include "kvlAtlasMesh.h"
 
+#include "itk_5_4_map.h"
+
 namespace kvl {
 
 class AtlasMeshRasterizor : public itk::Object {
@@ -43,7 +45,7 @@ protected:
   /** Static function used as a "callback" by the MultiThreader.  The threading
    * library will call this routine for each thread, which will delegate the
    * control to ThreadedGenerateData(). */
-  static itk::ITK_THREAD_RETURN_TYPE ThreaderCallback(void *arg);
+  static ITK_THREAD_RETURN_TYPE ThreaderCallback(void *arg);
 
   /** Internal structure used for passing information to the threading library
    */

@@ -3201,10 +3201,10 @@ void initArgDesc(boost::program_options::options_description *desc,
            ->notifier([cmdargs](auto v) {
              auto checker = cli::checkSize("fsubsample", 3);
              checker(v);
-             std::tie(cmdargs->SubSampStart, cmdargs->SubSampDelta,
-                      cmdargs->SubSampEnd) = std::array<int, 3>{
-                 cmdargs->fsubsample[0], cmdargs->fsubsample[1],
-                 cmdargs->fsubsample[2]};
+             cmdargs->SubSampStart = cmdargs->fsubsample[0];
+             cmdargs->SubSampDelta = cmdargs->fsubsample[1];
+             cmdargs->SubSampEnd = cmdargs->fsubsample[2];
+
              if (cmdargs->SubSampDelta == 0) {
                fmt::printf("ERROR: don't use subsample delta = 0\n");
                exit(1);

@@ -19,11 +19,10 @@
 
 
 #include "itkAdaptiveNonLocalMeansDenoisingImageFilter.h"
-#include "itkPlatformMultiThreader.h"
 #include "argparse.h"
 #include "mri.h"
 #include "AntsDenoiseImageFs.help.xml.h"
-
+#include "itk_5_4_map.h"
 
 int main(int argc, char const *argv[])
 {

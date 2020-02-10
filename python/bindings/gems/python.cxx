@@ -1,4 +1,3 @@
-#include "itkMultiThreaderBase.h"
 #include "pyKvlCalculator.h"
 #include "pyKvlImage.h"
 #include "pyKvlMesh.h"
@@ -6,6 +5,8 @@
 #include "pyKvlTransform.h"
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+
+#include "itk_5_4_map.h"
 
 namespace py = pybind11;
 

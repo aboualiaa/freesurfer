@@ -13,6 +13,8 @@
 
 #include "applyMorph.help.xml.h"
 
+#define throw(...)
+
 // required by FreeSurfer
 const char *Progname;
 
