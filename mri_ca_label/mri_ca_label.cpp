@@ -198,26 +198,28 @@ static int expand_ventricle_flag = FALSE;
 static int conform_flag = FALSE;
 struct utsname uts;
 char *cmdline2, cwd[2000];
-char *rusage_file = nullptr;
+char *rusage_file=NULL;
+char *PreGibbsFile=NULL;
+int n_omp_threads;
 
-int main(int argc, char *argv[]) {
-  char **av;
-  int ac, nargs, extra;
-  char *in_fname, *out_fname, *gca_fname, *xform_fname;
-  MRI *mri_inputs, *mri_labeled, *mri_fixed = nullptr, *mri_tmp,
-                                 *mri_independent_posterior = nullptr;
-  int msec, minutes, seconds, ninputs, input;
-  Timer start;
-  GCA *gca;
-  TRANSFORM *transform;
+int main(int argc, char *argv[])
+{
+  char         **av ;
+  int          ac, nargs, extra ;
+  char         *in_fname, *out_fname,  *gca_fname, *xform_fname;
+  MRI          *mri_inputs, *mri_labeled, *mri_fixed = NULL, *mri_tmp, *mri_independent_posterior = NULL ;
+  int          msec, minutes, seconds, ninputs, input ;
+  Timer start ;
+  GCA          *gca ;
+  TRANSFORM     *transform ;
 
-  char cmdline[CMD_LINE_LEN];
+  char cmdline[CMD_LINE_LEN] ;
 
-  FSinit();
-  make_cmd_version_string(
-      argc, argv,
-      "$Id: mri_ca_label.c,v 1.115 2016/10/22 17:31:36 fischl Exp $",
-      "$Name:  $", cmdline);
+  FSinit() ;
+  make_cmd_version_string
+  (argc, argv,
+   "$Id: mri_ca_label.c,v 1.115 2016/10/22 17:31:36 fischl Exp $",
+   "$Name:  $", cmdline);
 
   /* rkt: check for and handle version tag */
   nargs = handle_version_option(
@@ -244,13 +246,6 @@ int main(int argc, char *argv[]) {
 
   Progname = argv[0];
 
-#ifdef HAVE_OPENMP
-  {
-    int n_omp_threads = omp_get_max_threads();
-    printf("\n== Number of threads available to %s for OpenMP = %d == \n",
-           Progname, n_omp_threads);
-  }
-#endif
 
   setRandomSeed(-1L);
   Progname = argv[0];
@@ -267,8 +262,17 @@ int main(int argc, char *argv[]) {
     argv += nargs;
   }
 
-  if (getenv("BUILD_GCA_HISTO") != nullptr) {
-    int *counts, i, max_i;
+#ifdef HAVE_OPENMP
+  n_omp_threads = omp_get_max_threads();
+  printf("\n== Number of threads available to for OpenMP = %d == \n",n_omp_threads);
+#else
+  printf("Do not have OpenMP\n");
+  n_omp_threads = 1;
+#endif
+
+  if (getenv("BUILD_GCA_HISTO") != NULL)
+  {
+    int *counts, i, max_i ;
 
     fprintf(stderr, "reading gca from %s\n", argv[1]);
     gca = GCAread(argv[1]);
@@ -1021,32 +1025,48 @@ int main(int argc, char *argv[]) {
 
     } // else /* processing long data */
 
-    if (!no_gibbs) {
-      if (anneal) {
-        GCAanneal(mri_inputs, gca, mri_labeled, transform, max_iter,
-                  PRIOR_FACTOR);
-      } else {
-        if (Ggca_x >= 0) {
-          GCAdump(gca, mri_inputs, Ggca_x, Ggca_y, Ggca_z, transform, stdout,
-                  0);
-        }
-        GCAreclassifyUsingGibbsPriors(mri_inputs, gca, mri_labeled, transform,
-                                      max_iter, mri_fixed, 0, nullptr,
-                                      PRIOR_FACTOR, PRIOR_FACTOR);
-        if (reclassify_unlikely) {
-          int w;
+    if(PreGibbsFile){
+      printf("Saving pre-gibbs to %s\n",PreGibbsFile);
+      int err;
+      err = MRIwrite(mri_labeled,PreGibbsFile);
+      if(err) exit(1);
+    }
 
-          for (w = (unlikely_wsize - 1) / 2; w >= 1; w--) {
-            GCArelabelUnlikely(gca, mri_inputs, transform, mri_labeled,
-                               mri_labeled, mri_independent_posterior,
-                               unlikely_prior_thresh, w);
-            if (gca_write_iterations != 0) {
-              char fname[STRLEN];
-              sprintf(fname, "%s_un.w%d.mgz", gca_write_fname, w);
-              printf("writing snapshot to %s\n", fname);
-              MRIwrite(mri_labeled, fname);
-            }
-          }
+    if (!no_gibbs)
+    {
+      if (anneal)
+      {
+        GCAanneal(mri_inputs, gca, mri_labeled, 
+                  transform, max_iter, PRIOR_FACTOR) ;
+      }
+      else
+      {
+        if (Ggca_x >= 0)
+        {
+          GCAdump(gca, mri_inputs, Ggca_x, Ggca_y, Ggca_z,
+                  transform, stdout, 0) ;
+        }
+	printf("Reclassifying using Gibbs Priors\n");
+        GCAreclassifyUsingGibbsPriors
+        (mri_inputs, gca, mri_labeled, transform, max_iter,
+         mri_fixed, 0, NULL, PRIOR_FACTOR, PRIOR_FACTOR);
+        if (reclassify_unlikely)
+        {
+	  int w ;
+
+	  for (w = (unlikely_wsize-1)/2 ; w >= 1 ; w--)
+	  {
+	    GCArelabelUnlikely(gca, mri_inputs, transform, 
+			       mri_labeled, mri_labeled, mri_independent_posterior,
+			       unlikely_prior_thresh, w) ;
+	    if (gca_write_iterations != 0)
+	    {
+	      char fname[STRLEN] ;
+	      sprintf(fname, "%s_un.w%d.mgz", gca_write_fname, w) ;
+	      printf("writing snapshot to %s\n", fname) ;
+	      MRIwrite(mri_labeled, fname) ;
+	    }
+	  }
         }
       }
     }
@@ -1248,61 +1268,97 @@ int main(int argc, char *argv[]) {
 
   Description:
   ----------------------------------------------------------------------*/
-static int get_option(int argc, char *argv[]) {
-  int nargs = 0;
-  char *option;
+static int
+get_option(int argc, char *argv[])
+{
+  int  nargs = 0 ;
+  char *option ;
 
-  option = argv[1] + 1; /* past '-' */
-  if (!stricmp(option, "NOGIBBS")) {
-    no_gibbs = 1;
-    printf("disabling gibbs priors...\n");
-  } else if (!stricmp(option, "LH")) {
-    remove_rh = 1;
-    printf("removing right hemisphere labels\n");
-  } else if (!stricmp(option, "vent_topo_dist")) {
-    Gvent_topo_dist = atof(argv[2]);
-    printf("setting ventricle topology distance threshold to %2.1fmm "
-           "(default=3)\n",
-           Gvent_topo_dist);
-    nargs = 1;
-  } else if (!stricmp(option, "vent_topo_volume_thresh1")) {
-    Gvent_topo_volume_thresh1 = atof(argv[2]);
-    printf("setting ventricle topology volume1 threshold to %2.1fmm^3 "
-           "(default=50)\n",
-           Gvent_topo_volume_thresh1);
-    nargs = 1;
-  } else if (!stricmp(option, "vent_topo_volume_thresh2")) {
-    Gvent_topo_volume_thresh2 = atof(argv[2]);
-    printf("setting ventricle topology volume2 threshold to %2.1fmm^3 "
-           "(default=100)\n",
-           Gvent_topo_volume_thresh2);
-    nargs = 1;
-  } else if (!stricmp(option, "RH")) {
-    remove_lh = 1;
-    printf("removing left hemisphere labels\n");
-  } else if (!stricmp(option, "PRIOR")) {
-    PRIOR_FACTOR = atof(argv[2]);
-    nargs = 1;
-    printf("using Gibbs prior factor = %2.3f\n", PRIOR_FACTOR);
-  } else if (!stricmp(option, "NOCEREBELLUM")) {
-    remove_cerebellum = 1;
-    printf("removing cerebellum from atlas\n");
-  } else if (!stricmp(option, "nowmsa")) {
-    nowmsa = 1;
-    printf("disabling WMSA labels\n");
-  } else if (!stricmp(option, "fcd")) {
-    fcd = 1;
-    //    reclassify_unlikely = 0 ;
-    printf("checking for focal cortical dysplasias\n");
-  } else if (!stricmp(option, "read_intensities") || !stricmp(option, "ri")) {
-    read_intensity_fname[nreads] = argv[2];
-    nargs = 1;
-    printf("reading intensity scaling from %s\n", read_intensity_fname[nreads]);
-    nreads++;
-    if (nreads > MAX_READS) {
-      ErrorExit(ERROR_UNSUPPORTED,
-                "%s: too many intensity files specified (max %d)", Progname,
-                MAX_READS);
+  option = argv[1] + 1 ;            /* past '-' */
+  if (!stricmp(option, "NOGIBBS"))
+  {
+    no_gibbs = 1 ;
+    printf("disabling gibbs priors...\n") ;
+  }
+  else if (!stricmp(option, "THREADS"))
+  {
+    sscanf(argv[2],"%d",&n_omp_threads);
+    #ifdef HAVE_OPENMP
+    omp_set_num_threads(n_omp_threads);
+    printf("Setting threads to %d\n",n_omp_threads);
+    #else
+    printf("dont have openmp \n");
+    #endif
+    nargs = 1 ;
+  }
+  else if (!stricmp(option, "PREGIBBS"))
+  {
+    PreGibbsFile = argv[2];
+    printf("Saving pre-gibbs to %s\n",PreGibbsFile);
+    nargs = 1 ;
+  }
+  else if (!stricmp(option, "LH"))
+  {
+    remove_rh = 1  ;
+    printf("removing right hemisphere labels\n") ;
+  }
+  else if (!stricmp(option, "vent_topo_dist"))
+  {
+    Gvent_topo_dist = atof(argv[2]) ;
+    printf("setting ventricle topology distance threshold to %2.1fmm (default=3)\n", Gvent_topo_dist) ;
+    nargs = 1 ;
+  }
+  else if (!stricmp(option, "vent_topo_volume_thresh1"))
+  {
+    Gvent_topo_volume_thresh1 = atof(argv[2]) ;
+    printf("setting ventricle topology volume1 threshold to %2.1fmm^3 (default=50)\n", Gvent_topo_volume_thresh1) ;
+    nargs = 1 ;
+  }
+  else if (!stricmp(option, "vent_topo_volume_thresh2"))
+  {
+    Gvent_topo_volume_thresh2 = atof(argv[2]) ;
+    printf("setting ventricle topology volume2 threshold to %2.1fmm^3 (default=100)\n", Gvent_topo_volume_thresh2) ;
+    nargs = 1 ;
+  }
+  else if (!stricmp(option, "RH"))
+  {
+    remove_lh = 1  ;
+    printf("removing left hemisphere labels\n") ;
+  }
+  else if (!stricmp(option, "PRIOR"))
+  {
+    PRIOR_FACTOR = atof(argv[2]) ;
+    nargs = 1 ;
+    printf("using Gibbs prior factor = %2.3f\n", PRIOR_FACTOR) ;
+  }
+  else if (!stricmp(option, "NOCEREBELLUM"))
+  {
+    remove_cerebellum = 1 ;
+    printf("removing cerebellum from atlas\n") ;
+  }
+  else if (!stricmp(option, "nowmsa"))
+  {
+    nowmsa = 1 ;
+    printf("disabling WMSA labels\n") ;
+  }
+  else if (!stricmp(option, "fcd"))
+  {
+    fcd = 1 ;
+//    reclassify_unlikely = 0 ;
+    printf("checking for focal cortical dysplasias\n") ;
+  }
+  else if (!stricmp(option, "read_intensities") || !stricmp(option, "ri"))
+  {
+    read_intensity_fname[nreads] = argv[2] ;
+    nargs = 1 ;
+    printf("reading intensity scaling from %s\n",
+           read_intensity_fname[nreads]) ;
+    nreads++ ;
+    if (nreads > MAX_READS)
+    {
+      ErrorExit(ERROR_UNSUPPORTED, 
+                "%s: too many intensity files specified (max %d)",
+                Progname, MAX_READS);
     }
   } else if (!stricmp(option, "WM")) {
     wm_fname = argv[2];
@@ -1353,72 +1409,108 @@ static int get_option(int argc, char *argv[]) {
            unlikely_wsize, unlikely_prior_thresh);
     nargs = 2;
 #endif
-  } else if (!stricmp(option, "CONFORM")) {
-    conform_flag = TRUE;
-    printf("resampling input volume(s) to be 256^3 and 1mm^3\n");
-  } else if (!stricmp(option, "WMSA")) {
-    wmsa = 1;
-    printf("relabeling wm and wmsa in postprocessing\n");
-  } else if (!stricmp(option, "NORMPD")) {
-    norm_PD = TRUE;
-    printf("normalizing PD image (2nd input) to GCA means[1]\n");
-  } else if (!stricmp(option, "bigventricles")) {
-    handle_expanded_ventricles = 1;
-    printf("handling expanded ventricles...\n");
-  } else if (!stricmp(option, "nobigventricles")) {
-    handle_expanded_ventricles = 0;
-    printf("not handling expanded ventricles...\n");
-  } else if (!stricmp(option, "write_probs")) {
-    G_write_probs = argv[2];
-    nargs = 1;
-    printf("writing label probabilities to %s\n", G_write_probs);
-  } else if (!stricmp(option, "write_likelihood")) {
-    write_likelihood = argv[2];
-    nargs = 1;
-    printf("writing image likelihoods unders labeling to %s\n",
-           write_likelihood);
-  } else if (!stricmp(option, "wmsa_probs")) {
-    wmsa_probs = argv[2];
-    // wmsa_probs = 1;
-    printf("Writing WMSA probabilities to file %s\n", wmsa_probs);
-    nargs = 1;
-    // sprintf(wmsaprob_fname,"%s.mgz",wmsa_probs);
-  } else if (!stricmp(option, "TL")) {
-    tl_gca_fname = argv[2];
-    nargs = 1;
-    printf("using gca %s to label thin temporal lobe...\n", tl_gca_fname);
-  } else if (!stricmp(option, "DEBUG_VOXEL")) {
-    Ggca_x = atoi(argv[2]);
-    Ggca_y = atoi(argv[3]);
-    Ggca_z = atoi(argv[4]);
-    nargs = 3;
-    printf("debugging voxel (%d, %d, %d)\n", Ggca_x, Ggca_y, Ggca_z);
-  } else if (!stricmp(option, "DEBUG_NODE")) {
-    Gx = atoi(argv[2]);
-    Gy = atoi(argv[3]);
-    Gz = atoi(argv[4]);
-    nargs = 3;
-    printf("debugging node (%d, %d, %d)\n", Gx, Gy, Gz);
-  } else if (!stricmp(option, "DEBUG_PRIOR")) {
-    Gxp = atoi(argv[2]);
-    Gyp = atoi(argv[3]);
-    Gzp = atoi(argv[4]);
-    nargs = 3;
-    printf("debugging prior (%d, %d, %d)\n", Gxp, Gyp, Gzp);
-  } else if (!stricmp(option, "DEBUG_LABEL")) {
-    Ggca_label = atoi(argv[2]);
-    nargs = 1;
-    printf("debugging label %d\n", Ggca_label);
-  } else if (!stricmp(option, "TR")) {
-    TR = atof(argv[2]);
-    nargs = 1;
-    printf("using TR=%2.1f msec\n", TR);
-  } else if (!stricmp(option, "expand")) {
-    expand_ventricle_flag = TRUE;
-    printf("expanding ventricles in postprocessing...\n");
-  } else if (!stricmp(option, "EXAMPLE")) {
-    example_T1 = argv[2];
-    example_segmentation = argv[3];
+  }
+  else if (!stricmp(option, "CONFORM"))
+  {
+    conform_flag = TRUE ;
+    printf("resampling input volume(s) to be 256^3 and 1mm^3\n") ;
+  }
+  else if (!stricmp(option, "WMSA"))
+  {
+    wmsa = 1 ;
+    printf("relabeling wm and wmsa in postprocessing\n") ;
+  }
+  else if (!stricmp(option, "NORMPD"))
+  {
+    norm_PD = TRUE ;
+    printf("normalizing PD image (2nd input) to GCA means[1]\n") ;
+  }
+  else if (!stricmp(option, "bigventricles"))
+  {
+    handle_expanded_ventricles = 1 ;
+    printf("handling expanded ventricles...\n") ;
+  }
+  else if (!stricmp(option, "nobigventricles"))
+  {
+    handle_expanded_ventricles = 0 ;
+    printf("not handling expanded ventricles...\n") ;
+  }
+  else if (!stricmp(option, "write_probs"))
+  {
+    G_write_probs = argv[2] ;
+    nargs = 1 ;
+    printf("writing label probabilities to %s\n", G_write_probs) ;
+  }
+  else if (!stricmp(option, "write_likelihood"))
+  {
+    write_likelihood = argv[2] ;
+    nargs = 1 ;
+    printf("writing image likelihoods unders labeling to %s\n", 
+	   write_likelihood) ;
+  }
+  else if (!stricmp(option, "wmsa_probs"))
+  {
+    wmsa_probs = argv[2] ;
+    //wmsa_probs = 1;
+    printf("Writing WMSA probabilities to file %s\n", wmsa_probs) ;
+    nargs =1 ;
+    //sprintf(wmsaprob_fname,"%s.mgz",wmsa_probs);
+  }
+  else if (!stricmp(option, "TL"))
+  {
+    tl_gca_fname = argv[2] ;
+    nargs = 1 ;
+    printf("using gca %s to label thin temporal lobe...\n", tl_gca_fname) ;
+  }
+  else if (!stricmp(option, "DEBUG_VOXEL"))
+  {
+    Ggca_x = atoi(argv[2]) ;
+    Ggca_y = atoi(argv[3]) ;
+    Ggca_z = atoi(argv[4]) ;
+    nargs = 3 ;
+    printf("debugging voxel (%d, %d, %d)\n", Ggca_x,Ggca_y,Ggca_z) ;
+  }
+  else if (!stricmp(option, "DEBUG_NODE"))
+  {
+    Gx = atoi(argv[2]) ;
+    Gy = atoi(argv[3]) ;
+    Gz = atoi(argv[4]) ;
+    nargs = 3 ;
+    printf("debugging node (%d, %d, %d)\n", Gx,Gy,Gz) ;
+  }
+  else if (!stricmp(option, "DEBUG_PRIOR"))
+  {
+    Gxp = atoi(argv[2]) ;
+    Gyp = atoi(argv[3]) ;
+    Gzp = atoi(argv[4]) ;
+    nargs = 3 ;
+    printf("debugging prior (%d, %d, %d)\n", Gxp,Gyp,Gzp) ;
+  }
+  else if (!stricmp(option, "DEBUG_LABEL"))
+  {
+    Ggca_label = atoi(argv[2]) ;
+    nargs = 1 ;
+    printf("debugging label %d\n", Ggca_label) ;
+  }
+  else if (!stricmp(option, "DEBUG"))
+  {
+    Gdiag = DIAG_WRITE | DIAG_VERBOSE_ON;
+  }
+  else if (!stricmp(option, "TR"))
+  {
+    TR = atof(argv[2]) ;
+    nargs = 1 ;
+    printf("using TR=%2.1f msec\n", TR) ;
+  }
+  else if (!stricmp(option, "expand"))
+  {
+    expand_ventricle_flag = TRUE ;
+    printf("expanding ventricles in postprocessing...\n") ;
+  }
+  else if (!stricmp(option, "EXAMPLE"))
+  {
+    example_T1 = argv[2] ;
+    example_segmentation = argv[3] ;
     printf("using %s and %s as example T1 and segmentations respectively.\n",
            example_T1, example_segmentation);
     nargs = 2;
