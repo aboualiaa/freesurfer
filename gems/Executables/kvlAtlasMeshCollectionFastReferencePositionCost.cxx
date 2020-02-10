@@ -1,6 +1,7 @@
 #include "kvlAtlasMeshCollectionFastReferencePositionCost.h"
 
 #include "kvlTetrahedronAspectRatio.h"
+#include <math.h>
 
 namespace kvl {
 
