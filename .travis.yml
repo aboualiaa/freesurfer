@@ -14,6 +14,7 @@ jobs:
       osx_image: xcode11.3
       addons:
         homebrew:
+          update: true
           packages:
             - itk
             - vtk
@@ -39,7 +40,6 @@ jobs:
     - os: linux
       env: HOSTING_OS=trusty
       dist: trusty
-      python: 3.5
       addons:
         apt:
           packages:
@@ -57,7 +57,6 @@ jobs:
     - os: linux
       env: HOSTING_OS=xenial
       dist: xenial
-      python: 3.5
       addons:
         apt:
           packages:
@@ -75,14 +74,13 @@ jobs:
     - os: linux
       env: HOSTING_OS=bionic
       dist: bionic
-      python: 3.5
       addons:
         apt:
           packages:
             - gfortran
             - libxi-dev
             - liblapack-dev
-            - python3.5-dev
+            - python3.6-dev
             - tcsh
             - curl
             - git
