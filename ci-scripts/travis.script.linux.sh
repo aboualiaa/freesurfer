@@ -4,4 +4,5 @@
 #cmake -DCMAKE_CROSSCOMPILING=1 -DRUN_HAVE_STD_REGEX=0 -DRUN_HAVE_POSIX_REGEX=0 .
 #make -j$(nproc)
 cd ./cmake-build-debug-trusty
-make mri_* mris_* hiam_*
+#make mri_* mris_* hiam_*
+ninja -k 0

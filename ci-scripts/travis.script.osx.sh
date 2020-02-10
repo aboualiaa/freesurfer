@@ -8,4 +8,4 @@ sed -i '' '/CMAKE_C_COMPILER:FILEPATH/d' ./CMakeCache.txt # remove compiler cach
 sed -i '' '/\/\/C compiler/d' ./CMakeCache.txt
 cmake -G Ninja -DGEMS_BUILD_MATLAB=OFF ..
 cmake -G Ninja -DGEMS_BUILD_MATLAB=OFF .. # again so that AppleClang finds OpenMP
-timeout 50m ninja
+timeout 50m ninja -k 0
