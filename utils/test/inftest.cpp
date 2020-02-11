@@ -25,11 +25,9 @@
 #include <iostream>
 #include <math.h>
 
-extern "C" {
 #include "mghendian.h"
 #include "utils.h"
 const char *Progname = "inftest";
-}
 
 using namespace std;
 

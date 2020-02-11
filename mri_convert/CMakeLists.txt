@@ -35,8 +35,9 @@ install(TARGETS mri_make_uchar DESTINATION bin)
 # tests
 add_executable(mri_convert_tests mri_convert_tests.cpp)
 add_help(mri_convert_tests mri_convert.help.xml)
-set_target_properties(mri_convert_tests PROPERTIES EXCLUDE_FROM_ALL TRUE)
+set_target_properties(mri_convert_tests PROPERTIES EXCLUDE_FROM_ALL FALSE)
 target_link_libraries(mri_convert_tests utils mri_convert ${GTEST_LIBRARIES}
                       benchmark fmt gtest ${ARMADILLO_LIBRARIES}
                       Boost::program_options)
 add_test(mri_convert_tests mri_convert_tests)
+add_test(mri_convert_test mri_convert_tests)

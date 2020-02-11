@@ -28,9 +28,7 @@
 #include <cstdlib>
 #include <typeinfo>
 
-extern "C" {
 #include "fio.h"
-}
 
 const int MAX = 5;
 const double MAXD = 1.7976931348623157e+308;

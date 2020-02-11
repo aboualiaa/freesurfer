@@ -1,7 +1,7 @@
 project(lineprof)
 
 if(ITK_FOUND AND VTK_FOUND AND PETSC_FOUND)
-
+find_package(MPI)
   include_directories(
     SYSTEM
     ${ITK_INCLUDE_DIRS}
@@ -28,7 +28,8 @@ if(ITK_FOUND AND VTK_FOUND AND PETSC_FOUND)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework Accelerate")
   endif()
 
-  add_test_executable(lineprof_test LineProfTest.cpp)
+  add_executable(lineprof_test LineProfTest.cpp)
+  add_test(lineprof_test LineProfTest.cpp)
   target_link_libraries(lineprof_test
     lineprof
     ${ZLIB_LIBRARIES}
@@ -38,6 +39,7 @@ if(ITK_FOUND AND VTK_FOUND AND PETSC_FOUND)
     ${BLAS_LIBRARIES}
     ${GFORTRAN_LIBRARIES}
     ${ITK_LIBRARIES}
+    ${MPI_LIBRARIES}
   )
 
 endif()

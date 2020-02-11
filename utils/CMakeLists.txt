@@ -131,7 +131,7 @@ add_library(utils STATIC
   mripolv.cpp
   mriprob.cpp
   mris_compVolFrac.cpp
-  mris_fastmarching.cpp 
+  mris_fastmarching.cpp
   mrisegment.cpp
   mriset.cpp
   mrishash.cpp
@@ -235,4 +235,4 @@ target_compile_definitions(fsPrintHelp PRIVATE BUILD_MAIN)
 target_link_libraries(fsPrintHelp xml2 ${ZLIB_LIBRARIES})
 install(TARGETS fsPrintHelp DESTINATION bin)
 
-# add_subdirectory(test)
+add_subdirectory(test)

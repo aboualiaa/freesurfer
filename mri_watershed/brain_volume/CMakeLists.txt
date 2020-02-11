@@ -2,5 +2,6 @@ add_executable(mri_brain_volume mri_brain_volume.cpp)
 target_link_libraries(mri_brain_volume utils)
 install(TARGETS mri_brain_volume DESTINATION bin)
 
-add_test_executable(mri_brain_volume_test test.cpp)
+add_executable(mri_brain_volume_test test.cpp)
+add_test(mri_brain_volume_test mri_brain_volume_test)
 target_link_libraries(mri_brain_volume_test utils)

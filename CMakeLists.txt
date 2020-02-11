@@ -65,9 +65,25 @@ if(APPLE)
 endif()
 
 add_compile_options(-fPIC)
+string(TOLOWER ${CMAKE_BUILD_TYPE} build_type_lower )
+if(build_type_lower STREQUAL "debug")
+  message(STATUS "adding coverage instrumentation")
+  if("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang"
+     OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-instr-generate -fcoverage-mapping") # llvm style
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage") # gcov style
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0") # compile with debug info for correct coverage data
+  elseif(CMAKE_COMPILER_IS_GNUCXX)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
+  endif()
+endif()
 
 # enable ctest
 enable_testing()
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_proxy.sh ${CMAKE_CURRENT_BINARY_DIR}/test.sh COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_proxy.sh ${CMAKE_CURRENT_BINARY_DIR}/attic/test.sh COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_proxy.sh ${CMAKE_CURRENT_BINARY_DIR}/utils/test.sh COPYONLY)
 
 # include our custom cmake functions (and others)
 include(cmake/functions.cmake)
