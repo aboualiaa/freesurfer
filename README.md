@@ -19,22 +19,12 @@
 | Ubuntu 16.04 | N/A | ![Xenial](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/6?use_travis_com=true) | ![Xenial](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/3?use_travis_com=true) |
 | Ubuntu 18.04 | N/A | ![Bionic](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/7?use_travis_com=true) | ![Bionic](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/4?use_travis_com=true) |
 
-|Tests|
-|:--:|
-|[![codecov](https://codecov.io/gh/aboualiaa/freesurfer/branch/fs-modernize/graph/badge.svg)](https://codecov.io/gh/aboualiaa/freesurfer)|
-
-|Code Quality|
-|:--:|
-|![Code Size](https://img.shields.io/github/repo-size/aboualiaa/freesurfer)|
-|![Issues](https://img.shields.io/github/issues/aboualiaa/freesurfer)|
-|[![Codacy Badge](https://api.codacy.com/project/badge/Grade/152dd9ab1aff497999ffb1872b9718f5)](https://www.codacy.com/manual/aboualiaa/freesurfer?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=aboualiaa/freesurfer&amp;utm_campaign=Badge_Grade)|
-
-|Activity|
-|:--:|
-|![Contributers](https://img.shields.io/github/contributors/aboualiaa/freesurfer)|
-|![Pull Requests](https://img.shields.io/github/issues-pr/aboualiaa/freesurfer)|
-|![Last Commit](https://img.shields.io/github/last-commit/aboualiaa/freesurfer)|
-|![Version](https://img.shields.io/github/v/tag/aboualiaa/freesurfer)|
+|Code Quality |Activity|
+|:--:|:--:|
+|![Code Size](https://img.shields.io/github/repo-size/aboualiaa/freesurfer)|![Contributers](https://img.shields.io/github/contributors/aboualiaa/freesurfer)|
+|![Issues](https://img.shields.io/github/issues/aboualiaa/freesurfer)|![Pull Requests](https://img.shields.io/github/issues-pr/aboualiaa/freesurfer)|
+|[![Codacy Badge](https://api.codacy.com/project/badge/Grade/152dd9ab1aff497999ffb1872b9718f5)](https://www.codacy.com/manual/aboualiaa/freesurfer?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=aboualiaa/freesurfer&amp;utm_campaign=Badge_Grade)|![Last Commit](https://img.shields.io/github/last-commit/aboualiaa/freesurfer)|
+|[![codecov](https://codecov.io/gh/aboualiaa/freesurfer/branch/fs-modernize/graph/badge.svg)](https://codecov.io/gh/aboualiaa/freesurfer)|![Version](https://img.shields.io/github/v/tag/aboualiaa/freesurfer)|
 
 ## Introduction
 
