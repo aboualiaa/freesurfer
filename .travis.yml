@@ -11,6 +11,7 @@ jobs:
         - HOSTING_OS=osx
         - PATH="/usr/local/opt/python/libexec/bin:$PATH"
         - PATH="/usr/local/opt/llvm/bin:$PATH"
+        - HOSTING_COMPILER=appleclang
       osx_image: xcode11.3
       addons:
         homebrew:
@@ -38,7 +39,9 @@ jobs:
           - packages/hpx
           - cmake-build-release
     - os: linux
-      env: HOSTING_OS=trusty
+      env:
+        - HOSTING_OS=trusty
+        - HOSTING_COMPILER=gcc
       dist: trusty
       addons:
         apt:
@@ -55,7 +58,9 @@ jobs:
         - apt
         - ccache
     - os: linux
-      env: HOSTING_OS=xenial
+      env:
+        - HOSTING_OS=xenial
+        - HOSTING_COMPILER=gcc
       dist: xenial
       addons:
         apt:
@@ -72,7 +77,66 @@ jobs:
         - apt
         - ccache
     - os: linux
-      env: HOSTING_OS=bionic
+      env:
+        - HOSTING_OS=bionic
+        - HOSTING_COMPILER=gcc
+      dist: bionic
+      addons:
+        apt:
+          packages:
+            - gfortran
+            - libxi-dev
+            - liblapack-dev
+            - python3.6-dev
+            - tcsh
+            - curl
+            - git
+            - cmake
+      cache:
+        - apt
+        - ccache
+    - os: linux
+      env:
+        - HOSTING_OS=trusty
+        - HOSTING_COMPILER=clang
+      dist: trusty
+      addons:
+        apt:
+          packages:
+            - gfortran
+            - libxi-dev
+            - liblapack-dev
+            - python3.5-dev
+            - tcsh
+            - curl
+            - git
+            - cmake
+      cache:
+        - apt
+        - ccache
+    - os: linux
+      env:
+        - HOSTING_OS=xenial
+        - HOSTING_COMPILER=clang
+      dist: xenial
+      addons:
+        apt:
+          packages:
+            - gfortran
+            - libxi-dev
+            - liblapack-dev
+            - python3.5-dev
+            - tcsh
+            - curl
+            - git
+            - cmake
+      cache:
+        - apt
+        - ccache
+    - os: linux
+      env:
+        - HOSTING_OS=bionic
+        - HOSTING_COMPILER=clang
       dist: bionic
       addons:
         apt:
@@ -90,7 +154,7 @@ jobs:
         - ccache
 
 before_install:
-  - ./ci-scripts/travis.configure.${HOSTING_OS}.sh
+  - ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.sh
 
 script:
   - ./ci-scripts/travis.script.${HOSTING_OS}.sh
