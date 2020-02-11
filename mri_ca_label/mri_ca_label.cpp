@@ -1207,36 +1207,35 @@ int main(int argc, char *argv[])
   if (fcd)
     gcaCheckForFCDs(mri_labeled, mri_labeled, gca, transform, mri_inputs);
 
-  // convert back to uchar if possible
-  MRItoUCHAR(&mri_labeled);
-
-  printf("writing labeled volume to %s\n", out_fname);
-  if (MRIwrite(mri_labeled, out_fname) != NO_ERROR) {
-    ErrorExit(Gerror, "%s: MRIwrite(%s) failed", Progname, out_fname);
+  printf("writing labeled volume to %s\n", out_fname) ;
+  if (MRIwrite(mri_labeled, out_fname) != NO_ERROR)
+  {
+    ErrorExit(Gerror, "%s: MRIwrite(%s) failed", Progname, out_fname) ;
   }
 
-  if (G_write_probs != nullptr) {
-    MRI *mri_probs;
-    char fname[STRLEN];
+  if (G_write_probs != NULL)
+  {
+    MRI *mri_probs ;
+    char fname[STRLEN] ;
 
-    mri_probs = GCAcomputeTopNProbabilities(mri_inputs, gca, mri_labeled,
-                                            nullptr, transform, 3);
-    sprintf(fname, "%s.mgz", G_write_probs);
-    printf("writing ordered labels and  probabilities to %s\n", fname);
-    MRIwrite(mri_probs, fname);
-    MRIfree(&mri_probs);
+    mri_probs = GCAcomputeTopNProbabilities(mri_inputs,gca,mri_labeled,NULL,transform,3);
+    sprintf(fname, "%s.mgz", G_write_probs) ;
+    printf("writing ordered labels and  probabilities to %s\n", fname) ;
+    MRIwrite(mri_probs, fname) ;
+    MRIfree(&mri_probs) ;
   }
-  if (write_likelihood != nullptr) {
-    MRI *mri_probs;
-    char fname[STRLEN];
+  if (write_likelihood != NULL)
+  {
+    MRI *mri_probs ;
+    char fname[STRLEN] ;
 
-    mri_probs =
-        GCAcomputeLikelihoodImage(gca, mri_inputs, mri_labeled, transform);
-    sprintf(fname, "%s", write_likelihood);
-    if (mask_volume_fname) {
-      MRI *mri_mask;
-      printf("reading volume %s for masking...\n", mask_volume_fname);
-      mri_mask = MRIread(mask_volume_fname);
+    mri_probs = GCAcomputeLikelihoodImage(gca, mri_inputs, mri_labeled, transform);
+    sprintf(fname, "%s", write_likelihood) ;
+    if (mask_volume_fname)
+    {
+      MRI *mri_mask ;
+      printf("reading volume %s for masking...\n", mask_volume_fname) ;
+      mri_mask = MRIread(mask_volume_fname) ;
       if (!mri_mask)
         ErrorExit(ERROR_NOFILE, "%s: could not read mask volume from %s",
                   Progname, mask_volume_fname);
