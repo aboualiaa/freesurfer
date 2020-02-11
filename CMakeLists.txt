@@ -164,8 +164,8 @@ add_definitions(-DHAVE_ZLIB)
 # -------- gfortran/blas/lapack --------
 if(NOT APPLE)
   find_library(GFORTRAN_LIBRARIES
-               HINTS /usr/lib/gcc/*/*/
-               NAMES libgfortran.a gfortran)
+    HINTS /usr/lib/gcc/*/*/
+    NAMES libgfortran.a gfortran)
   find_library(BLAS_LIBRARIES NAMES libblas.a)
   find_library(LAPACK_LIBRARIES NAMES liblapack.a)
 endif()

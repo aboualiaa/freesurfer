@@ -188,9 +188,12 @@ int LabelAddVoxel(LABEL *area, int xv, int yv, int zv, int coords,
 int LabelDeleteVoxel(LABEL *area, int xv, int yv, int zv, int *vertices,
                      int *pnvertices);
 LABEL *LabelAddPoint(LABEL *label, LV *lv);
-int LabelAddVertex(LABEL *area, int vno, int coords);
-int LabelDeleteVertex(LABEL *area, int vno, int coords);
-double LabelAverageVal(LABEL *area, MRI_SURFACE *mris);
-LABEL *LabelFromSurface(MRI_SURFACE *mris, int which, double thresh);
+int   LabelAddVertex(LABEL *area, int vno, int coords) ;
+int   LabelDeleteVertex(LABEL *area, int vno, int coords) ;
+double LabelAverageVal(LABEL *area, MRI_SURFACE *mris) ;
+LABEL  *LabelFromSurface(MRI_SURFACE *mris, int which, double thresh) ;
+LABEL *LabelRemoveIslandsSurf(MRIS *surf, LABEL *lb);
+LABEL *LabelRemoveHolesSurf(MRIS *surf, LABEL *lb);
+LABEL *LabelRemoveHolesAndIslandsSurf(MRIS *surf, LABEL *lb);
 
 #endif
