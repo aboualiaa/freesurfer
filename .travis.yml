@@ -22,7 +22,6 @@ jobs:
             - petsc
             - cmake
             - python@3
-            - gcc@9
             - jemalloc
             - tcsh
             - armadillo
@@ -99,6 +98,8 @@ jobs:
       env:
         - HOSTING_OS=trusty
         - HOSTING_COMPILER=clang
+        - PATH="/usr/local/clang_9.0.0/bin:$PATH"
+        - LD_LIBRARY_PATH="/usr/local/clang_9.0.0/lib:$LD_LIBRARY_PATH"
       dist: trusty
       addons:
         apt:
@@ -118,6 +119,8 @@ jobs:
       env:
         - HOSTING_OS=xenial
         - HOSTING_COMPILER=clang
+        - PATH="/usr/local/clang_9.0.0/bin:$PATH"
+        - LD_LIBRARY_PATH="/usr/local/clang_9.0.0/lib:$LD_LIBRARY_PATH"
       dist: xenial
       addons:
         apt:
@@ -137,6 +140,8 @@ jobs:
       env:
         - HOSTING_OS=bionic
         - HOSTING_COMPILER=clang
+        - PATH="/usr/local/clang_9.0.0/bin:$PATH"
+        - LD_LIBRARY_PATH="/usr/local/clang_9.0.0/lib:$LD_LIBRARY_PATH"
       dist: bionic
       addons:
         apt:
@@ -152,6 +157,72 @@ jobs:
       cache:
         - apt
         - ccache
+    - os: osx
+      env:
+        - HOSTING_OS=osx
+        - PATH="/usr/local/opt/python/libexec/bin:$PATH"
+        - HOSTING_COMPILER=clang
+        - PATH="/usr/local/opt/llvm/bin:$PATH"
+        - LDFLAGS="-L/usr/local/opt/llvm/lib"
+        - CPPFLAGS="-I/usr/local/opt/llvm/include"
+      osx_image: xcode11.3
+      addons:
+        homebrew:
+          update: true
+          packages:
+            - itk
+            - vtk
+            - petsc
+            - cmake
+            - python@3
+            - jemalloc
+            - tcsh
+            - armadillo
+            - qt
+            - hdf5
+            - libomp
+            - szip
+            - fltk
+            - open-mpi
+            - eigen
+            - ninja
+            - llvm
+      cache:
+        directories:
+          - packages/hpx
+          - cmake-build-release
+    - os: osx
+      env:
+        - HOSTING_OS=osx
+        - PATH="/usr/local/opt/python/libexec/bin:$PATH"
+        - PATH="/usr/local/opt/gcc/bin:$PATH"
+        - HOSTING_COMPILER=gcc
+      osx_image: xcode11.3
+      addons:
+        homebrew:
+          update: true
+          packages:
+            - itk
+            - vtk
+            - petsc
+            - cmake
+            - python@3
+            - gcc@9
+            - jemalloc
+            - tcsh
+            - armadillo
+            - qt
+            - hdf5
+            - libomp
+            - szip
+            - fltk
+            - open-mpi
+            - eigen
+            - ninja
+      cache:
+        directories:
+          - packages/hpx
+          - cmake-build-release
 
 before_install:
   - ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.sh
