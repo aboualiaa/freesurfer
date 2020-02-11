@@ -165,6 +165,8 @@ jobs:
         - PATH="/usr/local/opt/llvm/bin:$PATH"
         - LDFLAGS="-L/usr/local/opt/llvm/lib"
         - CPPFLAGS="-I/usr/local/opt/llvm/include"
+        - CC=/usr/local/opt/llvm/bin/clang
+        - CXX=/usr/local/opt/llvm/bin/clang++
       osx_image: xcode11.3
       addons:
         homebrew:
@@ -197,6 +199,8 @@ jobs:
         - PATH="/usr/local/opt/python/libexec/bin:$PATH"
         - PATH="/usr/local/opt/gcc/bin:$PATH"
         - HOSTING_COMPILER=gcc
+        - CC=gcc-9
+        - CXX=g++-9
       osx_image: xcode11.3
       addons:
         homebrew:
