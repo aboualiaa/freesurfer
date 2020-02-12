@@ -39,6 +39,9 @@ jobs:
             - ninja
             - git-annex
             - lcov
+      cache:
+        directories:
+          - cmake-build-debug
     - os: linux
       stage: build
       env:
