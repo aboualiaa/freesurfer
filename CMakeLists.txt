@@ -186,6 +186,7 @@ find_package(ITK HINTS ${ITK_DIR})
 
 # -------- ann --------
 # ANN is only used by mris_resample
+set(ANN_DIR "${FS_PACKAGES_DIR}/ann/1.1.2/")
 find_package(ANN)
 
 # -------- gts --------
