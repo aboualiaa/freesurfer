@@ -21,7 +21,7 @@ enable_language(C CXX Fortran)
 set(CMAKE_CXX_STANDARD 20)
 
 if(APPLE AND NOT TRAVIS)
-  set(FS_PACKAGES_DIR "/Users/aboualiaa/Downloads/packages/")
+  set(FS_PACKAGES_DIR "/Users/aboualiaa/Downloads/packages")
 else()
   set(FS_PACKAGES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake-build-debug-$ENV{HOSTING_OS}/prebuilt_packages")
   message(STATUS "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -186,8 +186,7 @@ find_package(ITK HINTS ${ITK_DIR})
 
 # -------- ann --------
 # ANN is only used by mris_resample
-set(ANN_DIR "${FS_PACKAGES_DIR}/ann/1.1.2/")
-find_package(ANN)
+find_package(ANN HINTS "${FS_PACKAGES_DIR}/ann/1.1.2/")
 
 # -------- gts --------
 # only used by mris_decimate (not available on mac)
