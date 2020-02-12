@@ -40,6 +40,7 @@ jobs:
             - git-annex
             - lcov
             - gts
+            - arrayfire
       cache:
         directories:
           - cmake-build-debug
@@ -203,6 +204,7 @@ jobs:
             - ninja
             - llvm
             - gts
+            - arrayfire
     - os: osx
       stage: build
       env:
@@ -235,6 +237,7 @@ jobs:
             - eigen
             - ninja
             - gts
+            - arrayfire
     - os: osx
       stage: unit
       env:
@@ -266,6 +269,7 @@ jobs:
             - lcov
             - git-annex
             - gts
+            - arrayfire
 
 before_install:
   - ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.${TRAVIS_BUILD_STAGE_NAME}.sh
