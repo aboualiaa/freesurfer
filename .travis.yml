@@ -283,9 +283,9 @@ script:
   - ./ci-scripts/travis.script.${HOSTING_OS}.${TRAVIS_BUILD_STAGE_NAME}.sh
 
 after_success:
-  - if [[ $STAGE == "unit" ]]; then cd ./cmake-build-debug && rm -f ./**/testdata.tar.gz; fi
-  - if [[ $STAGE == "unit" ]]; then lcov --capture --directory ./cmake-build-debug/ --output-file ./coverage.info; fi
-  - if [[ $STAGE == "unit" ]]; then bash <(curl -s https://codecov.io/bash) -f ./coverage.info -t ${CODECOV_TOKEN}; fi
+  - if [[ $TRAVIS_BUILD_STAGE_NAME == "Unit" ]]; then cd ./cmake-build-debug && rm -f ./**/testdata.tar.gz; fi
+  - if [[ $TRAVIS_BUILD_STAGE_NAME == "Unit" ]]; then lcov --capture --directory ./cmake-build-debug/ --output-file ./coverage.info; fi
+  - if [[ $TRAVIS_BUILD_STAGE_NAME == "Unit" ]]; then bash <(curl -s https://codecov.io/bash) -f ./coverage.info -t ${CODECOV_TOKEN}; fi
 
 #before_install:
 #  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
