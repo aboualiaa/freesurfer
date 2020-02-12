@@ -28,9 +28,9 @@ find_package(MPI)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework Accelerate")
   endif()
 
-  add_executable(lineprof_test LineProfTest.cpp)
-  add_test(lineprof_test LineProfTest.cpp)
-  target_link_libraries(lineprof_test
+  add_executable(LineProfTest LineProfTest.cpp)
+  add_test(LineProfTest LineProfTest.cpp)
+  target_link_libraries(LineProfTest
     lineprof
     ${ZLIB_LIBRARIES}
     ${VTK_LIBRARIES}
