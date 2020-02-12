@@ -276,13 +276,3 @@ before_install:
 
 script:
   - ./ci-scripts/travis.script.${HOSTING_OS}.${TRAVIS_BUILD_STAGE_NAME}.sh
-
-before_cache:
-  - if [[ $TRAVIS_BUILD_STAGE_NAME == "Unit" ]]; then cd ./cmake-build-debug && rm -f ./**/testdata.tar.gz; fi
-  - if [[ $TRAVIS_BUILD_STAGE_NAME == "Unit" ]]; then lcov --capture --directory ./cmake-build-debug/ --output-file ./coverage.info; fi
-  - if [[ $TRAVIS_BUILD_STAGE_NAME == "Unit" ]]; then bash <(curl -s https://codecov.io/bash) -f ./coverage.info -t ${CODECOV_TOKEN}; fi
-  - cd ./cmake-build-debug;
-    ctest --schedule-random --timeout 150 -j 6;
-    lcov --capture --directory . --output-file ./coverage.info;
-    bash <(curl -s https://codecov.io/bash) -f ./coverage.info -t ${CODECOV_TOKEN};
-    rm -f ./**/testdata.tar.gz;
