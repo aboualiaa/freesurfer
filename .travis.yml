@@ -202,10 +202,6 @@ jobs:
             - eigen
             - ninja
             - llvm
-      cache:
-        directories:
-          - packages/hpx
-          - cmake-build-debug
     - os: osx
       stage: build
       env:
@@ -237,10 +233,6 @@ jobs:
             - open-mpi
             - eigen
             - ninja
-      cache:
-        directories:
-          - packages/hpx
-          - cmake-build-debug
     - os: osx
       stage: unit
       env:
@@ -271,10 +263,6 @@ jobs:
             - ninja
             - lcov
             - git-annex
-      cache:
-        directories:
-          - packages/hpx
-          - cmake-build-debug
 
 before_install:
   - ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.${TRAVIS_BUILD_STAGE_NAME}.sh
