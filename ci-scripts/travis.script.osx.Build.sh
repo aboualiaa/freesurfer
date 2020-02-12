@@ -14,7 +14,7 @@ ninja_exit=$?
 cd ..
 git remote add datasrc https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git
 git fetch datasrc
-travis_wait git annex get . || true
+git annex get . || true
 cd ./cmake-build-debug
 cmake ..
 ctest --schedule-random --timeout 150 -j 6
