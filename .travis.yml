@@ -203,7 +203,7 @@ jobs:
       cache:
         directories:
           - packages/hpx
-          - cmake-build-release
+          - cmake-build-debug
     - os: osx
       stage: build
       env:
@@ -238,7 +238,7 @@ jobs:
       cache:
         directories:
           - packages/hpx
-          - cmake-build-release
+          - cmake-build-debug
     - os: osx
       stage: unit
       env:
@@ -277,7 +277,7 @@ before_install:
   - ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.${TRAVIS_BUILD_STAGE_NAME}.sh
 
 script:
-  - ./ci-scripts/travis.script.${HOSTING_OS}.${STAGE}.sh
+  - ./ci-scripts/travis.script.${HOSTING_OS}.${TRAVIS_BUILD_STAGE_NAME}.sh
 
 after_success:
   - if [[ $STAGE == "unit" ]]; then cd ./cmake-build-debug && rm -f ./**/testdata.tar.gz; fi
