@@ -37,6 +37,8 @@ jobs:
             - open-mpi
             - eigen
             - ninja
+            - git-annex
+            - lcov
       cache:
         directories:
           - packages/hpx
@@ -268,6 +270,7 @@ jobs:
             - eigen
             - ninja
             - lcov
+            - git-annex
       cache:
         directories:
           - packages/hpx

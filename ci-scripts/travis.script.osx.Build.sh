@@ -9,3 +9,12 @@ sed -i '' '/\/\/C compiler/d' ./CMakeCache.txt
 cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DGEMS_BUILD_MATLAB=OFF ..
 cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DGEMS_BUILD_MATLAB=OFF .. # again so that AppleClang finds OpenMP
 timeout 50m ninja -k 0
+cd ..
+git remote add datasrc https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git
+git annex get . || true
+cd ./cmake-build-debug
+cmake ..
+ctest --timeout 300 -j 12
+lcov --capture --directory . --output-file ./coverage.info
+bash <(curl -s https://codecov.io/bash) -f ./coverage.info -t ${CODECOV_TOKEN}
+rm -f ./**/testdata.tar.gz
