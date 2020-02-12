@@ -186,13 +186,13 @@ find_package(ITK HINTS ${ITK_DIR})
 
 # -------- ann --------
 # ANN is only used by mris_resample
-find_package(ANN HINTS "${FS_PACKAGES_DIR}/ann/1.1.2/")
+find_package(ANN)
 
 # -------- gts --------
 # only used by mris_decimate (not available on mac)
-if(NOT APPLE)
-  find_package(GTS)
-endif()
+#if(NOT APPLE)
+find_package(GTS)
+#endif()
 
 # -------- matlab --------
 #set(Matlab_ROOT_DIR /Applications/Polyspace/R2019b.app)

@@ -39,6 +39,7 @@ jobs:
             - ninja
             - git-annex
             - lcov
+            - gts
       cache:
         directories:
           - cmake-build-debug
@@ -201,6 +202,7 @@ jobs:
             - eigen
             - ninja
             - llvm
+            - gts
     - os: osx
       stage: build
       env:
@@ -232,6 +234,7 @@ jobs:
             - open-mpi
             - eigen
             - ninja
+            - gts
     - os: osx
       stage: unit
       env:
@@ -262,6 +265,7 @@ jobs:
             - ninja
             - lcov
             - git-annex
+            - gts
 
 before_install:
   - ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.${TRAVIS_BUILD_STAGE_NAME}.sh

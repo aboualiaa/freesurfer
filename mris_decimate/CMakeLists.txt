@@ -1,6 +1,6 @@
 project(mris_decimate)
 
-if(NOT APPLE AND GTS_FOUND)
+if(GTS_FOUND)
 
   include_directories(${FS_INCLUDE_DIRS} ${GTS_INCLUDE_DIRS})
 

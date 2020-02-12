@@ -29,7 +29,7 @@ find_package(MPI)
   endif()
 
   add_executable(LineProfTest LineProfTest.cpp)
-  add_test(LineProfTest LineProfTest.cpp)
+  add_test(LineProfTest LineProfTest)
   target_link_libraries(LineProfTest
     lineprof
     ${ZLIB_LIBRARIES}
