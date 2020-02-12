@@ -3,15 +3,20 @@ git:
   quiet: true
 
 language: cpp
+stages:
+  - building
+  - unit-testing
 
 jobs:
   include:
     - os: osx
+      stage: building
       env:
         - HOSTING_OS=osx
         - PATH="/usr/local/opt/python/libexec/bin:$PATH"
         - PATH="/usr/local/opt/llvm/bin:$PATH"
         - HOSTING_COMPILER=appleclang
+        - STAGE=build
       osx_image: xcode11.3
       addons:
         homebrew:
@@ -36,11 +41,13 @@ jobs:
       cache:
         directories:
           - packages/hpx
-          - cmake-build-release
+          - cmake-build-debug
     - os: linux
+      stage: building
       env:
         - HOSTING_OS=trusty
         - HOSTING_COMPILER=gcc
+        - STAGE=build
       dist: trusty
       addons:
         apt:
@@ -57,9 +64,11 @@ jobs:
         - apt
         - ccache
     - os: linux
+      stage: building
       env:
         - HOSTING_OS=xenial
         - HOSTING_COMPILER=gcc
+        - STAGE=build
       dist: xenial
       addons:
         apt:
@@ -76,9 +85,11 @@ jobs:
         - apt
         - ccache
     - os: linux
+      stage: building
       env:
         - HOSTING_OS=bionic
         - HOSTING_COMPILER=gcc
+        - STAGE=build
       dist: bionic
       addons:
         apt:
@@ -95,11 +106,13 @@ jobs:
         - apt
         - ccache
     - os: linux
+      stage: building
       env:
         - HOSTING_OS=trusty
         - HOSTING_COMPILER=clang
         - PATH="/usr/local/clang_9.0.0/bin:$PATH"
         - LD_LIBRARY_PATH="/usr/local/clang_9.0.0/lib:$LD_LIBRARY_PATH"
+        - STAGE=build
       dist: trusty
       addons:
         apt:
@@ -116,11 +129,13 @@ jobs:
         - apt
         - ccache
     - os: linux
+      stage: building
       env:
         - HOSTING_OS=xenial
         - HOSTING_COMPILER=clang
         - PATH="/usr/local/clang_9.0.0/bin:$PATH"
         - LD_LIBRARY_PATH="/usr/local/clang_9.0.0/lib:$LD_LIBRARY_PATH"
+        - STAGE=build
       dist: xenial
       addons:
         apt:
@@ -137,11 +152,13 @@ jobs:
         - apt
         - ccache
     - os: linux
+      stage: building
       env:
         - HOSTING_OS=bionic
         - HOSTING_COMPILER=clang
         - PATH="/usr/local/clang_9.0.0/bin:$PATH"
         - LD_LIBRARY_PATH="/usr/local/clang_9.0.0/lib:$LD_LIBRARY_PATH"
+        - STAGE=build
       dist: bionic
       addons:
         apt:
@@ -158,6 +175,7 @@ jobs:
         - apt
         - ccache
     - os: osx
+      stage: building
       env:
         - HOSTING_OS=osx
         - PATH="/usr/local/opt/python/libexec/bin:$PATH"
@@ -167,6 +185,7 @@ jobs:
         - CPPFLAGS="-I/usr/local/opt/llvm/include"
         - CC=/usr/local/opt/llvm/bin/clang
         - CXX=/usr/local/opt/llvm/bin/clang++
+        - STAGE=build
       osx_image: xcode11.3
       addons:
         homebrew:
@@ -194,6 +213,7 @@ jobs:
           - packages/hpx
           - cmake-build-release
     - os: osx
+      stage: building
       env:
         - HOSTING_OS=osx
         - PATH="/usr/local/opt/python/libexec/bin:$PATH"
@@ -201,6 +221,7 @@ jobs:
         - HOSTING_COMPILER=gcc
         - CC=gcc-9
         - CXX=g++-9
+        - STAGE=build
       osx_image: xcode11.3
       addons:
         homebrew:
@@ -227,12 +248,49 @@ jobs:
         directories:
           - packages/hpx
           - cmake-build-release
+    - os: osx
+      stage: unit_testing
+      env:
+        - HOSTING_OS=osx
+        - PATH="/usr/local/opt/python/libexec/bin:$PATH"
+        - PATH="/usr/local/opt/llvm/bin:$PATH"
+        - HOSTING_COMPILER=appleclang
+        - STAGE=unit
+      osx_image: xcode11.3
+      addons:
+        homebrew:
+          update: true
+          packages:
+            - itk
+            - vtk
+            - petsc
+            - cmake
+            - python@3
+            - jemalloc
+            - tcsh
+            - armadillo
+            - qt
+            - hdf5
+            - libomp
+            - szip
+            - fltk
+            - open-mpi
+            - eigen
+            - ninja
+            - lcov
+      cache:
+        directories:
+          - packages/hpx
+          - cmake-build-debug
 
 before_install:
-  - ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.sh
+  - ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.${STAGE}.sh
 
 script:
-  - ./ci-scripts/travis.script.${HOSTING_OS}.sh
+  - ./ci-scripts/travis.script.${HOSTING_OS}.${STAGE}.sh
+
+after_success:
+  - if [[ $STAGE == "unit" ]]; then cd ./cmake-build-debug && rm -f ./**/testdata.tar.gz; fi
 
 #before_install:
 #  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test

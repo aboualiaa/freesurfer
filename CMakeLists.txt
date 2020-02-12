@@ -186,7 +186,7 @@ find_package(ITK HINTS ${ITK_DIR})
 
 # -------- ann --------
 # ANN is only used by mris_resample
-find_package(ANN)
+find_package(ANN HINTS "${FS_PACKAGES_DIR}/ann/1.1.2/")
 
 # -------- gts --------
 # only used by mris_decimate (not available on mac)
