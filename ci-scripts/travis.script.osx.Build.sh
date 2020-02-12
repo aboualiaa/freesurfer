@@ -1,6 +1,7 @@
 #!/bin/bash
 
 sudo xcode-select -r # s /Applications/Xcode.app
+export PATH="$(pwd)/hpx-install/:$PATH"
 mkdir -p cmake-build-debug && cd ./cmake-build-debug
 sed -i '' '/CMAKE_CXX_COMPILER:FILEPATH/d' ./CMakeCache.txt # remove compiler cache entry just in case travis updated xcode
 sed -i '' '/\/\/CXX compiler/d' ./CMakeCache.txt
