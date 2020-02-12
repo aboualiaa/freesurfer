@@ -9,15 +9,16 @@ sed -i '' '/CMAKE_C_COMPILER:FILEPATH/d' ./CMakeCache.txt # remove compiler cach
 sed -i '' '/\/\/C compiler/d' ./CMakeCache.txt
 cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DGEMS_BUILD_MATLAB=OFF ..
 cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DGEMS_BUILD_MATLAB=OFF .. # again so that AppleClang finds OpenMP
-timeout 50m ninja -k 0
+(timeout 50m ninja -k 0)
+ninja_exit=$?
 cd ..
 git remote add datasrc https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git
-git annex init
 git fetch datasrc
-git annex get . || true
+travis_wait git annex get . || true
 cd ./cmake-build-debug
 cmake ..
-ctest --timeout 300 -j $(nproc)
+ctest --schedule-random --timeout 150 -j 6
 lcov --capture --directory . --output-file ./coverage.info
 bash <(curl -s https://codecov.io/bash) -f ./coverage.info -t ${CODECOV_TOKEN}
 rm -f ./**/testdata.tar.gz
+exit $ninja_exit
