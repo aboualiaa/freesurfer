@@ -47,7 +47,7 @@ function(install_tarball)
       # message(FATAL_ERROR \"Could not extract ${INSTALL_UNPARSED_ARGUMENTS} - perhaps it hasn't been downloaded from the annex?\")
       message(SEND_ERROR \"Could not extract ${INSTALL_UNPARSED_ARGUMENTS} - perhaps it hasn't been downloaded from the annex?\")
     endif()"
-  )
+          )
 endfunction()
 
 
@@ -71,7 +71,7 @@ function(mac_deploy_qt)
       # message(FATAL_ERROR \"Could not deploy ${APP_TARGET}\")
       message(SEND_ERROR \"Could not deploy ${APP_TARGET}\")
     endif()"
-  )
+          )
 endfunction()
 
 
@@ -80,7 +80,7 @@ endfunction()
 # the help file and will run xxd to create the xml header during the build
 function(add_help BINARY HELPTEXT)
   add_custom_command(COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} &&
-                             xxd -i ${HELPTEXT} ${CMAKE_CURRENT_BINARY_DIR}/${HELPTEXT}.h
+                     xxd -i ${HELPTEXT} ${CMAKE_CURRENT_BINARY_DIR}/${HELPTEXT}.h
                      OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${HELPTEXT}.h
                      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${HELPTEXT})
   include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -109,7 +109,7 @@ function(install_append_help SCRIPT HELPTEXT DESTINATION)
       # message(FATAL_ERROR \"Could not append help text to ${SCRIPT}\")
       message(SEND_ERROR \"Could not append help text to ${SCRIPT}\")
     endif()"
-  )
+          )
   install(FILES ${HELPTEXT} DESTINATION docs/xml)
   # make sure to validate the xml as well
   add_test(${SCRIPT}_help_test bash -c "xmllint --noout ${CMAKE_CURRENT_SOURCE_DIR}/${HELPTEXT}")
@@ -131,7 +131,7 @@ function(install_osx_app APP_PATH)
       # message(FATAL_ERROR \"Could not install ${APP_NAME}\")
       message(SEND_ERROR \"Could not install ${APP_NAME}\")
     endif()"
-  )
+          )
 endfunction()
 
 
@@ -145,7 +145,7 @@ function(symlink TARGET LINKNAME)
       # message(FATAL_ERROR \"Could not create symlink to ${TARGET}\")
       message(SEND_ERROR \"Could not create symlink to ${TARGET}\")
     endif()"
-  )
+          )
 endfunction()
 
 
@@ -157,7 +157,11 @@ function(add_test_script)
   foreach(TARGET ${TEST_DEPENDS})
     set(TEST_CMD "${TEST_CMD} ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR} --target ${TARGET} &&")
   endforeach()
-  add_test(${TEST_NAME} bash -c "${TEST_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${TEST_SCRIPT}")
+  add_test(${TEST_NAME} bash -c "${CMAKE_CURRENT_BINARY_DIR}/${TEST_SCRIPT}")
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test.sh ${CMAKE_CURRENT_BINARY_DIR}/test.sh COPYONLY)
+  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz")
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz ${CMAKE_CURRENT_BINARY_DIR}/testdata.tar.gz COPYONLY)
+  endif()
 endfunction()
 
 
@@ -166,10 +170,10 @@ endfunction()
 # This function takes the same input as add_executable()
 function(add_test_executable)
   set(TARGET ${ARGV0})
-  LIST(REMOVE_AT ARGV 0)
+  list(REMOVE_AT ARGV 0)
   add_executable(${TARGET} EXCLUDE_FROM_ALL ${ARGV})
   set(TEST_CMD "${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR} --target ${TARGET} &&")
-  add_test(${TARGET} bash -c "${TEST_CMD} ${CMAKE_CURRENT_BINARY_DIR}/${TARGET}")
+  add_test(${TARGET} bash -c "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}")
 endfunction()
 
 
@@ -205,6 +209,6 @@ function(install_pyscript)
       message(STATUS \"Configuring python wrapper: ${CMAKE_INSTALL_PREFIX}/bin/${SCRIPT}\")
       set(SCRIPTNAME ${SCRIPT})
       configure_file(${CMAKE_SOURCE_DIR}/python/wrapper ${CMAKE_INSTALL_PREFIX}/bin/${SCRIPT} @ONLY)"
-    )
+            )
   endforeach()
 endfunction()

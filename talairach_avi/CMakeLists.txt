@@ -19,7 +19,7 @@ install(
   tal_QC_AZS
   DESTINATION bin
 )
-
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/talairach_avi ${CMAKE_CURRENT_BINARY_DIR}/talairach_avi COPYONLY)
 add_test_script(NAME talairach_avi_test SCRIPT test.sh)
 
 set(TRX_SOURCES rec.c Getifh.c endianio.c)

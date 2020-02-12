@@ -1,6 +1,6 @@
 # ____________________________
 # FreeSurfer Testing Framework
-# 
+#
 # This is the underlying framework used for various regression tests throughout
 # the freesurfer source tree. It should facilitate easy command testing and comparison
 # of test output against reference data. A test for a script or binary should
@@ -15,7 +15,7 @@
 # extracted every time a command is evaluated using the test_command function. For example:
 #
 #     test_command mri_convert rawavg.mgz orig.mgz --conform
-# 
+#
 # will evaluate this usage of mri_convert and will error out upon failure. The test_command
 # function will always evaluate a command within the testdata directory extracted from testdata.tar.gz,
 # and it assumes that the binary to be tested (mri_convert in this example) has been built in either
@@ -111,7 +111,7 @@ function find_path {
 }
 
 # setup the necessary freesurfer environment variables - these can be modified in the test script if necessary
-export FREESURFER_HOME="$(find_path $FSTEST_SCRIPT_DIR distribution)"
+export FREESURFER_HOME="/Users/aboualiaa/Desktop/.temp/repos/freesurfer/distribution"
 export SUBJECTS_DIR="$FSTEST_TESTDATA_DIR"
 export FSLOUTPUTTYPE="NIFTI_GZ"
 
