@@ -15,7 +15,7 @@
 #  cd ../../../
 #fi
 
-wget https://www.dropbox.com/s/wy25fuz2e8mr89c/hpx_install.tar?dl=1
+wget https://www.dropbox.com/s/wy25fuz2e8mr89c/hpx_install.tar?dl=1 >/dev/null 2>&1
 tar -xf "./hpx_install.tar?dl=1"
 #export PATH="$(pwd)/hpx-install/:$PATH"
 #mkdir ./cmake-build-debug && cd ./cmake-build-debug
