@@ -27,6 +27,7 @@ add_executable(mri_convert mri_convert_exec.cpp)
 target_link_libraries(mri_convert_exec utils mri_convert_lib Boost::program_options benchmark fmt absl::strings)
 target_link_libraries(mri_convert utils mri_convert_lib Boost::program_options benchmark fmt absl::strings)
 add_help(mri_convert_exec mri_convert.help.xml)
+add_help(mri_convert mri_convert.help.xml)
 install(TARGETS mri_convert_exec DESTINATION bin)
 add_test_script(NAME mri_convert_test SCRIPT test.sh DEPENDS mri_convert)
 
