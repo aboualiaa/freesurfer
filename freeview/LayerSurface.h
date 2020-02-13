@@ -311,7 +311,7 @@ public:
 
   bool FillPath(int nvo, const QVariantMap &options);
 
-  void FillPath(const QVector<int> &verts, const QVariantMap &options);
+  int FillPath(const QVector<int>& verts, const QVariantMap& options);
 
   void ClearMarks();
 

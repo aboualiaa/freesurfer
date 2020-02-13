@@ -2647,8 +2647,8 @@ bool LayerSurface::FillPath(int nvo, const QVariantMap &options) {
   return true;
 }
 
-void LayerSurface::FillPath(const QVector<int> &verts,
-                            const QVariantMap &options) {
+int LayerSurface::FillPath(const QVector<int> &verts, const QVariantMap &options)
+{
   QVariantMap opt = options;
   foreach (int nvo, verts) {
     if (FillPath(nvo, opt) && opt["CreateLabel"].toBool()) {
@@ -2656,6 +2656,7 @@ void LayerSurface::FillPath(const QVector<int> &verts,
       opt["AddToLabel"] = true;
     }
   }
+  return opt.value("FillAnnotationIndex").toInt();
 }
 
 int LayerSurface::GetLastMark() {
