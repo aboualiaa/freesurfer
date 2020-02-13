@@ -10,6 +10,7 @@ if(NOT PETSC_DIR)
 endif()
 
 set(PETSC_INCLUDE_DIR ${PETSC_DIR}/include)
+set(PETSC_INCLUDE_DIRS ${PETSC_DIR}/include)
 
 find_package_handle_standard_args(PETSC DEFAULT_MSG PETSC_INCLUDE_DIR)
 

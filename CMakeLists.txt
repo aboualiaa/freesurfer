@@ -19,7 +19,7 @@ enable_language(C CXX Fortran)
 
 # enable std c++20
 set(CMAKE_CXX_STANDARD 20)
-
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 if(APPLE AND NOT TRAVIS)
   set(FS_PACKAGES_DIR "/Users/aboualiaa/Downloads/packages")
 else()
