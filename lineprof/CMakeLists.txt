@@ -1,7 +1,7 @@
 project(lineprof)
 
 if(ITK_FOUND AND VTK_FOUND AND PETSC_FOUND)
-find_package(MPI)
+  find_package(MPI)
   include_directories(
     SYSTEM
     ${ITK_INCLUDE_DIRS}
@@ -14,11 +14,11 @@ find_package(MPI)
   add_definitions(-DHAVE_ITK45)
 
   set(SOURCES
-    Tracer.cpp
-    Preprocessor.cpp
-    PetscSolver.cpp
-    LineProf.cpp
-  )
+      Tracer.cpp
+      Preprocessor.cpp
+      PetscSolver.cpp
+      LineProf.cpp
+      )
 
   add_compile_options(-Wno-deprecated)
 
@@ -26,20 +26,22 @@ find_package(MPI)
 
   if(APPLE)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework Accelerate")
+  else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--allow-multiple-definition")
   endif()
 
   add_executable(LineProfTest LineProfTest.cpp)
   add_test(LineProfTest LineProfTest)
   target_link_libraries(LineProfTest
-    lineprof
-    ${ZLIB_LIBRARIES}
-    ${VTK_LIBRARIES}
-    ${PETSC_LIBRARIES}
-    ${LAPACK_LIBRARIES}
-    ${BLAS_LIBRARIES}
-    ${GFORTRAN_LIBRARIES}
-    ${ITK_LIBRARIES}
-    ${MPI_LIBRARIES}
-  )
+                        lineprof
+                        ${ZLIB_LIBRARIES}
+                        ${VTK_LIBRARIES}
+                        ${PETSC_LIBRARIES}
+                        ${LAPACK_LIBRARIES}
+                        ${BLAS_LIBRARIES}
+                        ${GFORTRAN_LIBRARIES}
+                        ${ITK_LIBRARIES}
+                        ${MPI_LIBRARIES}
+                        )
 
 endif()
