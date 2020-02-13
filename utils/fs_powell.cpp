@@ -38,7 +38,7 @@
 #include <vnl/vnl_math.h>
 #include <itkMath.h>
 
-#ifdef DEBUG
+#ifdef FS_LEGACY_DEBUG
 #include <vcl_iostream.h>
 #include <vnl/vnl_matlab_print.h>
 #endif
@@ -178,7 +178,9 @@ vnl_nonlinear_minimizer::ReturnCodes fs_powell::minimize(vnl_vector<double> &p,
     }
 
     if (2.0 * fabs(fp - fret) <= ftol * (fabs(fp) + fabs(fret))) {
-#ifdef DEBUG
+
+      // TODO: Use spdlog
+#ifdef FS_LEGACY_DEBUG
       vnl_matlab_print(vcl_cerr, xi, "xi");
 #endif
       if (verbose_)

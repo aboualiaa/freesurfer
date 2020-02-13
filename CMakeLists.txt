@@ -8,7 +8,10 @@ cmake_policy(SET CMP0048 NEW)
 project(freesurfer VERSION 7.0.0)
 if(NOT APPLE)
   cmake_minimum_required(VERSION 3.9)
-  add_definitions(-DFS_ITK_LEGACY_REMOVE)
+  set(HOST_OS $ENV{HOSTING_OS})
+  if(HOSTING_OS STREQUAL "trusty")
+    add_definitions(-DFS_ITK_LEGACY_REMOVE)
+  endif()
   add_definitions(-DVCL_GCC_80) # trick itk 4 into believing the compiler is gcc 8
   add_definitions(-DVXL_FULLCXX11SUPPORT)
   set(BUILD_GUIS OFF)
@@ -175,6 +178,8 @@ if(NOT APPLE)
   find_library(GFORTRAN_LIBRARIES
                HINTS /usr/lib/gcc/*/*/
                NAMES libgfortran.a gfortran)
+  # LineProfTest and mri_robust_register need this library
+  find_library(QUADMATH_LIB HINTS /usr/lib/gcc/*/*/ NAMES libquadmath.a quadmath)
   find_library(BLAS_LIBRARIES NAMES libblas.a)
   find_library(LAPACK_LIBRARIES NAMES liblapack.a)
 endif()

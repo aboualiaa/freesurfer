@@ -13,6 +13,9 @@ endif()
 include_directories(${FS_INCLUDE_DIRS})
 
 set(FORTRAN_LIBS ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES} ${GFORTRAN_LIBRARIES})
+if(QUADMATH_LIB)
+  set(FORTRAN_LIBS ${FORTRAN_LIBS} ${QUADMATH_LIB})
+endif()
 
 # mri_robust_register
 add_executable(

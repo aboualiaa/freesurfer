@@ -24,6 +24,8 @@
  *
  */
 
+#include <deque>
+
 #include "dijkstra.h"
 #include "c_surface.h"
 #include "c_vertex.h"
@@ -93,7 +95,7 @@ void label_singleVertexSet(MRIS *apmris, int avertex,
 }
 
 bool label_terminalsFind(MRIS *apmris, string astr_fileName,
-                         deque<int> &aque_terminal
+                         std::deque<int> &aque_terminal
 
 ) {
   //

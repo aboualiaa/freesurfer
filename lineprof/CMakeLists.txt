@@ -44,4 +44,8 @@ if(ITK_FOUND AND VTK_FOUND AND PETSC_FOUND)
                         ${MPI_LIBRARIES}
                         )
 
+  if(QUADMATH_LIB)
+    target_link_libraries(LineProfTest ${QUADMATH_LIB})
+  endif()
+
 endif()
