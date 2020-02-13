@@ -69,7 +69,12 @@ if(APPLE)
 endif()
 
 add_compile_options(-fPIC)
-string(TOLOWER ${CMAKE_BUILD_TYPE} build_type_lower)
+if(DEFINED ${CMAKE_BUILD_TYPE})
+  string(TOLOWER ${CMAKE_BUILD_TYPE} build_type_lower)
+else()
+  set(CMAKE_BUILD_TYPE "Debug")
+endif()
+
 if(build_type_lower STREQUAL "debug")
   message(STATUS "adding coverage instrumentation")
   if("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang"
