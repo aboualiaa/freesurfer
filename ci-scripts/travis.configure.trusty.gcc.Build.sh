@@ -22,19 +22,18 @@
   sudo apt-get update
   sudo apt-get install --yes python3.5 python3.5-dev
 
-  wget https://cmake.org/files/v3.16/cmake-3.16.4-Linux-x86_64.tar.gz
+  wget https://cmake.org/files/v3.16/cmake-3.16.4-Linux-x86_64.tar.gz > /dev/null
   tar -xzf cmake-3.16.4-Linux-x86_64.tar.gz
   export PATH="$(pwd)/cmake-3.16.4-Linux-x86_64/bin:$PATH"
 
-  wget https://github.com/ninja-build/ninja/releases/download/v1.10.0/ninja-linux.zip
+  wget https://github.com/ninja-build/ninja/releases/download/v1.10.0/ninja-linux.zip > /dev/null
   sudo unzip ninja-linux.zip -d /usr/local/bin/
   sudo update-alternatives --install /usr/bin/ninja ninja /usr/local/bin/ninja 1 --force
 
-  curl --connect-timeout 8 --retry 5 -O http://surfer.nmr.mgh.harvard.edu/pub/data/fspackages/prebuilt/centos7-packages.tar.gz
-  tar -xzf centos7-packages.tar.gz
-  mv ./packages ./prebuilt_packages
+  wget "https://www.dropbox.com/s/5xffk87vm0wb938/linux_packages.tar?dl=1" > /dev/null
+  tar -xf "./linux_packages.tar?dl=1"
 
-  sed -i -- 's/#  error \"Dunno about this gcc\"/\/\//g' ./prebuilt_packages/itk/4.13.0/include/ITK-4.13/vcl_compiler.h
+  sed -i -- 's/#  error \"Dunno about this gcc\"/\/\//g' ./prebuilt_packages/itk/include/ITK-4.13/vcl_compiler.h
 
   # TODO: reenable guis after fixing compile issues
   # TODO: check if the other flags are still needed (originally for the benchmark module)

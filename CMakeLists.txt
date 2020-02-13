@@ -9,7 +9,8 @@ project(freesurfer VERSION 7.0.0)
 if(NOT APPLE)
   cmake_minimum_required(VERSION 3.9)
   set(HOST_OS $ENV{HOSTING_OS})
-  if(HOSTING_OS STREQUAL "trusty")
+  # TODO: upgrade to itk 5 then remove
+  if(HOST_OS STREQUAL "trusty")
     add_definitions(-DFS_ITK_LEGACY_REMOVE)
   endif()
   add_definitions(-DVCL_GCC_80) # trick itk 4 into believing the compiler is gcc 8
@@ -32,8 +33,8 @@ if(APPLE AND NOT TRAVIS)
 else()
   set(FS_PACKAGES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake-build-debug-$ENV{HOSTING_OS}/prebuilt_packages")
   message(STATUS "${CMAKE_CURRENT_SOURCE_DIR}")
-  set(VTK_DIR ${FS_PACKAGES_DIR}/vtk/7.1 CACHE PATH "VTK install directory")
-  set(ITK_DIR ${FS_PACKAGES_DIR}/itk/4.13.0 CACHE PATH "ITK install directory")
+  set(VTK_DIR ${FS_PACKAGES_DIR}/vtk/ CACHE PATH "VTK install directory")
+  set(ITK_DIR ${FS_PACKAGES_DIR}/itk/ CACHE PATH "ITK install directory")
 endif()
 
 # a few build options
@@ -399,7 +400,6 @@ set(FS_INCLUDE_DIRS
     ${CMAKE_SOURCE_DIR}/packages/fmt/include/
     ${CMAKE_SOURCE_DIR}/packages/GSL/include
     ${CMAKE_SOURCE_DIR}/packages/spdlog/include
-    /usr/local/include/aboualiaa
     )
 
 # build the freesurfer static libraries
