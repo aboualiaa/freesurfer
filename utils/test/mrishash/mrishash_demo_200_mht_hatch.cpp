@@ -1,5 +1,5 @@
 /*--------------------------------------------
-  mrishash_demo_200_mht_hatch.c
+  mrishash_demo_200_mht_hatch.cpp
 
   Version History
   ----------------

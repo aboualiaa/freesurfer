@@ -1,5 +1,5 @@
 /*--------------------------------------------
-  Mrishash_test_200_intersect.c
+  Mrishash_test_200_intersect.cpp
 
   Version History
   ----------------
@@ -43,7 +43,7 @@ void init_various(char *AProgname) {
   sprintf(surffilepath, "lh.%s_.tri", Progname);
   sprintf(mrifilepath, "%s_mri.mgz", Progname);
 
-  rslt = gw_log_init(Progname, progver, logfilepath, 1); // empty file
+  rslt = gw_log_init(const_cast<char *>(Progname), progver, logfilepath, 1); // empty file
   if (rslt) {
     printf("Couldn't open log file %s", logfilepath);
     exit(-1);
@@ -154,7 +154,7 @@ int main(int argc, char *argv[]) {
     exit(77); // bypass
 
   Progname = argv[0];
-  init_various(Progname); // and gw_log_init
+  init_various(const_cast<char *>(Progname)); // and gw_log_init
 
   gw_log_begin();
 

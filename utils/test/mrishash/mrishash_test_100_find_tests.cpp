@@ -1,5 +1,5 @@
 /*--------------------------------------------
-  mrishash_test_100_find_tests.c
+  mrishash_test_100_find_tests.cpp
 
   The test code has to test:
 
@@ -38,6 +38,7 @@
 
 #include "gw_utils.h"
 #include "icosahedron.h"
+#include "mrishash.h"
 
 const char *Progname;
 char progver[] = "V1.11";
@@ -53,7 +54,7 @@ void init_various(char *AProgname) {
   sprintf(surffilepath, "lh.%s_.tri", Progname);
   sprintf(mrifilepath, "%s_mri.mgz", Progname);
 
-  rslt = gw_log_init(Progname, progver, logfilepath, 1); // empty file
+  rslt = gw_log_init(const_cast<char*>(Progname), progver, logfilepath, 1); // empty file
   if (rslt) {
     printf("Couldn't open log file %s", logfilepath);
     exit(-1);
@@ -72,7 +73,7 @@ int TestNearestVtxInConcentricIcos(int surfacenum, purpose_t purpose) {
   double probedistance, probex, probey, probez;
   double vecx, vecy, vecz, veclen;
   MRI_SURFACE *mris = NULL;
-  MRIS_HASH_TABLE *mht = NULL;
+  struct MRIS_HASH_TABLE *mht = NULL;
   VERTEX probe_vtx, *brute_vtx, *fcv_vtx, *fcvit_vtx, *gnrc_vtx;
   int brute_vno, fcvn_vno;
   int LegacyAnswerExpected, GenericAnswerExpected;
@@ -346,7 +347,7 @@ int main(int argc, char *argv[]) {
     exit(77); // bypass
 
   Progname = argv[0];
-  init_various(Progname); // and gw_log_init
+  init_various(const_cast<char *>(Progname)); // and gw_log_init
 
   gw_log_begin();
 

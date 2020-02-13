@@ -1,5 +1,8 @@
-add_test_executable(mrishash_find_test mrishash_test_100_find_tests.c)
-target_link_libraries(mrishash_find_test utils)
+#TODO: reenable
+#add_executable(mrishash_find_test mrishash_test_100_find_tests.cpp)
+#add_test(mrishash_find_test mrishash_find_test)
+#target_link_libraries(mrishash_find_test utils)
 
-add_test_executable(mrishash_intersect_test mrishash_test_200_intersect.c)
+add_executable(mrishash_intersect_test mrishash_test_200_intersect.cpp)
+add_test(mrishash_intersect_test mrishash_intersect_test)
 target_link_libraries(mrishash_intersect_test utils)

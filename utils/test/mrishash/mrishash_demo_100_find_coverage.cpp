@@ -1,5 +1,5 @@
 /*--------------------------------------------
-  mrishash_demo_100_find_coverage.c
+  mrishash_demo_100_find_coverage.cpp
 
   Version History
   ----------------
