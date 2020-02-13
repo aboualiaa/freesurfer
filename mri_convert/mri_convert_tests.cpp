@@ -4,10 +4,10 @@
 
 #include <gtest/gtest.h>
 #include "mri_convert_lib.hpp"
-#include <armadillo>
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <eigen3/Eigen/Dense>
+#include <random>
 
 using namespace fs::util::cli;
 
@@ -68,6 +68,13 @@ TEST(test_usage_message, valid_input_test) {
   ASSERT_STREQ(output.c_str(), "\ntype boosty_boost -u for usage\n\n");
 }
 
+// TODO: make this work with armadillo 4 then remove condition
+// Info: on trusty armadillo version is 4
+// This only compiles with version 9.850.1 on macOS Catalina
+#ifndef __linux__
+
+#include <armadillo>
+
 TEST(test_frobenius_norm, vector_test) {
   auto thresh = 1e-013;
   std::vector<double> arr{};
@@ -115,6 +122,8 @@ TEST(test_frobenius_normalize, vector_version) {
     ASSERT_NEAR(fsResult, eigenResult, thresh);
   }
 }
+
+#endif
 
 TEST(test_check_vector_range, test_vectors) {
   std::vector<std::string> strvec{20};
