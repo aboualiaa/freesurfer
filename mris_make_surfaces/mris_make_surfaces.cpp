@@ -203,7 +203,7 @@ static int nowhite = 0;
 
 // orig_white, if specified, will be used as the initial surface
 // to place the white surface. Whatever surface is specified, it
-// will not be smoothed prior to placing the white surface. 
+// will not be smoothed prior to placing the white surface.
 static char *orig_white = NULL ;
 static char *orig_sphere = NULL ;
 
@@ -1392,7 +1392,7 @@ int main(int argc, char *argv[]) {
     MRISfillInterior(mris, mri_T1_pial->xsize, mri_interior) ;
     MRImask(mri_T1_pial, mri_interior, mri_T1_pial, 1, fill_interior) ;
     printf("writing filled_interior.mgz\n") ;
-    MRIwrite(mri_T1_pial, "filled_interior.mgz") ; 
+    MRIwrite(mri_T1_pial, "filled_interior.mgz") ;
     MRIfree(&mri_interior) ;
   }
 
@@ -1611,7 +1611,7 @@ int main(int argc, char *argv[]) {
           nlabels = 0 ;
 
 	MRISremoveIntersections(mris) ;
-	
+
 	GetMemUsage(memusage);  printf("Pre Pial Targ Loc VmPeak %d\n",memusage[1]);fflush(stdout);
 
 	printf("CPTL: nlabels=%d, T2_min_inside=%g, T2_max_inside=%g, T2_min_outside=%g, T2_max_outside=%g, max_out_d=%g\n",
@@ -1643,7 +1643,7 @@ int main(int argc, char *argv[]) {
 		refine->SetVesselMR(vesselMR);
 		//refine->SetSphere(sph);
 		refine->getTarget(mris); //, debugVertex);
-		
+
 		MRIfree(&whiteMR);
 		MRIfree(&vesselMR);
 		delete refine;
@@ -1651,15 +1651,15 @@ int main(int argc, char *argv[]) {
 	else
 	{
 	  MRIScomputePialTargetLocationsMultiModal(mris, mri_flair, labels, nlabels,
-				      contrast_type, mri_aseg, 
-				      T2_min_inside, T2_max_inside, 
-				      T2_min_outside, T2_max_outside, 
+				      contrast_type, mri_aseg,
+				      T2_min_inside, T2_max_inside,
+				      T2_min_outside, T2_max_outside,
 				      max_outward_dist,
-				      Ghisto_left_inside_peak_pct, Ghisto_right_inside_peak_pct, 
-				      Ghisto_left_outside_peak_pct, Ghisto_right_outside_peak_pct, 
+				      Ghisto_left_inside_peak_pct, Ghisto_right_inside_peak_pct,
+				      Ghisto_left_outside_peak_pct, Ghisto_right_outside_peak_pct,
  				      wm_weight, pial_sigma, mri_T1_pial) ;
 	}
-	//	parms.l_location /= spring_scale ; 
+	//	parms.l_location /= spring_scale ;
 	GetMemUsage(memusage);  printf("Post Pial Targ Loc VmPeak %d\n",memusage[1]);fflush(stdout);
 
         if(Gdiag & DIAG_WRITE) {
@@ -1681,7 +1681,7 @@ int main(int argc, char *argv[]) {
       // T2=========================================
       if(T2_name) {
 	// Note: when T2 is specified, it is assigned to flair_or_T2_name, and this
-	// branch is not activated. It does not appear that there is a way to 
+	// branch is not activated. It does not appear that there is a way to
 	// activate this branch.
         // Note: l_location is set to 0.5 at the end and l_intensity is turned off
         MRI  *mri_T2 = NULL ;
@@ -1722,7 +1722,7 @@ int main(int argc, char *argv[]) {
             MRISsegmentMarked(mris, &labels, &nlabels, 1) ;
             INTEGRATION_PARMS_copy(&saved_parms, &parms) ;
 
-            printf("%d vertices found in imminent self-intersecting regions, deforming to remove...\n", 
+            printf("%d vertices found in imminent self-intersecting regions, deforming to remove...\n",
                    MRIScountMarked(mris,1));
             MRISinvertMarks(mris) ;
             MRISerodeMarked(mris, 2) ;
@@ -1753,10 +1753,10 @@ int main(int argc, char *argv[]) {
 		std::cout << " nooooooooooooooooooooooooooooooooooooooooooooooooooo" <<std::endl;
           MRIScomputePialTargetLocationsMultiModal(mris, mri_T2,
                                         labels, nlabels,
-                                        contrast_type, mri_aseg, T2_min_inside, T2_max_inside, 
+                                        contrast_type, mri_aseg, T2_min_inside, T2_max_inside,
 					T2_min_outside, T2_max_outside,max_outward_dist,
-					Ghisto_left_inside_peak_pct,Ghisto_right_inside_peak_pct, 
-					Ghisto_left_outside_peak_pct,Ghisto_right_outside_peak_pct, 
+					Ghisto_left_inside_peak_pct,Ghisto_right_inside_peak_pct,
+					Ghisto_left_outside_peak_pct,Ghisto_right_outside_peak_pct,
 					wm_weight, pial_sigma, mri_T1_pial) ;
         }
 
@@ -1794,7 +1794,7 @@ int main(int argc, char *argv[]) {
       }
 
       if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
-        MRIwrite(mri_T1, "pial_masked.mgz") ; 
+        MRIwrite(mri_T1, "pial_masked.mgz") ;
 
       if (mri_cover_seg)  { // off by default
         MRI *mri_tmp, *mri_bin ;
@@ -1854,7 +1854,7 @@ int main(int argc, char *argv[]) {
         }
       } // end if mri_cover_seg
 
-      else if (flair_or_T2_name == NULL) 
+      else if (flair_or_T2_name == NULL)
       {
         // This is the main CBV for pial
         // Intensity is ignored with T2 or FLAIR
@@ -1948,7 +1948,7 @@ int main(int argc, char *argv[]) {
       // Generally has no effect with T2/FLAIR because orig_pial usually != NULL
       if(j == 0 && i == 0 && orig_pial == NULL)  {
         // Problem: this stage is not run in recon-all because orig_pial is specified, but
-        // orig_pial is actually white.preaparc, which is not a real pial surface. 
+        // orig_pial is actually white.preaparc, which is not a real pial surface.
 	INTEGRATION_PARMS  saved_parms ;
 	int k, start_t ;
 
@@ -1986,15 +1986,15 @@ int main(int argc, char *argv[]) {
 	INTEGRATION_PARMS_copy(&parms, &saved_parms) ;
 	parms.start_t = start_t ;
 	parms.l_surf_repulse = l_surf_repulse ;
-      }// end if (j == 0 && i == 0 && orig_pial == NULL)  
+      }// end if (j == 0 && i == 0 && orig_pial == NULL)
 
       if(mristarget != NULL) MRISfree(&mristarget);
-      
+
       mristarget = MRISclone(mris);
 
       float *px,*py,*pz;
       MRISexportXYZ(mristarget, &px, &py, &pz);
-      
+
       for(vno=0; vno < mris->nvertices; vno++){
         VERTEX * const v = &(mristarget->vertices[vno]);
         if(flair_or_T2_name == NULL) {
@@ -2007,8 +2007,8 @@ int main(int argc, char *argv[]) {
 	else{
 	  VERTEX const * const v2 = &(mris->vertices[vno]);
           px[vno] = v2->targx; // clone does not copy this
-          py[vno] = v2->targy; 
-          pz[vno] = v2->targz; 
+          py[vno] = v2->targy;
+          pz[vno] = v2->targz;
         }
       }
 
