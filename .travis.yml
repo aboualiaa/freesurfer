@@ -21,6 +21,8 @@ jobs:
       addons:
         homebrew:
           update: true
+          casks:
+            - arrayfire
           packages:
             - itk
             - vtk
@@ -41,12 +43,9 @@ jobs:
             - git-annex
             - lcov
             - gts
-            - arrayfire
             - ccache
       cache:
-        ccache: true
-        directories:
-          - cmake-build-debug
+        - ccache
     - os: linux
       stage: build
       env:
@@ -188,6 +187,8 @@ jobs:
       addons:
         homebrew:
           update: true
+          casks:
+            - arrayfire
           packages:
             - itk
             - vtk
@@ -207,7 +208,6 @@ jobs:
             - ninja
             - llvm
             - gts
-            - arrayfire
     - os: osx
       stage: build
       env:
@@ -220,6 +220,8 @@ jobs:
       addons:
         homebrew:
           update: true
+          casks:
+            - arrayfire
           packages:
             - itk
             - vtk
@@ -239,7 +241,6 @@ jobs:
             - eigen
             - ninja
             - gts
-            - arrayfire
     - os: osx
       stage: unit
       env:
@@ -251,6 +252,8 @@ jobs:
       addons:
         homebrew:
           update: true
+          casks:
+            - arrayfire
           packages:
             - itk
             - vtk
@@ -271,7 +274,8 @@ jobs:
             - lcov
             - git-annex
             - gts
-            - arrayfire
+      cache:
+        - ccache
 
 before_install:
   - ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.${TRAVIS_BUILD_STAGE_NAME}.sh
