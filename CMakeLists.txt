@@ -101,8 +101,9 @@ if(build_type_lower STREQUAL "debug")
   endif()
 endif()
 
-# enable ctest
 enable_testing()
+include(CTest)
+
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_proxy.sh ${CMAKE_CURRENT_BINARY_DIR}/test.sh COPYONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_proxy.sh ${CMAKE_CURRENT_BINARY_DIR}/attic/test.sh COPYONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_proxy.sh ${CMAKE_CURRENT_BINARY_DIR}/utils/test.sh COPYONLY)
@@ -174,8 +175,6 @@ endif()
 
 # all custom find-modules are stored in the cmake subdir
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-
-add_subdirectory(packages/abseil-cpp)
 
 find_package(ArrayFire)
 
@@ -302,6 +301,8 @@ endif()
 set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Suppressing benchmark's tests" FORCE)
 
 add_subdirectory(packages)
+
+add_subdirectory(packages/abseil-cpp)
 
 # -------- openMP --------
 if(APPLE)
