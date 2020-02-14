@@ -6,15 +6,6 @@ else()
   set(EIGEN3_INCLUDE_DIR "/usr/local/include/eigen")
 endif()
 
-if("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang"
-   OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-instr-generate -fcoverage-mapping") # llvm style
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage") # gcov style
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0") # compile with debug info for correct coverage data
-elseif(CMAKE_COMPILER_IS_GNUCXX)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
-endif()
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fsanitize=address -fsanitize-recover=address -fsanitize-memory-track-origins -fno-omit-frame-pointer -fno-optimize-sibling-calls -fno-common -O0")
 
 include_directories(${FS_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/packages/dicom ${ITK_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR}
