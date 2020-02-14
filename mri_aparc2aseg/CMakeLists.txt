@@ -7,5 +7,5 @@ add_help(mri_aparc2aseg mri_aparc2aseg.help.xml)
 target_link_libraries(mri_aparc2aseg utils)
 
 add_test_script(NAME mri_aparc2aseg_test SCRIPT test.sh DEPENDS mri_aparc2aseg)
-
+set_property(TEST mri_aparc2aseg_test PROPERTY LABELS Expensive Integration)
 install(TARGETS mri_aparc2aseg DESTINATION bin)

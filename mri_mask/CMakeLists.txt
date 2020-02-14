@@ -7,5 +7,6 @@ add_help(mri_mask mri_mask.help.xml)
 target_link_libraries(mri_mask utils)
 
 add_test_script(NAME mri_mask_test SCRIPT test.sh DEPENDS mri_mask)
+set_property(TEST mri_mask_test PROPERTY LABELS Expensive Integration)
 install(TARGETS mri_mask DESTINATION bin)
 

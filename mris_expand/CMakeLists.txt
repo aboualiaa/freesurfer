@@ -6,5 +6,5 @@ add_executable(mris_expand mris_expand.cpp)
 target_link_libraries(mris_expand utils)
 
 add_test_script(NAME mris_expand_test SCRIPT test.sh DEPENDS mris_expand)
-
+set_property(TEST mris_expand_test PROPERTY LABELS Expensive Integration)
 install(TARGETS mris_expand DESTINATION bin)

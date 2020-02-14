@@ -8,7 +8,7 @@ target_link_libraries(mris_fix_topology utils)
 install(TARGETS mris_fix_topology DESTINATION bin)
 
 add_test_script(NAME mris_fix_topology_test SCRIPT test.sh DEPENDS mris_fix_topology)
-
+set_property(TEST mris_fix_topology_test PROPERTY LABELS Expensive Integration)
 add_executable(mris_remove_intersection mris_remove_intersection.cpp)
 add_help(mris_remove_intersection mris_remove_intersection.help.xml)
 target_link_libraries(mris_remove_intersection utils)
