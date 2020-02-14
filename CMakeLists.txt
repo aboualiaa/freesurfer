@@ -80,10 +80,12 @@ if(APPLE)
 endif()
 
 add_compile_options(-fPIC)
+
 if(DEFINED ${CMAKE_BUILD_TYPE})
   string(TOLOWER ${CMAKE_BUILD_TYPE} build_type_lower)
 else()
   set(CMAKE_BUILD_TYPE "Debug")
+  string(TOLOWER ${CMAKE_BUILD_TYPE} build_type_lower)
 endif()
 
 if(build_type_lower STREQUAL "debug")
