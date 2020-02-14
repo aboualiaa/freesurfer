@@ -40,7 +40,7 @@
   tar -xf "./itk5.0.1_linux_xenial.tar?dl=1"
   mv ./itk5 ./prebuilt_packages/itk
 
-  sed -i -- 's/#    error Unsupported compiler/\/\//g' ./prebuilt_packages/itk/include//Users/itk_compiler_detection.h
+  sed -i -- 's/#    error Unsupported compiler/\/\//g' ./prebuilt_packages/itk/include/ITK-5.0/itk_compiler_detection.h
 
   # TODO: reenable guis after fixing compile issues
   # TODO: check if the other flags are still needed (originally for the benchmark module)
