@@ -7,6 +7,7 @@
 
 #include <fmt/printf.h>
 #include <fstream>
+#include <string_view>
 
 #include "mri.h"
 

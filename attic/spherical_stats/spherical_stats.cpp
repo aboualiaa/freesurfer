@@ -387,7 +387,7 @@ static float sphericaldistance(float x1, float y1, float z1, float x2, float y2,
 
   dist = fabs((o * (n1 + n2) / 2.0f));
 
-  if (isnan(dist)) {
+  if (std::isnan(dist)) {
     return TNORM(x1 - x2, y1 - y2, z1 - z2);
   }
   // fprintf(stderr,"\n ISNAN n1=%f n2=%f - coso=%f o=%f ",n1,n2,coso,o);
