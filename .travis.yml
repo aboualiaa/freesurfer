@@ -215,8 +215,7 @@ jobs:
         - PATH="/usr/local/opt/python/libexec/bin:$PATH"
         - PATH="/usr/local/opt/gcc/bin:$PATH"
         - HOSTING_COMPILER=gcc
-        - CC=gcc-9
-        - CXX=g++-9
+        - FORCE_GCC=true
       osx_image: xcode11.3
       addons:
         homebrew:
