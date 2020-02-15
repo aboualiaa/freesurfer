@@ -1,8 +1,12 @@
 #!/bin/bash
 
-sudo sed -i -- 's/#   error Unsupported compiler/\/\//g' /usr/local/include/ITK-5.0/itk_compiler_detection.h
 ./ci-scripts/restore-mtime.sh
 ./ci-scripts/install-hpx.sh
+
+sudo rm -f /usr/local/include/ITK-5.0/itk_compiler_detection.h
+sudo rm -f /usr/local/include/ITK-5.0/compilers/*
+sudo cp ./ci-scripts/itk_compiler_detection/itk_compiler_detection.h /usr/local/include/ITK-5.0/
+sudo cp ./ci-scripts/itk_compiler_detection/compilers/* /usr/local/include/ITK-5.0/compilers/
 
 sudo xcode-select -r # s /Applications/Xcode.app
 export PATH="$(pwd)/hpx-install/:$PATH"
