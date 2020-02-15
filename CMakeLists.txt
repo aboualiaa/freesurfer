@@ -21,11 +21,11 @@ elseif(APPLE)
 endif()
 # project info
 
-if(POLICY CMP0025)
+if(POLICY CMP0025) # AppleClang and Clang are different compilers.
   cmake_policy(SET CMP0025 NEW)
 endif()
 
-if(POLICY CMP0048)
+if(POLICY CMP0048) # The project() command manages VERSION variables.
   cmake_policy(SET CMP0048 NEW)
 endif()
 
