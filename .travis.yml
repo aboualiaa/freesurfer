@@ -181,8 +181,7 @@ jobs:
         - PATH="/usr/local/opt/llvm/bin:$PATH"
         - LDFLAGS="-L/usr/local/opt/llvm/lib"
         - CPPFLAGS="-I/usr/local/opt/llvm/include"
-        - CC=/usr/local/opt/llvm/bin/clang
-        - CXX=/usr/local/opt/llvm/bin/clang++
+        - FORCE_LLVM_CLANG=true
       osx_image: xcode11.3
       addons:
         homebrew:
