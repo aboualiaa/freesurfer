@@ -34,4 +34,5 @@ target_link_libraries(mri_convert_tests utils mri_convert_lib ${GTEST_LIBRARIES}
                       benchmark fmt gtest ${ARMADILLO_LIBRARIES}
                       Boost::program_options)
 add_test(mri_convert_tests mri_convert_tests)
+set_property(TEST mri_convert_tests PROPERTY LABELS Unit)
 add_test(mri_convert_test mri_convert_tests)
