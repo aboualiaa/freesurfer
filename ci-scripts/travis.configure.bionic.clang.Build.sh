@@ -9,6 +9,11 @@ set -e
     mpich python3.6 libboost-all-dev libfltk1.3-dev libeigen3-dev \
     libarmadillo-dev qt5-default libqt5x11extras5-dev curl
 
+  sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  sudo apt-get update
+  sudo apt-get install -y gcc-9 g++-9
+  sudo apt-get install -y gfortran-9
+
   wget http://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz >/dev/null 2>&1
   tar -xf clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
   export PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04/bin:$PATH"
@@ -33,11 +38,13 @@ set -e
   tar -xf "./linux_packages.tar?dl=1"
 
   rm -rf ./prebuilt_packages/itk
-  wget "https://www.dropbox.com/s/drijzemquap0rqk/itk5.0.1_linux_bionic.tar?dl=1" >/dev/null 2>&1
+  wget "https://www.dropbox.com/s/uqysekgefm3vb8x/itk5.0.1_linux_bionic.tar?dl=1" >/dev/null 2>&1
   tar -xf "./itk5.0.1_linux_bionic.tar?dl=1"
   mv ./itk5 ./prebuilt_packages/itk
 
   sed -i -- 's/#    error Unsupported compiler/\/\//g' ./prebuilt_packages/itk/include/ITK-5.0/itk_compiler_detection.h
+#  sed -i -- 's/#if defined(__GNUC__) && __GNUC__ < 6/#if defined(__GNUC__) && !defined(__clang__) && __GNUC__ < 6/g' ./prebuilt_packages/itk/include/ITK-5.0/itkTransform.h
+#  sed -i -- 's/#if defined(__GNUC__) && __GNUC__ < 6/#if defined(__GNUC__) && !defined(__clang__) && __GNUC__ < 6/g' ./prebuilt_packages/itk/include/ITK-5.0/itkTransformBase.h
 
   # TODO: reenable guis after fixing compile issues
   # TODO: check if the other flags are still needed (originally for the benchmark module)
