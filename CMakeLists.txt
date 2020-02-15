@@ -302,8 +302,6 @@ set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Suppressing benchmark's tests" FORC
 
 add_subdirectory(packages)
 
-add_subdirectory(packages/abseil-cpp)
-
 # -------- openMP --------
 if(APPLE)
   if(CMAKE_C_COMPILER_ID MATCHES "Clang")
