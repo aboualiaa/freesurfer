@@ -12,6 +12,11 @@
 
   #  export LD_LIBRARY_PATH="/usr/local/clang_9.0.0/lib:$LD_LIBRARY_PATH"
 
+  sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  sudo apt-get update
+  sudo apt-get install -y gcc-9 g++-9
+  sudo apt-get install -y gfortran-9
+
   wget http://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz >/dev/null 2>&1
   tar -xf clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz
   export PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-16.04/bin:$PATH"

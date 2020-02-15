@@ -6,6 +6,9 @@ include_directories(${FS_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/packages/dicom)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 
+if(OPENMP_FOUND)
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -latomic")
+endif()
 # dngtester
 add_executable(dngtester dngtester.cpp)
 target_link_libraries(dngtester utils)
