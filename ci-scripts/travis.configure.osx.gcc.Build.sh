@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sudo sed -i -- 's/#  error \"Dunno about this gcc\"/\/\//g' /usr/local/include/ITK-5.0/itk_compiler_detection.h
+sudo sed -i -- 's/#    error Unsupported compiler/\/\//g' /usr/local/include/ITK-5.0/itk_compiler_detection.h
 ./ci-scripts/restore-mtime.sh
 ./ci-scripts/install-hpx.sh
 

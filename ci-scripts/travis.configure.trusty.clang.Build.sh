@@ -46,7 +46,7 @@ set -e
 
   export PATH="/usr/local/bin:$PATH"
 
-  sed -i -- 's/#  error \"Dunno about this gcc\"/\/\//g' ./prebuilt_packages/itk/4.13.0/include/ITK-4.13/vcl_compiler.h
+  sed -i -- 's/#  error \"Dunno about this gcc\"/\/\//g' ./prebuilt_packages/itk/include/ITK-4.13/vcl_compiler.h
 
   # TODO: reenable guis after fixing compile issues
   # TODO: check if the other flags are still needed (originally for the benchmark module)
