@@ -74,7 +74,7 @@ int iter = -1;
 static char *surf_filename = nullptr;
 static char *newsurf_filename = nullptr;
 
-char *basename(char *path) {
+char *fs_basename(char *path) {
   char *ptr = strrchr(path, '/');
   return ptr ? ptr + 1 : (char *)path;
 }
@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
   }
   argc -= nargs;
 
-  Progname = basename(argv[0]);
+  Progname = fs_basename(argv[0]);
   ErrorInit(NULL, NULL, NULL);
   DiagInit(nullptr, nullptr, nullptr);
 

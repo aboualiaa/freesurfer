@@ -64,7 +64,7 @@ int FLAG__abs = 0;
 // static char *outtypestring = NULL;
 static int outtype = MRI_VOLUME_TYPE_UNKNOWN;
 
-char *basename(char *path) {
+char *fs_basename(char *path) {
   char *ptr = strrchr(path, '/');
   return ptr ? ptr + 1 : (char *)path;
 }
@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
   }
   argc -= nargs;
 
-  Progname = basename(argv[0]);
+  Progname = fs_basename(argv[0]);
   ErrorInit(NULL, NULL, NULL);
   DiagInit(nullptr, nullptr, nullptr);
 
