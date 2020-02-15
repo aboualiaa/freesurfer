@@ -9,9 +9,26 @@ elseif(APPLE)
     set(CMAKE_NM "/usr/local/bin/gcc-nm-9")
     set(CMAKE_RANLIB "/usr/local/bin/gcc-ranlib-9")
   endif()
+  if(DEFINED ENV{FORCE_LLVM_CLANG})
+    set(CMAKE_C_COMPILER "/usr/local/opt/llvm/bin/clang")
+    set(CMAKE_CXX_COMPILER "/usr/local/opt/llvm/bin/clang++")
+    set(CMAKE_AR "/usr/local/opt/llvm/bin/llvm-ar")
+    set(CMAKE_NM "/usr/local/opt/llvm/bin/llvm-nm")
+    # TODO: uncomment after this issue has been resolved in llvm:
+    # https://bugs.llvm.org/show_bug.cgi?id=41707
+#    set(CMAKE_RANLIB "/usr/local/opt/llvm/bin/llvm-ranlib")
+  endif()
 endif()
 # project info
-cmake_policy(SET CMP0048 NEW)
+
+if(POLICY CMP0025)
+  cmake_policy(SET CMP0025 NEW)
+endif()
+
+if(POLICY CMP0048)
+  cmake_policy(SET CMP0048 NEW)
+endif()
+
 project(freesurfer VERSION 7.0.0)
 if(NOT APPLE)
   cmake_minimum_required(VERSION 3.9)
