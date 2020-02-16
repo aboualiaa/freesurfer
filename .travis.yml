@@ -1,5 +1,5 @@
 git:
-  depth: 1
+  depth: false # for git-restore-mtime to work
   quiet: true
 
 language: cpp
@@ -45,7 +45,9 @@ jobs:
             - gts
             - ccache
       cache:
-        - ccache
+        ccache: true
+        directories:
+          - cmake-build-debug
     - os: linux
       stage: build
       env:
@@ -64,8 +66,10 @@ jobs:
             - git
             - cmake
       cache:
-        - apt
-        - ccache
+        apt: true
+        ccache: true
+        directories:
+          - cmake-build-debug-trusty
     - os: linux
       stage: build
       env:
@@ -84,8 +88,10 @@ jobs:
             - git
             - cmake
       cache:
-        - apt
-        - ccache
+        apt: true
+        ccache: true
+        directories:
+          - cmake-build-debug-xenial
     - os: linux
       stage: build
       env:
@@ -104,8 +110,10 @@ jobs:
             - git
             - cmake
       cache:
-        - apt
-        - ccache
+        apt: true
+        ccache: true
+        directories:
+          - cmake-build-debug-bionic
     - os: linux
       stage: build
       env:
@@ -126,8 +134,10 @@ jobs:
             - git
             - cmake
       cache:
-        - apt
-        - ccache
+        apt: true
+        ccache: true
+        directories:
+          - cmake-build-debug-trusty
     - os: linux
       stage: build
       env:
@@ -148,8 +158,10 @@ jobs:
             - git
             - cmake
       cache:
-        - apt
-        - ccache
+        apt: true
+        ccache: true
+        directories:
+          - cmake-build-debug-xenial
     - os: linux
       stage: build
       env:
@@ -170,8 +182,10 @@ jobs:
             - git
             - cmake
       cache:
-        - apt
-        - ccache
+        apt: true
+        ccache: true
+        directories:
+          - cmake-build-debug-bionic
     - os: osx
       stage: build
       env:
@@ -207,39 +221,43 @@ jobs:
             - ninja
             - llvm
             - gts
-#    - os: osx
-#      stage: build
-#      env:
-#        - HOSTING_OS=osx
-#        - PATH="/usr/local/opt/python/libexec/bin:$PATH"
-#        - PATH="/usr/local/opt/gcc/bin:$PATH"
-#        - HOSTING_COMPILER=gcc
-#        - FORCE_GCC=true
-#      osx_image: xcode11.3
-#      addons:
-#        homebrew:
-#          update: true
-#          casks:
-#            - arrayfire
-#          packages:
-#            - itk
-#            - vtk
-#            - petsc
-#            - cmake
-#            - python@3
-#            - gcc@9
-#            - jemalloc
-#            - tcsh
-#            - armadillo
-#            - qt
-#            - hdf5
-#            - libomp
-#            - szip
-#            - fltk
-#            - open-mpi
-#            - eigen
-#            - ninja
-#            - gts
+      cache:
+        ccache: true
+        directories:
+          - cmake-build-debug
+    #    - os: osx
+    #      stage: build
+    #      env:
+    #        - HOSTING_OS=osx
+    #        - PATH="/usr/local/opt/python/libexec/bin:$PATH"
+    #        - PATH="/usr/local/opt/gcc/bin:$PATH"
+    #        - HOSTING_COMPILER=gcc
+    #        - FORCE_GCC=true
+    #      osx_image: xcode11.3
+    #      addons:
+    #        homebrew:
+    #          update: true
+    #          casks:
+    #            - arrayfire
+    #          packages:
+    #            - itk
+    #            - vtk
+    #            - petsc
+    #            - cmake
+    #            - python@3
+    #            - gcc@9
+    #            - jemalloc
+    #            - tcsh
+    #            - armadillo
+    #            - qt
+    #            - hdf5
+    #            - libomp
+    #            - szip
+    #            - fltk
+    #            - open-mpi
+    #            - eigen
+    #            - ninja
+    #            - gts
     - os: osx
       stage: unit
       env:
@@ -274,7 +292,188 @@ jobs:
             - git-annex
             - gts
       cache:
-        - ccache
+        ccache: true
+        directories:
+          - cmake-build-debug
+    - os: linux
+      stage: unit
+      env:
+        - HOSTING_OS=trusty
+        - HOSTING_COMPILER=gcc
+      dist: trusty
+      addons:
+        apt:
+          packages:
+            - gfortran
+            - libxi-dev
+            - liblapack-dev
+            - python3.5-dev
+            - tcsh
+            - curl
+            - git
+            - cmake
+      cache:
+        apt: true
+        ccache: true
+        directories:
+          - cmake-build-debug-trusty
+    - os: linux
+      stage: unit
+      env:
+        - HOSTING_OS=xenial
+        - HOSTING_COMPILER=gcc
+      dist: xenial
+      addons:
+        apt:
+          packages:
+            - gfortran
+            - libxi-dev
+            - liblapack-dev
+            - python3.5-dev
+            - tcsh
+            - curl
+            - git
+            - cmake
+      cache:
+        apt: true
+        ccache: true
+        directories:
+          - cmake-build-debug-xenial
+    - os: linux
+      stage: unit
+      env:
+        - HOSTING_OS=bionic
+        - HOSTING_COMPILER=gcc
+      dist: bionic
+      addons:
+        apt:
+          packages:
+            - gfortran
+            - libxi-dev
+            - liblapack-dev
+            - python3.6-dev
+            - tcsh
+            - curl
+            - git
+            - cmake
+      cache:
+        apt: true
+        ccache: true
+        directories:
+          - cmake-build-debug-bionic
+    - os: linux
+      stage: unit
+      env:
+        - HOSTING_OS=trusty
+        - HOSTING_COMPILER=clang
+        - PATH="/usr/local/clang_9.0.0/bin:$PATH"
+        - LD_LIBRARY_PATH="/usr/local/clang_9.0.0/lib:$LD_LIBRARY_PATH"
+      dist: trusty
+      addons:
+        apt:
+          packages:
+            - gfortran
+            - libxi-dev
+            - liblapack-dev
+            - python3.5-dev
+            - tcsh
+            - curl
+            - git
+            - cmake
+      cache:
+        apt: true
+        ccache: true
+        directories:
+          - cmake-build-debug-trusty
+    - os: linux
+      stage: unit
+      env:
+        - HOSTING_OS=xenial
+        - HOSTING_COMPILER=clang
+        - PATH="/usr/local/clang_9.0.0/bin:$PATH"
+        - LD_LIBRARY_PATH="/usr/local/clang_9.0.0/lib:$LD_LIBRARY_PATH"
+      dist: xenial
+      addons:
+        apt:
+          packages:
+            - gfortran
+            - libxi-dev
+            - liblapack-dev
+            - python3.5-dev
+            - tcsh
+            - curl
+            - git
+            - cmake
+      cache:
+        apt: true
+        ccache: true
+        directories:
+          - cmake-build-debug-xenial
+    - os: linux
+      stage: unit
+      env:
+        - HOSTING_OS=bionic
+        - HOSTING_COMPILER=clang
+        - PATH="/usr/local/clang_9.0.0/bin:$PATH"
+        - LD_LIBRARY_PATH="/usr/local/clang_9.0.0/lib:$LD_LIBRARY_PATH"
+      dist: bionic
+      addons:
+        apt:
+          packages:
+            - gfortran
+            - libxi-dev
+            - liblapack-dev
+            - python3.6-dev
+            - tcsh
+            - curl
+            - git
+            - cmake
+      cache:
+        apt: true
+        ccache: true
+        directories:
+          - cmake-build-debug-bionic
+    - os: osx
+      stage: unit
+      env:
+        - HOSTING_OS=osx
+        - PATH="/usr/local/opt/python/libexec/bin:$PATH"
+        - HOSTING_COMPILER=clang
+        - PATH="/usr/local/opt/llvm/bin:$PATH"
+        - LDFLAGS="-L/usr/local/opt/llvm/lib"
+        - CPPFLAGS="-I/usr/local/opt/llvm/include"
+        - FORCE_LLVM_CLANG=true
+      osx_image: xcode11.3
+      addons:
+        homebrew:
+          update: true
+          casks:
+            - arrayfire
+          packages:
+            - itk
+            - vtk
+            - petsc
+            - cmake
+            - python@3
+            - jemalloc
+            - tcsh
+            - armadillo
+            - qt
+            - hdf5
+            - libomp
+            - szip
+            - fltk
+            - open-mpi
+            - eigen
+            - ninja
+            - llvm
+            - lcov
+            - git-annex
+            - gts
+      cache:
+        ccache: true
+        directories:
+          - cmake-build-debug
 
 before_install:
   - ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.${TRAVIS_BUILD_STAGE_NAME}.sh

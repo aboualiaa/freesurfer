@@ -11,9 +11,12 @@ for d in ./packages/*; do
       cd "$d"
       git config --local diff.renameLimit 999999
       git config --local merge.renameLimit 999999
+      git-restore-mtime
     )
   fi
-  cd "$d"
-  git-restore-mtime
+  (
+    cd "$d"
+    git-restore-mtime
+  )
 done
 cd $LAST_PATH
