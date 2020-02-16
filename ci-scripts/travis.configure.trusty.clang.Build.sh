@@ -5,6 +5,12 @@ set -e
 (
   mkdir -p cmake-build-debug-trusty && cd ./cmake-build-debug-trusty
 
+  sudo gpg --recv-keys 78BD65473CB3BD13
+  sudo gpg --export 78BD65473CB3BD13 | apt-key add -
+
+  sudo gpg --recv-keys 6B05F25D762E3157
+  sudo gpg --export 6B05F25D762E3157 | apt-key add -
+
   sudo apt-get install -y --no-install-suggests --no-install-recommends git wget tcsh build-essential \
     gfortran libblas-dev liblapack-dev zlib1g-dev libxmu-dev \
     libxmu-headers libxi-dev libxt-dev libx11-dev libglu1-mesa-dev \
