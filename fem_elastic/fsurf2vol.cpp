@@ -1,3 +1,5 @@
+#include <iterator>
+
 // FEM includes
 #include "solver.h"
 

@@ -207,39 +207,39 @@ jobs:
             - ninja
             - llvm
             - gts
-    - os: osx
-      stage: build
-      env:
-        - HOSTING_OS=osx
-        - PATH="/usr/local/opt/python/libexec/bin:$PATH"
-        - PATH="/usr/local/opt/gcc/bin:$PATH"
-        - HOSTING_COMPILER=gcc
-        - FORCE_GCC=true
-      osx_image: xcode11.3
-      addons:
-        homebrew:
-          update: true
-          casks:
-            - arrayfire
-          packages:
-            - itk
-            - vtk
-            - petsc
-            - cmake
-            - python@3
-            - gcc@9
-            - jemalloc
-            - tcsh
-            - armadillo
-            - qt
-            - hdf5
-            - libomp
-            - szip
-            - fltk
-            - open-mpi
-            - eigen
-            - ninja
-            - gts
+#    - os: osx
+#      stage: build
+#      env:
+#        - HOSTING_OS=osx
+#        - PATH="/usr/local/opt/python/libexec/bin:$PATH"
+#        - PATH="/usr/local/opt/gcc/bin:$PATH"
+#        - HOSTING_COMPILER=gcc
+#        - FORCE_GCC=true
+#      osx_image: xcode11.3
+#      addons:
+#        homebrew:
+#          update: true
+#          casks:
+#            - arrayfire
+#          packages:
+#            - itk
+#            - vtk
+#            - petsc
+#            - cmake
+#            - python@3
+#            - gcc@9
+#            - jemalloc
+#            - tcsh
+#            - armadillo
+#            - qt
+#            - hdf5
+#            - libomp
+#            - szip
+#            - fltk
+#            - open-mpi
+#            - eigen
+#            - ninja
+#            - gts
     - os: osx
       stage: unit
       env:
