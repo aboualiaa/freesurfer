@@ -45,7 +45,7 @@ jobs:
             - gts
             - ccache
       cache:
-        ccache: true
+#        ccache: true
         directories:
           - cmake-build-debug
     - os: linux
@@ -222,7 +222,7 @@ jobs:
             - llvm
             - gts
       cache:
-        ccache: true
+#        ccache: true
         directories:
           - cmake-build-debug
     #    - os: osx
@@ -292,7 +292,7 @@ jobs:
             - git-annex
             - gts
       cache:
-        ccache: true
+#        ccache: true
         directories:
           - cmake-build-debug
     - os: linux
@@ -471,7 +471,7 @@ jobs:
             - git-annex
             - gts
       cache:
-        ccache: true
+#        ccache: true
         directories:
           - cmake-build-debug
 
