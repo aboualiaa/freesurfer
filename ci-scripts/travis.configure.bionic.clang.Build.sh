@@ -55,6 +55,7 @@ set -e
     #  sed -i -- 's/#if defined(__GNUC__) && __GNUC__ < 6/#if defined(__GNUC__) && !defined(__clang__) && __GNUC__ < 6/g' ./prebuilt_packages/itk/include/ITK-5.0/itkTransform.h
     #  sed -i -- 's/#if defined(__GNUC__) && __GNUC__ < 6/#if defined(__GNUC__) && !defined(__clang__) && __GNUC__ < 6/g' ./prebuilt_packages/itk/include/ITK-5.0/itkTransformBase.h
   fi
+
   # TODO: reenable guis after fixing compile issues
   # TODO: check if the other flags are still needed (originally for the benchmark module)
   cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_GUIS=OFF -DCMAKE_CROSSCOMPILING=1 -DRUN_HAVE_STD_REGEX=0 -DRUN_HAVE_POSIX_REGEX=0 ..
