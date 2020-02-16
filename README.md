@@ -14,7 +14,7 @@
 
 | Builds | AppleClang 11 | Clang 9 | GCC 9 |
 |:--:|:--:|:--:|:--:|
-| macOS 10.14| ![Mojave](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/1?use_travis_com=true) | Soon |
+| macOS 10.14| ![Mojave](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/1?use_travis_com=true) | ![Mojave](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/8?use_travis_com=true) | Soon |
 | Ubuntu 14.04 | N/A | ![Trusty](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/5?use_travis_com=true) | ![Trusty](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/2?use_travis_com=true) |
 | Ubuntu 16.04 | N/A | ![Xenial](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/6?use_travis_com=true) | ![Xenial](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/3?use_travis_com=true) |
 | Ubuntu 18.04 | N/A | ![Bionic](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/7?use_travis_com=true) | ![Bionic](https://travis-matrix-badges.herokuapp.com/repos/aboualiaa/freesurfer/branches/fs-modernize/4?use_travis_com=true) |
@@ -52,23 +52,3 @@ If you've found a bug in the software, feel free to open an issue or submit a pa
 
 Terms and conditions for use, reproduction, distribution and contribution are found in [LICENSE.txt](https://github.com/freesurfer/freesurfer/blob/dev/LICENSE.txt).
 
-## Milestones
-
-- [x] ITK 5
-- [x] Catalina: Apple Clang 11
-- [ ] ContiniousIntegration
-    - [x] macOS
-    - [ ] Ubuntu 14.04
-    - [ ] Ubuntu 16.04
-    - [ ] Ubuntu 18.04
-    - [ ] Catalina: LLVM Clang 9
-    - [ ] Catalina: GCC 9
-- [ ] no banned functions
-- [ ] Unify Interface using Boost Program Options
-- [ ] TDD (Boost/Google/Catch2?)
-- [ ] Benchmarks
-- [ ] DataOrientedDesign
-- [ ] Logging (spdlog)
-- [ ] C++17/20
-- [ ] Documentation
-- [ ] Guides
