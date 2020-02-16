@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+#set -e
 
 (
   mkdir -p cmake-build-debug-trusty && cd ./cmake-build-debug-trusty
