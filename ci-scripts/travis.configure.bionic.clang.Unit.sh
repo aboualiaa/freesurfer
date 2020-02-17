@@ -6,7 +6,10 @@ sudo apt-get install -y --no-install-suggests --no-install-recommends git wget t
   gfortran libblas-dev liblapack-dev zlib1g-dev libxmu-dev \
   libxmu-headers libxi-dev libxt-dev libx11-dev libglu1-mesa-dev \
   mpich python3.6 libboost-all-dev libfltk1.3-dev libeigen3-dev \
-  libarmadillo-dev qt5-default libqt5x11extras5-dev curl git-annex lcov
+  libarmadillo-dev qt5-default libqt5x11extras5-dev curl git-annex lcov libxml2-utils
+
+git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+git config --global user.name "Ahmed Abou-Aliaa"
 
 git remote add datasrc https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git
 git fetch datasrc

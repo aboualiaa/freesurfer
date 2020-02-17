@@ -3,27 +3,289 @@
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 
+name: Freesurfer.Linux
+
 trigger:
   branches:
     include:
       - fs-modernize
 
-jobs:
-- job: Linux
-  pool:
-    vmImage: 'ubuntu-latest'
-  steps:
-  - script: echo hello from Linux
-  displayName: 'Ubuntu Latest'
-- job: macOS
-  pool:
-    vmImage: 'macOS-latest'
-  steps:
-  - script: echo hello from macOS
-  displayName: 'macOS Latest'
-- job: Windows
-  pool:
-    vmImage: 'windows-latest'
-  steps:
-  - script: echo hello from Windows
-  displayName: 'Widnows Latest'
+stages:
+  - stage: Lint
+    jobs:
+      - job: LinuxLint
+        variables:
+          Z_ID: $(System.DefinitionId)
+          B_ID: $(Build.BuildId)
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - script: echo "linted succesfully"
+          - script: echo $B_ID
+          - script: echo $Z_ID
+        displayName: 'Linting'
+  - stage: CollectArtifacts
+    dependsOn: Lint
+    jobs:
+      - job: CheckGitAnnex
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - checkout: none
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '1'
+              specificBuildWithTriggering: true
+              buildVersionToDownload: 'latest'
+              allowPartiallySucceededBuilds: true
+              allowFailedBuilds: true
+              artifactName: 'GitAnnex'
+              targetPath: '$(Pipeline.Workspace)'
+        displayName: 'Check Cached Git Annex Data'
+      - job: DownloadGitAnnex
+        dependsOn: CheckGitAnnex
+        condition: failed()
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - bash: ./ci-scripts/cache.git.annex.sh
+            env:
+              CURRENT_WORK_DIR: $(Agent.BuildDirectory)
+          - publish: $(Agent.BuildDirectory)/annex-cache
+            artifact: GitAnnex
+        displayName: 'Download and Cache Git Annex Data'
+  - stage: Build
+    dependsOn: CollectArtifacts
+    condition: succeededOrFailed()
+    jobs:
+      - job: XenialBuildGCC
+        variables:
+          HOSTING_OS: xenial
+          HOSTING_COMPILER: gcc
+        pool:
+          vmImage: 'ubuntu-16.04'
+        steps:
+          - checkout: self
+            submodules: true
+          - download: current
+            artifact: GitAnnex
+          - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+          - script: ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+          - publish: ./cmake-build-debug-xenial
+            artifact: BuildDirXenialGCC
+        displayName: 'Ubuntu Xenial Build GCC'
+      - job: XenialBuildClang
+        variables:
+          HOSTING_OS: xenial
+          HOSTING_COMPILER: clang
+        pool:
+          vmImage: 'ubuntu-16.04'
+        steps:
+          - checkout: self
+            submodules: true
+          - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+          - script: ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+        displayName: 'Ubuntu Xenial Build Clang'
+      - job: BionicBuildGCC
+        variables:
+          HOSTING_OS: bionic
+          HOSTING_COMPILER: gcc
+        pool:
+          vmImage: 'ubuntu-18.04'
+        steps:
+          - checkout: self
+            submodules: true
+          - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+          - script: ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+        displayName: 'Ubuntu Bionic Build GCC'
+      - job: BionicBuildClang
+        variables:
+          HOSTING_OS: bionic
+          HOSTING_COMPILER: clang
+        pool:
+          vmImage: 'ubuntu-18.04'
+        steps:
+          - checkout: self
+            submodules: true
+          - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+          - script: ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+        displayName: 'Ubuntu Bionic Build Clang'
+      - job: macOSBuild
+        pool:
+          vmImage: 'macOS-latest'
+        steps:
+          - script: echo "hello from macOS $(nproc) Cores"
+        displayName: 'macOS Latest Build'
+      - job: WindowsBuild
+        pool:
+          vmImage: 'windows-latest'
+        steps:
+          - script: echo hello from Windows
+        displayName: 'Widnows Latest Build'
+      - job: XenialUnitTestGCC
+        variables:
+          HOSTING_OS: xenial
+          HOSTING_COMPILER: gcc
+        dependsOn: XenialBuildGCC
+        pool:
+          vmImage: 'ubuntu-16.04'
+        steps:
+          - checkout: self
+            submodules: true
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'current'
+              artifactName: 'BuildDirXenialGCC'
+              targetPath: '$(Build.SourcesDirectory)'
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '1'
+              specificBuildWithTriggering: true
+              buildVersionToDownload: 'latest'
+              allowPartiallySucceededBuilds: true
+              allowFailedBuilds: true
+              artifactName: 'GitAnnex'
+              targetPath: '$(Pipeline.Workspace)'
+          - script: git remote add cache ../annex-cache
+          - script: git annex copy --from cache
+          - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Unit.sh
+          - script: ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
+        displayName: 'Ubuntu Xenial Unit Test GCC'
+      - job: XenialUnitTestClang
+        variables:
+          HOSTING_OS: xenial
+          HOSTING_COMPILER: clang
+        dependsOn: XenialBuildClang
+        pool:
+          vmImage: 'ubuntu-16.04'
+        steps:
+          - checkout: self
+            submodules: true
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '1'
+              specificBuildWithTriggering: true
+              buildVersionToDownload: 'latest'
+              allowPartiallySucceededBuilds: true
+              allowFailedBuilds: true
+              artifactName: 'GitAnnex'
+              targetPath: '$(Pipeline.Workspace)'
+          - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Unit.sh
+          - script: ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
+        displayName: 'Ubuntu Xenial Unit Test Clang'
+      - job: BionicUnitTestGCC
+        variables:
+          HOSTING_OS: bionic
+          HOSTING_COMPILER: gcc
+        dependsOn: BionicBuildGCC
+        pool:
+          vmImage: 'ubuntu-18.04'
+        steps:
+          - checkout: self
+            submodules: true
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '1'
+              specificBuildWithTriggering: true
+              buildVersionToDownload: 'latest'
+              allowPartiallySucceededBuilds: true
+              allowFailedBuilds: true
+              artifactName: 'GitAnnex'
+              targetPath: '$(Pipeline.Workspace)'
+          - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Unit.sh
+          - script: ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
+        displayName: 'Ubuntu Bionic Unit Test GCC'
+      - job: BionicUnitTestClang
+        variables:
+          HOSTING_OS: bionic
+          HOSTING_COMPILER: clang
+        dependsOn: BionicBuildClang
+        pool:
+          vmImage: 'ubuntu-18.04'
+        steps:
+          - checkout: self
+            submodules: true
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '1'
+              specificBuildWithTriggering: true
+              buildVersionToDownload: 'latest'
+              allowPartiallySucceededBuilds: true
+              allowFailedBuilds: true
+              artifactName: 'GitAnnex'
+              targetPath: '$(Pipeline.Workspace)'
+          - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Unit.sh
+          - script: ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
+        displayName: 'Ubuntu Bionic Unit Test Clang'
+      - job: macOSUnitTest
+        dependsOn: macOSBuild
+        pool:
+          vmImage: 'macOS-latest'
+        steps:
+          - script: echo hello from macOS
+        displayName: 'macOS Latest Test'
+      - job: WindowsUnitTest
+        dependsOn: WindowsBuild
+        pool:
+          vmImage: 'windows-latest'
+        steps:
+          - script: echo hello from Windows
+        displayName: 'Widnows Latest Test'
+      - job: XenialIntegrationTestGCC
+        variables:
+          HOSTING_OS: xenial
+          HOSTING_COMPILER: gcc
+        dependsOn: XenialUnitTestGCC
+        pool:
+          vmImage: 'ubuntu-16.04'
+        steps:
+          - script: echo hello from Linux
+        displayName: 'Ubuntu Xenial Integration Test GCC'
+      - job: XenialIntegrationTestClang
+        variables:
+          HOSTING_OS: xenial
+          HOSTING_COMPILER: clang
+        dependsOn: XenialUnitTestClang
+        pool:
+          vmImage: 'ubuntu-16.04'
+        steps:
+          - script: echo hello from Linux
+        displayName: 'Ubuntu Xenial Integration Test Clang'
+      - job: BionicIntegrationTestGCC
+        dependsOn: BionicUnitTestGCC
+        pool:
+          vmImage: 'ubuntu-18.04'
+        steps:
+          - script: echo hello from Linux
+        displayName: 'Ubuntu Bionic Integration Test GCC'
+      - job: BionicIntegrationTestClang
+        dependsOn: BionicUnitTestClang
+        pool:
+          vmImage: 'ubuntu-18.04'
+        steps:
+          - script: echo hello from Linux
+        displayName: 'Ubuntu Bionic Integration Test Clang'
+      - job: macOSIntegrationTest
+        dependsOn: macOSUnitTest
+        pool:
+          vmImage: 'macOS-latest'
+        steps:
+          - script: echo hello from macOS
+        displayName: 'macOS Latest Test'
+      - job: WindowsIntegrationTest
+        dependsOn: WindowsUnitTest
+        pool:
+          vmImage: 'windows-latest'
+        steps:
+          - script: echo hello from Windows
+        displayName: 'Widnows Latest Test'

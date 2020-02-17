@@ -66,10 +66,10 @@ jobs:
             - git
             - cmake
       cache:
-#        apt: true
+        apt: true
 #        ccache: true
-        directories:
-          - cmake-build-debug-trusty
+#        directories:
+#          - cmake-build-debug-trusty
     - os: linux
       stage: build
       env:
@@ -88,10 +88,10 @@ jobs:
             - git
             - cmake
       cache:
-#        apt: true
+        apt: true
 #        ccache: true
-        directories:
-          - cmake-build-debug-xenial
+#        directories:
+#          - cmake-build-debug-xenial
     - os: linux
       stage: build
       env:
@@ -110,10 +110,10 @@ jobs:
             - git
             - cmake
       cache:
-#        apt: true
+        apt: true
 #        ccache: true
-        directories:
-          - cmake-build-debug-bionic
+#        directories:
+#          - cmake-build-debug-bionic
     - os: linux
       stage: build
       env:
@@ -134,10 +134,10 @@ jobs:
             - git
             - cmake
       cache:
-#        apt: true
+        apt: true
 #        ccache: true
-        directories:
-          - cmake-build-debug-trusty
+#        directories:
+#          - cmake-build-debug-trusty
     - os: linux
       stage: build
       env:
@@ -158,10 +158,10 @@ jobs:
             - git
             - cmake
       cache:
-#        apt: true
+        apt: true
 #        ccache: true
-        directories:
-          - cmake-build-debug-xenial
+#        directories:
+#          - cmake-build-debug-xenial
     - os: linux
       stage: build
       env:
@@ -182,10 +182,10 @@ jobs:
             - git
             - cmake
       cache:
-#        apt: true
+        apt: true
 #        ccache: true
-        directories:
-          - cmake-build-debug-bionic
+#        directories:
+#          - cmake-build-debug-bionic
     - os: osx
       stage: build
       env:
@@ -313,10 +313,10 @@ jobs:
             - git
             - cmake
       cache:
-#        apt: true
+        apt: true
 #        ccache: true
-        directories:
-          - cmake-build-debug-trusty
+#        directories:
+#          - cmake-build-debug-trusty
     - os: linux
       stage: unit
       env:
@@ -335,10 +335,10 @@ jobs:
             - git
             - cmake
       cache:
-#        apt: true
+        apt: true
 #        ccache: true
-        directories:
-          - cmake-build-debug-xenial
+#        directories:
+#          - cmake-build-debug-xenial
     - os: linux
       stage: unit
       env:
@@ -357,10 +357,10 @@ jobs:
             - git
             - cmake
       cache:
-#        apt: true
+        apt: true
 #        ccache: true
-        directories:
-          - cmake-build-debug-bionic
+#        directories:
+#          - cmake-build-debug-bionic
     - os: linux
       stage: unit
       env:
@@ -381,10 +381,10 @@ jobs:
             - git
             - cmake
       cache:
-#        apt: true
+        apt: true
 #        ccache: true
-        directories:
-          - cmake-build-debug-trusty
+#        directories:
+#          - cmake-build-debug-trusty
     - os: linux
       stage: unit
       env:
@@ -405,10 +405,10 @@ jobs:
             - git
             - cmake
       cache:
-#        apt: true
+        apt: true
 #        ccache: true
-        directories:
-          - cmake-build-debug-xenial
+#        directories:
+#          - cmake-build-debug-xenial
     - os: linux
       stage: unit
       env:
@@ -429,10 +429,10 @@ jobs:
             - git
             - cmake
       cache:
-#        apt: true
+        apt: true
 #        ccache: true
-        directories:
-          - cmake-build-debug-bionic
+#        directories:
+#          - cmake-build-debug-bionic
     - os: osx
       stage: unit
       env:

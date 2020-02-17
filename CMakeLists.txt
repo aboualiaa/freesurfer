@@ -21,7 +21,7 @@ elseif(APPLE)
     set(CMAKE_NM "/usr/local/opt/llvm/bin/llvm-nm")
     # TODO: uncomment after this issue has been resolved in llvm:
     # https://bugs.llvm.org/show_bug.cgi?id=41707
-#    set(CMAKE_RANLIB "/usr/local/opt/llvm/bin/llvm-ranlib")
+    #    set(CMAKE_RANLIB "/usr/local/opt/llvm/bin/llvm-ranlib")
   endif()
 endif()
 # project info
@@ -103,7 +103,7 @@ endif()
 
 add_compile_options(-fPIC)
 
-if(DEFINED ${CMAKE_BUILD_TYPE})
+if(CMAKE_BUILD_TYPE)
   string(TOLOWER ${CMAKE_BUILD_TYPE} build_type_lower)
 else()
   set(CMAKE_BUILD_TYPE "Debug")
@@ -123,7 +123,6 @@ if(build_type_lower STREQUAL "debug")
   endif()
 endif()
 
-enable_testing()
 include(CTest)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_proxy.sh ${CMAKE_CURRENT_BINARY_DIR}/test.sh COPYONLY)
@@ -241,8 +240,14 @@ find_package(GTS)
 #endif()
 
 # -------- matlab --------
-#set(Matlab_ROOT_DIR /Applications/Polyspace/R2019b.app)
-#find_package(MATLAB)
+if(UNIX AND NOT APPLE)
+  set(Matlab_ROOT_DIR /usr/local/MATLAB/MATLAB_Compiler_Runtime/v84)
+  find_package(MATLAB)
+else()
+  set(Matlab_ROOT_DIR /Applications/MATLAB/MATLAB_Compiler_Runtime/v84)
+  find_package(MATLAB)
+endif()
+
 
 # -------- hpx --------
 set(HPX_IGNORE_COMPILER_COMPATIBILITY ON)
@@ -440,8 +445,11 @@ add_subdirectories(vtkutils lineprof)
 
 # TODO: solve build issues on linux/gcc: looser throw spec...
 # the fem elastic subdir also builds a library, so it should be added first
-if(APPLE)
-  add_subdirectory(fem_elastic)
+if("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang"
+   OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
+  if(APPLE)
+    add_subdirectory(fem_elastic)
+  endif()
 endif()
 
 # build the gems library
