@@ -1,0 +1,5 @@
+add_executable(dmatrix_tests dmatrix_tests.cpp)
+add_test(dmatrix_tests dmatrix_tests)
+set_property(TEST dmatrix_tests PROPERTY LABELS Unit)
+target_include_directories(dmatrix_tests PUBLIC ${gtest_SOURCE_DIR}/include)
+target_link_libraries(dmatrix_tests utils gtest ${GTEST_LIBRARIES})

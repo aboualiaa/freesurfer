@@ -241,3 +241,7 @@ target_link_libraries(fsPrintHelp xml2 ${ZLIB_LIBRARIES})
 install(TARGETS fsPrintHelp DESTINATION bin)
 
 add_subdirectory(test)
+
+if(BUILD_TESTING)
+  add_subdirectory(unittests)
+endif()
