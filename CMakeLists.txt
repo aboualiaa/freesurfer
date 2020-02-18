@@ -147,9 +147,12 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   endif()
 endif()
 
-# create build stamp during install
+# version stamp
+set(FS_VERSION "$ENV{USER}-local" CACHE STRING "Distribution version")
+
+# build stamp
 string(TIMESTAMP TODAY "%Y%m%d")
-set(BUILD_STAMP "freesurfer-local-build-dev-${TODAY}" CACHE STRING "Distribution build stamp")
+set(BUILD_STAMP "freesurfer-local-build-${TODAY}" CACHE STRING "Distribution build stamp")
 install(CODE "file(WRITE ${CMAKE_INSTALL_PREFIX}/build-stamp.txt ${BUILD_STAMP}\\n)")
 
 # set the default build type to 'Release' for optimization purposes
@@ -426,10 +429,11 @@ add_subdirectory(distribution)
 # the top-level include dir contain the most commonly included freesurfer header files
 set(FS_INCLUDE_DIRS
     ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/include/mri_tools
+    ${CMAKE_BINARY_DIR}/include
     ${CMAKE_SOURCE_DIR}/packages/minc
     ${CMAKE_SOURCE_DIR}/packages/netcdf
     ${CMAKE_SOURCE_DIR}/packages/nifti
+    ${CMAKE_SOURCE_DIR}/include/mri_tools
     ${CMAKE_SOURCE_DIR}/packages/abseil-cpp/
     ${CMAKE_SOURCE_DIR}/packages/benchmark/include/
     ${CMAKE_SOURCE_DIR}/packages/fmt/include/

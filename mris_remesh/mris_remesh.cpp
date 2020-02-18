@@ -1,11 +1,12 @@
 #include "argparse.h"
+#include "mrisurf.h"
 #include "remesher.h"
 #include "surfgrad.h"
 #include "mris_remesh.help.xml.h"
 
-int main(int argc, const char **argv) {
-  int nv0;
 
+int main(int argc, char **argv) 
+{
   ArgumentParser parser;
   parser.addHelp(mris_remesh_help_xml, mris_remesh_help_xml_len);
   // required
@@ -23,9 +24,7 @@ int main(int argc, const char **argv) {
   // read input surface
   std::string inputname = parser.retrieve<std::string>("input");
   MRIS *surf = MRISread(inputname.c_str());
-  if (!surf)
-    fs::fatal() << "could not read input surface " << inputname;
-  nv0 = surf->nvertices;
+  if (!surf) fs::fatal() << "could not read input surface " << inputname;
 
   // number of iterations
   int iters = parser.exists("iters") ? parser.retrieve<int>("iters") : 5;
@@ -86,8 +85,7 @@ int main(int argc, const char **argv) {
 
   // print stats
   double diff = (double)remeshed->nvertices / (double)surf->nvertices;
-  printf("Remeshed surface quality stats nv0 = %d  nv = %d  %g\n",
-         surf->nvertices, remeshed->nvertices, diff);
+  printf("Remeshed surface quality stats nv0 = %d  nv = %d  %g\n", surf->nvertices, remeshed->nvertices, diff);
   MRISedges(remeshed);
   MRIScorners(remeshed);
   MRISfaceMetric(remeshed, 0);

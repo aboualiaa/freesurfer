@@ -81,30 +81,22 @@ static double nVFMultiplier = 1.1;
 
 int main(int argc, char *argv[]) {
   ROMP_main
+  
+  char          **av, *hemi, *sname, *cp, fname[STRLEN] ;
+  int           ac, nargs ;
+  MRI_SURFACE   *mris, *mris_corrected ;
+  MRI           *mri, *mri_wm ;
+  int           msec, nvert, nfaces, nedges, eno ;
+  float         max_len ;
+  Timer then ;
 
-      char **av,
-      *hemi, *sname, *cp, fname[STRLEN];
-  int ac, nargs;
-  MRI_SURFACE *mris, *mris_corrected;
-  MRI *mri, *mri_wm;
-  int msec, nvert, nfaces, nedges, eno;
-  float max_len;
-  Timer then;
 
-  char cmdline[CMD_LINE_LEN];
+  std::string cmdline = getAllInfo(argc, argv, "mris_fix_topology");
 
-  make_cmd_version_string(
-      argc, argv,
-      "$Id: mris_fix_topology.c,v 1.51 2016/10/27 19:43:58 fischl Exp $",
-      "$Name:  $", cmdline);
-
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv,
-      "$Id: mris_fix_topology.c,v 1.51 2016/10/27 19:43:58 fischl Exp $",
-      "$Name:  $");
-  if (nargs && argc - nargs == 1) {
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "mris_fix_topology");
+  if (nargs && argc - nargs == 1)
+  {
+    exit (0);
   }
   argc -= nargs;
 

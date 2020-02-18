@@ -67,28 +67,20 @@ const char *Progname;
 
 #define MAX_TPS 1000
 
-int main(int argc, char *argv[]) {
-  char *tp_fname, *in_fname, *out_fname, *tp_names[MAX_TPS];
-  int nargs, t, ntps;
-  char cmdline[CMD_LINE_LEN], line[STRLEN], *cp, fname[STRLEN], bdir[STRLEN],
-      *bname, sdir[STRLEN];
-  MRI *mri_norm = nullptr, *mri_aseg = nullptr, *mri_ctrl, *mri_bias, *mri_dst,
-      *mri_brain = nullptr;
-  FILE *fp;
-  LTA *ltas[MAX_TPS];
+int
+main(int argc, char *argv[])
+{
+  char   *tp_fname, *in_fname, *out_fname, *tp_names[MAX_TPS] ;
+  int    nargs, t, ntps ;
+  char line[STRLEN], *cp, fname[STRLEN], bdir[STRLEN], *bname, sdir[STRLEN] ;
+  MRI   *mri_norm = NULL, *mri_aseg = NULL, *mri_ctrl, *mri_bias, *mri_dst, *mri_brain = NULL ;
+  FILE  *fp ;
+  LTA   *ltas[MAX_TPS] ;
 
-  make_cmd_version_string(
-      argc, argv,
-      "$Id: mri_long_normalize.c,v 1.1 2015/05/20 15:59:06 fischl Exp $",
-      "$Name:  $", cmdline);
-
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv,
-      "$Id: mri_long_normalize.c,v 1.1 2015/05/20 15:59:06 fischl Exp $",
-      "$Name:  $");
-  if (nargs && argc - nargs == 1) {
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "mri_long_normalize");
+  if (nargs && argc - nargs == 1)
+  {
+    exit (0);
   }
   argc -= nargs;
 

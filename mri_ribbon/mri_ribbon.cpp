@@ -41,10 +41,7 @@ int main(int argc, char *argv[]) {
   int nargs;
   LABEL *area = nullptr;
 
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv, "$Id: mri_ribbon.c,v 1.15 2011/03/02 00:04:24 nicks Exp $",
-      "$Name:  $");
+  nargs = handleVersionOption(argc, argv, "mri_ribbon");
   if (nargs && argc - nargs == 1)
     exit(0);
   argc -= nargs;

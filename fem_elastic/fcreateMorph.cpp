@@ -37,7 +37,7 @@ struct IoParams {
   typedef std::vector<int> IntVectorType;
   IntVectorType vDbgCoords;
 
-  void parse(int ac, const char **av);
+  void parse(int ac, char** av);
 };
 
 //==================================================
@@ -45,7 +45,9 @@ struct IoParams {
 // assume field was already allocated
 MRI *CopyGcamToDeltaField(GCA_MORPH *gcam, MRI *field);
 
-int main(int argc, const char **argv) {
+int
+main(int argc, char** argv)
+{
   IoParams params;
   try {
     params.parse(argc, argv);
@@ -178,7 +180,10 @@ int main(int argc, const char **argv) {
   return 0;
 }
 
-void IoParams::parse(int ac, const char **av) {
+
+void
+IoParams::parse(int ac, char** av)
+{
   ArgumentParser parser;
   // required
   parser.addArgument("--in", '+', String, true);

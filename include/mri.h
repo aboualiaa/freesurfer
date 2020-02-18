@@ -1422,35 +1422,40 @@ MRI *MRIconformSliceOrder(MRI *mri);
 
 /** This is deprecated.
     Please use MRIextractDistanceMap in fastmarching.h instead */
-MRI *MRIdistanceTransform(MRI *mri_src, MRI *mri_dist, int label,
-                          float max_dist, int mode, MRI *mri_mask);
-int MRIaddCommandLine(MRI *mri, char *cmdline);
-MRI *MRInonMaxSuppress(MRI *mri_src, MRI *mri_sup, float thresh,
-                       int thresh_dir);
-MRI *MRIextractRegionAndPad(MRI *mri_src, MRI *mri_dst, MRI_REGION *region,
-                            int pad);
-MRI *MRIsetValuesOutsideRegion(MRI *mri_src, MRI_REGION *region, MRI *mri_dst,
-                               float val);
-double MRImeanAndVarianceInNbhd(MRI *mri, int wsize, int x, int y, int z,
-                                int frame, double *pvar);
-int MRIcountNonzeroInNbhd(MRI *mri, int wsize, int x, int y, int z);
-int MRImeanNonzeroInNbhd(MRI *mri, int wsize, int x, int y, int z, int frame);
-int MRImaxInNbhd(MRI *mri, int wsize, int x, int y, int z, int frame);
-int MRImaxInNbhd6Connected(MRI *mri, int x, int y, int z, int frame);
-int MRIcountValInNbhd(MRI *mri, int wsize, int x, int y, int z, int val);
-int MRIcountNonzero(MRI *mri);
-int MRIcountThreshInNbhd(MRI *mri, int wsize, int x, int y, int z,
-                         float thresh);
-MRI *MRImatchMeanIntensity(MRI *mri_source, MRI *mri_target,
-                           MRI *mri_source_scaled);
-MRI *MRIsqr(MRI *mri_src, MRI *mri_dst);
-MRI *MRIsqrt(MRI *mri_src, MRI *mri_dst);
-float MRImaxInRegion(MRI *mri, int x, int y, int z, int whalf);
-double MRImaxInLabelInRegion(MRI *mri_src, MRI *mri_labeled, int label, int x0,
-                             int y0, int z0, int whalf);
+MRI *MRIdistanceTransform(MRI *mri_src, MRI *mri_dist,
+                          int label, float max_dist, int mode, MRI *mri_mask);
+int MRIaddCommandLine(MRI *mri, const std::string& cmdline);
+MRI *MRInonMaxSuppress(MRI *mri_src, MRI *mri_sup,
+                       float thresh, int thresh_dir) ;
+MRI *MRIextractRegionAndPad(MRI *mri_src, MRI *mri_dst,
+                            MRI_REGION *region, int pad) ;
+MRI *MRIsetValuesOutsideRegion(MRI *mri_src,
+                               MRI_REGION *region,
+                               MRI *mri_dst,
+                               float val) ;
+double MRImeanAndVarianceInNbhd(MRI *mri, int wsize, int x, int y, int z, int frame, double *pvar) ;
+int MRIcountNonzeroInNbhd(MRI *mri, int wsize, int x, int y, int z) ;
+int MRImeanNonzeroInNbhd(MRI *mri, int wsize, int x, int y, int z, int frame) ;
+int MRImaxInNbhd(MRI *mri, int wsize, int x, int y, int z, int frame) ;
+int MRImaxInNbhd6Connected(MRI *mri, int x, int y, int z, int frame) ;
+int MRIcountValInNbhd(MRI *mri, int wsize, int x, int y, int z, int val) ;
+int MRIcountNonzero(MRI *mri) ;
+int MRIcountThreshInNbhd(MRI *mri, int wsize, int x,int y,int z, float thresh);
+MRI *MRImatchMeanIntensity(MRI *mri_source,
+                           MRI *mri_target,
+                           MRI *mri_source_scaled) ;
+MRI *MRIsqr(MRI *mri_src, MRI *mri_dst)  ;
+MRI *MRIsqrt(MRI *mri_src, MRI *mri_dst)  ;
+float MRImaxInRegion(MRI *mri, int x, int y, int z, int whalf) ;
+double MRImaxInLabelInRegion(MRI *mri_src,
+                             MRI *mri_labeled,
+                             int label,
+                             int x0, int y0, int z0,
+                             int whalf) ;
 
-double MRIestimateTIV(char *theLtaFile, double theScaleFactor,
-                      double *theAtlasDet);
+double MRIestimateTIV(char* theLtaFile,
+                      double theScaleFactor,
+                      double* theAtlasDet);
 
 int MRInormalizeFrames(MRI *mri);
 int MRInormalizeFramesMean(MRI *mri);

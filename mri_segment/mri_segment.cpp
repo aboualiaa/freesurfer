@@ -116,12 +116,10 @@ int main(int argc, char *argv[]) {
 
   TAGmakeCommandLineString(argc, argv, cmdline);
 
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv, "$Id: mri_segment.c,v 1.44 2016/10/22 17:29:37 fischl Exp $",
-      "$Name:  $");
-  if (nargs && argc - nargs == 1) {
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "mri_segment");
+  if (nargs && argc - nargs == 1)
+  {
+    exit (0);
   }
   argc -= nargs;
 

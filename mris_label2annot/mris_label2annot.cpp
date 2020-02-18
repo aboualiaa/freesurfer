@@ -186,9 +186,8 @@ int IndexOffset = 0;
 int main(int argc, char *argv[]) {
   int nargs, nthlabel, n, vtxno, ano, index, nunhit;
 
-  nargs = handle_version_option(argc, argv, vcid, "$Name:  $");
-  if (nargs && argc - nargs == 1)
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "mris_label2annot");
+  if (nargs && argc - nargs == 1) exit (0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);

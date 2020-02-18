@@ -112,11 +112,8 @@ int main(int argc, char **argv) {
   MATRIX *outv2r;
   MRI *outref = nullptr;
 
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(argc, argv, vcid, "$Name:  $");
-  if ((nargs != 0) && argc - nargs == 1) {
-    exit(0);
-  }
+  nargs = handleVersionOption(argc, argv, "dmri_group");
+  if (nargs && argc - nargs == 1) exit (0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);

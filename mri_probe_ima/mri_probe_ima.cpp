@@ -73,13 +73,9 @@ int main(int argc, char **argv) {
   IMAFILEINFO *ifi;
   int nargs;
 
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv, "$Id: mri_probe_ima.c,v 1.13 2011/03/02 00:04:24 nicks Exp $",
-      "$Name:  $");
-  if ((nargs != 0) && argc - nargs == 1) {
-    exit(0);
-  }
+  nargs = handleVersionOption(argc, argv, "mri_probe_ima");
+  if (nargs && argc - nargs == 1)
+    exit (0);
   argc -= nargs;
 
   tmpstr[0] = 'a'; /* to stop compiler warning */

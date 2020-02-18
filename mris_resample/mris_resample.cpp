@@ -75,10 +75,12 @@ struct IoParams {
   std::string strOutput;
   std::string strOutAnnotation;
 
-  void parse(int ac, const char **av);
+  void parse(int ac, char** av);
 };
 
-int main(int ac, const char **av) {
+int
+main(int ac, char** av)
+{
   // parse cmd-line
   IoParams params;
   try {
@@ -116,7 +118,9 @@ int main(int ac, const char **av) {
   return 0;
 }
 
-void IoParams::parse(int ac, const char **av) {
+void
+IoParams::parse(int ac, char** av)
+{
   ArgumentParser parser;
   // required
   parser.addArgument("--atlas_reg", 1, String, true);

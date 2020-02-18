@@ -144,10 +144,8 @@ int main(int ac, char *av[]) {
   int nargs = 0, msec;
   Timer then;
 
-  then.reset();
-  nargs = handle_version_option(
-      ac, av, "$Id: mris_volmask.cpp,v 1.28 2016/11/18 19:19:29 fischl Exp $",
-      "$Name:  $");
+  then.reset() ;
+  nargs = handleVersionOption(ac, av, "mris_volmask");
   if (nargs && ac - nargs == 1)
     exit(0);
   ac -= nargs;

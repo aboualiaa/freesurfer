@@ -149,47 +149,39 @@ static int write_iter = -1;
 #define TRANS_STEP_SIZE 1
 #define SCALE_STEP_SIZE .025
 
-static double max_rot = MAX_ROT;
-static double max_trans = MAX_TRANS;
-static double min_scale = 1.0;
-static double max_scale = 1.0;
-static MRI_SURFACE *mris;
-static double angle_step_size = ANGLE_STEP_SIZE;
-static double trans_step_size = TRANS_STEP_SIZE;
-// static double scale_step_size = SCALE_STEP_SIZE ;
-static double trans_steps = (2 / TRANS_STEP_SIZE) * MAX_TRANS + 1;
-static double angle_steps = (2 / ANGLE_STEP_SIZE) * DEGREES(MAX_ROT) + 1;
-static double scale_steps = 1;
+static double max_rot = MAX_ROT ;
+static double max_trans = MAX_TRANS ;
+static double min_scale = 1.0 ;
+static double max_scale = 1.0 ;
+static MRI_SURFACE   *mris ; 
+static double angle_step_size = ANGLE_STEP_SIZE ;
+static double trans_step_size = TRANS_STEP_SIZE ;
+//static double scale_step_size = SCALE_STEP_SIZE ;
+static double trans_steps = (2/TRANS_STEP_SIZE)*MAX_TRANS+1 ;
+static double angle_steps = (2/ANGLE_STEP_SIZE)*DEGREES(MAX_ROT)+1 ;
+static double scale_steps = 1 ;
 
-const char *Progname;
 
-static char base_name[STRLEN];
-static char *SUBJECTS_DIR;
-static MATRIX *R0;
-static char vcid[] =
-    "$Id: mris_register_to_label.c,v 1.3 2013/06/07 18:56:17 fischl Exp $";
-int main(int argc, char **argv) {
-  char cmdline[CMD_LINE_LEN], fname[STRLEN];
-  MRI *mri_dist, *mri_src;
-  LABEL *area, *ltmp;
-  int msec, nargs;
-  Timer then;
+const char *Progname ;
 
-  make_cmd_version_string(
-      argc, argv,
-      "$Id: mris_register_to_label.c,v 1.3 2013/06/07 18:56:17 fischl Exp $",
-      "$Name:  $", cmdline);
+static char base_name[STRLEN] ;
+static char *SUBJECTS_DIR ;
+static MATRIX *R0 ;
+static char vcid[] = "$Id: mris_register_to_label.c,v 1.3 2013/06/07 18:56:17 fischl Exp $";
+int
+main(int argc, char **argv) 
+{
+  char          fname[STRLEN] ;
+  MRI           *mri_dist, *mri_src ;
+  LABEL         *area, *ltmp ;
+  int           msec, nargs ;
+  Timer then ;
 
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv,
-      "$Id: mris_register_to_label.c,v 1.3 2013/06/07 18:56:17 fischl Exp $",
-      "$Name:  $");
-  if (nargs && argc - nargs == 1)
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "mris_register_to_label");
+  if(nargs && argc - nargs == 1) exit (0);
 
-  Progname = argv[0];
-  argc--;
+  Progname = argv[0] ;
+  argc --;
   argv++;
   ErrorInit(NULL, NULL, NULL);
   DiagInit(NULL, NULL, NULL);

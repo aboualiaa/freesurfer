@@ -167,33 +167,29 @@ static int MGZ = 1; // for use with MGZ format
 
 static int longitudinal = 0;
 
-int main(int argc, char *argv[]) {
-  char *hemi, *sname, *cp, fname[STRLEN], mdir[STRLEN];
-  int nargs, i, replace_val, msec, n_averages, j;
-  MRI_SURFACE *mris;
-  MRI *mri_filled, *mri_T1_30, *mri_T1_5; // *mri_labeled;
-  MRI *mri_em_seg = nullptr, *mri_PD = nullptr, *mri_T1 = nullptr;
-  float max_len;
-  // need to be estimated from EM segmentation;
-  // need to mask out cerebellum though
-  float white_mean[2], white_std[2], gray_mean[2], gray_std[2];
-  float PD_white_mean[2], PD_white_std[2], PD_gray_mean[2], PD_gray_std[2];
-  float T1_white_mean, T1_white_std, T1_gray_mean, T1_gray_std;
-  double current_sigma;
-  Timer then;
 
-  char cmdline[CMD_LINE_LEN];
+int
+main(int argc, char *argv[]) {
+  char          *hemi, *sname, *cp, fname[STRLEN], mdir[STRLEN];
+  int           nargs, i, replace_val, msec, n_averages, j ;
+  MRI_SURFACE   *mris ;
+  MRI           *mri_filled, *mri_T1_30, *mri_T1_5; // *mri_labeled;
+  MRI           *mri_em_seg = NULL, *mri_PD = NULL, *mri_T1 = NULL;
+  float         max_len ;
+  //need to be estimated from EM segmentation; 
+  //need to mask out cerebellum though
+  float         white_mean[2], white_std[2], gray_mean[2], gray_std[2];
+  float         PD_white_mean[2], PD_white_std[2], PD_gray_mean[2], 
+                PD_gray_std[2];
+  float         T1_white_mean, T1_white_std, T1_gray_mean, 
+                T1_gray_std;
+  double        current_sigma ;
+  Timer then ;
 
-  make_cmd_version_string(
-      argc, argv,
-      "$Id: mris_exvivo_surfaces.c,v 1.9 2015/02/05 23:34:41 zkaufman Exp $",
-      "$Name:  $", cmdline);
 
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv,
-      "$Id: mris_exvivo_surfaces.c,v 1.9 2015/02/05 23:34:41 zkaufman Exp $",
-      "$Name:  $");
+  std::string cmdline = getAllInfo(argc, argv, "mris_exvivo_surfaces");
+
+  nargs = handleVersionOption(argc, argv, "mris_exvivo_surfaces");
   if (nargs && argc - nargs == 1)
     exit(0);
   argc -= nargs;

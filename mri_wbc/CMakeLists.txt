@@ -9,3 +9,4 @@ install(TARGETS mri_wbc DESTINATION bin)
 
 add_executable(mri_wbc_tests mri_wbc_tests.cpp)
 target_link_libraries(mri_wbc_tests utils Boost::program_options Boost::unit_test_framework Boost::filesystem)
+

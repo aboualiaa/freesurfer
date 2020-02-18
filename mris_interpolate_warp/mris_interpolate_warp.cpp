@@ -288,13 +288,10 @@ int main(int argc, char *argv[]) {
   GCA_MORPH *gcam;
   MRI *mri = nullptr;
 
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv,
-      "$Id: mris_interpolate_warp.c,v 1.5 2011/10/07 12:07:26 fischl Exp $",
-      "$Name:  $");
-  if (nargs && argc - nargs == 1) {
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "mris_interpolate_warp");
+  if (nargs && argc - nargs == 1)
+  {
+    exit (0);
   }
   argc -= nargs;
 

@@ -149,14 +149,9 @@ int main(int argc, char **argv) {
   double ybvec;
   double zbvec;
 
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv,
-      "$Id: mri_probedicom.c,v 1.45 2015/07/28 21:51:22 greve Exp $",
-      "$Name:  $");
-  if ((nargs != 0) && argc - nargs == 1) {
-    exit(0);
-  }
+  nargs = handleVersionOption(argc, argv, "mri_probedicom");
+  if (nargs && argc - nargs == 1)
+    exit (0);
   argc -= nargs;
 
   tmpstr[0] = 'a'; /* to stop compiler warning */

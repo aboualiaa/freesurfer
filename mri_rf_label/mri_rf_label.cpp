@@ -38,80 +38,78 @@ static int postprocess_segmentation_with_aseg(MRI *mri_labeled, MRI *mri_aseg,
 static int postprocess_grow_wmsas(MRI *mri_labeled, MRI *mri_pvals,
                                   float pthresh, MRI *mri_aseg);
 #define MAX_READS 100
-static int nreads = 0;
-static char *read_intensity_fname[MAX_READS];
-static int avgs = 0;
+static int nreads = 0 ;
+static char *read_intensity_fname[MAX_READS] ;
+static int avgs = 0 ;
 
-static int wmsa = 0;   // apply wmsa postprocessing (using T2/PD data)
-static int nowmsa = 0; // remove all wmsa labels from the atlas
+static int wmsa = 0 ;   // apply wmsa postprocessing (using T2/PD data)
+static int nowmsa = 0 ; // remove all wmsa labels from the atlas
 
-static double TRs[MAX_GCA_INPUTS];
-static double fas[MAX_GCA_INPUTS];
-static double TEs[MAX_GCA_INPUTS];
-static int nsurfs = 0;
-static char *surface_names[MAX_SURFACES];
-static double surface_dist = 1;
+static double TRs[MAX_GCA_INPUTS] ;
+static double fas[MAX_GCA_INPUTS] ;
+static double TEs[MAX_GCA_INPUTS] ;
+static int nsurfs = 0 ;
+static char *surface_names[MAX_SURFACES] ;
+static double surface_dist = 1 ;
 
-int distance_to_label(MRI *mri_labeled, int label, int x, int y, int z, int dx,
-                      int dy, int dz, int max_dist);
 
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
 
-static double TR = -1;
-static double alpha = -1;
-static double TE = -1;
-static char *mask_volume_fname = nullptr;
+int distance_to_label( MRI *mri_labeled, int label, int x,
+                       int y, int z, int dx, int dy,
+                       int dz, int max_dist );
 
-const char *Progname;
-static void usage_exit(int code);
 
-static int filter = 0;
+int main(int argc, char *argv[]) ;
+static int get_option(int argc, char *argv[]) ;
 
-static int conform_flag = FALSE;
-static int single_classifier_flag = 0;
-static char *only_nbrs_rf_fname =
-    nullptr; // only pick voxels that are on borders of a wmsa to train
-static GCA *gca;
-static float wmsa_thresh = 0.0;
-static float pthresh = -1;
-static float wm_thresh = .8;
-static int wmsa_whalf = 3;
-static MRI *relabel_wmsa_nbrs_with_random_forest(RANDOM_FOREST *rf,
-                                                 TRANSFORM *transform, GCA *gca,
-                                                 MRI *mri_inputs,
-                                                 MRI *mri_labeled);
-static MRI *label_with_random_forest(RANDOM_FOREST *rf, TRANSFORM *transform,
-                                     GCA *gca, float wm_thresh, MRI *mri_in,
-                                     MRI *mri_labeled, int wmsa_whalf,
-                                     MRI *mri_aseg, MRI **pmri_pvals);
 
-static MRI *mri_aseg = nullptr;
-static int min_voxels = 6; // remove wmsa segments smaller than this
+static double TR = -1 ;
+static double alpha = -1 ;
+static double TE = -1 ;
+static char *mask_volume_fname = NULL ;
 
-int main(int argc, char *argv[]) {
-  char **av;
-  int ac, nargs, extra = 0;
-  char *in_fname, *out_fname, *rfa_fname, *xform_fname;
-  MRI *mri_inputs, *mri_labeled, *mri_tmp, *mri_pvals;
-  int msec, minutes, seconds, ninputs, input;
-  Timer start;
-  TRANSFORM *transform;
-  RFA *rfa = nullptr;
-  RANDOM_FOREST *rf = nullptr; // if single_classifier_flag is true
+const char *Progname ;
+static void usage_exit(int code) ;
 
-  char cmdline[CMD_LINE_LEN];
+static int filter = 0 ;
 
-  make_cmd_version_string(
-      argc, argv, "$Id: mri_rf_label.c,v 1.3 2012/05/23 23:50:50 fischl Exp $",
-      "$Name:  $", cmdline);
+static int conform_flag = FALSE ;
+static int single_classifier_flag = 0 ;
+static char *only_nbrs_rf_fname = 0 ;   // only pick voxels that are on borders of a wmsa to train
+static GCA *gca ;
+static float  wmsa_thresh = 0.0 ;
+static float pthresh = -1 ;
+static float wm_thresh = .8 ;
+static int wmsa_whalf = 3 ;
+static MRI *relabel_wmsa_nbrs_with_random_forest(RANDOM_FOREST *rf, TRANSFORM *transform, GCA *gca, 
+						 MRI *mri_inputs, MRI *mri_labeled) ;
+static MRI *label_with_random_forest(RANDOM_FOREST *rf, TRANSFORM *transform, GCA *gca,
+				     float wm_thresh, MRI *mri_in, MRI *mri_labeled, int wmsa_whalf,
+				     MRI *mri_aseg, MRI **pmri_pvals) ;
 
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv, "$Id: mri_rf_label.c,v 1.3 2012/05/23 23:50:50 fischl Exp $",
-      "$Name:  $");
-  if (nargs && argc - nargs == 1) {
-    exit(0);
+static MRI *mri_aseg = NULL; 
+static int min_voxels = 6 ; // remove wmsa segments smaller than this
+
+int
+main(int argc, char *argv[])
+{
+  char         **av ;
+  int          ac, nargs, extra = 0 ;
+  char         *in_fname, *out_fname,  *rfa_fname, *xform_fname ;
+  MRI          *mri_inputs, *mri_labeled, *mri_tmp, *mri_pvals ;
+  int          msec, minutes, seconds, ninputs, input ;
+  Timer start ;
+  TRANSFORM     *transform ;
+  RFA          *rfa = NULL ;
+  RANDOM_FOREST *rf = NULL ;  // if single_classifier_flag is true
+
+
+  std::string cmdline = getAllInfo(argc, argv, "mri_rf_label");
+
+  nargs = handleVersionOption(argc, argv, "mri_rf_label");
+  if (nargs && argc - nargs == 1)
+  {
+    exit (0);
   }
   argc -= nargs;
 

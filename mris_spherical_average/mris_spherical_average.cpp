@@ -78,20 +78,12 @@ int main(int argc, char *argv[]) {
   LABEL *area, *area_avg = NULL;
   float average_label_area = 0;
 
-  char cmdline[CMD_LINE_LEN];
+  std::string cmdline = getAllInfo(argc, argv, "mris_spherical_average");
 
-  make_cmd_version_string(
-      argc, argv,
-      "$Id: mris_spherical_average.c,v 1.38 2016/12/11 14:33:44 fischl Exp $",
-      "$Name:  $", cmdline);
-
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv,
-      "$Id: mris_spherical_average.c,v 1.38 2016/12/11 14:33:44 fischl Exp $",
-      "$Name:  $");
-  if (nargs && argc - nargs == 1) {
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "mris_spherical_average");
+  if (nargs && argc - nargs == 1)
+  {
+    exit (0);
   }
   argc -= nargs;
 

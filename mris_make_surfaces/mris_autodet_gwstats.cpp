@@ -70,10 +70,8 @@ int main(int argc, char **argv) {
   int nargs;
   char *cmdline2, cwd[2000];
 
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(argc, argv, vcid, "$Name:  $");
-  if (nargs && argc - nargs == 1)
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "mris_autodet_gwstats");
+  if (nargs && argc - nargs == 1) exit (0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);
@@ -232,12 +230,53 @@ static int parse_commandline(int argc, char **argv) {
         CMDargNErr(option, 1);
       subject = pargv[0];
       nargsused = 1;
-    } else if (!strcasecmp(option, "--threads") ||
-               !strcasecmp(option, "--nthreads")) {
-      if (nargc < 1)
-        CMDargNErr(option, 1);
-      sscanf(pargv[0], "%d", &nthreads);
-#ifdef _OPENMP
+    }
+    else if(!strcmp(option, "--min_border_white")) {
+      if(nargc < 1) CMDargNErr(option,1);
+      adgws.min_border_white = atof(pargv[0]);
+      adgws.min_border_white_set = 1;
+      nargsused = 1;
+    }
+    else if(!strcmp(option, "--max_border_white")) {
+      if(nargc < 1) CMDargNErr(option,1);
+      adgws.max_border_white = atof(pargv[0]);
+      adgws.max_border_white_set = 1;
+      nargsused = 1;
+    }
+    else if(!strcmp(option, "--min_gray_at_white_border")) {
+      if(nargc < 1) CMDargNErr(option,1);
+      adgws.min_gray_at_white_border = atof(pargv[0]);
+      adgws.min_gray_at_white_border_set = 1;
+      nargsused = 1;
+    }
+    else if(!strcmp(option, "--max_gray")) {
+      if(nargc < 1) CMDargNErr(option,1);
+      adgws.max_gray = atof(pargv[0]);
+      adgws.max_gray_set = 1;
+      nargsused = 1;
+    }
+    else if(!strcmp(option, "--max_gray_at_csf_border")) {
+      if(nargc < 1) CMDargNErr(option,1);
+      adgws.max_gray_at_csf_border = atof(pargv[0]);
+      adgws.max_gray_at_csf_border_set = 1;
+      nargsused = 1;
+    }
+    else if(!strcmp(option, "--min_gray_at_csf_border")) {
+      if(nargc < 1) CMDargNErr(option,1);
+      adgws.min_gray_at_csf_border = atof(pargv[0]);
+      adgws.min_gray_at_csf_border_set = 1;
+      nargsused = 1;
+    }
+    else if(!strcmp(option, "--max_csf")) {
+      if(nargc < 1) CMDargNErr(option,1);
+      adgws.max_csf = atof(pargv[0]);
+      adgws.max_csf_set = 1;
+      nargsused = 1;
+    }
+    else if(!strcasecmp(option, "--threads") || !strcasecmp(option, "--nthreads") ){
+      if(nargc < 1) CMDargNErr(option,1);
+      sscanf(pargv[0],"%d",&nthreads);
+      #ifdef _OPENMP
       omp_set_num_threads(nthreads);
 #endif
       nargsused = 1;
@@ -318,6 +357,13 @@ static void print_usage() {
   printf(" --s subject : reads in brain.finalsurfs.mgz, wm.mgz, lh.orig and "
          "rh.orig\n");
   printf(" --sd SUBJECTS_DIR \n");
+  printf(" --min_border_white MinBW : Min border white\n");
+  printf(" --max_border_white MaxBW : Max border white\n");
+  printf(" --min_gray_at_white_border MinGWB\n");
+  printf(" --max_gray MaxG\n");
+  printf(" --max_gray_at_csf_border MaxGCSFB\n");
+  printf(" --min_gray_at_csf_border MinGCSFB\n");
+  printf(" --max_csf MaxCSF\n");
   printf("\n");
 }
 

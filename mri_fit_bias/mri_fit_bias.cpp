@@ -122,21 +122,18 @@ MRI *MRIapplyBiasField(MRI *input, MRI *bf, MRI *seg, MRI *mask,
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
   int nargs;
-  int wmsegs[] = {2, 41, 251, 252, 253, 254, 255}, nwmsegs; // 7,46
-  int csfsegs[] = {4, 5, 14, 24, 43, 44, 75, 31, 63, 15}, ncsfsegs;
-  int ctxsegs[] = {3, 42}, nctxsegs;
-  int exsegs[] = {30, 62, 77, 85, 16, 7,  8,  46, 47, 12, 51, 13, 52,
-                  11, 50, 17, 53, 18, 54, 10, 49, 28, 60, 26, 58},
-      nexsegs;
+  int wmsegs[] = {2,41,251,252,253,254,255},nwmsegs; //7,46
+  int csfsegs[] = {4,5,14,24,43,44,75,31,63,15},ncsfsegs;
+  int ctxsegs[] = {3,42},nctxsegs;
+  int exsegs[] = {30,62,77,85,16,7,8,46,47,12,51,13,52,11,50,17,53,18,54,10,49,28,60,26,58},nexsegs;
 
-  nwmsegs = sizeof(wmsegs) / sizeof(int);
-  ncsfsegs = sizeof(csfsegs) / sizeof(int);
-  nctxsegs = sizeof(ctxsegs) / sizeof(int);
-  nexsegs = sizeof(exsegs) / sizeof(int);
+  nwmsegs = sizeof(wmsegs)/sizeof(int);
+  ncsfsegs = sizeof(csfsegs)/sizeof(int);
+  nctxsegs = sizeof(ctxsegs)/sizeof(int);
+  nexsegs = sizeof(exsegs)/sizeof(int);
 
-  nargs = handle_version_option(argc, argv, vcid, "$Name:  $");
-  if (nargs && argc - nargs == 1)
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "mri_fit_bias");
+  if (nargs && argc - nargs == 1) exit (0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);

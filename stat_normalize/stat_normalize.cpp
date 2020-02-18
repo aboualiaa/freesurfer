@@ -53,13 +53,8 @@ int main(int argc, char *argv[]) {
   SV *sv, *sv_avg = nullptr;
   MRI_SURFACE *mris;
 
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv,
-      "$Id: stat_normalize.c,v 1.14 2011/03/02 00:04:40 nicks Exp $",
-      "$Name:  $");
-  if (nargs && argc - nargs == 1)
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "stat_normalize");
+  if (nargs && argc - nargs == 1) exit (0);
   argc -= nargs;
 
   Progname = argv[0];

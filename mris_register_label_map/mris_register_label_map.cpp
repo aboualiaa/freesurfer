@@ -195,20 +195,18 @@ static int subcortical_labels[] = {
   (sizeof(subcortical_labels) / sizeof(subcortical_labels[0]))
 
 /*---------------------------------------------------------------*/
-int main(int argc, char *argv[]) {
-  int nargs, n, ic, nvert;
-  char *subject, fname[STRLEN];
-  MRI *mri_cmat, *mri_prior, *mri_stats = NULL, *mri_label_avg[MAX_SUBJECTS],
-                             *mri_cmat_mov, *mri_fvol[MAX_SUBJECTS][MAX_RUNS],
-                             *mri_fsurf[MAX_SUBJECTS][MAX_RUNS],
-                             *mri_target_label = NULL;
-  LABEL *labels[MAX_SUBJECTS], *target_area;
-  MRI_SURFACE *mris_lh_mov, *mris_rh_mov, *mris_lh_fixed, *mris_rh_fixed;
-  MATRIX *m_map_weights;
+int main(int argc, char *argv[]) 
+{
+  int         nargs, n, ic, nvert;
+  char        *subject, fname[STRLEN] ;
+  MRI         *mri_cmat, *mri_prior, *mri_stats = NULL, *mri_label_avg[MAX_SUBJECTS], *mri_cmat_mov,
+    *mri_fvol[MAX_SUBJECTS][MAX_RUNS], *mri_fsurf[MAX_SUBJECTS][MAX_RUNS], *mri_target_label = NULL ;
+  LABEL       *labels[MAX_SUBJECTS], *target_area ;
+  MRI_SURFACE *mris_lh_mov, *mris_rh_mov, *mris_lh_fixed, *mris_rh_fixed ;
+  MATRIX      *m_map_weights ;
 
-  nargs = handle_version_option(argc, argv, vcid, "$Name:  $");
-  if (nargs && argc - nargs == 1)
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "mris_register_label_map");
+  if (nargs && argc - nargs == 1) exit (0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);

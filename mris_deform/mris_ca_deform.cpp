@@ -37,82 +37,76 @@ static int compute_gradient_target_positions(MRI_SURFACE *mris,
                                              VERTEX_INFO *vi,
                                              float current_sigma);
 static GCA *make_gca(char *label_vol_name, char *intensity_vol_name,
-                     TRANSFORM *transform);
-static MRI *compute_pmap(GCA *gca, TRANSFORM *transform, MRI *mri_intensities,
-                         int target_label, MRI *mri_dist, double pad,
-                         MRI *mri_pmap);
-static MRI *compute_pmap_with_gcab(GCA *gca, TRANSFORM *transform,
-                                   MRI *mri_intensities, MRI *mri_labels,
-                                   int target_label, MRI *mri_dist, double pad,
-                                   GCAB *gcab, MRI *mri_pmap);
-int main(int argc, char *argv[]);
-static int get_option(int argc, char *argv[]);
-static int build_label_histograms(MRI *mri_labels, MRI *mri_intensities,
-                                  HISTOGRAM **histos);
-static MRI *compute_target_intensities_with_gcab(
-    MRI_SURFACE *mris, MRI *mri_labels, MRI *mri_intensities,
-    HISTOGRAM **histograms, VERTEX_INFO *vi, float sigma, TRANSFORM *transform,
-    GCA *gca, int target_label, float resolution, GCAB *gcab);
-static MRI *compute_target_intensities(MRI_SURFACE *mris, MRI *mri_labels,
-                                       MRI *mri_intensities,
-                                       HISTOGRAM **histograms, VERTEX_INFO *vi,
-                                       float sigma, TRANSFORM *transform,
-                                       GCA *gca, int label, float resolution);
-static int compute_target_labels(MRI_SURFACE *mris, MRI *mri_labels,
-                                 MRI *mri_intensities, HISTOGRAM **histograms,
-                                 VERTEX_INFO *vi);
+										 TRANSFORM *transform) ;
+static MRI *compute_pmap(GCA *gca, TRANSFORM *transform, MRI *mri_intensities, int target_label, MRI *mri_dist, double pad, MRI *mri_pmap) ;
+static MRI *compute_pmap_with_gcab(GCA *gca, TRANSFORM *transform, MRI *mri_intensities, MRI *mri_labels, int target_label, MRI *mri_dist, double pad, GCAB *gcab, MRI *mri_pmap) ;
+int main(int argc, char *argv[]) ;
+static int get_option(int argc, char *argv[]) ;
+static int build_label_histograms(MRI *mri_labels, MRI *mri_intensities, HISTOGRAM **histos) ;
+static MRI *compute_target_intensities_with_gcab(MRI_SURFACE *mris, MRI *mri_labels, MRI *mri_intensities, 
+                                                 HISTOGRAM **histograms, VERTEX_INFO *vi,float sigma, 
+                                                 TRANSFORM *transform, GCA *gca, int target_label, float resolution,
+                                                 GCAB *gcab) ;
+static MRI *compute_target_intensities(MRI_SURFACE *mris, MRI *mri_labels, MRI *mri_intensities, 
+                                       HISTOGRAM **histograms,
+                                      VERTEX_INFO *vi, float sigma,
+                                      TRANSFORM *transform, GCA *gca, int label, float resolution) ;
+static int compute_target_labels(MRI_SURFACE *mris, MRI *mri_labels, MRI *mri_intensities, HISTOGRAM **histograms,
+                                 VERTEX_INFO *vi) ;
 
-const char *Progname;
 
-static float resolution = 8.0;
-static char *label_vol_name = nullptr;
-static char *intensity_vol_name = nullptr; // for building GCA from hires data
-static char *gca_fname = nullptr;
-static int min_averages = 0;
-static int max_averages = 4;
-static float sigma = 1.0;
-static int vavgs = 0;
-static int nbrs = 2;
-static int target_label = -1;
-static int renormalize_gca = 1;
-static char *renorm_seg_fname = nullptr;
-static int read_ll = 0;
+const char *Progname ;
 
-static int use_grad = 0;
-static double max_grad_dist = 1.5; // mm away from current boundary position
+static float resolution = 8.0 ;
+static char *label_vol_name = NULL ;
+static char *intensity_vol_name = NULL ; // for building GCA from hires data
+static char *gca_fname = NULL ;
+static int min_averages = 0 ;
+static int max_averages = 4 ;
+static float sigma = 1.0 ;
+static int vavgs = 0 ;
+static int nbrs = 2 ;
+static int target_label = -1 ;
+static int renormalize_gca = 1 ;
+static char *renorm_seg_fname = NULL ;
+static int read_ll = 0 ;
 
-static void usage_exit(int code);
+static int use_grad = 0 ;
+static double max_grad_dist= 1.5 ; // mm away from current boundary position
 
-static char *gca_write_fname = nullptr;
-static INTEGRATION_PARMS parms;
+static void usage_exit(int code) ;
 
-static double externalLLGradient(MRI_SURFACE *mris, INTEGRATION_PARMS *parms);
-static double externalLLSSE(MRI_SURFACE *mris, INTEGRATION_PARMS *parms);
-static double externalLLRMS(MRI_SURFACE *mris, INTEGRATION_PARMS *parms);
+static char *gca_write_fname = NULL ;
+static INTEGRATION_PARMS parms ;
 
-static double externalGradGradient(MRI_SURFACE *mris, INTEGRATION_PARMS *parms);
-static double externalGradSSE(MRI_SURFACE *mris, INTEGRATION_PARMS *parms);
-static double externalGradRMS(MRI_SURFACE *mris, INTEGRATION_PARMS *parms);
+static double externalLLGradient(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) ;
+static double externalLLSSE(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) ;
+static double externalLLRMS(MRI_SURFACE *mris,INTEGRATION_PARMS *parms) ;
 
-static GCAB *gcab;
+static double externalGradGradient(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) ;
+static double externalGradSSE(MRI_SURFACE *mris, INTEGRATION_PARMS *parms) ;
+static double externalGradRMS(MRI_SURFACE *mris,INTEGRATION_PARMS *parms) ;
 
-int main(int argc, char *argv[]) {
-  char *out_fname, **av;
-  int ac, nargs, i;
-  MRI *mri_intensities, *mri_labels /*, *mri_kernel, *mri_smooth=NULL*/,
-      *mri_ll = nullptr;
-  MRI_SURFACE *mris;
-  int msec, minutes, seconds, n_averages;
-  float current_sigma;
-  Timer start;
-  char cmdline[CMD_LINE_LEN], *cp;
-  HISTOGRAM *histos[MAX_LABEL + 1];
-  VERTEX_INFO *vi;
-  TRANSFORM *transform;
-  GCA *gca;
+static GCAB *gcab ;
 
-  memset(&parms, 0, sizeof(parms));
-  parms.integration_type = INTEGRATE_MOMENTUM;
+int
+main(int argc, char *argv[]) {
+  char        *out_fname, **av ;
+  int         ac, nargs, i ;
+  MRI         *mri_intensities, *mri_labels/*, *mri_kernel, *mri_smooth=NULL*/,
+              *mri_ll = NULL ;
+  MRI_SURFACE *mris ;
+  int         msec, minutes, seconds, n_averages ;
+  float        current_sigma ;
+  Timer start ;
+  char        *cp ;
+  HISTOGRAM   *histos[MAX_LABEL+1] ;
+  VERTEX_INFO *vi ;
+  TRANSFORM   *transform ;
+  GCA         *gca ;
+
+  memset(&parms, 0, sizeof(parms)) ;
+  parms.integration_type = INTEGRATE_MOMENTUM ;
 
   // parms.l_nspring = .5; parms.l_tspring = 1; parms.l_curv = 1.0 ;
   parms.l_spring = .1;
@@ -132,14 +126,9 @@ int main(int argc, char *argv[]) {
   // parms.l_surf_repulse = .1 ;
   parms.dt = parms.base_dt = 0.5;
 
-  make_cmd_version_string(
-      argc, argv, "$Id: mris_ca_deform.c,v 1.2 2011/03/02 00:04:31 nicks Exp $",
-      "$Name:  $", cmdline);
+  std::string cmdline = getAllInfo(argc, argv, "mris_ca_deform");
 
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv, "$Id: mris_ca_deform.c,v 1.2 2011/03/02 00:04:31 nicks Exp $",
-      "$Name:  $");
+  nargs = handleVersionOption(argc, argv, "mris_ca_deform");
   if (nargs && argc - nargs == 1)
     exit(0);
   argc -= nargs;

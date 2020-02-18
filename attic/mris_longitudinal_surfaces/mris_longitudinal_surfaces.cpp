@@ -166,33 +166,29 @@ static int MGZ = 0; // for use with MGZ format
 
 static int longitudinal = 0;
 
-static float check_contrast_direction(MRI_SURFACE *mris, MRI *mri_T1);
-int main(int argc, char *argv[]) {
-  char **av, *hemi, *sname, *cp, fname[STRLEN], mdir[STRLEN];
-  int ac, nargs, i, label_val, replace_val, msec, n_averages, j;
-  MRI_SURFACE *mris;
-  MRI *mri_wm, *mri_kernel = NULL, *mri_smooth = NULL, *mri_filled, *mri_T1,
-               *mri_labeled, *mri_T1_white = NULL, *mri_T1_pial;
-  float max_len;
-  float white_mean, white_std, gray_mean, gray_std;
-  double l_intensity, current_sigma;
-  Timer then;
-  M3D *m3d;
+static float check_contrast_direction(MRI_SURFACE *mris,MRI *mri_T1) ;
+int
+main(int argc, char *argv[])
+{
+  char          **av, *hemi, *sname, *cp, fname[STRLEN], mdir[STRLEN];
+  int           ac, nargs, i, label_val, replace_val, msec, n_averages, j ;
+  MRI_SURFACE   *mris ;
+  MRI           *mri_wm, *mri_kernel = NULL, *mri_smooth = NULL,
+                *mri_filled, *mri_T1, *mri_labeled, *mri_T1_white = NULL, 
+                *mri_T1_pial ;
+  float         max_len ;
+  float         white_mean, white_std, gray_mean, gray_std ;
+  double        l_intensity, current_sigma ;
+  Timer then ;
+  M3D           *m3d ;
 
-  char cmdline[CMD_LINE_LEN];
 
-  make_cmd_version_string(argc, argv,
-                          "$Id: mris_longitudinal_surfaces.c,v 1.8 2015/11/09 "
-                          "04:18:29 zkaufman Exp $",
-                          "$Name:  $", cmdline);
+  std::string cmdline = getAllInfo(argc, argv, "mris_longitudinal_surfaces");
 
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(argc, argv,
-                                "$Id: mris_longitudinal_surfaces.c,v 1.8 "
-                                "2015/11/09 04:18:29 zkaufman Exp $",
-                                "$Name:  $");
-  if (nargs && argc - nargs == 1) {
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "mris_longitudinal_surfaces");
+  if (nargs && argc - nargs == 1)
+  {
+    exit (0);
   }
   argc -= nargs;
 

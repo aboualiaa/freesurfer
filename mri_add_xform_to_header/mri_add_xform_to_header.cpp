@@ -44,11 +44,7 @@ int main(int argc, char *argv[]) {
   MRI *mri = nullptr;
   char *xform_fname = nullptr, *in_fname = nullptr, *out_fname = nullptr;
 
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv,
-      "$Id: mri_add_xform_to_header.c,v 1.12 2011/03/02 00:04:13 nicks Exp $",
-      "$Name:  $");
+  nargs = handleVersionOption(argc, argv, "mri_add_xform_to_header");
 
   argc -= nargs;
 

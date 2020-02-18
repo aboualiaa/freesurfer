@@ -25,7 +25,7 @@
 #include "AntsN4BiasFieldCorrectionFs.help.xml.h"
 #include "itk_5_4_map.h"
 
-int main(int argc, char const *argv[])
+int main(int argc, char **argv)
 {
   // parse args
   ArgumentParser parser;

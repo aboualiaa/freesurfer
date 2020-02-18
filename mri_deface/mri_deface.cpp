@@ -220,27 +220,26 @@ int main(int argc, char *argv[]) {
       break;
     }
   }
-  parms.l_intensity = 1.0f;
-  parms.niterations = 100;
-  parms.levels = -1; /* use default */
-  parms.dt = 1e-6;   /* was 5e-6 */
-  parms.tol = INTEGRATION_TOL * 5;
+  parms.l_intensity = 1.0f ;
+  parms.niterations = 100 ;
+  parms.levels = -1 ;   /* use default */
+  parms.dt = 1e-6 ;  /* was 5e-6 */
+  parms.tol = INTEGRATION_TOL*5 ;
 
-  parms.max_levels = 0;
-  parms.dt = 5e-6; /* was 5e-6 */
-  tol = parms.tol = 1e-3;
-  parms.momentum = 0.8;
-  parms.niterations = 25;
-  Progname = argv[0];
+  parms.max_levels = 0 ;
+  parms.dt = 5e-6 ;  /* was 5e-6 */
+  tol = parms.tol = 1e-3 ;
+  parms.momentum = 0.8 ;
+  parms.niterations = 25 ;
+  Progname = argv[0] ;
 
-  setRandomSeed(-1L);
-  DiagInit(nullptr, nullptr, nullptr);
-  ErrorInit(NULL, NULL, NULL);
 
-  nargs = handle_version_option(
-      argc, argv, "$Id: mri_deface.c,v 1.25 2014/07/18 02:11:40 fischl Exp $",
-      "$Name:  $");
-  argc -= nargs;
+  setRandomSeed(-1L) ;
+  DiagInit(NULL, NULL, NULL) ;
+  ErrorInit(NULL, NULL, NULL) ;
+
+  nargs = handleVersionOption(argc, argv, "mri_deface");
+  argc -= nargs ;
   if (1 == argc)
     ErrorExit(ERROR_BADPARM,
               "usage: %s <in volume> <brain template> "

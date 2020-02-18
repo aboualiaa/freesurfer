@@ -1758,22 +1758,17 @@ int main(int argc, char *argv[]) {
   MRI *mri_talheader;
   LT *lt;
   MATRIX *m_L;
-  VOL_GEOM *dst = nullptr;
-  VOL_GEOM *src = nullptr;
-  char cmdline[CMD_LINE_LEN];
+  VOL_GEOM *dst=0;
+  VOL_GEOM *src=0;
 
-  make_cmd_version_string(
-      argc, argv, "$Id: mri_fill.c,v 1.119 2011/10/25 14:09:58 fischl Exp $",
-      "$Name:  $", cmdline);
+  std::string cmdline = getAllInfo(argc, argv, "mri_fill");
 
   // Gdiag = 0xFFFFFFFF;
 
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv, "$Id: mri_fill.c,v 1.119 2011/10/25 14:09:58 fischl Exp $",
-      "$Name:  $");
-  if (nargs && argc - nargs == 1) {
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "mri_fill");
+  if (nargs && argc - nargs == 1)
+  {
+    exit (0);
   }
   argc -= nargs;
 

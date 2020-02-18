@@ -254,12 +254,14 @@ static double (*similarity_func)(MRI_SURFACE *mris, MRI *mri_reg, MRI *mri_mask,
     mrisRegistrationGradientNormalSimilarity;
 
 /*---------------------------------------------------------------*/
-int main(int argc, char **argv) {
-  char cmdline[CMD_LINE_LEN], *saved_pial_fname;
-  MRI_SURFACE *mris;
-  int skip, i, msec;
-  MRI *mri_kernel, *mri_smooth, *mri_mask, *mri_mag;
-  double sigma, last_similarity, similarity;
+int
+main(int argc, char **argv) 
+{
+  char          *saved_pial_fname ;
+  MRI_SURFACE   *mris ;
+  int           skip, i, msec ;
+  MRI           *mri_kernel, *mri_smooth, *mri_mask, *mri_mag ;
+  double        sigma, last_similarity, similarity ;
 #if 0
   MRI           *mri_dist;
   HISTOGRAM     *h ;
@@ -267,21 +269,11 @@ int main(int argc, char **argv) {
   MATRIX *m_save = NULL;
   Timer then;
 
-  make_cmd_version_string(
-      argc, argv,
-      "$Id: mris_register_to_volume.c,v 1.10 2011/03/02 00:04:33 nicks Exp $",
-      "$Name:  $", cmdline);
+  nargs = handleVersionOption(argc, argv, "mris_register_to_volume");
+  if(nargs && argc - nargs == 1) exit (0);
 
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv,
-      "$Id: mris_register_to_volume.c,v 1.10 2011/03/02 00:04:33 nicks Exp $",
-      "$Name:  $");
-  if (nargs && argc - nargs == 1)
-    exit(0);
-
-  Progname = argv[0];
-  argc--;
+  Progname = argv[0] ;
+  argc --;
   argv++;
   ErrorInit(NULL, NULL, NULL);
   DiagInit(NULL, NULL, NULL);

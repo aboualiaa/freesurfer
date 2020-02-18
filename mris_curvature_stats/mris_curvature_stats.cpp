@@ -397,23 +397,21 @@ int LABEL_RipSurface(MRI_SURFACE *apmris, LABEL *aplbl) {
   return (NO_ERROR);
 }
 
-int main(int argc, char *argv[]) {
-  char **av, fname[STRBUF], *sdir;
-  char *subject_name;
-  char pch_surface[16384];
-  char pch_tmp[1024];
-  int ac, nargs;
-  int i = START_i;
-  MRI_SURFACE *mris;
-  int b_surfaceFiltered = 0;
+int
+main(int argc, char *argv[])
+{
+  char          **av, fname[STRBUF], *sdir ;
+  char          *subject_name;
+  char    pch_surface[16384];
+  char    pch_tmp[1024];
+  int           ac, nargs;
+  int   i       = START_i;
+  MRI_SURFACE   *mris;
+  int   b_surfaceFiltered   = 0;
 
-  GpSTDOUT = stdout;
-  //  InitDebugging( "mris_curvature_stats" );
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv,
-      "$Id: mris_curvature_stats.c,v 1.65 2015/06/04 20:50:51 nicks Exp $",
-      "$Name:  $");
+  GpSTDOUT  = stdout;
+//  InitDebugging( "mris_curvature_stats" );
+  nargs = handleVersionOption(argc, argv, "mris_curvature_stats");
   if (nargs && argc - nargs == 1) {
     exit(0);
   }

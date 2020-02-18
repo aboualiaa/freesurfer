@@ -73,11 +73,7 @@ int main(int argc, char *argv[]) {
   MRI *mri_src, *mri_vfrac_wm, *mri_vfrac_cortex, *mri_vfrac_subcort,
       *mri_vfrac_csf, *mri_unpv_intensities;
 
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(argc, argv,
-                                "$Id: mri_compute_volume_intensities.c,v 1.3 "
-                                "2016/04/19 13:32:50 fischl Exp $",
-                                "$Name:  $");
+  nargs = handleVersionOption(argc, argv, "mri_compute_volume_intensities");
   if (nargs && argc - nargs == 1)
     exit(0);
   argc -= nargs;

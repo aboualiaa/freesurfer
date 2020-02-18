@@ -71,12 +71,10 @@ int main(int argc, char *argv[]) {
   sigma = nullptr;
   txfm = nullptr;
 
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv, "$Id: talairach_afd.c,v 1.13 2011/03/02 00:04:40 nicks Exp $",
-      "$Name:  $");
-  if (nargs && argc - nargs == 1) {
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "talairach_afd");
+  if (nargs && argc - nargs == 1)
+  {
+    exit (0);
   }
   argc -= nargs;
 

@@ -41,49 +41,41 @@
 #include "mrisurf.h"
 
 static char vcid[] =
-    "$Id: mris_make_map_surfaces.c,v 1.3 2013/01/08 22:01:16 nicks Exp $";
-const char *Progname;
-static char sdir[STRLEN] = "";
-static double l_surf_repulse = 5.0;
-static int nbrs = 2;
+  "$Id: mris_make_map_surfaces.c,v 1.3 2013/01/08 22:01:16 nicks Exp $";
+const char *Progname ;
+static char sdir[STRLEN] = "" ;
+static double l_surf_repulse = 5.0 ;
+static int nbrs = 2 ;
 
-static char white_name[STRLEN] = "white";
-static char pial_name[STRLEN] = "pial";
-static MRI *mri_aseg = NULL;
+static char white_name[STRLEN]  = "white" ;
+static char pial_name[STRLEN]  = "pial" ;
+static MRI *mri_aseg = NULL ;
 
-static MRI *mask_volume(MRI *mri_src, MRI *mri_aseg, MRI *mri_dst);
-static int get_option(int argc, char *argv[]);
-static void usage_exit(void);
-static void print_usage(void);
-static void print_help(void);
-static void print_version(void);
+static MRI *mask_volume(MRI *mri_src, MRI *mri_aseg, MRI *mri_dst) ;
+static int  get_option(int argc, char *argv[]) ;
+static void usage_exit(void) ;
+static void print_usage(void) ;
+static void print_help(void) ;
+static void print_version(void) ;
 
-static INTEGRATION_PARMS parms;
+static INTEGRATION_PARMS parms ;
 
-static int max_averages = 16;
-static int min_averages = 2;
+static int max_averages = 16 ;
+static int min_averages = 2 ;
 
-int main(int argc, char *argv[]) {
-  char *output_suffix, *subject, fname[STRLEN], *cp, **av;
-  MRI *mri;
-  MRIS *mris_lh, *mris_rh, *mris;
-  int ac, nargs, averages, i;
-  double orig_dt;
+int
+main(int argc, char *argv[])
+{
+  char           *output_suffix, *subject, fname[STRLEN], *cp, **av ;
+  MRI            *mri ;
+  MRIS           *mris_lh, *mris_rh, *mris ;
+  int            ac, nargs, averages, i ;
+  double         orig_dt ;
 
-  char cmdline[CMD_LINE_LEN];
-
-  make_cmd_version_string(
-      argc, argv,
-      "$Id: mris_make_map_surfaces.c,v 1.3 2013/01/08 22:01:16 nicks Exp $",
-      "$Name:  $", cmdline);
-
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv,
-      "$Id: mris_make_map_surfaces.c,v 1.3 2013/01/08 22:01:16 nicks Exp $",
-      "$Name:  $");
-  if (nargs && argc - nargs == 1) {
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "mris_make_map_surfaces");
+  if (nargs && argc - nargs == 1)
+  {
+    exit (0);
   }
 
   argc -= nargs;

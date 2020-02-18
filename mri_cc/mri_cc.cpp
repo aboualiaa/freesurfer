@@ -126,34 +126,30 @@ double findMinSize(MRI *mri) {
 
 #define MAX_CC_DIVISIONS 50
 #define DEFAULT_CC_DIVISIONS 5
-static int cc_divisions = DEFAULT_CC_DIVISIONS;
+static int cc_divisions = DEFAULT_CC_DIVISIONS ;
 
-int main(int argc, char *argv[]) {
-  char ifname[STRLEN], ofname[STRLEN], data_dir[STRLEN], *cp;
-  int nargs, msec, y, z, xi, temp, i, j, k;
-  double xc, yc, zc, xv, yv, zv;
-  MATRIX *mrot = NULL, *mtrans = NULL;
-  Timer then;
-  MRI *mri_tal = NULL, *mri_talheader = NULL, *mri_header = NULL, *mri_cc;
-  FILE *fp = NULL;
-  LTA *lta2 = 0;
-  MRI *mri_wm = NULL, *mri_cc_tal = NULL, *mri_fornix = NULL, *mri_aseg = NULL;
-  double means[3];
-  float volume[MAX_CC_DIVISIONS], evalues[3], ez_x, ez_y, ez_z, zf,
-      zf_low = 256, zf_high = 0;
-  MATRIX *m_evectors;
+int
+main(int argc, char *argv[])
+{
+  char        ifname[STRLEN], ofname[STRLEN],  data_dir[STRLEN], *cp ;
+  int         nargs, msec, y, z, xi, temp, i, j, k ;
+  double      xc,yc,zc, xv, yv, zv;
+  MATRIX      *mrot = NULL, *mtrans = NULL;
+  Timer then ;
+  MRI         *mri_tal=NULL, *mri_talheader=NULL, *mri_header=NULL, *mri_cc;
+  FILE        *fp=NULL;
+  LTA         *lta2 = 0;
+  MRI         *mri_wm = NULL,
+               *mri_cc_tal = NULL, *mri_fornix = NULL, *mri_aseg = NULL ;
+  double      means[3] ;
+  float       volume[MAX_CC_DIVISIONS], evalues[3],
+              ez_x, ez_y, ez_z, zf, zf_low=256, zf_high=0;
+  MATRIX      *m_evectors ;
 
-  char cmdline[CMD_LINE_LEN];
-  make_cmd_version_string(
-      argc, argv, "$Id: mri_cc.c,v 1.39 2015/12/04 13:59:56 fischl Exp $",
-      "$Name:  $", cmdline);
-
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv, "$Id: mri_cc.c,v 1.39 2015/12/04 13:59:56 fischl Exp $",
-      "$Name:  $");
-  if (nargs && argc - nargs == 1) {
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "mri_cc");
+  if (nargs && argc - nargs == 1)
+  {
+    exit (0);
   }
   argc -= nargs;
 

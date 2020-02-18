@@ -116,9 +116,10 @@ int main(int argc, char *argv[]) {
   MRI_SURFACE *mris;
   double avgfacearea;
 
-  nargs = handle_version_option(argc, argv, vcid, "$Name:  $");
-  if (nargs && argc - nargs == 1) {
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "main");
+  if (nargs && argc - nargs == 1)
+  {
+    exit (0);
   }
   Progname = argv[0];
   argc -= nargs;

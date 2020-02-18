@@ -48,22 +48,20 @@ static void usage_exit(int code);
 
 #define MAX_DIVISIONS 1000
 
-int main(int argc, char *argv[]) {
-  char **av;
-  int ac, nargs, segno, indices[MAX_DIVISIONS];
-  int msec, minutes, seconds, nparts, i, num, label, mx, my, mz, x, y, z;
-  Timer start;
-  MRI *mri;
-  double cx, cy, cz, min_dist, dist, dx, dy, dz;
-  float evalues[3], zf, zf_low, zf_high, ez_x, ez_y, ez_z;
-  //  double       e1x, e1y, e1z, e2x, e2y, e2z, e3z, e3y, e3z ;
-  MATRIX *m_obs, *m_obs_T, *m_cov, *m_eig;
+int
+main(int argc, char *argv[]) {
+  char   **av ;
+  int    ac, nargs, segno, indices[MAX_DIVISIONS] ;
+  int          msec, minutes, seconds, nparts, i, num, label, mx, my, mz, x, y, z ;
+  Timer start ;
+  MRI          *mri ;
+  double       cx, cy, cz, min_dist, dist, dx, dy, dz ;
+  float        evalues[3], zf, zf_low, zf_high, ez_x, ez_y, ez_z ;
+//  double       e1x, e1y, e1z, e2x, e2y, e2z, e3z, e3y, e3z ;
+  MATRIX       *m_obs, *m_obs_T, *m_cov, *m_eig ;
 
-  setRandomSeed(-1L);
-  nargs = handle_version_option(
-      argc, argv,
-      "$Id: mri_divide_segmentation.c,v 1.3 2014/05/28 20:27:57 fischl Exp $",
-      "$Name:  $");
+  setRandomSeed(-1L) ;
+  nargs = handleVersionOption(argc, argv, "mri_divide_segmentation");
   if (nargs && argc - nargs == 1)
     exit(0);
   argc -= nargs;

@@ -137,14 +137,14 @@ static int rgb_scale = 30;
 
 /*---------------------------------------------------------------*/
 int main(int argc, char *argv[]) {
-  int ac, nargs, *nunits, index;
-  MRI_SURFACE *mris;
-  char **av, fname[STRLEN], *annot_name, *out_fname, *cp, *subject, *hemi;
-  float area_thresh;
+  int         ac, nargs, *nunits, index ;
+  MRI_SURFACE *mris ;
+  char        **av, fname[STRLEN], *annot_name, *out_fname, *cp,
+  *subject, *hemi ;
+  float       area_thresh ;
 
-  nargs = handle_version_option(argc, argv, vcid, "$Name:  $");
-  if (nargs && argc - nargs == 1)
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "mris_divide_parcellation");
+  if (nargs && argc - nargs == 1)  exit (0);
   argc -= nargs;
 
   ErrorInit(NULL, NULL, NULL);

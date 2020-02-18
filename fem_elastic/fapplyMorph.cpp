@@ -103,12 +103,14 @@ struct IoParams {
 
   unsigned int zlibBuffer;
 
-  void parse(int ac, const char **av);
+  void parse(int ac, char** av);
 };
 
 //------------------------------------------------------
 
-int main(int argc, const char **argv) {
+int
+main(int argc, char** argv)
+{
   // cmd-line
   IoParams params;
 
@@ -234,7 +236,9 @@ int main(int argc, const char **argv) {
 
 //---------------------
 
-void IoParams::parse(int ac, const char **av) {
+void
+IoParams::parse(int ac, char** av)
+{
   ArgumentParser parser;
   // required
   parser.addArgument("inputs", '+', String, true);

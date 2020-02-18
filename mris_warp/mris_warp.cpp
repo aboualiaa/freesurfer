@@ -101,10 +101,11 @@ int main(int argc, char *argv[]) {
 
   GCA_MORPH *gcam1, *gcam2;
 
-  //  nargs = handle_version_option (argc, argv, "$Id: mris_warp.c,v 1.3
-  //  2012/02/29 15:59:46 nicks Exp $", "$Name:  $");
-  if (nargs && argc - nargs == 1) {
-    exit(0);
+
+  // nargs = handleVersionOption(argc, argv, "mris_warp");
+  if (nargs && argc - nargs == 1)
+  {
+    exit (0);
   }
   argc -= nargs;
 

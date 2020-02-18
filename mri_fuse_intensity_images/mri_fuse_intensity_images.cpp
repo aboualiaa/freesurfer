@@ -55,28 +55,22 @@ static int get_option(int argc, char *argv[]);
 static double cross_time_sigma = 1.0;
 
 #define MAX_TIMEPOINTS 2000
-static char *subjects[MAX_TIMEPOINTS];
-int main(int argc, char *argv[]) {
-  char *in_fname, *out_fname, **av, *xform_fname, fname[STRLEN];
-  MRI *mri_in, *mri_tmp;
-  int ac, nargs, msec, minutes, seconds;
-  int input, ninputs;
-  Timer start;
-  TRANSFORM *transform = nullptr;
-  char cmdline[CMD_LINE_LEN], line[STRLEN], *cp, subject[STRLEN], sdir[STRLEN],
-      base_name[STRLEN];
-  FILE *fp;
+static char *subjects[MAX_TIMEPOINTS] ;
+int
+main(int argc, char *argv[])
+{
+  char         *in_fname, *out_fname, **av, *xform_fname, fname[STRLEN] ;
+  MRI          *mri_in, *mri_tmp ;
+  int          ac, nargs, msec, minutes, seconds;
+  int          input, ninputs ;
+  Timer start ;
+  TRANSFORM    *transform = NULL ;
+  char         line[STRLEN], *cp, subject[STRLEN], sdir[STRLEN], base_name[STRLEN] ;
+  FILE         *fp ;
 
-  make_cmd_version_string(
-      argc, argv,
-      "$Id: mri_fuse_intensity_images.c,v 1.2 2011/06/02 14:05:10 fischl Exp $",
-      "$Name:  $", cmdline);
+  std::string cmdline = getAllInfo(argc, argv, "mri_fuse_intensity_images");
 
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv,
-      "$Id: mri_fuse_intensity_images.c,v 1.2 2011/06/02 14:05:10 fischl Exp $",
-      "$Name:  $");
+  nargs = handleVersionOption(argc, argv, "mri_fuse_intensity_images");
   if (nargs && argc - nargs == 1)
     exit(0);
   argc -= nargs;

@@ -3,7 +3,8 @@
 
 #include "mris_annot_diff.help.xml.h"
 
-int main(int argc, const char *argv[]) {
+int main(int argc, char *argv[])
+{
   ArgumentParser parser;
   parser.addHelp(mris_annot_diff_help_xml, mris_annot_diff_help_xml_len);
   parser.addArgument("annot1");

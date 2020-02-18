@@ -31,7 +31,9 @@ static double computeJaccard(IntermediateMetrics &im) {
   return im.intersect / im.total;
 }
 
-int main(int argc, const char **argv) {
+
+int main(int argc, char **argv) 
+{
   // ------ parse arguments ------
 
   ArgumentParser parser;

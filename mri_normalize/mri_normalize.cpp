@@ -133,40 +133,34 @@ static int no1d = 0;
 static int file_only = 0;
 
 #define MAX_NORM_SURFACES 10
-static int nsurfs = 0;
-static char *surface_fnames[MAX_NORM_SURFACES];
-static TRANSFORM *surface_xforms[MAX_NORM_SURFACES];
-static char *surface_xform_fnames[MAX_NORM_SURFACES];
-static float grad_thresh = -1;
-static MRI *mri_not_control = nullptr;
+static int nsurfs = 0 ;
+static char *surface_fnames[MAX_NORM_SURFACES]  ;
+static TRANSFORM *surface_xforms[MAX_NORM_SURFACES] ;
+static char *surface_xform_fnames[MAX_NORM_SURFACES] ;
+static float grad_thresh = -1 ;
+static MRI *mri_not_control = NULL;
 
-static LABEL *control_point_label = nullptr;
+static LABEL *control_point_label = NULL ;
 
-static int nonmax_suppress = 1;
-static int erode = 0;
-static int remove_nonwm_voxels(MRI *mri_ctrl_src, MRI *mri_aseg,
-                               MRI *mri_ctrl_dst);
+static int nonmax_suppress = 1 ;
+static int erode = 0 ;
+static int remove_nonwm_voxels(MRI *mri_ctrl_src,
+                               MRI *mri_aseg,
+                               MRI *mri_ctrl_dst) ;
 
-int main(int argc, char *argv[]) {
-  int nargs, n;
-  MRI *mri_src, *mri_dst = nullptr, *mri_bias, *mri_orig, *mri_aseg = nullptr;
-  char *in_fname, *out_fname;
-  int msec, minutes, seconds;
-  Timer start;
+int
+main(int argc, char *argv[])
+{
+  int    nargs, n ;
+  MRI    *mri_src, *mri_dst = NULL, *mri_bias, *mri_orig, *mri_aseg = NULL ;
+  char   *in_fname, *out_fname ;
+  int          msec, minutes, seconds ;
+  Timer start ;
 
-  char cmdline[CMD_LINE_LEN];
 
-  make_cmd_version_string(
-      argc, argv, "$Id: mri_normalize.c,v 1.92 2017/01/27 22:31:34 ah221 Exp $",
-      "$Name:  $", cmdline);
-
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv, "$Id: mri_normalize.c,v 1.92 2017/01/27 22:31:34 ah221 Exp $",
-      "$Name:  $");
-  if (nargs && argc - nargs == 1) {
-    exit(0);
-  }
+  std::string cmdline = getAllInfo(argc, argv, "mri_normalize");
+  nargs = handleVersionOption(argc, argv, "mri_normalize");
+  if (nargs && argc - nargs == 1) exit(0);
   argc -= nargs;
 
   Progname = argv[0];

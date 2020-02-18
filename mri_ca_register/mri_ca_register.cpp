@@ -175,55 +175,53 @@ int main(int argc, char *argv[]) {
   GCA_MORPH *gcam;
 
   // for GCA Renormalization with Alignment (if called sequentially)
-  float label_scales[MAX_CMA_LABELS], label_offsets[MAX_CMA_LABELS];
-  float label_peaks[MAX_CMA_LABELS];
-  int label_computed[MAX_CMA_LABELS];
-  int got_scales = 0;
+  float        label_scales[MAX_CMA_LABELS], label_offsets[MAX_CMA_LABELS];
+  float        label_peaks[MAX_CMA_LABELS];
+  int          label_computed[MAX_CMA_LABELS];
+  int          got_scales =0;
 
-  FSinit();
+  FSinit() ;
 
-  parms.l_log_likelihood = 0.2f;
-  parms.niterations = 500;
-  parms.levels = 6;
-  parms.scale_smoothness = 1;
-  parms.uncompress = 0;
-  parms.npasses = 1;
-  parms.diag_write_snapshots = 1;
-  parms.diag_sample_type = SAMPLE_TRILINEAR;
-  parms.relabel_avgs = -1; /* never relabel, was 1 */
-  parms.reset_avgs = 0;    /* reset metric properties when navgs=0 */
-  parms.dt = 0.05;         /* was 5e-6 */
-  parms.momentum = 0.9;
-  parms.tol = .05; /* at least .05% decrease in sse */
-  parms.l_jacobian = 1.0;
-  parms.l_label = 1.0;
-  parms.l_map = 0.0;
-  parms.label_dist = 10.0;
-  parms.l_smoothness = 2;
-  parms.start_t = 0;
-  parms.max_grad = .30000;
-  parms.sigma = 2.0f;
-  parms.exp_k = 20;
-  parms.min_avgs = 0;
-  parms.navgs = 256;
-  parms.noneg = True;
-  parms.log_fp = nullptr;
-  parms.ratio_thresh = 0.1;
-  parms.nsmall = 1;
-  parms.integration_type = GCAM_INTEGRATE_BOTH;
+  parms.l_log_likelihood = 0.2f ;
+  parms.niterations = 500 ;
+  parms.levels = 6 ;
+  parms.scale_smoothness = 1 ;
+  parms.uncompress = 0 ;
+  parms.npasses = 1 ;
+  parms.diag_write_snapshots = 1 ;
+  parms.diag_sample_type = SAMPLE_TRILINEAR ;
+  parms.relabel_avgs = -1 ;  /* never relabel, was 1 */
+  parms.reset_avgs = 0 ;  /* reset metric properties when navgs=0 */
+  parms.dt = 0.05 ;  /* was 5e-6 */
+  parms.momentum = 0.9 ;
+  parms.tol = .05 ;  /* at least .05% decrease in sse */
+  parms.l_jacobian = 1.0 ;
+  parms.l_label = 1.0 ;
+  parms.l_map = 0.0 ;
+  parms.label_dist = 10.0 ;
+  parms.l_smoothness = 2 ;
+  parms.start_t = 0 ;
+  parms.max_grad = .30000 ;
+  parms.sigma = 2.0f ;
+  parms.exp_k = 20 ;
+  parms.min_avgs = 0 ;
+  parms.navgs = 256 ;
+  parms.noneg = True ;
+  parms.log_fp = NULL ;
+  parms.ratio_thresh = 0.1 ;
+  parms.nsmall = 1 ;
+  parms.integration_type = GCAM_INTEGRATE_BOTH ;
 
-  Progname = argv[0];
-  setRandomSeed(-1L);
+  Progname = argv[0] ;
+  setRandomSeed(-1L) ;
 
-  DiagInit(nullptr, nullptr, nullptr);
-  ErrorInit(NULL, NULL, NULL);
+  DiagInit(NULL, NULL, NULL) ;
+  ErrorInit(NULL, NULL, NULL) ;
 
-  nargs = handle_version_option(
-      argc, argv,
-      "$Id: mri_ca_register.c,v 1.99 2016/10/22 17:31:24 fischl Exp $",
-      "$Name:  $");
-  if (nargs && argc - nargs == 1) {
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "mri_ca_register");
+  if (nargs && argc - nargs == 1)
+  {
+    exit (0);
   }
   argc -= nargs;
 

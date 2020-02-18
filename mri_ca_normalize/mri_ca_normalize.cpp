@@ -122,45 +122,45 @@ static int discard_unlikely_control_points(GCA *gca, GCA_SAMPLE *gcas_struct,
   argv[4]  - output volume
 */
 
-#define DEFAULT_CTL_POINT_PCT .25
-static double ctl_point_pct = DEFAULT_CTL_POINT_PCT;
+#define DEFAULT_CTL_POINT_PCT   .25
+static double ctl_point_pct = DEFAULT_CTL_POINT_PCT ;
 
-static int normalization_structures[] = {
-    Left_Cerebral_White_Matter, Right_Cerebral_White_Matter,
-    Left_Cerebellum_White_Matter, Right_Cerebellum_White_Matter, Brain_Stem};
+static int normalization_structures[] =
+{
+  Left_Cerebral_White_Matter,
+  Right_Cerebral_White_Matter,
+  Left_Cerebellum_White_Matter,
+  Right_Cerebellum_White_Matter,
+  Brain_Stem
+} ;
 
-#define NSTRUCTURES                                                            \
-  (sizeof(normalization_structures) / sizeof(normalization_structures[0]))
+#define NSTRUCTURES (sizeof(normalization_structures) / sizeof(normalization_structures[0]))
 
-static int nregions = 3; /* divide each struct into 3x3x3 regions */
+static int nregions = 3 ;  /* divide each struct into 3x3x3 regions */
 
-static char *ctrl_point_fname = nullptr;
-static char *read_ctrl_point_fname = nullptr;
+static char *ctrl_point_fname = NULL ;
+static char *read_ctrl_point_fname = NULL ;
 
-int main(int argc, char *argv[]) {
-  char *gca_fname, *in_fname, *out_fname, **av, *xform_fname;
-  MRI *mri_in = nullptr, *mri_norm = nullptr, *mri_tmp, *mri_ctrl = nullptr;
-  GCA *gca;
-  int ac, nargs, nsamples, msec, minutes, seconds;
-  int i, struct_samples, norm_samples = 0, n, input, ninputs;
-  Timer start;
-  GCA_SAMPLE *gcas, *gcas_norm = nullptr, *gcas_struct;
-  TRANSFORM *transform = nullptr;
-  char cmdline[CMD_LINE_LEN];
+int
+main(int argc, char *argv[])
+{
+  char         *gca_fname, *in_fname, *out_fname, **av, *xform_fname ;
+  MRI          *mri_in = NULL, *mri_norm = NULL, *mri_tmp, *mri_ctrl = NULL ;
+  GCA          *gca ;
+  int          ac, nargs, nsamples, msec, minutes, seconds;
+  int          i, struct_samples, norm_samples = 0, n, input, ninputs ;
+  Timer start ;
+  GCA_SAMPLE   *gcas, *gcas_norm = NULL, *gcas_struct ;
+  TRANSFORM    *transform = NULL ;
 
   FSinit();
-  make_cmd_version_string(
-      argc, argv,
-      "$Id: mri_ca_normalize.c,v 1.69 2016/10/22 17:30:57 fischl Exp $",
-      "$Name:  $", cmdline);
+  
+  std::string cmdline = getAllInfo(argc, argv, "mri_ca_normalize");
 
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv,
-      "$Id: mri_ca_normalize.c,v 1.69 2016/10/22 17:30:57 fischl Exp $",
-      "$Name:  $");
-  if (nargs && argc - nargs == 1) {
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "mri_ca_normalize");
+  if (nargs && argc - nargs == 1)
+  {
+    exit (0);
   }
   argc -= nargs;
 

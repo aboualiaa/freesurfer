@@ -195,9 +195,8 @@ int main(int argc, char *argv[]) {
   double AvgDiff = 0.0, SumDiff = 0.0, SumSqDiff = 0.0;
   FILE *fp = nullptr;
 
-  nargs = handle_version_option(argc, argv, vcid, "$Name:  $");
-  if (nargs && argc - nargs == 1)
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "mri_diff");
+  if (nargs && argc - nargs == 1) exit (0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);

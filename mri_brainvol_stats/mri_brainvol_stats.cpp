@@ -5,7 +5,9 @@
 #include "argparse.h"
 #include "cma.h"
 
-int main(int argc, const char **argv) {
+
+int main(int argc, char **argv) 
+{
   // parse arguments
   ArgumentParser parser;
   parser.addArgument("subject");

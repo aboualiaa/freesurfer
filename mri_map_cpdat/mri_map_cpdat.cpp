@@ -42,9 +42,7 @@ static struct Parameters P = {"", "", "", "", "", 0, 0};
 static int get_option(int argc, char *argv[], Parameters &P);
 static void usage_exit(int code);
 
-static char vcid[] =
-    "$Id: mri_map_cpdat.cpp,v 1.6 2014/01/21 23:07:41 greve Exp $";
-const char *Progname = nullptr;
+const char *Progname = NULL;
 static LTA *LTAloadTalairachXFM(const char *subject);
 static LTA *LTAloadTalairachXFMInv(const char *subject);
 
@@ -53,9 +51,10 @@ int main(int argc, char *argv[]) {
   LTA *lta = nullptr;
 
   // Default initialization
-  nargs = handle_version_option(argc, argv, vcid, "$Name:  $");
-  if (nargs && argc - nargs == 1) {
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "mri_map_cpdat");
+  if (nargs && argc - nargs == 1)
+  {
+    exit (0);
   }
   argc -= nargs;
   Progname = argv[0];

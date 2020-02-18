@@ -203,7 +203,11 @@ private:
 public:
   // ----------------------------- argument parser ----------------------------
 
-  ArgumentParser() : variable_positional(false), variable_flag(false) {}
+  ArgumentParser() : variable_positional(false), variable_flag(false) {
+    // add default --all-info and --version flags
+    addArgument("--all-info", 0, Bool, false);
+    addArgument("--version", 0, Bool, false);
+  }
 
   void addArgument(const String &name, char nargs = 0,
                    ArgType argtype = Unknown, bool required = false);
@@ -212,8 +216,7 @@ public:
 
   void addHelp(const unsigned char *text, unsigned int size);
 
-  void parse(size_t argc, const char **argv);
-  void parse(const StringVector &argv);
+  void parse(size_t argc, char** argv);
 
   bool exists(const String &name);
 

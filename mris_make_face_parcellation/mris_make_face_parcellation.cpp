@@ -158,43 +158,37 @@ static char *write_annot_fname = nullptr;
 char *ctab_fname = nullptr;
 int InflatedOK = 0;
 
-int main(int argc, char *argv[]) {
-  char **av, *in_fname, *ico_fname, *out_fname, path[STRLEN], ico_name[STRLEN];
-  int ac, nargs;
-  float scale;
-  MRI_SURFACE *mris, *mris_ico;
-  float radius;
-  int fno, vno, annot, k;
-  char cmdline[CMD_LINE_LEN];
-  double fdist;
-  FACE *face;
-  MHT *mht;
-  VERTEX *v;
-  int msec, minutes, seconds;
-  MRI *mri_smatrix = nullptr;
+int
+main(int argc, char *argv[]) {
+  char               **av, *in_fname, *ico_fname, *out_fname, path[STRLEN], ico_name[STRLEN] ;
+  int                ac, nargs ;
+  float              scale ;
+  MRI_SURFACE        *mris, *mris_ico ;
+  float              radius ;
+  int                fno, vno, annot,k ;
+  double             fdist ;
+  FACE               *face ;
+  MHT                *mht ;
+  VERTEX             *v ;
+  int                msec, minutes, seconds ;
+  MRI                *mri_smatrix = NULL ;
 
-  parms.max_iterations = 100;
-  parms.tol = 1e-6;
-  parms.l_markov = 0;   // 0.001
-  parms.l_gaussian = 0; // 0.01
-  parms.l_var = 1.0;
-  parms.energy_type = ENERGY_VARIANCE;
-  parms.l_eden = 1.0;
 
+  parms.max_iterations = 100 ;
+  parms.tol = 1e-6 ;
+  parms.l_markov = 0 ;  // 0.001
+  parms.l_gaussian = 0 ; // 0.01
+  parms.l_var = 1.0 ;
+  parms.energy_type = ENERGY_VARIANCE ;
+  parms.l_eden = 1.0 ;
+  
   Timer start;
 
-  make_cmd_version_string(argc, argv,
-                          "$Id: mris_make_face_parcellation.c,v 1.22 "
-                          "2016/05/06 17:26:14 fischl Exp $",
-                          "$Name:  $", cmdline);
+  std::string cmdline = getAllInfo(argc, argv, "mris_make_face_parcellation");
 
   setRandomSeed(1L);
 
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(argc, argv,
-                                "$Id: mris_make_face_parcellation.c,v 1.22 "
-                                "2016/05/06 17:26:14 fischl Exp $",
-                                "$Name:  $");
+  nargs = handleVersionOption(argc, argv, "mris_make_face_parcellation");
   if (nargs && argc - nargs == 1)
     exit(0);
   argc -= nargs;

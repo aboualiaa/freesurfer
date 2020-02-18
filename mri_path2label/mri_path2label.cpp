@@ -89,20 +89,16 @@ int debug = 0;
 int checkoptsonly = 0;
 
 /*-------------------------------------------------------------*/
-int main(int argc, char *argv[]) {
-  int nargs;
-  int source_is_label = 0;
-  int source_is_path = 0;
-  int err = 0;
-  FILE *fp = nullptr;
+int main(int argc, char *argv[]) 
+{
+  int   nargs;
+  int   source_is_label      = 0;
+  int   source_is_path       = 0;
+  int   err                  = 0;
+  FILE* fp                   = NULL;
 
-  nargs = handle_version_option(
-      argc, argv,
-      "$Id: mri_path2label.c,v 1.23 2011/03/02 00:04:23 nicks Exp $",
-      "$Name:  $");
-  if ((nargs != 0) && argc - nargs == 1) {
-    exit(0);
-  }
+  nargs = handleVersionOption(argc, argv, "mri_path2label");
+  if(nargs && argc - nargs == 1) exit (0);
   argc -= nargs;
 
   Progname = argv[0];

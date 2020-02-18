@@ -82,39 +82,31 @@ static char *jacobian_fname = nullptr;
 static char *inflated_name = nullptr;
 
 #define MAX_LABELS 100
-static int nlabels = 0;
-static LABEL *labels[MAX_LABELS];
-static char *label_names[MAX_LABELS];
-static GCSA *label_gcsa[MAX_LABELS];
-static int label_indices[MAX_LABELS];
-static int label_annots[MAX_LABELS];
+static int nlabels = 0 ;
+static LABEL *labels[MAX_LABELS] ;
+static char  *label_names[MAX_LABELS] ;
+static GCSA  *label_gcsa[MAX_LABELS] ;
+static int   label_indices[MAX_LABELS] ;
+static int   label_annots[MAX_LABELS] ;
 
-static int use_defaults = 1;
+static int use_defaults = 1 ;
 
-static INTEGRATION_PARMS parms;
-static int remove_negative = 1;
+static INTEGRATION_PARMS  parms ;
+static int remove_negative = 1 ;
 
-int main(int argc, char *argv[]) {
-  char **av, *lh_surf_fname, *rh_surf_fname, *out_fname, fname[STRLEN], *cp;
-  int ac, nargs, msec, sno, h, i;
-  MRI_SURFACE *mris_lh, *mris_rh, *mris_template, *mris_mov;
-  MRI_SP *mrisp_template;
-  float *lh_coords[3], *rh_coords[3], **coords;
+int
+main(int argc, char *argv[])
+{
+  char         **av, *lh_surf_fname, *rh_surf_fname, *out_fname, fname[STRLEN],*cp ;
+  int          ac, nargs, msec, sno, h, i ;
+  MRI_SURFACE  *mris_lh, *mris_rh, *mris_template, *mris_mov ;
+  MRI_SP       *mrisp_template ;
+  float        *lh_coords[3], *rh_coords[3], **coords ;
 
-  char cmdline[CMD_LINE_LEN];
-
-  make_cmd_version_string(
-      argc, argv,
-      "$Id: mris_left_right_register.c,v 1.2 2011/12/16 20:49:37 greve Exp $",
-      "$Name:  $", cmdline);
-
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv,
-      "$Id: mris_left_right_register.c,v 1.2 2011/12/16 20:49:37 greve Exp $",
-      "$Name:  $");
-  if (nargs && argc - nargs == 1) {
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "mris_left_right_register");
+  if (nargs && argc - nargs == 1)
+  {
+    exit (0);
   }
   argc -= nargs;
 

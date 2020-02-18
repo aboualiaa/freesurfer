@@ -269,13 +269,10 @@ int main(int argc, char *argv[]) {
   unsigned long NRindex[MAX_CLASSES + 1];
   int indexmap[MAX_CLASSES + 1];
 
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv,
-      "$Id: mri_ms_EM_with_atlas.c,v 1.10 2011/10/25 14:13:02 fischl Exp $",
-      "$Name:  $");
-  if (nargs && argc - nargs == 1) {
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "mri_ms_EM_with_atlas");
+  if (nargs && argc - nargs == 1)
+  {
+    exit (0);
   }
   argc -= nargs;
 

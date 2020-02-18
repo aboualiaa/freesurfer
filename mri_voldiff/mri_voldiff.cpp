@@ -78,10 +78,8 @@ int main(int argc, char **argv) {
   double maxdiff, d;
   int cmax, rmax, smax, fmax;
 
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(argc, argv, vcid, "$Name:  $");
-  if (nargs && argc - nargs == 1)
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "mri_voldiff");
+  if (nargs && argc - nargs == 1) exit (0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);

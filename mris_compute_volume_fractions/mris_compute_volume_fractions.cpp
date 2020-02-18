@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
   printf("working!\n");
   int nargs;
 
-  nargs = handle_version_option(argc, argv, vcid, "$Name:  $");
+  nargs = handleVersionOption(argc, argv, "mris_compute_volume_fractions");
 
   if (nargs && argc - nargs == 1)
     exit(0);

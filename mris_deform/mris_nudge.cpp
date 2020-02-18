@@ -37,19 +37,18 @@ static int get_option(int argc, char *argv[]);
 
 #define MAX_VERTICES 10000
 static int nvertices = 0;
-static int target_vnos[MAX_VERTICES];
-static float target_vals[MAX_VERTICES];
-static double sigma = 2.0;
+static int target_vnos[MAX_VERTICES] ;
+static float target_vals[MAX_VERTICES] ;
+static double sigma = 2.0 ;
 
-int main(int argc, char *argv[]) {
-  char **av;
-  int ac, nargs, nsize;
-  MRI_SURFACE *mris;
-  MRI *mri;
+int
+main(int argc, char *argv[]) {
+  char         **av ;
+  int          ac, nargs, nsize ;
+  MRI_SURFACE  *mris ;
+  MRI          *mri ;
 
-  nargs = handle_version_option(
-      argc, argv, "$Id: mris_nudge.c,v 1.3 2012/08/08 13:10:32 fischl Exp $",
-      "$Name:  $");
+  nargs = handleVersionOption(argc, argv, "mris_nudge");
   if (nargs && argc - nargs == 1)
     exit(0);
   argc -= nargs;

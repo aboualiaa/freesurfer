@@ -80,9 +80,8 @@ int main(int argc, char *argv[]) {
   nthiter = 0;
   mri = var = mri0 = delta = deltasm = xyz = nullptr;
 
-  nargs = handle_version_option(argc, argv, vcid, "$Name:  $");
-  if (nargs && argc - nargs == 1)
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "mris_niters2fwhm");
+  if (nargs && argc - nargs == 1) exit (0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);

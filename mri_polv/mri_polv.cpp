@@ -48,13 +48,9 @@ int main(int argc, char *argv[]) {
   char *in_fname;
   char *out_fname;
 
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv, "$Id: mri_polv.c,v 1.6 2011/03/02 00:04:24 nicks Exp $",
-      "$Name:  $");
-  if ((nargs != 0) && argc - nargs == 1) {
-    exit(0);
-  }
+  nargs = handleVersionOption(argc, argv, "mri_polv");
+  if (nargs && argc - nargs == 1)
+    exit (0);
   argc -= nargs;
 
   Progname = argv[0];

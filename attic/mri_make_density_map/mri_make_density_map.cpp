@@ -74,11 +74,7 @@ int main(int argc, char *argv[]) {
                                 *mri_orig_intensity, *mri_target;
   GCA_MORPH *gcam;
 
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv,
-      "$Id: mri_make_density_map.c,v 1.8 2011/03/02 00:04:22 nicks Exp $",
-      "$Name:  $");
+  nargs = handleVersionOption(argc, argv, "mri_make_density_map");
   if (nargs && argc - nargs == 1)
     exit(0);
   argc -= nargs;

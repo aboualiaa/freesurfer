@@ -50,29 +50,23 @@ static int longinput = 0;
 */
 
 #define MAX_TIMEPOINTS 2000
-static char *subjects[MAX_TIMEPOINTS];
-int main(int argc, char *argv[]) {
-  char *gca_fname, *in_fname, *out_fname, **av, *xform_fname, fname[STRLEN];
-  MRI *mri_in, *mri_tmp;
-  GCA *gca;
-  int ac, nargs, msec, minutes, seconds;
-  int input, ninputs;
-  Timer start;
-  TRANSFORM *transform;
-  char cmdline[CMD_LINE_LEN], line[STRLEN], *cp, sdir[STRLEN],
-      base_name[STRLEN];
-  FILE *fp;
+static char *subjects[MAX_TIMEPOINTS] ;
+int
+main(int argc, char *argv[])
+{
+  char         *gca_fname, *in_fname, *out_fname, **av, *xform_fname, fname[STRLEN] ;
+  MRI          *mri_in, *mri_tmp ;
+  GCA          *gca ;
+  int          ac, nargs, msec, minutes, seconds;
+  int          input, ninputs ;
+  Timer start ;
+  TRANSFORM    *transform ;
+  char         line[STRLEN], *cp, sdir[STRLEN], base_name[STRLEN] ;
+  FILE         *fp ;
 
-  make_cmd_version_string(
-      argc, argv,
-      "$Id: mri_cal_renormalize_gca.c,v 1.2 2015/10/02 17:16:23 mreuter Exp $",
-      "$Name:  $", cmdline);
+  std::string cmdline = getAllInfo(argc, argv, "mri_cal_renormalize_gca");
 
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv,
-      "$Id: mri_cal_renormalize_gca.c,v 1.2 2015/10/02 17:16:23 mreuter Exp $",
-      "$Name:  $");
+  nargs = handleVersionOption(argc, argv, "mri_cal_renormalize_gca");
   if (nargs && argc - nargs == 1)
     exit(0);
   argc -= nargs;

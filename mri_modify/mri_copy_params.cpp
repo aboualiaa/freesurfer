@@ -52,12 +52,8 @@ void print_usage() {
 int main(int argc, char *argv[]) {
   bool bVolumeDifferent = false;
   bool bSizeDifferent = false;
-  int nargs;
-  /* rkt: check for and handle version tag */
-  nargs = handle_version_option(
-      argc, argv,
-      "$Id: mri_copy_params.cpp,v 1.5 2011/03/02 00:04:23 nicks Exp $",
-      "$Name:  $");
+  int  nargs;
+  nargs = handleVersionOption(argc, argv, "mri_copy_params");
   if (nargs && argc - nargs == 1)
     exit(0);
   argc -= nargs;

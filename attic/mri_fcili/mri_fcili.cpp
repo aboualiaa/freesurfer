@@ -90,9 +90,8 @@ int main(int argc, char *argv[]) {
   int c, f, nrois, roi1, roi2, nframes;
   double v, ss, v1, v2, den, num, LL, LR, RL, RR;
 
-  nargs = handle_version_option(argc, argv, vcid, "$Name:  $");
-  if (nargs && argc - nargs == 1)
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "mri_fcili");
+  if (nargs && argc - nargs == 1) exit (0);
   argc -= nargs;
   cmdline = argv2cmdline(argc, argv);
   uname(&uts);

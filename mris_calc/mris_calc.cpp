@@ -1093,11 +1093,10 @@ int main(int argc, char *argv[]) {
   e_FILEACCESS eACCESS;
 
   init();
-  nargs = handle_version_option(
-      argc, argv, "$Id: mris_calc.c,v 1.55 2016/09/27 18:50:16 greve Exp $",
-      "$Name:  $");
-  if (nargs && argc - nargs == 1) {
-    exit(0);
+  nargs = handleVersionOption(argc, argv, "mris_calc");
+  if (nargs && argc - nargs == 1)
+  {
+    exit (0);
   }
   argc -= nargs;
 

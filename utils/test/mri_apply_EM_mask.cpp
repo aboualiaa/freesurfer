@@ -66,18 +66,16 @@ int main(int argc, char *argv[]) {
 
   Progname = argv[0];
 
-  nargs = handle_version_option(
-      argc, argv,
-      "$Id: mri_apply_EM_mask.c,v 1.3 2011/03/02 00:04:55 nicks Exp $",
-      "$Name:  $");
-  argc -= nargs;
+  nargs = handleVersionOption(argc, argv, "mri_apply_EM_mask");
+  argc -= nargs ;
 
-  ac = argc;
-  av = argv;
-  for (; argc > 1 && ISOPTION(*argv[1]); argc--, argv++) {
-    nargs = get_option(argc, argv);
-    argc -= nargs;
-    argv += nargs;
+  ac = argc ;
+  av = argv ;
+  for ( ; argc > 1 && ISOPTION(*argv[1]) ; argc--, argv++)
+  {
+    nargs = get_option(argc, argv) ;
+    argc -= nargs ;
+    argv += nargs ;
   }
 
   if (argc != 3)
