@@ -72,8 +72,10 @@ stages:
             artifact: 'GitAnnex'
           - checkout: self
             submodules: true
-          - script: git remote add cache ../annex-cache
+          - script: git remote add cache ../GitAnnex
           - script: sudo apt-get install -y git-annex
+          - script: git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+          - script: git config --global user.name "Ahmed Abou-Aliaa"
           - script: git annex move --from cache
           - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
@@ -91,8 +93,10 @@ stages:
             artifact: 'GitAnnex'
           - checkout: self
             submodules: true
-          - script: git remote add cache ../annex-cache
+          - script: git remote add cache ../GitAnnex
           - script: sudo apt-get install -y git-annex
+          - script: git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+          - script: git config --global user.name "Ahmed Abou-Aliaa"
           - script: git annex move --from cache
           - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
@@ -110,8 +114,10 @@ stages:
             artifact: 'GitAnnex'
           - checkout: self
             submodules: true
-          - script: git remote add cache ../annex-cache
+          - script: git remote add cache ../GitAnnex
           - script: sudo apt-get install -y git-annex
+          - script: git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+          - script: git config --global user.name "Ahmed Abou-Aliaa"
           - script: git annex move --from cache
           - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
@@ -129,8 +135,10 @@ stages:
             artifact: 'GitAnnex'
           - checkout: self
             submodules: true
-          - script: git remote add cache ../annex-cache
+          - script: git remote add cache ../GitAnnex
           - script: sudo apt-get install -y git-annex
+          - script: git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+          - script: git config --global user.name "Ahmed Abou-Aliaa"
           - script: git annex move --from cache
           - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
