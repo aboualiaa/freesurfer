@@ -25,28 +25,29 @@ stages:
           - script: echo $Z_ID
         displayName: 'Linting'
   - stage: CollectArtifacts
-    dependsOn: Lint
+#    dependsOn: Lint
     jobs:
-      - job: CheckGitAnnex
-        pool:
-          vmImage: 'ubuntu-latest'
-        steps:
-          - checkout: none
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              buildType: 'specific'
-              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              specificBuildWithTriggering: true
-              buildVersionToDownload: 'latest'
-              allowPartiallySucceededBuilds: true
-              allowFailedBuilds: true
-              artifactName: 'GitAnnex'
-              targetPath: '$(Pipeline.Workspace)'
-        displayName: 'Check Cached Git Annex Data'
+#      - job: CheckGitAnnex
+#        pool:
+#          vmImage: 'ubuntu-latest'
+#        steps:
+#          - checkout: none
+#          - task: DownloadPipelineArtifact@2
+#            inputs:
+#              buildType: 'specific'
+#              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+#              definition: '2'
+#              buildVersionToDownload: 'latestFromBranch'
+#              branchName: 'refs/heads/fs-modernize'
+#              tags: 'artifact'
+#              allowPartiallySucceededBuilds: true
+#              allowFailedBuilds: true
+#              artifactName: 'GitAnnex'
+#              targetPath: '$(Pipeline.Workspace)'
+#        displayName: 'Check Cached Git Annex Data'
       - job: DownloadGitAnnex
-        dependsOn: CheckGitAnnex
-        condition: failed()
+#        dependsOn: CheckGitAnnex
+#        condition: failed()
         pool:
           vmImage: 'ubuntu-latest'
         steps:
@@ -69,8 +70,6 @@ stages:
         steps:
           - checkout: self
             submodules: true
-          - download: current
-            artifact: GitAnnex
           - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
           - publish: ./cmake-build-debug-xenial
@@ -87,6 +86,8 @@ stages:
             submodules: true
           - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+          - publish: ./cmake-build-debug-xenial
+            artifact: BuildDirXenialClang
         displayName: 'Ubuntu Xenial Build Clang'
       - job: BionicBuildGCC
         variables:
@@ -99,6 +100,8 @@ stages:
             submodules: true
           - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+          - publish: ./cmake-build-debug-bionic
+            artifact: BuildDirBionicGCC
         displayName: 'Ubuntu Bionic Build GCC'
       - job: BionicBuildClang
         variables:
@@ -111,6 +114,8 @@ stages:
             submodules: true
           - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+          - publish: ./cmake-build-debug-bionic
+            artifact: BuildDirBionicClang
         displayName: 'Ubuntu Bionic Build Clang'
       - job: macOSBuild
         pool:
@@ -134,23 +139,15 @@ stages:
         steps:
           - checkout: self
             submodules: true
+          - download: current
+            artifact: 'GitAnnex'
           - task: DownloadPipelineArtifact@2
             inputs:
               buildType: 'current'
               artifactName: 'BuildDirXenialGCC'
               targetPath: '$(Build.SourcesDirectory)'
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              buildType: 'specific'
-              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              specificBuildWithTriggering: true
-              buildVersionToDownload: 'latest'
-              allowPartiallySucceededBuilds: true
-              allowFailedBuilds: true
-              artifactName: 'GitAnnex'
-              targetPath: '$(Pipeline.Workspace)'
           - script: git remote add cache ../annex-cache
+          - script: sudo apt-get install -y git-annex
           - script: git annex copy --from cache
           - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Unit.sh
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
@@ -165,17 +162,16 @@ stages:
         steps:
           - checkout: self
             submodules: true
+          - download: current
+            artifact: 'GitAnnex'
           - task: DownloadPipelineArtifact@2
             inputs:
-              buildType: 'specific'
-              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              specificBuildWithTriggering: true
-              buildVersionToDownload: 'latest'
-              allowPartiallySucceededBuilds: true
-              allowFailedBuilds: true
-              artifactName: 'GitAnnex'
-              targetPath: '$(Pipeline.Workspace)'
+              buildType: 'current'
+              artifactName: 'BuildDirXenialClang'
+              targetPath: '$(Build.SourcesDirectory)'
+          - script: git remote add cache ../annex-cache
+          - script: sudo apt-get install -y git-annex
+          - script: git annex copy --from cache
           - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Unit.sh
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
         displayName: 'Ubuntu Xenial Unit Test Clang'
@@ -189,17 +185,16 @@ stages:
         steps:
           - checkout: self
             submodules: true
+          - download: current
+            artifact: 'GitAnnex'
           - task: DownloadPipelineArtifact@2
             inputs:
-              buildType: 'specific'
-              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              specificBuildWithTriggering: true
-              buildVersionToDownload: 'latest'
-              allowPartiallySucceededBuilds: true
-              allowFailedBuilds: true
-              artifactName: 'GitAnnex'
-              targetPath: '$(Pipeline.Workspace)'
+              buildType: 'current'
+              artifactName: 'BuildDirBionicGCC'
+              targetPath: '$(Build.SourcesDirectory)'
+          - script: git remote add cache ../annex-cache
+          - script: sudo apt-get install -y git-annex
+          - script: git annex copy --from cache
           - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Unit.sh
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
         displayName: 'Ubuntu Bionic Unit Test GCC'
@@ -213,17 +208,16 @@ stages:
         steps:
           - checkout: self
             submodules: true
+          - download: current
+            artifact: 'GitAnnex'
           - task: DownloadPipelineArtifact@2
             inputs:
-              buildType: 'specific'
-              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              specificBuildWithTriggering: true
-              buildVersionToDownload: 'latest'
-              allowPartiallySucceededBuilds: true
-              allowFailedBuilds: true
-              artifactName: 'GitAnnex'
-              targetPath: '$(Pipeline.Workspace)'
+              buildType: 'current'
+              artifactName: 'BuildDirBionicClang'
+              targetPath: '$(Build.SourcesDirectory)'
+          - script: git remote add cache ../annex-cache
+          - script: sudo apt-get install -y git-annex
+          - script: git annex copy --from cache
           - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Unit.sh
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
         displayName: 'Ubuntu Bionic Unit Test Clang'
