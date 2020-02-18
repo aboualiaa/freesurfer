@@ -25,29 +25,26 @@ stages:
           - script: echo $Z_ID
         displayName: 'Linting'
   - stage: CollectArtifacts
-#    dependsOn: Lint
+    dependsOn: Lint
     jobs:
-#      - job: CheckGitAnnex
-#        pool:
-#          vmImage: 'ubuntu-latest'
-#        steps:
-#          - checkout: none
-#          - task: DownloadPipelineArtifact@2
-#            inputs:
-#              buildType: 'specific'
-#              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-#              definition: '2'
-#              buildVersionToDownload: 'latestFromBranch'
-#              branchName: 'refs/heads/fs-modernize'
-#              tags: 'artifact'
-#              allowPartiallySucceededBuilds: true
-#              allowFailedBuilds: true
-#              artifactName: 'GitAnnex'
-#              targetPath: '$(Pipeline.Workspace)'
-#        displayName: 'Check Cached Git Annex Data'
+      - job: CheckGitAnnex
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - checkout: none
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '2'
+              buildVersionToDownload: 'specific'
+              pipelineId: '31'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Pipeline.Workspace)'
+        displayName: 'Check Cached Git Annex Data'
       - job: DownloadGitAnnex
-#        dependsOn: CheckGitAnnex
-#        condition: failed()
+        dependsOn: CheckGitAnnex
+        condition: failed()
         pool:
           vmImage: 'ubuntu-latest'
         steps:
@@ -68,8 +65,18 @@ stages:
         pool:
           vmImage: 'ubuntu-16.04'
         steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '2'
+              buildVersionToDownload: 'specific'
+              pipelineId: '31'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Pipeline.Workspace)'
           - download: current
             artifact: 'GitAnnex'
+            condition: failed()
           - checkout: self
             submodules: true
           - script: git remote add cache ../GitAnnex
@@ -89,8 +96,18 @@ stages:
         pool:
           vmImage: 'ubuntu-16.04'
         steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '2'
+              buildVersionToDownload: 'specific'
+              pipelineId: '31'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Pipeline.Workspace)'
           - download: current
             artifact: 'GitAnnex'
+            condition: failed()
           - checkout: self
             submodules: true
           - script: git remote add cache ../GitAnnex
@@ -110,8 +127,18 @@ stages:
         pool:
           vmImage: 'ubuntu-18.04'
         steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '2'
+              buildVersionToDownload: 'specific'
+              pipelineId: '31'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Pipeline.Workspace)'
           - download: current
             artifact: 'GitAnnex'
+            condition: failed()
           - checkout: self
             submodules: true
           - script: git remote add cache ../GitAnnex
@@ -131,8 +158,18 @@ stages:
         pool:
           vmImage: 'ubuntu-18.04'
         steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '2'
+              buildVersionToDownload: 'specific'
+              pipelineId: '31'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Pipeline.Workspace)'
           - download: current
             artifact: 'GitAnnex'
+            condition: failed()
           - checkout: self
             submodules: true
           - script: git remote add cache ../GitAnnex
