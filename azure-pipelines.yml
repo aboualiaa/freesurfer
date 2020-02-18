@@ -36,7 +36,7 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '1'
+              definition: '2'
               specificBuildWithTriggering: true
               buildVersionToDownload: 'latest'
               allowPartiallySucceededBuilds: true
@@ -143,7 +143,7 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '1'
+              definition: '2'
               specificBuildWithTriggering: true
               buildVersionToDownload: 'latest'
               allowPartiallySucceededBuilds: true
@@ -169,7 +169,7 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '1'
+              definition: '2'
               specificBuildWithTriggering: true
               buildVersionToDownload: 'latest'
               allowPartiallySucceededBuilds: true
@@ -193,7 +193,7 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '1'
+              definition: '2'
               specificBuildWithTriggering: true
               buildVersionToDownload: 'latest'
               allowPartiallySucceededBuilds: true
@@ -217,7 +217,7 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '1'
+              definition: '2'
               specificBuildWithTriggering: true
               buildVersionToDownload: 'latest'
               allowPartiallySucceededBuilds: true
