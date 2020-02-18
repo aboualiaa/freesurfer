@@ -1,5 +1,10 @@
 
 container:
   image: gcc:latest
+  cpu: 8
+  memory: 24G
+
 task:
-  tests_script: make tests
+  configure_script: ./ci-scripts/travis.configure.bionic.gcc.Build.sh
+  build_script: ./ci-scripts/travis.script.bionic.Build.sh
+  test_script: ./ci-scripts/travis.script.bionic.Unit.sh
