@@ -25,7 +25,7 @@ include_directories(
   ${ITK_INCLUDE_DIRS}
 )
 
-add_library(utils STATIC
+add_library(utils SHARED
   afni.cpp
   annotation.cpp
   argparse.cpp
