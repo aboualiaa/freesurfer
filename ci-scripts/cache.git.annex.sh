@@ -16,7 +16,8 @@ git clone --no-recurse-submodules https://www.github.com/aboualiaa/freesurfer
 cd freesurfer
 git remote add datasrc https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/repo/annex.git
 git fetch datasrc
-git annex get . || true
+git annex get ./**/testdata.* || true
+git annex get ./distribution || true
 git remote add cache $CURRENT_WORK_DIR/annex-cache
 git config remote.cache.annex-speculate-present true
 git config remote.cache.annex-cost 10

@@ -148,8 +148,9 @@ stages:
               targetPath: '$(Build.SourcesDirectory)'
           - script: git remote add cache ../annex-cache
           - script: sudo apt-get install -y git-annex
-          - script: git annex copy --from cache
+          - script: git annex move --from cache
           - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Unit.sh
+          - script: git annex drop --force
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
         displayName: 'Ubuntu Xenial Unit Test GCC'
       - job: XenialUnitTestClang
@@ -171,8 +172,9 @@ stages:
               targetPath: '$(Build.SourcesDirectory)'
           - script: git remote add cache ../annex-cache
           - script: sudo apt-get install -y git-annex
-          - script: git annex copy --from cache
+          - script: git annex move --from cache
           - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Unit.sh
+          - script: git annex drop --force
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
         displayName: 'Ubuntu Xenial Unit Test Clang'
       - job: BionicUnitTestGCC
@@ -194,8 +196,9 @@ stages:
               targetPath: '$(Build.SourcesDirectory)'
           - script: git remote add cache ../annex-cache
           - script: sudo apt-get install -y git-annex
-          - script: git annex copy --from cache
+          - script: git annex move --from cache
           - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Unit.sh
+          - script: git annex drop --force
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
         displayName: 'Ubuntu Bionic Unit Test GCC'
       - job: BionicUnitTestClang
@@ -217,8 +220,9 @@ stages:
               targetPath: '$(Build.SourcesDirectory)'
           - script: git remote add cache ../annex-cache
           - script: sudo apt-get install -y git-annex
-          - script: git annex copy --from cache
+          - script: git annex move --from cache
           - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Unit.sh
+          - script: git annex drop --force
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
         displayName: 'Ubuntu Bionic Unit Test Clang'
       - job: macOSUnitTest
@@ -239,7 +243,7 @@ stages:
         variables:
           HOSTING_OS: xenial
           HOSTING_COMPILER: gcc
-        dependsOn: XenialUnitTestGCC
+        dependsOn: XenialBuildGCC
         pool:
           vmImage: 'ubuntu-16.04'
         steps:
@@ -249,21 +253,21 @@ stages:
         variables:
           HOSTING_OS: xenial
           HOSTING_COMPILER: clang
-        dependsOn: XenialUnitTestClang
+        dependsOn: XenialBuildClang
         pool:
           vmImage: 'ubuntu-16.04'
         steps:
           - script: echo hello from Linux
         displayName: 'Ubuntu Xenial Integration Test Clang'
       - job: BionicIntegrationTestGCC
-        dependsOn: BionicUnitTestGCC
+        dependsOn: BionicBuildGCC
         pool:
           vmImage: 'ubuntu-18.04'
         steps:
           - script: echo hello from Linux
         displayName: 'Ubuntu Bionic Integration Test GCC'
       - job: BionicIntegrationTestClang
-        dependsOn: BionicUnitTestClang
+        dependsOn: BionicBuildClang
         pool:
           vmImage: 'ubuntu-18.04'
         steps:
