@@ -8,7 +8,7 @@
     gfortran libblas-dev liblapack-dev zlib1g-dev libxmu-dev \
     libxmu-headers libxi-dev libxt-dev libx11-dev libglu1-mesa-dev \
     mpich python3.5 libboost-all-dev libfltk1.3-dev libeigen3-dev \
-    libarmadillo-dev qt5-default libqt5x11extras5-dev curl
+    libarmadillo-dev qt5-default libqt5x11extras5-dev curl git-annex lcov libxml2-utils
 
   #  export LD_LIBRARY_PATH="/usr/local/clang_9.0.0/lib:$LD_LIBRARY_PATH"
 

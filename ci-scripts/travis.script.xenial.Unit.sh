@@ -2,7 +2,7 @@
 
 cd ./cmake-build-debug-xenial
 timeout 50m ninja
-ctest --schedule-random --timeout 90 -j $(nproc) -LE Expensive -T Test
+ctest --schedule-random --timeout 90 -j $(nproc) -LE Expensive -T Test --group Continuous
 #lcov --capture --directory . --output-file ./coverage.info;
 #curl -s https://codecov.io/bash -o codecov.sh
 #chmod +x ./codecov.sh

@@ -7,5 +7,5 @@ add_help(mri_ca_label mri_ca_label.help.xml)
 target_link_libraries(mri_ca_label utils)
 
 add_test_script(NAME mri_ca_label_test SCRIPT test.sh DEPENDS mri_ca_label)
-
+set_property(TEST mri_ca_label_test PROPERTY LABELS Expensive Integration)
 install(TARGETS mri_ca_label DESTINATION bin)

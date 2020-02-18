@@ -7,7 +7,7 @@
     gfortran libblas-dev liblapack-dev zlib1g-dev libxmu-dev \
     libxmu-headers libxi-dev libxt-dev libx11-dev libglu1-mesa-dev \
     mpich2 python3.5 libboost-all-dev libfltk1.3-dev libeigen3-dev \
-    libarmadillo-dev qt5-default libqt5x11extras5-dev libxml2-utils
+    libarmadillo-dev qt5-default libqt5x11extras5-dev libxml2-utils git-annex lcov
 
   export PATH="/usr/local/bin:$PATH"
 
