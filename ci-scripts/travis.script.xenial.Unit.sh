@@ -1,6 +1,11 @@
 #!/bin/bash
 
 cd ./cmake-build-debug-xenial
+if [[ $HOSTING_COMPILER == "clang" ]]; then
+  export PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-16.04/bin:$PATH"
+  export LD_LIBRARY_PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-16.04/lib:$LD_LIBRARY_PATH"
+  export PATH="$(pwd)/cmake-3.16.4-Linux-x86_64/bin:$PATH"
+fi
 timeout 50m ninja
 ctest --schedule-random --timeout 90 -j $(nproc) -LE Expensive -T Test --group Continuous
 #lcov --capture --directory . --output-file ./coverage.info;
