@@ -60,7 +60,6 @@ stages:
         pool:
           vmImage: 'ubuntu-16.04'
         steps:
-          - script: cd .. && pwd && ls
           - task: DownloadPipelineArtifact@2
             inputs:
               buildType: 'specific'
@@ -73,7 +72,6 @@ stages:
           - download: current
             artifact: 'GitAnnex'
             condition: failed()
-          - script: cd .. && pwd && ls
           - script: ls
           - checkout: self
             submodules: true
@@ -92,6 +90,7 @@ stages:
             inputs:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
         displayName: 'Ubuntu Xenial Build GCC'
       - job: XenialBuildClang
         variables:
@@ -129,6 +128,7 @@ stages:
             inputs:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
         displayName: 'Ubuntu Xenial Build Clang'
       - job: BionicBuildGCC
         variables:
@@ -166,6 +166,7 @@ stages:
             inputs:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
         displayName: 'Ubuntu Bionic Build GCC'
       - job: BionicBuildClang
         variables:
@@ -203,6 +204,7 @@ stages:
             inputs:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
         displayName: 'Ubuntu Bionic Build Clang'
       - job: XenialIntegrationTestGCC
         timeoutInMinutes: 300
@@ -241,6 +243,7 @@ stages:
             inputs:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-IntegrationTests'
         displayName: 'Ubuntu Xenial Integration Test GCC'
       - job: XenialIntegrationTestClang
         timeoutInMinutes: 300
@@ -279,6 +282,7 @@ stages:
             inputs:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-IntegrationTests'
         displayName: 'Ubuntu Xenial Integration Test Clang'
       - job: BionicIntegrationTestGCC
         timeoutInMinutes: 300
@@ -317,6 +321,7 @@ stages:
             inputs:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-IntegrationTests'
         displayName: 'Ubuntu Bionic Integration Test GCC'
       - job: BionicIntegrationTestClang
         timeoutInMinutes: 300
@@ -355,4 +360,5 @@ stages:
             inputs:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-IntegrationTests'
         displayName: 'Ubuntu Bionic Integration Test Clang'
