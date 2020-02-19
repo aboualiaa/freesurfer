@@ -257,6 +257,9 @@ stages:
         displayName: 'Ubuntu Xenial Integration Test Clang'
       - job: BionicIntegrationTestGCC
         timeoutInMinutes: 300
+          variables:
+            HOSTING_OS: bionic
+            HOSTING_COMPILER: gcc
         pool:
           vmImage: 'ubuntu-18.04'
         steps:
@@ -286,6 +289,9 @@ stages:
         displayName: 'Ubuntu Bionic Integration Test GCC'
       - job: BionicIntegrationTestClang
         timeoutInMinutes: 300
+          variables:
+            HOSTING_OS: bionic
+            HOSTING_COMPILER: clang
         pool:
           vmImage: 'ubuntu-18.04'
         steps:
