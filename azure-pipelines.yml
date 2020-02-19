@@ -17,12 +17,16 @@ stages:
         variables:
           Z_ID: $(System.DefinitionId)
           B_ID: $(Build.BuildId)
+          BUILDDIR: $(Agent.BuildDirectory)
+          PIPEDIR: $(Pipeline.Workspace)
         pool:
           vmImage: 'ubuntu-latest'
         steps:
           - script: echo "linted succesfully"
           - script: echo $B_ID
           - script: echo $Z_ID
+          - script: echo $BUILDDIR
+          - script: echo $PIPEDIR
         displayName: 'Linting'
   - stage: CollectArtifacts
     dependsOn: Lint
@@ -40,7 +44,7 @@ stages:
               buildVersionToDownload: 'specific'
               pipelineId: '31'
               artifactName: 'GitAnnex'
-              targetPath: '$(Pipeline.Workspace)'
+              targetPath: '$(Agent.BuildDirectory)'
         displayName: 'Check Cached Git Annex Data'
       - job: DownloadGitAnnex
         dependsOn: CheckGitAnnex
@@ -73,7 +77,7 @@ stages:
               buildVersionToDownload: 'specific'
               pipelineId: '31'
               artifactName: 'GitAnnex'
-              targetPath: '$(Pipeline.Workspace)'
+              targetPath: '$(Agent.BuildDirectory)'
           - download: current
             artifact: 'GitAnnex'
             condition: failed()
@@ -104,7 +108,7 @@ stages:
               buildVersionToDownload: 'specific'
               pipelineId: '31'
               artifactName: 'GitAnnex'
-              targetPath: '$(Pipeline.Workspace)'
+              targetPath: '$(Agent.BuildDirectory)'
           - download: current
             artifact: 'GitAnnex'
             condition: failed()
@@ -135,7 +139,7 @@ stages:
               buildVersionToDownload: 'specific'
               pipelineId: '31'
               artifactName: 'GitAnnex'
-              targetPath: '$(Pipeline.Workspace)'
+              targetPath: '$(Agent.BuildDirectory)'
           - download: current
             artifact: 'GitAnnex'
             condition: failed()
@@ -166,7 +170,7 @@ stages:
               buildVersionToDownload: 'specific'
               pipelineId: '31'
               artifactName: 'GitAnnex'
-              targetPath: '$(Pipeline.Workspace)'
+              targetPath: '$(Agent.BuildDirectory)'
           - download: current
             artifact: 'GitAnnex'
             condition: failed()
@@ -182,49 +186,125 @@ stages:
           - script: git annex drop --force
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
         displayName: 'Ubuntu Bionic Build Clang'
-      - job: macOSBuild
-        pool:
-          vmImage: 'macOS-latest'
-        steps:
-          - script: echo "hello from macOS $(nproc) Cores"
-        displayName: 'macOS Latest Build'
-      - job: WindowsBuild
-        pool:
-          vmImage: 'windows-latest'
-        steps:
-          - script: echo hello from Windows
-        displayName: 'Widnows Latest Build'
       - job: XenialIntegrationTestGCC
+        timeoutInMinutes: 300
         variables:
           HOSTING_OS: xenial
           HOSTING_COMPILER: gcc
-        dependsOn: XenialBuildGCC
         pool:
           vmImage: 'ubuntu-16.04'
         steps:
-          - script: echo hello from Linux
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '2'
+              buildVersionToDownload: 'specific'
+              pipelineId: '31'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Agent.BuildDirectory)'
+          - download: current
+            artifact: 'GitAnnex'
+            condition: failed()
+          - checkout: self
+            submodules: true
+          - script: git remote add cache ../GitAnnex
+          - script: sudo apt-get install -y git-annex
+          - script: git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+          - script: git config --global user.name "Ahmed Abou-Aliaa"
+          - script: git annex copy --from cache
+          - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+          - script: ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+          - script: git annex drop --force
+          - script: ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh
         displayName: 'Ubuntu Xenial Integration Test GCC'
       - job: XenialIntegrationTestClang
+        timeoutInMinutes: 300
         variables:
           HOSTING_OS: xenial
           HOSTING_COMPILER: clang
-        dependsOn: XenialBuildClang
         pool:
           vmImage: 'ubuntu-16.04'
         steps:
-          - script: echo hello from Linux
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '2'
+              buildVersionToDownload: 'specific'
+              pipelineId: '31'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Agent.BuildDirectory)'
+          - download: current
+            artifact: 'GitAnnex'
+            condition: failed()
+          - checkout: self
+            submodules: true
+          - script: git remote add cache ../GitAnnex
+          - script: sudo apt-get install -y git-annex
+          - script: git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+          - script: git config --global user.name "Ahmed Abou-Aliaa"
+          - script: git annex copy --from cache
+          - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+          - script: ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+          - script: git annex drop --force
+          - script: ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh
         displayName: 'Ubuntu Xenial Integration Test Clang'
       - job: BionicIntegrationTestGCC
-        dependsOn: BionicBuildGCC
+        timeoutInMinutes: 300
         pool:
           vmImage: 'ubuntu-18.04'
         steps:
-          - script: echo hello from Linux
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '2'
+              buildVersionToDownload: 'specific'
+              pipelineId: '31'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Agent.BuildDirectory)'
+          - download: current
+            artifact: 'GitAnnex'
+            condition: failed()
+          - checkout: self
+            submodules: true
+          - script: git remote add cache ../GitAnnex
+          - script: sudo apt-get install -y git-annex
+          - script: git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+          - script: git config --global user.name "Ahmed Abou-Aliaa"
+          - script: git annex copy --from cache
+          - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+          - script: ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+          - script: git annex drop --force
+          - script: ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh
         displayName: 'Ubuntu Bionic Integration Test GCC'
       - job: BionicIntegrationTestClang
-        dependsOn: BionicBuildClang
+        timeoutInMinutes: 300
         pool:
           vmImage: 'ubuntu-18.04'
         steps:
-          - script: echo hello from Linux
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '2'
+              buildVersionToDownload: 'specific'
+              pipelineId: '31'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Agent.BuildDirectory)'
+          - download: current
+            artifact: 'GitAnnex'
+            condition: failed()
+          - checkout: self
+            submodules: true
+          - script: git remote add cache ../GitAnnex
+          - script: sudo apt-get install -y git-annex
+          - script: git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+          - script: git config --global user.name "Ahmed Abou-Aliaa"
+          - script: git annex copy --from cache
+          - script: ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+          - script: ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+          - script: git annex drop --force
+          - script: ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh
         displayName: 'Ubuntu Bionic Integration Test Clang'
