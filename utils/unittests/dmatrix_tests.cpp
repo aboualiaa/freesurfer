@@ -13,6 +13,19 @@ TEST(dmatrix_test, constat_value) { // NOLINT
   MATRIX *mf;
   double v;
 
+  md = DMatrixConstVal(0, 3, 3, nullptr);
+  unsigned int sum = 0;
+  for (int i = 0; i < md->rows * md->cols; ++i) {
+    sum |= static_cast<unsigned int>(md->data[i]); // NOLINT
+  }
+  EXPECT_EQ(sum, 0);
+  md = DMatrixConstVal(0, 3, 3, md);
+  sum = 0;
+  for (int i = 0; i < md->rows * md->cols; ++i) {
+    sum |= static_cast<unsigned int>(md->data[i]); // NOLINT
+  }
+  EXPECT_EQ(sum, 0);
+
   mf = MatrixConstVal(14, 7, 2, nullptr);  // NOLINT (magic numbers)
   md = DMatrixConstVal(14, 7, 2, nullptr); // NOLINT (magic numbers)
 
@@ -73,7 +86,6 @@ TEST(dmatrix_test, dmatrix_subtract) { // NOLINT
 
 TEST(dmatrix_test, dmatrix_scalar_mult) { // NOLINT
   DMATRIX *m1d;
-  DMATRIX *m2d;
   DMATRIX *md;
   MATRIX *m1f;
   MATRIX *m2f;
@@ -83,7 +95,6 @@ TEST(dmatrix_test, dmatrix_scalar_mult) { // NOLINT
   m1f = MatrixDRand48(14, 7, nullptr); // NOLINT
   m2f = MatrixDRand48(14, 7, nullptr); // NOLINT
   m1d = DMatrixCopyFMatrix(m1f, nullptr);
-  m2d = DMatrixCopyFMatrix(m2f, nullptr);
 
   mf = MatrixScalarMul(m1f, static_cast<float>(2.3), nullptr); // NOLINT
   md = DMatrixScalarMul(m1d, 2.3, nullptr);                    // NOLINT
@@ -154,6 +165,22 @@ TEST(dmatrix_test, dmatrix_vector_cross) { // NOLINT
   MATRIX *m2f;
   MATRIX *mf;
   double v;
+  m1f = MatrixDRand48(4, 1, nullptr);
+  m2f = MatrixDRand48(4, 1, nullptr);
+  m1d = DMatrixCopyFMatrix(m1f, nullptr);
+  m2d = DMatrixCopyFMatrix(m2f, nullptr);
+
+  md = DVectorCrossProduct(nullptr, m2d, nullptr);
+  EXPECT_EQ(md, nullptr);
+  md = DVectorCrossProduct(m1d, nullptr, nullptr);
+  EXPECT_EQ(md, nullptr);
+
+  md = DVectorCrossProduct(m1d, m2d, nullptr);
+  EXPECT_EQ(md, nullptr);
+
+  md = DVectorCrossProduct(m1d, m2d, nullptr);
+  EXPECT_EQ(md, nullptr);
+
   m1f = MatrixDRand48(3, 1, nullptr);
   m2f = MatrixDRand48(3, 1, nullptr);
   m1d = DMatrixCopyFMatrix(m1f, nullptr);
@@ -161,8 +188,8 @@ TEST(dmatrix_test, dmatrix_vector_cross) { // NOLINT
 
   mf = VectorCrossProduct(m1f, m2f, nullptr);
   md = DVectorCrossProduct(m1d, m2d, nullptr);
-
   EXPECT_NE(md, nullptr);
+
   v = DMatrixCompareFMatrix(mf, md);
   EXPECT_LT(v, .0001);
 }
@@ -190,20 +217,17 @@ TEST(dmatrix_test, dmatrix_vector_dot) { // NOLINT
 
 TEST(dmatrix_test, dmatrix_vector_length) { // NOLINT
   DMATRIX *m1d;
-  DMATRIX *m2d;
   MATRIX *m1f;
-  MATRIX *m2f;
   double v;
   double vf;
   double vd;
   m1f = MatrixDRand48(3, 1, nullptr);
-  m2f = MatrixDRand48(3, 1, nullptr);
   m1d = DMatrixCopyFMatrix(m1f, nullptr);
-  m2d = DMatrixCopyFMatrix(m2f, nullptr);
 
   vf = static_cast<double>(VectorLen(m1f));
+  vd = DVectorLen(nullptr);
+  EXPECT_GE(vd, -1);
   vd = DVectorLen(m1d);
-
   EXPECT_GE(vd, 0);
   v = fabs(vf - vd);
   EXPECT_LT(v, .0001);
@@ -244,12 +268,18 @@ TEST(dmatrix_test, dmatrix_check_dims) { // NOLINT
   res = DMatrixCheckDims(m1d, temp1, 2, stdout, "");
   EXPECT_EQ(res, 1);
   temp1 = DMatrixCopyFMatrix(m1f, nullptr);
-  m1f = MatrixDRand48(5, 5, nullptr);
+  m1f = MatrixDRand48(5, 5, nullptr); // NOLINT
   m1d = DMatrixCopyFMatrix(m1f, nullptr);
   res = DMatrixCheckDims(m1d, temp1, 4, stdout, "");
   EXPECT_EQ(res, 1);
+}
 
-  EXPECT_EQ(DMatrixFree(&temp), 0);
+TEST(dmatrix_test, dmatrix_alloc) { // NOLINT
+  EXPECT_EQ(DMatrixAlloc(3, 3, MATRIX_COMPLEX), nullptr);
+  EXPECT_NE(DMatrixAlloc(3, 3, MATRIX_REAL), nullptr);
+  EXPECT_EQ(DMatrixAlloc(3, 3, 3), nullptr);
+  // TODO: restructure code to use custom *alloc routines
+  // and test for memory allocation errors
 }
 
 auto main(int argc, char *argv[]) -> int { // NOLINT (unused parameters)
