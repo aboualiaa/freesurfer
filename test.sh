@@ -111,8 +111,11 @@ function find_path {
 }
 
 # setup the necessary freesurfer environment variables - these can be modified in the test script if necessary
-#export FREESURFER_HOME="$(find_path $FSTEST_SCRIPT_DIR distribution)"
-export FREESURFER_HOME="/Users/aboualiaa/Desktop/.temp/repos/freesurfer/distribution" # todo: revert to above line
+if [ -z ${AZURE_SOURCE_DIR+x} ]; then
+  export FREESURFER_HOME="$(find_path $FSTEST_SCRIPT_DIR distribution)"
+else
+ export FREESURFER_HOME="$(find_path $AZURE_SOURCE_DIR distribution)"
+fi
 export SUBJECTS_DIR="$FSTEST_TESTDATA_DIR"
 export FSLOUTPUTTYPE="NIFTI_GZ"
 

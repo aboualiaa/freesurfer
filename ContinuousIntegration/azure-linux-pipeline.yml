@@ -3,7 +3,7 @@
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 
-name: $(TeamProject)_$(Build.DefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+name: $(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
 
 trigger:
   branches:
@@ -57,6 +57,7 @@ stages:
         variables:
           HOSTING_OS: xenial
           HOSTING_COMPILER: gcc
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)'
         pool:
           vmImage: 'ubuntu-16.04'
         steps:
@@ -83,7 +84,7 @@ stages:
               git annex copy --from cache
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
-              git annex drop --force
+              rm -rf ../GitAnnex
               ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
             displayName: 'Build and Test'
           - task: PublishTestResults@2
@@ -96,6 +97,7 @@ stages:
         variables:
           HOSTING_OS: xenial
           HOSTING_COMPILER: clang
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)'
         pool:
           vmImage: 'ubuntu-16.04'
         steps:
@@ -121,7 +123,7 @@ stages:
               git annex copy --from cache
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
-              git annex drop --force
+              rm -rf ../GitAnnex
               ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
             displayName: 'Build and Test'
           - task: PublishTestResults@2
@@ -134,6 +136,7 @@ stages:
         variables:
           HOSTING_OS: bionic
           HOSTING_COMPILER: gcc
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)'
         pool:
           vmImage: 'ubuntu-18.04'
         steps:
@@ -159,7 +162,7 @@ stages:
               git annex copy --from cache
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
-              git annex drop --force
+              rm -rf ../GitAnnex
               ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
             displayName: 'Build and Test'
           - task: PublishTestResults@2
@@ -172,6 +175,7 @@ stages:
         variables:
           HOSTING_OS: bionic
           HOSTING_COMPILER: clang
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)'
         pool:
           vmImage: 'ubuntu-18.04'
         steps:
@@ -197,7 +201,7 @@ stages:
               git annex copy --from cache
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
-              git annex drop --force
+              rm -rf ../GitAnnex
               ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
             displayName: 'Build and Test'
           - task: PublishTestResults@2
@@ -211,6 +215,7 @@ stages:
         variables:
           HOSTING_OS: xenial
           HOSTING_COMPILER: gcc
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)'
         pool:
           vmImage: 'ubuntu-16.04'
         steps:
@@ -236,7 +241,7 @@ stages:
               git annex copy --from cache
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
-              git annex drop --force
+              rm -rf ../GitAnnex
               ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh
             displayName: 'Build and Test'
           - task: PublishTestResults@2
@@ -250,6 +255,7 @@ stages:
         variables:
           HOSTING_OS: xenial
           HOSTING_COMPILER: clang
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)'
         pool:
           vmImage: 'ubuntu-16.04'
         steps:
@@ -275,7 +281,7 @@ stages:
               git annex copy --from cache
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
-              git annex drop --force
+              rm -rf ../GitAnnex
               ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh
             displayName: 'Build and Test'
           - task: PublishTestResults@2
@@ -289,6 +295,7 @@ stages:
         variables:
           HOSTING_OS: bionic
           HOSTING_COMPILER: gcc
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)'
         pool:
           vmImage: 'ubuntu-18.04'
         steps:
@@ -314,7 +321,7 @@ stages:
               git annex copy --from cache
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
-              git annex drop --force
+              rm -rf ../GitAnnex
               ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh
             displayName: 'Build and Test'
           - task: PublishTestResults@2
@@ -328,6 +335,7 @@ stages:
         variables:
           HOSTING_OS: bionic
           HOSTING_COMPILER: clang
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)'
         pool:
           vmImage: 'ubuntu-18.04'
         steps:
@@ -353,7 +361,7 @@ stages:
               git annex copy --from cache
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
-              git annex drop --force
+              rm -rf ../GitAnnex
             displayName: 'Build and Test'
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh
           - task: PublishTestResults@2
