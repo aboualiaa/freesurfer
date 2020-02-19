@@ -35,6 +35,7 @@ stages:
         pool:
           vmImage: 'ubuntu-latest'
         steps:
+          - script: cd .. && pwd && ls
           - checkout: none
           - task: DownloadPipelineArtifact@2
             inputs:
@@ -45,6 +46,7 @@ stages:
               pipelineId: '31'
               artifactName: 'GitAnnex'
               targetPath: '$(Agent.BuildDirectory)'
+          - script: cd .. && pwd && ls
         displayName: 'Check Cached Git Annex Data'
       - job: DownloadGitAnnex
         dependsOn: CheckGitAnnex
@@ -78,10 +80,12 @@ stages:
               buildVersionToDownload: 'specific'
               pipelineId: '31'
               artifactName: 'GitAnnex'
-              targetPath: '$(Agent.BuildDirectory)'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
           - download: current
             artifact: 'GitAnnex'
             condition: failed()
+          - script: cd .. && pwd && ls
+          - script: ls
           - checkout: self
             submodules: true
           - script: git remote add cache ../GitAnnex
@@ -109,7 +113,7 @@ stages:
               buildVersionToDownload: 'specific'
               pipelineId: '31'
               artifactName: 'GitAnnex'
-              targetPath: '$(Agent.BuildDirectory)'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
           - download: current
             artifact: 'GitAnnex'
             condition: failed()
@@ -140,7 +144,7 @@ stages:
               buildVersionToDownload: 'specific'
               pipelineId: '31'
               artifactName: 'GitAnnex'
-              targetPath: '$(Agent.BuildDirectory)'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
           - download: current
             artifact: 'GitAnnex'
             condition: failed()
@@ -171,7 +175,7 @@ stages:
               buildVersionToDownload: 'specific'
               pipelineId: '31'
               artifactName: 'GitAnnex'
-              targetPath: '$(Agent.BuildDirectory)'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
           - download: current
             artifact: 'GitAnnex'
             condition: failed()
@@ -203,7 +207,7 @@ stages:
               buildVersionToDownload: 'specific'
               pipelineId: '31'
               artifactName: 'GitAnnex'
-              targetPath: '$(Agent.BuildDirectory)'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
           - download: current
             artifact: 'GitAnnex'
             condition: failed()
@@ -235,7 +239,7 @@ stages:
               buildVersionToDownload: 'specific'
               pipelineId: '31'
               artifactName: 'GitAnnex'
-              targetPath: '$(Agent.BuildDirectory)'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
           - download: current
             artifact: 'GitAnnex'
             condition: failed()
@@ -264,7 +268,7 @@ stages:
               buildVersionToDownload: 'specific'
               pipelineId: '31'
               artifactName: 'GitAnnex'
-              targetPath: '$(Agent.BuildDirectory)'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
           - download: current
             artifact: 'GitAnnex'
             condition: failed()
@@ -293,7 +297,7 @@ stages:
               buildVersionToDownload: 'specific'
               pipelineId: '31'
               artifactName: 'GitAnnex'
-              targetPath: '$(Agent.BuildDirectory)'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
           - download: current
             artifact: 'GitAnnex'
             condition: failed()
