@@ -97,6 +97,10 @@ stages:
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
           - script: git annex drop --force
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
         displayName: 'Ubuntu Xenial Build GCC'
       - job: XenialBuildClang
         variables:
@@ -128,6 +132,10 @@ stages:
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
           - script: git annex drop --force
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
         displayName: 'Ubuntu Xenial Build Clang'
       - job: BionicBuildGCC
         variables:
@@ -159,6 +167,10 @@ stages:
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
           - script: git annex drop --force
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
         displayName: 'Ubuntu Bionic Build GCC'
       - job: BionicBuildClang
         variables:
@@ -190,6 +202,10 @@ stages:
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
           - script: git annex drop --force
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
         displayName: 'Ubuntu Bionic Build Clang'
       - job: XenialIntegrationTestGCC
         timeoutInMinutes: 300
@@ -222,6 +238,10 @@ stages:
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
           - script: git annex drop --force
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
         displayName: 'Ubuntu Xenial Integration Test GCC'
       - job: XenialIntegrationTestClang
         timeoutInMinutes: 300
@@ -254,6 +274,10 @@ stages:
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
           - script: git annex drop --force
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
         displayName: 'Ubuntu Xenial Integration Test Clang'
       - job: BionicIntegrationTestGCC
         timeoutInMinutes: 300
@@ -286,6 +310,10 @@ stages:
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
           - script: git annex drop --force
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
         displayName: 'Ubuntu Bionic Integration Test GCC'
       - job: BionicIntegrationTestClang
         timeoutInMinutes: 300
@@ -318,4 +346,8 @@ stages:
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
           - script: git annex drop --force
           - script: ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
         displayName: 'Ubuntu Bionic Integration Test Clang'
