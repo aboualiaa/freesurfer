@@ -69,6 +69,7 @@ stages:
         pool:
           vmImage: 'ubuntu-16.04'
         steps:
+          - script: cd .. && pwd && ls
           - task: DownloadPipelineArtifact@2
             inputs:
               buildType: 'specific'
