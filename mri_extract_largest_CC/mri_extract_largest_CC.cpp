@@ -43,7 +43,8 @@ static char hemi[80] = "lh";
 static int inverse = 0;
 
 const char *Progname;
-static MRI *mri_orig = nullptr;
+static MRI *mri_orig = NULL ;
+static int target_value = 255;
 
 int main(int argc, char *argv[]) {
   char **av;
@@ -51,7 +52,6 @@ int main(int argc, char *argv[]) {
   int ac, nargs;
 
   int x, y, z;
-  int target_value = 255;
 
   Progname = argv[0];
 
@@ -71,10 +71,13 @@ int main(int argc, char *argv[]) {
   if (argc != 3)
     usage(1);
 
-  if (!stricmp(hemi, "lh")) {
-    target_value = lh_label;
-  } else {
-    target_value = rh_label;
+  if (target_value == 255)
+  {
+    if (!stricmp(hemi, "lh")) {
+      target_value = lh_label;
+    } else {
+      target_value = rh_label;
+    }
   }
 
   mri_seg = MRIread(argv[1]);
@@ -87,18 +90,27 @@ int main(int argc, char *argv[]) {
   for (z = 0; z < mri_seg->depth; z++)
     for (y = 0; y < mri_seg->height; y++)
       for (x = 0; x < mri_seg->width; x++) {
-        if (inverse == 0) {
-          if (MRIgetVoxVal(mri_seg, x, y, z, 0) < threshold)
-            MRIsetVoxVal(mri_seg, x, y, z, 0, 0);
-          else
-            MRIsetVoxVal(mri_seg, x, y, z, 0, 255);
-        } else // extract background
-        {
-          if (MRIgetVoxVal(mri_seg, x, y, z, 0) > threshold)
-            MRIsetVoxVal(mri_seg, x, y, z, 0, 0);
-          else
-            MRIsetVoxVal(mri_seg, x, y, z, 0, 255);
-        }
+	if (target_value != rh_label && target_value != lh_label)
+	{
+	  if (MRIgetVoxVal(mri_seg, x, y, z, 0) == target_value)
+	    MRIsetVoxVal(mri_seg, x, y, z, 0, 255);
+	  else
+	    MRIsetVoxVal(mri_seg, x, y, z, 0, 0);
+	} 
+	else if (inverse == 0)
+	{
+	  if (MRIgetVoxVal(mri_seg, x, y, z, 0) < threshold)
+	    MRIsetVoxVal(mri_seg, x, y, z, 0, 0);
+	  else
+	    MRIsetVoxVal(mri_seg, x, y, z, 0, 255);
+	}
+	else  // extract background
+	{
+	  if (MRIgetVoxVal(mri_seg, x, y, z, 0) > threshold)
+	    MRIsetVoxVal(mri_seg, x, y, z, 0, 0);
+	  else
+	    MRIsetVoxVal(mri_seg, x, y, z, 0, 255);
+	}
       }
 
   GetLargestCC6(mri_seg);
@@ -132,15 +144,13 @@ void usage(int exit_val) {
   fout = (exit_val ? stderr : stdout);
 
   fprintf(fout, "usage: %s <input vol> <output vol>\n", Progname);
-  fprintf(fout, "this program extracts the largest connected component of the "
-                "input volume \n");
-  fprintf(fout, "\t Options are: \n");
-  fprintf(fout, "\t\t -T #: threshold for object \n");
-  fprintf(fout, "\t\t -hemi lh/rh: set the target value corresponding to lh "
-                "(255) or rh (127) \n");
-  fprintf(fout, "\t\t -I : find the largest CC in the background\n");
-  fprintf(fout, "\t\t -O <orig volume> : clone values from <orig volume> into "
-                "output (used with -I)\n");
+  fprintf(fout, "this program extracts the largest connected component of the input volume \n") ;
+  fprintf(fout, "\t Options are: \n") ;
+  fprintf(fout, "\t\t -T #: threshold for object \n") ;
+  fprintf(fout, "\t\t -hemi lh/rh: set the target value corresponding to lh (255) or rh (127) \n") ;
+  fprintf(fout, "\t\t -I : find the largest CC in the background\n") ;
+  fprintf(fout, "\t\t -O <orig volume> : clone values from <orig volume> into output (used with -I)\n") ;
+  fprintf(fout, "\t\t -L <label val> : perform connected components on voxels with value <label val>\n") ;
   exit(exit_val);
 
 } /*  end usage()  */
@@ -163,19 +173,22 @@ static int get_option(int argc, char *argv[]) {
     strcpy(hemi, argv[2]);
     printf("hemisphere = %s\n", hemi);
     nargs = 1;
-  } else
-    switch (toupper(*option)) {
-    case 'O':
-      mri_orig = MRIread(argv[2]);
-      if (mri_orig == nullptr)
-        ErrorExit(ERROR_NOFILE, "%s: could not open orig volume %s", Progname,
-                  argv[2]);
-      nargs = 1;
-      break;
-    case 'I':
-      inverse = 1;
-      printf("extracting CC from background instead of foreground\n");
-      break;
+  } else switch (toupper(*option)) {
+  case 'O':
+    mri_orig = MRIread(argv[2]) ;
+    if (mri_orig == NULL)
+      ErrorExit(ERROR_NOFILE, "%s: could not open orig volume %s", Progname, argv[2]) ;
+    nargs = 1 ;
+    break ;
+    case 'L':
+      target_value = atoi(argv[2]) ;
+      printf("using target value %d\n", target_value) ;
+      nargs = 1 ;
+      break ;
+  case 'I':
+    inverse = 1 ;
+    printf("extracting CC from background instead of foreground\n") ;
+    break ;
     case '?':
     case 'U':
       usage(0);

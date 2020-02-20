@@ -28,6 +28,7 @@
 #include <QMouseEvent>
 #include <QColorDialog>
 #include <QMessageBox>
+#include <QPalette>
 
 WidgetHistogram::WidgetHistogram(QWidget *parent) : QWidget(parent) {
   m_dInputData = NULL;
@@ -185,14 +186,17 @@ void WidgetHistogram::paintEvent(QPaintEvent *event) {
 
     // draw y metrics
     int nMetricInterval = 25;
-    double dMetricStep = ((double)m_nMaxCount) / (nCavHeight / nMetricInterval);
-    dMetricStep = MyUtils::RoundToGrid(dMetricStep);
+    QPalette pal = palette();
+    double dMetricStep = ((double)m_nMaxCount) / ( nCavHeight / nMetricInterval );
+    dMetricStep = MyUtils::RoundToGrid( dMetricStep );
     double dMetricStart = 0;
     y = m_rectGraph.bottom();
-    painter.setPen(QPen(Qt::black));
-    while (y > m_rectGraph.top() && dMetricStep > 0) {
-      if (y < m_rectGraph.bottom()) {
-        painter.drawLine(m_rectGraph.left(), y, m_rectGraph.left() - 4, y);
+    painter.setPen( QPen(pal.color(QPalette::WindowText)) );
+    while ( y > m_rectGraph.top() && dMetricStep > 0 )
+    {
+      if( y < m_rectGraph.bottom() )
+      {
+        painter.drawLine( m_rectGraph.left(), y, m_rectGraph.left()-4, y );
 
         QPen oldPen = painter.pen();
         QPen newpen(Qt::gray);
@@ -252,26 +256,24 @@ void WidgetHistogram::paintEvent(QPaintEvent *event) {
                    (x2 - x) / 2.0;
           }
         }
-        if (bDraw) {
-          painter.setPen(Qt::black);
-          if (i > 0 && i < m_nNumberOfBins - 1)
-            painter.drawLine(nPos, m_rectGraph.bottom(), nPos,
-                             m_rectGraph.bottom() + 4);
-          QString value_strg = QString::number((int)dVal);
-          QRect tmp_rc =
-              painter.boundingRect(QRect(), Qt::AlignCenter, value_strg);
-          tmp_rc.moveCenter(QPoint((x + x2) / 2, m_rectGraph.bottom() + 5 +
-                                                     tmp_rc.height() / 2));
-          painter.drawText(tmp_rc, value_strg);
+        if (bDraw)
+        {
+          painter.setPen(pal.color(QPalette::WindowText));
+          if (i > 0 && i < m_nNumberOfBins-1)
+            painter.drawLine( nPos, m_rectGraph.bottom(), nPos, m_rectGraph.bottom()+4 );
+          QString value_strg = QString::number( (int)dVal );
+          QRect tmp_rc = painter.boundingRect( QRect(), Qt::AlignCenter, value_strg );
+          tmp_rc.moveCenter( QPoint((x+x2)/2, m_rectGraph.bottom()+5+tmp_rc.height()/2));
+          painter.drawText( tmp_rc, value_strg );
         }
       }
       x = x2;
     }
 
     // draw axis
-    painter.setBrush(QBrush(Qt::NoBrush));
-    painter.setPen(QPen(Qt::black));
-    painter.drawRect(m_rectGraph);
+    painter.setBrush( QBrush(Qt::NoBrush) );
+    painter.setPen( QPen(pal.color(QPalette::WindowText)) );
+    painter.drawRect( m_rectGraph );
 
     // draw zero line
     LineMarker lm;
@@ -292,8 +294,9 @@ void WidgetHistogram::paintEvent(QPaintEvent *event) {
     }
 
     // draw x metrics
-    if (!m_bUsePercentile) {
-      painter.setPen(QPen(Qt::black));
+    if (!m_bUsePercentile)
+    {
+      painter.setPen(QPen(pal.color(QPalette::WindowText)));
       nMetricInterval = 50;
       dMetricStep = (m_dOutputRange[1] - m_dOutputRange[0]) /
                     (nCavWidth / nMetricInterval);
