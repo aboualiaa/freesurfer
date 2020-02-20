@@ -18,6 +18,8 @@ stages:
           vmImage: 'ubuntu-latest'
         steps:
           - script: echo "linted succesfully"
+          - script: sudo apt-get install -y libxml2-utils
+          - script: xmllint --noout ./**/*.xml
         displayName: 'Linting'
   - stage: CollectArtifacts
     dependsOn: Lint
