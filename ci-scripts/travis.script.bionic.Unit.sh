@@ -7,7 +7,7 @@ if [[ $HOSTING_COMPILER == "clang" ]]; then
   export PATH="$(pwd)/cmake-3.16.4-Linux-x86_64/bin:$PATH"
 fi
 timeout 50m ninja
-ctest --schedule-random --timeout 90 -j $(nproc) -LE Expensive -T Test --group Continuous
+ctest --schedule-random --timeout 90 -j $(nproc) -LE Expensive -VV -T Test --group Continuous
 #lcov --capture --directory . --output-file ./coverage.info;
 #curl -s https://codecov.io/bash -o codecov.sh
 #chmod +x ./codecov.sh
