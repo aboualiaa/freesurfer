@@ -2014,7 +2014,9 @@ COLOR_TABLE *TissueTypeSchemaDefaultHead(COLOR_TABLE *ct) {
   TTCSF = 4;
   TTHead = 5;
 
-  if (ct == nullptr) {
+  printf("Entering TissueTypeSchemaDefaultHead()\n");
+
+  if (ct == NULL) {
     fsenv = FSENVgetenv();
     sprintf(tmpstr, "%s/FreeSurferColorLUT.txt", fsenv->FREESURFER_HOME);
     ct = CTABreadASCII(tmpstr);
@@ -2117,21 +2119,23 @@ COLOR_TABLE *TissueTypeSchemaDefaultHead(COLOR_TABLE *ct) {
       TT = TTWM;
       break;
 
-    case Third_Ventricle:
-    case Fourth_Ventricle:
-    case CSF:
-    case CSF_ExtraCerebral:
-    case Left_Lateral_Ventricle:
-    case Right_Lateral_Ventricle:
-    case Left_Inf_Lat_Vent:
-    case Right_Inf_Lat_Vent:
-    case Left_choroid_plexus:
-    case Right_choroid_plexus:
-    case Fifth_Ventricle:
-    case Left_vessel:
-    case Right_vessel:
-      TT = TTCSF;
-      break;
+      case Third_Ventricle:
+      case Fourth_Ventricle:
+      case CSF:
+      case CSF_ExtraCerebral:
+      case Left_Lateral_Ventricle:
+      case 75: // was Left_Lateral_Ventricle
+      case Right_Lateral_Ventricle:
+      case 76: // was Right_Lateral_Ventricle
+      case Left_Inf_Lat_Vent:
+      case Right_Inf_Lat_Vent:
+      case Left_choroid_plexus:
+      case Right_choroid_plexus:
+      case Fifth_Ventricle:
+      case Left_vessel:
+      case Right_vessel:
+        TT = TTCSF;
+        break;
 
     case Head_ExtraCerebral:
     case 165: // Skull
