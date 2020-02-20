@@ -57,7 +57,7 @@ stages:
         variables:
           HOSTING_OS: xenial
           HOSTING_COMPILER: gcc
-          TESTING_TYPE: 'Unit_Tests'
+          TESTING_TYPE: '_Unit_Tests'
           AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
           vmImage: 'ubuntu-16.04'
@@ -104,7 +104,7 @@ stages:
         variables:
           HOSTING_OS: xenial
           HOSTING_COMPILER: clang
-          TESTING_TYPE: 'Unit_Tests'
+          TESTING_TYPE: '_Unit_Tests'
           AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
           vmImage: 'ubuntu-16.04'
@@ -154,7 +154,7 @@ stages:
         variables:
           HOSTING_OS: bionic
           HOSTING_COMPILER: gcc
-          TESTING_TYPE: 'Unit_Tests'
+          TESTING_TYPE: '_Unit_Tests'
           AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
           vmImage: 'ubuntu-18.04'
@@ -201,7 +201,7 @@ stages:
         variables:
           HOSTING_OS: bionic
           HOSTING_COMPILER: clang
-          TESTING_TYPE: 'Unit_Tests'
+          TESTING_TYPE: '_Unit_Tests'
           AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
           vmImage: 'ubuntu-18.04'
@@ -252,7 +252,7 @@ stages:
         variables:
           HOSTING_OS: xenial
           HOSTING_COMPILER: gcc
-          TESTING_TYPE: 'Integration_Tests'
+          TESTING_TYPE: '_Integration_Tests'
           AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
           vmImage: 'ubuntu-16.04'
@@ -300,7 +300,7 @@ stages:
         variables:
           HOSTING_OS: xenial
           HOSTING_COMPILER: clang
-          TESTING_TYPE: 'Integration_Tests'
+          TESTING_TYPE: '_Integration_Tests'
           AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
           vmImage: 'ubuntu-16.04'
@@ -351,7 +351,7 @@ stages:
         variables:
           HOSTING_OS: bionic
           HOSTING_COMPILER: gcc
-          TESTING_TYPE: 'Integration_Tests'
+          TESTING_TYPE: '_Integration_Tests'
           AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
           vmImage: 'ubuntu-18.04'
@@ -399,7 +399,7 @@ stages:
         variables:
           HOSTING_OS: bionic
           HOSTING_COMPILER: clang
-          TESTING_TYPE: 'Integration_Tests'
+          TESTING_TYPE: '_Integration_Tests'
           AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
           vmImage: 'ubuntu-18.04'

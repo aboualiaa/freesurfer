@@ -247,7 +247,7 @@ if(UNIX AND NOT APPLE)
   set(Matlab_ROOT_DIR /usr/local/MATLAB/MATLAB_Compiler_Runtime/v84)
   find_package(MATLAB)
 else()
-  set(Matlab_ROOT_DIR /Applications/MATLAB/MATLAB_Compiler_Runtime/v84)
+  set(Matlab_ROOT_DIR /Applications/MATLAB/Matlab.app)
   find_package(MATLAB)
 endif()
 
