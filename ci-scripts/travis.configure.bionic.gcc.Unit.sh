@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 mkdir -p cmake-build-debug-bionic && cd ./cmake-build-debug-bionic
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 mkdir -p cmake-build-debug-xenial && cd ./cmake-build-debug-xenial
 

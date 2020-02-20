@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # this script downloads all data from the annex repo
 # then copies it on a cache on azure pipelines

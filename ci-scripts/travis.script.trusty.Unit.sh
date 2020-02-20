@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 cd ./cmake-build-debug-trusty
 timeout 50m ninja

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ./ci-scripts/restore-mtime.sh
 ./ci-scripts/install-hpx.sh

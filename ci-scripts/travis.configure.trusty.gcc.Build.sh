@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 (
   mkdir -p cmake-build-debug-trusty && cd ./cmake-build-debug-trusty

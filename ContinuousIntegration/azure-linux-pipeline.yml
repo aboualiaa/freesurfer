@@ -57,7 +57,8 @@ stages:
         variables:
           HOSTING_OS: xenial
           HOSTING_COMPILER: gcc
-          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)'
+          TESTING_TYPE: 'Unit_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
           vmImage: 'ubuntu-16.04'
         steps:
@@ -76,6 +77,7 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              export TESTING_TYPE
               git remote add cache ../GitAnnex
               sudo apt-get install -y git-annex
               git config --global user.email "ahmed.s.aboualiaa@gmail.com"
@@ -102,7 +104,8 @@ stages:
         variables:
           HOSTING_OS: xenial
           HOSTING_COMPILER: clang
-          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)'
+          TESTING_TYPE: 'Unit_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
           vmImage: 'ubuntu-16.04'
         steps:
@@ -128,6 +131,7 @@ stages:
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
+              export TESTING_TYPE
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
@@ -135,6 +139,9 @@ stages:
           - script: |
               echo $AZURE_SOURCE_DIR
               export AZURE_SOURCE_DIR
+              export PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-16.04/bin:$PATH"
+              export LD_LIBRARY_PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-16.04/lib:$LD_LIBRARY_PATH"
+              export PATH="$(pwd)/cmake-3.16.4-Linux-x86_64/bin:$PATH"
               ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
             displayName: 'Unit Testing'
           - task: PublishTestResults@2
@@ -147,7 +154,8 @@ stages:
         variables:
           HOSTING_OS: bionic
           HOSTING_COMPILER: gcc
-          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)'
+          TESTING_TYPE: 'Unit_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
           vmImage: 'ubuntu-18.04'
         steps:
@@ -166,6 +174,7 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              export TESTING_TYPE
               git remote add cache ../GitAnnex
               sudo apt-get install -y git-annex
               git config --global user.email "ahmed.s.aboualiaa@gmail.com"
@@ -192,7 +201,8 @@ stages:
         variables:
           HOSTING_OS: bionic
           HOSTING_COMPILER: clang
-          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)'
+          TESTING_TYPE: 'Unit_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
           vmImage: 'ubuntu-18.04'
         steps:
@@ -218,6 +228,7 @@ stages:
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
+              export TESTING_TYPE
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
@@ -225,6 +236,9 @@ stages:
           - script: |
               echo $AZURE_SOURCE_DIR
               export AZURE_SOURCE_DIR
+              export PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04/bin:$PATH"
+              export LD_LIBRARY_PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04/lib:$LD_LIBRARY_PATH"
+              export PATH="$(pwd)/cmake-3.16.4-Linux-x86_64/bin:$PATH"
               ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
             displayName: 'Unit Testing'
           - task: PublishTestResults@2
@@ -238,7 +252,8 @@ stages:
         variables:
           HOSTING_OS: xenial
           HOSTING_COMPILER: gcc
-          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)'
+          TESTING_TYPE: 'Integration_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
           vmImage: 'ubuntu-16.04'
         steps:
@@ -264,6 +279,7 @@ stages:
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
+              export TESTING_TYPE
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
@@ -284,7 +300,8 @@ stages:
         variables:
           HOSTING_OS: xenial
           HOSTING_COMPILER: clang
-          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)'
+          TESTING_TYPE: 'Integration_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
           vmImage: 'ubuntu-16.04'
         steps:
@@ -310,6 +327,7 @@ stages:
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
+              export TESTING_TYPE
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
@@ -317,6 +335,9 @@ stages:
           - script: |
               echo $AZURE_SOURCE_DIR
               export AZURE_SOURCE_DIR
+              export PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-16.04/bin:$PATH"
+              export LD_LIBRARY_PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-16.04/lib:$LD_LIBRARY_PATH"
+              export PATH="$(pwd)/cmake-3.16.4-Linux-x86_64/bin:$PATH"
               ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh $HOSTING_COMPILER
             displayName: 'Integration Testing'
           - task: PublishTestResults@2
@@ -330,7 +351,8 @@ stages:
         variables:
           HOSTING_OS: bionic
           HOSTING_COMPILER: gcc
-          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)'
+          TESTING_TYPE: 'Integration_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
           vmImage: 'ubuntu-18.04'
         steps:
@@ -356,6 +378,7 @@ stages:
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
+              export TESTING_TYPE
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
@@ -376,7 +399,8 @@ stages:
         variables:
           HOSTING_OS: bionic
           HOSTING_COMPILER: clang
-          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)'
+          TESTING_TYPE: 'Integration_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
           vmImage: 'ubuntu-18.04'
         steps:
@@ -402,6 +426,7 @@ stages:
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
+              export TESTING_TYPE
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
@@ -409,6 +434,9 @@ stages:
           - script: |
               echo $AZURE_SOURCE_DIR
               export AZURE_SOURCE_DIR
+              export PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04/bin:$PATH"
+              export LD_LIBRARY_PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04/lib:$LD_LIBRARY_PATH"
+              export PATH="$(pwd)/cmake-3.16.4-Linux-x86_64/bin:$PATH"
               ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh $HOSTING_COMPILER
             displayName: 'Integration Testing'
           - task: PublishTestResults@2

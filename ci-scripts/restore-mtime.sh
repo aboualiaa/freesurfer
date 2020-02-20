@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 git clone https://github.com/MestreLion/git-tools.git
 export PATH="$(pwd)/git-tools:$PATH"
 git config --local diff.renameLimit 999999
