@@ -89,6 +89,8 @@ stages:
               rm -rf ../GitAnnex
             displayName: "Build"
           - script: |
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
               ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
             displayName: 'Test'
           - task: PublishTestResults@2
@@ -132,6 +134,8 @@ stages:
               rm -rf ../GitAnnex
             displayName: 'Build'
           - script: |
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
               ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
             displayName: 'Build'
           - task: PublishTestResults@2
@@ -175,8 +179,10 @@ stages:
               rm -rf ../GitAnnex
             displayName: 'Build'
           - script: |
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
               ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
-            displayName: 'Build'
+            displayName: 'Test'
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'cTest'
@@ -218,6 +224,8 @@ stages:
               rm -rf ../GitAnnex
             displayName: 'Build'
           - script: |
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
               ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
             displayName: 'Test'
           - task: PublishTestResults@2
@@ -262,6 +270,8 @@ stages:
               rm -rf ../GitAnnex
             displayName: 'Build'
           - script: |
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
               ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh $HOSTING_COMPILER
             displayName: 'Test'
           - task: PublishTestResults@2
@@ -306,6 +316,8 @@ stages:
               rm -rf ../GitAnnex
             displayName: 'Build'
           - script: |
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
               ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh $HOSTING_COMPILER
             displayName: 'Test'
           - task: PublishTestResults@2
@@ -350,6 +362,8 @@ stages:
               rm -rf ../GitAnnex
             displayName: 'Build'
           - script: |
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
               ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh $HOSTING_COMPILER
             displayName: 'Test'
           - task: PublishTestResults@2
@@ -394,6 +408,8 @@ stages:
               rm -rf ../GitAnnex
             displayName: 'Build'
           - script: |
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
               ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh $HOSTING_COMPILER
             displayName: 'Test'
           - task: PublishTestResults@2

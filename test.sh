@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # ____________________________
 # FreeSurfer Testing Framework
 #
