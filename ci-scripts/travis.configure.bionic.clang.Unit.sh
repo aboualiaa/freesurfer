@@ -22,10 +22,12 @@ sudo apt-get install -y gfortran-9
 
 #wget http://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz >/dev/null 2>&1
 #tar -xf clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
-export PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04/bin:$PATH"
-export LD_LIBRARY_PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04/lib:$LD_LIBRARY_PATH"
+#export PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04/bin:$PATH"
+#export LD_LIBRARY_PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04/lib:$LD_LIBRARY_PATH"
 export CXX=clang++
 export CC=clang
+
+export PATH=/usr/local/bin:$PATH
 
 #  sudo add-apt-repository --yes ppa:fkrull/deadsnakes
 sudo apt-get update

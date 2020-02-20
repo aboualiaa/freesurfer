@@ -139,8 +139,6 @@ stages:
           - script: |
               echo $AZURE_SOURCE_DIR
               export AZURE_SOURCE_DIR
-              export PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-16.04/bin:$PATH"
-              export LD_LIBRARY_PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-16.04/lib:$LD_LIBRARY_PATH"
               export PATH="$(pwd)/cmake-3.16.4-Linux-x86_64/bin:$PATH"
               ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
             displayName: 'Unit Testing'
@@ -236,8 +234,6 @@ stages:
           - script: |
               echo $AZURE_SOURCE_DIR
               export AZURE_SOURCE_DIR
-              export PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04/bin:$PATH"
-              export LD_LIBRARY_PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04/lib:$LD_LIBRARY_PATH"
               export PATH="$(pwd)/cmake-3.16.4-Linux-x86_64/bin:$PATH"
               ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
             displayName: 'Unit Testing'
@@ -335,8 +331,6 @@ stages:
           - script: |
               echo $AZURE_SOURCE_DIR
               export AZURE_SOURCE_DIR
-              export PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-16.04/bin:$PATH"
-              export LD_LIBRARY_PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-16.04/lib:$LD_LIBRARY_PATH"
               export PATH="$(pwd)/cmake-3.16.4-Linux-x86_64/bin:$PATH"
               ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh $HOSTING_COMPILER
             displayName: 'Integration Testing'
@@ -434,8 +428,6 @@ stages:
           - script: |
               echo $AZURE_SOURCE_DIR
               export AZURE_SOURCE_DIR
-              export PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04/bin:$PATH"
-              export LD_LIBRARY_PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04/lib:$LD_LIBRARY_PATH"
               export PATH="$(pwd)/cmake-3.16.4-Linux-x86_64/bin:$PATH"
               ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh $HOSTING_COMPILER
             displayName: 'Integration Testing'

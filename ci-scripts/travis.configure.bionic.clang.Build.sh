@@ -14,13 +14,28 @@ set -e
   sudo apt-get install -y gcc-9 g++-9
   sudo apt-get install -y gfortran-9
 
-  if [[ ! -d "$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04" ]]; then
+  if [[ ! -f "$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz" ]]; then
+    echo "Downloading and Installing LLVM"
     wget http://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz >/dev/null 2>&1
-    tar -xf clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
+    sudo tar -xf clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz --strip-components=1 -C /usr/local
+  else
+    echo "Installing LLVM"
+    sudo tar -xf clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz --strip-components=1 -C /usr/local
   fi
 
-  export PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04/bin:$PATH"
-  export LD_LIBRARY_PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04/lib:$LD_LIBRARY_PATH"
+  export PATH=/usr/local/bin:$PATH
+
+  (
+    cd /usr/local
+    sudo cat >libs.conf <<"END"
+/usr/local/lib
+END
+  )
+  sudo mv libs.conf /etc/ld.so.conf.d/libs.conf
+  sudo ldconfig
+
+  #  export PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04/bin:$PATH"
+  #  export LD_LIBRARY_PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04/lib:$LD_LIBRARY_PATH"
   export CXX=clang++
   export CC=clang
 
