@@ -82,11 +82,15 @@ stages:
               git config --global user.email "ahmed.s.aboualiaa@gmail.com"
               git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
+            displayName: "Set up Git Annex"
+          - script: |
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
+            displayName: "Build"
+          - script: |
               ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
-            displayName: 'Build and Test'
+            displayName: 'Test'
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'cTest'
@@ -121,11 +125,15 @@ stages:
               git config --global user.email "ahmed.s.aboualiaa@gmail.com"
               git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
+            displayName: 'Set up Git Annex'
+          - script: |
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
-              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
-            displayName: 'Build and Test'
+            displayName: 'Build'
+          - script: |
+              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
+            displayName: 'Build'
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'cTest'
@@ -160,11 +168,15 @@ stages:
               git config --global user.email "ahmed.s.aboualiaa@gmail.com"
               git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
+            displayName: 'Set up Git Annex'
+          - script: |
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
-              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
-            displayName: 'Build and Test'
+            displayName: 'Build'
+          - script: |
+              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
+            displayName: 'Build'
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'cTest'
@@ -199,11 +211,15 @@ stages:
               git config --global user.email "ahmed.s.aboualiaa@gmail.com"
               git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
+            displayName: 'Set up Git Annex'
+          - script: |
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
+            displayName: 'Build'
+          - script: |
               ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
-            displayName: 'Build and Test'
+            displayName: 'Test'
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'cTest'
@@ -239,11 +255,15 @@ stages:
               git config --global user.email "ahmed.s.aboualiaa@gmail.com"
               git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
+            displayName: 'Set up Git Annex'
+          - script: |
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
-              ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh
-            displayName: 'Build and Test'
+            displayName: 'Build'
+          - script: |
+              ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh $HOSTING_COMPILER
+            displayName: 'Test'
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'cTest'
@@ -279,11 +299,15 @@ stages:
               git config --global user.email "ahmed.s.aboualiaa@gmail.com"
               git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
+            displayName: 'Set up Git Annex'
+          - script: |
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
-              ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh
-            displayName: 'Build and Test'
+            displayName: 'Build'
+          - script: |
+              ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh $HOSTING_COMPILER
+            displayName: 'Test'
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'cTest'
@@ -319,11 +343,15 @@ stages:
               git config --global user.email "ahmed.s.aboualiaa@gmail.com"
               git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
+            displayName: 'Set up Git Annex'
+          - script: |
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
-              ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh
-            displayName: 'Build and Test'
+            displayName: 'Build'
+          - script: |
+              ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh $HOSTING_COMPILER
+            displayName: 'Test'
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'cTest'
@@ -359,11 +387,15 @@ stages:
               git config --global user.email "ahmed.s.aboualiaa@gmail.com"
               git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
+            displayName: 'Set up Git Annex'
+          - script: |
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
-            displayName: 'Build and Test'
-          - script: ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh
+            displayName: 'Build'
+          - script: |
+              ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh $HOSTING_COMPILER
+            displayName: 'Test'
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'cTest'

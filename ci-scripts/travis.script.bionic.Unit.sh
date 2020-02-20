@@ -1,13 +1,13 @@
 #!/bin/bash
 
 cd ./cmake-build-debug-bionic
-if [[ $HOSTING_COMPILER == "clang" ]]; then
+if [[ $1 == "clang" ]]; then
   export PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04/bin:$PATH"
   export LD_LIBRARY_PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04/lib:$LD_LIBRARY_PATH"
   export PATH="$(pwd)/cmake-3.16.4-Linux-x86_64/bin:$PATH"
 fi
 timeout 50m ninja
-ctest --schedule-random --timeout 90 -j $(nproc) -LE Expensive -VV -T Test --group Continuous
+ctest --schedule-random --timeout 90 -LE Expensive -VV -T Test --group Continuous
 #lcov --capture --directory . --output-file ./coverage.info;
 #curl -s https://codecov.io/bash -o codecov.sh
 #chmod +x ./codecov.sh
