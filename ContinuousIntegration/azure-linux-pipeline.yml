@@ -73,7 +73,6 @@ stages:
           - download: current
             artifact: 'GitAnnex'
             condition: failed()
-          - script: ls
           - checkout: self
             submodules: true
           - script: |
@@ -82,17 +81,17 @@ stages:
               git config --global user.email "ahmed.s.aboualiaa@gmail.com"
               git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
-            displayName: "Set up Git Annex"
+            displayName: 'Setting up Git Annex'
           - script: |
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
-            displayName: "Build"
+            displayName: 'Building'
           - script: |
               echo $AZURE_SOURCE_DIR
               export AZURE_SOURCE_DIR
-              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
-            displayName: 'Test'
+              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
+            displayName: 'Unit Testing'
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'cTest'
@@ -127,17 +126,17 @@ stages:
               git config --global user.email "ahmed.s.aboualiaa@gmail.com"
               git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
-            displayName: 'Set up Git Annex'
+            displayName: 'Setting up Git Annex'
           - script: |
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
-            displayName: 'Build'
+            displayName: 'Building'
           - script: |
               echo $AZURE_SOURCE_DIR
               export AZURE_SOURCE_DIR
               ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
-            displayName: 'Build'
+            displayName: 'Unit Testing'
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'cTest'
@@ -172,17 +171,17 @@ stages:
               git config --global user.email "ahmed.s.aboualiaa@gmail.com"
               git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
-            displayName: 'Set up Git Annex'
+            displayName: 'Setting up Git Annex'
           - script: |
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
-            displayName: 'Build'
+            displayName: 'Building'
           - script: |
               echo $AZURE_SOURCE_DIR
               export AZURE_SOURCE_DIR
               ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
-            displayName: 'Test'
+            displayName: 'Unit Testing'
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'cTest'
@@ -217,17 +216,17 @@ stages:
               git config --global user.email "ahmed.s.aboualiaa@gmail.com"
               git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
-            displayName: 'Set up Git Annex'
+            displayName: 'Setting up Git Annex'
           - script: |
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
-            displayName: 'Build'
+            displayName: 'Building'
           - script: |
               echo $AZURE_SOURCE_DIR
               export AZURE_SOURCE_DIR
-              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh
-            displayName: 'Test'
+              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
+            displayName: 'Unit Testing'
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'cTest'
@@ -263,17 +262,17 @@ stages:
               git config --global user.email "ahmed.s.aboualiaa@gmail.com"
               git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
-            displayName: 'Set up Git Annex'
+            displayName: 'Setting up Git Annex'
           - script: |
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
-            displayName: 'Build'
+            displayName: 'Building'
           - script: |
               echo $AZURE_SOURCE_DIR
               export AZURE_SOURCE_DIR
               ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh $HOSTING_COMPILER
-            displayName: 'Test'
+            displayName: 'Integration Testing'
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'cTest'
@@ -309,17 +308,17 @@ stages:
               git config --global user.email "ahmed.s.aboualiaa@gmail.com"
               git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
-            displayName: 'Set up Git Annex'
+            displayName: 'Setting up Git Annex'
           - script: |
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
-            displayName: 'Build'
+            displayName: 'Building'
           - script: |
               echo $AZURE_SOURCE_DIR
               export AZURE_SOURCE_DIR
               ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh $HOSTING_COMPILER
-            displayName: 'Test'
+            displayName: 'Integration Testing'
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'cTest'
@@ -355,17 +354,17 @@ stages:
               git config --global user.email "ahmed.s.aboualiaa@gmail.com"
               git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
-            displayName: 'Set up Git Annex'
+            displayName: 'Setting up Git Annex'
           - script: |
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
-            displayName: 'Build'
+            displayName: 'Building'
           - script: |
               echo $AZURE_SOURCE_DIR
               export AZURE_SOURCE_DIR
               ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh $HOSTING_COMPILER
-            displayName: 'Test'
+            displayName: 'Integration Testing'
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'cTest'
@@ -401,17 +400,17 @@ stages:
               git config --global user.email "ahmed.s.aboualiaa@gmail.com"
               git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
-            displayName: 'Set up Git Annex'
+            displayName: 'Setting up Git Annex'
           - script: |
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
-            displayName: 'Build'
+            displayName: 'Building'
           - script: |
               echo $AZURE_SOURCE_DIR
               export AZURE_SOURCE_DIR
               ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh $HOSTING_COMPILER
-            displayName: 'Test'
+            displayName: 'Integration Testing'
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'cTest'
