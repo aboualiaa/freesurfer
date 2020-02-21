@@ -3,7 +3,7 @@
 # this script downloads all data from the annex repo
 # then copies it on a cache on azure pipelines
 
-sudo apt-get install -y --no-install-suggests --no-install-recommends git-annex
+sudo apt-get install -y -qq --no-install-suggests --no-install-recommends git-annex
 git config --global user.email "ahmed.s.aboualiaa@gmail.com"
 git config --global user.name "Ahmed Abou-Aliaa"
 git init --bare $CURRENT_WORK_DIR/annex-cache

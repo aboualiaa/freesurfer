@@ -2,9 +2,8 @@
 
 (
   mkdir -p cmake-build-debug-xenial && cd ./cmake-build-debug-xenial
-  sudo apt-get update -y
-  sudo apt-get update
-  sudo apt-get install -y --no-install-suggests --no-install-recommends git wget tcsh build-essential \
+  sudo apt-get update -y -qq
+  sudo apt-get install -y -qq --no-install-suggests --no-install-recommends git wget tcsh build-essential \
     gfortran libblas-dev liblapack-dev zlib1g-dev libxmu-dev \
     libxmu-headers libxi-dev libxt-dev libx11-dev libglu1-mesa-dev \
     mpich python3.5 libboost-all-dev libfltk1.3-dev libeigen3-dev \
@@ -13,9 +12,9 @@
   #  export LD_LIBRARY_PATH="/usr/local/clang_9.0.0/lib:$LD_LIBRARY_PATH"
 
   sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-  sudo apt-get update
-  sudo apt-get install -y gcc-9 g++-9
-  sudo apt-get install -y gfortran-9
+  sudo apt-get update -y -qq
+  sudo apt-get install -y -qq gcc-9 g++-9
+  sudo apt-get install -y -qq gfortran-9
 
   if [[ ! -f "$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz" ]]; then
     echo "Downloading and Installing LLVM"

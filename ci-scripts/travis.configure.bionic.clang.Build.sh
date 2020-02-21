@@ -2,17 +2,17 @@
 set -e
 (
   mkdir -p cmake-build-debug-bionic && cd ./cmake-build-debug-bionic
-  sudo apt-get update -y
-  sudo apt-get install -y --no-install-suggests --no-install-recommends git wget tcsh build-essential \
+  sudo apt-get update -y -qq
+  sudo apt-get install -y -qq --no-install-suggests --no-install-recommends git wget tcsh build-essential \
     gfortran libblas-dev liblapack-dev zlib1g-dev libxmu-dev \
     libxmu-headers libxi-dev libxt-dev libx11-dev libglu1-mesa-dev \
     mpich python3.6 libboost-all-dev libfltk1.3-dev libeigen3-dev \
     libarmadillo-dev qt5-default libqt5x11extras5-dev curl git-annex lcov libxml2-utils
 
   sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-  sudo apt-get update
-  sudo apt-get install -y gcc-9 g++-9
-  sudo apt-get install -y gfortran-9
+  sudo apt-get update -y -qq
+  sudo apt-get install -qq -y gcc-9 g++-9
+  sudo apt-get install -qq -y gfortran-9
 
   if [[ ! -f "$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz" ]]; then
     echo "Downloading and Installing LLVM"
@@ -32,7 +32,7 @@ sudo bash <<"ENDBASH"
 END
 ENDBASH
 
-  sudo mv libs.conf /etc/ld.so.conf.d/libs.conf
+  sudo mv /usr/local/libs.conf /etc/ld.so.conf.d/libs.conf
   sudo ldconfig
 
   #  export PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04/bin:$PATH"
