@@ -1,5 +1,5 @@
 /**
- * @file  mri_cc_ma_fill.c
+ * @file  mri_cc_ma_fill.cpp
  * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
  *
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
@@ -71,6 +71,8 @@ const char *Progname;
 int main(int argc, char *argv[]) {
   int nargs, msec, length = 100, n = 0, i = 0, j = 0, k = 0;
   int cc_x = 0, width, height, depth;
+  int nearest = 0;
+  int dist = 0;
   Timer then;
   MRI *mri_cc, *mri_ma, *mri_out;
   FILE *fp;
@@ -115,7 +117,7 @@ int main(int argc, char *argv[]) {
     for (j = floor(height / 2) - 2; j < floor(height / 2) + 2; j++) {
       for (i = 0; i < mri_cc->width; i++) {
         if
-          MRIvox(mri_cc, i, j, k) > 0 {
+            (MRIvox(mri_cc, i, j, k) > 0) {
             cc_x = i;
             break;
           }

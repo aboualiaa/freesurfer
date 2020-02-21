@@ -1,5 +1,5 @@
 /**
- * @file  mri_cc_medial_axis.c
+ * @file  mri_cc_medial_axis.cpp
  * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
  *
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
@@ -250,10 +250,10 @@ static int find_mid_plane_wm(char *subject) {
                 (ERROR_BADFILE,
                  "cc volume measurement: file %s does not exist!", ifname));
   }
-  print("writing results to %s\n", ifname);
+  printf("writing results to %s\n", ifname);
 
   sprintf(ifname, "%s/%s/%s", data_dir, subject, wmvolume);
-  print("reading white matter volume from %s\n", ifname);
+  printf("reading white matter volume from %s\n", ifname);
   mri_wm = MRIread(ifname);
   if (!mri_wm)
     ErrorExit(ERROR_NOFILE, "%s: could not read MRI volume %s", Progname,
@@ -271,7 +271,7 @@ static int find_mid_plane_wm(char *subject) {
   }
 
   mri_talheader = MRIallocHeader(mri_wm->width, mri_wm->height, mri_wm->depth,
-                                 mri_wm->type);
+                                 mri_wm->type, 1);
   MRIcopyHeader(mri_wm, mri_talheader); // not allocate memory, though
 
   ModifyTalairachCRAS(mri_talheader, lta);
@@ -306,7 +306,7 @@ static int find_mid_plane_wm(char *subject) {
 
   // rotation wm volume to be upright, using cc volume temporarily
   mri_header = MRIallocHeader(mri_wm->width, mri_wm->height, mri_wm->depth,
-                              mri_wm->type);
+                              mri_wm->type, 1);
   MRIcopyHeader(mri_wm, mri_header);
   ModifyTalairachCRAS(mri_header, lta2);
   mri_cc = MRIcopy(mri_wm, NULL);
@@ -433,7 +433,7 @@ static int find_mid_plane_tal(char *subject, char *volume) {
   strcpy(data_dir, cp);
 
   sprintf(ifname, "%s/%s/%s", data_dir, subject, talvolume);
-  print("reading talairach transformed volume from %s\n", ifname);
+  printf("reading talairach transformed volume from %s\n", ifname);
   mri_intensity = MRIread(ifname);
   if (!mri_intensity)
     ErrorExit(ERROR_NOFILE, "%s: could not read MRI volume %s", Progname,
@@ -444,7 +444,7 @@ static int find_mid_plane_tal(char *subject, char *volume) {
 
   if (NO_CORRECTION) {
     sprintf(ifname, "%s/%s/fatal.mgh", data_dir, subject);
-    print("reading talairach transformed fa volume from %s\n", ifname);
+    printf("reading talairach transformed fa volume from %s\n", ifname);
     mri_intensity = MRIread(ifname);
   } else {
     sprintf(ofname, "%s/%s/%s_rotated.mgh", data_dir, subject, talvolume);
@@ -1444,7 +1444,7 @@ static MEDATOM *find_medial_axis(MEDATOM *medial_axis, int length, int n_sample,
     fprintf(stdout, "cc medial axis measurment: file %s does not exist!",
             ofname);
   }
-  print("writing medial axis results to %s\n", ofname);
+  printf("writing medial axis results to %s\n", ofname);
   // fprintf(fp, "This file contains the position and radius of 100 equally
   // sampled medial atoms along the medial axis\n");
   MRIsampleVolumeFrameType(mri_intensity, cc_tal_x, medial_axis[0].y,

@@ -18,6 +18,8 @@ if(NOT BUILD_ATTIC)
     mri_auto_fill
     mri_bc_sc_bias_correct
     mri_build_priors
+      mri_cc_ma_fill
+      mri_cc_medial_axis
     mri_cht2p
     mri_classify
     mri_compute_structure_transforms
@@ -27,6 +29,7 @@ if(NOT BUILD_ATTIC)
     mri_elastic_energy
     mri_estimate_tissue_parms
     mri_extract_conditions
+      mri_extract_ma_intensity
     mri_fcili
     mri_gcab_train
     mri_gdfglm
@@ -39,6 +42,7 @@ if(NOT BUILD_ATTIC)
     mri_make_labels
     mri_make_register
     mri_make_template
+      mri_map_atrophy
     mri_mosaic
     mri_ms_EM
     mri_ms_EM_with_atlas
@@ -54,6 +58,7 @@ if(NOT BUILD_ATTIC)
     mris_average_parcellation
     mris_classify_thickness
     mris_compute_optimal_kernel
+      mris_curvature_vectors
     mris_density
     mri_segment_tumor
     mri_segment_wm_damage
@@ -63,6 +68,7 @@ if(NOT BUILD_ATTIC)
     mris_longitudinal_surfaces
     mris_make_map_surfaces
     mris_ms_surface_CNR
+      mris_pval_fill
     mris_surface_change
     mris_svm_classify
     mris_svm_train
@@ -106,6 +112,8 @@ else()
     mri_auto_fill
     mri_bc_sc_bias_correct
     mri_build_priors
+    mri_cc_ma_fill
+    mri_cc_medial_axis
     mri_cht2p
     mri_classify
     mri_compute_structure_transforms
@@ -115,6 +123,7 @@ else()
     mri_elastic_energy
     mri_estimate_tissue_parms
     mri_extract_conditions
+    mri_extract_ma_intensity
     mri_fcili
     mri_gcab_train
     mri_gdfglm
@@ -127,6 +136,7 @@ else()
     mri_make_labels
     mri_make_register
     mri_make_template
+    mri_map_atrophy
     mri_mosaic
     mri_ms_EM
     mri_ms_EM_with_atlas
@@ -152,12 +162,14 @@ else()
     mris_average_parcellation
     mris_classify_thickness
     mris_compute_optimal_kernel
+    mris_curvature_vectors
     mris_density
     mris_fbirn_annot
     mris_glm
     mris_longitudinal_surfaces
     mris_make_map_surfaces
     mris_ms_surface_CNR
+    mris_pval_fill
     mris_surface_change
     mris_svm_classify
     mris_svm_train

@@ -1,5 +1,5 @@
 /**
- * @file  mri_extract_ma_intensity.c
+ * @file  mri_extract_ma_intensity.cpp
  * @brief REPLACE_WITH_ONE_LINE_SHORT_DESCRIPTION
  *
  * REPLACE_WITH_LONG_DESCRIPTION_OR_REFERENCE
@@ -54,7 +54,7 @@
 #include "cma.h"
 #include "version.h"
 #include "error.h"
-#include "volume_io/geom_structs.h"
+//#include "volume_io/geom_structs.h"
 #include "transform.h"
 #include "talairachex.h"
 #include "matrix.h"

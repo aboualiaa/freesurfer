@@ -1,5 +1,5 @@
 /**
- * @file  mris_curvature_vectors.c
+ * @file  mris_curvature_vectors.cpp
  * @brief returns surface normals and directions of principal curvature
  * directions
  *
@@ -66,7 +66,6 @@ int MRISorderPrincipalDirectionsConsistentWithNormal(MRI_SURFACE *mris);
 // Global variables
 
 // char*  Progname ;
-char Progname[64];
 char *hemi;
 
 short b_sortBySignedPrincipalCurv =
@@ -83,8 +82,8 @@ int main(int argc, char *argv[]) {
   InitDebugging( "mris_curvature_vectors" ) ;
   nargs = handleVersionOption(argc, argv, "mris_curvature_vectors");
 
-  // Progname = argv[0] ;
-  sprintf(Progname, "mris_curvature_vectors");
+   Progname = argv[0] ;
+//  sprintf(Progname, "mris_curvature_vectors");
   ErrorInit(NULL, NULL, NULL);
   DiagInit(NULL, NULL, NULL);
 
