@@ -2,7 +2,7 @@
 
 (
   mkdir -p cmake-build-debug-bionic && cd ./cmake-build-debug-bionic
-
+  sudo apt-get update -y
   sudo apt-get install -y --no-install-suggests --no-install-recommends git wget tcsh build-essential \
     gfortran libblas-dev liblapack-dev zlib1g-dev libxmu-dev \
     libxmu-headers libxi-dev libxt-dev libx11-dev libglu1-mesa-dev \

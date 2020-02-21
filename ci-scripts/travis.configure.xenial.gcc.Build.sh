@@ -2,7 +2,7 @@
 
 (
   mkdir -p cmake-build-debug-xenial && cd ./cmake-build-debug-xenial
-
+  sudo apt-get update -y
   sudo apt-get install -y --no-install-suggests --no-install-recommends git wget tcsh build-essential \
     gfortran libblas-dev liblapack-dev zlib1g-dev libxmu-dev \
     libxmu-headers libxi-dev libxt-dev libx11-dev libglu1-mesa-dev \
