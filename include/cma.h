@@ -140,25 +140,28 @@
  * no brain labels after this please unless you fix the IS_BRAIN macro
  */
 
-#define Dura 98
-#define Epidermis 118
-#define Conn_Tissue 119
-#define SC_FAT_MUSCLE 120
-#define Cranium 121
-#define CSF_SA 122
-#define Muscle 123
-#define Ear 124
-#define Fatty_Tissue 125
-#define Spinal_Cord 126
-#define Soft_Tissue 127
-#define Nerve 128
-#define Bone 129
-#define Air 130
-#define Orbit 131
-#define Tongue 132
+#define Dura              98
+#define Lesion            99
+#define Epidermis        118
+#define Conn_Tissue      119
+#define SC_FAT_MUSCLE    120
+#define Cranium          121
+#define CSF_SA           122
+#define Muscle           123
+#define Ear              124
+#define Fatty_Tissue     125
+#define Spinal_Cord      126
+#define Soft_Tissue      127
+#define Nerve            128
+#define Bone             129
+#define Air              130
+#define Orbit            131
+#define Tongue           132
 #define Nasal_Structures 133
 #define Globe 134
 #define Teeth 135
+
+#define Skull            165
 
 #define Right_Temporal_Cerebral_White_Matter 186
 #define Left_Temporal_Cerebral_White_Matter 187
@@ -219,6 +222,7 @@
 #define VOXEL_UNCHANGED 256
 #define CSF_ExtraCerebral 257
 #define Head_ExtraCerebral 258
+#define Eye_Fluid         259
 
 // vascular and lymph labels (from Alex G)
 #define Aorta 331
