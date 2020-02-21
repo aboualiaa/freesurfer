@@ -25,12 +25,13 @@ set -e
 
   export PATH=/usr/local/bin:$PATH
 
-  (
-    cd /usr/local
-    sudo cat >libs.conf <<"END"
+sudo bash <<"ENDBASH"
+  cd /usr/local
+  cat >libs.conf <<"END"
 /usr/local/lib
 END
-  )
+ENDBASH
+
   sudo mv libs.conf /etc/ld.so.conf.d/libs.conf
   sudo ldconfig
 
