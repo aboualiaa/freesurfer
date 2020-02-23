@@ -75,22 +75,22 @@ int main(int argc, char *argv[]) {
 
   mris = MRISread(in_fname);
   if (!mris)
-    ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s", Progname,
-              in_fname);
-  eno = MRIScomputeEulerNumber(mris, &nvertices, &nfaces, &nedges);
-  fprintf(stderr, "euler # = v-e+f = 2g-2: %d - %d + %d = %d --> %d holes\n",
-          nvertices, nedges, nfaces, eno, 1 - eno / 2);
+    ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s",
+              Progname, in_fname) ;
+  eno = MRIScomputeEulerNumber(mris, &nvertices, &nfaces, &nedges) ;
+  fprintf(stdout, "euler # = v-e+f = 2g-2: %d - %d + %d = %d --> %d holes\n",
+          nvertices, nedges, nfaces, eno, 1-eno/2) ;
 
-  fprintf(stderr, "      F =2V-4:          %d %s= %d-4 (%d)\n", nfaces,
-          nfaces == 2 * nvertices - 4 ? "" : "!", 2 * nvertices,
-          2 * nvertices - 4 - nfaces);
-  fprintf(stderr, "      2E=3F:            %d %s= %d (%d)\n", 2 * nedges,
-          2 * nedges == 3 * nfaces ? "" : "!", 3 * nfaces,
-          2 * nedges - 3 * nfaces);
+  fprintf(stdout, "      F =2V-4:          %d %s= %d-4 (%d)\n",
+          nfaces, nfaces == 2*nvertices-4 ? "" : "!", 2*nvertices,
+          2*nvertices-4-nfaces) ;
+  fprintf(stdout, "      2E=3F:            %d %s= %d (%d)\n",
+          2*nedges, 2*nedges == 3*nfaces ? "" : "!", 3*nfaces,
+          2*nedges-3*nfaces) ;
 
-  dno = MRIStopologicalDefectIndex(mris);
-  fprintf(stderr, "\ntotal defect index = %d\n", dno);
-  if (outfile && !patch_flag) {
+  dno = MRIStopologicalDefectIndex(mris) ;
+  fprintf(stdout, "\ntotal defect index = %d\n", dno) ;
+  if(outfile && !patch_flag){
     // write out number of holes
     FILE *fp;
     fp = fopen(outfile, "w");
@@ -98,28 +98,29 @@ int main(int argc, char *argv[]) {
     fclose(fp);
   }
 
-  if (patch_flag) {
-    MRISremoveTopologicalDefects(mris, curv_thresh);
-    fprintf(stderr, "\nafter editing:\n");
+  if (patch_flag)
+  {
+    MRISremoveTopologicalDefects(mris, curv_thresh) ;
+    fprintf(stdout, "\nafter editing:\n") ;
 
-    eno = MRIScomputeEulerNumber(mris, &nvertices, &nfaces, &nedges);
-    fprintf(stderr, "euler # = v-e+f = 2g-2: %d - %d + %d = %d --> %d holes\n",
-            nvertices, nedges, nfaces, eno, 2 - eno);
+    eno = MRIScomputeEulerNumber(mris, &nvertices, &nfaces, &nedges) ;
+    fprintf(stdout, "euler # = v-e+f = 2g-2: %d - %d + %d = %d --> %d holes\n",
+            nvertices, nedges, nfaces, eno, 2-eno) ;
 
-    fprintf(stderr, "      F =2V-4:          %d %s= %d-4 (%d)\n", nfaces,
-            nfaces == 2 * nvertices - 4 ? "" : "!", 2 * nvertices,
-            2 * nvertices - 4 - nfaces);
-    fprintf(stderr, "      2E=3F:            %d %s= %d (%d)\n", 2 * nedges,
-            2 * nedges == 3 * nfaces ? "" : "!", 3 * nfaces,
-            2 * nedges - 3 * nfaces);
+    fprintf(stdout, "      F =2V-4:          %d %s= %d-4 (%d)\n",
+            nfaces, nfaces == 2*nvertices-4 ? "" : "!", 2*nvertices,
+            2*nvertices-4-nfaces) ;
+    fprintf(stdout, "      2E=3F:            %d %s= %d (%d)\n",
+            2*nedges, 2*nedges == 3*nfaces ? "" : "!", 3*nfaces,
+            2*nedges-3*nfaces) ;
 
-    dno = MRIStopologicalDefectIndex(mris);
-    fprintf(stderr, "total defect index = %d\n", dno);
+    dno = MRIStopologicalDefectIndex(mris) ;
+    fprintf(stdout, "total defect index = %d\n", dno) ;
 
-    sprintf(fname, "%s.edit", in_fname);
-    fprintf(stderr, "writing out patched surface to %s\n", fname);
-    MRISwritePatch(mris, fname);
-    if (outfile) {
+    sprintf(fname, "%s.edit", in_fname) ;
+    fprintf(stdout, "writing out patched surface to %s\n", fname) ;
+    MRISwritePatch(mris, fname) ;
+    if(outfile){
       // write out number of holes
       FILE *fp;
       fp = fopen(outfile, "w");
