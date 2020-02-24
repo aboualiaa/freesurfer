@@ -44,7 +44,7 @@ auto frobenius_normalize(std::vector<double> *matrix) -> void;
 } // namespace fs::math
 
 namespace fs::dbg {
-void create_gdb_file(gsl::multi_span<char *> args);
+void create_gdb_file(std::vector<char const *> args);
 } // namespace fs::dbg
 
 namespace boost::program_options {

@@ -7,24 +7,25 @@
 
 #include "mri.h"
 #include "mri2.h"
-#include "version.h"
 #include "mri_convert_lib.hpp"
+#include "version.h"
 
 #include <boost/program_options.hpp>
+#include <utility>
 
 constexpr int default_cropsize = 256;
 constexpr int default_crop_center = 128;
 namespace po = boost::program_options;
 struct CMDARGS {
-  CMDARGS(int argc, char *argv[]) : raw(argv, argc){}; // NOLINT
+  explicit CMDARGS(std::vector<char const *> args) { raw = std::move(args); }
 
-  void check_conflicts(po::variables_map vm) {
+  void check_conflicts(po::variables_map const &vm) {
     for (auto const &[key, val] : conflict_map) {
       po::conflicting_options(vm, key, val);
     }
   }
 
-  void check_dependencies(po::variables_map vm) {
+  void check_dependencies(po::variables_map const &vm) {
     for (auto const &[key, val] : dependency_map) {
       po::dependant_options(vm, key, val);
     }
@@ -36,7 +37,7 @@ public:
   MATRIX *AutoAlign{};
   double fwhm{-1.0};
   double gstd{-1.0};
-  gsl::multi_span<char *> raw;
+  std::vector<char const *> raw;
   std::vector<int> reorder_vals{};
   std::vector<int> reorder4_vals{};
   std::string left_right_mirror_hemi{}; // which half to mirror (lh, rh)
@@ -99,7 +100,7 @@ public:
   float out_j_size{};
   float out_k_size{};
   int nthframe{-1};
-  int n_erode_seg;
+  int n_erode_seg{};
   int n_dil_seg{};
   int ncutends{};
   int out_n_i{};
@@ -213,8 +214,7 @@ public:
 };
 
 struct ENV {
-  std::string vcid =
-      "$Id: mri_convert.c,v 1.227 2017/02/16 19:15:42 greve Exp $";
+  std::string vcid = "mri_convert";
 };
 
 /// \brief does the housekeeping, use this to parse command lines,
@@ -236,7 +236,7 @@ static void initArgDesc(boost::program_options::options_description *desc,
 /// \param env holds the vcid string
 inline static void
 print_usage(boost::program_options::options_description const &desc, ENV *env) {
-  std::cout << desc << "\n" << env->vcid << std::endl;
+  std::cout << desc << std::endl;
 }
 
 ///

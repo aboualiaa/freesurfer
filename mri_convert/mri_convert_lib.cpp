@@ -79,12 +79,12 @@ auto frobenius_normalize(std::vector<double> *matrix) -> void {
 } // namespace fs::math
 
 namespace fs::dbg {
-void create_gdb_file(gsl::multi_span<char *> args) {
+void create_gdb_file(std::vector<char const *> args) {
   std::ofstream fptmp("debug.gdb");
   fmt::fprintf(fptmp, "# source this file in gdb to debug\n");
   fmt::fprintf(fptmp, "file %s\n", args[0]);
   fmt::fprintf(fptmp, "run ");
-  for (int j = 1; j < args.size(); j++) {
+  for (size_t j = 1; j < args.size(); j++) {
     std::string tmp{args[j]};
     if (tmp.find("debug") != std::string::npos) {
       continue;

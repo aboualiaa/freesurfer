@@ -41,13 +41,15 @@
 
 //#include <aboualiaa/banned.h>
 
-auto main(int argc, char *argv[]) -> int {
-  auto err_logger = spdlog::stderr_color_mt("stderr");
+auto main(int argc, char const *argv[]) -> int {
+  auto err_logger = spdlog::stderr_color_mt("mri-convert");
   spdlog::set_level(spdlog::level::warn);
   auto env = ENV();
-  auto cmdargs = CMDARGS(argc, argv);
+  std::vector<char const *> args(argv, argv + argc);
+  auto cmdargs = CMDARGS(args);
   if (!good_cmdline_args(&cmdargs, &env)) {
-    spdlog::get("stderr")->critical("error while parsing.");
+    spdlog::get("mri-convert")
+        ->critical("Error while parsing command line arguments.");
     return 1;
   }
 
@@ -118,7 +120,7 @@ auto main(int argc, char *argv[]) -> int {
   sizes_good_flag = true;
 
   if (!sizes_good_flag) {
-    spdlog::get("stderr")->critical("sizes_good_flag is not set");
+    spdlog::get("mri-convert")->critical("sizes_good_flag is not set");
     fs::util::cli::usage_message(stdout);
     exit(1);
   }
@@ -300,7 +302,6 @@ auto main(int argc, char *argv[]) -> int {
                          "= --zero_ge_z_offset option ignored.\n");
   }
 
-  fmt::printf("$Id: mri_convert.c,v 1.227 2017/02/16 19:15:42 greve Exp $\n");
   fmt::printf("reading from %s...\n", in_name_only.data());
 
   if (in_volume_type == MGH_MORPH) {
@@ -1996,9 +1997,8 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
   po::variables_map vm;
 
   initArgDesc(&desc, cmdargs, env);
-  auto args = cmdargs->raw;
-  auto ac = static_cast<int>(args.size());
-  auto av = args.data();
+  auto av = cmdargs->raw.data();
+  auto ac = static_cast<int>(cmdargs->raw.size());
   if (ac == 1) {
     print_usage(desc, env);
     return false;
@@ -2019,7 +2019,7 @@ static auto good_cmdline_args(CMDARGS *cmdargs, ENV *env) noexcept -> bool {
     cmdargs->check_conflicts(vm);
     cmdargs->check_dependencies(vm);
   } catch (std::exception const &e) {
-    spdlog::get("stderr")->critical(e.what());
+    spdlog::get("mri-convert")->critical(e.what());
     return false;
   }
 
