@@ -245,3 +245,6 @@ add_subdirectory(test)
 if(BUILD_TESTING)
   add_subdirectory(unittests)
 endif()
+
+install(TARGETS utils
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
