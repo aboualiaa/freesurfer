@@ -282,9 +282,10 @@ TEST(dmatrix_test, dmatrix_alloc) { // NOLINT
   // and test for memory allocation errors
 }
 
-auto main(int argc, char *argv[]) -> int { // NOLINT (unused parameters)
+auto main(int /*argc*/, char * * /*argv*/) -> int {
 
   testing::InitGoogleTest();
   return RUN_ALL_TESTS();
 }
-#pragma GCC diagnostic push
+
+#pragma GCC diagnostic pop
