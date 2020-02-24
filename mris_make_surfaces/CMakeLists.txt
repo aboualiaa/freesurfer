@@ -9,7 +9,6 @@ add_help(mris_make_surfaces mris_make_surfaces.help.xml)
 target_link_libraries(mris_make_surfaces utils)
 install(TARGETS mris_make_surfaces DESTINATION bin)
 add_test_script(NAME mris_make_surfaces_test SCRIPT test.sh DEPENDS mris_make_surfaces)
-set_property(TEST mris_make_surfaces_test PROPERTY LABELS Expensive Integration)
 
 add_executable(mris_place_surface mris_place_surface.cpp)
 add_help(mris_place_surface mris_place_surface.help.xml)

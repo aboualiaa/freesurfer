@@ -3,7 +3,7 @@
 cd ./cmake-build-debug-bionic
 export PATH=/usr/local/bin:$PATH
 #timeout 50m ninja
-ctest --schedule-random --timeout 90 -LE Expensive -j $(nproc) -T Test --group Continuous
+ctest --schedule-random --timeout 90 -L Unit -j $(nproc) -T Test --group Continuous
 #lcov --capture --directory . --output-file ./coverage.info;
 #curl -s https://codecov.io/bash -o codecov.sh
 #chmod +x ./codecov.sh

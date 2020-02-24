@@ -8,7 +8,6 @@ target_link_libraries(mri_normalize utils)
 install(TARGETS mri_normalize DESTINATION bin)
 
 add_test_script(NAME mri_normalize_test SCRIPT test.sh DEPENDS mri_normalize)
-set_property(TEST mri_normalize_test PROPERTY LABELS Expensive Integration)
 add_executable(mri_long_normalize mri_long_normalize.cpp)
 add_help(mri_long_normalize mri_long_normalize.help.xml)
 target_link_libraries(mri_long_normalize utils)

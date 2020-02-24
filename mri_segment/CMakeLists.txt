@@ -7,5 +7,4 @@ add_help(mri_segment mri_segment.help.xml)
 target_link_libraries(mri_segment utils)
 
 add_test_script(NAME mri_segment_test SCRIPT test.sh DEPENDS mri_segment)
-set_property(TEST mri_segment_test PROPERTY LABELS Expensive Integration)
 install(TARGETS mri_segment DESTINATION bin)
