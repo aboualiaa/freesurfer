@@ -6,7 +6,6 @@
 #define MRI_TOOLS_MRI_CONVERT_LIB_HPP
 
 #include <boost/program_options.hpp>
-#include <gsl/multi_span>
 #include <fmt/format.h>
 
 #undef GET_PROGRAM_NAME

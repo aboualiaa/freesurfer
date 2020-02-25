@@ -2056,8 +2056,9 @@ void initArgDesc(boost::program_options::options_description *desc,
        po::bool_switch() //
            ->notifier([cmdargs, env](auto v) {
              if (v) {
-//               handle_version_option(false, cmdargs->raw, env->vcid,
-//                                     "$Name:  $");
+               // handle_version_option(false, cmdargs->raw,
+               // env->vcid,
+               //                       "$Name:  $");
                exit(0);
              }
            }),
@@ -2071,8 +2072,9 @@ void initArgDesc(boost::program_options::options_description *desc,
        po::bool_switch() //
            ->notifier([cmdargs, env](auto v) {
              if (v) {
-//               handle_version_option(true, cmdargs->raw, env->vcid,
-//                                     "$Name:  $");
+               // handle_version_option(true, cmdargs->raw,
+               // env->vcid,
+               //                       "$Name:  $");
                exit(0);
              }
            }),
