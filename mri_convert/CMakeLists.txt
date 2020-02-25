@@ -43,3 +43,9 @@ if(BUILD_TESTING)
   add_test(mri_convert_test mri_convert_tests)
   set_property(TEST mri_convert_test PROPERTY LABELS Unit)
 endif()
+
+add_executable(mri_convert_bench mri_convert_bench.cpp)
+add_help(mri_convert_bench mri_convert.help.xml)
+target_link_libraries(mri_convert_bench utils mri_convert_lib ${GTEST_LIBRARIES}
+                      benchmark fmt gtest ${ARMADILLO_LIBRARIES}
+                      Boost::program_options)
