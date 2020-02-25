@@ -59,7 +59,7 @@ auto main(int argc, char const *argv[]) -> int {
   MRI *mri_in_like{};
   int i{};
   int err{};
-  float invert_val{1.0};
+  float invert_val{-1.0};
   int conform_width{};
   int in_volume_type{};
   int out_volume_type{MRI_VOLUME_TYPE_UNKNOWN};
@@ -1938,7 +1938,7 @@ auto main(int argc, char const *argv[]) -> int {
     exit(0);
   }
   if (!cmdargs.no_write_flag) {
-    if (cmdargs.split_frames_flag) {
+    if (!cmdargs.split_frames_flag) {
       fmt::printf("writing to %s...\n", cmdargs.out_name.data());
       if (cmdargs.force_out_type_flag) {
         err = MRIwriteType(mri, cmdargs.out_name.data(), out_volume_type);
