@@ -2992,8 +2992,11 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("out_name",
 
        po::value(&cmdargs->out_name) //
-           ->notifier(cli::addConflicts({"read_only", "no_write"}, "out_name",
-                                        cmdargs)),
+           ->notifier([cmdargs](auto v) {
+             auto adder = cli::addConflicts({"read_only", "no_write"},
+                                            "out_name", cmdargs);
+             adder(v);
+           }),
 
        "out_name")
 
@@ -3641,7 +3644,10 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("out_type,ot",
 
        po::value(&cmdargs->out_type_string) //
-           ->notifier([cmdargs](auto /*unused*/) {
+           ->notifier([cmdargs](auto v) {
+             auto adder =
+                 cli::addDependencies({"out_name"}, "out_type", cmdargs);
+             adder(v);
              cmdargs->force_out_type_flag = true;
              cmdargs->forced_out_type =
                  string_to_type(cmdargs->out_type_string.data());
