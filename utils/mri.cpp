@@ -46,6 +46,7 @@ extern const char *Progname;
 #include "matrix.h"
 #include "minc.h"
 #include "mri2.h"
+#include "mri2020.hpp"
 #include "mriBSpline.h"
 #include "pdf.h"
 #include "proto.h"

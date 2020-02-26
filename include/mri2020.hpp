@@ -2,6 +2,9 @@
 // Created by Ahmed Abou-Aliaa on 22.02.20.
 //
 
+#ifndef MRI2020_HPP
+#define MRI2020_HPP
+
 #include "immintrin.h"
 #include "mri.h"
 
@@ -210,3 +213,5 @@ inline auto get_typed_new_vox_setter_chunked(MRI *mri) -> new_vox_setter {
 }
 
 } // namespace fs::mri
+
+#endif

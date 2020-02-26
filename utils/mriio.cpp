@@ -60,6 +60,7 @@
 #include "matfile.h"
 #include "matrix.h"
 #include "mri2.h"
+#include "mri2020.hpp"
 #include "mri_circulars.h"
 #include "mri_identify.h"
 #include "nifti1.h"

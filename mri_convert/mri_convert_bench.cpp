@@ -3,7 +3,7 @@
 //
 
 #include "mri.h"
-#include "mri2020.tpp"
+#include "mri2020.hpp"
 #include "mri_convert_lib.hpp"
 
 #include <benchmark/benchmark.h>

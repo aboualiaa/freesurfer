@@ -31,6 +31,7 @@
 #include "fmriutils.h"
 #include "gcamorph.h"
 #include "mri2.h"
+#include "mri2020.hpp"
 #include "mri_conform.h"
 #include "mri_identify.h"
 #include "mriio.hpp"
