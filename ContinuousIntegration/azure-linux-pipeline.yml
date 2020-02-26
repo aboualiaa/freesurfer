@@ -21,8 +21,9 @@ stages:
           - script: sudo apt-get install -y libxml2-utils
           - script: xmllint --noout ./**/*.xml
         displayName: 'Linting'
-  - stage: CollectArtifacts
+  - stage: CollectCachedArtifacts
     dependsOn: Lint
+    condition: succeeded()
     jobs:
       - job: CheckGitAnnex
         pool:
@@ -39,6 +40,10 @@ stages:
               artifactName: 'GitAnnex'
               targetPath: '$(Agent.BuildDirectory)'
         displayName: 'Check Cached Git Annex Data'
+  - stage: DownloadArtifacts
+    dependsOn: Lint
+    condition: failed('CollectCachedArtifacts')
+    jobs:
       - job: DownloadGitAnnex
         dependsOn: CheckGitAnnex
         condition: failed()
@@ -52,8 +57,10 @@ stages:
             artifact: GitAnnex
         displayName: 'Download and Cache Git Annex Data'
   - stage: Build
-    dependsOn: CollectArtifacts
-    condition: succeededOrFailed()
+    dependsOn:
+      - CollectCachedArtifacts
+      - DownloadArtifacts
+    condition: or(succeeded('DownloadArtifacts'), succeeded('CollectCachedArtifacts'))
     jobs:
       - job: XenialBuildGCC
         variables:
