@@ -41,7 +41,7 @@ stages:
               targetPath: '$(Agent.BuildDirectory)'
         displayName: 'Check Cached Git Annex Data'
   - stage: DownloadArtifacts
-    dependsOn: Lint
+    dependsOn: CollectCachedArtifacts
     condition: failed('CollectCachedArtifacts')
     jobs:
       - job: DownloadGitAnnex
