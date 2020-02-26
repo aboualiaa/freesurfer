@@ -45,8 +45,6 @@ stages:
     condition: failed('CollectCachedArtifacts')
     jobs:
       - job: DownloadGitAnnex
-        dependsOn: CheckGitAnnex
-        condition: failed()
         pool:
           vmImage: 'ubuntu-latest'
         steps:
