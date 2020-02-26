@@ -43,7 +43,8 @@ const char *Progname;
 
 static int get_option(int argc, char *argv[]);
 
-static int InterpMethod = SAMPLE_NEAREST;
+static int   InterpMethod = SAMPLE_NEAREST;
+static int dilate = 0 ;
 
 /* The following specifies the src and dst volumes
    of the input FSL/LTA transform */
@@ -281,9 +282,17 @@ int main(int argc, char *argv[]) {
     mask = (int)transfer_val;
     out_val = transfer_val;
   }
-  mri_out = MRImask(mri_in, mri_mask, nullptr, mask, out_val);
-  if (!mri_out) {
-    ErrorExit(Gerror, "%s: stripping failed", Progname);
+  if (dilate > 0)
+  {
+    int i ;
+    for (i = 0 ; i < dilate ; i++)
+      MRIdilate(mri_mask, mri_mask);
+  }
+
+  mri_out = MRImask(mri_in, mri_mask, NULL, mask, out_val) ;
+  if (!mri_out)
+  {
+    ErrorExit(Gerror, "%s: stripping failed", Progname) ;
   }
 
   if (keep_mask_deletion_edits) {
@@ -349,7 +358,15 @@ static int get_option(int argc, char *argv[]) {
     no_cerebellum = 1;
   } else if (!stricmp(option, "rh")) {
     DoRH = 1;
-  } else if (!stricmp(option, "xform")) {
+  }
+  else if (!stricmp(option, "dilate"))
+  {
+    dilate = atoi(argv[2]) ;
+    nargs = 1 ;
+    printf("dilating mask %d times before applying\n", dilate);
+  }
+  else if (!stricmp(option, "xform"))
+  {
     xform_fname = argv[2];
     nargs = 1;
     fprintf(stderr, "transform file name is %s\n", xform_fname);

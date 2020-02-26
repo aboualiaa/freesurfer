@@ -8093,9 +8093,10 @@ int MRIScomputePialTargetLocationsMultiModal(MRI_SURFACE *mris,
 
   // Create a distance volume at twice the size. This can be quite big
   // The value at a voxel is the distance from the voxel to the surface
-  printf("Creating distance volumes t=%g\n", then.minutes()); fflush(stdout);
-  mri_tmp = MRISfillInterior(mris, mri_T2->xsize/2, NULL) ;
-  mri_filled = MRIextractRegionAndPad(mri_tmp, NULL, NULL, nint(30/mri_T2->xsize)) ;
+  printf("Creating white distance volumes t=%g\n", then.minutes()); fflush(stdout);
+  mri_tmp = MRISmakeBoundingVolume(mris, mri_T2->xsize / 2);
+  MRISfillInterior(mris, mri_T2->xsize / 2, mri_tmp);
+  mri_filled = MRIextractRegionAndPad(mri_tmp, NULL, NULL, nint(30/mri_T2->xsize)) ; 
   MRIfree(&mri_tmp) ;
   mri_dist_white = MRIcloneDifferentType(mri_filled, MRI_FLOAT) ;
   MRIdistanceTransform(mri_filled, mri_dist_white, 1, 100, DTRANS_MODE_SIGNED, NULL) ;
@@ -8105,8 +8106,9 @@ int MRIScomputePialTargetLocationsMultiModal(MRI_SURFACE *mris,
   MRISrestoreVertexPositions(mris, TMP2_VERTICES) ;
   MRISaverageVertexPositions(mris, 2) ; // smooth pial surface?
   MRIScomputeMetricProperties(mris) ;
-  mri_tmp = MRISfillInterior(mris, mri_T2->xsize/2, NULL) ;
-  mri_filled_pial = MRIextractRegionAndPad(mri_tmp, NULL, NULL, nint(30/mri_T2->xsize)) ;
+  mri_tmp = MRISmakeBoundingVolume(mris, mri_T2->xsize / 2);
+  MRISfillInterior(mris, mri_T2->xsize / 2, mri_tmp);
+  mri_filled_pial = MRIextractRegionAndPad(mri_tmp, NULL, NULL, nint(30/mri_T2->xsize)) ; 
   MRIfree(&mri_tmp) ;
   mri_dist_pial = MRIcloneDifferentType(mri_filled_pial, MRI_FLOAT) ;
   MRIdistanceTransform(mri_filled_pial, mri_dist_pial, 1, 100, DTRANS_MODE_SIGNED, NULL) ;
