@@ -31,13 +31,13 @@ if(BUILD_TESTING)
   # tests
   add_test_script(NAME mri_convert_test SCRIPT test.sh DEPENDS mri_convert)
 
-  add_executable(mri_convert_tests mri_convert_tests.cpp)
-  add_help(mri_convert_tests mri_convert.help.xml)
-  target_link_libraries(mri_convert_tests ${COMMON_LIBS} ${GTEST_LIBRARIES}
+  add_executable(mri_convert_unit mri_convert_unit.cpp)
+  add_help(mri_convert_unit mri_convert.help.xml)
+  target_link_libraries(mri_convert_unit ${COMMON_LIBS} ${GTEST_LIBRARIES}
                         gtest ${ARMADILLO_LIBRARIES})
-  add_test(mri_convert_tests mri_convert_tests)
-  set_property(TEST mri_convert_tests PROPERTY LABELS Unit)
-  set_property(TEST mri_convert_test PROPERTY LABELS Unit)
+  add_test(mri_convert_unit mri_convert_unit)
+  set_property(TEST mri_convert_unit PROPERTY LABELS Unit)
+  set_property(TEST mri_convert_test PROPERTY LABELS Integration)
 endif()
 
 add_executable(mri_convert_bench mri_convert_bench.cpp)

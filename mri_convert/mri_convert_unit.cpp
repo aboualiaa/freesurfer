@@ -47,7 +47,7 @@ TEST(test_usage_message, nullptr_test) { // NOLINT
 
 TEST(test_usage_message, returns_string) { // NOLINT
   ASSERT_STREQ(cli::usage_message().c_str(),
-               "\ntype mri_convert_tests -u for usage\n\n");
+               "\ntype mri_convert_unit -u for usage\n\n");
 }
 
 TEST(test_usage_message, valid_input_test) { // NOLINT
