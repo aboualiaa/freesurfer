@@ -378,12 +378,17 @@ void LayerROI::GetStats(int nPlane, int *count_out, float *area_out,
 
   int cnt = 0;
   //  QVector<int> indices;
+  double val_range[2];
+  GetProperty()->GetValueRange(val_range);
   QVector<float> coords;
-  for (int i = 0; i < dim[0]; i++) {
-    for (int j = 0; j < dim[1]; j++) {
-      for (int k = 0; k < dim[2]; k++) {
-        if (ptr[k * dim[0] * dim[1] + j * dim[0] + i] >
-            GetProperty()->GetThreshold()) {
+  for ( int i = 0; i < dim[0]; i++ )
+  {
+    for ( int j = 0; j < dim[1]; j++ )
+    {
+      for ( int k = 0; k < dim[2]; k++ )
+      {
+        if ( ptr[k*dim[0]*dim[1]+j*dim[0]+i] >= val_range[0] )
+        {
           cnt++;
           //          indices << i << j << k;
           coords << i * vs[0] + origin[0] << j * vs[1] + origin[1]
