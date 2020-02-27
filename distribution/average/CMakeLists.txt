@@ -38,7 +38,7 @@ install_tarball(fsaverage.tar.gz DESTINATION subjects)
 add_subdirectory(samseg)
 
 # subjects required for infant recon-all
-if(INFANT_MODULE)
+if(FS_INFANT_MODULE)
   install_tarball(CNYBCH.tar.gz DESTINATION average)
 endif()
 

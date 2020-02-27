@@ -50,6 +50,7 @@ else()
 endif()
 enable_language(C CXX Fortran)
 find_program(CCACHE_PROGRAM ccache)
+mark_as_advanced(CCACHE_PROGRAM)
 if(CCACHE_PROGRAM)
   message(STATUS "using ccache")
   set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
@@ -69,18 +70,24 @@ endif()
 # a few build options
 option(MINIMAL "Only build core components" OFF)
 option(BUILD_GUIS "Build GUI tools" ON)
-option(BUILD_ATTIC "Build deprecated tools from the attic" ON)
-option(INFANT_MODULE "Include infant recon-all" ON)
-option(BUILD_DNG "Build Doug's testing tools" ON)
+option(FS_BUILD_ATTIC "Build deprecated tools from the attic" ON)
+option(FS_INFANT_MODULE "Include infant recon-all" ON)
+option(FS_BUILD_DNG "Build Doug's testing tools" ON)
 option(SUPPRESS_WARNINGS "Suppress some selected warnings" ON)
 option(PROFILING "Compile binaries for profiling with gprof" OFF)
 option(CMAKE_EXPORT_COMPILE_COMMANDS OFF)
-
-option(BUILD_BOOST_TESTS ON)
+option(FS_USE_CCACHE "Use ccache to reduce build times" ON)
+option(FS_BUILD_BOOST_TESTS "Unimplemented" ON)
+set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "None;Debug;Release;RelWithDebInfo;MinSizeRel")
 
 if(NOT APPLE)
   # linux-only build options
   option(TKTOOLS_MODULE "Install old Linux TK GUIs" OFF)
+else()
+  mark_as_advanced(CMAKE_OSX_SYSROOT
+                   CMAKE_OSX_DEPLOYMENT_TARGET
+                   CMAKE_OSX_ARCHITECTURES
+                   CMAKE_EXECUTABLE_FORMAT)
 endif()
 
 # warnings
@@ -173,6 +180,7 @@ find_program(XXD xxd)
 if(NOT XXD)
   message(WARNING "MISSING xxd - required to build executable help texts")
 endif()
+mark_as_advanced(XXD)
 
 # Most of the packages required by freesurfer are located by custom find-modules stored in the
 # 'cmake' subdir. The find-modules expect each package to be installed under a common
@@ -201,6 +209,7 @@ endif()
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 find_package(ArrayFire)
+mark_as_advanced(ArrayFire_DIR)
 
 # -------- zlib --------
 find_package(ZLIB REQUIRED)
@@ -219,6 +228,7 @@ endif()
 
 # -------- armadillo --------
 find_package(Armadillo)
+mark_as_advanced(ARMADILLO_LIBRARIES ARMADILLO_LIBRARIES ARMADILLO_INCLUDE_DIRS)
 
 # -------- petsc --------
 find_package(PETSC)
@@ -230,6 +240,7 @@ find_package(Boost REQUIRED COMPONENTS program_options unit_test_framework files
 
 # -------- itk --------
 find_package(ITK HINTS ${ITK_DIR})
+mark_as_advanced(ITK_DIR)
 
 # -------- ann --------
 # ANN is only used by mris_resample
@@ -240,6 +251,8 @@ find_package(ANN)
 # only used by mris_decimate (not available on mac)
 #if(NOT APPLE)
 find_package(GTS)
+mark_as_advanced(ICONV_LIBRARY)
+
 #endif()
 
 # -------- matlab --------
@@ -250,12 +263,23 @@ else()
   set(Matlab_ROOT_DIR /Applications/MATLAB/Matlab.app)
   find_package(MATLAB)
 endif()
-
+mark_as_advanced(Matlab_ROOT_DIR)
 
 # -------- hpx --------
 set(HPX_IGNORE_COMPILER_COMPATIBILITY ON)
 set(HPX_IGNORE_CMAKE_BUILD_TYPE_COMPATIBILITY OFF FORCE)
 find_package(HPX)
+mark_as_advanced(HPX_GIT_COMMIT
+                 HPX_Fortran_COMPILER_VERSION
+                 HPX_Fortran_COMPILER_ID
+                 HPX_Fortran_COMPILER
+                 HPX_DIR
+                 HPX_C_COMPILER_VERSION
+                 HPX_C_COMPILER_ID
+                 HPX_C_COMPILER
+                 HPX_CXX_COMPILER_VERSION
+                 HPX_CXX_COMPILER_ID
+                 HPX_CXX_COMPILER)
 
 # -------- openCV --------
 if(NOT APPLE)
@@ -264,6 +288,10 @@ endif()
 
 # -------- X11 ---------
 find_package(X11)
+mark_as_advanced(XT_LIBRARY
+                 XMU_LIBRARY
+                 X11_LIBRARY
+                 X11_INCLUDE_DIR GL_LIBRARY GLU_LIBRARY)
 
 # search for GUI libraries
 if(BUILD_GUIS)
@@ -282,6 +310,10 @@ if(BUILD_GUIS)
   # -------- qt --------
   find_package(QT)
 
+  mark_as_advanced(Qt5Widgets_DIR
+                   Qt5Sql_DIR
+                   Qt5Gui_DIR
+                   Qt5Core_DIR)
 endif()
 
 # -------- vtk --------
@@ -753,7 +785,7 @@ if(NOT MINIMAL)
   )
 endif()
 
-if(INFANT_MODULE)
+if(FS_INFANT_MODULE)
   add_subdirectory(infant)
   add_subdirectory(sscnn_skullstripping)
 endif()
@@ -762,6 +794,6 @@ if(TKTOOLS_MODULE)
   add_subdirectory(tktools)
 endif()
 
-if(BUILD_DNG)
+if(FS_BUILD_DNG)
   add_subdirectory(dngtester)
 endif()

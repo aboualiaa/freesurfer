@@ -1,6 +1,6 @@
 # The attic is the home for old and unused tools, that are mostly deprecated, but can still be built if needed
 
-if(NOT BUILD_ATTIC)
+if(NOT FS_BUILD_ATTIC)
   # list of binaries/scripts that have been deprecated from the default build. In place, a dummy script will
   # be created for each removed tool that warns the user of its deprecation. It's possible that this list
   # will differ from the below list of subdirectories, so unfortunately it has to be defined separately

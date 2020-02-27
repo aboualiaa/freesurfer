@@ -24,13 +24,13 @@ if(NOT ZBLIB_FOUND)
   find_package(ZLIB REQUIRED)
 endif()
 
-option(GEMS_BUILD_SHARED_LIBS "Build GEMS with shared libraries" ON) # doesn't do anything
-option(GEMS_BUILD_EXECUTABLES "Build command line executables" ON)
-option(GEMS_BUILD_TESTING "Build tests" ON)
-option(GEMS_BUILD_GUI "Build GUI components (requires FLTK and VTK)" ON)
+option(FS_GEMS_BUILD_SHARED_LIBS "Build GEMS with shared libraries" ON) # doesn't do anything
+option(FS_GEMS_BUILD_EXECUTABLES "Build command line executables" ON)
+option(FS_GEMS_BUILD_TESTING "Build tests" ON)
+option(FS_GEMS_BUILD_GUI "Build GUI components (requires FLTK and VTK)" ON)
 option(GEMS_BUILD_MATLAB "Build Matlab wrappers" OFF)
-option(GEMS_BUILD_PYTHON "Build Python wrappers" OFF) # if you're building the whole freesurfer project, this gets turned on below
-option(GEMS_BUILD_CUDA "Build CUDA stuff" OFF)
+option(FS_GEMS_BUILD_PYTHON "Build Python wrappers" OFF) # if you're building the whole freesurfer project, this gets turned on below
+option(FS_GEMS_BUILD_CUDA "Build CUDA stuff" OFF)
 
 set(GEMS_RUNTIME_PATH ${CMAKE_CURRENT_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${GEMS_RUNTIME_PATH})
@@ -40,7 +40,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${GEMS_RUNTIME_PATH})
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fpermissive -msse2 -mfpmath=sse")
 
-if(GEMS_BUILD_EXECUTABLES OR GEMS_BUILD_GUI)
+if(FS_GEMS_BUILD_EXECUTABLES OR FS_GEMS_BUILD_GUI)
   add_definitions(-DUSE_DYNAMIC_MESH)
   message(STATUS "Since you're building executables to compute meshes, ITK dynamic meshes will "
           "be used (internally using std::map instead of std::vector to store lists of points, cells, etc). "
@@ -49,7 +49,7 @@ if(GEMS_BUILD_EXECUTABLES OR GEMS_BUILD_GUI)
           )
 endif()
 
-if(GEMS_BUILD_CUDA)
+if(FS_GEMS_BUILD_CUDA)
   find_package(CUDA REQUIRED)
   set(CMAKE_CXX_FLAGS "-g ${CMAKE_CXX_FLAGS} -std=c++11")
   include_directories(${CUDA_INCLUDE_DIRS})
@@ -99,17 +99,17 @@ add_library(kvlGEMSCommon ${SOURCES})
 target_link_libraries(kvlGEMSCommon ${ITK_LIBRARIES} ${ZLIB_LIBRARIES})
 
 # build command line executables
-if(GEMS_BUILD_EXECUTABLES)
+if(FS_GEMS_BUILD_EXECUTABLES)
   add_subdirectory(Executables)
 endif()
 
 # build tests
-if(GEMS_BUILD_TESTING)
+if(FS_GEMS_BUILD_TESTING)
   add_subdirectory(Testing)
 endif()
 
 # build GUI
-if(GEMS_BUILD_GUI)
+if(FS_GEMS_BUILD_GUI)
   add_subdirectory(GUI)
 endif()
 

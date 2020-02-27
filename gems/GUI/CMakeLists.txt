@@ -4,6 +4,12 @@ endif()
 
 # FLTK is required
 find_package(FLTK REQUIRED)
+mark_as_advanced(FLTK_MATH_LIBRARY
+                 FLTK_INCLUDE_DIR
+                 FLTK_FLUID_EXECUTABLE
+                 FLTK_DIR
+                 FLTK_CONFIG_SCRIPT)
+
 include_directories(${FLTK_INCLUDE_DIR})
 include_directories(${ITK_INCLUDE_DIRS})
 include_directories(${VTK_INCLUDE_DIRS})
