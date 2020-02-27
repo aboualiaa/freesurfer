@@ -40,11 +40,9 @@ stages:
               artifactName: 'GitAnnex'
               targetPath: '$(Agent.BuildDirectory)'
         displayName: 'Check Cached Git Annex Data'
-  - stage: DownloadArtifacts
-    dependsOn: CollectCachedArtifacts
-    condition: failed('CollectCachedArtifacts')
-    jobs:
       - job: DownloadGitAnnex
+        dependsOn: CheckGitAnnex
+        condition: failed('CheckGitAnnex')
         pool:
           vmImage: 'ubuntu-latest'
         steps:
@@ -54,13 +52,834 @@ stages:
           - publish: $(Agent.BuildDirectory)/annex-cache
             artifact: GitAnnex
         displayName: 'Download and Cache Git Annex Data'
-  - stage: Build
-    dependsOn:
-      - CollectCachedArtifacts
-      - DownloadArtifacts
-    condition: or(succeeded('DownloadArtifacts'), succeeded('CollectCachedArtifacts'))
+
+# MARK: -
+
+  - stage: BionicClang
+    dependsOn: CollectCachedArtifacts
+    condition: or(succeeded('DownloadGitAnnex'), succeeded('CheckGitAnnex'))
     jobs:
-      - job: XenialBuildGCC
+      - job: BionicDebugClang_Coverage
+        variables:
+          HOSTING_OS: bionic
+          HOSTING_COMPILER: clang
+          TESTING_TYPE: '_Unit_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
+        pool:
+          vmImage: 'ubuntu-16.04'
+        steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '2'
+              buildVersionToDownload: 'specific'
+              pipelineId: '31'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
+          - download: current
+            artifact: 'GitAnnex'
+            condition: failed()
+          - checkout: self
+            submodules: true
+          - script: |
+              export TESTING_TYPE
+              git remote add cache ../GitAnnex
+              sudo apt-get install -y git-annex
+              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+              git config --global user.name "Ahmed Abou-Aliaa"
+              git annex copy --from cache
+            displayName: 'Setting up Git Annex'
+          - script: |
+              ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+              ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+              rm -rf ../GitAnnex
+            displayName: 'Building'
+          - script: |
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
+              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
+            displayName: 'Unit Testing'
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
+        displayName: 'Ubuntu Xenial Build GCC'
+      - job: BionicReleaseClang_ASAN
+        variables:
+          HOSTING_OS: bionic
+          HOSTING_COMPILER: clang
+          TESTING_TYPE: '_Unit_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
+        pool:
+          vmImage: 'ubuntu-16.04'
+        steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '2'
+              buildVersionToDownload: 'specific'
+              pipelineId: '31'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
+          - download: current
+            artifact: 'GitAnnex'
+            condition: failed()
+          - checkout: self
+            submodules: true
+          - script: |
+              export TESTING_TYPE
+              git remote add cache ../GitAnnex
+              sudo apt-get install -y git-annex
+              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+              git config --global user.name "Ahmed Abou-Aliaa"
+              git annex copy --from cache
+            displayName: 'Setting up Git Annex'
+          - script: |
+              ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+              ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+              rm -rf ../GitAnnex
+            displayName: 'Building'
+          - script: |
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
+              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
+            displayName: 'Unit Testing'
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
+        displayName: 'Ubuntu Bionic Build Clang + ASAN'
+      - job: BionicReleaseClang_TSAN
+        variables:
+          HOSTING_OS: bionic
+          HOSTING_COMPILER: clang
+          TESTING_TYPE: '_Unit_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
+        pool:
+          vmImage: 'ubuntu-16.04'
+        steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '2'
+              buildVersionToDownload: 'specific'
+              pipelineId: '31'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
+          - download: current
+            artifact: 'GitAnnex'
+            condition: failed()
+          - checkout: self
+            submodules: true
+          - script: |
+              export TESTING_TYPE
+              git remote add cache ../GitAnnex
+              sudo apt-get install -y git-annex
+              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+              git config --global user.name "Ahmed Abou-Aliaa"
+              git annex copy --from cache
+            displayName: 'Setting up Git Annex'
+          - script: |
+              ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+              ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+              rm -rf ../GitAnnex
+            displayName: 'Building'
+          - script: |
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
+              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
+            displayName: 'Unit Testing'
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
+        displayName: 'Ubuntu Bionic Build Clang + TSAN'
+      - job: BionicReleaseClang_UBSAN
+        variables:
+          HOSTING_OS: bionic
+          HOSTING_COMPILER: clang
+          TESTING_TYPE: '_Unit_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
+        pool:
+          vmImage: 'ubuntu-16.04'
+        steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '2'
+              buildVersionToDownload: 'specific'
+              pipelineId: '31'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
+          - download: current
+            artifact: 'GitAnnex'
+            condition: failed()
+          - checkout: self
+            submodules: true
+          - script: |
+              export TESTING_TYPE
+              git remote add cache ../GitAnnex
+              sudo apt-get install -y git-annex
+              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+              git config --global user.name "Ahmed Abou-Aliaa"
+              git annex copy --from cache
+            displayName: 'Setting up Git Annex'
+          - script: |
+              ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+              ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+              rm -rf ../GitAnnex
+            displayName: 'Building'
+          - script: |
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
+              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
+            displayName: 'Unit Testing'
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
+        displayName: 'Ubuntu Bionic Build Clang + UBSAN'
+      - job: BionicReleaseClang_MSAN
+        variables:
+          HOSTING_OS: bionic
+          HOSTING_COMPILER: clang
+          TESTING_TYPE: '_Unit_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
+        pool:
+          vmImage: 'ubuntu-16.04'
+        steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '2'
+              buildVersionToDownload: 'specific'
+              pipelineId: '31'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
+          - download: current
+            artifact: 'GitAnnex'
+            condition: failed()
+          - checkout: self
+            submodules: true
+          - script: |
+              export TESTING_TYPE
+              git remote add cache ../GitAnnex
+              sudo apt-get install -y git-annex
+              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+              git config --global user.name "Ahmed Abou-Aliaa"
+              git annex copy --from cache
+            displayName: 'Setting up Git Annex'
+          - script: |
+              ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+              ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+              rm -rf ../GitAnnex
+            displayName: 'Building'
+          - script: |
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
+              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
+            displayName: 'Unit Testing'
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
+        displayName: 'Ubuntu Bionic Build Clang + MSAN'
+      - job: BionicReleaseClang_CFISAN
+        variables:
+          HOSTING_OS: bionic
+          HOSTING_COMPILER: clang
+          TESTING_TYPE: '_Unit_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
+        pool:
+          vmImage: 'ubuntu-16.04'
+        steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '2'
+              buildVersionToDownload: 'specific'
+              pipelineId: '31'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
+          - download: current
+            artifact: 'GitAnnex'
+            condition: failed()
+          - checkout: self
+            submodules: true
+          - script: |
+              export TESTING_TYPE
+              git remote add cache ../GitAnnex
+              sudo apt-get install -y git-annex
+              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+              git config --global user.name "Ahmed Abou-Aliaa"
+              git annex copy --from cache
+            displayName: 'Setting up Git Annex'
+          - script: |
+              ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+              ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+              rm -rf ../GitAnnex
+            displayName: 'Building'
+          - script: |
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
+              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
+            displayName: 'Unit Testing'
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
+        displayName: 'Ubuntu Bionic Build Clang + CFISAN'
+# MARK: -
+
+  - stage: XenialClang
+    dependsOn: CollectCachedArtifacts
+    condition: or(succeeded('DownloadGitAnnex'), succeeded('CheckGitAnnex'))
+    jobs:
+      - job: XenialDebugClang_Coverage
+        variables:
+          HOSTING_OS: xenial
+          HOSTING_COMPILER: clang
+          TESTING_TYPE: '_Unit_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
+        pool:
+          vmImage: 'ubuntu-16.04'
+        steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '2'
+              buildVersionToDownload: 'specific'
+              pipelineId: '31'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
+          - download: current
+            artifact: 'GitAnnex'
+            condition: failed()
+          - checkout: self
+            submodules: true
+          - script: |
+              export TESTING_TYPE
+              git remote add cache ../GitAnnex
+              sudo apt-get install -y git-annex
+              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+              git config --global user.name "Ahmed Abou-Aliaa"
+              git annex copy --from cache
+            displayName: 'Setting up Git Annex'
+          - script: |
+              ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+              ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+              rm -rf ../GitAnnex
+            displayName: 'Building'
+          - script: |
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
+              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
+            displayName: 'Unit Testing'
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
+        displayName: 'Ubuntu Xenial Build GCC'
+      - job: XenialReleaseClang_ASAN
+        variables:
+          HOSTING_OS: xenial
+          HOSTING_COMPILER: clang
+          TESTING_TYPE: '_Unit_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
+        pool:
+          vmImage: 'ubuntu-16.04'
+        steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '2'
+              buildVersionToDownload: 'specific'
+              pipelineId: '31'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
+          - download: current
+            artifact: 'GitAnnex'
+            condition: failed()
+          - checkout: self
+            submodules: true
+          - script: |
+              export TESTING_TYPE
+              git remote add cache ../GitAnnex
+              sudo apt-get install -y git-annex
+              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+              git config --global user.name "Ahmed Abou-Aliaa"
+              git annex copy --from cache
+            displayName: 'Setting up Git Annex'
+          - script: |
+              ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+              ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+              rm -rf ../GitAnnex
+            displayName: 'Building'
+          - script: |
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
+              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
+            displayName: 'Unit Testing'
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
+        displayName: 'Ubuntu Bionic Build Clang + ASAN'
+      - job: XenialReleaseClang_TSAN
+        variables:
+          HOSTING_OS: xenial
+          HOSTING_COMPILER: clang
+          TESTING_TYPE: '_Unit_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
+        pool:
+          vmImage: 'ubuntu-16.04'
+        steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '2'
+              buildVersionToDownload: 'specific'
+              pipelineId: '31'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
+          - download: current
+            artifact: 'GitAnnex'
+            condition: failed()
+          - checkout: self
+            submodules: true
+          - script: |
+              export TESTING_TYPE
+              git remote add cache ../GitAnnex
+              sudo apt-get install -y git-annex
+              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+              git config --global user.name "Ahmed Abou-Aliaa"
+              git annex copy --from cache
+            displayName: 'Setting up Git Annex'
+          - script: |
+              ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+              ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+              rm -rf ../GitAnnex
+            displayName: 'Building'
+          - script: |
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
+              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
+            displayName: 'Unit Testing'
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
+        displayName: 'Ubuntu Bionic Build Clang + TSAN'
+      - job: XenialReleaseClang_UBSAN
+        variables:
+          HOSTING_OS: xenial
+          HOSTING_COMPILER: clang
+          TESTING_TYPE: '_Unit_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
+        pool:
+          vmImage: 'ubuntu-16.04'
+        steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '2'
+              buildVersionToDownload: 'specific'
+              pipelineId: '31'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
+          - download: current
+            artifact: 'GitAnnex'
+            condition: failed()
+          - checkout: self
+            submodules: true
+          - script: |
+              export TESTING_TYPE
+              git remote add cache ../GitAnnex
+              sudo apt-get install -y git-annex
+              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+              git config --global user.name "Ahmed Abou-Aliaa"
+              git annex copy --from cache
+            displayName: 'Setting up Git Annex'
+          - script: |
+              ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+              ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+              rm -rf ../GitAnnex
+            displayName: 'Building'
+          - script: |
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
+              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
+            displayName: 'Unit Testing'
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
+        displayName: 'Ubuntu Bionic Build Clang + UBSAN'
+      - job: XenialReleaseClang_MSAN
+        variables:
+          HOSTING_OS: xenial
+          HOSTING_COMPILER: clang
+          TESTING_TYPE: '_Unit_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
+        pool:
+          vmImage: 'ubuntu-16.04'
+        steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '2'
+              buildVersionToDownload: 'specific'
+              pipelineId: '31'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
+          - download: current
+            artifact: 'GitAnnex'
+            condition: failed()
+          - checkout: self
+            submodules: true
+          - script: |
+              export TESTING_TYPE
+              git remote add cache ../GitAnnex
+              sudo apt-get install -y git-annex
+              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+              git config --global user.name "Ahmed Abou-Aliaa"
+              git annex copy --from cache
+            displayName: 'Setting up Git Annex'
+          - script: |
+              ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+              ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+              rm -rf ../GitAnnex
+            displayName: 'Building'
+          - script: |
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
+              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
+            displayName: 'Unit Testing'
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
+        displayName: 'Ubuntu Bionic Build Clang + MSAN'
+      - job: XenialReleaseClang_CFISAN
+        variables:
+          HOSTING_OS: xenial
+          HOSTING_COMPILER: clang
+          TESTING_TYPE: '_Unit_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
+        pool:
+          vmImage: 'ubuntu-16.04'
+        steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '2'
+              buildVersionToDownload: 'specific'
+              pipelineId: '31'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
+          - download: current
+            artifact: 'GitAnnex'
+            condition: failed()
+          - checkout: self
+            submodules: true
+          - script: |
+              export TESTING_TYPE
+              git remote add cache ../GitAnnex
+              sudo apt-get install -y git-annex
+              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+              git config --global user.name "Ahmed Abou-Aliaa"
+              git annex copy --from cache
+            displayName: 'Setting up Git Annex'
+          - script: |
+              ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+              ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+              rm -rf ../GitAnnex
+            displayName: 'Building'
+          - script: |
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
+              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
+            displayName: 'Unit Testing'
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
+        displayName: 'Ubuntu Bionic Build Clang + CFISAN'
+
+# MARK: -
+
+  - stage: BionicGCC
+    dependsOn: CollectCachedArtifacts
+    condition: or(succeeded('DownloadGitAnnex'), succeeded('CheckGitAnnex'))
+    jobs:
+      - job: BionicDebugGCC_Coverage
+        variables:
+          HOSTING_OS: bionic
+          HOSTING_COMPILER: gcc
+          TESTING_TYPE: '_Unit_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
+        pool:
+          vmImage: 'ubuntu-16.04'
+        steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '2'
+              buildVersionToDownload: 'specific'
+              pipelineId: '31'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
+          - download: current
+            artifact: 'GitAnnex'
+            condition: failed()
+          - checkout: self
+            submodules: true
+          - script: |
+              export TESTING_TYPE
+              git remote add cache ../GitAnnex
+              sudo apt-get install -y git-annex
+              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+              git config --global user.name "Ahmed Abou-Aliaa"
+              git annex copy --from cache
+            displayName: 'Setting up Git Annex'
+          - script: |
+              ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+              ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+              rm -rf ../GitAnnex
+            displayName: 'Building'
+          - script: |
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
+              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
+            displayName: 'Unit Testing'
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
+        displayName: 'Ubuntu Xenial Build GCC'
+      - job: BionicReleaseGCC_ASAN
+        variables:
+          HOSTING_OS: bionic
+          HOSTING_COMPILER: gcc
+          TESTING_TYPE: '_Unit_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
+        pool:
+          vmImage: 'ubuntu-16.04'
+        steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '2'
+              buildVersionToDownload: 'specific'
+              pipelineId: '31'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
+          - download: current
+            artifact: 'GitAnnex'
+            condition: failed()
+          - checkout: self
+            submodules: true
+          - script: |
+              export TESTING_TYPE
+              git remote add cache ../GitAnnex
+              sudo apt-get install -y git-annex
+              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+              git config --global user.name "Ahmed Abou-Aliaa"
+              git annex copy --from cache
+            displayName: 'Setting up Git Annex'
+          - script: |
+              ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+              ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+              rm -rf ../GitAnnex
+            displayName: 'Building'
+          - script: |
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
+              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
+            displayName: 'Unit Testing'
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
+        displayName: 'Ubuntu Bionic Build Clang + ASAN'
+      - job: BionicReleaseGCC_TSAN
+        variables:
+          HOSTING_OS: bionic
+          HOSTING_COMPILER: gcc
+          TESTING_TYPE: '_Unit_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
+        pool:
+          vmImage: 'ubuntu-16.04'
+        steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '2'
+              buildVersionToDownload: 'specific'
+              pipelineId: '31'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
+          - download: current
+            artifact: 'GitAnnex'
+            condition: failed()
+          - checkout: self
+            submodules: true
+          - script: |
+              export TESTING_TYPE
+              git remote add cache ../GitAnnex
+              sudo apt-get install -y git-annex
+              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+              git config --global user.name "Ahmed Abou-Aliaa"
+              git annex copy --from cache
+            displayName: 'Setting up Git Annex'
+          - script: |
+              ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+              ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+              rm -rf ../GitAnnex
+            displayName: 'Building'
+          - script: |
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
+              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
+            displayName: 'Unit Testing'
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
+        displayName: 'Ubuntu Bionic Build Clang + TSAN'
+      - job: BionicReleaseGCC_UBSAN
+        variables:
+          HOSTING_OS: bionic
+          HOSTING_COMPILER: gcc
+          TESTING_TYPE: '_Unit_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
+        pool:
+          vmImage: 'ubuntu-16.04'
+        steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '2'
+              buildVersionToDownload: 'specific'
+              pipelineId: '31'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
+          - download: current
+            artifact: 'GitAnnex'
+            condition: failed()
+          - checkout: self
+            submodules: true
+          - script: |
+              export TESTING_TYPE
+              git remote add cache ../GitAnnex
+              sudo apt-get install -y git-annex
+              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+              git config --global user.name "Ahmed Abou-Aliaa"
+              git annex copy --from cache
+            displayName: 'Setting up Git Annex'
+          - script: |
+              ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+              ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+              rm -rf ../GitAnnex
+            displayName: 'Building'
+          - script: |
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
+              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
+            displayName: 'Unit Testing'
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
+        displayName: 'Ubuntu Bionic Build Clang + UBSAN'
+      - job: BionicReleaseGCC_MSAN
+        variables:
+          HOSTING_OS: bionic
+          HOSTING_COMPILER: gcc
+          TESTING_TYPE: '_Unit_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
+        pool:
+          vmImage: 'ubuntu-16.04'
+        steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '2'
+              buildVersionToDownload: 'specific'
+              pipelineId: '31'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
+          - download: current
+            artifact: 'GitAnnex'
+            condition: failed()
+          - checkout: self
+            submodules: true
+          - script: |
+              export TESTING_TYPE
+              git remote add cache ../GitAnnex
+              sudo apt-get install -y git-annex
+              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+              git config --global user.name "Ahmed Abou-Aliaa"
+              git annex copy --from cache
+            displayName: 'Setting up Git Annex'
+          - script: |
+              ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+              ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+              rm -rf ../GitAnnex
+            displayName: 'Building'
+          - script: |
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
+              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
+            displayName: 'Unit Testing'
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
+        displayName: 'Ubuntu Bionic Build Clang + MSAN'
+
+
+# MARK: -
+
+  - stage: XenialGCC
+    dependsOn: CollectCachedArtifacts
+    condition: or(succeeded('DownloadGitAnnex'), succeeded('CheckGitAnnex'))
+    jobs:
+      - job: XenialDebugGCC_Coverage
         variables:
           HOSTING_OS: xenial
           HOSTING_COMPILER: gcc
@@ -107,62 +926,14 @@ stages:
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
         displayName: 'Ubuntu Xenial Build GCC'
-      - job: XenialBuildClang
+      - job: XenialReleaseGCC_ASAN
         variables:
           HOSTING_OS: xenial
-          HOSTING_COMPILER: clang
-          TESTING_TYPE: '_Unit_Tests'
-          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
-        pool:
-          vmImage: 'ubuntu-16.04'
-        steps:
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              buildType: 'specific'
-              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              buildVersionToDownload: 'specific'
-              pipelineId: '31'
-              artifactName: 'GitAnnex'
-              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
-          - download: current
-            artifact: 'GitAnnex'
-            condition: failed()
-          - checkout: self
-            submodules: true
-          - script: |
-              git remote add cache ../GitAnnex
-              sudo apt-get install -y git-annex
-              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
-              git config --global user.name "Ahmed Abou-Aliaa"
-              git annex copy --from cache
-            displayName: 'Setting up Git Annex'
-          - script: |
-              export TESTING_TYPE
-              ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
-              ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
-              rm -rf ../GitAnnex
-            displayName: 'Building'
-          - script: |
-              echo $AZURE_SOURCE_DIR
-              export AZURE_SOURCE_DIR
-              export PATH="$(pwd)/cmake-3.16.4-Linux-x86_64/bin:$PATH"
-              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
-            displayName: 'Unit Testing'
-          - task: PublishTestResults@2
-            inputs:
-              testResultsFormat: 'cTest'
-              testResultsFiles: '**/Test.xml'
-              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'Ubuntu Xenial Build Clang'
-      - job: BionicBuildGCC
-        variables:
-          HOSTING_OS: bionic
           HOSTING_COMPILER: gcc
           TESTING_TYPE: '_Unit_Tests'
           AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
-          vmImage: 'ubuntu-18.04'
+          vmImage: 'ubuntu-16.04'
         steps:
           - task: DownloadPipelineArtifact@2
             inputs:
@@ -201,15 +972,15 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'Ubuntu Bionic Build GCC'
-      - job: BionicBuildClang
+        displayName: 'Ubuntu Bionic Build Clang + ASAN'
+      - job: XenialReleaseGCC_TSAN
         variables:
-          HOSTING_OS: bionic
-          HOSTING_COMPILER: clang
+          HOSTING_OS: xenial
+          HOSTING_COMPILER: gcc
           TESTING_TYPE: '_Unit_Tests'
           AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
-          vmImage: 'ubuntu-18.04'
+          vmImage: 'ubuntu-16.04'
         steps:
           - task: DownloadPipelineArtifact@2
             inputs:
@@ -226,6 +997,7 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              export TESTING_TYPE
               git remote add cache ../GitAnnex
               sudo apt-get install -y git-annex
               git config --global user.email "ahmed.s.aboualiaa@gmail.com"
@@ -233,7 +1005,6 @@ stages:
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
-              export TESTING_TYPE
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
@@ -241,7 +1012,6 @@ stages:
           - script: |
               echo $AZURE_SOURCE_DIR
               export AZURE_SOURCE_DIR
-              export PATH="$(pwd)/cmake-3.16.4-Linux-x86_64/bin:$PATH"
               ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
             displayName: 'Unit Testing'
           - task: PublishTestResults@2
@@ -249,13 +1019,12 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'Ubuntu Bionic Build Clang'
-      - job: XenialIntegrationTestGCC
-        timeoutInMinutes: 300
+        displayName: 'Ubuntu Bionic Build Clang + TSAN'
+      - job: XenialReleaseGCC_UBSAN
         variables:
           HOSTING_OS: xenial
           HOSTING_COMPILER: gcc
-          TESTING_TYPE: '_Integration_Tests'
+          TESTING_TYPE: '_Unit_Tests'
           AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
           vmImage: 'ubuntu-16.04'
@@ -275,6 +1044,7 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              export TESTING_TYPE
               git remote add cache ../GitAnnex
               sudo apt-get install -y git-annex
               git config --global user.email "ahmed.s.aboualiaa@gmail.com"
@@ -282,7 +1052,6 @@ stages:
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
-              export TESTING_TYPE
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
@@ -290,20 +1059,19 @@ stages:
           - script: |
               echo $AZURE_SOURCE_DIR
               export AZURE_SOURCE_DIR
-              ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh $HOSTING_COMPILER
-            displayName: 'Integration Testing'
+              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
+            displayName: 'Unit Testing'
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
-              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-IntegrationTests'
-        displayName: 'Ubuntu Xenial Integration Test GCC'
-      - job: XenialIntegrationTestClang
-        timeoutInMinutes: 300
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
+        displayName: 'Ubuntu Bionic Build Clang + UBSAN'
+      - job: XenialReleaseGCC_MSAN
         variables:
           HOSTING_OS: xenial
-          HOSTING_COMPILER: clang
-          TESTING_TYPE: '_Integration_Tests'
+          HOSTING_COMPILER: gcc
+          TESTING_TYPE: '_Unit_Tests'
           AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
           vmImage: 'ubuntu-16.04'
@@ -323,6 +1091,7 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              export TESTING_TYPE
               git remote add cache ../GitAnnex
               sudo apt-get install -y git-annex
               git config --global user.email "ahmed.s.aboualiaa@gmail.com"
@@ -330,7 +1099,6 @@ stages:
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
-              export TESTING_TYPE
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
@@ -338,109 +1106,11 @@ stages:
           - script: |
               echo $AZURE_SOURCE_DIR
               export AZURE_SOURCE_DIR
-              export PATH="$(pwd)/cmake-3.16.4-Linux-x86_64/bin:$PATH"
-              ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh $HOSTING_COMPILER
-            displayName: 'Integration Testing'
+              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
+            displayName: 'Unit Testing'
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
-              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-IntegrationTests'
-        displayName: 'Ubuntu Xenial Integration Test Clang'
-      - job: BionicIntegrationTestGCC
-        timeoutInMinutes: 300
-        variables:
-          HOSTING_OS: bionic
-          HOSTING_COMPILER: gcc
-          TESTING_TYPE: '_Integration_Tests'
-          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
-        pool:
-          vmImage: 'ubuntu-18.04'
-        steps:
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              buildType: 'specific'
-              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              buildVersionToDownload: 'specific'
-              pipelineId: '31'
-              artifactName: 'GitAnnex'
-              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
-          - download: current
-            artifact: 'GitAnnex'
-            condition: failed()
-          - checkout: self
-            submodules: true
-          - script: |
-              git remote add cache ../GitAnnex
-              sudo apt-get install -y git-annex
-              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
-              git config --global user.name "Ahmed Abou-Aliaa"
-              git annex copy --from cache
-            displayName: 'Setting up Git Annex'
-          - script: |
-              export TESTING_TYPE
-              ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
-              ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
-              rm -rf ../GitAnnex
-            displayName: 'Building'
-          - script: |
-              echo $AZURE_SOURCE_DIR
-              export AZURE_SOURCE_DIR
-              ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh $HOSTING_COMPILER
-            displayName: 'Integration Testing'
-          - task: PublishTestResults@2
-            inputs:
-              testResultsFormat: 'cTest'
-              testResultsFiles: '**/Test.xml'
-              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-IntegrationTests'
-        displayName: 'Ubuntu Bionic Integration Test GCC'
-      - job: BionicIntegrationTestClang
-        timeoutInMinutes: 300
-        variables:
-          HOSTING_OS: bionic
-          HOSTING_COMPILER: clang
-          TESTING_TYPE: '_Integration_Tests'
-          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
-        pool:
-          vmImage: 'ubuntu-18.04'
-        steps:
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              buildType: 'specific'
-              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              buildVersionToDownload: 'specific'
-              pipelineId: '31'
-              artifactName: 'GitAnnex'
-              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
-          - download: current
-            artifact: 'GitAnnex'
-            condition: failed()
-          - checkout: self
-            submodules: true
-          - script: |
-              git remote add cache ../GitAnnex
-              sudo apt-get install -y git-annex
-              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
-              git config --global user.name "Ahmed Abou-Aliaa"
-              git annex copy --from cache
-            displayName: 'Setting up Git Annex'
-          - script: |
-              export TESTING_TYPE
-              ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
-              ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
-              rm -rf ../GitAnnex
-            displayName: 'Building'
-          - script: |
-              echo $AZURE_SOURCE_DIR
-              export AZURE_SOURCE_DIR
-              export PATH="$(pwd)/cmake-3.16.4-Linux-x86_64/bin:$PATH"
-              ./ci-scripts/travis.script.${HOSTING_OS}.Integration.sh $HOSTING_COMPILER
-            displayName: 'Integration Testing'
-          - task: PublishTestResults@2
-            inputs:
-              testResultsFormat: 'cTest'
-              testResultsFiles: '**/Test.xml'
-              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-IntegrationTests'
-        displayName: 'Ubuntu Bionic Integration Test Clang'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
+        displayName: 'Ubuntu Bionic Build Clang + MSAN'
