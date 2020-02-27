@@ -12,8 +12,8 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wglobal-constructors"
 
-namespace cli = fs::util::cli;
-namespace po = boost::program_options;
+namespace cli   = fs::util::cli;
+namespace po    = boost::program_options;
 namespace gtest = testing::internal;
 
 auto get_random_number() -> uint64_t;
@@ -22,8 +22,8 @@ auto get_random_number() -> uint64_t;
 /// \return a random uint64_t between 0 and 40 000
 auto get_random_number() -> uint64_t {
   static std::random_device &rd =
-      *new std::random_device;   // obtain a random number from hardware
-  static std::mt19937 eng(rd()); // seed the generator
+      *new std::random_device;     // obtain a random number from hardware
+  static std::mt19937   eng(rd()); // seed the generator
   static const uint64_t upper_limit = 40'000;
   static std::uniform_int_distribution<uint64_t> distr(
       0, upper_limit); // define the range
@@ -32,7 +32,7 @@ auto get_random_number() -> uint64_t {
 }
 
 TEST(test_usage_message, nullptr_test) { // NOLINT
-  FILE *stream{};
+  FILE *      stream{};
   std::string program_name{"boosty_boost"};
   ASSERT_FALSE(cli::usage_message(nullptr, nullptr));
   ASSERT_FALSE(cli::usage_message(stream, nullptr));
@@ -91,37 +91,37 @@ TEST(test_usage_message, valid_input_test) { // NOLINT
 #include <armadillo>
 
 TEST(test_frobenius_norm, vector_test) { // NOLINT
-  auto const thresh = 1e-011;
+  auto const          thresh = 1e-011;
   std::vector<double> arr{};
-  arma::mat matrix(1, get_random_number(), arma::fill::randn);
+  arma::mat           matrix(1, get_random_number(), arma::fill::randn);
   arr.reserve(get_random_number());
   for (uint64_t i = 0; i < get_random_number(); ++i) {
     arr.push_back(matrix(0, i));
   }
 
   auto armanorm = arma::norm(matrix, "fro");
-  auto norm = fs::math::frobenius_norm(&arr);
+  auto norm     = fs::math::frobenius_norm(&arr);
   ASSERT_NEAR(norm, armanorm, thresh);
 }
 
 TEST(test_frobenius_normalize, vector_version) { // NOLINT
-  auto const thresh = 1e-11;
+  auto const          thresh = 1e-11;
   std::vector<double> fsMatrix{};
   fsMatrix.reserve(get_random_number());
-  arma::mat armaMatrix(1, get_random_number(), arma::fill::randn);
+  arma::mat       armaMatrix(1, get_random_number(), arma::fill::randn);
   Eigen::MatrixXd eigenMatrix(1, get_random_number());
   for (size_t i = 0; i < get_random_number(); ++i) {
     fsMatrix.push_back(armaMatrix(0, i));
     eigenMatrix(0, i) = armaMatrix(0, i);
   }
-  auto armaNorm = arma::norm(armaMatrix, "fro");
+  auto armaNorm  = arma::norm(armaMatrix, "fro");
   auto eigenNorm = eigenMatrix.norm();
-  auto fsNorm = fs::math::frobenius_norm(&fsMatrix);
+  auto fsNorm    = fs::math::frobenius_norm(&fsMatrix);
   ASSERT_NEAR(fsNorm, armaNorm, thresh);
   ASSERT_NEAR(fsNorm, eigenNorm, thresh);
   for (auto &x : fsMatrix) {
-    auto fsResult = x / fsNorm;
-    auto armaResult = x / armaNorm;
+    auto fsResult    = x / fsNorm;
+    auto armaResult  = x / armaNorm;
     auto eigenResult = x / eigenNorm;
     ASSERT_NEAR(fsResult, armaResult, thresh);
     ASSERT_NEAR(fsResult, eigenResult, thresh);
@@ -130,8 +130,8 @@ TEST(test_frobenius_normalize, vector_version) { // NOLINT
   fs::math::frobenius_normalize(&fsMatrix);
   eigenMatrix.normalize();
   for (size_t i = 0; i < copy.size(); ++i) {
-    auto fsResult = fsMatrix[i];
-    auto armaResult = copy[i] / armaNorm;
+    auto fsResult    = fsMatrix[i];
+    auto armaResult  = copy[i] / armaNorm;
     auto eigenResult = eigenMatrix(0, i);
     ASSERT_NEAR(fsResult, armaResult, thresh);
     ASSERT_NEAR(fsResult, eigenResult, thresh);
@@ -151,7 +151,8 @@ TEST(test_check_vector_range, test_vectors) { // NOLINT
   ASSERT_TRUE(cli::check_vector_range(strvec, "7", 15, 20));
   ASSERT_TRUE(cli::check_vector_range(strvec, "8", 19, 20));
   ASSERT_TRUE(cli::check_vector_range(strvec, "9", 20, 21));
-  ASSERT_ANY_THROW(cli::check_vector_range(strvec, "10", 30, 20)); // NOLINT (goto)
+  ASSERT_ANY_THROW(
+      cli::check_vector_range(strvec, "10", 30, 20)); // NOLINT (goto)
 }
 
 TEST(test_create_gdb_file, test_input) { // NOLINT
@@ -159,7 +160,7 @@ TEST(test_create_gdb_file, test_input) { // NOLINT
                                  "2"};
   fs::dbg::create_gdb_file(args);
   std::ifstream file("debug.gdb");
-  std::string str((std::istreambuf_iterator<char>(file)),
+  std::string   str((std::istreambuf_iterator<char>(file)),
                   std::istreambuf_iterator<char>());
   ASSERT_STREQ(str.c_str(), "# source this file in gdb to debug\nfile "
                             "mri_convert_tests\nrun --hello 2 \n");
@@ -167,7 +168,7 @@ TEST(test_create_gdb_file, test_input) { // NOLINT
                                   "2"};
   fs::dbg::create_gdb_file(args2);
   std::ifstream file2("debug.gdb");
-  std::string str2((std::istreambuf_iterator<char>(file2)),
+  std::string   str2((std::istreambuf_iterator<char>(file2)),
                    std::istreambuf_iterator<char>());
   ASSERT_STREQ(str2.c_str(), "# source this file in gdb to debug\nfile "
                              "mri_convert_tests\nrun --hello 2 \n");
@@ -176,8 +177,8 @@ TEST(test_create_gdb_file, test_input) { // NOLINT
 TEST(test_print_parsed_tokens, example_input) { // NOLINT
   std::vector<char const *> myargv{"mri_convert_tests", "--debug", "--hello",
                                    "baby"};
-  po::options_description mydesc("whazzup");
-  std::string temp{};
+  po::options_description   mydesc("whazzup");
+  std::string               temp{};
   mydesc.add_options()                /**/
       ("debug",                       /**/
        "print debug information")     /**/
