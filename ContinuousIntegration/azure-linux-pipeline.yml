@@ -57,7 +57,6 @@ stages:
 
   - stage: BionicClang
     dependsOn: CollectCachedArtifacts
-    condition: or(succeeded('DownloadGitAnnex'), succeeded('CheckGitAnnex'))
     jobs:
       - job: BionicDebugClang_Coverage
         variables:
@@ -345,7 +344,6 @@ stages:
 
   - stage: XenialClang
     dependsOn: CollectCachedArtifacts
-    condition: or(succeeded('DownloadGitAnnex'), succeeded('CheckGitAnnex'))
     jobs:
       - job: XenialDebugClang_Coverage
         variables:
@@ -634,7 +632,6 @@ stages:
 
   - stage: BionicGCC
     dependsOn: CollectCachedArtifacts
-    condition: or(succeeded('DownloadGitAnnex'), succeeded('CheckGitAnnex'))
     jobs:
       - job: BionicDebugGCC_Coverage
         variables:
@@ -877,7 +874,6 @@ stages:
 
   - stage: XenialGCC
     dependsOn: CollectCachedArtifacts
-    condition: or(succeeded('DownloadGitAnnex'), succeeded('CheckGitAnnex'))
     jobs:
       - job: XenialDebugGCC_Coverage
         variables:
@@ -1114,3 +1110,33 @@ stages:
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
         displayName: 'Ubuntu Bionic Build Clang + MSAN'
+
+  - stage: TestInstallationXenial
+    dependsOn:
+      - XenialGCC
+      - XenialClang
+    condition: succeeded()
+    jobs:
+      - job: LinuxLint
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - script: sudo apt-get update -y
+          - script: sudo apt-get install -y libxml2-utils
+          - script: xmllint --noout ./**/*.xml
+        displayName: 'Linting'
+
+  - stage: TestInstallationBionic
+    dependsOn:
+      - BionicGCC
+      - BionicClang
+    condition: succeeded()
+    jobs:
+      - job: LinuxLint
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - script: sudo apt-get update -y
+          - script: sudo apt-get install -y libxml2-utils
+          - script: xmllint --noout ./**/*.xml
+        displayName: 'Linting'
