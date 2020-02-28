@@ -5,6 +5,7 @@
 #include "kvlMatlabObjectArray.h"
 #include "kvlMatlabRunner.h"
 #include "mex.h"
+#include <cstring>
 
 namespace kvl {
 

@@ -163,7 +163,10 @@ char *rusage_file = nullptr;
 int n_omp_threads;
 
 int main(int argc, char *argv[]) {
+#ifdef HAVE_OPENMP
   ROMP_main
+#endif
+
 
       char *gca_fname,
       *in_fname, *out_fname, fname[STRLEN], **av;
@@ -171,7 +174,10 @@ int main(int argc, char *argv[]) {
   GCA *gca /*, *gca_tmp, *gca_reduced*/;
   int ac, nargs, ninputs, input, extra = 0;
   int msec, hours, minutes, seconds /*, iter*/;
+#ifdef HAVE_OPENMP
   Timer start, mytimer;
+#endif
+
   GCA_MORPH *gcam;
 
   // for GCA Renormalization with Alignment (if called sequentially)
@@ -257,7 +263,9 @@ int main(int argc, char *argv[]) {
   //  Gdiag |= DIAG_WRITE ;
   printf("logging results to %s.log\n", parms.base_name);
 
+#ifdef HAVE_OPENMP
   start.reset();
+#endif
 
   // build frames from ninputs ////////////////////////////////
   for (input = 0; input < ninputs; input++) {
@@ -1278,11 +1286,16 @@ int main(int argc, char *argv[]) {
       // this is the first (and also last) call
       // do not bother passing or receiving scales info
       printf("Starting GCAmapRenormalizeWithAlignment() without scales\n");
+#ifdef HAVE_OPENMP
       mytimer.reset();
+#endif
+
       GCAmapRenormalizeWithAlignment(gcam->gca, mri_inputs, transform,
                                      parms.log_fp, parms.base_name, nullptr, 0);
+#ifdef HAVE_OPENMP
       printf("GCAmapRenormalizeWithAlignment() took %g min\n",
              (mytimer.milliseconds() / 1000.0) / 60.0);
+#endif
 
       if (parms.write_iterations != 0) {
         char fname[STRLEN];
@@ -1463,8 +1476,10 @@ int main(int argc, char *argv[]) {
   printf("Calls to gcamComputeMetricProperties    %d tmin = %g\n",
          gcamComputeMetricProperties_nCalls,
          gcamComputeMetricProperties_tsec / 60.0);
-
+#ifdef HAVE_OPENMP
   msec = start.milliseconds();
+#endif
+
   seconds = nint((float)msec / 1000.0f);
   minutes = seconds / 60;
   hours = minutes / (60);

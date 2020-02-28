@@ -830,7 +830,7 @@ template <class Cstr, int n> int TSolver<Cstr, n>::setup_load() {
   ierr = ISCreateGeneral(PETSC_COMM_WORLD, (int)mrhs.size(), indices,
                          PETSC_USE_POINTER, &is);
   CHKERRQ(ierr);
-  ierr = MatZeroRowsIS(m_stiffness, is, 1.0);
+  ierr = MatZeroRowsIS(m_stiffness, is, 1.0, NULL, NULL);
   CHKERRQ(ierr);
   ierr = ISDestroy(&is);
   CHKERRQ(ierr);

@@ -80,16 +80,18 @@ static int MGZ = 1; // set to 1 for MGZ
 static double nVFMultiplier = 1.1;
 
 int main(int argc, char *argv[]) {
+#ifdef HAVE_OPENMP
   ROMP_main
-  
+#endif
   char          **av, *hemi, *sname, *cp, fname[STRLEN] ;
   int           ac, nargs ;
   MRI_SURFACE   *mris, *mris_corrected ;
   MRI           *mri, *mri_wm ;
   int           msec, nvert, nfaces, nedges, eno ;
   float         max_len ;
+#ifdef HAVE_OPENMP
   Timer then ;
-
+#endif
 
   std::string cmdline = getAllInfo(argc, argv, "mris_fix_topology");
 
@@ -164,7 +166,10 @@ int main(int argc, char *argv[]) {
   printf("  %s\n", MRISurfSrcVersion());
   fflush(stdout);
 
+#ifdef HAVE_OPENMP
   then.reset();
+#endif
+
   sname = argv[1];
   hemi = argv[2];
   if (strlen(sdir) == 0) {
@@ -295,11 +300,10 @@ int main(int argc, char *argv[]) {
     MRISwrite(mris_corrected, fname) ;
   */
 
-  msec = then.milliseconds();
-  printf("topology fixing took %2.1f minutes\n", (float)msec / (60 * 1000.0f));
-
   // Output formatted so it can be easily grepped
 #ifdef HAVE_OPENMP
+  msec = then.milliseconds();
+  printf("topology fixing took %2.1f minutes\n", (float)msec / (60 * 1000.0f));
   int n_omp_threads = omp_get_max_threads();
   printf("FSRUNTIME@ mris_fix_topology %s %7.4f hours %d threads\n", hemi,
          msec / (1000.0 * 60.0 * 60.0), n_omp_threads);

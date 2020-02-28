@@ -55,6 +55,8 @@ public:
 
   double GetHeatscaleMin() { return m_dHeatscaleMin; }
 
+  double GetHeatscaleMax() { return m_dHeatscaleMax; }
+
   void GetValueRange(double* range)
   {
     range[0] = m_dValueRange[0];

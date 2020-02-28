@@ -43,7 +43,7 @@ if(FS_INFANT_MODULE)
 endif()
 
 # the following data isn't required for recon-all, but will be installed by default
-if(NOT MINIMAL)
+if(NOT FS_MINIMAL_BUILD)
 
   add_subdirectories(
     surf

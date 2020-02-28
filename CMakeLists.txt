@@ -68,12 +68,13 @@ else()
 endif()
 
 # a few build options
-option(MINIMAL "Only build core components" OFF)
+option(FS_MINIMAL_BUILD "Only build core components" OFF)
 option(BUILD_GUIS "Build GUI tools" ON)
+option(FS_INTEGRATION_TESTING "Copy files for integration tests" OFF)
 option(FS_BUILD_ATTIC "Build deprecated tools from the attic" ON)
 option(FS_INFANT_MODULE "Include infant recon-all" ON)
 option(FS_BUILD_DNG "Build Doug's testing tools" ON)
-option(SUPPRESS_WARNINGS "Suppress some selected warnings" ON)
+option(FS_SUPPRESS_WARNINGS "Suppress some selected warnings" ON)
 option(PROFILING "Compile binaries for profiling with gprof" OFF)
 option(CMAKE_EXPORT_COMPILE_COMMANDS OFF)
 option(FS_USE_CCACHE "Use ccache to reduce build times" ON)
@@ -92,7 +93,7 @@ endif()
 
 # warnings
 # clang complains about -Wno-unused-but-set-variable and says to use -Wno-unused-const-variable
-if(SUPPRESS_WARNINGS)
+if(FS_SUPPRESS_WARNINGS)
   if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-Wno-everything)
   elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
@@ -101,7 +102,7 @@ if(SUPPRESS_WARNINGS)
   add_link_options(-w)
 endif()
 
-if(APPLE)
+if(APPLE AND NOT DEFINED FS_INTERNAL_NEW_LLVM_AR)
   set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
   set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
   set(CMAKE_C_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
@@ -424,6 +425,7 @@ endif()
 # initialize pybind for python wrapping
 set(PYBIND11_PYTHON_VERSION 3.5)
 add_subdirectory(packages/pybind11)
+mark_as_advanced(PYBIND11_TEST PYBIND11_INSTALL USE_PYTHON_INCLUDE_DIR)
 
 if(NOT DISTRIBUTE_FSPYTHON)
   # link to an external python binary if fspython won't be distributed
@@ -597,7 +599,7 @@ add_subdirectories(
 
 # the following program subdirectories aren't required in the standard recon-all stream.
 # they will be built by default, but not if a minimal build is configured
-if(NOT MINIMAL)
+if(NOT FS_MINIMAL_BUILD)
   add_subdirectories(
     anatomicuts
     attic

@@ -106,7 +106,7 @@ install_symlinks(
 )
 
 # not required for minimal recon-all
-if(NOT MINIMAL)
+if(NOT FS_MINIMAL_BUILD)
 
   install_symlinks(
     711-2B_as_mni_average_305.4dfp.hdr

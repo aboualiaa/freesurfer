@@ -367,12 +367,19 @@ static int MRISfindMostSimilarBasins(MRI_SURFACE *mris, MRI *mri, int *pb2) {
     memset(avg_grad, 0, nbasins * sizeof(*avg_grad));
     max_basin = 0;
     // reductions for min and max aren't available in earlier openmp
+#ifdef HAVE_OPENMP
     ROMP_PF_begin
+#endif
+
 #if defined(HAVE_OPENMP) && GCC_VERSION > 40408
 #pragma omp parallel for if_ROMP(experimental) reduction(max : max_basin)
 #endif
         for (vno = 0; vno < mris->nvertices; vno++) {
-      ROMP_PFLB_begin int n, nbr_basin;
+#ifdef HAVE_OPENMP
+          ROMP_PFLB_begin
+#endif
+
+          int n, nbr_basin;
 
       VERTEX_TOPOLOGY const *const vt = &mris->vertices_topology[vno];
       VERTEX const *const v = &mris->vertices[vno];
@@ -388,9 +395,15 @@ static int MRISfindMostSimilarBasins(MRI_SURFACE *mris, MRI *mri, int *pb2) {
         if (nbr_basin > max_basin)
           max_basin = nbr_basin;
       }
-      ROMP_PFLB_end
+#ifdef HAVE_OPENMP
+          ROMP_PFLB_end
+#endif
+
     }
+#ifdef HAVE_OPENMP
     ROMP_PF_end
+#endif
+
 
         min_grad = 1e10;
     for (basin = 1; basin <= max_basin; basin++) {

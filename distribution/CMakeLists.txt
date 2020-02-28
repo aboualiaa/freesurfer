@@ -39,7 +39,7 @@ install_symlinks(
 )
 
 # these aren't required for recon-all, but will be installed by default
-if(NOT MINIMAL)
+if(NOT FS_MINIMAL_BUILD)
   add_subdirectory(diffusion)
   install(FILES sessions/README DESTINATION sessions)
   install_tarball(trctrain/trctraindata.tar.gz DESTINATION trctrain)

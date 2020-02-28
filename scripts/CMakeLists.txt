@@ -69,7 +69,7 @@ install(PROGRAMS
   fsl_sub_mgh
   fslregister
   fsr-checkxopts
-  fsr-coreg  
+  fsr-coreg
   fsr-getxopts
   fsr-import
   fsvglrun
@@ -292,7 +292,7 @@ install_append_help(bbregister bbregister.help.xml bin)
 
 install_symlinks(fs_spmreg.glnxa64 irepifitvol.glnx64 TYPE programs DESTINATION bin)
 
-if(NOT MINIMAL)
+if(NOT FS_MINIMAL_BUILD)
 
   # these tcl scripts should be excluded from a minimal distribution
   install(PROGRAMS

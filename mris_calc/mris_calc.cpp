@@ -1973,21 +1973,31 @@ short CURV_functionRunABC(double (*F)(float f_A, float f_B)) {
   //
   int i;
 
-  ROMP_PF_begin
 #ifdef HAVE_OPENMP
+  ROMP_PF_begin
 #pragma omp parallel for if_ROMP(experimental)
 #endif
       for (i = 0; i < G_sizeCurv1; i++) {
-    ROMP_PFLB_begin double f_a = 0.;
+#ifdef HAVE_OPENMP
+        ROMP_PFLB_begin
+#endif
+
+        double f_a = 0.;
     double f_b = 0.;
     double f_c = 0.;
     f_a = G_pf_arrayCurv1[i];
     f_b = G_pf_arrayCurv2[i];
     f_c = (F)(f_a, f_b);
     G_pf_arrayCurv3[i] = f_c;
-    ROMP_PFLB_end
+#ifdef HAVE_OPENMP
+        ROMP_PFLB_end
+#endif
+
   }
-  ROMP_PF_end return 1;
+#ifdef HAVE_OPENMP
+  ROMP_PF_end
+#endif
+      return 1;
 }
 
 /*!
