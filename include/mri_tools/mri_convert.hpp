@@ -126,7 +126,7 @@ public:
   float scale_factor{1};
   float out_scale_factor{1};
   float SliceBiasAlpha{1.0};
-  int out_data_type{};
+  int out_data_type{-1};
   int resample_type_val{SAMPLE_TRILINEAR};
   int forced_out_type{MRI_VOLUME_TYPE_UNKNOWN};
   int forced_in_type{MRI_VOLUME_TYPE_UNKNOWN};
