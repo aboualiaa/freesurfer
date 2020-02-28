@@ -23,7 +23,8 @@
  */
 #include "TrackData.h"
 #include "track_io/TrackIO.h"
-#include <QDebug>
+#include <iostream>
+#include <stdlib.h>
 
 TrackData::TrackData(QObject *parent)
     : QObject(parent), m_bHasEmbeddedColor(false) {}
@@ -93,33 +94,40 @@ bool TrackData::LoadFromFiles(const QStringList &filenames) {
     int nScalars = m_nNumberOfScalars;
     int nProperties = m_nNumberOfProperties;
     short dim[3] = {(short)m_nDim[0], (short)m_nDim[1], (short)m_nDim[2]};
-    while (reader.GetNextPointCount(&track.nNum)) {
-      track.fPts = new float[track.nNum * 3];
-      if (!track.fPts) {
-        qDebug() << "Can not allocate memory.";
+    while (reader.GetNextPointCount(&track.nNum))
+    {
+      track.fPts = new float[track.nNum*3];
+      if (!track.fPts)
+      {
+        std::cerr << "Can not allocate memory." << std::endl;
         return false;
       }
-      float *f = NULL;
-      if (nScalars > 0) {
-        f = new float[track.nNum * nScalars];
-        if (!f) {
-          qDebug() << "Can not allocate memory.";
+      float* f = NULL;
+      if (nScalars > 0)
+      {
+        f = new float[track.nNum*nScalars];
+        if (!f)
+        {
+          std::cerr << "Can not allocate memory." << std::endl;
           return false;
         }
       }
       track.fProperty = NULL;
       if (nProperties > 0) {
         track.fProperty = new float[nProperties];
-        if (!track.fProperty) {
-          qDebug() << "Can not allocate memory.";
+        if (!track.fProperty)
+        {
+          std::cerr << "Can not allocate memory." << std::endl;
           return false;
         }
       }
       reader.GetNextTrackData(track.nNum, track.fPts, f, track.fProperty);
-      for (int i = 0; i < nScalars; i++) {
-        float *p = new float[track.nNum];
-        if (!p) {
-          qDebug() << "Can not allocate memory.";
+      for (int i = 0; i < nScalars; i++)
+      {
+        float* p = new float[track.nNum];
+        if (!p)
+        {
+          std::cerr << "Can not allocate memory." << std::endl;
           return false;
         }
         track.fScalars.push_back(p);

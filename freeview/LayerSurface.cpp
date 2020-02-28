@@ -303,8 +303,9 @@ bool LayerSurface::WriteIntersection(const QString &filename, int nPlane,
 
   if (lines && points) {
     QFile file(filename);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-      qDebug() << "Cannot write file " << filename;
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+      cerr << "Cannot write file " << qPrintable(filename) << endl;
       return false;
     }
     QTextStream out(&file);
@@ -2037,16 +2038,18 @@ bool LayerSurface::LoadRGBFromFile(const QString &filename) {
           map.data << (int)list[i].toDouble();
       }
     }
-    if (map.data.size() != GetNumberOfVertices() * 3) {
-      qDebug() << "data size does not match";
+    if (map.data.size() != GetNumberOfVertices()*3)
+    {
+      cout << "data size does not match" << endl;
       return false;
     }
   } else {
     MRI *mri = ::MRIread(filename.toLatin1().data());
     if (!mri)
       return false;
-    else if (mri->width != GetNumberOfVertices() || mri->height != 3) {
-      qDebug() << "data size does not match";
+    else if (mri->width != GetNumberOfVertices() || mri->height != 3)
+    {
+      cout << "data size does not match" << endl;
       MRIfree(&mri);
       return false;
     }
@@ -2624,8 +2627,9 @@ bool LayerSurface::IsVertexOnPath(int vno) {
 bool LayerSurface::FillPath(int nvo, const QVariantMap &options) {
   bool bAsAnnotation = options["AsAnnotation"].toBool();
   QVector<int> verts = FloodFillFromSeed(nvo, options);
-  if (verts.size() == 0) {
-    qDebug() << "Did not fill/remove any vertices";
+  if (verts.size() == 0)
+  {
+    cout << "Did not fill/remove any vertices" << endl;
     return false;
   }
 

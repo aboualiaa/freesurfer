@@ -822,8 +822,10 @@ void PanelVolume::OnColorTableItemDoubleClicked(QTreeWidgetItem *item_in) {
       if (layer->GetLayerLabelCenter(val, pos)) {
         MainWindow::GetMainWindow()->SetSlicePosition(pos);
         MainWindow::GetMainWindow()->CenterAtWorldPosition(pos);
-      } else {
-        qDebug() << tr("Label %1 does not exist").arg(item->text(0));
+      }
+      else
+      {
+        cout << qPrintable(tr("Label %1 does not exist").arg(item->text(0))) << endl;
       }
     }
   }
@@ -1802,8 +1804,10 @@ void PanelVolume::OnGoToFirstPoint() {
         MainWindow::GetMainWindow()->SetSlicePosition(pos);
         MainWindow::GetMainWindow()->CenterAtWorldPosition(pos);
         m_nCurrentVoxelIndex = 0;
-      } else {
-        qDebug() << tr("Label %1 does not exist").arg(item->text(0));
+      }
+      else
+      {
+        cout << qPrintable(tr("Label %1 does not exist").arg(item->text(0))) << endl;
       }
     }
   }

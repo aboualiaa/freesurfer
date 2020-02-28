@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 
+#include "diag.h"
 #include "fsinit.h"
 
 // terminal colors
@@ -45,40 +46,36 @@ struct logger {
 
 namespace fs {
 
-struct fatal : public detail::logger {
-  int ret;
-  fatal(int err = 1) : ret(err) {}
-  ~fatal() {
-    std::cerr << term::red() << "error: " << term::reset() << this->ss.str()
-              << "\n";
-    detail::writeToErrorLog(this->ss.str());
-    detail::errorExit(this->ret);
-  }
-};
+  struct fatal : public detail::logger
+  {
+    int ret;
+    fatal(int err = 1) : ret(err) {}
+    ~fatal() {
+      std::cerr << term::red() << "error: " << term::reset() << this->ss.str() << "\n";
+      detail::writeToErrorLog(this->ss.str());
+      detail::errorExit(this->ret);
+    }
+  };
 
-struct error : public detail::logger {
-  ~error() {
-    std::cerr << term::red() << "error: " << term::reset() << this->ss.str()
-              << "\n";
-    detail::writeToErrorLog(this->ss.str());
-  }
-};
+  struct error : public detail::logger
+  {
+    ~error() {
+      std::cerr << term::red() << "error: " << term::reset() << this->ss.str() << "\n";
+      detail::writeToErrorLog(this->ss.str());
+    }
+  };
 
-struct warning : public detail::logger {
-  ~warning() {
-    std::cerr << term::yellow() << "warning: " << term::reset()
-              << this->ss.str() << "\n";
-  }
-};
+  struct warning : public detail::logger
+  {
+    ~warning() { std::cerr << term::yellow() << "warning: " << term::reset() << this->ss.str() << "\n"; }
+  };
 
-struct debug : public detail::logger {
-  ~debug() {
-    std::cerr << term::cyan() << "debug: " << term::reset() << this->ss.str()
-              << "\n";
-  }
-};
+  struct debug : public detail::logger
+  {
+    ~debug() { if (DIAG_VERBOSE_ON) std::cerr << term::cyan() << "debug: " << term::reset() << this->ss.str() << "\n"; }
+  };
 
-} // namespace fs
+}
 
 // temporary definitions
 #define logWarning fs::warning()

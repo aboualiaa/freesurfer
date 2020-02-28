@@ -362,9 +362,8 @@ int main(int argc, char *argv[]) {
     MRISwrite(mris, "before");
   }
 
-  if (true) {
-    fprintf(stdout, "%s:%d should but doesn't set orig x et al here \n",
-            __FILE__, __LINE__);
+  if (1) {
+    fs::debug() << "should but doesn't set orig xyz here";
   } else {
     MRISsetOriginalXYZfromXYZ(mris);
     mrisComputeOriginalVertexDistances(mris);

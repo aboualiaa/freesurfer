@@ -859,8 +859,9 @@ bool LayerFCD::GoToContralateralPoint(double *pos, double *pos_out) {
   } else
     oppo_surf = m_surf_rh;
 
-  if (nVertex < 0) {
-    qDebug() << "Did not find any vertex at cursor on" << this->GetName();
+  if (nVertex < 0)
+  {
+    cout << "Did not find any vertex at cursor on" << qPrintable(GetName()) << endl;
     return false;
   }
 

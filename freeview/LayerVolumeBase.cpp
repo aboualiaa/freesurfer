@@ -1116,7 +1116,7 @@ void LayerVolumeBase::SaveBufferItem(UndoRedoBufferItem &item, int nPlane,
     QFile file(this->GenerateCacheFileName());
     if (!file.open(QIODevice::WriteOnly) || file.write((char*)m_imageData->GetScalarPointer() + (nFrame >= 0 ? nSize*nFrame : 0), nSize) != nSize)
     {
-      qDebug() << "Could not write undo cache to disk";
+      cerr << "Could not write undo cache to disk" << endl;
       return;
     }
     file.close();
