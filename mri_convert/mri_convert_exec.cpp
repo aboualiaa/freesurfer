@@ -3125,8 +3125,10 @@ void initArgDesc(boost::program_options::options_description *desc,
       ("mosaic-fix-noascii",
 
        po::bool_switch() //
-           ->notifier([](auto /*unused*/) {
-             setenv("FS_MOSAIC_FIX_NOASCII", "1", 1);
+           ->notifier([](auto v) {
+             if (v) {
+               setenv("FS_MOSAIC_FIX_NOASCII", "1", 1);
+             }
            }),
 
        "mosaic-fix-noascii")
