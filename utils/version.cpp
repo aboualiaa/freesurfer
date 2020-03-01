@@ -6,6 +6,7 @@
 #include <sys/utsname.h>
 #include <ctime>
 #include <unistd.h>
+#include <vector>
 
 #include "version.h"
 #include "version_info.h"
@@ -70,7 +71,7 @@ static std::string ver_string(int a, int b, int c) {
 #endif
 
 
-int handle_version_option(bool all_info, gsl::multi_span<char *> args,
+int handle_version_option(bool all_info, std::vector<char *> args,
                           const std::string id_string,
                           const std::string version_string) {
   if (!all_info) {
@@ -159,7 +160,7 @@ char *argv2cmdline(int argc, char *argv[]) {
   return (cmdline);
 }
 
-std::string argv2cmdline(gsl::multi_span<char *> args, bool progname) {
+std::string argv2cmdline(std::vector<char *> args, bool progname) {
   std::string arguments;
   if (progname) {
     arguments += args[0];
