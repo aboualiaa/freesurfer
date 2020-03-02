@@ -351,19 +351,13 @@ MRI::~MRI() {
     free(frames);
   }
 
-  // if (free_transform) delete_general_transform(&transform);
-  if (register_mat)
-    MatrixFree(&register_mat);
-  if (i_to_r__)
-    AffineMatrixFree(&i_to_r__);
-  if (r_to_i__)
-    MatrixFree(&r_to_i__);
-  if (AutoAlign)
-    MatrixFree(&AutoAlign);
-  if (bvals)
-    MatrixFree(&bvals);
-  if (bvecs)
-    MatrixFree(&bvecs);
+  if (free_transform) delete_general_transform(&transform);
+  if (register_mat) MatrixFree(&register_mat);
+  if (i_to_r__) AffineMatrixFree(&i_to_r__);
+  if (r_to_i__) MatrixFree(&r_to_i__);
+  if (AutoAlign) MatrixFree(&AutoAlign);
+  if (bvals) MatrixFree(&bvals);
+  if (bvecs) MatrixFree(&bvecs);
 
   for (int i = 0; i < ncmds; i++) {
     if (cmdlines[i])

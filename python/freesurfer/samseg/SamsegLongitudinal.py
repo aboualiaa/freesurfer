@@ -92,7 +92,9 @@ class SamsegLongitudinal:
         threshold=None,
         thresholdSearchString=None,
         modeNames=None,
-        pallidumAsWM=True):
+        pallidumAsWM=True,
+        savePosteriors=False
+        ):
 
         # Store input parameters as class variables
         self.imageFileNamesList = imageFileNamesList
@@ -108,6 +110,7 @@ class SamsegLongitudinal:
         self.strengthOfLatentDeformationHyperprior = strengthOfLatentDeformationHyperprior
         self.modeNames = modeNames
         self.pallidumAsWM = pallidumAsWM
+        self.savePosteriors = savePosteriors
 
         # Initialize some objects
         self.affine = Affine()
@@ -249,7 +252,8 @@ class SamsegLongitudinal:
                 targetIntensity=self.targetIntensity,
                 targetSearchStrings=self.targetSearchStrings,
                 modeNames=self.modeNames,
-                pallidumAsWM=self.pallidumAsWM
+                pallidumAsWM=self.pallidumAsWM,
+                savePosteriors=self.savePosteriors
             ))
             self.timepointModels[timepointNumber].mask = self.sstModel.mask
             self.timepointModels[timepointNumber].imageBuffers = self.imageBuffersList[timepointNumber]
