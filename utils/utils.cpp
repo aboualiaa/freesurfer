@@ -33,7 +33,7 @@
 
 #include <cctype>
 #include <cerrno>
-#include <math.h>
+#include <cmath>
 
 #include <cstdio>
 #include <cstdlib>
@@ -925,6 +925,10 @@ union ieee754_float {
 #endif
 
 int devIsinf(float value) {
+  if (-value == std::numeric_limits<float>::infinity())
+    return -1;
+  else
+    return std::isinf(value);
   unsigned int s, e, f;
 
   union ieee754_float v;
@@ -944,6 +948,7 @@ int devIsinf(float value) {
 
 /* isnan non-zero if NaN, 0 otherwise */
 int devIsnan(float value) {
+  return std::isnan(value);
   unsigned int e, f;
   //  unsigned int s;
 

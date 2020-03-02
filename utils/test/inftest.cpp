@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
   }
   res = devIsinf(-HUGE_VALF);
   if (res != -1) {
-    cerr << res << " should be -inf for HUGE_VALF" << endl;
+    cerr << res << " should be -inf for -HUGE_VALF" << endl;
     fails++;
   }
 #endif
