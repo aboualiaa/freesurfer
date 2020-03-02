@@ -511,10 +511,13 @@ void GCAMorphUtils::Read(GCAM **dst, string fName) const {
 
 // #########################################################################
 
-static GCAMorphUtils myGCAMutils;
+auto getGCAMorphUtils() {
+  static GCAMorphUtils myGCAMutils;
+  return myGCAMutils;
+}
 
 // ======================================================================
 
 void WriteGCAMoneInput(const GCAM *src, const char *fName) {
-  myGCAMutils.Write(src, fName);
+  getGCAMorphUtils().Write(src, fName);
 }

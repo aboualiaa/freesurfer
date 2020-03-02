@@ -120,7 +120,7 @@ FS_ALWAYS_INLINE auto new_vox_setter_chunked(MRI *mri, size_t index,
     voxval = std::numeric_limits<T>::max();
   }
 
-  *((T *)mri->chunk + index) = voxval;
+  *((T *)mri->chunk + index) = nint(voxval);
   return (0);
 }
 
