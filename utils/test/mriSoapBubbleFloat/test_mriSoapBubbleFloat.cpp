@@ -5,19 +5,12 @@
 #include <string>
 #include <iostream>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "error.h"
 #include "utils.h"
 #include "macros.h"
 #include "mri.h"
 #include "mrinorm.h"
 
-#ifdef __cplusplus
-}
-#endif
 
 int main(int argc, char *argv[]) {
   // check arg count:
