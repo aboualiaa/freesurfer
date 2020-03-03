@@ -1,12 +1,8 @@
 #!/usr/bin/env bash
 
+set -e
+
 mkdir -p cmake-build-debug-bionic && cd ./cmake-build-debug-bionic
-sudo apt-get update -y
-sudo apt-get install -y --no-install-suggests --no-install-recommends git wget tcsh build-essential \
-  gfortran libblas-dev liblapack-dev zlib1g-dev libxmu-dev \
-  libxmu-headers libxi-dev libxt-dev libx11-dev libglu1-mesa-dev \
-  mpich python3.6 libboost-all-dev libfltk1.3-dev libeigen3-dev \
-  libarmadillo-dev qt5-default libqt5x11extras5-dev curl git-annex lcov libxml2-utils
 
 #git config --global user.email "ahmed.s.aboualiaa@gmail.com"
 #git config --global user.name "Ahmed Abou-Aliaa"
@@ -17,20 +13,6 @@ sudo apt-get install -y --no-install-suggests --no-install-recommends git wget t
 
 export PATH="/usr/local/bin:$PATH"
 
-sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-sudo apt-get update
-sudo apt-get install -y gcc-9 g++-9
-sudo apt-get install -y gfortran-9
-
-sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 90 --slave /usr/bin/g++ g++ /usr/bin/g++-9
-
-sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-9 90
-
-sudo update-alternatives --install /usr/local/bin/python python /usr/bin/python3.6 1 --force
-sudo add-apt-repository --yes ppa:fkrull/deadsnakes
-sudo apt-get update
-sudo apt-get install --yes python3.6 python3.6-dev
-#
 #wget https://cmake.org/files/v3.16/cmake-3.16.4-Linux-x86_64.tar.gz >/dev/null 2>&1
 #tar -xzf cmake-3.16.4-Linux-x86_64.tar.gz
 export PATH="$(pwd)/cmake-3.16.4-Linux-x86_64/bin:$PATH"

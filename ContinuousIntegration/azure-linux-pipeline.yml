@@ -82,11 +82,9 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              ./ci-scripts/install_deps.sh $HOSTING_OS $HOSTING_COMPILER
               export TESTING_TYPE
               git remote add cache ../GitAnnex
-              sudo apt-get install -y git-annex
-              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
-              git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
@@ -129,11 +127,9 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              ./ci-scripts/install_deps.sh $HOSTING_OS $HOSTING_COMPILER
               export TESTING_TYPE
               git remote add cache ../GitAnnex
-              sudo apt-get install -y git-annex
-              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
-              git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
@@ -176,11 +172,9 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              ./ci-scripts/install_deps.sh $HOSTING_OS $HOSTING_COMPILER
               export TESTING_TYPE
               git remote add cache ../GitAnnex
-              sudo apt-get install -y git-annex
-              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
-              git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
@@ -223,11 +217,9 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              ./ci-scripts/install_deps.sh $HOSTING_OS $HOSTING_COMPILER
               export TESTING_TYPE
               git remote add cache ../GitAnnex
-              sudo apt-get install -y git-annex
-              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
-              git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
@@ -270,11 +262,9 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              ./ci-scripts/install_deps.sh $HOSTING_OS $HOSTING_COMPILER
               export TESTING_TYPE
               git remote add cache ../GitAnnex
-              sudo apt-get install -y git-annex
-              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
-              git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
@@ -317,11 +307,9 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              ./ci-scripts/install_deps.sh $HOSTING_OS $HOSTING_COMPILER
               export TESTING_TYPE
               git remote add cache ../GitAnnex
-              sudo apt-get install -y git-annex
-              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
-              git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
@@ -369,11 +357,9 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              ./ci-scripts/install_deps.sh $HOSTING_OS $HOSTING_COMPILER
               export TESTING_TYPE
               git remote add cache ../GitAnnex
-              sudo apt-get install -y git-annex
-              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
-              git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
@@ -416,11 +402,9 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              ./ci-scripts/install_deps.sh $HOSTING_OS $HOSTING_COMPILER
               export TESTING_TYPE
               git remote add cache ../GitAnnex
-              sudo apt-get install -y git-annex
-              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
-              git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
@@ -463,11 +447,9 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              ./ci-scripts/install_deps.sh $HOSTING_OS $HOSTING_COMPILER
               export TESTING_TYPE
               git remote add cache ../GitAnnex
-              sudo apt-get install -y git-annex
-              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
-              git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
@@ -510,11 +492,9 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              ./ci-scripts/install_deps.sh $HOSTING_OS $HOSTING_COMPILER
               export TESTING_TYPE
               git remote add cache ../GitAnnex
-              sudo apt-get install -y git-annex
-              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
-              git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
@@ -557,11 +537,9 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              ./ci-scripts/install_deps.sh $HOSTING_OS $HOSTING_COMPILER
               export TESTING_TYPE
               git remote add cache ../GitAnnex
-              sudo apt-get install -y git-annex
-              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
-              git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
@@ -604,11 +582,9 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              ./ci-scripts/install_deps.sh $HOSTING_OS $HOSTING_COMPILER
               export TESTING_TYPE
               git remote add cache ../GitAnnex
-              sudo apt-get install -y git-annex
-              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
-              git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
@@ -657,11 +633,9 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              ./ci-scripts/install_deps.sh $HOSTING_OS $HOSTING_COMPILER
               export TESTING_TYPE
               git remote add cache ../GitAnnex
-              sudo apt-get install -y git-annex
-              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
-              git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
@@ -704,11 +678,9 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              ./ci-scripts/install_deps.sh $HOSTING_OS $HOSTING_COMPILER
               export TESTING_TYPE
               git remote add cache ../GitAnnex
-              sudo apt-get install -y git-annex
-              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
-              git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
@@ -751,11 +723,9 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              ./ci-scripts/install_deps.sh $HOSTING_OS $HOSTING_COMPILER
               export TESTING_TYPE
               git remote add cache ../GitAnnex
-              sudo apt-get install -y git-annex
-              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
-              git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
@@ -798,11 +768,9 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              ./ci-scripts/install_deps.sh $HOSTING_OS $HOSTING_COMPILER
               export TESTING_TYPE
               git remote add cache ../GitAnnex
-              sudo apt-get install -y git-annex
-              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
-              git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
@@ -845,11 +813,9 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              ./ci-scripts/install_deps.sh $HOSTING_OS $HOSTING_COMPILER
               export TESTING_TYPE
               git remote add cache ../GitAnnex
-              sudo apt-get install -y git-annex
-              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
-              git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
@@ -899,11 +865,9 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              ./ci-scripts/install_deps.sh $HOSTING_OS $HOSTING_COMPILER
               export TESTING_TYPE
               git remote add cache ../GitAnnex
-              sudo apt-get install -y git-annex
-              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
-              git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
@@ -946,11 +910,9 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              ./ci-scripts/install_deps.sh $HOSTING_OS $HOSTING_COMPILER
               export TESTING_TYPE
               git remote add cache ../GitAnnex
-              sudo apt-get install -y git-annex
-              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
-              git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
@@ -993,11 +955,9 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              ./ci-scripts/install_deps.sh $HOSTING_OS $HOSTING_COMPILER
               export TESTING_TYPE
               git remote add cache ../GitAnnex
-              sudo apt-get install -y git-annex
-              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
-              git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
@@ -1040,11 +1000,9 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              ./ci-scripts/install_deps.sh $HOSTING_OS $HOSTING_COMPILER
               export TESTING_TYPE
               git remote add cache ../GitAnnex
-              sudo apt-get install -y git-annex
-              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
-              git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
@@ -1087,11 +1045,9 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              ./ci-scripts/install_deps.sh $HOSTING_OS $HOSTING_COMPILER
               export TESTING_TYPE
               git remote add cache ../GitAnnex
-              sudo apt-get install -y git-annex
-              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
-              git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
             displayName: 'Setting up Git Annex'
           - script: |
