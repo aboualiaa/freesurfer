@@ -12072,52 +12072,9 @@ MRI *MRIchangeType(MRI *src, int dest_type, float f_low, float f_high,
       for (k = 0; k < src->depth; k++)
         for (j = 0; j < src->height; j++)
           for (i = 0; i < src->width; i++) {
-#if 0
-            if (src->type == MRI_UCHAR)
-              val = (float)MRIvox(src, i, j, k);
-            if (src->type == MRI_SHORT)
-              val = (float)MRISvox(src, i, j, k);
-            if (src->type == MRI_INT)
-              val = (float)MRIIvox(src, i, j, k);
-            if (src->type == MRI_LONG)
-              val = (float)MRILvox(src, i, j, k);
-            if (src->type == MRI_FLOAT)
-              val = (float)MRIFvox(src, i, j, k);
-#else
+
             val = MRIgetVoxVal(src, i, j, k, frame);
-#endif
 
-            if (dest->type == MRI_UCHAR) {
-              if (val < UCHAR_MIN)
-                val = UCHAR_MIN;
-              if (val > UCHAR_MAX)
-                val = UCHAR_MAX;
-              //            MRIvox(dest, i, j, k) = (unsigned char)nint(val);
-            }
-            if (dest->type == MRI_SHORT) {
-              if (val < SHORT_MIN)
-                val = SHORT_MIN;
-              if (val > SHORT_MAX)
-                val = SHORT_MAX;
-              //            MRISvox(dest, i, j, k) = (short)nint(val);
-            }
-            if (dest->type == MRI_INT) {
-              if (val < INT_MIN)
-                val = INT_MIN;
-              if (val > INT_MAX)
-                val = INT_MAX;
-              //            MRIIvox(dest, i, j, k) = (int)nint(val);
-            }
-            if (dest->type == MRI_LONG) {
-              if (val < LONG_MIN)
-                val = LONG_MIN;
-              if (val > LONG_MAX)
-                val = LONG_MAX;
-              //	      MRILvox(dest, i, j, k) = (long)nint(val);
-            }
-
-            //	    if (dest_type == MRI_FLOAT)
-            //            MRIFvox(dest, i, j, k) = (float)val;
             MRIsetVoxVal(dest, i, j, k, frame, val);
           }
   } else {
@@ -12132,24 +12089,31 @@ MRI *MRIchangeType(MRI *src, int dest_type, float f_low, float f_high,
     for (i = 0; i < N_HIST_BINS; i++)
       hist_bins[i] = 0;
 
+    fs::mri::new_vox_getter vox_getter =
+        fs::mri::get_typed_new_vox_getter_chunked(src);
+    if (src->ischunked) {
+      for (size_t index{0}; index < src->vox_total; index++) {
+        val = vox_getter(src, index);
+        if (!DZERO(val)) {
+          nonzero++;
+        }
+        bin = (int)((val - src_min) / bin_size);
+        if (bin < 0) {
+          bin = 0;
+        }
+        if (bin >= N_HIST_BINS) {
+          bin = N_HIST_BINS - 1;
+        }
+
+        hist_bins[bin]++;
+      }
+    } else {
     for (frame = 0; frame < src->nframes; frame++)
       for (i = 0; i < src->width; i++)
         for (j = 0; j < src->height; j++)
           for (k = 0; k < src->depth; k++) {
-#if 0
-            if (src->type == MRI_UCHAR)
-              val = (float)MRIvox(src, i, j, k);
-            if (src->type == MRI_SHORT)
-              val = (float)MRISvox(src, i, j, k);
-            if (src->type == MRI_INT)
-              val = (float)MRIIvox(src, i, j, k);
-            if (src->type == MRI_LONG)
-              val = (float)MRILvox(src, i, j, k);
-            if (src->type == MRI_FLOAT)
-              val = (float)MRIFvox(src, i, j, k);
-#else
+
             val = MRIgetVoxVal(src, i, j, k, frame);
-#endif
 
             if (!DZERO(val))
               nonzero++;
@@ -12162,7 +12126,7 @@ MRI *MRIchangeType(MRI *src, int dest_type, float f_low, float f_high,
 
             hist_bins[bin]++;
           }
-
+  }
     nth = (int)(f_low * src->width * src->height * src->depth);
     for (n_passed = 0, bin = 0; n_passed < nth && bin < N_HIST_BINS; bin++)
       n_passed += hist_bins[bin];
@@ -12214,55 +12178,25 @@ MRI *MRIchangeType(MRI *src, int dest_type, float f_low, float f_high,
     MRIcopyHeader(src, dest);
     dest->type = dest_type;
 
-    for (frame = 0; frame < src->nframes; frame++)
-      for (i = 0; i < src->width; i++)
-        for (j = 0; j < src->height; j++)
-          for (k = 0; k < src->depth; k++) {
-#if 0
-            if (src->type == MRI_SHORT)
-              val = MRISvox(src, i, j, k);
-            if (src->type == MRI_INT)
-              val = MRIIvox(src, i, j, k);
-            if (src->type == MRI_LONG)
-              val = MRILvox(src, i, j, k);
-            if (src->type == MRI_FLOAT)
-              val = MRIFvox(src, i, j, k);
-#else
-            val = MRIgetVoxVal(src, i, j, k, frame);
-#endif
+    fs::mri::new_vox_setter vox_setter =
+        fs::mri::get_typed_new_vox_setter_chunked(dest);
 
-            val = dest_min + scale * (val - src_min);
-
-            if (dest->type == MRI_UCHAR) {
-              if (val < UCHAR_MIN)
-                val = UCHAR_MIN;
-              if (val > UCHAR_MAX)
-                val = UCHAR_MAX;
-              //            MRIvox(dest, i, j, k) = (unsigned char)nint(val);
+    if (src->ischunked) {
+      for (size_t index{0}; index < src->vox_total; index++) {
+        val = vox_getter(src, index);
+        val = dest_min + scale * (val - src_min);
+        vox_setter(dest, index, val);
+      }
+    } else {
+      for (frame = 0; frame < src->nframes; frame++)
+        for (i = 0; i < src->width; i++)
+          for (j = 0; j < src->height; j++)
+            for (k = 0; k < src->depth; k++) {
+              val = MRIgetVoxVal(src, i, j, k, frame);
+              val = dest_min + scale * (val - src_min);
+              MRIsetVoxVal(dest, i, j, k, frame, val);
             }
-            if (dest->type == MRI_SHORT) {
-              if (val < SHORT_MIN)
-                val = SHORT_MIN;
-              if (val > SHORT_MAX)
-                val = SHORT_MAX;
-              //            MRISvox(dest, i, j, k) = (short)nint(val);
-            }
-            if (dest->type == MRI_INT) {
-              if (val < INT_MIN)
-                val = INT_MIN;
-              if (val > INT_MAX)
-                val = INT_MAX;
-              //            MRIIvox(dest, i, j, k) = (int)nint(val);
-            }
-            if (dest->type == MRI_LONG) {
-              if (val < LONG_MIN)
-                val = LONG_MIN;
-              if (val > LONG_MAX)
-                val = LONG_MAX;
-              //            MRILvox(dest, i, j, k) = (long)nint(val);
-            }
-            MRIsetVoxVal(dest, i, j, k, frame, val);
-          }
+    }
   }
 
   return (dest);
@@ -13050,7 +12984,7 @@ MRI *MRIresampleFill(MRI *src, MRI *template_vol, int resample_type,
 
 int MRIlimits(MRI *mri, float *min, float *max) {
   float val;
-  int i, j, k, f;
+  int   i, j, k, f;
 
   if (mri == NULL)
     return (NO_ERROR);
@@ -13058,6 +12992,20 @@ int MRIlimits(MRI *mri, float *min, float *max) {
   if (mri->slices == NULL)
     return (NO_ERROR);
 
+  fs::mri::new_vox_getter vox_getter =
+      fs::mri::get_typed_new_vox_getter_chunked(mri);
+
+  if (mri->ischunked) {
+    *min = *max = vox_getter(mri, 0);
+
+    for (size_t index{0}; index < mri->vox_total; index++) {
+      val = vox_getter(mri, index);
+      if (val < *min)
+        *min = val;
+      if (val > *max)
+        *max = val;
+    }
+  } else {
 #if 1
   *min = *max = (float)MRIgetVoxVal(mri, 0, 0, 0, 0);
   for (f = 0; f < mri->nframes; f++)
@@ -13141,7 +13089,7 @@ int MRIlimits(MRI *mri, float *min, float *max) {
         }
   }
 #endif
-
+}
   return (NO_ERROR);
 
 } /* end MRIlimits() */

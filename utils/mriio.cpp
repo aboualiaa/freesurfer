@@ -14273,11 +14273,32 @@ static MRI *readGCA(const char *fname, int start_frame, int end_frame) {
 MRI *MRIremoveNaNs(MRI *mri_src, MRI *mri_dst) {
   if (mri_dst != mri_src)
     mri_dst = MRIcopy(mri_src, mri_dst);
+  if (getenv("FS_LEAVE_NANS") != NULL) {
+    return mri_dst;
+  }
 
   int x;
   int nans = 0;
   static int first = 1;
 
+  fs::mri::new_vox_getter vox_getter =
+      fs::mri::get_typed_new_vox_getter_chunked(mri_dst);
+  fs::mri::new_vox_setter vox_setter =
+      fs::mri::get_typed_new_vox_setter_chunked(mri_dst);
+
+  if (mri_dst->ischunked) {
+    for (size_t index{0}; index < mri_dst->vox_total; index++) {
+      float val = vox_getter(mri_dst, index);
+      if (!std::isfinite(val)) {
+        nans++;
+        vox_setter(mri_dst, index, 0);
+        if (first) {
+          printf("NaN found at voxel (%d)\n", index);
+          first = 0;
+        }
+      }
+    }
+  } else {
   ROMP_PF_begin
 #ifdef HAVE_OPENMP
 #pragma omp parallel for if_ROMP(shown_reproducible) shared(mri_dst) reduction(+ : nans)
@@ -14311,7 +14332,7 @@ MRI *MRIremoveNaNs(MRI *mri_src, MRI *mri_dst) {
     ROMP_PFLB_end
   }
   ROMP_PF_end
-
+}
       if (nans > 0)
           ErrorPrintf(ERROR_BADPARM, "WARNING: %d NaNs found in volume %s...\n",
                       nans, mri_src->fname);
