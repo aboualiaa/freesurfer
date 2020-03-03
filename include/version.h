@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 std::string getVersion();
 std::string getBuildStamp();
