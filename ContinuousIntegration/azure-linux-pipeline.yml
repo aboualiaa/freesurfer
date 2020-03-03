@@ -65,7 +65,7 @@ stages:
           TESTING_TYPE: '_Unit_Tests'
           AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
-          vmImage: 'ubuntu-16.04'
+          vmImage: 'ubuntu-18.04'
         steps:
           - task: DownloadPipelineArtifact@2
             inputs:
@@ -112,7 +112,7 @@ stages:
           TESTING_TYPE: '_Unit_Tests'
           AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
-          vmImage: 'ubuntu-16.04'
+          vmImage: 'ubuntu-18.04'
         steps:
           - task: DownloadPipelineArtifact@2
             inputs:
@@ -159,7 +159,7 @@ stages:
           TESTING_TYPE: '_Unit_Tests'
           AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
-          vmImage: 'ubuntu-16.04'
+          vmImage: 'ubuntu-18.04'
         steps:
           - task: DownloadPipelineArtifact@2
             inputs:
@@ -206,7 +206,7 @@ stages:
           TESTING_TYPE: '_Unit_Tests'
           AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
-          vmImage: 'ubuntu-16.04'
+          vmImage: 'ubuntu-18.04'
         steps:
           - task: DownloadPipelineArtifact@2
             inputs:
@@ -253,7 +253,7 @@ stages:
           TESTING_TYPE: '_Unit_Tests'
           AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
-          vmImage: 'ubuntu-16.04'
+          vmImage: 'ubuntu-18.04'
         steps:
           - task: DownloadPipelineArtifact@2
             inputs:
@@ -300,7 +300,7 @@ stages:
           TESTING_TYPE: '_Unit_Tests'
           AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
-          vmImage: 'ubuntu-16.04'
+          vmImage: 'ubuntu-18.04'
         steps:
           - task: DownloadPipelineArtifact@2
             inputs:
@@ -640,7 +640,7 @@ stages:
           TESTING_TYPE: '_Unit_Tests'
           AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
-          vmImage: 'ubuntu-16.04'
+          vmImage: 'ubuntu-18.04'
         steps:
           - task: DownloadPipelineArtifact@2
             inputs:
@@ -687,7 +687,7 @@ stages:
           TESTING_TYPE: '_Unit_Tests'
           AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
-          vmImage: 'ubuntu-16.04'
+          vmImage: 'ubuntu-18.04'
         steps:
           - task: DownloadPipelineArtifact@2
             inputs:
@@ -734,7 +734,7 @@ stages:
           TESTING_TYPE: '_Unit_Tests'
           AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
-          vmImage: 'ubuntu-16.04'
+          vmImage: 'ubuntu-18.04'
         steps:
           - task: DownloadPipelineArtifact@2
             inputs:
@@ -781,7 +781,7 @@ stages:
           TESTING_TYPE: '_Unit_Tests'
           AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
-          vmImage: 'ubuntu-16.04'
+          vmImage: 'ubuntu-18.04'
         steps:
           - task: DownloadPipelineArtifact@2
             inputs:
@@ -828,7 +828,7 @@ stages:
           TESTING_TYPE: '_Unit_Tests'
           AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
-          vmImage: 'ubuntu-16.04'
+          vmImage: 'ubuntu-18.04'
         steps:
           - task: DownloadPipelineArtifact@2
             inputs:
@@ -1119,7 +1119,7 @@ stages:
     jobs:
       - job: LinuxLint
         pool:
-          vmImage: 'ubuntu-latest'
+          vmImage: 'ubuntu-16.04'
         steps:
           - script: sudo apt-get update -y
           - script: sudo apt-get install -y libxml2-utils
@@ -1134,7 +1134,7 @@ stages:
     jobs:
       - job: LinuxLint
         pool:
-          vmImage: 'ubuntu-latest'
+          vmImage: 'ubuntu-18.04'
         steps:
           - script: sudo apt-get update -y
           - script: sudo apt-get install -y libxml2-utils
