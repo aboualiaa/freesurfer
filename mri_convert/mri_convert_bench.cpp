@@ -15,7 +15,7 @@ constexpr auto magic_20 = 20;
 constexpr auto magic_40 = 40;
 
 static auto get_mri() {
-  static auto mri = MRIread("/Users/aboualiaa/Downloads/medium.nii");
+  static auto mri = MRIread("/Users/aboualiaa/Downloads/mini.nii");
   return mri;
 }
 
