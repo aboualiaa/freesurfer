@@ -2,12 +2,15 @@
 // Created by Ahmed Abou-Aliaa on 29.11.19.
 //
 
-#include "mri_convert_lib.hpp"
+#include "mri2020.hpp"
+#include "mri_convert.hpp"
+
+#include <random>
+
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <eigen3/Eigen/Dense>
 #include <gtest/gtest.h>
-#include <random>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wglobal-constructors"
@@ -29,6 +32,13 @@ auto get_random_number() -> uint64_t {
       0, upper_limit); // define the range
   static auto fsrand = distr(eng);
   return fsrand;
+}
+
+static auto get_mri() {
+  static auto mri = MRIread("/Users/aboualiaa/Downloads/mini.nii");
+  static auto res = system("mkdir testdata2 && tar -zxvf testdata.tar.gz -C "
+                           "testdata2 --strip-components=1");
+  return mri;
 }
 
 TEST(test_usage_message, nullptr_test) { // NOLINT
@@ -151,8 +161,8 @@ TEST(test_check_vector_range, test_vectors) { // NOLINT
   ASSERT_TRUE(cli::check_vector_range(strvec, "7", 15, 20));
   ASSERT_TRUE(cli::check_vector_range(strvec, "8", 19, 20));
   ASSERT_TRUE(cli::check_vector_range(strvec, "9", 20, 21));
-  ASSERT_ANY_THROW(
-      cli::check_vector_range(strvec, "10", 30, 20)); // NOLINT (goto)
+  ASSERT_ANY_THROW( // NOLINT (goto)
+      cli::check_vector_range(strvec, "10", 30, 20));
 }
 
 TEST(test_create_gdb_file, test_input) { // NOLINT
@@ -197,6 +207,145 @@ TEST(test_print_parsed_tokens, example_input) { // NOLINT
   auto output = gtest::GetCapturedStdout();
 
   ASSERT_STREQ(output.c_str(), "--debug\n--hello baby\n");
+}
+
+TEST(test_vox_val_getter, old_vs_new) { // NOLINT
+  fs::mri::new_vox_getter vox_func =
+      fs::mri::get_typed_new_vox_getter_chunked(get_mri());
+  auto mri      = get_mri();
+  auto perrow   = mri->vox_per_row;
+  auto perslice = mri->vox_per_slice;
+  auto pervol   = mri->vox_per_vol;
+
+  std::vector<float> newVox;
+  newVox.reserve(mri->vox_total);
+  std::vector<float> oldVox;
+  oldVox.reserve(mri->vox_total);
+
+  for (size_t index{0}; index < get_mri()->vox_total; index++) {
+    auto val = vox_func(get_mri(), index);
+    newVox.push_back(val);
+  }
+
+  for (size_t f = 0; f < get_mri()->nframes; f++) {
+    for (size_t i = 0; i < get_mri()->width; i++) {
+      for (size_t j = 0; j < get_mri()->height; j++) {
+        for (size_t k = 0; k < get_mri()->depth; k++) {
+          auto val = MRIgetVoxVal(get_mri(), i, j, k, f);
+          *(oldVox.data() + i + j * perrow + k * perslice + f * pervol) = val;
+        }
+      }
+    }
+  }
+
+  for (size_t i{0}; i < mri->vox_total; i++) {
+    ASSERT_EQ(newVox[i], oldVox[i]);
+  }
+
+  float *rawData = newVox.data();
+
+  for (size_t f = 0; f < get_mri()->nframes; f++) {
+    for (size_t i = 0; i < get_mri()->width; i++) {
+      for (size_t j = 0; j < get_mri()->height; j++) {
+        for (size_t k = 0; k < get_mri()->depth; k++) {
+          auto val = static_cast<float>(
+              *(rawData + i + j * perrow + k * perslice + f * pervol));
+          auto val2 = MRIgetVoxVal(get_mri(), i, j, k, f);
+          ASSERT_EQ(val, val2);
+        }
+      }
+    }
+  }
+}
+
+TEST(test_mri_change_type, old_vs_new_vox_getter) { // NOLINT
+}
+
+TEST(test_mri_limits, old_vs_new_vox_getter) { // NOLINT
+}
+
+TEST(test_mri_remove_nans, old_vs_new_vox_getter) { // NOLINT
+}
+
+TEST(test_mri_read, old_vs_new_vox_getter) { // NOLINT
+}
+
+TEST(test_mri_convert, test_conform) { // NOLINT
+  std::vector<char const *> args{"mri_convert",
+                                 "testdata2/rawavg.mgz",
+                                 "testdata2/orig.mgz",
+                                 "--conform",
+                                 "-oi",
+                                 "-ii"};
+  //  gtest::CaptureStderr();
+  //  gtest::CaptureStdout();
+  ASSERT_EQ(mri_convert(args), 0);
+}
+
+TEST(test_mri_convert, test_dicom) { // NOLINT
+  std::vector<char const *> args{"mri_convert",
+                                 "testdata2/dcm/261000-10-60.dcm",
+                                 "testdata2/dicom.mgz", "-oi", "-ii"};
+  //  gtest::CaptureStderr();
+  //  gtest::CaptureStdout();
+  ASSERT_EQ(mri_convert(args), 0);
+}
+
+TEST(test_mri_convert, test_nifti) { // NOLINT
+  std::vector<char const *> args{"mri_convert", "testdata2/nifti.nii",
+                                 "testdata2/nifti.mgz", "-oi", "-ii"};
+  //  gtest::CaptureStderr();
+  //  gtest::CaptureStdout();
+  ASSERT_EQ(mri_convert(args), 0);
+}
+
+TEST(test_mri_convert, test_analyze) { // NOLINT
+  std::vector<char const *> args{"mri_convert", "testdata2/analyze.img",
+                                 "testdata2/analyze.mgz", "-oi", "-ii"};
+  //  gtest::CaptureStderr();
+  //  gtest::CaptureStdout();
+  ASSERT_EQ(mri_convert(args), 0);
+}
+
+TEST(test_mri_convert, test_downsampled) { // NOLINT
+  std::vector<char const *> args{"mri_convert",
+                                 "-at",
+                                 "testdata2/odd.m3z",
+                                 "testdata2/orig.mgz",
+                                 "testdata2/morphed.mgz",
+                                 "-oi",
+                                 "-ii"};
+  //  gtest::CaptureStderr();
+  //  gtest::CaptureStdout();
+  ASSERT_EQ(mri_convert(args), 0);
+}
+
+TEST(test_mri_convert, test_standard_mosaic_dicom) { // NOLINT
+  std::vector<char const *> args{"mri_convert", "testdata2/ep2d.mosaic.dcm",
+                                 "testdata2/ep2d.mosaic.mgz", "-oi", "-ii"};
+  //  gtest::CaptureStderr();
+  //  gtest::CaptureStdout();
+  ASSERT_EQ(mri_convert(args), 0);
+}
+
+TEST(test_mri_convert, test_non_mosaic_dicom) { // NOLINT
+  std::vector<char const *> args{"mri_convert", "testdata2/vnav.non-mosaic.dcm",
+                                 "testdata2/vnav.non-mosaic.mgz", "-oi", "-ii"};
+  //  gtest::CaptureStderr();
+  //  gtest::CaptureStdout();
+  ASSERT_EQ(mri_convert(args), 0);
+}
+
+TEST(test_mri_convert, test_identical_geometry) { // NOLINT
+  std::vector<char const *> args{"mri_convert",
+                                 "--mosaic-fix-noascii",
+                                 "testdata2/vnav.mosaic.dcm",
+                                 "testdata2/vnav.mosaic.mgz",
+                                 "-oi",
+                                 "-ii"};
+  //  gtest::CaptureStderr();
+  //  gtest::CaptureStdout();
+  ASSERT_EQ(mri_convert(args), 0);
 }
 
 auto main(int /*argc*/, char * * /*argv*/) -> int {
