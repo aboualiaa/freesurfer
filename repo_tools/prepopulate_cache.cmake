@@ -1,0 +1,12 @@
+set(BUILD_TESTING OFF CACHE BOOL "build test target")
+set(FS_MINIMAL_BUILD OFF CACHE BOOL "create a minimal build")
+set(FS_BUILD_ATTIC ON CACHE BOOL "build deprecated tools")
+set(FS_INFANT_MODULE ON CACHE BOOL "build infant module")
+set(FS_BUILD_DNG ON CACHE BOOL "build dng's testing tools")
+set(FS_SUPPRESS_WARNING ON CACHE BOOL "suppress compiler warnings")
+set(GEMS_BUILD_MATLAB ON CACHE BOOL "build matlab wrappers")
+set(FS_GEMS_BUILD_GUIS ON CACHE BOOL "build gems guis")
+set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE STRING "install prefix")
+set(CMAKE_BUILD_TYPE "Release" CACHE STRING "build type")
+set(CMAKE_GENERATOR "Ninja" CACHE STRING "make, ninja, unix makefiles etc")
+
