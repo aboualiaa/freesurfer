@@ -109,7 +109,7 @@ void NormalizedCutsFilter<TMesh, TMembershipFunctionType>::Update() {
     } else {
       typename SampleType::ConstIterator iter = sample->Begin();
       int i = 0;
-      while (iter != sample->End()) {
+      while (!(iter == sample->End())) {
         labels[iter.GetMeasurementVector().GetCellId()] =
             lastLabel + std::to_string(centroidIndeces[i].first);
 

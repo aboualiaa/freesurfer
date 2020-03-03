@@ -1,5 +1,5 @@
 project(pysurfer)
-
+set(CMAKE_CXX_STANDARD 17)
 add_subdirectories(bindings)
 
 # if INSTALL_PYTHON_DEPENDENCIES is on, all required python packages will get

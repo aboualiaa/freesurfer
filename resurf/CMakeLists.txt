@@ -1,5 +1,5 @@
 project(resurf)
-
+set(CMAKE_CXX_STANDARD 17)
 if(ITK_FOUND AND VTK_FOUND)
 
   include(${ITK_USE_FILE})
@@ -23,19 +23,19 @@ if(ITK_FOUND AND VTK_FOUND)
   add_executable(mris_multimodal mris_multimodal.cxx)
   target_link_libraries(mris_multimodal utils ${ITK_LIBRARIES} ${VTK_LIBRARIES})
   install(TARGETS mris_multimodal DESTINATION bin)
-  
+
   add_executable(mris_profileClustering mris_profileClustering.cxx)
   target_link_libraries(mris_profileClustering utils ${OPENGL_LIBRARIES} ${ITK_LIBRARIES} ${VTK_LIBRARIES})
   install(TARGETS mris_profileClustering DESTINATION bin)
- 
+
   add_executable(mris_surf2vtk mris_surf2vtk.cxx)
   target_link_libraries(mris_surf2vtk utils ${ITK_LIBRARIES} ${VTK_LIBRARIES})
   install(TARGETS mris_surf2vtk DESTINATION bin)
- 
+
   add_executable(mris_image2vtk mris_image2vtk.cxx) # Code/vtkNIFTIImageReader.cxx)
   target_link_libraries(mris_image2vtk utils ${ITK_LIBRARIES} ${VTK_LIBRARIES} )
   install(TARGETS mris_image2vtk DESTINATION bin)
-  
+
   #file(GLOB ALGLIB_SRC /space/erebus/2/users/vsiless/code/commong/alglib/src/*.cpp)
   #add_executable(sigmoidFit sigmoidFit.cxx ${ALGLIB_SRC})
   #target_link_libraries(sigmoidFit utils ${ITK_LIBRARIES} ${VTK_LIBRARIES})
