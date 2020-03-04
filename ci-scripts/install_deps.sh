@@ -5,7 +5,7 @@ set -e
 HOSTING_OS="$1"
 HOSTING_COMPILER="$2"
 
-sudo add-apt-repository --yes ppa:fkrull/deadsnakes    # for python
+#sudo add-apt-repository --yes ppa:fkrull/deadsnakes    # for python
 sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test # for gcc 9
 
 sudo apt-get update -y -qq
