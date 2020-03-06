@@ -48,7 +48,7 @@ int DEBUG_Z = 92;
 
 static float smooth = 0;
 static int erode = 0;
-static int open = 0;
+static int is_open = 0;
 static int binarize = 0;
 static void usage_exit(int code);
 static MRI *MRIcomputePriors(MRI *mri_priors, int ndof, MRI *mri_char_priors);
@@ -305,12 +305,12 @@ int main(int argc, char *argv[]) {
         for (i = 0; i < erode; i++)
           MRIerode(mri_T1, mri_T1);
       }
-      if (open) {
+      if (is_open) {
         int i;
-        printf("opening input %d times\n", open);
-        for (i = 0; i < open; i++)
+        printf("opening input %d times\n", is_open);
+        for (i = 0; i < is_open; i++)
           MRIerode(mri_T1, mri_T1);
-        for (i = 0; i < open; i++)
+        for (i = 0; i < is_open; i++)
           MRIdilate(mri_T1, mri_T1);
       }
 
@@ -503,8 +503,8 @@ static int get_option(int argc, char *argv[]) {
     printf("eroding input volume %d times...\n", erode);
     nargs = 1;
   } else if (!stricmp(option, "open")) {
-    open = atoi(argv[2]);
-    printf("opening input volume %d times...\n", open);
+    is_open = atoi(argv[2]);
+    printf("opening input volume %d times...\n", is_open);
     nargs = 1;
   } else if (!stricmp(option, "novar")) {
     novar = 1;

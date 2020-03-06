@@ -1,6 +1,8 @@
 project(trc)
 
 # TODO: remove APPLE condition after solving fem_elastic build issues on linux
+find_package(MPI REQUIRED)
+
 if(PETSC_FOUND AND APPLE)
 
   include_directories(

@@ -52,7 +52,7 @@ const char *Progname;
 static double thresh = 50000;
 static double max_thresh = 64000;
 
-static int open = 5;
+static int is_open = 5;
 
 int main(int argc, char *argv[]) {
   char **av;
@@ -101,16 +101,16 @@ int main(int argc, char *argv[]) {
   }
   MRIsegmentFree(&mriseg);
 
-  if (open > 0 && 0) {
+  if (is_open > 0 && 0) {
     MRI *mri_opened;
     int i, x, y;
 
     mri_opened = MRIcopy(mri_in, NULL);
-    for (i = 0; i < open; i++)
+          for (i = 0; i < is_open; i++)
       MRIerode(mri_opened, mri_opened);
     if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
       MRIwrite(mri_opened, "e.mgz");
-    for (i = 0; i < 2 * open; i++)
+    for (i = 0; i < 2 * is_open; i++)
       MRIdilate(mri_opened, mri_opened);
     if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
       MRIwrite(mri_opened, "d.mgz");
@@ -164,9 +164,9 @@ static int get_option(int argc, char *argv[]) {
   } else
     switch (toupper(*option)) {
     case 'O':
-      open = atof(argv[2]);
+      is_open = atof(argv[2]);
       nargs = 1;
-      printf("opening image %d times to detect tears\n", open);
+      printf("opening image %d times to detect tears\n", is_open);
       break;
     case 'T':
       thresh = atof(argv[2]);
