@@ -130,7 +130,7 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'build:'
+        displayName: 'linux build:'
 
   - stage: GCCBuilds
     dependsOn: Lint
@@ -138,62 +138,62 @@ stages:
       - job: BionicXenialGCCBuild
         strategy:
           matrix:
-            bionic_clang_coverage:
+              bionic_gcc_coverage:
               hosting_os: bionic
               imageName: 'ubuntu-18.04'
               hosting_compiler: gcc
               instrumentation: coverage
-            bionic_clang_asan:
+            bionic_gcc_asan:
               hosting_os: bionic
               imageName: 'ubuntu-18.04'
               hosting_compiler: gcc
               instrumentation: asan
-            bionic_clang_tsan:
+            bionic_gcc_tsan:
               hosting_os: bionic
               imageName: 'ubuntu-18.04'
               hosting_compiler: gcc
               instrumentation: tsan
-            bionic_clang_ubsan:
+            bionic_gcc_ubsan:
               hosting_os: bionic
               imageName: 'ubuntu-18.04'
               hosting_compiler: gcc
               instrumentation: ubsan
-            bionic_clang_msan:
+            bionic_gcc_msan:
               hosting_os: bionic
               imageName: 'ubuntu-18.04'
               hosting_compiler: gcc
               instrumentation: msan
-            bionic_clang_cfisan:
+            bionic_gcc_cfisan:
               hosting_os: bionic
               imageName: 'ubuntu-18.04'
               hosting_compiler: gcc
               instrumentation: cfisan
-            xenial_clang_coverage:
+            xenial_gcc_coverage:
               hosting_os: xenial
               imageName: 'ubuntu-16.04'
               hosting_compiler: gcc
               instrumentation: coverage
-            xenial_clang_asan:
+            xenial_gcc_asan:
               hosting_os: xenial
               imageName: 'ubuntu-16.04'
               hosting_compiler: gcc
               instrumentation: asan
-            xenial_clang_tsan:
+            xenial_gcc_tsan:
               hosting_os: xenial
               imageName: 'ubuntu-16.04'
               hosting_compiler: gcc
               instrumentation: tsan
-            xenial_clang_ubsan:
+            xenial_gcc_ubsan:
               hosting_os: xenial
               imageName: 'ubuntu-16.04'
               hosting_compiler: gcc
               instrumentation: ubsan
-            xenial_clang_msan:
+            xenial_gcc_msan:
               hosting_os: xenial
               imageName: 'ubuntu-16.04'
               hosting_compiler: gcc
               instrumentation: msan
-            xenial_clang_cfisan:
+            xenial_gcc_cfisan:
               hosting_os: xenial
               imageName: 'ubuntu-16.04'
               hosting_compiler: gcc
@@ -238,7 +238,7 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'build:'
+        displayName: 'linux build:'
 
   - stage: TestInstallationClang
     dependsOn:

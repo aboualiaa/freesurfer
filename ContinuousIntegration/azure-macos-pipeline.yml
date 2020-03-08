@@ -6,7 +6,7 @@ trigger:
       - fs-modernize
 
 stages:
-  - stage: Build
+  - stage: ClangBuilds
     jobs:
       - job: CatalinaBuildAppleClang
         strategy:
@@ -67,5 +67,5 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'macOS Catalina AppleClang'
+        displayName: 'macOS build:'
 
