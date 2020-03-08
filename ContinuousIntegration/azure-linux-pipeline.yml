@@ -163,11 +163,6 @@ stages:
               imageName: 'ubuntu-18.04'
               hosting_compiler: gcc
               instrumentation: msan
-            bionic_gcc_cfisan:
-              hosting_os: bionic
-              imageName: 'ubuntu-18.04'
-              hosting_compiler: gcc
-              instrumentation: cfisan
             xenial_gcc_coverage:
               hosting_os: xenial
               imageName: 'ubuntu-16.04'
@@ -193,11 +188,6 @@ stages:
               imageName: 'ubuntu-16.04'
               hosting_compiler: gcc
               instrumentation: msan
-            xenial_gcc_cfisan:
-              hosting_os: xenial
-              imageName: 'ubuntu-16.04'
-              hosting_compiler: gcc
-              instrumentation: cfisan
         variables:
           HOSTING_OS: $(hosting_os)
           HOSTING_COMPILER: $(hosting_compiler)
