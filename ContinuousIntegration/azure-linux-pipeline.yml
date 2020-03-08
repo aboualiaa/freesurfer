@@ -130,7 +130,7 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'Ubuntu Xenial Build Clang + Coverage'
+        displayName: 'build_'
 
   - stage: GCCBuilds
     dependsOn: Lint
@@ -238,7 +238,7 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'Ubuntu Bionic Build GCC + Coverage'
+        displayName: 'build_'
 
   - stage: TestInstallationClang
     dependsOn:
