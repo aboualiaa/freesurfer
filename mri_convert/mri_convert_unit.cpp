@@ -35,9 +35,9 @@ auto get_random_number() -> uint64_t {
 }
 
 static auto get_mri() {
-  static auto mri = MRIread("/Users/aboualiaa/Downloads/mini.nii");
   static auto res = system("mkdir testdata2 && tar -zxvf testdata.tar.gz -C "
                            "testdata2 --strip-components=1");
+  static auto mri = MRIread("testdata2/nifti.nii");
   return mri;
 }
 
