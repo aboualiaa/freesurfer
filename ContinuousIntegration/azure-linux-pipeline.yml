@@ -130,7 +130,7 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'build_'
+        displayName: 'build:'
 
   - stage: GCCBuilds
     dependsOn: Lint
@@ -238,7 +238,7 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'build_'
+        displayName: 'build:'
 
   - stage: TestInstallationClang
     dependsOn:
