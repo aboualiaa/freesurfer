@@ -9,13 +9,26 @@ stages:
   - stage: Build
     jobs:
       - job: CatalinaBuildAppleClang
+        strategy:
+          matrix:
+            catalina_appleclang_unit:
+              hosting_os: osx
+              imageName: 'macOS-10.15'
+              hosting_compiler: appleclang
+              instrumentation: coverage
+            catalina_clang_unit:
+              hosting_os: osx
+              imageName: 'macOS-10.15'
+              hosting_compiler: clang
+              instrumentation: coverage
         variables:
-          HOSTING_OS: osx
-          HOSTING_COMPILER: appleclang
+          HOSTING_OS: $(hosting_os)
+          HOSTING_COMPILER: $(hosting_compiler)
+          INSTRUMENTATION: $(instrumentation)
           TESTING_TYPE: '_Unit_Tests'
           AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
         pool:
-          vmImage: 'macOS-10.15'
+          vmImage: $(imageName)
         steps:
           - task: DownloadPipelineArtifact@2
             inputs:
@@ -34,13 +47,12 @@ stages:
               git config --global user.email "ahmed.s.aboualiaa@gmail.com"
               git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
-              brew update
               brew cask install arrayfire xquartz || true
-              brew install armadillo ccache cmake eigen fltk git-annex gts hdf5 itk \
+              brew install armadillo cmake eigen fltk git-annex gts hdf5 itk coreutils \
               jemalloc lcov libomp llvm ninja open-mpi petsc python@3 qt szip tcsh vtk || true
             displayName: 'Installing Dependencies'
           - script: |
-              export PATH="/usr/local/opt/ccache/:/usr/local/opt/llvm/bin:/usr/local/opt/python/libexec/bin:$PATH"
+              export PATH="/usr/local/opt/llvm/bin:/usr/local/opt/python/libexec/bin:$PATH"
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
