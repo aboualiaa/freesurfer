@@ -28,7 +28,7 @@ get_filename_component(bindir "${CMAKE_BINARY_DIR}" REALPATH)
 
 # disallow in-source builds
 if("${srcdir}" STREQUAL "${bindir}")
-  message(FATAL_ERROR "Quitting configuration")
+  message(FATAL_ERROR "In-source builds are disallowed. Create a separate directory to store cmake output and built files")
 endif()
 
 if(POLICY CMP0025) # AppleClang and Clang are different compilers.
