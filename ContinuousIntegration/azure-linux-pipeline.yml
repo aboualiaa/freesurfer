@@ -21,42 +21,11 @@ stages:
           - script: sudo apt-get install -y libxml2-utils
           - script: xmllint --noout ./**/*.xml
         displayName: 'Linting'
-  - stage: CollectCachedArtifacts
-    dependsOn: Lint
-    condition: succeeded()
-    jobs:
-      - job: CheckGitAnnex
-        pool:
-          vmImage: 'ubuntu-latest'
-        steps:
-          - checkout: none
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              buildType: 'specific'
-              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              buildVersionToDownload: 'specific'
-              pipelineId: '31'
-              artifactName: 'GitAnnex'
-              targetPath: '$(Agent.BuildDirectory)'
-        displayName: 'Check Cached Git Annex Data'
-      - job: DownloadGitAnnex
-        dependsOn: CheckGitAnnex
-        condition: failed('CheckGitAnnex')
-        pool:
-          vmImage: 'ubuntu-latest'
-        steps:
-          - bash: ./ci-scripts/cache.git.annex.sh
-            env:
-              CURRENT_WORK_DIR: $(Agent.BuildDirectory)
-          - publish: $(Agent.BuildDirectory)/annex-cache
-            artifact: GitAnnex
-        displayName: 'Download and Cache Git Annex Data'
 
 # MARK: -
 
   - stage: BionicClang
-    dependsOn: CollectCachedArtifacts
+    dependsOn: Lint
     jobs:
       - job: BionicDebugClang_Coverage
         variables:
@@ -71,14 +40,10 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              buildVersionToDownload: 'specific'
-              pipelineId: '31'
+              definition: '3'
+              buildVersionToDownload: 'latest'
               artifactName: 'GitAnnex'
               targetPath: '$(Agent.BuildDirectory)/GitAnnex'
-          - download: current
-            artifact: 'GitAnnex'
-            condition: failed()
           - checkout: self
             submodules: true
           - script: |
@@ -116,14 +81,10 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              buildVersionToDownload: 'specific'
-              pipelineId: '31'
+              definition: '3'
+              buildVersionToDownload: 'latest'
               artifactName: 'GitAnnex'
               targetPath: '$(Agent.BuildDirectory)/GitAnnex'
-          - download: current
-            artifact: 'GitAnnex'
-            condition: failed()
           - checkout: self
             submodules: true
           - script: |
@@ -161,14 +122,10 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              buildVersionToDownload: 'specific'
-              pipelineId: '31'
+              definition: '3'
+              buildVersionToDownload: 'latest'
               artifactName: 'GitAnnex'
               targetPath: '$(Agent.BuildDirectory)/GitAnnex'
-          - download: current
-            artifact: 'GitAnnex'
-            condition: failed()
           - checkout: self
             submodules: true
           - script: |
@@ -206,14 +163,10 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              buildVersionToDownload: 'specific'
-              pipelineId: '31'
+              definition: '3'
+              buildVersionToDownload: 'latest'
               artifactName: 'GitAnnex'
               targetPath: '$(Agent.BuildDirectory)/GitAnnex'
-          - download: current
-            artifact: 'GitAnnex'
-            condition: failed()
           - checkout: self
             submodules: true
           - script: |
@@ -251,14 +204,10 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              buildVersionToDownload: 'specific'
-              pipelineId: '31'
+              definition: '3'
+              buildVersionToDownload: 'latest'
               artifactName: 'GitAnnex'
               targetPath: '$(Agent.BuildDirectory)/GitAnnex'
-          - download: current
-            artifact: 'GitAnnex'
-            condition: failed()
           - checkout: self
             submodules: true
           - script: |
@@ -296,14 +245,10 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              buildVersionToDownload: 'specific'
-              pipelineId: '31'
+              definition: '3'
+              buildVersionToDownload: 'latest'
               artifactName: 'GitAnnex'
               targetPath: '$(Agent.BuildDirectory)/GitAnnex'
-          - download: current
-            artifact: 'GitAnnex'
-            condition: failed()
           - checkout: self
             submodules: true
           - script: |
@@ -331,7 +276,7 @@ stages:
 # MARK: -
 
   - stage: XenialClang
-    dependsOn: CollectCachedArtifacts
+    dependsOn: Lint
     jobs:
       - job: XenialDebugClang_Coverage
         variables:
@@ -346,14 +291,10 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              buildVersionToDownload: 'specific'
-              pipelineId: '31'
+              definition: '3'
+              buildVersionToDownload: 'latest'
               artifactName: 'GitAnnex'
               targetPath: '$(Agent.BuildDirectory)/GitAnnex'
-          - download: current
-            artifact: 'GitAnnex'
-            condition: failed()
           - checkout: self
             submodules: true
           - script: |
@@ -391,14 +332,10 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              buildVersionToDownload: 'specific'
-              pipelineId: '31'
+              definition: '3'
+              buildVersionToDownload: 'latest'
               artifactName: 'GitAnnex'
               targetPath: '$(Agent.BuildDirectory)/GitAnnex'
-          - download: current
-            artifact: 'GitAnnex'
-            condition: failed()
           - checkout: self
             submodules: true
           - script: |
@@ -436,14 +373,10 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              buildVersionToDownload: 'specific'
-              pipelineId: '31'
+              definition: '3'
+              buildVersionToDownload: 'latest'
               artifactName: 'GitAnnex'
               targetPath: '$(Agent.BuildDirectory)/GitAnnex'
-          - download: current
-            artifact: 'GitAnnex'
-            condition: failed()
           - checkout: self
             submodules: true
           - script: |
@@ -481,14 +414,10 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              buildVersionToDownload: 'specific'
-              pipelineId: '31'
+              definition: '3'
+              buildVersionToDownload: 'latest'
               artifactName: 'GitAnnex'
               targetPath: '$(Agent.BuildDirectory)/GitAnnex'
-          - download: current
-            artifact: 'GitAnnex'
-            condition: failed()
           - checkout: self
             submodules: true
           - script: |
@@ -526,14 +455,10 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              buildVersionToDownload: 'specific'
-              pipelineId: '31'
+              definition: '3'
+              buildVersionToDownload: 'latest'
               artifactName: 'GitAnnex'
               targetPath: '$(Agent.BuildDirectory)/GitAnnex'
-          - download: current
-            artifact: 'GitAnnex'
-            condition: failed()
           - checkout: self
             submodules: true
           - script: |
@@ -571,14 +496,10 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              buildVersionToDownload: 'specific'
-              pipelineId: '31'
+              definition: '3'
+              buildVersionToDownload: 'latest'
               artifactName: 'GitAnnex'
               targetPath: '$(Agent.BuildDirectory)/GitAnnex'
-          - download: current
-            artifact: 'GitAnnex'
-            condition: failed()
           - checkout: self
             submodules: true
           - script: |
@@ -607,7 +528,7 @@ stages:
 # MARK: -
 
   - stage: BionicGCC
-    dependsOn: CollectCachedArtifacts
+    dependsOn: Lint
     jobs:
       - job: BionicDebugGCC_Coverage
         variables:
@@ -622,14 +543,10 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              buildVersionToDownload: 'specific'
-              pipelineId: '31'
+              definition: '3'
+              buildVersionToDownload: 'latest'
               artifactName: 'GitAnnex'
               targetPath: '$(Agent.BuildDirectory)/GitAnnex'
-          - download: current
-            artifact: 'GitAnnex'
-            condition: failed()
           - checkout: self
             submodules: true
           - script: |
@@ -667,14 +584,10 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              buildVersionToDownload: 'specific'
-              pipelineId: '31'
+              definition: '3'
+              buildVersionToDownload: 'latest'
               artifactName: 'GitAnnex'
               targetPath: '$(Agent.BuildDirectory)/GitAnnex'
-          - download: current
-            artifact: 'GitAnnex'
-            condition: failed()
           - checkout: self
             submodules: true
           - script: |
@@ -712,14 +625,10 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              buildVersionToDownload: 'specific'
-              pipelineId: '31'
+              definition: '3'
+              buildVersionToDownload: 'latest'
               artifactName: 'GitAnnex'
               targetPath: '$(Agent.BuildDirectory)/GitAnnex'
-          - download: current
-            artifact: 'GitAnnex'
-            condition: failed()
           - checkout: self
             submodules: true
           - script: |
@@ -757,14 +666,10 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              buildVersionToDownload: 'specific'
-              pipelineId: '31'
+              definition: '3'
+              buildVersionToDownload: 'latest'
               artifactName: 'GitAnnex'
               targetPath: '$(Agent.BuildDirectory)/GitAnnex'
-          - download: current
-            artifact: 'GitAnnex'
-            condition: failed()
           - checkout: self
             submodules: true
           - script: |
@@ -802,14 +707,10 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              buildVersionToDownload: 'specific'
-              pipelineId: '31'
+              definition: '3'
+              buildVersionToDownload: 'latest'
               artifactName: 'GitAnnex'
               targetPath: '$(Agent.BuildDirectory)/GitAnnex'
-          - download: current
-            artifact: 'GitAnnex'
-            condition: failed()
           - checkout: self
             submodules: true
           - script: |
@@ -839,7 +740,7 @@ stages:
 # MARK: -
 
   - stage: XenialGCC
-    dependsOn: CollectCachedArtifacts
+    dependsOn: Lint
     jobs:
       - job: XenialDebugGCC_Coverage
         variables:
@@ -854,14 +755,10 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              buildVersionToDownload: 'specific'
-              pipelineId: '31'
+              definition: '3'
+              buildVersionToDownload: 'latest'
               artifactName: 'GitAnnex'
               targetPath: '$(Agent.BuildDirectory)/GitAnnex'
-          - download: current
-            artifact: 'GitAnnex'
-            condition: failed()
           - checkout: self
             submodules: true
           - script: |
@@ -899,14 +796,10 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              buildVersionToDownload: 'specific'
-              pipelineId: '31'
+              definition: '3'
+              buildVersionToDownload: 'latest'
               artifactName: 'GitAnnex'
               targetPath: '$(Agent.BuildDirectory)/GitAnnex'
-          - download: current
-            artifact: 'GitAnnex'
-            condition: failed()
           - checkout: self
             submodules: true
           - script: |
@@ -944,14 +837,10 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              buildVersionToDownload: 'specific'
-              pipelineId: '31'
+              definition: '3'
+              buildVersionToDownload: 'latest'
               artifactName: 'GitAnnex'
               targetPath: '$(Agent.BuildDirectory)/GitAnnex'
-          - download: current
-            artifact: 'GitAnnex'
-            condition: failed()
           - checkout: self
             submodules: true
           - script: |
@@ -989,14 +878,10 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              buildVersionToDownload: 'specific'
-              pipelineId: '31'
+              definition: '3'
+              buildVersionToDownload: 'latest'
               artifactName: 'GitAnnex'
               targetPath: '$(Agent.BuildDirectory)/GitAnnex'
-          - download: current
-            artifact: 'GitAnnex'
-            condition: failed()
           - checkout: self
             submodules: true
           - script: |
@@ -1034,14 +919,10 @@ stages:
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
-              definition: '2'
-              buildVersionToDownload: 'specific'
-              pipelineId: '31'
+              definition: '3'
+              buildVersionToDownload: 'latest'
               artifactName: 'GitAnnex'
               targetPath: '$(Agent.BuildDirectory)/GitAnnex'
-          - download: current
-            artifact: 'GitAnnex'
-            condition: failed()
           - checkout: self
             submodules: true
           - script: |
