@@ -1,0 +1,57 @@
+name: $(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+
+trigger:
+  branches:
+    include:
+      - fs-modernize
+
+stages:
+  - stage: Build
+    jobs:
+      - job: CatalinaBuildAppleClang
+        variables:
+          HOSTING_OS: osx
+          HOSTING_COMPILER: appleclang
+          TESTING_TYPE: '_Unit_Tests'
+          AZURE_SOURCE_DIR: '$(Build.SourcesDirectory)/distribution'
+        pool:
+          vmImage: 'macOS-10.15'
+        steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              buildType: 'specific'
+              project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
+              definition: '3'
+              buildVersionToDownload: 'latest'
+              artifactName: 'GitAnnex'
+              targetPath: '$(Agent.BuildDirectory)/GitAnnex'
+          - checkout: self
+            submodules: true
+          - script: |
+              export TESTING_TYPE
+              git remote add cache ../GitAnnex
+              sudo apt-get install -y git-annex
+              git config --global user.email "ahmed.s.aboualiaa@gmail.com"
+              git config --global user.name "Ahmed Abou-Aliaa"
+              git annex copy --from cache
+              brew install armadillo ccache cmake eigen fltk git-annex gts hdf5 itk \
+              jemalloc lcov libomp llvm ninja open-mpi petsc python@3 qt szip tcsh vtk
+              export PATH="/usr/local/opt/ccache/:/usr/local/opt/llvm/bin:/usr/local/opt/python/libexec/bin:$PATH"
+            displayName: 'Setting up Git Annex'
+          - script: |
+              ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+              ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
+              rm -rf ../GitAnnex
+            displayName: 'Building'
+          - script: |
+              echo $AZURE_SOURCE_DIR
+              export AZURE_SOURCE_DIR
+              ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
+            displayName: 'Unit Testing'
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'cTest'
+              testResultsFiles: '**/Test.xml'
+              testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
+        displayName: 'Ubuntu Xenial Build GCC'
+
