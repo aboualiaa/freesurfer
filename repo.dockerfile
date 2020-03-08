@@ -37,7 +37,8 @@ RUN apt-get update && \
                        libfltk1.3-dev \
                        libeigen3-dev \
                        qt5-default \
-                       libqt5x11extras5-dev
+                       libqt5x11extras5-dev \
+                       xxd
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 50 && \
     update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 50
 RUN pip3 install --upgrade pip
