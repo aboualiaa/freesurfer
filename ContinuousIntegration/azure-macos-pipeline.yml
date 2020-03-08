@@ -34,11 +34,13 @@ stages:
               git config --global user.email "ahmed.s.aboualiaa@gmail.com"
               git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
+              brew update
+              brew cask install arrayfire
               brew install armadillo ccache cmake eigen fltk git-annex gts hdf5 itk \
               jemalloc lcov libomp llvm ninja open-mpi petsc python@3 qt szip tcsh vtk
-              export PATH="/usr/local/opt/ccache/:/usr/local/opt/llvm/bin:/usr/local/opt/python/libexec/bin:$PATH"
             displayName: 'Installing Dependencies'
           - script: |
+              export PATH="/usr/local/opt/ccache/:/usr/local/opt/llvm/bin:/usr/local/opt/python/libexec/bin:$PATH"
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
