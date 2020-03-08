@@ -1,0 +1,18 @@
+name: $(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+
+trigger:
+  branches:
+    include:
+      - azure-annex
+
+stages:
+  - stage: DownloadGitAnnex
+    jobs:
+      - job: DownloadGitAnnex
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - bash: ./ci-scripts/cache.git.annex.sh
+          - publish: $(Agent.BuildDirectory)/annex-cache
+            artifact: GitAnnex
+        displayName: 'Download and Cache Git Annex Data'
