@@ -35,8 +35,9 @@ auto get_random_number() -> uint64_t {
 }
 
 static auto get_mri() {
-  static auto res = system("mkdir testdata2 && tar -zxvf testdata.tar.gz -C "
-                           "testdata2 --strip-components=1");
+  [[maybe_unused]] static int res =
+      system("mkdir testdata2 && tar -zxvf testdata.tar.gz -C "
+             "testdata2 --strip-components=1");
   static auto mri = MRIread("testdata2/nifti.nii");
   return mri;
 }
@@ -122,7 +123,7 @@ TEST(test_frobenius_normalize, vector_version) { // NOLINT
   Eigen::MatrixXd eigenMatrix(1, get_random_number());
   for (size_t i = 0; i < get_random_number(); ++i) {
     fsMatrix.push_back(armaMatrix(0, i));
-    eigenMatrix(0, i) = armaMatrix(0, i);
+    eigenMatrix(0, static_cast<long>(i)) = armaMatrix(0, i);
   }
   auto armaNorm  = arma::norm(armaMatrix, "fro");
   auto eigenNorm = eigenMatrix.norm();
@@ -142,7 +143,7 @@ TEST(test_frobenius_normalize, vector_version) { // NOLINT
   for (size_t i = 0; i < copy.size(); ++i) {
     auto fsResult    = fsMatrix[i];
     auto armaResult  = copy[i] / armaNorm;
-    auto eigenResult = eigenMatrix(0, i);
+    auto eigenResult = eigenMatrix(0, static_cast<long>(i));
     ASSERT_NEAR(fsResult, armaResult, thresh);
     ASSERT_NEAR(fsResult, eigenResult, thresh);
   }
@@ -227,11 +228,13 @@ TEST(test_vox_val_getter, old_vs_new) { // NOLINT
     newVox.push_back(val);
   }
 
-  for (size_t f = 0; f < get_mri()->nframes; f++) {
-    for (size_t i = 0; i < get_mri()->width; i++) {
-      for (size_t j = 0; j < get_mri()->height; j++) {
-        for (size_t k = 0; k < get_mri()->depth; k++) {
-          auto val = MRIgetVoxVal(get_mri(), i, j, k, f);
+  for (size_t f = 0; f < static_cast<size_t>(get_mri()->nframes); f++) {
+    for (size_t i = 0; i < static_cast<size_t>(get_mri()->width); i++) {
+      for (size_t j = 0; j < static_cast<size_t>(get_mri()->height); j++) {
+        for (size_t k = 0; k < static_cast<size_t>(get_mri()->depth); k++) {
+          auto val =
+              MRIgetVoxVal(get_mri(), static_cast<int>(i), static_cast<int>(j),
+                           static_cast<int>(k), static_cast<int>(f));
           *(oldVox.data() + i + j * perrow + k * perslice + f * pervol) = val;
         }
       }
@@ -244,13 +247,15 @@ TEST(test_vox_val_getter, old_vs_new) { // NOLINT
 
   float *rawData = newVox.data();
 
-  for (size_t f = 0; f < get_mri()->nframes; f++) {
-    for (size_t i = 0; i < get_mri()->width; i++) {
-      for (size_t j = 0; j < get_mri()->height; j++) {
-        for (size_t k = 0; k < get_mri()->depth; k++) {
+  for (size_t f = 0; f < static_cast<size_t>(get_mri()->nframes); f++) {
+    for (size_t i = 0; i < static_cast<size_t>(get_mri()->width); i++) {
+      for (size_t j = 0; j < static_cast<size_t>(get_mri()->height); j++) {
+        for (size_t k = 0; k < static_cast<size_t>(get_mri()->depth); k++) {
           auto val = static_cast<float>(
               *(rawData + i + j * perrow + k * perslice + f * pervol));
-          auto val2 = MRIgetVoxVal(get_mri(), i, j, k, f);
+          auto val2 =
+              MRIgetVoxVal(get_mri(), static_cast<int>(i), static_cast<int>(j),
+                           static_cast<int>(k), static_cast<int>(f));
           ASSERT_EQ(val, val2);
         }
       }
