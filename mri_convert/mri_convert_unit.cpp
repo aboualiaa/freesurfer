@@ -36,8 +36,8 @@ auto get_random_number() -> uint64_t {
 
 static auto get_mri() {
   [[maybe_unused]] static int res =
-      system("mkdir testdata2 && tar -zxvf testdata.tar.gz -C "
-             "testdata2 --strip-components=1");
+      std::system("mkdir testdata2 && tar -zxvf testdata.tar.gz -C "
+                  "testdata2 --strip-components=1");
   static auto mri = MRIread("testdata2/nifti.nii");
   return mri;
 }
@@ -282,34 +282,48 @@ TEST(test_mri_convert, test_conform) { // NOLINT
                                  "--conform",
                                  "-oi",
                                  "-ii"};
-  //  gtest::CaptureStderr();
-  //  gtest::CaptureStdout();
+
   ASSERT_EQ(mri_convert(args), 0);
+
+  auto res = std::system(
+      "../mri_diff/mri_diff testdata2/orig.mgz testdata2/orig.ref.mgz --debug");
+  ASSERT_EQ(res, 0);
 }
 
 TEST(test_mri_convert, test_dicom) { // NOLINT
   std::vector<char const *> args{"mri_convert",
                                  "testdata2/dcm/261000-10-60.dcm",
                                  "testdata2/dicom.mgz", "-oi", "-ii"};
-  //  gtest::CaptureStderr();
-  //  gtest::CaptureStdout();
+
   ASSERT_EQ(mri_convert(args), 0);
+
+  auto res = std::system("../mri_diff/mri_diff testdata2/dicom.mgz "
+                         "testdata2/freesurfer.mgz --debug");
+  ASSERT_EQ(res, 0);
 }
 
 TEST(test_mri_convert, test_nifti) { // NOLINT
   std::vector<char const *> args{"mri_convert", "testdata2/nifti.nii",
                                  "testdata2/nifti.mgz", "-oi", "-ii"};
-  //  gtest::CaptureStderr();
-  //  gtest::CaptureStdout();
+
   ASSERT_EQ(mri_convert(args), 0);
+
+  auto res = std::system(
+      "../mri_diff/mri_diff testdata2/nifti.mgz "
+      "testdata2/freesurfer.mgz --notallow-acq --geo-thresh 0.000008 --debug");
+  ASSERT_EQ(res, 0);
 }
 
 TEST(test_mri_convert, test_analyze) { // NOLINT
   std::vector<char const *> args{"mri_convert", "testdata2/analyze.img",
                                  "testdata2/analyze.mgz", "-oi", "-ii"};
-  //  gtest::CaptureStderr();
-  //  gtest::CaptureStdout();
+
   ASSERT_EQ(mri_convert(args), 0);
+
+  auto res = std::system(
+      "../mri_diff/mri_diff testdata2/analyze.mgz "
+      "testdata2/freesurfer.mgz --notallow-acq --geo-thresh 0.000008 --debug");
+  ASSERT_EQ(res, 0);
 }
 
 TEST(test_mri_convert, test_downsampled) { // NOLINT
@@ -320,25 +334,34 @@ TEST(test_mri_convert, test_downsampled) { // NOLINT
                                  "testdata2/morphed.mgz",
                                  "-oi",
                                  "-ii"};
-  //  gtest::CaptureStderr();
-  //  gtest::CaptureStdout();
+
   ASSERT_EQ(mri_convert(args), 0);
+
+  auto res = std::system("../mri_diff/mri_diff testdata2/morphed.mgz "
+                         "testdata2/odd.ref.mgz --debug");
+  ASSERT_EQ(res, 0);
 }
 
 TEST(test_mri_convert, test_standard_mosaic_dicom) { // NOLINT
   std::vector<char const *> args{"mri_convert", "testdata2/ep2d.mosaic.dcm",
                                  "testdata2/ep2d.mosaic.mgz", "-oi", "-ii"};
-  //  gtest::CaptureStderr();
-  //  gtest::CaptureStdout();
+
   ASSERT_EQ(mri_convert(args), 0);
+
+  auto res = std::system("../mri_diff/mri_diff testdata2/ep2d.mosaic.mgz "
+                         "testdata2/ep2d.mosaic.ref.mgz --debug");
+  ASSERT_EQ(res, 0);
 }
 
 TEST(test_mri_convert, test_non_mosaic_dicom) { // NOLINT
   std::vector<char const *> args{"mri_convert", "testdata2/vnav.non-mosaic.dcm",
                                  "testdata2/vnav.non-mosaic.mgz", "-oi", "-ii"};
-  //  gtest::CaptureStderr();
-  //  gtest::CaptureStdout();
+
   ASSERT_EQ(mri_convert(args), 0);
+
+  auto res = std::system("../mri_diff/mri_diff testdata2/vnav.non-mosaic.mgz "
+                         "testdata2/vnav.non-mosaic.ref.mgz --debug");
+  ASSERT_EQ(res, 0);
 }
 
 TEST(test_mri_convert, test_identical_geometry) { // NOLINT
@@ -348,9 +371,12 @@ TEST(test_mri_convert, test_identical_geometry) { // NOLINT
                                  "testdata2/vnav.mosaic.mgz",
                                  "-oi",
                                  "-ii"};
-  //  gtest::CaptureStderr();
-  //  gtest::CaptureStdout();
+
   ASSERT_EQ(mri_convert(args), 0);
+
+  auto res = std::system("../mri_diff/mri_diff testdata2/vnav.mosaic.mgz "
+                         "testdata2/vnav.mosaic.ref.mgz --debug");
+  ASSERT_EQ(res, 0);
 }
 
 auto main(int /*argc*/, char * * /*argv*/) -> int {
