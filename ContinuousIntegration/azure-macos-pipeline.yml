@@ -37,7 +37,7 @@ stages:
               brew install armadillo ccache cmake eigen fltk git-annex gts hdf5 itk \
               jemalloc lcov libomp llvm ninja open-mpi petsc python@3 qt szip tcsh vtk
               export PATH="/usr/local/opt/ccache/:/usr/local/opt/llvm/bin:/usr/local/opt/python/libexec/bin:$PATH"
-            displayName: 'Setting up Git Annex'
+            displayName: 'Installing Dependencies'
           - script: |
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
@@ -53,5 +53,5 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'Ubuntu Xenial Build GCC'
+        displayName: 'macOS Catalina AppleClang'
 

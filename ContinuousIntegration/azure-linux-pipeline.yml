@@ -67,7 +67,7 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'Ubuntu Xenial Build GCC'
+        displayName: 'Ubuntu Xenial Build Clang + Coverage'
       - job: BionicReleaseClang_ASAN
         variables:
           HOSTING_OS: bionic
@@ -318,7 +318,7 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'Ubuntu Xenial Build GCC'
+        displayName: 'Ubuntu Xenial Build Clang + Coverage'
       - job: XenialReleaseClang_ASAN
         variables:
           HOSTING_OS: xenial
@@ -359,7 +359,7 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'Ubuntu Bionic Build Clang + ASAN'
+        displayName: 'Ubuntu Xenial Build Clang + ASAN'
       - job: XenialReleaseClang_TSAN
         variables:
           HOSTING_OS: xenial
@@ -400,7 +400,7 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'Ubuntu Bionic Build Clang + TSAN'
+        displayName: 'Ubuntu Xenial Build Clang + TSAN'
       - job: XenialReleaseClang_UBSAN
         variables:
           HOSTING_OS: xenial
@@ -441,7 +441,7 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'Ubuntu Bionic Build Clang + UBSAN'
+        displayName: 'Ubuntu Xenial Build Clang + UBSAN'
       - job: XenialReleaseClang_MSAN
         variables:
           HOSTING_OS: xenial
@@ -482,7 +482,7 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'Ubuntu Bionic Build Clang + MSAN'
+        displayName: 'Ubuntu Xenial Build Clang + MSAN'
       - job: XenialReleaseClang_CFISAN
         variables:
           HOSTING_OS: xenial
@@ -523,7 +523,7 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'Ubuntu Bionic Build Clang + CFISAN'
+        displayName: 'Ubuntu Xenial Build Clang + CFISAN'
 
 # MARK: -
 
@@ -570,7 +570,7 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'Ubuntu Xenial Build GCC'
+        displayName: 'Ubuntu Bionic Build GCC + Coverage'
       - job: BionicReleaseGCC_ASAN
         variables:
           HOSTING_OS: bionic
@@ -611,7 +611,7 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'Ubuntu Bionic Build Clang + ASAN'
+        displayName: 'Ubuntu Bionic Build GCC + ASAN'
       - job: BionicReleaseGCC_TSAN
         variables:
           HOSTING_OS: bionic
@@ -652,7 +652,7 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'Ubuntu Bionic Build Clang + TSAN'
+        displayName: 'Ubuntu Bionic Build GCC + TSAN'
       - job: BionicReleaseGCC_UBSAN
         variables:
           HOSTING_OS: bionic
@@ -693,7 +693,7 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'Ubuntu Bionic Build Clang + UBSAN'
+        displayName: 'Ubuntu Bionic Build GCC + UBSAN'
       - job: BionicReleaseGCC_MSAN
         variables:
           HOSTING_OS: bionic
@@ -734,7 +734,7 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'Ubuntu Bionic Build Clang + MSAN'
+        displayName: 'Ubuntu Bionic Build GCC + MSAN'
 
 
 # MARK: -
@@ -782,7 +782,7 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'Ubuntu Xenial Build GCC'
+        displayName: 'Ubuntu Xenial Build GCC + Coverage'
       - job: XenialReleaseGCC_ASAN
         variables:
           HOSTING_OS: xenial
@@ -823,7 +823,7 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'Ubuntu Bionic Build Clang + ASAN'
+        displayName: 'Ubuntu Xenial Build GCC + ASAN'
       - job: XenialReleaseGCC_TSAN
         variables:
           HOSTING_OS: xenial
@@ -864,7 +864,7 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'Ubuntu Bionic Build Clang + TSAN'
+        displayName: 'Ubuntu Xenial Build GCC + TSAN'
       - job: XenialReleaseGCC_UBSAN
         variables:
           HOSTING_OS: xenial
@@ -905,7 +905,7 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'Ubuntu Bionic Build Clang + UBSAN'
+        displayName: 'Ubuntu Xenial Build GCC + UBSAN'
       - job: XenialReleaseGCC_MSAN
         variables:
           HOSTING_OS: xenial
@@ -946,7 +946,7 @@ stages:
               testResultsFormat: 'cTest'
               testResultsFiles: '**/Test.xml'
               testRunTitle: 'cTest-$(HOSTING_OS)-$(HOSTING_COMPILER)-UnitTests'
-        displayName: 'Ubuntu Bionic Build Clang + MSAN'
+        displayName: 'Ubuntu Xenial GCC Clang + MSAN'
 
   - stage: TestInstallationXenial
     dependsOn:
@@ -954,14 +954,13 @@ stages:
       - XenialClang
     condition: succeeded()
     jobs:
-      - job: LinuxLint
+      - job: XenialInstallationTest
         pool:
           vmImage: 'ubuntu-16.04'
         steps:
-          - script: sudo apt-get update -y
-          - script: sudo apt-get install -y libxml2-utils
-          - script: xmllint --noout ./**/*.xml
-        displayName: 'Linting'
+          - checkout: none
+          - script: echo "whassup"
+        displayName: 'Testing Xenial Installation'
 
   - stage: TestInstallationBionic
     dependsOn:
@@ -969,11 +968,10 @@ stages:
       - BionicClang
     condition: succeeded()
     jobs:
-      - job: LinuxLint
+      - job: BionicInstallationTest
         pool:
           vmImage: 'ubuntu-18.04'
         steps:
-          - script: sudo apt-get update -y
-          - script: sudo apt-get install -y libxml2-utils
-          - script: xmllint --noout ./**/*.xml
-        displayName: 'Linting'
+          - checkut: none
+          - script: echo "whassup"
+        displayName: 'Testing Bionic Installation'
