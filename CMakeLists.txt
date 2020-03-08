@@ -23,6 +23,14 @@ elseif(APPLE)
   endif()
 endif()
 
+get_filename_component(srcdir "${CMAKE_SOURCE_DIR}" REALPATH)
+get_filename_component(bindir "${CMAKE_BINARY_DIR}" REALPATH)
+
+# disallow in-source builds
+if("${srcdir}" STREQUAL "${bindir}")
+  message(FATAL_ERROR "Quitting configuration")
+endif()
+
 if(POLICY CMP0025) # AppleClang and Clang are different compilers.
   cmake_policy(SET CMP0025 NEW)
 endif()
