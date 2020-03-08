@@ -31,11 +31,13 @@
 //#undef SEEK_SET
 //#undef SEEK_END
 //#undef SEEK_CUR
+
+#include <mpi.h>
+
 #include "../fem_elastic/morph.h"
 #include "../fem_elastic/morph_utils.h"
 #include "../fem_elastic/surf_utils.h"
 #include "gcamorph.h"
-#include <mpi.h>
 #endif
 
 #include "mri.h"

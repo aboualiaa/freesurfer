@@ -4,6 +4,7 @@
 #define ITK_THREAD_RETURN_TYPE itk::ITK_THREAD_RETURN_TYPE
 #define ITK_THREAD_RETURN_DEFAULT_VALUE itk::ITK_THREAD_RETURN_DEFAULT_VALUE
 #else
+#include "itkMultiThreader.h"
 #define PlatformMultiThreader MultiThreader
 #define GetNumberOfWorkUnitsUsed GetNumberOfThreadsUsed
 #define MultiThreaderBase MultiThreader

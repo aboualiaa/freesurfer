@@ -1,9 +1,9 @@
 project(trc)
 
 # TODO: remove APPLE condition after solving fem_elastic build issues on linux
-find_package(MPI REQUIRED)
+if(PETSC_FOUND AND APPLE AND NOT DEFINED FS_GCC_PATH)
 
-if(PETSC_FOUND AND APPLE)
+find_package(MPI REQUIRED)
 
   include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -13,6 +13,7 @@ if(PETSC_FOUND AND APPLE)
     ${CMAKE_SOURCE_DIR}/packages/tetgen
     ${ITK_INCLUDE_DIRS}
     ${PETSC_INCLUDE_DIR}
+    ${MPI_CXX_HEADER_DIR}
   )
 
   # dmri_spline

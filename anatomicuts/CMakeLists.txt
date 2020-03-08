@@ -11,7 +11,7 @@ if(VTK_FOUND)
     ${VTK_INCLUDE_DIRS}
   )
 
-  include(${ITK_USE_FILE})  
+  include(${ITK_USE_FILE})
   include(${VTK_USE_FILE})
 
   if(NOT APPLE)
@@ -42,29 +42,29 @@ if(VTK_FOUND)
   add_executable(streamlineFilter StreamlineFilter.cxx ${TRACKIO})
   target_link_libraries(streamlineFilter utils ${ITK_LIBRARIES} ${VTK_LIBRARIES})
   install(TARGETS streamlineFilter DESTINATION bin)
-  
+
 #dmri_stats_ac
   add_executable(dmri_stats_ac dmri_stats_ac.cxx ${TRACKIO})
   target_link_libraries(dmri_stats_ac utils ${ITK_LIBRARIES} ${VTK_LIBRARIES})
   install(TARGETS dmri_stats_ac DESTINATION bin)
 
 #orientation planes
-  add_executable(testOrientationPlanesFromParcellation testOrientationFromParcellationFilter.cxx ) 
+  add_executable(testOrientationPlanesFromParcellation testOrientationFromParcellationFilter.cxx )
   target_link_libraries(testOrientationPlanesFromParcellation ${ITK_LIBRARIES} ${VTK_LIBRARIES})
   install(TARGETS testOrientationPlanesFromParcellation DESTINATION bin)
 
 #Save histograms
-  add_executable(dmri_saveHistograms SaveHistograms.cxx ${TRACKIO}) 
+  add_executable(dmri_saveHistograms SaveHistograms.cxx ${TRACKIO})
   target_link_libraries(dmri_saveHistograms ${ITK_LIBRARIES} ${VTK_LIBRARIES})
   install(TARGETS dmri_saveHistograms DESTINATION bin)
 
 #dmri_groupByEndpoints
-  add_executable(dmri_groupByEndpoints dmri_groupByEndpoints.cxx ${TRACKIO}) 
+  add_executable(dmri_groupByEndpoints dmri_groupByEndpoints.cxx ${TRACKIO})
   target_link_libraries(dmri_groupByEndpoints utils ${ITK_LIBRARIES} ${VTK_LIBRARIES})
   install(TARGETS dmri_groupByEndpoints DESTINATION bin)
 
 #dmri_extractSurfaceMeasurements
-  add_executable(dmri_extractSurfaceMeasurements dmri_extractSurfaceMeasurements.cxx ${TRACKIO}) 
+  add_executable(dmri_extractSurfaceMeasurements dmri_extractSurfaceMeasurements.cxx ${TRACKIO})
   target_link_libraries(dmri_extractSurfaceMeasurements utils ${ITK_LIBRARIES} ${VTK_LIBRARIES})
   install(TARGETS dmri_extractSurfaceMeasurements DESTINATION bin)
 

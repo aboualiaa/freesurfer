@@ -8,6 +8,7 @@ if(PETSC_FOUND)
     ${CMAKE_SOURCE_DIR}/packages/tetgen
     ${PETSC_INCLUDE_DIR}
     ${ITK_INCLUDE_DIRS}
+    ${MPI_CXX_HEADER_DIR}
   )
 
   set(COMMON3D_SOURCES
