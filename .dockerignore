@@ -1,0 +1,5 @@
+**/*.tar.gz
+**/cmake-build-*
+**/clang-*-build
+**/gcc-*-build
+**/.git

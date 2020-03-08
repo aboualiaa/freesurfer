@@ -38,9 +38,9 @@ if(BUILD_TESTING)
   add_test(mri_convert_unit mri_convert_unit)
   set_property(TEST mri_convert_unit PROPERTY LABELS Unit)
   set_property(TEST mri_convert_test PROPERTY LABELS Integration)
-endif()
 
-add_executable(mri_convert_bench mri_convert_bench.cpp)
-add_help(mri_convert_bench mri_convert.help.xml)
-target_link_libraries(mri_convert_bench ${COMMON_LIBS} ${GTEST_LIBRARIES}
-                      gtest ${ARMADILLO_LIBRARIES})
+  add_executable(mri_convert_bench mri_convert_bench.cpp)
+  add_help(mri_convert_bench mri_convert.help.xml)
+  target_link_libraries(mri_convert_bench ${COMMON_LIBS} ${GTEST_LIBRARIES}
+                        gtest ${ARMADILLO_LIBRARIES})
+endif()

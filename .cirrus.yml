@@ -1,10 +1,4 @@
-
-container:
-  image: gcc:latest
+docker_builder:
   cpu: 8
   memory: 24G
-
-task:
-  configure_script: ./ci-scripts/travis.configure.bionic.gcc.Build.sh
-  build_script: ./ci-scripts/travis.script.bionic.Build.sh
-  test_script: ./ci-scripts/travis.script.bionic.Unit.sh
+  build_script: docker build --tag freesurfer:latest -f repo.dockerfile .
