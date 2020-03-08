@@ -17,14 +17,14 @@ fi
 
 export PATH=/usr/local/bin:$PATH
 
-(
+sudo bash <<"ENDBASH"
   cd /usr/local
-  sudo cat >libs.conf <<"END"
+  cat >libs.conf <<"END"
 /usr/local/lib
 END
-)
+ENDBASH
 
-sudo mv libs.conf /etc/ld.so.conf.d/libs.conf
+sudo mv /usr/local/libs.conf /etc/ld.so.conf.d/libs.conf
 sudo ldconfig
 
 #  export PATH="$(pwd)/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-16.04/bin:$PATH"
