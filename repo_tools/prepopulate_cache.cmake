@@ -1,5 +1,6 @@
 set(BUILD_TESTING OFF CACHE BOOL "build test target")
 set(FS_MINIMAL_BUILD OFF CACHE BOOL "create a minimal build")
+set(FS_INTEGRATION_TESTING OFF CACHE BOOL "get data for integration testing")
 set(FS_BUILD_ATTIC ON CACHE BOOL "build deprecated tools")
 set(FS_INFANT_MODULE ON CACHE BOOL "build infant module")
 set(FS_BUILD_DNG ON CACHE BOOL "build dng's testing tools")
