@@ -40,6 +40,20 @@ if(POLICY CMP0048) # The project() command manages VERSION variables.
 endif()
 
 # project info
+project(freesurfer VERSION 7.0.0)
+if(NOT APPLE)
+  cmake_minimum_required(VERSION 3.9)
+  set(HOST_OS $ENV{HOSTING_OS})
+  # TODO: upgrade to itk 5 then remove
+  if(HOST_OS STREQUAL "trusty")
+    add_definitions(-DFS_ITK_LEGACY_REMOVE)
+  endif()
+  add_definitions(-DVCL_GCC_80) # trick itk 4 into believing the compiler is gcc 8
+  add_definitions(-DVXL_FULLCXX11SUPPORT)
+  set(BUILD_GUIS OFF)
+else()
+  cmake_minimum_required(VERSION 3.10.2) # preparing for itk5
+endif()
 enable_language(C CXX Fortran)
 find_program(CCACHE_PROGRAM ccache)
 mark_as_advanced(CCACHE_PROGRAM)
