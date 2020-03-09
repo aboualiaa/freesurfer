@@ -1542,7 +1542,20 @@ LABEL *MRIScortexLabel(MRI_SURFACE *mris, MRI *mri_aseg, int min_vertices, int K
   double xv, yv, zv, val, xs, ys, zs, d;
   MRI_REGION box;
 
+  // Control whether NucAcc is medial wall. Historically, it has been
+  // if a NucAcc voxel was just outside the white.preaparc. NucAcc is
+  // very close to the true medial wall, so sometimes these marked
+  // vertices would get tangled up in the erode/dilate/cluster
+  // operations on the medial wall (unlike putamen where there is a
+  // clear distinction). In these cases, true cortex near the NucAcc
+  // can get masked out. Changed so that by default NucAcc is now
+  // NOT considered part of the medial wall. DNG 3/5/2020
+  int NucAccIsMedialWall = 0; 
+  if(getenv("FS_NUCACC_IS_MEDIAL_WALL") != NULL)
+    sscanf(getenv("FS_NUCACC_IS_MEDIAL_WALL"),"%d",&NucAccIsMedialWall);
+
   printf(" Generating cortex label... RemoveHipAmgy=%d\n",KeepHipAmyg);
+  printf("NucAccIsMedialWall=%d\n",NucAccIsMedialWall);
 
   mri_aseg = MRIcopy(mri_aseg, nullptr); // so we can mess with it
 
@@ -1602,8 +1615,9 @@ LABEL *MRIScortexLabel(MRI_SURFACE *mris, MRI *mri_aseg, int min_vertices, int K
       if(label == Left_Lateral_Ventricle ||
           ( !KeepHipAmyg && (IS_HIPPO(label) || IS_AMYGDALA(label)) ) ||
           (IS_WM(label) && IS_WM(base_label) && (base_label != label)) ||  // crossed hemi staying in wm
-          label == Right_Lateral_Ventricle || label == Third_Ventricle || label == Left_Accumbens_area ||
-          label == Right_Accumbens_area || label == Left_Caudate || label == Right_Caudate || IS_CC(label) ||
+          label == Right_Lateral_Ventricle || label == Third_Ventricle || 
+          (NucAccIsMedialWall && (label == Left_Accumbens_area || label == Right_Accumbens_area)) ||
+          label == Left_Caudate || label == Right_Caudate || IS_CC(label) ||
           label == Left_Pallidum || label == Right_Pallidum || 
           IS_LAT_VENT(label) || label == Third_Ventricle || label == Right_Thalamus ||
           label == Left_Thalamus || label == Brain_Stem || label == Left_VentralDC || label == Right_VentralDC) {

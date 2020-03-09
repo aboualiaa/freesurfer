@@ -208,20 +208,21 @@ add_library(utils SHARED
 )
 
 target_link_libraries(utils
-                      jpeg
-                      tiff
-                      xml2
-                      minc
-                      netcdf
-                      nrrdio
-                      dicom
-                      cephes
-                      nifti
-                      gifti
-                      expat
-                      ${ZLIB_LIBRARIES}
-                      ${ITK_LIBRARIES}
-                      )
+  jpeg
+  tiff
+  xml2
+  minc
+  netcdf
+  nrrdio
+  dicom
+  cephes
+  nifti
+  gifti
+  expat
+  ${ZLIB_LIBRARIES}
+  ${ITK_LIBRARIES}
+  ${OMP_CXX_LIBRARIES}
+)
 
 if(NOT APPLE)
   target_link_libraries(utils crypt rt atomic)

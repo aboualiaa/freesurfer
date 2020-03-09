@@ -169,7 +169,17 @@ bool SurfacePath::RemovePoint(int nVert) {
   return false;
 }
 
-bool SurfacePath::RemovePoint(double *pos) {
+void SurfacePath::RemoveLastPoint()
+{
+  if (!m_listVertices.isEmpty())
+  {
+    m_listVertices.removeLast();
+    Update();
+  }
+}
+
+bool SurfacePath::RemovePoint( double* pos )
+{
   int nVert = m_mris->GetVertexIndexAtTarget(pos, NULL);
   return RemovePoint(nVert);
 }

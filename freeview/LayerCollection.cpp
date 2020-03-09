@@ -29,10 +29,17 @@
 #include <math.h>
 #include <QDebug>
 #include <iostream>
+#include <QTimer>
+#include "LayerMRI.h"
+#include "LayerPropertyMRI.h"
 
-LayerCollection::LayerCollection(const QString &strType, QObject *parent)
-    : QObject(parent), m_layerActive(NULL), m_strType(strType) {
-  for (int i = 0; i < 3; i++) {
+LayerCollection::LayerCollection( const QString& strType, QObject* parent ) :
+  QObject( parent ),
+  m_layerActive( NULL ),
+  m_strType( strType )
+{
+  for ( int i = 0; i < 3; i++ )
+  {
     m_dSlicePosition[i] = 0;
     m_dWorldOrigin[i] = 0;
     m_dWorldVoxelSize[i] = 1;
@@ -399,10 +406,33 @@ void LayerCollection::Append2DProps(vtkRenderer *renderer, int nImagePlane) {
   }
 }
 
-void LayerCollection::Append3DProps(vtkRenderer *renderer,
-                                    bool *bSliceVisibility) {
-  for (int i = (int)m_layers.size() - 1; i >= 0; i--) {
-    m_layers[i]->Append3DProps(renderer, bSliceVisibility);
+void LayerCollection::Append3DProps( vtkRenderer* renderer, bool* bSliceVisibility )
+{
+  if (m_strType != "MRI")
+  {
+    for ( int i = (int)m_layers.size()-1; i >= 0; i-- )
+    {
+      m_layers[i]->Append3DProps( renderer, bSliceVisibility );
+    }
+  }
+  else
+  {
+    QList<Layer*> contour_layers;
+    QList<Layer*> normal_layers;
+    for (size_t i = 0; i < m_layers.size(); i++)
+    {
+      if (m_layers[i]->IsTypeOf("VolumeTrack") ||
+          qobject_cast<LayerMRI*>(m_layers[i])->GetProperty()->GetShowAsContour())
+        contour_layers << m_layers[i];
+      else
+        normal_layers << m_layers[i];
+    }
+
+    for (int i = (int)contour_layers.size()-1; i >= 0; i--)
+      contour_layers[i]->Append3DProps(renderer, bSliceVisibility);
+
+    for (int i = (int)normal_layers.size()-1; i >= 0; i--)
+      normal_layers[i]->Append3DProps(renderer, bSliceVisibility);
   }
 }
 

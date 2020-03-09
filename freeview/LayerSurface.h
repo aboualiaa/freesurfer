@@ -289,6 +289,8 @@ public:
 
   void RemovePathPoint(int vno);
 
+  void RemoveLastPathPoint();
+
   void SetActivePath(int n);
 
   SurfacePath *GetActivePath();

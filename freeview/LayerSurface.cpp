@@ -2261,8 +2261,15 @@ void LayerSurface::EditPathPoint(int vno, bool remove) {
     m_marks->AddPoint(vno);
 }
 
-void LayerSurface::SetActivePath(int n) {
-  if (m_nActivePath >= 0)
+void LayerSurface::RemoveLastPathPoint()
+{
+  if (m_marks)
+    m_marks->RemoveLastPoint();
+}
+
+void LayerSurface::SetActivePath(int n)
+{
+  if (m_nActivePath >=0)
     m_paths[m_nActivePath]->SetColor(Qt::red);
 
   if (n >= 0) {
