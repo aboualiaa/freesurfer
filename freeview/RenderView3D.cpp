@@ -1359,6 +1359,11 @@ void RenderView3D::SetCamera(const QVariantMap &info) {
     //    cam->SetClippingRange(clip_range);
     m_renderer->ResetCameraClippingRange();
     Render();
+    if (info.contains("ViewSize"))
+    {
+      map = info["ViewSize"].toMap();
+      MainWindow::GetMainWindow()->SetViewSize(map["width"].toInt(), map["height"].toInt());
+    }
   }
 }
 
@@ -1391,6 +1396,10 @@ QVariantMap RenderView3D::GetCamera() {
     //    map["near"] = clip_range[0];
     //    map["far"] = clip_range[1];
     //    info["ClippingRange"] = map;
+    map.clear();
+    map["width"] = width();
+    map["height"] = height();
+    info["ViewSize"] = map;
   }
   return info;
 }

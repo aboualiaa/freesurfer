@@ -549,7 +549,9 @@ bool Interactor2DVolumeEdit::ProcessKeyDownEvent(QKeyEvent *event,
     return false;
   }
 
-  if ((event->modifiers() & Qt::ShiftModifier) && m_nAction == EM_Shift) {
+  // disable using keyboard to shift voxels
+  if (false) // (event->modifiers() & Qt::ShiftModifier) && m_nAction == EM_Shift )
+  {
     int nKeyCode = event->key();
     int n[3] = {0, 0, 0};
     int nx = 0, ny = 1;

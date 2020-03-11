@@ -64,6 +64,34 @@ int DEBUG_V = -1;
 static int spherical_coordinate(double x, double y, double z, double *pphi,
                                 double *ptheta);
 
+
+// even though all spheres should be centered at the origin, it's possible they aren't, and
+// this needs to be accounted for when creating parameterizations
+static MRIS* makeCenteredSphere(MRIS *surf)
+{
+  mrisComputeSurfaceDimensions(surf);
+  float distance = std::sqrt((surf->xctr * surf->xctr) + (surf->yctr * surf->yctr) + (surf->zctr * surf->zctr));
+
+  if (distance > 0.1) {
+    fs::warning() << "Sphere is not centered (distance = " << distance << "). Moving center to origin - this might be unstable.";
+    surf = MRISclone(surf);
+    MRISmoveOrigin(surf, 0, 0, 0);
+  }
+
+  return surf;
+}
+
+
+// if 'centered' was copied from the original, copy the new curv values and free the centered surface
+static void resetCenteredSphere(MRIS *orig, MRIS *centered)
+{
+  if (orig != centered) {
+    for (int vno = 0 ; vno < orig->nvertices ; vno++) orig->vertices[vno].curv = centered->vertices[vno].curv;
+    MRISfree(&centered);
+  }
+}
+
+
 /*-----------------------------------------------------
         Parameters:
 
@@ -394,8 +422,11 @@ MRIStoParameterization(MRIS *mris, MRI_SP *mrisp, float scale,int fno)
   return(mrisp) ;
 }
 #else
-MRI_SP *MRIStoParameterization(MRIS *mris, MRI_SP *mrisp, float scale,
-                               int fno) {
+MRI_SP *MRIStoParameterization(MRIS *mris, MRI_SP *mrisp, float scale, int fno)
+{
+  MRIS *original = mris;
+  mris = makeCenteredSphere(mris);
+
   float a, b, c, phi, theta, x, y, z, uf, vf, d, total_d, **distances, *fp;
   int vno, u, v, unfilled, **filled, npasses, nfilled;
   VERTEX *vertex;
@@ -656,6 +687,8 @@ MRI_SP *MRIStoParameterization(MRIS *mris, MRI_SP *mrisp, float scale,
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
     ImageWrite(mrisp->Ip, "sphere.hipl");
 
+  resetCenteredSphere(original, mris);
+
   return (mrisp);
 }
 #endif
@@ -663,6 +696,9 @@ MRI_SP *MRIStoParameterization(MRIS *mris, MRI_SP *mrisp, float scale,
 
 MRI_SP *MRIStoParameterizationBarycentric(MRIS *mris, MRI_SP *mrisp, float scale, int frameno)
 {
+  MRIS *original = mris;
+  mris = makeCenteredSphere(mris);
+
   if (!mrisp) {
     mrisp = MRISPalloc(scale, 1);
   } else {
@@ -756,6 +792,8 @@ MRI_SP *MRIStoParameterizationBarycentric(MRIS *mris, MRI_SP *mrisp, float scale
   free(filled);
   free(distances);
 
+  resetCenteredSphere(original, mris);
+
   return mrisp;
 }
 
@@ -768,6 +806,9 @@ MRIS *MRISfromParameterizationBarycentric(MRI_SP *mrisp, MRIS *mris, int fno)
 
   if (!mris)
     mris = MRISclone(mrisp->mris);
+
+  MRIS *original = mris;
+  mris = makeCenteredSphere(mris);
 
   a = b = c = MRISaverageRadius(mris);
 
@@ -829,7 +870,8 @@ MRIS *MRISfromParameterizationBarycentric(MRI_SP *mrisp, MRIS *mris, int fno)
     vertex->curv = curv;
   }
 
-  return (mris);
+  resetCenteredSphere(original, mris);
+  return original;
 }
 
 int MRIScoordsFromParameterizationBarycentric(MRIS *mris, MRI_SP *mrisp,
@@ -1148,6 +1190,9 @@ MRIS *MRISfromParameterization(MRI_SP *mrisp, MRIS *mris, int fno) {
   if (!mris)
     mris = MRISclone(mrisp->mris);
 
+  MRIS *original = mris;
+  mris = makeCenteredSphere(mris);
+
 #if 0
   if (FZERO(mris->radius))
     a = b = c = MRISaverageRadius(mris) ;
@@ -1224,7 +1269,8 @@ MRIS *MRISfromParameterization(MRI_SP *mrisp, MRIS *mris, int fno) {
     vertex->curv = curv;
   }
 
-  return (mris);
+  resetCenteredSphere(original, mris);
+  return original;
 }
 /*-----------------------------------------------------
         Parameters:
@@ -1384,6 +1430,9 @@ MRIS *MRISnormalizeFromParameterization(MRI_SP *mrisp, MRIS *mris, int fno) {
   if (!mris)
     mris = MRISclone(mrisp->mris);
 
+  MRIS *original = mris;
+  mris = makeCenteredSphere(mris);
+
 #if 0
   if (FZERO(mris->radius))
     a = b = c = MRISaverageRadius(mris) ;
@@ -1457,7 +1506,8 @@ MRIS *MRISnormalizeFromParameterization(MRI_SP *mrisp, MRIS *mris, int fno) {
     vertex->curv = curv / (sqrt(var));
   }
 
-  return (mris);
+  resetCenteredSphere(original, mris);
+  return original;
 }
 /*-----------------------------------------------------
         Parameters:
@@ -1466,9 +1516,12 @@ MRIS *MRISnormalizeFromParameterization(MRI_SP *mrisp, MRIS *mris, int fno) {
 
         Description
 ------------------------------------------------------*/
-MRI_SP *MRISgradientToParameterization(MRIS *mris, MRI_SP *mrisp, float scale) {
-  float a, b, c, phi, theta, x, y, z, uf, vf, d, total_d, **distances, sigma,
-      two_sigma_sq;
+MRI_SP *MRISgradientToParameterization(MRIS *mris, MRI_SP *mrisp, float scale)
+{
+  MRIS *original = mris;
+  mris = makeCenteredSphere(mris);
+
+  float a, b, c, phi, theta, x, y, z, uf, vf, d, total_d, **distances, sigma, two_sigma_sq;
   int vno, u, v, unfilled, **filled;
   VERTEX *vertex;
 
@@ -1644,6 +1697,8 @@ MRI_SP *MRISgradientToParameterization(MRIS *mris, MRI_SP *mrisp, float scale) {
   if (Gdiag & DIAG_WRITE && DIAG_VERBOSE_ON)
     ImageWrite(mrisp->Ip, "sphere.hipl");
 
+  resetCenteredSphere(original, mris);
+
   return (mrisp);
 }
 /*-----------------------------------------------------
@@ -1660,6 +1715,9 @@ MRIS *MRISgradientFromParameterization(MRI_SP *mrisp, MRIS *mris) {
 
   if (!mris)
     mris = MRISclone(mrisp->mris);
+
+  MRIS *original = mris;
+  mris = makeCenteredSphere(mris);
 
 #if 0
   if (FZERO(mris->radius))
@@ -1747,7 +1805,8 @@ MRIS *MRISgradientFromParameterization(MRI_SP *mrisp, MRIS *mris) {
         du * (1.0f - dv) * *IMAGEFseq_pix(mrisp->Ip, u1, v0, 2);
   }
 
-  return (mris);
+  resetCenteredSphere(original, mris);
+  return original;
 }
 /*-----------------------------------------------------
         Parameters:
@@ -3092,6 +3151,9 @@ MRIS *MRISfromParameterizations(MRI_SP *mrisp, MRIS *mris, int *frames,
   if (!mris)
     mris = MRISclone(mrisp->mris);
 
+  MRIS *original = mris;
+  mris = makeCenteredSphere(mris);
+
 #if 0
   if (FZERO(mris->radius))
     a = b = c = MRISaverageRadius(mris) ;
@@ -3161,11 +3223,15 @@ MRIS *MRISfromParameterizations(MRI_SP *mrisp, MRIS *mris, int *frames,
     }
   }
 
-  return (mris);
+  resetCenteredSphere(original, mris);
+  return original;
 }
 
-MRI_SP *MRIStoParameterizations(MRIS *mris, MRI_SP *mrisp, float scale,
-                                int *frames, int *indices, int nframes) {
+MRI_SP *MRIStoParameterizations(MRIS *mris, MRI_SP *mrisp, float scale, int *frames, int *indices, int nframes)
+{
+  MRIS *original = mris;
+  mris = makeCenteredSphere(mris);
+
   float a, b, c, phi, theta, x, y, z, uf, vf, d, total_d, **distances, *total;
   int m, vno, u, v, unfilled, **filled, npasses, nfilled;
   VERTEX *vertex;
@@ -3366,6 +3432,8 @@ MRI_SP *MRIStoParameterizations(MRIS *mris, MRI_SP *mrisp, float scale,
     fprintf(stderr, "done.\n");
 
   free(total);
+
+  resetCenteredSphere(original, mris);
 
   return (mrisp);
 }

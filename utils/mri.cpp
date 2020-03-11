@@ -12072,9 +12072,7 @@ MRI *MRIchangeType(MRI *src, int dest_type, float f_low, float f_high,
       for (k = 0; k < src->depth; k++)
         for (j = 0; j < src->height; j++)
           for (i = 0; i < src->width; i++) {
-
             val = MRIgetVoxVal(src, i, j, k, frame);
-
             MRIsetVoxVal(dest, i, j, k, frame, val);
           }
   } else {
@@ -12112,11 +12110,8 @@ MRI *MRIchangeType(MRI *src, int dest_type, float f_low, float f_high,
       for (i = 0; i < src->width; i++)
         for (j = 0; j < src->height; j++)
           for (k = 0; k < src->depth; k++) {
-
             val = MRIgetVoxVal(src, i, j, k, frame);
-
-            if (!DZERO(val))
-              nonzero++;
+            if (!DZERO(val)) nonzero++;
             bin = (int)((val - src_min) / bin_size);
 
             if (bin < 0)

@@ -274,6 +274,7 @@ void SurfaceOverlayProperty::SetColorMethod(int nTh) { m_nColorMethod = nTh; }
 void SurfaceOverlayProperty::SetMinPoint(double dValue) {
   if (dValue != m_dMinPoint) {
     m_dMinPoint = dValue;
+    SetColorScale(m_nColorScale);
   }
 }
 
@@ -282,6 +283,7 @@ double SurfaceOverlayProperty::GetMinPoint() { return m_dMinPoint; }
 void SurfaceOverlayProperty::SetMidPoint(double dValue) {
   if (dValue != m_dMidPoint) {
     m_dMidPoint = dValue;
+    SetColorScale(m_nColorScale);
   }
 }
 
@@ -290,6 +292,7 @@ double SurfaceOverlayProperty::GetMidPoint() { return m_dMidPoint; }
 void SurfaceOverlayProperty::SetMaxPoint(double dValue) {
   if (dValue != m_dMaxPoint) {
     m_dMaxPoint = dValue;
+    SetColorScale(m_nColorScale);
   }
 }
 
@@ -298,6 +301,7 @@ double SurfaceOverlayProperty::GetMaxPoint() { return m_dMaxPoint; }
 void SurfaceOverlayProperty::SetOffset(double dOffset) {
   if (dOffset != m_dOffset) {
     m_dOffset = dOffset;
+    SetColorScale(m_nColorScale);
   }
 }
 
@@ -317,18 +321,10 @@ void SurfaceOverlayProperty::SetColorTruncate(bool bTruncate) {
   SetColorScale(m_nColorScale);
 }
 
-/*
-void SurfaceOverlayProperty::MapOverlayColor( unsigned char* colordata, int
-nPoints )
+void SurfaceOverlayProperty::MapOverlayColor( float* data, unsigned char* colordata, int nPoints )
 {
-  MapOverlayColor( m_overlay->GetData(), colordata, nPoints );
-}
-*/
-
-void SurfaceOverlayProperty::MapOverlayColor(float *data,
-                                             unsigned char *colordata,
-                                             int nPoints) {
-  if (m_nColorScale <= CS_BlueRed) {
+  if ( m_nColorScale <= CS_BlueRed )
+  {
     MapOverlayColorSymmetric(data, colordata, nPoints);
   } else {
     MapOverlayColorFullScale(data, colordata, nPoints);

@@ -125,7 +125,6 @@ public:
 
   void Reset();
 
-  void EmitColorMapChanged() { emit ColorMapChanged(); }
 
   void SetMask(SurfaceLabel *label);
 
@@ -142,7 +141,11 @@ signals:
   void ComputeCorrelationChanged();
 
 public slots:
-  void OnLabelMaskDestroyed(QObject *label);
+  void EmitColorMapChanged()
+  {
+    emit ColorMapChanged();
+  }
+  void OnLabelMaskDestroyed(QObject* label);
 
 private:
   double m_dOpacity;
