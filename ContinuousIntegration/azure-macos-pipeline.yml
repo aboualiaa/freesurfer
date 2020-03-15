@@ -31,6 +31,7 @@ stages:
           vmImage: $(imageName)
         steps:
           - task: DownloadPipelineArtifact@2
+            continueOnError: false
             inputs:
               buildType: 'specific'
               project: '1eee1365-4e03-49ce-a8e3-c84dd1212c9e'
@@ -51,17 +52,20 @@ stages:
               brew install armadillo cmake eigen fltk gts hdf5 itk coreutils \
               jemalloc lcov libomp llvm ninja open-mpi petsc python@3 qt szip tcsh vtk || true
             displayName: 'Installing Dependencies'
+            continueOnError: false
           - script: |
               export PATH="/usr/local/opt/llvm/bin:/usr/local/opt/python/libexec/bin:$PATH"
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
             displayName: 'Building'
+            continueOnError: false
           - script: |
               echo $AZURE_SOURCE_DIR
               export AZURE_SOURCE_DIR
               ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
             displayName: 'Unit Testing'
+            continueOnError: true
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'cTest'
