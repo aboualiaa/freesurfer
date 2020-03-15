@@ -119,7 +119,7 @@ stages:
               export TESTING_TYPE
               git remote add cache ../GitAnnex
               git annex copy --from cache
-            displayName: 'Setting up Git Annex'
+            displayName: 'Installing Dependencies'
             continueOnError: false
           - script: |
               set -e
@@ -224,7 +224,7 @@ stages:
               export TESTING_TYPE
               git remote add cache ../GitAnnex
               git annex copy --from cache
-            displayName: 'Setting up Git Annex'
+            displayName: 'Installing Dependencies'
             continueOnError: false
           - script: |
               set -e
