@@ -225,7 +225,7 @@ stages:
             continueOnError: false
           - script: |
               set -e
-              ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+              ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh $INSTRUMENTATION
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
             displayName: 'Building'
