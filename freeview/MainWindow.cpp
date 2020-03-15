@@ -1285,10 +1285,12 @@ void MainWindow::OnIdle() {
     }
   }
 
-  ui->actionViewSagittal->setChecked(m_nMainView == this->MV_Sagittal);
-  ui->actionViewCoronal->setChecked(m_nMainView == this->MV_Coronal);
-  ui->actionViewAxial->setChecked(m_nMainView == this->MV_Axial);
-  ui->actionView3D->setChecked(m_nMainView == this->MV_3D);
+  ui->actionShowToolbar->setChecked(ui->mainToolBar->isVisible());
+
+  ui->actionViewSagittal->setChecked( m_nMainView == this->MV_Sagittal );
+  ui->actionViewCoronal->setChecked( m_nMainView == this->MV_Coronal );
+  ui->actionViewAxial->setChecked( m_nMainView == this->MV_Axial );
+  ui->actionView3D->setChecked( m_nMainView == this->MV_3D );
 
   ui->actionLayout1x1->setChecked(m_nViewLayout == this->VL_1x1);
   ui->actionLayout2x2->setChecked(m_nViewLayout == this->VL_2x2);
