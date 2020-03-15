@@ -2,6 +2,8 @@
 
 set -e
 
+INSTRUMENTATION="$1"
+
 mkdir -p cmake-build-debug-xenial && cd ./cmake-build-debug-xenial
 
 #  export LD_LIBRARY_PATH="/usr/local/clang_9.0.0/lib:$LD_LIBRARY_PATH"
@@ -57,4 +59,4 @@ if [[ ! -d "$(pwd)/prebuilt_packages" ]]; then
 fi
 # TODO: reenable guis after fixing compile issues
 # TODO: check if the other flags are still needed (originally for the benchmark module)
-cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_GUIS=OFF -DCMAKE_CROSSCOMPILING=1 -DRUN_HAVE_STD_REGEX=0 -DRUN_HAVE_POSIX_REGEX=0 ..
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_GUIS=OFF -DCMAKE_CROSSCOMPILING=1 -DRUN_HAVE_STD_REGEX=0 -DRUN_HAVE_POSIX_REGEX=0 -DFS_ADD_INSTRUMENTATION=$INSTRUMENTATION ..
