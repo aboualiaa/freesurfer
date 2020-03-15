@@ -172,7 +172,7 @@ if(FS_ADD_INSTRUMENTATION STREQUAL "cfisan")
   if("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang"
      OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
     message(STATUS "adding cfisan instrumentation")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=cfi -flto")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=cfi -flto -fvisibility=hidden")
     #  set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_COMPILER}")
     #  set(CMAKE_C_LINK_EXECUTABLE "${CMAKE_C_COMPILER}")
   else()
