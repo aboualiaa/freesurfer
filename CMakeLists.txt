@@ -376,52 +376,55 @@ set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Suppressing benchmark's tests" FORC
 
 add_subdirectory(packages)
 
+#if(APPLE)
+#  # this is an ugly hack to ensure that cmake looks for the
+#  # static version of libomp on mac, since we don't want
+#  # to distribute the shared library
+#  set(ORIG_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
+#  set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+#  find_package(OpenMP)
+#  set(CMAKE_FIND_LIBRARY_SUFFIXES ${ORIG_LIBRARY_SUFFIXES})
+#else()
+#  find_package(OpenMP)
+#endif()
+#
+#if(OPENMP_FOUND)
+#  add_definitions(-DHAVE_OPENMP)
+#  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+#  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+#  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
+#  set(OMP_CXX_LIBRARIES OpenMP::OpenMP_CXX)
+#endif()
+
+# -------- openMP --------
 if(APPLE)
-  # this is an ugly hack to ensure that cmake looks for the
-  # static version of libomp on mac, since we don't want
-  # to distribute the shared library
-  set(ORIG_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
-  find_package(OpenMP)
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ${ORIG_LIBRARY_SUFFIXES})
-else()
-  find_package(OpenMP)
+  if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+    set(OpenMP_C "${CMAKE_C_COMPILER}")
+    set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp -lomp -L/usr/local/opt/libomp/lib -I/usr/local/opt/libomp/include")
+    set(OpenMP_C_LIB_NAMES "libomp" "libgomp" "libiomp5")
+    set(OpenMP_libomp_LIBRARY ${OpenMP_C_LIB_NAMES})
+    set(OpenMP_libgomp_LIBRARY ${OpenMP_C_LIB_NAMES})
+    set(OpenMP_libiomp5_LIBRARY ${OpenMP_C_LIB_NAMES})
+  endif()
+  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    set(OpenMP_CXX "${CMAKE_CXX_COMPILER}")
+    set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp -lomp -L/usr/local/opt/libomp/lib -I/usr/local/opt/libomp/include -L/usr/local/opt/hdf5/lib -L/usr/local/opt/szip/lib")
+    set(OpenMP_CXX_LIB_NAMES "libomp" "libgomp" "libiomp5")
+    set(OpenMP_libomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+    set(OpenMP_libgomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+    set(OpenMP_libiomp5_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+  endif()
+  add_link_options(-Xpreprocessor -fopenmp -lomp -L/usr/local/opt/libomp/lib -I/usr/local/opt/libomp/include -L/usr/local/opt/hdf5/lib -L/usr/local/opt/szip/lib)
 endif()
 
+find_package(OpenMP)
 if(OPENMP_FOUND)
-  add_definitions(-DHAVE_OPENMP)
+  add_definitions(-DHAVE_OPENMP -D_OPENMP)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
   set(OMP_CXX_LIBRARIES OpenMP::OpenMP_CXX)
 endif()
-## -------- openMP --------
-#if(APPLE)
-#  if(CMAKE_C_COMPILER_ID MATCHES "Clang")
-#    set(OpenMP_C "${CMAKE_C_COMPILER}")
-#    set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp -lomp -L/usr/local/opt/libomp/lib -I/usr/local/opt/libomp/include")
-#    set(OpenMP_C_LIB_NAMES "libomp" "libgomp" "libiomp5")
-#    set(OpenMP_libomp_LIBRARY ${OpenMP_C_LIB_NAMES})
-#    set(OpenMP_libgomp_LIBRARY ${OpenMP_C_LIB_NAMES})
-#    set(OpenMP_libiomp5_LIBRARY ${OpenMP_C_LIB_NAMES})
-#  endif()
-#  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-#    set(OpenMP_CXX "${CMAKE_CXX_COMPILER}")
-#    set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp -lomp -L/usr/local/opt/libomp/lib -I/usr/local/opt/libomp/include -L/usr/local/opt/hdf5/lib -L/usr/local/opt/szip/lib")
-#    set(OpenMP_CXX_LIB_NAMES "libomp" "libgomp" "libiomp5")
-#    set(OpenMP_libomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
-#    set(OpenMP_libgomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
-#    set(OpenMP_libiomp5_LIBRARY ${OpenMP_CXX_LIB_NAMES})
-#  endif()
-#  add_link_options(-Xpreprocessor -fopenmp -lomp -L/usr/local/opt/libomp/lib -I/usr/local/opt/libomp/include -L/usr/local/opt/hdf5/lib -L/usr/local/opt/szip/lib)
-#endif()
-#
-#find_package(OpenMP)
-#if(OPENMP_FOUND)
-#  add_definitions(-DHAVE_OPENMP -D_OPENMP)
-#  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-#  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-#endif()
 
 
 # --------------------------------------------------
