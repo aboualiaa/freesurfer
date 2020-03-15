@@ -22,7 +22,7 @@ stages:
           - script: xmllint --noout ./**/*.xml
         displayName: 'Linting'
 
-# MARK: -
+  # MARK: -
 
   - stage: ClangBuilds
     dependsOn: Lint
@@ -111,6 +111,7 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              set -e
               ./ci-scripts/install_deps.sh $HOSTING_OS $HOSTING_COMPILER
               export TESTING_TYPE
               git remote add cache ../GitAnnex
@@ -118,12 +119,14 @@ stages:
             displayName: 'Setting up Git Annex'
             continueOnError: false
           - script: |
+              set -e
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh $INSTRUMENTATION
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
             displayName: 'Building'
             continueOnError: false
           - script: |
+              set -e
               echo $AZURE_SOURCE_DIR
               export AZURE_SOURCE_DIR
               ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
@@ -213,6 +216,7 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              set -e
               ./ci-scripts/install_deps.sh $HOSTING_OS $HOSTING_COMPILER
               export TESTING_TYPE
               git remote add cache ../GitAnnex
@@ -220,12 +224,14 @@ stages:
             displayName: 'Setting up Git Annex'
             continueOnError: false
           - script: |
+              set -e
               ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
             displayName: 'Building'
             continueOnError: false
           - script: |
+              set -e
               echo $AZURE_SOURCE_DIR
               export AZURE_SOURCE_DIR
               ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
