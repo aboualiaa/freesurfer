@@ -37,8 +37,6 @@
 # flag to the test script.
 #
 
-echo "zzzzzzzzzzzzzz: $AZURE_SOURCE_DIR"
-
 # make sure the script errors out after all failures
 set -e
 set -o pipefail
@@ -119,8 +117,6 @@ if [ -z ${AZURE_SOURCE_DIR+x} ]; then
 else
  export FREESURFER_HOME="$(find_path $AZURE_SOURCE_DIR distribution)"
 fi
-
-echo "zzzzzzzzzzzzzz: $FREESURFER_HOME"
 
 export SUBJECTS_DIR="$FSTEST_TESTDATA_DIR"
 export FSLOUTPUTTYPE="NIFTI_GZ"
