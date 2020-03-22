@@ -12,7 +12,6 @@
 #include <eigen3/Eigen/Dense>
 #include <gtest/gtest.h>
 
-#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wglobal-constructors"
 
 namespace cli   = fs::util::cli;
@@ -384,5 +383,3 @@ auto main(int /*argc*/, char * * /*argv*/) -> int {
   testing::InitGoogleTest();
   return RUN_ALL_TESTS();
 }
-
-#pragma GCC diagnostic pop
