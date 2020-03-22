@@ -915,7 +915,11 @@ static int get_option(int argc, char *argv[]) {
   } else if (!stricmp(option, "cubic")) {
     InterpMethod = SAMPLE_CUBIC;
     printf("using cubic interpolation\n");
-  } else if (!stricmp(option, "nearest")) {
+    printf("WARNING!!!! Cubic interpolation not implemented properly yet\n");
+    exit(1) ;
+  }
+  else if (!stricmp(option, "nearest"))
+  {
     InterpMethod = SAMPLE_NEAREST;
     printf("using nearest-neighbor interpolation\n");
   } else if (!stricmp(option, "tr")) {

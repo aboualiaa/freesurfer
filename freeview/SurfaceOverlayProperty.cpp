@@ -36,17 +36,26 @@
 #include "SurfaceLabel.h"
 #include <QDebug>
 
-SurfaceOverlayProperty::SurfaceOverlayProperty(SurfaceOverlay *overlay)
-    : QObject(), m_dOpacity(1), m_bColorInverse(false), m_bColorTruncate(false),
-      m_bClearLower(true), m_bClearHigher(false), m_bSmooth(false),
-      m_nSmoothSteps(1), m_overlay(overlay), m_bUsePercentile(false),
-      m_dOffset(0), m_mask(NULL), m_maskData(NULL), m_bInverseMask(false),
-      m_bIgnoreZeros(false) {
+SurfaceOverlayProperty::SurfaceOverlayProperty ( SurfaceOverlay* overlay) :
+  QObject( ),
+  m_dOpacity( 1 ),
+  m_bColorInverse( false ),
+  m_bColorTruncate( false ),
+  m_bClearLower(true),
+  m_bClearHigher(false),
+  m_bSmooth(false),
+  m_nSmoothSteps(1),
+  m_overlay( overlay ),
+  m_bUsePercentile(false),
+  m_dOffset(0),
+  m_mask(NULL),
+  m_maskData(NULL),
+  m_bInverseMask(false),
+  m_bIgnoreZeros(false),
+  m_nColorScale(CS_Heat),
+  m_nColorMethod(CM_LinearOpaque)
+{
   m_lut = vtkRGBAColorTransferFunction::New();
-
-  Reset();
-  SetColorScale(CS_Heat);
-  SetColorMethod(CM_LinearOpaque);
 }
 
 SurfaceOverlayProperty::~SurfaceOverlayProperty() {
@@ -113,6 +122,8 @@ void SurfaceOverlayProperty::Reset()
     m_customScale << QGradientStop(m_dMinPoint, Qt::red);
     m_dMinStop = m_dMinPoint;
     m_dMaxStop = m_dMaxPoint;
+    SetColorScale( m_nColorScale );
+    SetColorMethod( m_nColorMethod );
   }
 }
 

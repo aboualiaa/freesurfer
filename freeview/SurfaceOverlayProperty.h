@@ -125,8 +125,7 @@ public:
 
   void Reset();
 
-
-  void SetMask(SurfaceLabel *label);
+  void SetMask(SurfaceLabel* label);
 
   SurfaceLabel *GetMask() { return m_mask; }
 

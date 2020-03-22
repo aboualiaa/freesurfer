@@ -5075,8 +5075,18 @@ void MainWindow::LoadSurfaceFile(const QString &filename,
   QStringList sup_files = sup_files_in;
   if (sup_options.value("no_autoload").toBool()) {
     layer->SetSphereFileName("");
-  } else {
-    if (fi.fileName().contains("inflated.nofix")) {
+    if (fi.fileName().contains("inflated"))
+    {
+        QString fn = fi.absoluteFilePath();
+        fn.replace(".inflated", ".white");
+        if (QFile::exists(fn) && !sup_files.contains("white"))
+            sup_files << "white";
+    }
+  }
+  else
+  {
+    if (fi.fileName().contains("inflated.nofix"))
+    {
       if (!sup_files.contains("orig.nofix"))
         sup_files << "orig.nofix";
     } else if (fi.fileName().contains("inflated")) {

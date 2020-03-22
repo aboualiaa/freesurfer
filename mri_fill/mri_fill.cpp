@@ -5356,21 +5356,26 @@ static MRI *extend_to_lateral_borders(MRI *mri_src, MRI *mri_dst, int mask) {
   return (mri_dst);
 }
 
-#define WHALF ((11 - 1) / 2)
-static int find_cc_seed_with_segmentation(MRI *mri, MRI *mri_seg,
-                                          double *pcc_tal_x, double *pcc_tal_y,
-                                          double *pcc_tal_z) {
-  int x, y, z, label, yi, zi, yk, zk, xl, xr, rlabel, llabel, num, max_num;
-  double xcc, ycc, zcc;
+#define WHALF ((11-1)/2)
+static int
+find_cc_seed_with_segmentation
+(MRI *mri, MRI *mri_seg, double *pcc_tal_x, double *pcc_tal_y, double *pcc_tal_z)
+{
+  int  x,  y, z, label, yi, zi, yk, zk, xl, xr, rlabel, llabel, num, max_num;
+  double xcc, ycc,  zcc ;
 
-  xcc = ycc = zcc = 0.0;
-  max_num = 0;
-  for (x = 0; x < mri->width; x++) {
-    for (y = 0; y < mri->height; y++) {
-      for (z = 0; z < mri->width; z++) {
-        label = MRIgetVoxVal(mri_seg, x, y, z, 0);
-        if (!IS_WM(label)) {
-          continue;
+  xcc = ycc = zcc = 0.0  ;
+  max_num = 0 ;
+  for (x = 0 ; x  < mri->width ; x++)
+  {
+    for (y = 0 ; y  < mri->height ; y++)
+    {
+      for (z = 0 ; z  < mri->depth ; z++)
+      {
+        label = MRIgetVoxVal(mri_seg, x,  y, z,0) ;
+        if (!IS_WM(label))
+        {
+          continue  ;
         }
         xr = mri_seg->xi[x + 1];
         xl = mri_seg->xi[x - 1];
@@ -5600,78 +5605,99 @@ MRI *fill_with_aseg(MRI *mri_img, MRI *mri_seg) {
         }
       }
 
-  printf("Building Voronoi diagram ...\n");
-  MRIbuildVoronoiDiagram(mri_fill, mri_ctrl, mri_fill);
+  if (lhonly == 0 && rhonly == 0)
+  {
+    printf("Building Voronoi diagram ...\n");
+    MRIbuildVoronoiDiagram(mri_fill, mri_ctrl, mri_fill);
+    printf("Using the Voronoi diagram for ") ;
+  }
 
-  printf("Using the Voronoi diagram to "
-         "separate WM into two hemispheres ...\n");
+  printf("separating WM into two hemispheres ...\n");
 
-  for (z = 0; z < depth; z++)
-    for (y = 0; y < height; y++)
-      for (x = 0; x < width; x++) {
-        int val;
+  for (z=0; z < depth; z++)
+    for (y=0; y< height; y++)
+      for (x=0; x < width; x++)
+      {
+	int val ; 
 
-        if (x == Gx && y == Gy && z == Gz)
-          DiagBreak();
+	if (x == Gx && y == Gy && z == Gz)
+	  DiagBreak() ;
 
-        val = MRIgetVoxVal(mri_img, x, y, z, 0);
-        if (val == WM_EDITED_OFF_VAL) {
-          MRIsetVoxVal(mri_fill_lh, x, y, z, 0, 0);
-          MRIsetVoxVal(mri_fill_rh, x, y, z, 0, 0);
-          MRIsetVoxVal(mri_fill, x, y, z, 0, 0);
-          continue;
-        } else if (val == WM_EDITED_ON_VAL) {
-          int whalf = (int)ceil(5 / (mri_seg->xsize)), lh, rh;
+	val = MRIgetVoxVal(mri_img, x, y, z, 0) ;
+	if (val == WM_EDITED_OFF_VAL)
+	{
+	  MRIsetVoxVal(mri_fill_lh, x, y, z, 0, 0) ;
+	  MRIsetVoxVal(mri_fill_rh, x, y, z, 0, 0) ;
+	  MRIsetVoxVal(mri_fill, x, y, z, 0, 0) ;
+	  continue ;
+	}
+	else if (val == WM_EDITED_ON_VAL)
+	{
+	  int whalf = (int)ceil(5 / (mri_seg->xsize)), lh, rh ;
+	  
+	  if (lhonly || rhonly)
+	    whalf = MIN(whalf, 1);
 
-          lh = MRIlabelsInNbhd(mri_seg, x, y, z, whalf,
-                               Left_Cerebral_White_Matter) +
-               MRIlabelsInNbhd(mri_seg, x, y, z, whalf, Left_Cerebral_Cortex);
-          rh = MRIlabelsInNbhd(mri_seg, x, y, z, whalf,
-                               Right_Cerebral_White_Matter) +
-               MRIlabelsInNbhd(mri_seg, x, y, z, whalf, Right_Cerebral_Cortex);
-          while (lh == 0 && rh == 0) {
-            whalf++;
-            lh = MRIlabelsInNbhd(mri_seg, x, y, z, whalf,
-                                 Left_Cerebral_White_Matter) +
-                 MRIlabelsInNbhd(mri_seg, x, y, z, whalf, Left_Cerebral_Cortex);
-            rh =
-                MRIlabelsInNbhd(mri_seg, x, y, z, whalf,
-                                Right_Cerebral_White_Matter) +
-                MRIlabelsInNbhd(mri_seg, x, y, z, whalf, Right_Cerebral_Cortex);
-            if (whalf > 20) // give up
-              break;
-          }
-          if (lh > rh)
-            MRIsetVoxVal(mri_fill, x, y, z, 0, lh_fill_val);
-          else
-            MRIsetVoxVal(mri_fill, x, y, z, 0, rh_fill_val);
-        } else if (val < WM_MIN_VAL) {
-          label = MRIgetVoxVal(mri_seg, x, y, z, 0);
-          if (label != Left_Lesion && label != Right_Lesion &&
-              !IS_WMSA(label)) {
-            MRIsetVoxVal(mri_fill_lh, x, y, z, 0, 0);
-            MRIsetVoxVal(mri_fill_rh, x, y, z, 0, 0);
-            MRIsetVoxVal(mri_fill, x, y, z, 0, 0);
-            continue;
-          }
+	  lh = MRIlabelsInNbhd(mri_seg, x, y, z, whalf, Left_Cerebral_White_Matter) + MRIlabelsInNbhd(mri_seg, x, y, z, whalf, Left_Cerebral_Cortex) ;
+	  rh = MRIlabelsInNbhd(mri_seg, x, y, z, whalf, Right_Cerebral_White_Matter) + MRIlabelsInNbhd(mri_seg, x, y, z, whalf, Right_Cerebral_Cortex) ;
+	  while (lh == 0 && rh == 0)
+	  {
+	    whalf++ ;
+	    lh = MRIlabelsInNbhd(mri_seg, x, y, z, whalf, Left_Cerebral_White_Matter) + MRIlabelsInNbhd(mri_seg, x, y, z, whalf, Left_Cerebral_Cortex) ;
+	    rh = MRIlabelsInNbhd(mri_seg, x, y, z, whalf, Right_Cerebral_White_Matter) + MRIlabelsInNbhd(mri_seg, x, y, z, whalf, Right_Cerebral_Cortex) ;
+	    if (whalf > 20) // give up
+	      break ;
+	  }
+	  if (lh > rh)
+	  {
+	    if (rhonly == 0)
+	      MRIsetVoxVal(mri_fill, x, y, z, 0, lh_fill_val) ;
+	  }
+	  else
+	  {
+	    if (lhonly == 0)
+	      MRIsetVoxVal(mri_fill, x, y, z, 0, rh_fill_val) ;
+	  }
+	}
+        else if (val < WM_MIN_VAL)
+        {
+	  label = MRIgetVoxVal(mri_seg,x, y,z, 0);
+	  if (label != Left_Lesion && label != Right_Lesion && !IS_WMSA(label))
+	  {
+	    MRIsetVoxVal(mri_fill_lh, x, y, z, 0, 0) ;
+	    MRIsetVoxVal(mri_fill_rh, x, y, z, 0, 0) ;
+	    MRIsetVoxVal(mri_fill, x, y, z, 0, 0) ;
+	    continue;
+	  }
         }
 
-        if (MRIvox(mri_fill, x, y, z) == rh_fill_val) {
-          MRIvox(mri_fill_rh, x, y, z) = 1;
-          MRIvox(mri_fill_lh, x, y, z) = 0;
-        } else {
-          MRIvox(mri_fill_lh, x, y, z) = 1;
-          MRIvox(mri_fill_rh, x, y, z) = 0;
+        if (MRIvox(mri_fill, x, y, z) == rh_fill_val)
+        {
+	  if (lhonly == 0)
+	    MRIvox(mri_fill_rh,x,y,z) = 1;
+          MRIvox(mri_fill_lh,x,y,z) = 0;
+        }
+        else
+        {
+	  if (rhonly == 0)
+	    MRIvox(mri_fill_lh,x,y,z) = 1;
+          MRIvox(mri_fill_rh,x,y,z) = 0;
         }
       }
 
   printf("Find the largest connected component for each hemisphere ...\n");
 
-  GetLargestCC18(mri_fill_lh);
-  GetLargestCC18(mri_fill_rh);
+  if (rhonly == 0)
+  {
+    GetLargestCC18(mri_fill_lh);
+    RemoveHoles(mri_fill_lh);
+  }
 
-  RemoveHoles(mri_fill_lh);
-  RemoveHoles(mri_fill_rh);
+  if (lhonly == 0)
+  {
+    GetLargestCC18(mri_fill_rh);
+    RemoveHoles(mri_fill_rh);
+  }
 
   for (z = 0; z < depth; z++)
     for (y = 0; y < height; y++)
@@ -5679,10 +5705,15 @@ MRI *fill_with_aseg(MRI *mri_img, MRI *mri_seg) {
         if (Gx == x && y == Gy && Gz == z)
           DiagBreak();
         MRIvox(mri_fill, x, y, z) = 0;
-        if (MRIvox(mri_fill_lh, x, y, z) > 0) {
-          MRIvox(mri_fill, x, y, z) = lh_fill_val;
-        } else if (MRIvox(mri_fill_rh, x, y, z) > 0) {
-          MRIvox(mri_fill, x, y, z) = rh_fill_val;
+        if (MRIvox(mri_fill_lh, x, y, z) > 0)
+        {
+	  if (rhonly == 0)
+	    MRIvox(mri_fill, x, y, z) = lh_fill_val;
+        }
+        else if (MRIvox(mri_fill_rh, x, y, z) > 0)
+        {
+	  if (lhonly == 0)
+	    MRIvox(mri_fill, x, y, z) = rh_fill_val;
         }
       }
 
