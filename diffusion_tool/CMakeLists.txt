@@ -11,4 +11,3 @@ if(FS_BUILD_GUIS AND Qt5_FOUND)
   target_link_libraries(diffusion_tool Qt5::Core Qt5::Widgets)
 
 endif()
-

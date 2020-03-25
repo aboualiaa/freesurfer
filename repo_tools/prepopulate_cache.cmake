@@ -13,8 +13,7 @@ set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug;Release;RelWithDebIn
 set(CMAKE_GENERATOR "Xcode" CACHE STRING "Ninja, Unix Makefiles, Xcode")
 set_property(CACHE CMAKE_GENERATOR PROPERTY STRINGS "Ninja;Unix Makefiles;Xcode")
 set(FS_ADD_INSTRUMENTATION "None" CACHE STRING "choose an instrumentation")
-set_property(CACHE FS_ADD_INSTRUMENTATION PROPERTY STRINGS "none;ubsan;asan;tsan;msan;cfisan;coverage")
-set(FS_PROFILE_BUILD OFF CACHE BOOL "profiling")
+set_property(CACHE FS_ADD_INSTRUMENTATION PROPERTY STRINGS "none;ubsan;asan;tsan;msan;cfisan;coverage;profile")
 set(FS_INSTALL_PYTHON_DEPS ON CACHE BOOL "python deps")
 set(FS_USE_CCACHE ON CACHE BOOL "use ccache if present")
 
