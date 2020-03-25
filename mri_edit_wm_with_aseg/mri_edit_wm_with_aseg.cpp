@@ -926,19 +926,26 @@ static int edit_segmentation(MRI *mri_wm, MRI *mri_T1, MRI *mri_seg) {
   /* more spackling. Look for hippocampal or ventricular voxels that have wm
   inferior, but are diagonally connected to non-wm inferior. Fill these.
   */
-  for (i = 0; i < 1; i++) {
-    for (z = 0; z < depth; z++) {
-      for (y = height - 1; y > 0; y--) {
-        for (x = 2; x < width - 2; x++) {
-          if (x == Gx && y == Gy && z == Gz) {
-            DiagBreak();
+  for (i = 0 ; i < 1 ; i++)
+  {
+    for (z = 0 ; z < depth ; z++)
+    {
+      for (y = height-2 ; y > 0 ; y--)
+      {
+        for (x = 2 ; x < width-2 ; x++)
+        {
+          if (x == Gx && y == Gy && z == Gz)
+          {
+            DiagBreak() ;
           }
-          if (MRIvox(mri_wm, x, y, z) >= MIN_WM_VAL) {
-            continue;
+          if (MRIvox(mri_wm, x, y, z) >= MIN_WM_VAL)
+          {
+            continue ;
           }
-          label = MRIgetVoxVal(mri_seg, x, y, z, 0);
-          left = 0;
-          switch (label) {
+          label = MRIgetVoxVal(mri_seg, x, y, z, 0) ;
+          left = 0 ;
+          switch (label)
+          {
           case Left_Inf_Lat_Vent:
           case Left_Hippocampus:
           case Left_Amygdala:

@@ -12038,7 +12038,6 @@ MRI *MRIchangeType(MRI *src, int dest_type, float f_low, float f_high,
     no_scale_flag = TRUE;
   else {
     MRIlimits(src, &src_min, &src_max);
-
     if (no_scale_option_flag > 1)
       no_scale_flag = TRUE;
     else if (no_scale_option_flag == 1) {
@@ -12083,6 +12082,18 @@ MRI *MRIchangeType(MRI *src, int dest_type, float f_low, float f_high,
            "dest_type=%d\n",
            src_min, src_max, N_HIST_BINS, f_low, f_high, dest_type);
     bin_size = (src_max - src_min) / (float)N_HIST_BINS;
+    {
+      double mn = MRImeanFrameThresh(src, 0, 1e-7) ;
+      int    mn_bin ;
+
+      mn_bin = (int)((mn - src_min) / bin_size);
+
+      if (mn_bin < (N_HIST_BINS/5.0))
+      {
+	printf("original bin size %2.1f (max %2.1f) too big for mean/min %2.2f/%2.2f, scaling down to %2.5f\n", bin_size, src_max, mn, src_min, (mn-src_min)/(N_HIST_BINS/5.0)) ;
+	bin_size = (mn-src_min)/(N_HIST_BINS/5.0);
+      }
+    }
 
     for (i = 0; i < N_HIST_BINS; i++)
       hist_bins[i] = 0;
@@ -18288,3 +18299,38 @@ void MRI::loadITKImage(ITKImageType::Pointer image, int frame) {
     }
   }
 }
+void
+MRIlimitsMultipleTimes(MRI *mri_src, float *psrc_min, float *psrc_max, int ntimes)
+{
+  int  done = 0, nmin = 0, nmax = 0, x, y, z, f ;
+  float val ;
+  MRI   *mri_copy ;
+
+  mri_copy = MRIcopy(mri_src, NULL) ;
+  do
+  {
+    MRIlimits(mri_copy, psrc_min, psrc_max) ;
+    for (f = 0 ; f < mri_src->nframes ; f++)
+      for (x = 0 ; x < mri_src->width ; x++)
+	for (y = 0 ; y < mri_src->height ; y++)
+	  for (z = 0 ; z < mri_src->depth ; z++)
+	  {
+	    val = MRIgetVoxVal(mri_src, x, y, z, f);
+	    if (val == *psrc_min)
+	    {
+	      MRIsetVoxVal(mri_copy, x, y, z, f, 0) ;
+	      nmin++ ;
+	    }
+	    if (val == *psrc_max)
+	    {
+	      MRIsetVoxVal(mri_copy, x, y, z, f, 0) ;
+	      nmax++ ;
+	    }
+	  }
+    done = (nmin >= ntimes) && (nmax >= ntimes) ;
+  } while (!done);
+  MRIfree(&mri_copy) ;
+  return ;
+}
+
+	  

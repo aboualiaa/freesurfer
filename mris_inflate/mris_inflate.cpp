@@ -147,10 +147,16 @@ int main(int argc, char *argv[]) {
   fflush(stdout);
   mris = MRISread(in_fname);
   if (!mris)
-    ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s", Progname,
-              in_fname);
-
-  MRISaddCommandLine(mris, cmdline);
+    ErrorExit(ERROR_NOFILE, "%s: could not read surface file %s",
+              Progname, in_fname) ;
+  
+  if ((mris->vg.xsize < .8) && (mris->vg.xsize > 0))
+  {
+    parms.niterations = nint((float)parms.niterations/mris->vg.xsize);
+    printf("resetting # of iterations to %d for highres volume\n", 
+	   parms.niterations);
+  }
+  MRISaddCommandLine(mris, cmdline) ;
 
   if (talairach_flag) {
     MRIStalairachTransform(mris, mris);
