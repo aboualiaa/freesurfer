@@ -50,7 +50,7 @@ if(NOT APPLE)
   endif()
   add_definitions(-DVCL_GCC_80) # trick itk 4 into believing the compiler is gcc 8
   add_definitions(-DVXL_FULLCXX11SUPPORT)
-  set(BUILD_GUIS OFF)
+  set(FS_BUILD_GUIS OFF)
 else()
   cmake_minimum_required(VERSION 3.10.2) # preparing for itk5
 endif()
@@ -75,13 +75,13 @@ endif()
 
 # a few build options
 option(FS_MINIMAL_BUILD "Only build core components" OFF)
-option(BUILD_GUIS "Build GUI tools" ON)
+option(FS_BUILD_GUIS "Build GUI tools" ON)
 option(FS_INTEGRATION_TESTING "Copy files for integration tests" OFF)
 option(FS_BUILD_ATTIC "Build deprecated tools from the attic" ON)
 option(FS_INFANT_MODULE "Include infant recon-all" ON)
 option(FS_BUILD_DNG "Build Doug's testing tools" ON)
 option(FS_SUPPRESS_WARNINGS "Suppress some selected warnings" ON)
-option(PROFILING "Compile binaries for profiling with gprof" OFF)
+option(FS_PROFILE_BUILD "Compile binaries for profiling with gprof" OFF)
 option(CMAKE_EXPORT_COMPILE_COMMANDS OFF)
 option(FS_USE_CCACHE "Use ccache to reduce build times" ON)
 option(FS_BUILD_BOOST_TESTS "Unimplemented" ON)
@@ -343,7 +343,7 @@ mark_as_advanced(XT_LIBRARY
                  X11_INCLUDE_DIR GL_LIBRARY GLU_LIBRARY)
 
 # search for GUI libraries
-if(BUILD_GUIS)
+if(FS_BUILD_GUIS)
 
   # -------- openGL --------
   if(EXISTS /usr/lib64/nvidia/libGL.so)
@@ -518,7 +518,7 @@ else()
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${STRIP_FLAGS} -Wl,-Map,ld_map.txt -Wl,--no-demangle")
 endif()
 
-if(PROFILING)
+if(FS_PROFILE_BUILD)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
 endif()

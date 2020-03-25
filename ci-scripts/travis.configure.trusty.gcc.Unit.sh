@@ -21,4 +21,4 @@ sed -i -- 's/#  error \"Dunno about this gcc\"/\/\//g' ./prebuilt_packages/itk/i
 
 # TODO: reenable guis after fixing compile issues
 # TODO: check if the other flags are still needed (originally for the benchmark module)
-cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_GUIS=OFF -DCMAKE_CROSSCOMPILING=1 -DRUN_HAVE_STD_REGEX=0 -DRUN_HAVE_POSIX_REGEX=0 ..
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DFS_BUILD_GUIS=OFF -DCMAKE_CROSSCOMPILING=1 -DRUN_HAVE_STD_REGEX=0 -DRUN_HAVE_POSIX_REGEX=0 ..

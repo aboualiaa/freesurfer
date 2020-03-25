@@ -68,7 +68,7 @@ RUN mkdir -p cmake-build-debug-bionic && cd ./cmake-build-debug-bionic && \
 ENV HOSTING_OS bionic
 
 RUN cd ./cmake-build-debug-bionic && \
-    cmake -D BUILD_GUIS=OFF \
+    cmake -D FS_BUILD_GUIS=OFF \
           -D BUILD_TESTING=OFF \
           -D CMAKE_BUILD_TYPE=Release \
           -D PYTHON_EXECUTABLE=/usr/bin/python3.6 \

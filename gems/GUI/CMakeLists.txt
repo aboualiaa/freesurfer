@@ -1,4 +1,4 @@
-if(NOT BUILD_GUIS)
+if(NOT FS_BUILD_GUIS)
   return()
 endif()
 

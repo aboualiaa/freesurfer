@@ -2,10 +2,10 @@ project(pysurfer)
 set(CMAKE_CXX_STANDARD 17)
 add_subdirectories(bindings)
 
-# if INSTALL_PYTHON_DEPENDENCIES is on, all required python packages will get
+# if FS_INSTALL_PYTHON_DEPS is on, all required python packages will get
 # installed to freesurfer/python, otherwise, only the freesurfer package gets installed
-option(INSTALL_PYTHON_DEPENDENCIES "Install freesurfer python dependencies" ON)
-if(NOT INSTALL_PYTHON_DEPENDENCIES)
+option(FS_INSTALL_PYTHON_DEPS "Install freesurfer python dependencies" ON)
+if(NOT FS_INSTALL_PYTHON_DEPS)
   set(PIP_FLAGS "--no-dependencies")
 endif()
 
@@ -17,6 +17,6 @@ install(CODE "
     # message(FATAL_ERROR \"Could not install freesurfer python module\")
     message(SEND_ERROR \"Could not install freesurfer python module\")
   endif()"
-)
+        )
 
 install(PROGRAMS fspython DESTINATION bin)
