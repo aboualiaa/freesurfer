@@ -337,7 +337,8 @@ mark_as_advanced(HPX_GIT_COMMIT
                  HPX_C_COMPILER
                  HPX_CXX_COMPILER_VERSION
                  HPX_CXX_COMPILER_ID
-                 HPX_CXX_COMPILER)
+                 HPX_CXX_COMPILER
+                 LLVM_FILECHECK_EXE)
 
 # -------- openCV --------
 if(NOT APPLE)
