@@ -62,6 +62,7 @@ stages:
           - checkout: self
             submodules: true
           - script: |
+              set -e
               export TESTING_TYPE
               git remote add cache ../GitAnnex
               brew install git-annex
@@ -74,13 +75,15 @@ stages:
             displayName: 'Installing Dependencies'
             continueOnError: false
           - script: |
+              set -e
               export PATH="/usr/local/opt/llvm/bin:/usr/local/opt/python/libexec/bin:$PATH"
-              ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh
+              ./ci-scripts/travis.configure.${HOSTING_OS}.${HOSTING_COMPILER}.Build.sh $INSTRUMENTATION
               ./ci-scripts/travis.script.${HOSTING_OS}.Build.sh
               rm -rf ../GitAnnex
             displayName: 'Building'
             continueOnError: false
           - script: |
+              set -e
               echo $AZURE_SOURCE_DIR
               export AZURE_SOURCE_DIR
               ./ci-scripts/travis.script.${HOSTING_OS}.Unit.sh $HOSTING_COMPILER
