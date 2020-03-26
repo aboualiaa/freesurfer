@@ -49,7 +49,7 @@ stages:
               git config --global user.name "Ahmed Abou-Aliaa"
               git annex copy --from cache
               brew cask install arrayfire xquartz || true
-              brew install armadillo cmake eigen fltk gts hdf5 itk coreutils \
+              brew install armadillo cmake eigen fltk gts hdf5 itk coreutils wget \
               jemalloc lcov libomp llvm ninja open-mpi petsc python@3 qt szip tcsh vtk || true
             displayName: 'Installing Dependencies'
             continueOnError: false

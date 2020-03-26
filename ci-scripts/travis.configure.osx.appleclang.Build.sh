@@ -2,7 +2,6 @@
 
 set -e
 
-#./ci-scripts/restore-mtime.sh
 ./ci-scripts/install-hpx.sh
 
 sudo xcode-select -r # s /Applications/Xcode.app

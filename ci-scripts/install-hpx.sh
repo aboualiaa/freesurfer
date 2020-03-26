@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 #if [ -d ./packages/hpx/cmake-build-debug ]; then
 #  echo "cached hpx found -- nothing to download, installing"
 #  cd ./packages/hpx/cmake-build-debug
