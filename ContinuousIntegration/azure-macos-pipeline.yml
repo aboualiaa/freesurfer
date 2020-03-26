@@ -16,11 +16,31 @@ stages:
               imageName: 'macOS-10.15'
               hosting_compiler: appleclang
               instrumentation: coverage
-            catalina_clang_unit:
+            catalina_clang_coverage:
               hosting_os: osx
               imageName: 'macOS-10.15'
               hosting_compiler: clang
               instrumentation: coverage
+            catalina_clang_asan:
+              hosting_os: osx
+              imageName: 'macOS-10.15'
+              hosting_compiler: clang
+              instrumentation: asan
+            catalina_clang_ubsan:
+              hosting_os: osx
+              imageName: 'macOS-10.15'
+              hosting_compiler: clang
+              instrumentation: ubsan
+            catalina_clang_tsan:
+              hosting_os: osx
+              imageName: 'macOS-10.15'
+              hosting_compiler: clang
+              instrumentation: tsan
+            catalina_clang_cfisan:
+              hosting_os: osx
+              imageName: 'macOS-10.15'
+              hosting_compiler: clang
+              instrumentation: cfisan
         variables:
           HOSTING_OS: $(hosting_os)
           HOSTING_COMPILER: $(hosting_compiler)
