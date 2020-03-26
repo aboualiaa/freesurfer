@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 cd ./cmake-build-debug-trusty
 timeout 50m ninja
 ctest --schedule-random --timeout 90 -j $(nproc) -LE Expensive -T Test --group Continuous

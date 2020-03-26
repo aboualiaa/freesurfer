@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 #./ci-scripts/restore-mtime.sh
 ./ci-scripts/install-hpx.sh
 

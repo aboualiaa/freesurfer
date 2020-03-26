@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
+
 mkdir -p cmake-build-debug-xenial && cd ./cmake-build-debug-xenial
 
 export PATH="/usr/local/bin:$PATH"

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 cd ./cmake-build-debug-trusty
 ninja
 rm -rf ./clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-*

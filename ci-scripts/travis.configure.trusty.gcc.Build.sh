@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
+
 mkdir -p cmake-build-debug-trusty && cd ./cmake-build-debug-trusty
 
 export PATH="/usr/local/bin:$PATH"

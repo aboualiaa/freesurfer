@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 cd ./cmake-build-debug
 ctest --schedule-random --timeout 90 -j $(nproc) -L Unit -T Test --group Continuous
 #lcov --capture --directory . --output-file ./coverage.info

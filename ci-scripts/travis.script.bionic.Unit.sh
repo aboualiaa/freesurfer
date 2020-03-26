@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 cd ./cmake-build-debug-bionic
 export PATH=/usr/local/bin:$PATH
 #timeout 50m ninja
