@@ -1711,7 +1711,183 @@ void MainWindow::RunScript() {
   }
   else if ( cmd == "setsurfacecolor" )
   {
+    CommandLoadPVolumes( sa );
+  }
+  else if ( cmd == "loadtrack")
+  {
+    CommandLoadTrack(sa);
+  }
+  else if ( cmd == "settrackcolor")
+  {
+    CommandSetTrackColor( sa );
+  }
+  else if ( cmd == "settrackrender")
+  {
+    CommandSetTrackRender( sa );
+  }
+  else if ( cmd == "screencapture" )
+  {
+    CommandScreenCapture( sa );
+  }
+  else if ( cmd == "quit" || cmd == "exit" )
+  {
+    close();
+  }
+  else if (cmd == "center")
+  {
+    for (int i = 0; i < 3; i++)
+      ((RenderView2D*)m_views[i])->CenterAtCursor();
+    double pos[3];
+    GetLayerCollection("MRI")->GetSlicePosition(pos);
+    m_views[3]->CenterAtWorldPosition(pos);
+  }
+  else if ( cmd == "setviewport" )
+  {
+    CommandSetViewport( sa );
+  }
+  else if ( cmd == "setviewsize" )
+  {
+    CommandSetViewSize( sa );
+  }
+  else if ( cmd == "zoom" )
+  {
+    CommandZoom( sa );
+  }
+  else if ( cmd == "setcamera")
+  {
+    CommandSetCamera(sa);
+  }
+  else if ( cmd == "ras" )
+  {
+    CommandSetRAS( sa );
+  }
+  else if ( cmd == "slice" )
+  {
+    CommandSetSlice( sa );
+  }
+  else if (cmd == "writesurfaceintersection")
+  {
+    CommandWriteSurfaceIntersection( sa );
+  }
+  else if ( cmd == "setcolormap" )
+  {
+    CommandSetColorMap( sa );
+  }
+  else if ( cmd == "setheatscaleoptions" )
+  {
+    CommandSetHeadScaleOptions( sa );
+  }
+  else if ( cmd == "setlut" )
+  {
+    CommandSetLUT( sa );
+  }
+  else if ( cmd == "setopacity" )
+  {
+    CommandSetOpacity( sa );
+  }
+  else if ( cmd == "setsmoothed")
+  {
+    CommandSetSmoothed( sa );
+  }
+  else if ( cmd == "setrgb" )
+  {
+    CommandSetRgb( sa );
+  }
+  else if ( cmd == "setdisplayoutline")
+  {
+    CommandSetLabelOutline(sa);
+  }
+  else if ( cmd == "setdisplayisosurface" )
+  {
+    CommandSetDisplayIsoSurface( sa );
+  }
+  else if ( cmd == "saveisosurface")
+  {
+    OnSaveIsoSurface(sa.last());
+  }
+  else if ( cmd == "setisosurfacecolor" )
+  {
+    CommandSetIsoSurfaceColor( sa );
+  }
+  else if (cmd == "setisosurfacesmooth")
+  {
+    CommandSetIsoSurfaceSmooth( sa );
+  }
+  else if (cmd == "setisosurfaceupsample")
+  {
+    CommandSetIsoSurfaceUpsample( sa );
+  }
+  else if (cmd == "setextractallregions")
+  {
+    CommandSetExtractAllRegions( sa );
+  }
+  else if ( cmd == "loadisosurfaceregion" )
+  {
+    CommandLoadIsoSurfaceRegion( sa );
+  }
+  else if ( cmd == "setsurfaceoverlaymethod" )
+  {
+    CommandSetSurfaceOverlayMethod( sa );
+  }
+  else if ( cmd == "setsurfaceoverlaycustom" )
+  {
+    CommandSetSurfaceOverlayCustom( sa );
+  }
+  else if (cmd == "setsurfaceoverlaycolormap")
+  {
+    CommandSetSurfaceOverlayColormap( sa );
+  }
+  else if ( cmd == "setsurfaceoverlayopacity" )
+  {
+    CommandSetSurfaceOverlayOpacity( sa );
+  }
+  else if ( cmd == "setsurfaceoverlayframe")
+  {
+    CommandSetSurfaceOverlayFrame( sa );
+  }
+  else if (cmd == "setsurfaceoverlaysmooth")
+  {
+    CommandSetSurfaceOverlaySmooth( sa );
+  }
+  else if (cmd == "setsurfaceoverlaymask")
+  {
+    CommandSetSurfaceOverlayMask( sa );
+  }
+  else if ( cmd == "setsurfaceoffset" )
+  {
+    CommandSetSurfaceOffset( sa );
+  }
+  else if ( cmd == "gotosurfacevertex")
+  {
+    CommandGoToSurfaceVertex( sa );
+  }
+  else if ( cmd == "setpointsetcolor" )
+  {
+    CommandSetPointSetColor( sa );
+  }
+  else if ( cmd == "setpointsetradius" )
+  {
+    CommandSetPointSetRadius( sa );
+  }
+  else if (cmd == "setpointsetheatmap")
+  {
+    CommandSetPointSetHeatmap( sa );
+  }
+  else if ( cmd == "setdisplayvector" )
+  {
+    CommandSetDisplayVector( sa );
+  }
+  else if ( cmd == "setdisplaytensor" )
+  {
+    CommandSetDisplayTensor( sa );
+  }
+  else if ( cmd == "setsurfacecolor" )
+  {
     CommandSetSurfaceColor( sa );
+  }
+  else if ( cmd == "setsurfaceopacity" )
+  {
+    CommandSetSurfaceOpacity( sa );
   }
   else if ( cmd == "setsurfaceedgecolor" )
   {
@@ -2033,27 +2209,46 @@ void MainWindow::CommandLoadVolume(const QStringList &sa) {
         if (args.size() > 1 && args[1].size() > 0) {
           script << args[1];
         }
-        m_scripts.insert(0, script);
-      } else if (subOption == "isosurface_output") {
-        m_scripts.insert(m_scripts.size() - 1,
-                         (QStringList("saveisosurface") << subArgu));
-      } else if (subOption == "upsample_isosurface") {
-        m_scripts.insert(0, (QStringList("setisosurfaceupsample") << subArgu));
-      } else if (subOption == "isosurface_color") {
-        m_scripts.insert(0, (QStringList("setisosurfacecolor") << subArgu));
-      } else if (subOption == "extract_all_regions") {
-        m_scripts.insert(0, (QStringList("setextractallregions") << subArgu));
-      } else if (subOption == "surface_region" ||
-                 subOption == "surface_regions") {
-        m_scripts.insert(0, (QStringList("loadisosurfaceregion")
-                             << QFileInfo(subArgu).absoluteFilePath()));
-      } else if (subOption == "name") {
-        m_scripts.insert(0, QStringList("setlayername") << "MRI" << subArgu);
-      } else if (subOption == "lock" || subOption == "locked") {
-        m_scripts.insert(0, QStringList("locklayer") << "MRI" << subArgu);
-      } else if (subOption == "visible") {
-        m_scripts.insert(0, QStringList("showlayer") << "MRI" << subArgu);
-      } else if (subOption == "gotolabel" || subOption == "structure") {
+        m_scripts.insert( 0, script );
+      }
+      else if ( subOption == "isosurface_output")
+      {
+        m_scripts.insert(m_scripts.size()-1, (QStringList("saveisosurface") << subArgu));
+      }
+      else if ( subOption == "upsample_isosurface")
+      {
+        m_scripts.insert( 0,  (QStringList("setisosurfaceupsample") << subArgu) );
+      }
+      else if (subOption == "isosurface_color")
+      {
+        m_scripts.insert( 0,  (QStringList("setisosurfacecolor") << subArgu) );
+      }
+      else if (subOption == "isosurface_smooth")
+      {
+        m_scripts.insert(0, (QStringList("setisosurfacesmooth") << subArgu) );
+      }
+      else if (subOption == "extract_all_regions")
+      {
+        m_scripts.insert( 0,  (QStringList("setextractallregions") << subArgu) );
+      }
+      else if ( subOption == "surface_region" || subOption == "surface_regions" )
+      {
+        m_scripts.insert( 0, (QStringList("loadisosurfaceregion") << QFileInfo(subArgu).absoluteFilePath()) );
+      }
+      else if ( subOption == "name" )
+      {
+        m_scripts.insert( 0, QStringList("setlayername") << "MRI" << subArgu );
+      }
+      else if ( subOption == "lock" || subOption == "locked" )
+      {
+        m_scripts.insert( 0, QStringList("locklayer") << "MRI" << subArgu );
+      }
+      else if ( subOption == "visible" )
+      {
+        m_scripts.insert( 0, QStringList("showlayer") << "MRI" << subArgu );
+      }
+      else if ( subOption == "gotolabel" || subOption == "structure")
+      {
         m_scripts.insert(0, QStringList("gotolabel") << subArgu);
         gotoLabelName = subArgu;
       } else if (subOption == "mask") {
@@ -2498,11 +2693,27 @@ void MainWindow::CommandSetIsoSurfaceUpsample(const QStringList &cmd) {
   }
 }
 
-void MainWindow::CommandSetExtractAllRegions(const QStringList &cmd) {
-  LayerMRI *mri = (LayerMRI *)GetLayerCollection("MRI")->GetActiveLayer();
-  if (mri) {
-    if (cmd[1].toLower() == "off" || cmd[1].toLower() == "false" ||
-        cmd[1].toLower() == "0") {
+void MainWindow::CommandSetIsoSurfaceSmooth(const QStringList &cmd)
+{
+  LayerMRI* mri = (LayerMRI*)GetLayerCollection( "MRI" )->GetActiveLayer();
+  if ( mri )
+  {
+    bool bOk;
+    int nIterations = cmd[1].toInt(&bOk);
+    if (bOk && nIterations > 0)
+    {
+      mri->GetProperty()->SetContourSmoothIterations(nIterations);
+    }
+  }
+}
+
+void MainWindow::CommandSetExtractAllRegions(const QStringList &cmd)
+{
+  LayerMRI* mri = (LayerMRI*)GetLayerCollection( "MRI" )->GetActiveLayer();
+  if ( mri )
+  {
+    if (cmd[1].toLower() == "off" || cmd[1].toLower() == "false" || cmd[1].toLower() == "0")
+    {
       mri->GetProperty()->SetContourExtractAllRegions(false);
     }
   }
@@ -2839,14 +3050,23 @@ void MainWindow::CommandLoadSurface(const QStringList &cmd) {
       overlay_reg = "n/a";
 
     //  for ( int k = sa_fn.size()-1; k >= 0; k-- )
-    for (int k = 0; k < sa_fn.size(); k++) {
-      int n = sa_fn[k].indexOf("=");
-      if (n != -1) {
-        QString subOption = sa_fn[k].left(n).toLower();
-        QString subArgu = sa_fn[k].mid(n + 1);
-        if (subOption == "color") {
-          m_scripts.insert(0, QStringList("setsurfacecolor") << subArgu);
-        } else if (subOption == "id") {
+    for (int k = 0; k < sa_fn.size(); k++)
+    {
+      int n = sa_fn[k].indexOf( "=" );
+      if ( n != -1  )
+      {
+        QString subOption = sa_fn[k].left( n ).toLower();
+        QString subArgu = sa_fn[k].mid( n+1 );
+        if ( subOption == "color" )
+        {
+          m_scripts.insert( 0, QStringList("setsurfacecolor") << subArgu );
+        }
+        else if (subOption == "opacity")
+        {
+          m_scripts.insert( 0, QStringList("setsurfaceopacity") << subArgu );
+        }
+        else if ( subOption == "id")
+        {
           bool ok;
           subArgu.toInt(&ok);
           if (ok)
@@ -3427,11 +3647,32 @@ void MainWindow::CommandSetSurfaceEdgeThickness(const QStringList &cmd) {
   }
 }
 
-void MainWindow::CommandSetDisplaySurfaceVertex(const QStringList &cmd) {
-  LayerSurface *surf =
-      (LayerSurface *)GetLayerCollection("Surface")->GetActiveLayer();
-  if (surf && (cmd[1].toLower() == "on" || cmd[1].toLower() == "true" ||
-               cmd[1].toLower() == "yes" || cmd[1] == "1")) {
+void MainWindow::CommandSetSurfaceOpacity( const QStringList& cmd )
+{
+  LayerSurface* surf = (LayerSurface*)GetLayerCollection( "Surface" )->GetActiveLayer();
+  if ( surf )
+  {
+    bool bOK;
+    double opacity = cmd[1].toDouble(&bOK);
+    if ( !bOK || opacity < 0 || opacity > 1)
+    {
+      cerr << "Invalid opacity value. Must be between 0 and 1.\n";
+    }
+    else
+    {
+      surf->GetProperty()->SetOpacity(opacity);
+    }
+  }
+}
+
+void MainWindow::CommandSetDisplaySurfaceVertex(const QStringList &cmd)
+{
+  LayerSurface* surf = (LayerSurface*)GetLayerCollection( "Surface" )->GetActiveLayer();
+  if ( surf && (cmd[1].toLower() == "on" ||
+                cmd[1].toLower() == "true" ||
+                cmd[1].toLower() == "yes" ||
+                cmd[1] == "1") )
+  {
     surf->GetProperty()->ShowVertices(true);
   }
 }
