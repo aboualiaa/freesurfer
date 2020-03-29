@@ -12,5 +12,7 @@ find . \
     -o -name '*.cpp' \
     -o -name '*.h' \
     -o -name '*.hh' \
+    -o -name '*.txx' \
+    -o -name '*.tpp' \
     -o -name '*.hpp' \) |
-    parallel --max-args=1 /Users/aboualiaa/Downloads/clang+llvm-10.0.0-x86_64-apple-darwin/bin/clang-format -i '{}'
+    parallel -j +2 --eta --bar --max-args=1 /Users/aboualiaa/Downloads/clang+llvm-10.0.0-x86_64-apple-darwin/bin/clang-format -i '{}'

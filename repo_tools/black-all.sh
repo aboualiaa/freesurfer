@@ -2,4 +2,4 @@
 
 find . \
   \( -name '*.py' \) |
-  parallel --max-args=1 black -l 80 {}
+  parallel -j +2 --eta --bar --max-args=1 black -q -l 80 {}

@@ -2,8 +2,8 @@
 
 find . \
     \( -name '*.xml' \) |
-    parallel --max-args=1 xmllint --noout '{}'
+   parallel -j +2 --eta --bar --max-args=1 mllint --noout '{}'
 
 find . \
     \( -name '*.xml' \) |
-    parallel --max-args=1 xmllint --output '{}' --format '{}'
+    parallel -j +2 --eta --bar --max-args=1 mllint --output '{}' --format '{}'

@@ -4,4 +4,4 @@ find . \
   \( -name '*.sh' \
   -o -name '*.tcsh' \
   -o -name '*.csh' \) |
-  parallel --max-args=1 shfmt -i 4 -w {}
+  parallel -j +2 --eta --bar --max-args=1 hfmt -i 4 -w {}
