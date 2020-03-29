@@ -54,21 +54,24 @@ Updated by Lee Tirrell to add command line options,and read/write surface files
 
 """
 
-h_input = 'path to input surface'
-h_output = 'path to ouput surface, spherically projected'
+h_input = "path to input surface"
+h_output = "path to ouput surface, spherically projected"
 
 
 def options_parse():
     """
     Command line option parser for spherically_project.py
     """
-    parser = optparse.OptionParser(version='$Id: spherically_project,v 1.1 2017/01/30 20:42:08 ltirrell Exp $', usage=HELPTEXT)
-    parser.add_option('--input',  '-i', dest='input_surf', help=h_input)
-    parser.add_option('--output', '-o', dest='output_surf', help=h_output)
+    parser = optparse.OptionParser(
+        version="$Id: spherically_project,v 1.1 2017/01/30 20:42:08 ltirrell Exp $",
+        usage=HELPTEXT,
+    )
+    parser.add_option("--input", "-i", dest="input_surf", help=h_input)
+    parser.add_option("--output", "-o", dest="output_surf", help=h_output)
     (options, args) = parser.parse_args()
 
     if options.input_surf is None or options.output_surf is None:
-        sys.exit('ERROR: Please specify input and output surfaces')
+        sys.exit("ERROR: Please specify input and output surfaces")
 
     return options
 
@@ -90,26 +93,19 @@ def computeAB(v, t):
     or to solve Poisson equation: A x = B f (where f is function on mesh vertices)
     or to solve Laplace equation: A x = 0
     or to model the operator's action on a vector x:   y = B\(Ax) 
-    """  
+    """
     v = np.array(v)
     t = np.array(t)
     tnum = t.shape[0]
 
-
     # Linear local matrices on unit triangle:
-    tB = (np.ones((3,3)) + np.eye(3)) / 24.0
+    tB = (np.ones((3, 3)) + np.eye(3)) / 24.0
 
-    tA00 = np.array([[ 0.5,-0.5, 0.0],
-                     [-0.5, 0.5, 0.0],
-                     [ 0.0, 0.0, 0.0]])
+    tA00 = np.array([[0.5, -0.5, 0.0], [-0.5, 0.5, 0.0], [0.0, 0.0, 0.0]])
 
-    tA11 = np.array([[ 0.5, 0.0,-0.5],
-                     [ 0.0, 0.0, 0.0],
-                     [-0.5, 0.0, 0.5]])
+    tA11 = np.array([[0.5, 0.0, -0.5], [0.0, 0.0, 0.0], [-0.5, 0.0, 0.5]])
 
-    tA0110 = np.array([[ 1.0,-0.5,-0.5],
-                       [-0.5, 0.0, 0.5],
-                       [-0.5, 0.5, 0.0]])
+    tA0110 = np.array([[1.0, -0.5, -0.5], [-0.5, 0.0, 0.5], [-0.5, 0.5, 0.0]])
 
     # Compute vertex coordinates and a difference vector for each triangle:
     v1 = v[t[:, 0], :]
@@ -117,7 +113,7 @@ def computeAB(v, t):
     v3 = v[t[:, 2], :]
     v2mv1 = v2 - v1
     v3mv1 = v3 - v1
-    
+
     # Compute length^2 of v3mv1 for each triangle:
     a0 = np.sum(v3mv1 * v3mv1, axis=1)
 
@@ -128,19 +124,24 @@ def computeAB(v, t):
     a0110 = np.sum(v2mv1 * v3mv1, axis=1)
 
     # Compute cross product and 2*vol for each triangle:
-    cr  = np.cross(v2mv1,v3mv1)
-    vol = np.sqrt(np.sum(cr*cr, axis=1))
+    cr = np.cross(v2mv1, v3mv1)
+    vol = np.sqrt(np.sum(cr * cr, axis=1))
     # zero vol will cause division by zero below, so set to small value:
-    vol_mean = 0.001*np.mean(vol)
+    vol_mean = 0.001 * np.mean(vol)
     vol = [vol_mean if x == 0 else x for x in vol]
 
     # Construct all local A and B matrices (guess: for each triangle):
-    localB = np.array([x*tB for x in vol])
-    localA = np.array([(1.0/xv) * (xa0*tA00 + xa1*tA11 - xa0110*tA0110) for xv, xa0, xa1, xa0110 in zip(vol,a0,a1,a0110)])
+    localB = np.array([x * tB for x in vol])
+    localA = np.array(
+        [
+            (1.0 / xv) * (xa0 * tA00 + xa1 * tA11 - xa0110 * tA0110)
+            for xv, xa0, xa1, xa0110 in zip(vol, a0, a1, a0110)
+        ]
+    )
 
     # Construct row and col indices.
-    I = np.array([np.tile(x, (3,1)) for x in t])
-    J = np.array([np.transpose(np.tile(x, (3,1))) for x in t])
+    I = np.array([np.tile(x, (3, 1)) for x in t])
+    J = np.array([np.transpose(np.tile(x, (3, 1))) for x in t])
 
     # Flatten arrays and swap I and J:
     I = I.flatten()
@@ -155,19 +156,17 @@ def computeAB(v, t):
     return A, B
 
 
-
 def laplaceTria(v, t, k=10):
     """
     Compute linear finite-element method Laplace-Beltrami spectrum
     """
-    A, M = computeAB(v,t)
+    A, M = computeAB(v, t)
     eigenvalues, eigenvectors = eigsh(A, k, M, sigma=-0.01)
 
-    #eigenvalues = eigenvalues.tolist()
-    #eigenvectors = eigenvectors.tolist()
-   
-    return eigenvalues, eigenvectors
+    # eigenvalues = eigenvalues.tolist()
+    # eigenvectors = eigenvectors.tolist()
 
+    return eigenvalues, eigenvectors
 
 
 def sphericalProject(v, t):
@@ -190,60 +189,58 @@ def sphericalProject(v, t):
     evecs = laplaceTria(v, t, k=4)[1]
 
     # flip efuncs to align to coordinates consistently
-    ev1 = evecs[:,1]
+    ev1 = evecs[:, 1]
     ev1maxi = np.argmax(ev1)
     ev1mini = np.argmin(ev1)
-    cmax = v[ev1maxi,:]
-    cmin = v[ev1mini,:]
+    cmax = v[ev1maxi, :]
+    cmin = v[ev1mini, :]
     # axis 1 = y is aligned with this function (for brains in FS space)
-    if (cmax[1] < cmin[1]):
-        ev1 = -1 * ev1;
-        
-    ev2 = evecs[:,2]
+    if cmax[1] < cmin[1]:
+        ev1 = -1 * ev1
+
+    ev2 = evecs[:, 2]
     ev2maxi = np.argmax(ev2)
     ev2mini = np.argmin(ev2)
-    cmax = v[ev2maxi,:]
-    cmin = v[ev2mini,:]
+    cmax = v[ev2maxi, :]
+    cmin = v[ev2mini, :]
     # axis 2 = z is aligned with this function (for brains in FS space)
-    if (cmax[2] < cmin[2]):
-        ev2 = -1 * ev2;
-        
-    ev3 = evecs[:,3]
+    if cmax[2] < cmin[2]:
+        ev2 = -1 * ev2
+
+    ev3 = evecs[:, 3]
     ev3maxi = np.argmax(ev3)
     ev3mini = np.argmin(ev3)
-    cmax = v[ev3maxi,:]
-    cmin = v[ev3mini,:]
+    cmax = v[ev3maxi, :]
+    cmin = v[ev3mini, :]
     # axis 0 = x is aligned with this function (for brains in FS space)
-    if (cmax[0] < cmin[0]):
-        ev3 = -1 * ev3;
+    if cmax[0] < cmin[0]:
+        ev3 = -1 * ev3
 
     # we map evN to -1..0..+1 (keep zero level fixed)
     # I have the feeling that this helps a little with the stretching
     # at the poles, but who knows...
     ev1min = np.amin(ev1)
     ev1max = np.amax(ev1)
-    ev1[ev1<0] /= - ev1min
-    ev1[ev1>0] /= ev1max
+    ev1[ev1 < 0] /= -ev1min
+    ev1[ev1 > 0] /= ev1max
 
     ev2min = np.amin(ev2)
     ev2max = np.amax(ev2)
-    ev2[ev2<0] /= - ev2min
-    ev2[ev2>0] /= ev2max
+    ev2[ev2 < 0] /= -ev2min
+    ev2[ev2 > 0] /= ev2max
 
     ev3min = np.amin(ev3)
     ev3max = np.amax(ev3)
-    ev3[ev3<0] /= - ev3min
-    ev3[ev3>0] /= ev3max
+    ev3[ev3 < 0] /= -ev3min
+    ev3[ev3 > 0] /= ev3max
 
     # project to sphere and scaled to have the same scale/origin as FS:
-    dist = np.sqrt( np.square(ev1) + np.square(ev2) + np.square(ev3))
-    v[:,0] = 100 * (ev3 / dist)
-    v[:,1] = 100 * (ev1 / dist)
-    v[:,2] = 100 * (ev2 / dist)
-
+    dist = np.sqrt(np.square(ev1) + np.square(ev2) + np.square(ev3))
+    v[:, 0] = 100 * (ev3 / dist)
+    v[:, 1] = 100 * (ev1 / dist)
+    v[:, 2] = 100 * (ev2 / dist)
 
     return v, t
-
 
 
 def spherically_project_surface(insurf, outsurf):
@@ -252,13 +249,13 @@ def spherically_project_surface(insurf, outsurf):
     """
     surf = fs.read_geometry(insurf, read_metadata=True)
     projected = sphericalProject(surf[0], surf[1])
-    fs.write_geometry(outsurf, projected[0], projected[1], volume_info=surf[2]) 
+    fs.write_geometry(outsurf, projected[0], projected[1], volume_info=surf[2])
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     # Command Line options are error checking done here
     options = options_parse()
-    surf_to_project = options.input_surf 
+    surf_to_project = options.input_surf
     projected_surf = options.output_surf
 
     print("Reading in surface: {} ...".format(surf_to_project))
@@ -266,5 +263,3 @@ if __name__=="__main__":
     print("Outputing spherically projected surface: {}".format(projected_surf))
 
     sys.exit(0)
-
-

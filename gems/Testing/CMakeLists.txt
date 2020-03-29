@@ -12,7 +12,7 @@ target_link_libraries(kvlAtlasMeshRasterizorTestGPU kvlGEMSCommon)
 
 # boost tests
 if(Boost_FOUND)
-  set(GEMS2libs kvlGEMSCommon )
+  set(GEMS2libs kvlGEMSCommon)
   set(testsrcs boosttests.cpp)
   list(APPEND testsrcs testatlasmeshrasterizorbasic.cpp)
   list(APPEND testsrcs atlasmeshvisitcountercpuwrapper.cpp)
@@ -30,14 +30,14 @@ if(Boost_FOUND)
     list(APPEND testsrcs cudaimagetests.cu)
     list(APPEND testsrcs testcudatetrahedralmesh.cpp)
     list(APPEND GEMS2libs kvlGEMSCUDA)
-    cuda_add_executable( TestGEMS2 ${testsrcs} ${cudatestsrcs})
+    cuda_add_executable(TestGEMS2 ${testsrcs} ${cudatestsrcs})
   else()
     add_executable(TestGEMS2 ${testsrcs})
   endif()
 
   target_link_libraries(TestGEMS2 ${Boost_LIBRARIES} ${GEMS2libs})
 endif()
-               
+
 # copy some files
 configure_file(test.nii ${GEMS_RUNTIME_PATH}/test.nii COPYONLY)
 configure_file(test.txt.gz ${GEMS_RUNTIME_PATH}/test.txt.gz COPYONLY)

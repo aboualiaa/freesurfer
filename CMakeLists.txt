@@ -131,6 +131,7 @@ if(FS_BUILD_TESTING)
 endif()
 
 include(cmake/functions.cmake)
+include(cmake/HandleFSOptions.cmake)
 include(TestBigEndian)
 include(CheckFunctionExists)
 
