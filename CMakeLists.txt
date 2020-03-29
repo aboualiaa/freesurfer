@@ -2,33 +2,26 @@ if(UNIX AND NOT APPLE)
   set(CMAKE_Fortran_COMPILER "/usr/bin/gfortran")
 elseif(APPLE)
   set(CMAKE_Fortran_COMPILER "/usr/local/bin/gfortran")
-  if(DEFINED FS_GCC_PATH)
-    set(CMAKE_C_COMPILER "${FS_GCC_PATH}/bin/gcc-9")
-    set(CMAKE_CXX_COMPILER "${FS_GCC_PATH}/bin/g++-9")
-    set(CMAKE_AR "${FS_GCC_PATH}/bin/gcc-ar-9")
-    set(CMAKE_NM "${FS_GCC_PATH}/bin/gcc-nm-9")
-    set(CMAKE_RANLIB "${FS_GCC_PATH}/bin/gcc-ranlib-9")
+  if(DEFINED FS_USE_GCC AND NOT FS_USE_GCC STREQUAL "")
+    set(CMAKE_C_COMPILER "${FS_USE_GCC}/bin/gcc-9")
+    set(CMAKE_CXX_COMPILER "${FS_USE_GCC}/bin/g++-9")
+    set(CMAKE_AR "${FS_USE_GCC}/bin/gcc-ar-9")
+    set(CMAKE_NM "${FS_USE_GCC}/bin/gcc-nm-9")
+    set(CMAKE_RANLIB "${FS_USE_GCC}/bin/gcc-ranlib-9")
     add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
   endif()
-  if(DEFINED FS_LLVM_PATH)
+  if(DEFINED FS_USE_LLVM AND NOT FS_USE_LLVM STREQUAL "")
     unset(CMAKE_C_COMPILER CACHE)
     unset(CMAKE_CXX_COMPILER CACHE)
     unset(CMAKE_AR CACHE)
     unset(CMAKE_NM CACHE)
     unset(CMAKE_RANLIB CACHE)
-    set(CMAKE_C_COMPILER "${FS_LLVM_PATH}/clang")
-    set(CMAKE_CXX_COMPILER "${FS_LLVM_PATH}/clang++")
-    set(CMAKE_AR "${FS_LLVM_PATH}/llvm-ar")
-    set(CMAKE_NM "${FS_LLVM_PATH}/llvm-nm")
+    set(CMAKE_C_COMPILER "${FS_USE_LLVM}/clang")
+    set(CMAKE_CXX_COMPILER "${FS_USE_LLVM}/clang++")
+    set(CMAKE_AR "${FS_USE_LLVM}/llvm-ar")
+    set(CMAKE_NM "${FS_USE_LLVM}/llvm-nm")
+    set(CMAKE_RANLIB "${FS_USE_LLVM}/llvm-ranlib")
   endif()
-endif()
-
-get_filename_component(srcdir "${CMAKE_SOURCE_DIR}" REALPATH)
-get_filename_component(bindir "${CMAKE_BINARY_DIR}" REALPATH)
-
-# disallow in-source builds
-if("${srcdir}" STREQUAL "${bindir}")
-  message(FATAL_ERROR "In-source builds are disallowed. Create a separate directory to store cmake output and built files")
 endif()
 
 if(POLICY CMP0025) # AppleClang and Clang are different compilers.
@@ -39,8 +32,45 @@ if(POLICY CMP0048) # The project() command manages VERSION variables.
   cmake_policy(SET CMP0048 NEW)
 endif()
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "[Cc]lang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "10"
+   AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+  set(CMAKE_RANLIB "${FS_USE_LLVM}/llvm-ranlib")
+endif()
+
+if(APPLE)
+  if(CMAKE_CXX_COMPILER_ID MATCHES "(Apple)[Cc]lang")# AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "10.0")
+    set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
+    set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
+    set(CMAKE_C_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
+    set(CMAKE_CXX_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
+  endif()
+  mark_as_advanced(CMAKE_OSX_SYSROOT
+                   CMAKE_OSX_DEPLOYMENT_TARGET
+                   CMAKE_OSX_ARCHITECTURES
+                   CMAKE_EXECUTABLE_FORMAT)
+endif()
+
+find_program(CCACHE_PROGRAM ccache)
+mark_as_advanced(CCACHE_PROGRAM)
+if(CCACHE_PROGRAM)
+  message(STATUS "using ccache")
+  set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
+endif()
+
+function(prevent_in_source_builds_and_installs)
+  get_filename_component(SRCDIR "${CMAKE_SOURCE_DIR}" REALPATH)
+  get_filename_component(BINDIR "${CMAKE_BINARY_DIR}" REALPATH)
+
+  # disallow in-source builds
+  if("${SRCDIR}" STREQUAL "${BINDIR}")
+    message(FATAL_ERROR "In-source builds/installs are disallowed. source dir: ${SRCDIR}; build dir: ${BINDIR}")
+  endif()
+endfunction()
+
 # project info
 project(freesurfer VERSION 7.0.0)
+prevent_in_source_builds_and_installs()
+
 if(NOT APPLE)
   cmake_minimum_required(VERSION 3.9)
   set(HOST_OS $ENV{HOSTING_OS})
@@ -50,20 +80,12 @@ if(NOT APPLE)
   endif()
   add_definitions(-DVCL_GCC_80) # trick itk 4 into believing the compiler is gcc 8
   add_definitions(-DVXL_FULLCXX11SUPPORT)
-  set(FS_BUILD_GUIS OFF)
 else()
   cmake_minimum_required(VERSION 3.10.2) # preparing for itk5
 endif()
+
 enable_language(C CXX Fortran)
-find_program(CCACHE_PROGRAM ccache)
-mark_as_advanced(CCACHE_PROGRAM)
-if(CCACHE_PROGRAM)
-  message(STATUS "using ccache")
-  set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
-endif()
-# enable std c++20
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 if(APPLE AND NOT TRAVIS)
   set(FS_PACKAGES_DIR "/Users/aboualiaa/Downloads/packages")
 else()
@@ -73,32 +95,7 @@ else()
   set(ITK_DIR ${FS_PACKAGES_DIR}/itk/ CACHE PATH "ITK install directory")
 endif()
 
-# a few build options
-option(FS_MINIMAL_BUILD "Only build core components" OFF)
-option(FS_BUILD_GUIS "Build GUI tools" ON)
-option(FS_INTEGRATION_TESTING "Copy files for integration tests" OFF)
-option(FS_BUILD_ATTIC "Build deprecated tools from the attic" ON)
-option(FS_INFANT_MODULE "Include infant recon-all" ON)
-option(FS_BUILD_DNG "Build Doug's testing tools" ON)
-option(FS_SUPPRESS_WARNINGS "Suppress some selected warnings" ON)
-option(CMAKE_EXPORT_COMPILE_COMMANDS OFF)
-option(FS_USE_CCACHE "Use ccache to reduce build times" ON)
-option(FS_BUILD_BOOST_TESTS "Unimplemented" ON)
-set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "None;Debug;Release;RelWithDebInfo;MinSizeRel")
-
-if(NOT APPLE)
-  # linux-only build options
-  option(TKTOOLS_MODULE "Install old Linux TK GUIs" OFF)
-else()
-  mark_as_advanced(CMAKE_OSX_SYSROOT
-                   CMAKE_OSX_DEPLOYMENT_TARGET
-                   CMAKE_OSX_ARCHITECTURES
-                   CMAKE_EXECUTABLE_FORMAT)
-endif()
-
-# warnings
-# clang complains about -Wno-unused-but-set-variable and says to use -Wno-unused-const-variable
-if(FS_SUPPRESS_WARNINGS)
+if(FS_SUPRESS_WARNINGS)
   if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-Wno-everything)
   elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
@@ -107,94 +104,32 @@ if(FS_SUPPRESS_WARNINGS)
   add_link_options(-w)
 endif()
 
-if(APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "(Apple)[Cc]lang")# AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "10.0")
-  set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
-  set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
-  set(CMAKE_C_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
-  set(CMAKE_CXX_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
-endif()
-
-if(CMAKE_CXX_COMPILER_ID MATCHES "[Cc]lang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "10"
-   AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-  set(CMAKE_RANLIB "${FS_LLVM_PATH}/llvm-ranlib")
-endif()
-
 add_compile_options(-fPIC)
 
-if(NOT DEFINED CMAKE_BUILD_TYPE)
-  message(STATUS "defaulting to debug")
-  set(CMAKE_BUILD_TYPE "Debug")
-endif()
-
-if(FS_ADD_INSTRUMENTATION STREQUAL "coverage")
-  message(STATUS "adding coverage instrumentation")
-  if("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang"
-     OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-instr-generate -fcoverage-mapping") # llvm style
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage") # gcov style
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0") # compile with debug info for correct coverage data
-  elseif(CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
+if(CMAKE_CONFIGURATION_TYPES AND FS_EXP_BUILD_CONFIGURATIONS)
+  if(NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
+    list(REMOVE_ITEM FS_EXP_BUILD_CONFIGURATIONS "profile")
   endif()
-endif()
-
-if(FS_ADD_INSTRUMENTATION STREQUAL "asan")
-  message(STATUS "adding asan instrumentation")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
-endif()
-
-if(FS_ADD_INSTRUMENTATION STREQUAL "ubsan")
-  message(STATUS "adding ubsan instrumentation")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined")
-endif()
-
-if(FS_ADD_INSTRUMENTATION STREQUAL "tsan")
-  message(STATUS "adding tsan instrumentation")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=thread")
-endif()
-
-if(FS_ADD_INSTRUMENTATION STREQUAL "msan")
-  if(LINUX)
-    if("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang"
-       OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
-      message(STATUS "adding msan instrumentation")
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=memory")
-    else()
-      message(STATUS "msan instrumentation is only available in non apple clang; ignoring")
-    endif()
-  else()
-    message(STATUS "msan instrumentation is only available on linux; ignoring")
+  if(NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    list(REMOVE_ITEM FS_EXP_BUILD_CONFIGURATIONS "cfisan")
   endif()
-endif()
-
-if(FS_ADD_INSTRUMENTATION STREQUAL "cfisan")
-  if(NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)[Cc]lang"
-     AND "${CMAKE_CXX_COMPILER_ID}" MATCHES "[Cc]lang")
-    message(STATUS "adding cfisan instrumentation")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=cfi -flto -fvisibility=hidden")
-  else()
-    message(STATUS "cfi instrumentation is only available in clang; ignoring")
+  if(NOT LINUX)
+    list(REMOVE_ITEM FS_EXP_BUILD_CONFIGURATIONS "msan")
   endif()
-endif()
-
-if(FS_ADD_INSTRUMENTATION STREQUAL "profile")
-  if("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
-    message(STATUS "adding profiling instrumentation")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
-  else()
-    message(STATUS "profiler instrumentation is only available in gcc; ignoring")
+  if("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)[Cc]lang"
+     OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)[Cc]lang")
+    list(REMOVE_ITEM FS_EXP_BUILD_CONFIGURATIONS "lsan")
   endif()
+  set(CMAKE_CONFIGURATION_TYPES ${FS_EXP_BUILD_CONFIGURATIONS})
 endif()
 
-include(CTest)
+if(FS_BUILD_TESTING)
+  include(CTest)
+  configure_file(${PROJECT_SOURCE_DIR}/test_proxy.sh ${CMAKE_CURRENT_BINARY_DIR}/test.sh COPYONLY)
+  configure_file(${PROJECT_SOURCE_DIR}/test_proxy.sh ${CMAKE_CURRENT_BINARY_DIR}/attic/test.sh COPYONLY)
+  configure_file(${PROJECT_SOURCE_DIR}/test_proxy.sh ${CMAKE_CURRENT_BINARY_DIR}/utils/test.sh COPYONLY)
+endif()
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_proxy.sh ${CMAKE_CURRENT_BINARY_DIR}/test.sh COPYONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_proxy.sh ${CMAKE_CURRENT_BINARY_DIR}/attic/test.sh COPYONLY)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test_proxy.sh ${CMAKE_CURRENT_BINARY_DIR}/utils/test.sh COPYONLY)
-
-# include our custom cmake functions (and others)
 include(cmake/functions.cmake)
 include(TestBigEndian)
 include(CheckFunctionExists)
@@ -205,7 +140,7 @@ set(CMAKE_NO_SYSTEM_FROM_IMPORTED TRUE)
 # if an install prefix is not provided, check the FS_INSTALL_DIR env var, and
 # if that is not defined, set the default path to /usr/local/freesurfer
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  if(NOT "$ENV{FS_INSTALL_DIR}" STREQUAL "")
+  if(NOT " $ENV{FS_INSTALL_DIR}" STREQUAL "")
     set(CMAKE_INSTALL_PREFIX "$ENV{FS_INSTALL_DIR}" CACHE PATH "Copied from FS_INSTALL_DIR env variable" FORCE)
   else()
     set(CMAKE_INSTALL_PREFIX "/usr/local/freesurfer" CACHE PATH "Default install path" FORCE)
@@ -218,11 +153,11 @@ set(FS_VERSION "$ENV{USER}-local" CACHE STRING "Distribution version")
 # build stamp
 string(TIMESTAMP TODAY "%Y%m%d")
 set(BUILD_STAMP "freesurfer-local-build-${TODAY}" CACHE STRING "Distribution build stamp")
-install(CODE "file(WRITE ${CMAKE_INSTALL_PREFIX}/build-stamp.txt ${BUILD_STAMP}\\n)")
+install(CODE "file (WRITE ${CMAKE_INSTALL_PREFIX}/build-stamp.txt ${BUILD_STAMP}\\n) ")
 
 # set the default build type to 'Release' for optimization purposes
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  message(STATUS "No build type selected - defaulting to Release")
+  message(STATUS " No build type selected - defaulting to Release")
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Default build type" FORCE)
 endif()
 
@@ -483,11 +418,11 @@ endif()
 # python scripts run out-of-the-box (and to help guarantee reproducibility) requires
 # distributing a minimal, custom python installation called fspython. This fspython package
 # will get installed to "freesurfer/python", but an external python can be used instead when the
-# DISTRIBUTE_FSPYTHON option is turned off. Turning this off will create a freesurfer/bin/fspythonlink
+# FS_DISTRIBUTE_FSPYTHON option is turned off. Turning this off will create a freesurfer/bin/fspythonlink
 # symlink during install that points to the external python executable located by pybind
-option(DISTRIBUTE_FSPYTHON "Include the fspython distribution in the installation" OFF)
+option(FS_DISTRIBUTE_FSPYTHON "Include the fspython distribution in the installation" OFF)
 
-if(DISTRIBUTE_FSPYTHON)
+if(FS_DISTRIBUTE_FSPYTHON)
   set(FSPYTHON_DIR ${FS_PACKAGES_DIR}/fspython/3.6)
   if(EXISTS ${FSPYTHON_DIR}/bin/python3)
     # specify the python to use
@@ -507,7 +442,7 @@ set(PYBIND11_PYTHON_VERSION 3.5)
 add_subdirectory(packages/pybind11)
 mark_as_advanced(PYBIND11_TEST PYBIND11_INSTALL USE_PYTHON_INCLUDE_DIR)
 
-if(NOT DISTRIBUTE_FSPYTHON)
+if(NOT FS_DISTRIBUTE_FSPYTHON)
   # link to an external python binary if fspython won't be distributed
   symlink(${PYTHON_EXECUTABLE} ${CMAKE_INSTALL_PREFIX}/python/bin/python3)
 endif()
@@ -573,7 +508,7 @@ add_subdirectory(gems)
 # --------------------------------------------------
 
 # the following subdirectories contain programs required for recon-all
-# and should be included during a "minimal" install. Extra programs that aren't
+# and should be included during a "minimal " install. Extra programs that aren't
 # used in the standard stream should be added further down
 add_subdirectories(
   AntsDenoiseImageFs
@@ -867,7 +802,7 @@ if(FS_INFANT_MODULE)
   add_subdirectory(sscnn_skullstripping)
 endif()
 
-if(TKTOOLS_MODULE)
+if(FS_TKTOOLS_MODULE)
   add_subdirectory(tktools)
 endif()
 

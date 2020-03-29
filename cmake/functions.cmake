@@ -87,7 +87,7 @@ function(add_help BINARY HELPTEXT)
   target_sources(${BINARY} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/${HELPTEXT}.h)
   install(FILES ${HELPTEXT} DESTINATION docs/xml)
   # make sure to validate the xml as well
-#  add_test(${BINARY}_help_test bash -c "xmllint --noout ${CMAKE_CURRENT_SOURCE_DIR}/${HELPTEXT}")
+  #  add_test(${BINARY}_help_test bash -c "xmllint --noout ${CMAKE_CURRENT_SOURCE_DIR}/${HELPTEXT}")
 endfunction(add_help)
 
 
@@ -112,7 +112,7 @@ function(install_append_help SCRIPT HELPTEXT DESTINATION)
           )
   install(FILES ${HELPTEXT} DESTINATION docs/xml)
   # make sure to validate the xml as well
-#  add_test(${SCRIPT}_help_test bash -c "xmllint --noout ${CMAKE_CURRENT_SOURCE_DIR}/${HELPTEXT}")
+  #  add_test(${SCRIPT}_help_test bash -c "xmllint --noout ${CMAKE_CURRENT_SOURCE_DIR}/${HELPTEXT}")
 endfunction()
 
 # install_osx_app(<app>)
@@ -153,18 +153,46 @@ endfunction()
 # Adds a script to the test framework. If the script calls a freesurfer binary, it
 # should be specified with DEPENDS to guarantee it gets built beforehand
 function(add_test_script)
+  if(CMAKE_CONFIGURATION_TYPES)
+    configure_file(${CMAKE_SOURCE_DIR}/test_proxy.sh ${CMAKE_CURRENT_BINARY_DIR}/test.sh COPYONLY)
+  endif()
   cmake_parse_arguments(TEST "" "NAME;SCRIPT" "DEPENDS" ${ARGN})
   foreach(TARGET ${TEST_DEPENDS})
     set(TEST_CMD "${TEST_CMD} ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR} --target ${TARGET} &&")
   endforeach()
-  add_test(${TEST_NAME} bash -c "${CMAKE_CURRENT_BINARY_DIR}/${TEST_SCRIPT}")
-  set_property(TEST ${TEST_NAME} PROPERTY LABELS Integration)
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test.sh ${CMAKE_CURRENT_BINARY_DIR}/test.sh COPYONLY)
+
+  if(CMAKE_CONFIGURATION_TYPES)
+    foreach(X IN LISTS CMAKE_CONFIGURATION_TYPES)
+      add_test(${TEST_NAME}_${X} bash -c "${CMAKE_CURRENT_BINARY_DIR}/${X}/${TEST_SCRIPT}")
+      set_property(TEST ${TEST_NAME}_${X} PROPERTY LABELS Integration)
+      configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test.sh ${CMAKE_CURRENT_BINARY_DIR}/${X}/test.sh COPYONLY)
+    endforeach()
+  else()
+    add_test(${TEST_NAME} bash -c "${CMAKE_CURRENT_BINARY_DIR}/${TEST_SCRIPT}")
+    set_property(TEST ${TEST_NAME} PROPERTY LABELS Integration)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test.sh ${CMAKE_CURRENT_BINARY_DIR}/test.sh COPYONLY)
+  endif()
+
+  # testdata
   if(BUILD_TESTING AND FS_INTEGRATION_TESTING)
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz")
-      if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/testdata.tar.gz")
-        message(STATUS "Copying test file ${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz")
-        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz ${CMAKE_CURRENT_BINARY_DIR}/testdata.tar.gz COPYONLY)
+      if(CMAKE_CONFIGURATION_TYPES)
+        foreach(X IN LISTS CMAKE_CONFIGURATION_TYPES)
+          if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${X}/testdata.tar.gz")
+            message(STATUS "Copying test file ${CMAKE_CURRENT_SOURCE_DIR}/${X}/testdata.tar.gz")
+            execute_process(COMMAND ln -s "${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz" "${CMAKE_CURRENT_BINARY_DIR}/${X}/testdata.tar.gz"
+                            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                            RESULT_VARIABLE WHATEVER)
+          endif()
+        endforeach()
+      else()
+        if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${TEMP_BUILD_DIR}testdata.tar.gz")
+          message(STATUS "Copying test file ${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz")
+          execute_process(COMMAND ln -s "${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz" "${CMAKE_CURRENT_BINARY_DIR}/${X}/testdata.tar.gz"
+                          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                          RESULT_VARIABLE WHATEVER)
+          #          configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testdata.tar.gz ${CMAKE_CURRENT_BINARY_DIR}/testdata.tar.gz COPYONLY)
+        endif()
       endif()
     endif()
   endif()

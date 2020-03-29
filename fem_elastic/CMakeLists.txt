@@ -12,15 +12,15 @@ if(PETSC_FOUND)
   )
 
   set(COMMON3D_SOURCES
-    fem_3d.cpp
-    small_matrix.cpp
-    morph.cpp
-    morph_utils.cpp
-    misc_maths.cpp
-    transformUtils.cpp
-    surf_utils.cpp
-    ZlibStringCompressor.cpp
-    )
+      fem_3d.cpp
+      small_matrix.cpp
+      morph.cpp
+      morph_utils.cpp
+      misc_maths.cpp
+      transformUtils.cpp
+      surf_utils.cpp
+      ZlibStringCompressor.cpp
+      )
 
   # createMorph
   add_executable(createMorph fcreateMorph.cpp ${COMMON3D_SOURCES})
@@ -48,32 +48,32 @@ if(PETSC_FOUND)
 
   # surf2vol
   add_executable(surf2vol
-    ${COMMON3D_SOURCES}
-    fsurf2vol.cpp
-    surf_powell.cpp
-    surf_energy.cpp
-    misc_maths.cpp
-    transformUtils.cpp
-    surf_utils.cpp
-    ZlibStringCompressor.cpp
-    pbCluster_mesh_crop.cpp
-    untangler.cpp
-    )
+                 ${COMMON3D_SOURCES}
+                 fsurf2vol.cpp
+                 surf_powell.cpp
+                 surf_energy.cpp
+                 misc_maths.cpp
+                 transformUtils.cpp
+                 surf_utils.cpp
+                 ZlibStringCompressor.cpp
+                 pbCluster_mesh_crop.cpp
+                 untangler.cpp
+                 )
   target_link_libraries(surf2vol
-    utils
-    tetgen
-    ${PETSC_LIBRARIES}
-    ${LAPACK_LIBRARIES}
-    ${BLAS_LIBRARIES}
-    ${GFORTRAN_LIBRARIES}
-    ${MPI_CXX_LIBRARIES}
-    )
+                        utils
+                        tetgen
+                        ${PETSC_LIBRARIES}
+                        ${LAPACK_LIBRARIES}
+                        ${BLAS_LIBRARIES}
+                        ${GFORTRAN_LIBRARIES}
+                        ${MPI_CXX_LIBRARIES}
+                        )
   install(TARGETS surf2vol DESTINATION bin)
 
   # fem_elastic library
   add_library(fem_elastic STATIC fcreateMorph.cpp fapplyMorph.cpp ${COMMON3D_SOURCES})
   add_help(fem_elastic applyMorph.help.xml)
   add_help(fem_elastic createMorph.help.xml)
-  target_link_libraries(fem_elastic)
+  #target_link_libraries(fem_elastic)
 
 endif()

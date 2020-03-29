@@ -17,4 +17,4 @@ sed -i '' '/CMAKE_CXX_COMPILER:FILEPATH/d' ./CMakeCache.txt || true # remove com
 sed -i '' '/\/\/CXX compiler/d' ./CMakeCache.txt || true
 sed -i '' '/CMAKE_C_COMPILER:FILEPATH/d' ./CMakeCache.txt || true # remove compiler cache entry just in case travis updated xcode
 sed -i '' '/\/\/C compiler/d' ./CMakeCache.txt || true
-cmake -G Ninja -DFS_BUILD_GUIS=OFF -DCMAKE_BUILD_TYPE=Debug -DGEMS_BUILD_MATLAB=OFF ..
+cmake -G Ninja -DFS_BUILD_GUIS=OFF -DCMAKE_BUILD_TYPE=Debug -DFS_GEMS_BUILD_MATLAB=OFF ..

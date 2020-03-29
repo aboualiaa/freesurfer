@@ -28,7 +28,7 @@ option(FS_GEMS_BUILD_SHARED_LIBS "Build GEMS with shared libraries" ON) # doesn'
 option(FS_GEMS_BUILD_EXECUTABLES "Build command line executables" ON)
 option(FS_GEMS_BUILD_TESTING "Build tests" ON)
 option(FS_GEMS_BUILD_GUI "Build GUI components (requires FLTK and VTK)" ON)
-option(GEMS_BUILD_MATLAB "Build Matlab wrappers" OFF)
+option(FS_GEMS_BUILD_MATLAB "Build Matlab wrappers" OFF)
 option(FS_GEMS_BUILD_PYTHON "Build Python wrappers" OFF) # if you're building the whole freesurfer project, this gets turned on below
 option(FS_GEMS_BUILD_CUDA "Build CUDA stuff" OFF)
 
@@ -114,6 +114,6 @@ if(FS_GEMS_BUILD_GUI)
 endif()
 
 # build Matlab wrappers
-if(GEMS_BUILD_MATLAB)
+if(FS_GEMS_BUILD_MATLAB)
   add_subdirectory(Matlab)
 endif()

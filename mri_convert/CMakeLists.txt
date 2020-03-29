@@ -37,7 +37,6 @@ if(BUILD_TESTING)
                         gtest ${ARMADILLO_LIBRARIES})
   add_test(mri_convert_unit mri_convert_unit)
   set_property(TEST mri_convert_unit PROPERTY LABELS Unit)
-  set_property(TEST mri_convert_test PROPERTY LABELS Integration)
 
   add_executable(mri_convert_bench mri_convert_bench.cpp)
   add_help(mri_convert_bench mri_convert.help.xml)

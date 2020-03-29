@@ -9,6 +9,17 @@ else()
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -w -ffixed-line-length-132 -fno-second-underscore")
 endif()
 
+# sanitizer flags cause errors because of mixed compilation with fortran
+set(CMAKE_C_FLAGS_UBSAN "")
+set(CMAKE_C_FLAGS_ASAN "")
+set(CMAKE_C_FLAGS_MSAN "")
+set(CMAKE_C_FLAGS_TSAN "")
+set(CMAKE_C_FLAGS_LSAN "")
+set(CMAKE_C_FLAGS_CFISAN "")
+set(CMAKE_C_FLAGS_COVERAGE "")
+set(CMAKE_C_FLAGS_FULLLTO "")
+set(CMAKE_C_FLAGS_THINLTO "")
+
 install(
   PROGRAMS
   talairach_avi
